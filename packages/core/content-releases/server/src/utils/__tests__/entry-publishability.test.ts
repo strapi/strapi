@@ -294,6 +294,33 @@ describe('getPublishabilityForActions', () => {
     expect(publishedVersion).toEqual({ id: 7, documentId: 'a' });
   });
 
+  // i18n adds a `locale` column to every content type, so a non-localized draft reads back with
+  // `locale: null`; the document service treats it like an absent locale
+  test('looks up the published version of a non-localized entry without a locale', async () => {
+    const validate = jest.fn().mockResolvedValue({});
+    const findPublished = jest.fn().mockResolvedValue({ id: 7, documentId: 'a' });
+    const strapi = buildStrapi({
+      validate,
+      findPublished,
+      findOne: jest.fn().mockResolvedValue({ id: 1, documentId: 'a', locale: null }),
+    });
+
+    const results = await getPublishabilityForActions(
+      [{ id: 1, type: 'publish' as const, contentType: contentTypeUid, entryDocumentId: 'a' }],
+      { strapi }
+    );
+
+    expect(findPublished).toHaveBeenCalledWith({
+      documentId: 'a',
+      locale: undefined,
+      status: 'published',
+      fields: ['documentId'],
+    });
+    const [, , , publishedVersion] = validate.mock.calls[0];
+    expect(publishedVersion).toEqual({ id: 7, documentId: 'a' });
+    expect(results.get(1)).toEqual({ publishable: true, outcome: null, reason: null, error: null });
+  });
+
   // The run can't record any of these as the entry's own failure: its transaction is gone, or it
   // lost to another transaction and can run again
   describe.each([

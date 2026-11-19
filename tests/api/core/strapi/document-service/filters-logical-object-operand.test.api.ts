@@ -55,6 +55,9 @@ const arrayLimitMessage = (operator: string, path: string) =>
 const objectMessage = (operator: string, path: string) =>
   `Invalid operand for ${operator} at ${path}: expected a list of filters, at the root of the filters or under a relation, not an object`;
 
+const attributeMessage = (operator: string, path: string) =>
+  `Invalid operator ${operator} at ${path}: use $and and $or at the root of the filters or under a relation, not on an attribute`;
+
 describe('Document Service filters with object-shaped $or and $and operands', () => {
   beforeAll(async () => {
     await builder.addContentTypes([categoryModel, noteModel]).build();
@@ -111,6 +114,17 @@ describe('Document Service filters with object-shaped $or and $and operands', ()
       'the operator map of $and on a scalar attribute',
       { title: { $and: { $eq: 'Note 1' } } },
       objectMessage('$and', 'title.$and'),
+    ],
+    // The database layer has no attribute level $or / $and, a list included
+    [
+      'a $or list on a scalar attribute',
+      { title: { $or: [{ $eq: 'Note 1' }, { $eq: 'Note 2' }] } },
+      attributeMessage('$or', 'title.$or'),
+    ],
+    [
+      'a $or list on an attribute of a relation',
+      { category: { name: { $or: [{ $eq: 'Cat A' }] } } },
+      attributeMessage('$or', 'category.name.$or'),
     ],
   ];
 

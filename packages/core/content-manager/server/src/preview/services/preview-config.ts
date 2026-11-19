@@ -3,7 +3,7 @@ import { errors, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export type HandlerParams = {
   documentId: string;
-  locale: string;
+  locale?: string;
   status: 'published' | 'draft';
 };
 

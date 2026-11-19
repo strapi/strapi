@@ -84,3 +84,81 @@ describe('validateFilters - $or and $and operands keyed by operators', () => {
     await expect(validate(filters)).resolves.toEqual(filters);
   });
 });
+
+/**
+ * The database layer has no attribute level `$and` / `$or`. The object form is rejected above. A list
+ * or a single value fails in the database layer too (REST answers with a 500).
+ */
+describe('validateFilters - $or and $and lists on a scalar attribute', () => {
+  const ctx = { schema: articleModel, getModel };
+
+  const validate = (filters: unknown) =>
+    validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+  const attributeMessage = (operator: string, path: string) =>
+    `Invalid operator ${operator} at ${path}: use $and and $or at the root of the filters or under a relation, not on an attribute`;
+
+  test.each([
+    ['a $or list of operator maps', { title: { $or: [{ $eq: 'x' }] } }, '$or', 'title.$or'],
+    [
+      'a $and list of operator maps',
+      { title: { $and: [{ $eq: 'x' }, { $ne: 'y' }] } },
+      '$and',
+      'title.$and',
+    ],
+    // GraphQL scalar filter inputs expose `or: [String]` and `and: [String]`
+    ['a $or list of values', { title: { $or: ['a', 'b'] } }, '$or', 'title.$or'],
+    [
+      'a $or list holding $null',
+      { title: { $or: [{ $eq: 'x' }, { $null: true }] } },
+      '$or',
+      'title.$or',
+    ],
+    ['a single value', { title: { $or: 'a' } }, '$or', 'title.$or'],
+    [
+      'a $or list under $not',
+      { title: { $not: { $or: [{ $eq: 'x' }] } } },
+      '$or',
+      'title.$not.$or',
+    ],
+    [
+      'a $or list on an attribute of a relation',
+      { createdBy: { firstname: { $or: [{ $eq: 'a' }] } } },
+      '$or',
+      'createdBy.firstname.$or',
+    ],
+    [
+      'a $or list in a $and list',
+      { $and: [{ title: { $or: [{ $eq: 'a' }] } }] },
+      '$or',
+      'title.$or',
+    ],
+    ['a $or list on documentId', { documentId: { $or: ['a'] } }, '$or', 'documentId.$or'],
+  ])('throws on %s', async (_, filters, operator, path) => {
+    const error = await validate(filters).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({
+      message: attributeMessage(operator, path),
+      details: { key: operator, path },
+    });
+  });
+
+  test.each([
+    // Hold no condition, so they are left as they were: GraphQL `or: []` returns every row
+    ['an empty $or list', { title: { $or: [] } }],
+    ['a null $or', { title: { $or: null } }],
+    // Groups belong around the attribute filters
+    ['a $or list of attribute filters', { $or: [{ title: 'a' }, { title: { $eq: 'b' } }] }],
+    ['a $and list in a relation filter', { createdBy: { $and: [{ firstname: 'a' }] } }],
+    // Left to query conversion, which reads a $null / $notNull operand as a boolean
+    ['a $or list in a $null operand', { title: { $null: { $or: [{ $eq: 1 }] } } }],
+  ])('accepts %s', async (_, filters) => {
+    await expect(validate(filters)).resolves.toEqual(filters);
+  });
+
+  // The filters traversal drops the empty objects from the list
+  test('accepts a $and list of empty objects', async () => {
+    await expect(validate({ title: { $and: [{}] } })).resolves.toEqual({ title: { $and: [] } });
+  });
+});

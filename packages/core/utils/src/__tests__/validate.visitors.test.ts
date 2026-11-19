@@ -458,7 +458,6 @@ describe('Validate visitors util', () => {
 
     test.each([
       ['a $not list of operator maps', { title: { $not: [{ $eq: 'x' }, { $contains: 'y' }] } }],
-      ['an $or list of operator maps', { title: { $or: [{ $eq: 'x' }, { $null: true }] } }],
       ['a list of values', { title: { $eq: ['x', 'y'] }, rank: { $notIn: [1, 2] } }],
       ['a relation id operand', { createdBy: { $eq: 1, $in: [1, 2] } }],
       ['a relation $null operand', { createdBy: { $null: true }, cover: { $notNull: true } }],

@@ -2,6 +2,8 @@
 
 /* eslint-env jest */
 
+const _ = require('lodash');
+
 jest.mock('../../utils/provider-http');
 jest.mock('../../utils/verify-jwt-with-jwks');
 jest.mock('../../utils/oauth-connect/oauth1');
@@ -16,15 +18,30 @@ const setRequestMock = (requestMock) => {
   twitterGet.mockImplementation(() => requestMock());
 };
 
-// providers-registry reads global `strapi` at call time — provide a minimal stub
+// providers-registry reads global `strapi` at call time — provide a minimal stub.
+// It mirrors the config provider: the startup copy as own keys, plus `get` over the same values.
+const CONFIG_VALUES = {
+  api: { rest: { prefix: '/api' } },
+  server: { url: 'http://localhost:1337' },
+};
 global.strapi = {
   config: {
-    get: jest.fn().mockReturnValue('/api'),
-    server: { url: 'http://localhost:1337' },
+    ...CONFIG_VALUES,
+    get: (path, defaultValue) => _.get(CONFIG_VALUES, path, defaultValue),
   },
 };
 
 const providersRegistry = require('../providers-registry');
+
+describe('providers registry — callback URLs', () => {
+  it('builds callback URLs from the server URL and the REST prefix', () => {
+    const registry = providersRegistry();
+
+    expect(registry.get('github').grantConfig.callbackUrl).toBe(
+      'http://localhost:1337/api/auth/github/callback'
+    );
+  });
+});
 
 describe('cognito authCallback — email_verified guard', () => {
   const FAKE_ID_TOKEN = 'fake.id.token';

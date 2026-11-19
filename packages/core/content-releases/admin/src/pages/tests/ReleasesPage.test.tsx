@@ -418,6 +418,87 @@ describe('Releases home page', () => {
     ]);
   });
 
+  describe('release name', () => {
+    const mockWidths = ({
+      scrollWidth,
+      clientWidth,
+    }: {
+      scrollWidth: number;
+      clientWidth: number;
+    }) => {
+      const original = {
+        scroll: Object.getOwnPropertyDescriptor(Element.prototype, 'scrollWidth'),
+        client: Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth'),
+      };
+      Object.defineProperty(Element.prototype, 'scrollWidth', {
+        configurable: true,
+        get: () => scrollWidth,
+      });
+      Object.defineProperty(Element.prototype, 'clientWidth', {
+        configurable: true,
+        get: () => clientWidth,
+      });
+
+      return () => {
+        if (original.scroll) {
+          Object.defineProperty(Element.prototype, 'scrollWidth', original.scroll);
+        }
+        if (original.client) {
+          Object.defineProperty(Element.prototype, 'clientWidth', original.client);
+        }
+      };
+    };
+
+    it('shows the full name in a tooltip when it is cut off', async () => {
+      const restore = mockWidths({ scrollWidth: 400, clientWidth: 200 });
+      captureRequests();
+
+      try {
+        const { user } = render(<ReleasesPage />);
+
+        await user.hover(await screen.findByRole('link', { name: 'Holiday newsletter' }));
+
+        expect(await screen.findByRole('tooltip')).toHaveTextContent('Holiday newsletter');
+      } finally {
+        restore();
+      }
+    });
+
+    it('shows the tooltip when the link takes the keyboard focus', async () => {
+      const restore = mockWidths({ scrollWidth: 400, clientWidth: 200 });
+      captureRequests();
+
+      try {
+        render(<ReleasesPage />);
+
+        const link = await screen.findByRole('link', { name: 'Holiday newsletter' });
+        fireEvent.focus(link);
+
+        expect(await screen.findByRole('tooltip')).toHaveTextContent('Holiday newsletter');
+      } finally {
+        restore();
+      }
+    });
+
+    it('shows no tooltip when the name fits', async () => {
+      const restore = mockWidths({ scrollWidth: 200, clientWidth: 200 });
+      captureRequests();
+
+      try {
+        const { user } = render(<ReleasesPage />);
+
+        await user.hover(await screen.findByRole('link', { name: 'Holiday newsletter' }));
+
+        // The tooltip opens asynchronously: give it the chance to appear, then require it hasn't
+        await expect(
+          waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument(), { timeout: 1500 })
+        ).rejects.toThrow();
+      } finally {
+        restore();
+      }
+    });
+  });
+
   describe('filters', () => {
     const getOptionLabels = () => screen.getAllByRole('option').map((option) => option.textContent);
 

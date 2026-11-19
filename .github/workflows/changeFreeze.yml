@@ -21,12 +21,28 @@ jobs:
     outputs:
       isTeamMember: ${{ steps.get-user-teams-membership.outputs.isTeamMember }}
     steps:
-      - uses: tspascoal/get-user-teams-membership@b2546c5affc730fd8e3d8483ae9ad3621938c2f9 # v4.0.2
+      # Inline `gh api` call so the token is never handed to a third-party action.
+      # The endpoint returns 404 for non-members; only an active membership counts.
+      # Any other API error (bad token, rate limit, 5xx) fails the step so no comment is posted.
+      - name: Check membership of the strapi/team team
         id: get-user-teams-membership
-        with:
-          GITHUB_TOKEN: ${{ secrets.CHECK_OWNERSHIP_TOKEN }}
-          team: team
-          username: ${{ github.actor }}
+        env:
+          GH_TOKEN: ${{ secrets.CHECK_OWNERSHIP_TOKEN }}
+          USERNAME: ${{ github.actor }}
+        run: |
+          if body=$(gh api "orgs/strapi/teams/team/memberships/$USERNAME" 2>&1); then
+            state=$(jq -r '.state // empty' <<< "$body")
+          elif grep -q 'HTTP 404' <<< "$body"; then
+            state=""
+          else
+            echo "::error::Team membership lookup failed: $body"
+            exit 1
+          fi
+          if [ "$state" = "active" ]; then
+            echo "isTeamMember=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "isTeamMember=false" >> "$GITHUB_OUTPUT"
+          fi
   send-response:
     name: 'Alert user to change freeze'
     runs-on: ubuntu-latest

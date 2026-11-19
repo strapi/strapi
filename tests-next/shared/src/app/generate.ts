@@ -3,12 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
-// Type only: `create-strapi-app` points `types` at dist/src/index.d.ts, but its build emits
-// dist/types.d.ts next to dist/index.d.ts.
-import type { Scope } from 'create-strapi-app/dist/types';
+import type { Scope } from 'create-strapi-app';
 
 import { testPluginConfigEntry } from '../test-plugin';
-import { APPS_DIR, baseEnv } from './config';
+import { APPS_DIR, baseEnv, inheritedEnv } from './config';
 
 export interface App {
   name: string;
@@ -79,7 +77,7 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
     {
       // Telemetry off: create-strapi-app tracks events unless NODE_ENV=test, which Jest sets
       // but Playwright doesn't.
-      env: { ...process.env, ...baseEnv() },
+      env: { ...inheritedEnv(), ...baseEnv() },
       maxBuffer: 10 * 1024 * 1024,
     }
   );

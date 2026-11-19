@@ -425,6 +425,73 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(404);
       });
     });
+
+    describe('Populate', () => {
+      const getStageRoutes = () => [
+        {
+          name: 'find',
+          url: `/review-workflows/workflows/${testWorkflow.id}/stages`,
+          getStage: (body) => body.data.find((stage) => stage.id === secondStage.id),
+        },
+        {
+          name: 'findById',
+          url: `/review-workflows/workflows/${testWorkflow.id}/stages/${secondStage.id}`,
+          getStage: (body) => body.data,
+        },
+      ];
+
+      // Each query string populate shape must populate the stage workflow
+      test.each([
+        ['populate=*'],
+        ['populate=workflow'],
+        ['populate=workflow,permissions'],
+        ['populate[0]=workflow'],
+        ['populate[workflow]=true'],
+      ])('It should populate the workflow with %s', async (query) => {
+        if (!hasRW) {
+          return;
+        }
+
+        for (const route of getStageRoutes()) {
+          const res = await requests.admin.get(`${route.url}?${query}`);
+
+          expect({ route: route.name, status: res.status }).toEqual({
+            route: route.name,
+            status: 200,
+          });
+          expect(route.getStage(res.body).workflow).toMatchObject({ id: testWorkflow.id });
+        }
+      });
+
+      test('It should not populate the workflow without populate', async () => {
+        if (!hasRW) {
+          return;
+        }
+
+        for (const route of getStageRoutes()) {
+          const res = await requests.admin.get(route.url);
+
+          expect(res.status).toBe(200);
+          expect(route.getStage(res.body).workflow).toBeUndefined();
+        }
+      });
+
+      test('It should reject a populate it cannot convert with a 400', async () => {
+        if (!hasRW) {
+          return;
+        }
+
+        for (const route of getStageRoutes()) {
+          const res = await requests.admin.get(`${route.url}?populate[0][workflow]=true`);
+
+          expect({ route: route.name, status: res.status }).toEqual({
+            route: route.name,
+            status: 400,
+          });
+          expect(res.body.error.name).toBe('ValidationError');
+        }
+      });
+    });
   });
 
   describe('Assignee updates in Content Manager', () => {

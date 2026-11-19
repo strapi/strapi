@@ -10,6 +10,7 @@ toc_max_heading_level: 3
 status: needs-review
 review_notes:
   - Marked WIP. Examples use `global.strapi`, which the repo guidelines forbid (use dependency injection).
+  - The `config` section lists the startup keys as properties of the container. They are a shallow copy taken when the container is created; reads go through `get(path)` (see the note in that section).
 ---
 
 import Type from '@site/docs/api/components/type';
@@ -599,6 +600,8 @@ The strapi containers are accessible via `strapi.get('name-of-the-container')`.
     - `strapi`: <Type>String</Type> - Current version of Strapi
 
 Every file stored under the `config` folder will be injected in this config container object.
+
+Read config values with `get(path)`, never as properties of the container (`strapi.config.server.url`). The keys above are also copied onto the container when it is created, but that copy is shallow: a top-level `set('server', { ... })` replaces the live value and leaves the copy stale, and module namespaces such as `plugin::upload` are only reachable through `get`.
 
 ### `services`
 
