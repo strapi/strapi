@@ -20,3 +20,4 @@ export type * from './registry-drift';
 export type * from './implementation';
 export type * from './license';
 export type { IsStrict } from './strictness';
+export type * from './lifecycles';

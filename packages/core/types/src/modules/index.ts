@@ -12,6 +12,7 @@ export type * as Cron from './cron';
 export type * as CustomFields from './custom-fields';
 export type * as EntityValidator from './entity-validator';
 export type * as EventHub from './event-hub';
+export type * as Lifecycles from './lifecycles';
 export type * as Features from './features';
 export type * as Localization from './localization';
 export type * as Fetch from './fetch';
