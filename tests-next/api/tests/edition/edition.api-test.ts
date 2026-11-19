@@ -76,6 +76,9 @@ describe('editionEnv', () => {
 describe('the instance', () => {
   let app: App;
   let server: Server;
+  // The EE blocks at the end record that they ran. After them, an EE run fails when one was
+  // skipped, a CE run when one ran.
+  const ran: string[] = [];
 
   beforeAll(async () => {
     app = await generateApp({ name: `api-edition-${worker}` });
@@ -86,6 +89,9 @@ describe('the instance', () => {
 
   afterAll(async () => {
     await stopAllServers();
+    expect(ran, 'EE blocks that ran').toEqual(
+      editionFromEnv() === 'ee' ? ['describeEE', 'describeIfFeature'] : []
+    );
   });
 
   test('runs in the edition of the run, read from the instance', async () => {
@@ -129,18 +135,26 @@ describe('the instance', () => {
   });
 
   describeEE('EE-only block', () => {
-    test('runs only in EE runs', () => {
-      expect(editionFromEnv()).toBe('ee');
+    test('runs only in EE runs, on an EE instance', async () => {
+      ran.push('describeEE');
+      expect((await getInstanceFeatures(server)).edition).toBe('ee');
     });
   });
 
+  // describeIfFeature's check reads the server through this getter, before the block's tests.
+  let featureChecked = false;
   describeIfFeature(
     'cms-content-releases',
-    () => server,
+    () => {
+      featureChecked = true;
+      return server;
+    },
     'feature-gated block',
     () => {
-      test('runs only in EE runs, on an instance with the feature', () => {
-        expect(editionFromEnv()).toBe('ee');
+      test('runs only in EE runs, after the check, on an instance with the feature', async () => {
+        ran.push('describeIfFeature');
+        expect(featureChecked, 'describeIfFeature checked the feature first').toBe(true);
+        expect((await getInstanceFeatures(server)).ee).toContain('cms-content-releases');
       });
     }
   );
