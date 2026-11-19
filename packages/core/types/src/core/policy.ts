@@ -28,10 +28,15 @@ export type PolicyHandler<TConfig = unknown> = (
 /**
  * The handler of a policy with strict types: declared as a method, whose parameters TypeScript
  * compares bivariantly, so a policy registered with a config contract (`Policy<{ role: string }>`)
- * is assignable to `Policy` (`Policy<unknown>`). Calls still check the config.
+ * is assignable to `Policy` (`Policy<unknown>`). Calls still check the config. The server awaits
+ * the result (`packages/core/core/src/services/server/policy.ts`), so the handler may be async.
  */
 type StrictPolicyHandler<TConfig> = {
-  handler(ctx: PolicyContext, cfg: TConfig, opts: { strapi: Strapi }): boolean | undefined;
+  handler(
+    ctx: PolicyContext,
+    cfg: TConfig,
+    opts: { strapi: Strapi }
+  ): boolean | undefined | Promise<boolean | undefined>;
 }['handler'];
 
 /** The handler of a policy: develop's without strict types, {@link StrictPolicyHandler} with them. */

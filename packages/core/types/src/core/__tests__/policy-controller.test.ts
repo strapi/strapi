@@ -54,3 +54,14 @@ declare const koaContext: ExtendableContext;
 isAuthenticated({ ...koaContext, type: 'koa', is: () => false }, undefined, {
   strapi: {} as Core.Strapi,
 });
+
+// With strict types too, the server awaits policy handlers, so async policies are allowed.
+export const asyncStrictPolicy: Core.Policy = async (policyContext) => {
+  return policyContext.state?.user !== undefined;
+};
+export const asyncStrictObjectPolicy: Core.Policy = {
+  name: 'async',
+  handler: async () => true,
+};
+// @ts-expect-error an async policy must resolve to a boolean or nothing, not any other value.
+export const invalidAsyncPolicy: Core.Policy = async () => 'allowed';
