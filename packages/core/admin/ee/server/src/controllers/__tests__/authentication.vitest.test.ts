@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach, vi } from 'vitest';
+import { describe, test, expect, afterEach, beforeEach, vi } from 'vitest';
 import { emitAudit } from '@strapi/utils';
 
 import authenticationController from '../authentication';
@@ -59,6 +59,40 @@ describe('EE authentication controller', () => {
 
       expect(adminStore.set).toHaveBeenCalled();
       expect(emitAudit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('providers', () => {
+    const providers = [
+      { uid: 'google', displayName: 'Google', icon: 'google.svg', createStrategy: vi.fn() },
+      { uid: 'okta', displayName: 'Okta', icon: null, createStrategy: vi.fn() },
+    ];
+
+    beforeEach(() => {
+      const providerRegistry = {
+        getAll: () => providers,
+        has: (uid: string) => providers.some((provider) => provider.uid === uid),
+      };
+      global.strapi = { admin: { services: { passport: { providerRegistry } } } } as any;
+    });
+
+    test('getProviders lists the registered providers without their strategy', async () => {
+      const ctx = {} as any;
+
+      await authenticationController.getProviders(ctx);
+
+      expect(ctx.body).toEqual([
+        { uid: 'google', displayName: 'Google', icon: 'google.svg' },
+        { uid: 'okta', displayName: 'Okta', icon: null },
+      ]);
+    });
+
+    test('providerLogin rejects a provider that is not registered', () => {
+      const ctx = { params: { provider: 'github' } } as any;
+
+      expect(() => authenticationController.providerLogin(ctx, vi.fn())).toThrow(
+        'Invalid provider supplied: github'
+      );
     });
   });
 });
