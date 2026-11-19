@@ -1,5 +1,6 @@
 import { has } from 'lodash';
 import type { Core } from '@strapi/types';
+import type { RawModule } from '../domain/module';
 
 const apisRegistry = (strapi: Core.Strapi) => {
   const apis: Record<string, unknown> = {};
@@ -11,7 +12,7 @@ const apisRegistry = (strapi: Core.Strapi) => {
     getAll() {
       return apis;
     },
-    add(apiName: string, apiConfig: unknown) {
+    add(apiName: string, apiConfig: RawModule) {
       if (has(apis, apiName)) {
         throw new Error(`API ${apiName} has already been registered.`);
       }
