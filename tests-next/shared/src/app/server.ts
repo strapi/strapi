@@ -276,7 +276,11 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
       assertEdition(await getInstanceFeatures(server), edition);
     } catch (error) {
       await stop();
-      throw new Error(`${(error as Error).message}\n${output.slice(-4000)}`, { cause: error });
+      // Strapi says why it switched to CE early in the boot: the output tail can miss it.
+      const reasons = output.split('\n').filter((line) => line.includes('Switching to CE.'));
+      throw new Error([(error as Error).message, ...reasons, output.slice(-4000)].join('\n'), {
+        cause: error,
+      });
     }
   }
 

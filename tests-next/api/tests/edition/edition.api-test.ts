@@ -154,8 +154,15 @@ describe('the license', () => {
   test('an EE run whose license Strapi rejects fails instead of running as CE', async () => {
     const app = await generateApp({ name: `api-edition-${worker}`, overwrite: false });
     await resetDatabase(app, databaseFromEnv());
-    await expect(
-      startServer(app, { port, edition: 'ee', env: { STRAPI_LICENSE: 'not-a-license' } })
-    ).rejects.toThrow('Strapi booted as CE in an EE run');
+    const start = startServer(app, {
+      port,
+      edition: 'ee',
+      env: { STRAPI_LICENSE: 'not-a-license' },
+    });
+    // The error quotes Strapi's reason: it must have rejected the license, not booted as CE for
+    // another reason (EE turned off, license not passed on).
+    await expect(start).rejects.toThrow(
+      /^Strapi booted as CE in an EE run.*\n.*Invalid license\. Switching to CE\./
+    );
   });
 });
