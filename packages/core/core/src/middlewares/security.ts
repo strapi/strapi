@@ -1,10 +1,24 @@
 import { defaultsDeep, mergeWith } from 'lodash';
-import helmet, { KoaHelmet } from 'koa-helmet';
+import helmet from 'koa-helmet';
+import type { HelmetOptions } from 'helmet';
 import { CSP_DEFAULTS } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 
-export type Config = NonNullable<Parameters<KoaHelmet>[0]>;
+/**
+ * The options `koa-helmet` passes to `helmet` as they are. Typed from `helmet` itself: the
+ * declarations of `koa-helmet` reference a `helmet` namespace that `helmet` 6 does not declare, so
+ * importing them would add an error to every application compiled with `skipLibCheck: false`.
+ */
+export type Config = HelmetOptions;
+
+/**
+ * `plugin::graphql.utils`. GraphQL is an optional plugin that the core does not depend on, so its
+ * registered contract is not loaded here.
+ */
+type GraphQLUtilsService = {
+  playground: { isEnabled(): boolean };
+};
 
 const defaults: Config = {
   crossOriginEmbedderPolicy: false,
@@ -53,9 +67,10 @@ export const security: Core.MiddlewareFactory<Config> =
     };
 
     // if apollo graphql playground is enabled, add exceptions for it
-    if (strapi.plugin('graphql')?.service('utils').playground.isEnabled()) {
+    if (strapi.plugin('graphql')?.service<GraphQLUtilsService>('utils').playground.isEnabled()) {
       const { config: gqlConfig } = strapi.plugin('graphql');
-      specialPaths.push(gqlConfig('endpoint'));
+      // Core does not load the GraphQL contracts, an optional plugin.
+      specialPaths.push(gqlConfig<string>('endpoint'));
 
       directives['script-src'].push(`https: 'unsafe-inline'`);
       directives['img-src'].push(`'apollo-server-landing-page.cdn.apollographql.com'`);
