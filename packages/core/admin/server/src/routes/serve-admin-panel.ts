@@ -15,11 +15,7 @@ const applyAdminShellCacheHeaders = (setHeader: (name: string, value: string) =>
 };
 
 const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
-  let buildDir = resolve(strapi.dirs.dist.root, 'build');
-
-  if (!fse.pathExistsSync(buildDir)) {
-    buildDir = resolve(__dirname, '../../build');
-  }
+  const buildDir = resolve(strapi.dirs.dist.root, 'build');
 
   const serveAdminMiddleware = async (ctx: Context, next: Next) => {
     await next();
