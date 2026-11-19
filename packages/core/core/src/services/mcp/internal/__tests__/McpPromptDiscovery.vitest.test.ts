@@ -1,10 +1,13 @@
 import { describe, test, expect, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/client';
-import { InMemoryTransport } from '@modelcontextprotocol/server';
+import { completable, InMemoryTransport } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { z } from '@strapi/utils';
 import { McpCapabilityDefinitionRegistry } from '../McpCapabilityDefinitionRegistry';
 import { createMcpServerWithRegistries } from '../McpServerFactory';
+
+const ARGS_SCHEMA_HINT =
+  'Prompt arguments arrive as strings: declare argsSchema as z.object() with z.string() fields (z.iso.date() for a date, not z.date() or z.coerce.date()).';
 
 const AUTH: Modules.MCP.McpCapabilityAuth = { policies: [{ action: 'test.read' }] };
 
@@ -106,7 +109,7 @@ describe('MCP prompt discovery', () => {
 
         expect(strapi.log.error).toHaveBeenCalledTimes(1);
         expect(strapi.log.error).toHaveBeenCalledWith(
-          `[MCP] Failed to register prompt "unconvertible" with MCP server: argsSchema cannot be converted to JSON Schema: ${reason}`
+          `[MCP] Failed to register prompt "unconvertible" with MCP server: argsSchema cannot be converted to JSON Schema: ${reason}. ${ARGS_SCHEMA_HINT}`
         );
         expect(registries.prompts.status('unconvertible')).toBe('disabled');
         expect(registries.prompts.status('healthy-before')).toBe('enabled');
@@ -167,7 +170,7 @@ describe('MCP prompt discovery', () => {
       ]);
       expect(strapi.log.error).toHaveBeenCalledTimes(1);
       expect(strapi.log.error).toHaveBeenCalledWith(
-        '[MCP] Failed to register prompt "raw-unconvertible" with MCP server: argsSchema cannot be converted to JSON Schema: Date cannot be represented in JSON Schema'
+        `[MCP] Failed to register prompt "raw-unconvertible" with MCP server: argsSchema cannot be converted to JSON Schema: Date cannot be represented in JSON Schema. ${ARGS_SCHEMA_HINT}`
       );
     } finally {
       await close();
@@ -215,6 +218,81 @@ describe('MCP prompt discovery', () => {
 
       expect(advertisedPrompts.map((prompt) => prompt.name)).toEqual(['input-convertible']);
       expect(strapi.log.error).not.toHaveBeenCalled();
+    } finally {
+      await close();
+    }
+  });
+  test('a rejected argsSchema is logged once, not on every request', async () => {
+    const strapi = createStrapi();
+    const prompts = new McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>(
+      'prompt'
+    );
+    definePrompt(prompts, 'unconvertible', z.object({ due: z.date() }));
+    definePrompt(prompts, 'healthy', z.object({ topic: z.string() }));
+
+    // A new MCP server, and so a new registration, is built for every request.
+    for (let request = 0; request < 3; request += 1) {
+      const { client, registries, close } = await connectClient(strapi, prompts);
+
+      try {
+        const { prompts: advertisedPrompts } = await client.listPrompts();
+
+        expect(advertisedPrompts.map((prompt) => prompt.name)).toEqual(['healthy']);
+        expect(registries.prompts.status('unconvertible')).toBe('disabled');
+      } finally {
+        await close();
+      }
+    }
+
+    expect(strapi.log.error).toHaveBeenCalledTimes(1);
+  });
+
+  test('a rejected prompt does not advertise completions', async () => {
+    const strapi = createStrapi();
+    const prompts = new McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>(
+      'prompt'
+    );
+    definePrompt(
+      prompts,
+      'unconvertible-completable',
+      z.object({
+        topic: completable(z.string(), () => ['strapi']),
+        due: z.date(),
+      })
+    );
+    definePrompt(prompts, 'healthy', z.object({ topic: z.string() }));
+
+    const { client, close } = await connectClient(strapi, prompts);
+
+    try {
+      expect(client.getServerCapabilities()?.completions).toBeUndefined();
+      await expect(client.listPrompts()).resolves.toMatchObject({ prompts: [{ name: 'healthy' }] });
+    } finally {
+      await close();
+    }
+  });
+
+  test('a completable prompt that converts still advertises completions', async () => {
+    const strapi = createStrapi();
+    const prompts = new McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>(
+      'prompt'
+    );
+    definePrompt(
+      prompts,
+      'completable',
+      z.object({ topic: completable(z.string(), () => ['strapi']) })
+    );
+
+    const { client, close } = await connectClient(strapi, prompts);
+
+    try {
+      expect(client.getServerCapabilities()?.completions).toEqual({});
+      await expect(
+        client.complete({
+          ref: { type: 'ref/prompt', name: 'completable' },
+          argument: { name: 'topic', value: 'str' },
+        })
+      ).resolves.toMatchObject({ completion: { values: ['strapi'] } });
     } finally {
       await close();
     }
