@@ -55,7 +55,11 @@ const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T
   return Object.fromEntries(entries);
 };
 
-type MediaAsset = Schema.Attribute.MediaValue<true>[number];
+/**
+ * A Media Library asset, typed as the image an image block stores: the block keeps a copy of some of
+ * its fields, not the file document a media attribute holds.
+ */
+type MediaAsset = Block<'image'>['image'];
 
 /** A Media Library asset as an image block stores it. */
 const toBlockImage = (asset: MediaAsset): Block<'image'>['image'] => {
@@ -187,7 +191,7 @@ const ImageDialog = () => {
   const MediaLibraryDialog = components['media-library'] as React.ComponentType<{
     allowedTypes: Schema.Attribute.MediaKind[];
     onClose: () => void;
-    onSelectAssets: (_images: Schema.Attribute.MediaValue<true>) => void;
+    onSelectAssets: (_images: MediaAsset[]) => void;
   }>;
 
   const insertImages = (images: Block<'image'>['image'][]) => {
@@ -264,7 +268,7 @@ const ImageDialog = () => {
     setIsOpen(false);
   };
 
-  const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {
+  const handleSelectAssets = (images: MediaAsset[]) => {
     insertImages(images.map(toBlockImage));
     close();
   };
@@ -344,4 +348,4 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
   },
 };
 
-export { imageBlocks, createDroppedImagesInserter };
+export { imageBlocks, createDroppedImagesInserter, type MediaAsset };
