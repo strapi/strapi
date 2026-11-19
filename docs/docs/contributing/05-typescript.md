@@ -830,7 +830,11 @@ types what the runtime returns, not what the schema asks for:
   document: `Schema.Attribute.MediaValue` reads the file schema with strict types, and stays `any`
   (`any[]` for multiple media) without them. A media attribute whose plurality is unknown stays
   `any`. The `image` of a blocks image node is not a media value: it holds a copy of some file
-  fields, taken when the image was inserted, and stays `any`.
+  fields, taken when the image was inserted, with no `id` nor `documentId`. With strict types it has
+  the fields the entity validator checks on an image node (`imageNodeValidator` in
+  `packages/core/core/src/services/entity-validator/blocks-validator.ts`). Writes that skip the
+  entity validator, such as `strapi.db.query`, can store other shapes. Without strict types it stays
+  `any`.
 
 The JSDoc on each type gives the runtime reason. Without strict types, results keep develop's
 `Result` type.
