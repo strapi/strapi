@@ -29,9 +29,8 @@ The package README marks it as internal. Application developers import the same 
 - `UID`: the UID types. They read the public registries.
 - `Internal`: the low-level `Namespace`, `UID` and `Registry` types. They do not depend on an application.
 - `Public`: the public registries that applications augment.
-- `Providers`: the contracts that provider packages implement. `Providers.Upload` holds the upload provider contract (see [Providers](../upload/01-backend/00-providers.md)).
+- `Providers`: the contracts that provider packages implement. `Providers.Upload` holds the upload provider contract (see [Providers](../upload/01-backend/00-providers.md)). `Providers.Email` holds the `Factory`, `Provider`, `SendOptions`, `Settings` and `Capabilities` types of email providers (see [`@strapi/email`](../email/index.md)). Both are also exported at the root, as `UploadProvider*` and `EmailProvider*` types.
 - `Plugin`: the `LoadedPlugin` shape, the `IsEnabled` helper and the `Config` types for the `strapi-server` and `strapi-admin` entry points.
-- `Providers`: the contracts that provider packages implement. `Providers.Email` holds the `Factory`, `Provider`, `SendOptions`, `Settings` and `Capabilities` types of email providers.
 - `Utils`: type helpers, such as `Get`, `If` and the `Object`, `String` and `Guard` groups.
 
 ### Schema

@@ -42,7 +42,7 @@ The `server` service wraps a Koa app. It builds the route managers for the admin
 
 ### Core API factories
 
-`createCoreController`, `createCoreService`, `createCoreRouter` and `createCoreValidator` in `src/factories.ts` build the default controller, service, router and validator of a content type. A user extends the default with a config object or callback. `createUploadProvider`, also in `src/factories.ts`, types an upload provider module that an application writes and returns it unchanged (see [Providers](../upload/01-backend/00-providers.md)). The exports are available as `factories` from `@strapi/strapi`. Code: [`src/core-api`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/core-api).
+`createCoreController`, `createCoreService`, `createCoreRouter` and `createCoreValidator` in `src/factories.ts` build the default controller, service, router and validator of a content type. A user extends the default with a config object or callback. `createUploadProvider` and `createEmailProvider`, also in `src/factories.ts`, type an upload or email provider module that an application writes and return it unchanged (see [Providers](../upload/01-backend/00-providers.md) and [`@strapi/email`](../email/index.md)). The exports are available as `factories` from `@strapi/strapi`. Code: [`src/core-api`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/core-api).
 
 ### Enterprise Edition gate
 

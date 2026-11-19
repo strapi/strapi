@@ -7,7 +7,7 @@ import type { Plugin, Providers } from '@strapi/types';
  */
 export interface EmailConfig extends Record<string, unknown> {
   provider: string;
-  providerOptions: object;
+  providerOptions: Record<string, unknown>;
   settings: Providers.Email.Settings;
 }
 

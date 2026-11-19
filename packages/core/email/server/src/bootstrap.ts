@@ -3,7 +3,8 @@ import type { EmailConfig } from './types';
 
 const createProvider = (emailConfig: EmailConfig) => {
   const providerName = emailConfig.provider.toLowerCase();
-  let provider: Providers.Email.Factory;
+  // Documents what the module should be: `require` returns `any`, so nothing is checked here.
+  let provider: Providers.Email.Factory<EmailConfig['providerOptions']>;
 
   let modulePath: string;
   try {
