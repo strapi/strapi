@@ -303,6 +303,34 @@ describe('Utils', () => {
       expect(fooDashBar.type.text).toBe('foobar');
     });
 
+    test('Object keys keep the English order whatever the machine locale', () => {
+      // Lithuanian sorts `y` right after `i`, English after `x`.
+      const lithuanian = new Intl.Collator('lt');
+      const { localeCompare } = String.prototype;
+      const spy = jest.spyOn(String.prototype, 'localeCompare').mockImplementation(function compare(
+        this: string,
+        that: string,
+        locales?: any
+      ) {
+        return locales === undefined
+          ? lithuanian.compare(this, that)
+          : localeCompare.call(this, that, locales);
+      });
+
+      try {
+        const node = toTypeLiteral({ za: 1, ya: 2, ia: 3, Title: 4 });
+
+        expect(node.members.map((member: any) => member.name.escapedText)).toEqual([
+          'ia',
+          'Title',
+          'ya',
+          'za',
+        ]);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
     test('Invalid data type supplied (function)', () => {
       expect(() => toTypeLiteral(() => {})).toThrowError(
         'Cannot convert to object literal. Unknown type "function"'
