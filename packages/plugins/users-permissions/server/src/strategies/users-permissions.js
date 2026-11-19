@@ -1,6 +1,6 @@
 'use strict';
 
-const { map, every } = require('lodash');
+const { every } = require('lodash');
 const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
@@ -43,8 +43,9 @@ const authenticate = async (ctx) => {
       // Fetch user's permissions
       const permissions = await Promise.resolve(user.role.id)
         .then(getService('permission').findRolePermissions)
+        // `load` resolves to null if the role was deleted after the user was fetched
         .then((permissions) =>
-          map(permissions, (permission) =>
+          (permissions ?? []).map((permission) =>
             getService('permission').toContentAPIPermission(permission)
           )
         );
@@ -69,9 +70,7 @@ const authenticate = async (ctx) => {
     const publicPermissions = await getService('permission')
       .findPublicPermissions()
       .then((permissions) =>
-        map(permissions, (permission) =>
-          getService('permission').toContentAPIPermission(permission)
-        )
+        permissions.map((permission) => getService('permission').toContentAPIPermission(permission))
       );
 
     if (publicPermissions.length === 0) {

@@ -159,7 +159,7 @@ module.exports = ({ strapi }) => ({
     const roles = await strapi.db.query('plugin::users-permissions.role').findMany();
     const dbPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany();
 
-    const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
+    const permissionsFoundInDB = _.uniq(dbPermissions.map((permission) => permission.action));
 
     const appActions = _.flatMap(strapi.apis, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {

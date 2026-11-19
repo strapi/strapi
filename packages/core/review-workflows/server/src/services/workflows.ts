@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { isString, map } from 'lodash';
+import { isString } from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
 import { ERRORS, WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 import {
@@ -139,7 +139,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const createdWorkflow = await strapi.db.transaction(async () => {
         // Create stages
         const stages = await getService('stages', { strapi }).createMany(opts.data.stages);
-        createOpts = { ...createOpts, data: { ...createOpts.data, stages: map(stages, 'id') } };
+        createOpts = {
+          ...createOpts,
+          data: { ...createOpts.data, stages: stages.map((stage: Stage) => stage.id) },
+        };
 
         if (opts.data.stageRequiredToPublishName) {
           const stageRequiredToPublish = stages.find(

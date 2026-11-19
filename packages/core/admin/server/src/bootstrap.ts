@@ -1,4 +1,4 @@
-import { map, merge, difference } from 'lodash';
+import { merge, difference } from 'lodash';
 
 import type { Core } from '@strapi/types';
 import { async, quoteForLog } from '@strapi/utils';
@@ -131,7 +131,7 @@ export const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await async.pipe(
     strapi.db.query('admin::api-token-permission').findMany,
-    (permissions) => map(permissions, 'action')
+    (permissions: { action: string }[]) => permissions.map((permission) => permission.action)
   )();
 
   const unknownPermissions = [...new Set(difference(permissionsInDB, validPermissions))];

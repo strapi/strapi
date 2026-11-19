@@ -1,4 +1,4 @@
-import { curry, groupBy, mapValues, map, isEmpty } from 'lodash';
+import { curry, groupBy, mapValues, isEmpty } from 'lodash';
 import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
@@ -76,7 +76,7 @@ export const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
       orWhere.push({
         [typeColumn.name]: type,
         field,
-        [idColumn.name]: { $in: map(arr, idColumn.name) },
+        [idColumn.name]: { $in: arr.map((row) => row[idColumn.name]) },
       });
     }
   }
