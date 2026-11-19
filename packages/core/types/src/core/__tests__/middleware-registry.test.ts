@@ -164,18 +164,24 @@ declare const apiLookupChecks: [
 ];
 apiLookupChecks satisfies unknown;
 
-// Maps resolve registered keys to their factory, other keys to the legacy middleware.
+// Maps resolve registered keys to their factory, other keys to a middleware whose config is `unknown`.
 const mappedCache = strapi.middlewares['plugin::middleware-lab.cache'];
 const mappedDynamic = strapi.middlewares[dynamicName];
 const mappedPluginCache = strapi.plugin('middleware-lab').middlewares.cache;
 const mappedPluginOther = strapi.plugin('middleware-lab').middlewares.other;
+const mappedApiOther = strapi.api('middleware-lab').middlewares.other;
+const mappedAdminOther = strapi.admin.middlewares.other;
 declare const mapChecks: [
   Expect<Equal<typeof mappedCache, MiddlewareFactory<{ maxAge: number }>>>,
-  Expect<Equal<typeof mappedDynamic, MiddlewareFactory>>,
+  Expect<Equal<typeof mappedDynamic, MiddlewareFactory<unknown>>>,
   Expect<Equal<typeof mappedPluginCache, MiddlewareFactory<{ maxAge: number }>>>,
-  Expect<Equal<typeof mappedPluginOther, Middleware>>,
+  Expect<Equal<typeof mappedPluginOther, MiddlewareHandler | MiddlewareFactory<unknown>>>,
+  Expect<Equal<typeof mappedApiOther, MiddlewareHandler | MiddlewareFactory<unknown>>>,
+  Expect<Equal<typeof mappedAdminOther, MiddlewareHandler | MiddlewareFactory<unknown>>>,
 ];
 mapChecks satisfies unknown;
+// A middleware without a config contract still accepts any config.
+mappedDynamic({ anything: true }, { strapi });
 // @ts-expect-error Registered factories receive their config contract.
 cache({ ttl: 1 }, { strapi });
 

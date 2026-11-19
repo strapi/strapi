@@ -38,13 +38,13 @@ export type MiddlewareConfigFor<TName extends RegisteredMiddlewareName> =
 /**
  * Middlewares keyed by UID, e.g. `strapi.middlewares`. With strict types enabled, registered UIDs
  * resolve to a factory that receives their config contract. Other keys, literal or dynamic, resolve to
- * the legacy factory.
+ * a factory whose config is `unknown`: they have no config contract.
  */
 export type MiddlewareMap = IsStrict extends false
   ? Record<string, MiddlewareFactory>
   : RegisteredRecord<
       { [TName in RegisteredMiddlewareName]: MiddlewareFactory<MiddlewareConfigFor<TName>> },
-      MiddlewareFactory
+      MiddlewareFactory<unknown>
     >;
 
 /**
