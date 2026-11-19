@@ -21,7 +21,10 @@ const mockCompile = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('@strapi/typescript-utils', () => ({
   compile: (...args: unknown[]) => mockCompile(...args),
-  generators: { generate: jest.fn().mockResolvedValue(undefined) },
+  generators: {
+    generate: jest.fn().mockResolvedValue(undefined),
+    getStrictProgramWarning: jest.fn(() => undefined),
+  },
 }));
 
 jest.mock('@strapi/utils', () => ({
