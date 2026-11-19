@@ -1,10 +1,13 @@
 import '@strapi/types';
 
-export default () => {
-  const registry = new Map();
+/** An SSO provider, keyed by its `uid` in the registry. */
+type SSOProvider = { uid: string; [key: string]: unknown };
 
-  Object.assign(registry, {
-    register(provider: unknown) {
+export default () => {
+  const registry = new Map<string, SSOProvider>();
+
+  return Object.assign(registry, {
+    register(provider: SSOProvider) {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new provider after the bootstrap`);
       }
@@ -14,18 +17,16 @@ export default () => {
       this.set(provider.uid, provider);
     },
 
-    registerMany(providers: unknown[]) {
+    registerMany(providers: SSOProvider[]) {
       providers.forEach((provider) => {
         this.register(provider);
       });
     },
 
-    getAll(): unknown[] {
+    getAll(): SSOProvider[] {
       // TODO
       // @ts-expect-error check map types
       return Array.from(this.values());
     },
   });
-
-  return registry;
 };
