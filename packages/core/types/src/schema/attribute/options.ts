@@ -234,3 +234,14 @@ export type SetPluginOptions<TConfig extends object = object> = { pluginOptions?
  * @see DefaultOption
  */
 export type DefaultTo<T> = { default: T };
+
+/**
+ * Marks an attribute that has a `conditions.visible` rule. The rule depends on the data: when it
+ * hides the field, the entity validator skips every check on it, `required` included
+ * (`entity-validator/index.ts:449-456` in `@strapi/core`). The strict write inputs of the Document
+ * Service therefore treat a conditional attribute as optional and nullable.
+ *
+ * Type generation emits it only with `typescript.strictTypes`: without strict types, generated
+ * files stay as in previous releases.
+ */
+export type Conditional = { conditions: { visible: unknown } };
