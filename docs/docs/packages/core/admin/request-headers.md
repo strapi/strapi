@@ -45,9 +45,9 @@ A call reads the providers once, when it starts. The retry after a 401 sends the
 
 ## When a provider fails
 
-If a provider throws, or returns a header that the browser cannot send, the request fails with a `RequestHeadersError` and is not sent. For a header that cannot be sent, the message names the header. For a provider that throws, the thrown error is the `cause`. Header values must be Latin-1 without line breaks, so send identifiers rather than display names.
+If a provider throws, or returns an invalid header name or value, the request fails with a `RequestHeadersError` and is not sent. For an invalid header, the message names the header. For a provider that throws, the thrown error is the `cause`. Header values must be Latin-1 without line breaks, so send identifiers rather than display names. A forbidden name such as `Cookie`, `Origin`, `Sec-*` or `Proxy-*` does not fail: the browser drops it without an error.
 
-The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. The RTK Query base query returns the error as a `SerializedError` named `RequestHeadersError`.
+The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. The RTK Query base query returns the error as a `SerializedError` named `RequestHeadersError`, so check `error.name` there. `instanceof RequestHeadersError` works only for errors from `getFetchClient` or `unstable_getRequestHeaders`.
 
 ## CORS
 

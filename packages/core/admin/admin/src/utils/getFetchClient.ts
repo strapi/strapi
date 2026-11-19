@@ -44,8 +44,8 @@ let onTokenUpdate: ((token: string) => void) | null = null;
 type RequestHeadersProvider = () => Record<string, string | null | undefined>;
 
 /**
- * Thrown, instead of sending the request, when a provider fails or returns a
- * header the browser cannot send. Sending the request without the header could
+ * Thrown, instead of sending the request, when a provider fails or returns an
+ * invalid header name or value. Sending the request without the header could
  * run it in the wrong context (e.g. the wrong space), so the request fails.
  */
 class RequestHeadersError extends Error {
@@ -87,8 +87,8 @@ const unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => vo
  * `Authorization`, `Content-Type` and `Accept`, which core sets itself.
  * Unstable: the API can change in a minor release.
  *
- * @throws {RequestHeadersError} When a provider throws or returns a header the
- * browser cannot send. Do not send the request.
+ * @throws {RequestHeadersError} When a provider throws or returns an invalid
+ * header name or value. Do not send the request.
  */
 const unstable_getRequestHeaders = (): Headers => {
   const headers = new Headers();
@@ -857,6 +857,7 @@ export {
   getFetchClient,
   isFetchError,
   FetchError,
+  RequestHeadersError,
   getFailedRequestSessionToken,
   setFailedRequestSessionToken,
   attemptTokenRefresh,

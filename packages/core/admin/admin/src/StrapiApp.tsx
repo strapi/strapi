@@ -247,9 +247,9 @@ class StrapiApp {
    * fetch client and Media Library uploads, e.g. the space a browser tab works in.
    * The provider is called when a request starts, so it returns the current value;
    * a retry after a 401 reuses it. A provider cannot replace `Authorization`,
-   * `Content-Type` or `Accept`. If a provider throws or returns a header the
-   * browser cannot send, the request fails with a `RequestHeadersError` instead
-   * of being sent without the header.
+   * `Content-Type` or `Accept`. If a provider throws or returns an invalid header
+   * name or value, the request fails with a `RequestHeadersError` instead of being
+   * sent without the header.
    * Unstable: the API can change in a minor release.
    *
    * @returns A function that removes the provider.
