@@ -22,7 +22,11 @@ const ALLOWED_TYPES = [
 ] as const;
 
 const customFieldsRegistry = (strapi: Core.Strapi) => {
-  const customFields: Record<string, unknown> = {};
+  // `add` stores the options it receives; with strict types, `get` and `getAll` return them.
+  const customFields: Record<
+    string,
+    Core.IsStrict extends true ? ReturnType<Core.CustomFieldsRegistry['get']> : unknown
+  > = {};
 
   return {
     getAll() {
