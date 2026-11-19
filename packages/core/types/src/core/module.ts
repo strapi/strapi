@@ -5,6 +5,7 @@ import type { ControllerFor, RegisteredControllerUID } from './controller';
 import type {
   MiddlewareConfigFor,
   MiddlewareFactory,
+  MiddlewareHandler,
   RegisteredMiddlewareName,
 } from './middleware';
 import type { PolicyConfigFor, RegisteredPolicyName } from './policy';
@@ -77,7 +78,8 @@ export type ModulePolicyMap<TNamespace extends string> = IsStrict extends false
 
 /**
  * The module's middlewares keyed by name. With strict types enabled, registered names resolve to a
- * factory that receives their config contract; other names resolve to the legacy middleware.
+ * factory that receives their config contract; other names resolve to a handler or a factory whose
+ * config is `unknown`.
  */
 export type ModuleMiddlewareMap<TNamespace extends string> = IsStrict extends false
   ? Record<string, Middleware>
@@ -87,7 +89,7 @@ export type ModuleMiddlewareMap<TNamespace extends string> = IsStrict extends fa
           MiddlewareConfigFor<Extract<`${TNamespace}.${TName}`, RegisteredMiddlewareName>>
         >;
       },
-      Middleware
+      MiddlewareHandler | MiddlewareFactory<unknown>
     >;
 
 /**
