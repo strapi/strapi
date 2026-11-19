@@ -182,7 +182,7 @@ type StrictPluginConfigGetter<TName extends string> = {
 
 /**
  * The provider registered for the plugin, if any, the application's entry first; otherwise
- * `provider` stays on the index.
+ * `provider` stays on the index, as `unknown`.
  */
 type StrictPluginProvider<TName extends string> =
   TName extends keyof Strapi.Registries.AppPluginProviders
@@ -230,7 +230,11 @@ type PluginMembers<TName extends string> = IsStrict extends false
       >(
         name: TControllerName
       ): PluginControllerLookup<TName, TControllerName, NoInfer<T>>;
-      [key: string]: any;
+      /**
+       * Keys the plugin object does not declare: `undefined` at runtime unless a plugin sets them.
+       * A registered provider is typed by `provider`; an unregistered one is `unknown`.
+       */
+      [key: string]: unknown;
     } & StrictPluginConfigGetter<TName> &
       StrictPluginPolicyGetter<TName> &
       StrictPluginMiddlewareGetter<TName> &
