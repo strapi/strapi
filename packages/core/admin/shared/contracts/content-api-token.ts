@@ -46,7 +46,10 @@ export declare namespace Create {
 export declare namespace List {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      /** The values of the plugin filters on the list, by plugin id. Core does not read them */
+      plugins?: Record<string, unknown>;
+    };
   }
 
   export interface Response {
