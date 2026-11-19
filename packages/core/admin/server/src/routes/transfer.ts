@@ -1,6 +1,30 @@
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
 import dataTransferAuthStrategy from '../strategies/data-transfer';
 
-export default [
+// The published type stays the one develop infers; `satisfies` checks the literals.
+const routes: (
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        middlewares: string[];
+        auth: { strategies: (typeof dataTransferAuthStrategy)[]; scope: string[] };
+        policies?: undefined;
+      };
+    }
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        middlewares: string[];
+        policies: (string | { name: string; config: { actions: string[] } })[];
+        auth?: undefined;
+      };
+    }
+)[] = [
   // Transfer Push
   {
     method: 'GET',
@@ -97,4 +121,6 @@ export default [
       ],
     },
   },
-];
+] satisfies Core.RouteInputFor<Controllers>[];
+
+export default routes;
