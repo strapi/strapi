@@ -57,11 +57,12 @@ declare const applicationChecks: [
 applicationChecks satisfies unknown;
 appProvider.outboxPath() satisfies string;
 
-// Plugins without an entry keep the index signature, as all their other unregistered members.
+// Plugins without an entry keep the index signature, as all their other unregistered members: the
+// provider is `unknown` until a package or the application registers it.
 declare const unregisteredChecks: [
-  Expect<Equal<PluginOf<'other'>['provider'], any>>,
-  Expect<Equal<PluginOf<string>['provider'], any>>,
-  Expect<Equal<typeof unregisteredProvider, any>>,
-  Expect<Equal<typeof dynamicProvider, any>>,
+  Expect<Equal<PluginOf<'other'>['provider'], unknown>>,
+  Expect<Equal<PluginOf<string>['provider'], unknown>>,
+  Expect<Equal<typeof unregisteredProvider, unknown>>,
+  Expect<Equal<typeof dynamicProvider, unknown>>,
 ];
 unregisteredChecks satisfies unknown;
