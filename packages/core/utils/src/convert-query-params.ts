@@ -154,7 +154,11 @@ export interface Params {
   hasPublishedVersion?: boolean | 'true' | 'false';
 }
 
-type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
+/**
+ * The database query builder calls it with its metadata of the queried model as `meta`
+ * (`database/src/query/query-builder.ts`), of which filters read the `uid`.
+ */
+type FiltersQuery = (options: { meta: { uid: string } }) => WhereQuery | undefined;
 type OrderByQuery = SortMap | SortMap[];
 type SelectQuery = string | string[];
 
@@ -904,7 +908,7 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
 
   const convertStatusParams = (status?: 'draft' | 'published', query: Query = {}) => {
     // NOTE: this is the query layer filters not the document/entity service filters
-    query.filters = ({ meta }: { meta: Model }) => {
+    query.filters = ({ meta }: { meta: { uid: string } }) => {
       const contentType = getModel(meta.uid);
 
       // Ignore if target model has disabled DP, as it doesn't make sense to filter by its status
