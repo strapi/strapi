@@ -2,6 +2,7 @@ import type { ReadStream } from 'node:fs';
 import { v2 as cloudinary, ConfigOptions, UploadApiOptions } from 'cloudinary';
 import intoStream from 'into-stream';
 import * as utils from '@strapi/utils';
+import type { Providers } from '@strapi/types';
 
 interface File {
   name: string;
@@ -24,7 +25,7 @@ interface File {
   buffer?: Buffer;
 }
 
-export default {
+const providerModule = {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 
@@ -168,3 +169,9 @@ export default {
     };
   },
 };
+
+// Checked apart from its declaration, so the contract does not re-type the parameters the
+// provider leaves to inference.
+providerModule satisfies Providers.Upload.Factory<ConfigOptions>;
+
+export default providerModule;

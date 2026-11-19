@@ -10567,6 +10567,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.1023.0"
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
+    "@strapi/types": "npm:5.63.0"
     "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.63.0"
     lodash: "npm:4.18.1"
@@ -10580,12 +10581,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/types": "npm:5.63.0"
     "@strapi/utils": "npm:5.63.0"
     "@types/node": "npm:22.20.0"
     cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.63.0"
     into-stream: "npm:^5.1.0"
     tsconfig: "npm:5.63.0"
+    vitest: "catalog:"
+    vitest-config: "npm:5.63.0"
   languageName: unknown
   linkType: soft
 
@@ -10789,11 +10793,15 @@ __metadata:
     "@types/node": "npm:22.20.0"
     create-strapi-app: "workspace:*"
     eslint-config-custom: "workspace:*"
+    knex: "npm:3.3.0"
+    mysql2: "npm:3.23.1"
+    pg: "npm:8.20.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.6"
     styled-components: "npm:6.4.1"
     tsconfig: "workspace:*"
+    vitest: "catalog:"
   languageName: unknown
   linkType: soft
 

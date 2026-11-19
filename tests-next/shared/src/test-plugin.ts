@@ -7,6 +7,7 @@ import constants from '../test-plugin/constants.json';
 
 export { createFakeAiTranslationsProvider } from '../test-plugin/lib/fake-ai-provider';
 export { isLoopbackAddress } from '../test-plugin/lib/loopback';
+export { restoreSql } from '../test-plugin/lib/sqlite-snapshot';
 /* eslint-enable import/no-relative-packages */
 
 /** The test-only plugin loaded into every generated app (tests-next/shared/test-plugin). */
@@ -17,6 +18,9 @@ export const TEST_PLUGIN_ENV_VAR = constants.envVar;
 
 /** Set it to "fake" to register the fake AI translations provider (EE with `cms-byok-ai`). */
 export const TEST_AI_PROVIDER_ENV_VAR = constants.aiProviderEnvVar;
+
+/** The snapshot file, next to a SQLite database (test-plugin/lib/sqlite-snapshot.js). */
+export const SQLITE_SNAPSHOT_FILE = constants.sqliteSnapshotFile;
 
 /** Access key of the transfer token that POST /api/tests/transfer-token creates. */
 export const TEST_TRANSFER_TOKEN_ACCESS_KEY = constants.transferTokenAccessKey;
