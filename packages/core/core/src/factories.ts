@@ -14,7 +14,7 @@ type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S)
 
 const createCoreController = <
   TUID extends UID.ContentType,
-  TController extends Core.CoreAPI.Controller.Extendable<TUID>
+  TController extends Core.CoreAPI.Controller.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<Core.CoreAPI.Controller.FactoryConfig<TUID, TController>>
@@ -26,7 +26,7 @@ const createCoreController = <
   }): TController & Core.CoreAPI.Controller.ContentType<TUID> => {
     const baseController = createController({ contentType: strapi.contentType(uid) });
 
-    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
+    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
     for (const methodName of Object.keys(baseController) as Array<keyof typeof baseController>) {
       if (userCtrl[methodName] === undefined) {
@@ -51,7 +51,7 @@ const createCoreController = <
 
 function createCoreService<
   TUID extends UID.ContentType,
-  TService extends Core.CoreAPI.Service.Extendable<TUID>
+  TService extends Core.CoreAPI.Service.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>
@@ -63,7 +63,7 @@ function createCoreService<
   }): TService & Core.CoreAPI.Service.ContentType<TUID> => {
     const baseService = createService({ contentType: strapi.contentType(uid) });
 
-    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
+    const userService = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
     for (const methodName of Object.keys(baseService) as Array<keyof typeof baseService>) {
       if (userService[methodName] === undefined) {
@@ -154,7 +154,7 @@ const createUploadProvider = <
   TModule extends Providers.Upload.Factory<TOptions>,
   TOptions extends object = TModule extends Providers.Upload.Factory<infer TInit>
     ? TInit
-    : Record<string, unknown>
+    : Record<string, unknown>,
 >(
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
@@ -197,7 +197,7 @@ const createEmailProvider = <
   TModule extends Providers.Email.Factory<TOptions>,
   TOptions extends object = TModule extends Providers.Email.Factory<infer TInit>
     ? TInit
-    : Record<string, unknown>
+    : Record<string, unknown>,
 >(
   module: TModule & Providers.Email.Factory<TOptions>
 ): TModule => module;
