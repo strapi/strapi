@@ -194,7 +194,7 @@ const getAssignedWorkflow = async (
 // workflow requires a stage to publish, it is at that stage
 const computeEntryPublishability = async (
   contentTypeUid: UID.ContentType,
-  entry: DraftEntry | null,
+  entry: (DraftEntry & { locale?: string | null }) | null,
   { workflow, strictRelations }: { workflow: WorkflowWithRequiredStage; strictRelations: boolean },
   { strapi }: { strapi: Core.Strapi }
 ): Promise<EntryPublishability> => {
@@ -211,7 +211,7 @@ const computeEntryPublishability = async (
   // leaves that version out of unique checks
   const publishedVersion = await strapi.documents(contentTypeUid).findOne({
     documentId: entry.documentId,
-    locale: entry.locale,
+    locale: entry.locale ?? undefined,
     status: 'published',
     fields: ['documentId'],
   });
