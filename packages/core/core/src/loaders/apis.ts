@@ -29,7 +29,10 @@ const DEFAULT_CONTENT_TYPE = {
 };
 
 // to handle names with numbers in it we first check if it is already in kebabCase
-const normalizeName = (name: string) => (strings.isKebabCase(name) ? name : _.kebabCase(name));
+// The type generators of @strapi/typescript-utils mirror this rule (generators/common/sources.ts):
+// both run the cases of tests/fixtures/kebab-names.json
+export const normalizeName = (name: string) =>
+  strings.isKebabCase(name) ? name : _.kebabCase(name);
 
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');
