@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+import type { ImplementationServices } from '../types';
 import auth from '../services/auth';
 import role from '../services/role';
 import user from '../services/user';
@@ -13,11 +15,25 @@ import * as transfer from '../services/transfer';
 import { homepageService } from '../services/homepage';
 import debugDump from '../services/debug-dump';
 
+/**
+ * With strict types, the implementation's contract: `findOne` may resolve to `null`. Without them,
+ * as on develop, so the declarations emitted from inferred types stay the same.
+ */
+type RoleService = Core.IsStrict extends true ? ImplementationServices['role'] : typeof role;
+
+/**
+ * With strict types, the implementation's contract: the action provider checks permission action
+ * IDs. Without them, as on develop.
+ */
+type PermissionService = Core.IsStrict extends true
+  ? ImplementationServices['permission']
+  : typeof permission;
+
 type S = {
-  role: typeof role;
+  role: RoleService;
   user: typeof user;
   passport: typeof passport;
-  permission: typeof permission;
+  permission: PermissionService;
   'content-type': typeof contentType;
   token: typeof token;
   auth: typeof auth;

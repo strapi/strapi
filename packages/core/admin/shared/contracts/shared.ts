@@ -1,4 +1,4 @@
-import type { Data, Struct, UID } from '@strapi/types';
+import type { Core, Data, Struct, UID } from '@strapi/types';
 
 export interface Entity {
   id: Data.ID;
@@ -13,7 +13,7 @@ export interface Permission extends Entity {
   properties: {
     fields?: string[];
     locales?: string[] | null;
-    [key: string]: any;
+    [key: string]: Core.IsStrict extends true ? unknown : any;
   };
   conditions: string[];
 }
