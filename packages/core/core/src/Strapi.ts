@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
-import type { Core, Modules, UID, Schema } from '@strapi/types';
+import type { Core, Modules, UID, Schema, Struct } from '@strapi/types';
 
 import { loadConfiguration } from './configuration';
 import { warnDeprecatedServerConfig } from './configuration/server-config';
@@ -97,7 +97,11 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   get ee(): Core.Strapi['ee'] {
-    return utils.ee;
+    // With strict types, `features.get` returns the feature named by its argument, which
+    // `list().find()` cannot express: only the feature reads take the contract's types.
+    return utils.ee as Omit<typeof utils.ee, 'features'> & {
+      features: Core.Strapi['ee']['features'];
+    };
   }
 
   get dirs(): Core.StrapiDirectories {
@@ -159,7 +163,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('startupLogger');
   }
 
-  get eventHub(): Modules.EventHub.EventHub {
+  /** Typed as `Core.Strapi['eventHub']`: with strict types, registered events follow the registry. */
+  get eventHub(): Core.Strapi['eventHub'] {
     return this.get('eventHub');
   }
 
@@ -179,7 +184,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('sessionManager');
   }
 
-  get store(): Modules.CoreStore.CoreStore {
+  /** Typed as `Core.Strapi['store']`: with strict types, reads and writes follow the store registry. */
+  get store(): Core.Strapi['store'] {
     return this.get('coreStore');
   }
 
@@ -191,8 +197,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('services').getAll();
   }
 
-  service(uid: UID.Service) {
-    return this.get('services').get(uid);
+  service<T = unknown, TUID extends UID.Service = UID.Service>(
+    uid: TUID
+  ): Core.ServiceLookup<TUID, T> {
+    return this.get('services').get(uid) as Core.ServiceLookup<TUID, T>;
   }
 
   get controllers() {
@@ -231,12 +239,12 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('middlewares').get(name);
   }
 
-  get plugins(): Record<string, Core.Plugin> {
+  get plugins(): Core.PluginMap {
     return this.get('plugins').getAll();
   }
 
-  plugin(name: string): Core.Plugin {
-    return this.get('plugins').get(name);
+  plugin<TName extends string>(name: TName): Core.PluginOf<TName> {
+    return this.get('plugins').get(name) as Core.PluginOf<TName>;
   }
 
   get hooks() {
@@ -251,7 +259,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('apis').getAll();
   }
 
-  api(name: string): Core.Module {
+  api<TName extends string>(name: TName): Core.ModuleOf<`api::${TName}`> {
     return this.get('apis').get(name);
   }
 
@@ -295,7 +303,7 @@ class Strapi extends Container implements Core.Strapi {
 
     const logger = createLogger({
       level: 'http', // Strapi defaults to level 'http'
-      ...config.get('logger'), // DEPRECATED
+      ...config.get<Record<string, unknown> | undefined>('logger'), // DEPRECATED
       ...config.get('server.logger.config'),
     });
 
@@ -537,7 +545,7 @@ class Strapi extends Container implements Core.Strapi {
       type: 'strapi',
       name: 'content_types',
       key: 'schema',
-      value: this.contentTypes,
+      value: this.contentTypes as Record<string, Struct.ContentTypeSchema>,
     });
 
     await this.server.initMiddlewares();

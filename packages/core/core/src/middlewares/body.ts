@@ -15,7 +15,7 @@ const defaults = {
 // formidable's own default, applied when `formidable.maxFileSize` is not configured
 export const DEFAULT_MAX_FILE_SIZE = 200 * 1024 * 1024;
 
-const getMaxFileSize = (config: Config) => {
+const getMaxFileSize = (config: Partial<Config>) => {
   const limit = Number(config.formidable?.maxFileSize);
 
   return Number.isFinite(limit) ? limit : DEFAULT_MAX_FILE_SIZE;
@@ -31,13 +31,16 @@ function getFiles(ctx: Koa.Context) {
   return ctx?.request?.files?.files;
 }
 
-const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
-  const bodyConfig: Config = defaultsDeep({}, config, defaults);
+// The options are merged over `defaults`, and `koa-body` defaults the rest, so every field is
+// optional.
+const bodyMiddleware: Core.MiddlewareFactory<Partial<Config>> = (config, { strapi }) => {
+  const bodyConfig: Partial<Config> = defaultsDeep({}, config, defaults);
 
   let gqlEndpoint: string | undefined;
   if (strapi.plugin('graphql')) {
     const { config: gqlConfig } = strapi.plugin('graphql');
-    gqlEndpoint = gqlConfig('endpoint');
+    // Core does not load the GraphQL contracts, an optional plugin.
+    gqlEndpoint = gqlConfig<string | undefined>('endpoint');
   }
 
   return async (ctx, next) => {
