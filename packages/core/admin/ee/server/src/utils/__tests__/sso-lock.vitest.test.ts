@@ -25,14 +25,14 @@ describe('isSsoLocked', () => {
     roles: [{ id: 3 }, { id: 4 }],
   };
 
+  const load = vi.fn(async () => {
+    return [{ id: 2 }];
+  });
+
   global.strapi = {
     db: {
       query: vi.fn(() => {
-        return {
-          load: vi.fn(async () => {
-            return [{ id: 2 }];
-          }),
-        };
+        return { load };
       }),
     },
     store: vi.fn(() => {
@@ -78,5 +78,7 @@ describe('isSsoLocked', () => {
     ssoEnabled = true;
     expect(await isSsoLocked(userWithLoadedLockedRoles)).toBe(true);
     expect(global.strapi.db.query).toHaveBeenCalledTimes(1);
+    expect(global.strapi.db.query).toHaveBeenCalledWith('admin::user');
+    expect(load).toHaveBeenCalledWith(userWithLoadedLockedRoles, 'roles', { select: ['id'] });
   });
 });
