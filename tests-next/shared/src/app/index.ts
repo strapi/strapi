@@ -6,5 +6,7 @@ export { generateApp } from './generate';
 export type { App, GenerateAppOptions } from './generate';
 export { buildAdmin, hasAdminBuild } from './build';
 export type { BuildAdminOptions } from './build';
+export { prepareApp } from './prepare';
+export type { PrepareAppOptions, PreparedApp } from './prepare';
 export { startServer, stopAllServers, stopServer } from './server';
 export type { Server, ServerMode, StartServerOptions } from './server';
