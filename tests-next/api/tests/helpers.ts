@@ -8,7 +8,6 @@ export const port = appPort('api', worker - 1);
 export interface Response {
   status: number;
   // The tests read the bodies they expect: typing every route is not worth it here.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: any;
 }
 
