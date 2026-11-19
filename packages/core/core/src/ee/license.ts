@@ -138,7 +138,7 @@ const throwShouldFallbackError = () => {
 const fetchLicense = async (
   { strapi }: { strapi: Core.Strapi },
   key: string,
-  projectId: string
+  projectId: string | undefined
 ) => {
   const installIdFromPackageJson = strapi.config.get<string | undefined>('installId');
 
