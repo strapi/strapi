@@ -5,7 +5,7 @@ import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default (({ strapi }: { strapi: Core.Strapi }) => {
   const internals = {
     isUpdating: false,
     // Held from the first line of updateSchema until it returns. isUpdating
@@ -75,4 +75,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.send({ data: { isUpdating: internals.isUpdating } });
     },
   };
-};
+}) satisfies Core.ControllerFactory<'plugin::content-type-builder.schema'>;
