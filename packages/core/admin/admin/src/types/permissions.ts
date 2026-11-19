@@ -34,4 +34,4 @@ interface PermissionMap {
     };
 }
 
-export { PermissionMap };
+export type { PermissionMap };
