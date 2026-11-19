@@ -57,7 +57,7 @@ export default ({ strapi }: Context) => {
         },
       },
 
-      args: getContentTypeArgs(contentType),
+      args: getContentTypeArgs(contentType) as Nexus.core.ArgsRecord | undefined,
 
       async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType });
