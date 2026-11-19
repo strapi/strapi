@@ -6,6 +6,7 @@ import { styled } from 'styled-components';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetPreview, UploadPreview } from './AssetPreview';
+import { AssetSubtitle } from './AssetSubtitle';
 import { FieldMenuItem, GhostIconButton } from './FieldControls';
 import { UploadProgressBar } from './UploadProgressBar';
 
@@ -105,7 +106,12 @@ export const AssetCard = ({
     <CardFrame
       tone="neutral"
       preview={<AssetPreview asset={asset} size="L" />}
-      name={<Name textColor="neutral800">{asset.name}</Name>}
+      name={
+        <Flex direction="column" alignItems="stretch" minWidth={0}>
+          <Name textColor="neutral800">{asset.name}</Name>
+          <AssetSubtitle asset={asset} />
+        </Flex>
+      }
       actions={
         <Menu.Root modal={false}>
           <Menu.Trigger

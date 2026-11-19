@@ -85,9 +85,17 @@ const asset = (id: number, name: string): AssetFile =>
     provider: 'local',
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
-  }) as AssetFile;
+  } as AssetFile);
 
 const image = (name: string) => new File(['x'], name, { type: 'image/png' });
+
+/**
+ * Finds the element whose whole text is `text`, for text split across child
+ * elements (such as the parts of an asset's subtitle). Its ancestors also hold
+ * the asset's name, so only the line itself matches.
+ */
+const getByTextContent = (text: string) =>
+  screen.getByText((_, element) => element?.textContent === text);
 
 interface PendingRequest {
   name: string;
@@ -231,6 +239,19 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(screen.getByRole('button', { name: 'Copy link to one.png' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Remove one.png' })).toBeInTheDocument();
       expect(screen.queryByText('Drag & drop an asset here')).not.toBeInTheDocument();
+    });
+
+    it('shows the type, dimensions and size of the asset under its name', () => {
+      renderInput({}, { cover: { ...asset(1, 'one.png'), width: 800, height: 600 } });
+
+      expect(getByTextContent('PNG - 800×600 - 10.0KB')).toBeInTheDocument();
+    });
+
+    it('shows no line under the name when nothing is known about the file', () => {
+      renderInput({}, { cover: { ...asset(1, 'file'), ext: undefined, size: 0 } });
+
+      expect(screen.getByText('file')).toBeInTheDocument();
+      expect(screen.queryByText(/KB|×| -/)).not.toBeInTheDocument();
     });
 
     it('shows the upload in progress, then the uploaded asset', async () => {
@@ -441,6 +462,25 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(screen.getByText('one.png')).toBeInTheDocument();
       expect(screen.getByText('two.png')).toBeInTheDocument();
       expect(getDropZone()).toBeInTheDocument();
+    });
+
+    it('shows the type, dimensions and size of each asset under its name', () => {
+      renderInput(multiple, {
+        cover: [{ ...asset(1, 'one.png'), width: 800, height: 600 }, asset(2, 'two.png')],
+      });
+
+      expect(getByTextContent('PNG - 800×600 - 10.0KB')).toBeInTheDocument();
+      expect(getByTextContent('PNG - 10.0KB')).toBeInTheDocument();
+    });
+
+    it('keeps each part of the line whole, so a narrow card wraps it instead of cutting the size', () => {
+      renderInput(multiple, {
+        cover: [{ ...asset(1, 'one.png'), width: 800, height: 600, size: 2300 }],
+      });
+
+      expect(screen.getByText('PNG -')).toBeInTheDocument();
+      expect(screen.getByText('800×600 -')).toBeInTheDocument();
+      expect(screen.getByText('2.3MB')).toBeInTheDocument();
     });
 
     it('adds each file as it lands, keeping the assets already there', async () => {
