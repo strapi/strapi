@@ -511,3 +511,24 @@ const removeMiddleware = app.documents.use(async (_context, next) => next());
 removeMiddleware satisfies () => void;
 // @ts-expect-error `use()` does not return the service, so calls cannot be chained.
 app.documents.use(async (_context, next) => next()).use(async (_context, next) => next());
+
+// The core service passes `status` to the Document Service's `delete`, which throws
+// `Cannot delete a draft document` on a draft and publish content type.
+// @ts-expect-error A draft and publish document cannot be deleted by its draft version
+void articleService.delete('a', { status: 'draft' });
+// @ts-expect-error A draft and publish document cannot be deleted by its draft version
+void homepageService.delete({ status: 'draft' });
+void articleService.delete('a', { status: 'published' });
+declare const categoryService: Core.CoreAPI.Service.ContentType<'api::category.category'>;
+void categoryService.delete('a', { status: 'draft' });
+
+// With generated schemas, a union of UIDs that includes a draft and publish content type only
+// accepts `published`: `draft` throws for that member.
+declare const articleOrCategory: 'api::article.article' | 'api::category.category';
+declare const anyContentType: import('@strapi/strapi').UID.ContentType;
+// @ts-expect-error `draft` throws for the draft and publish member
+void app.documents(articleOrCategory).delete({ documentId: 'a', status: 'draft' });
+// @ts-expect-error `draft` throws if the UID has draft and publish enabled
+void app.documents(anyContentType).delete({ documentId: 'a', status: 'draft' });
+void app.documents(articleOrCategory).delete({ documentId: 'a', status: 'published' });
+void app.documents('api::category.category').delete({ documentId: 'a', status: 'draft' });
