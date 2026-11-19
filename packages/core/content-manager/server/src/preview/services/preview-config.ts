@@ -18,6 +18,7 @@ export type PreviewConfig = NonNullable<Core.Config.Admin['preview']>;
  */
 const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
+    /** @internal */
     register() {
       if (!this.isEnabled()) {
         return;
@@ -48,11 +49,13 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
+    /** @internal */
     isConfigured() {
       const config = strapi.config.get('admin.preview') as PreviewConfig;
       return config?.enabled === false || config?.config?.handler != null;
     },
 
+    /** @internal */
     isEnabled() {
       const config = strapi.config.get('admin.preview') as PreviewConfig;
 
@@ -65,6 +68,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Validate if the configuration is valid
+     * @internal
      */
     validate() {
       if (!this.isEnabled()) {
@@ -83,6 +87,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Utility to get the preview handler from the configuration
+     * @internal
      */
     getPreviewHandler(): NonNullable<Core.Config.Admin['preview']>['config']['handler'] {
       const emptyHandler = () => {

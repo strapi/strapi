@@ -22,6 +22,11 @@ const setMetricsStoreValue = (value: MetricStoreValue) =>
   strapi.store.set({ type: 'plugin', name: 'upload', key: 'metrics', value });
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
+  /**
+   * Counts the assets and the folders, and computes the folder depth statistics.
+   *
+   * @internal
+   */
   async computeMetrics() {
     // Folder metrics
     // @ts-expect-error - no dynamic types for the metadata
@@ -100,6 +105,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     };
   },
 
+  /**
+   * Sends the weekly telemetry event with the computed metrics and stores the time it was sent.
+   *
+   * @internal
+   */
   async sendMetrics() {
     const metrics = await this.computeMetrics();
     await getService('metrics').trackUsage('didSendUploadPropertiesOnceAWeek', {
@@ -110,6 +120,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });
   },
 
+  /**
+   * The stored weekly cron schedule. A new one is stored when none is, or when the metrics were not
+   * sent in the last week.
+   *
+   * @internal
+   */
   async ensureWeeklyStoredCronSchedule(): Promise<string> {
     const metricsInfoStored = await getMetricsStoreValue();
     const { weeklySchedule: currentSchedule, lastWeeklyUpdate } = metricsInfoStored;
@@ -127,6 +143,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return weeklySchedule;
   },
 
+  /**
+   * Schedules `sendMetrics` on the stored weekly cron schedule.
+   *
+   * @internal
+   */
   async registerCron() {
     const weeklySchedule = await this.ensureWeeklyStoredCronSchedule();
 

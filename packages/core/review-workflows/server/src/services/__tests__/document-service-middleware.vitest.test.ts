@@ -9,7 +9,7 @@ const workflow = { id: 1 };
 const draftStage = { id: 10, name: 'Draft', workflow };
 const reviewStage = { id: 11, name: 'Review', workflow };
 
-const createStrapiMock = (previousStage: typeof draftStage) => {
+const createStrapiMock = (previousStage: typeof draftStage | null) => {
   return {
     documents: vi.fn(() => ({
       findOne: vi.fn().mockResolvedValue({ [ENTITY_STAGE_ATTRIBUTE]: previousStage }),
@@ -180,8 +180,12 @@ describe('review-workflows document service middleware', () => {
       );
     });
 
-    test('runs the update once when the stage does not change', async () => {
-      const strapi = createStrapiMock(draftStage);
+    // A read with no stage returns `strapi_stage: null`: the previous stage then has no id
+    test.each([
+      ['the stage does not change', draftStage],
+      ['the entry had no stage', null],
+    ])('runs the update once without an event when %s', async (_, previousStage) => {
+      const strapi = createStrapiMock(previousStage);
       vi.stubGlobal('strapi', strapi);
 
       const updatedEntry = { id: 1, locale: 'en', [ENTITY_STAGE_ATTRIBUTE]: draftStage };

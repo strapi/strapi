@@ -14,6 +14,17 @@ import { warnOnSizeLimitMismatch } from './size-limit-warning';
 import type { UploadTooLargeDetails } from '../../shared/contracts/files';
 
 const { PayloadTooLargeError } = errors;
+
+/**
+ * `plugin::documentation.override`. Documentation is an optional plugin that upload does not depend
+ * on, so its registered contract is not loaded here.
+ */
+type DocumentationOverrideService = {
+  registerOverride(
+    override: unknown,
+    opts?: { pluginOrigin: string; excludeFromGeneration?: string[] }
+  ): void;
+};
 const { bytesToHumanReadable, kbytesToBytes } = file;
 
 /**
@@ -57,7 +68,7 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   if (strapi.plugin('documentation')) {
     strapi
       .plugin('documentation')
-      .service('override')
+      .service<DocumentationOverrideService>('override')
       .registerOverride(spec, {
         pluginOrigin: 'upload',
         excludeFromGeneration: ['upload'],
