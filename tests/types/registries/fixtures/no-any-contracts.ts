@@ -9,9 +9,6 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 // - `admin::content-type.getPermissionsWithNestedFields` `actions`: accepted residual.
 // - `plugin::graphql.builders.get` and `plugin::graphql.utils.mappers.strapiScalarToGraphQLScalar`:
 //   the precise Nexus types are a follow-up.
-// - The `entry` of the content-releases action rows (`Modules.Documents.AnyDocument`), and the
-//   members whose only `any` is that `entry` (`release.create`, `release.delete`,
-//   `release.recordMissedRun`, `release-action.groupActions`).
 // - The rows the round left out: `admin::passport`, the content-manager `relations` controller, the
 //   `strapi::responses` and `strapi::session` middlewares, and `PackageConfigs['middlewares']`,
 //   which re-exposes their configs.
@@ -363,3 +360,99 @@ declare const coreChecks: [
   Core.Assert<Equal<[HasAny<Core.MiddlewareConfigFor<'strapi::cors'>>], [false]>>,
 ];
 coreChecks satisfies unknown;
+
+// Documents of unregistered schemas (G01): with strict types, `Modules.Documents.AnyDocument` values
+// and the input of an unregistered content type are `unknown`. Only those positions are guarded:
+// the document params (`filters`, `sort`, `populate`) still reach `any` through the blocks `image`
+// and library iterator types, and `groupActions` results through `mainFieldValue`.
+type DocumentManager = Service<'plugin::content-manager.document-manager'>;
+type History = Service<'plugin::content-manager.history'>;
+type ReviewWorkflowsMiddleware =
+  Service<'plugin::review-workflows.document-service-middlewares'>['assignStageOnCreate'];
+type Result<TMethod extends (...args: never[]) => unknown> = Awaited<ReturnType<TMethod>>;
+declare const documentChecks: [
+  Core.Assert<Equal<[HasAny<History['createVersion']>], [false]>>,
+  Core.Assert<Equal<[HasAny<History['restoreVersion']>], [false]>>,
+  Core.Assert<
+    Equal<
+      [
+        HasAny<
+          [
+            Result<DocumentManager['findOne']>,
+            Result<DocumentManager['findLocales']>,
+            Result<DocumentManager['findMany']>,
+            Result<DocumentManager['findPage']>,
+            Result<DocumentManager['create']>,
+            Result<DocumentManager['update']>,
+            Result<DocumentManager['clone']>,
+            Result<DocumentManager['publish']>,
+            Result<DocumentManager['unpublish']>,
+            Result<DocumentManager['discardDraft']>,
+          ]
+        >,
+      ],
+      [false]
+    >
+  >,
+  // The written data.
+  Core.Assert<
+    Equal<
+      [
+        HasAny<
+          [
+            NonNullable<Parameters<DocumentManager['create']>[1]>['data'],
+            NonNullable<Parameters<DocumentManager['update']>[2]>['data'],
+            Parameters<DocumentManager['clone']>[1],
+          ]
+        >,
+      ],
+      [false]
+    >
+  >,
+  Core.Assert<Equal<[HasAny<Service<'plugin::content-releases.release'>['create']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Service<'plugin::content-releases.release'>['delete']>], [false]>>,
+  Core.Assert<
+    Equal<[HasAny<Service<'plugin::content-releases.release'>['recordMissedRun']>], [false]>
+  >,
+  Core.Assert<Equal<[HasAny<Parameters<ReleaseAction['groupActions']>>], [false]>>,
+  Core.Assert<Equal<[HasAny<ReleaseAction['findPage']>], [false]>>,
+  Core.Assert<
+    Equal<
+      [HasAny<Service<'plugin::i18n.ai-localizations'>['generateDocumentLocalizations']>],
+      [false]
+    >
+  >,
+  Core.Assert<
+    Equal<[HasAny<Service<'plugin::i18n.fill-from-locale'>['fetchRawDocument']>], [false]>
+  >,
+  Core.Assert<
+    Equal<[HasAny<Service<'plugin::review-workflows.assignees'>['updateEntityAssignee']>], [false]>
+  >,
+  Core.Assert<Equal<[HasAny<Service<'plugin::review-workflows.stages'>['updateEntity']>], [false]>>,
+  // A document service middleware: the written data, what `next()` resolves to, and its result.
+  Core.Assert<
+    Equal<
+      [
+        HasAny<
+          [
+            Extract<
+              Parameters<ReviewWorkflowsMiddleware>[0],
+              { action: 'create' }
+            >['params']['data'],
+            ReturnType<Parameters<ReviewWorkflowsMiddleware>[1]>,
+            ReturnType<ReviewWorkflowsMiddleware>,
+          ]
+        >,
+      ],
+      [false]
+    >
+  >,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['entry.create']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['entry.update']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['entry.delete']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['entry.publish']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['entry.unpublish']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['entry.draft-discard']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['releases.publish']>], [false]>>,
+];
+documentChecks satisfies unknown;
