@@ -1,4 +1,5 @@
 import type * as Schema from '../../../../schema';
+import type { IsStrict } from '../../../../core/strictness';
 
 import type * as UID from '../../../../uid';
 import type { Array, Constants, If, Extends, IsNotNever, MatchFirst } from '../../../../utils';
@@ -66,6 +67,23 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
   IsNotNever<TAttribute>,
   MatchFirst<
     [
+      // Media, with strict types: the loose input of develop, where the media value is the input.
+      // Strict types make the media value the upload file document, and the deprecated Entity
+      // Service keeps its input. Without strict types, the branch resolves to no entry and the
+      // fallback below keeps the same value.
+      ...(IsStrict extends false
+        ? []
+        : [
+            [
+              Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+              TAttribute extends Schema.Attribute.Media<
+                Schema.Attribute.MediaKind | undefined,
+                infer TMultiple
+              >
+                ? If<TMultiple, any[], any>
+                : never,
+            ],
+          ]),
       // Relation
       [
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
