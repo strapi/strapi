@@ -21,7 +21,10 @@ import { describeEE, describeIfFeature, requireServerFeature } from '@strapi/tes
 
 import { port, worker } from '../helpers';
 
-/** The edition contract (RFC D6). The suite runs in the edition of STRAPI_TEST_EDITION. */
+/**
+ * The edition contract (see the Edition section of tests-next/README.md). The suite runs in the
+ * edition of STRAPI_TEST_EDITION.
+ */
 
 describe('editionFromEnv', () => {
   test('defaults to CE', () => {

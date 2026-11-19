@@ -8,7 +8,7 @@ import type { AppOptions } from './fixtures/app';
 const REPORTS_DIR = path.join(__dirname, '../../test-apps/next/reports');
 
 /**
- * Edition contract (RFC D6), from STRAPI_TEST_EDITION. A CE run runs every test but the `@ee`
+ * Edition contract (tests-next/README.md, Edition), from STRAPI_TEST_EDITION. A CE run runs every test but the `@ee`
  * ones. An EE run replays the `@ee` and `@smoke` tests only: the rest behaves the same in both
  * editions.
  */

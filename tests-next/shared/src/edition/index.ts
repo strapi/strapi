@@ -2,7 +2,8 @@ import { PROBE_TIMEOUT } from '../app/config';
 import type { Server } from '../app/server';
 
 /**
- * The edition contract (RFC D6): one module decides whether a run is CE or EE, for every suite.
+ * The edition contract: one module decides whether a run is CE or EE, for every tests-next
+ * suite. See the Edition section of tests-next/README.md.
  *
  * - `STRAPI_TEST_EDITION=ce|ee`, default `ce`. In the tests-next suites it replaces `RUN_EE`,
  *   `STRAPI_E2E_EDITION` and `STRAPI_DISABLE_EE`; `/tests` still uses those until the cutover.

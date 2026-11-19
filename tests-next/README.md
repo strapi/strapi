@@ -53,7 +53,7 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
     bootstrap) and the custom-order cache (which content types have custom order on). That cache
     is stale-while-revalidate: once it is 10 s old, the next read still answers from it and
     refreshes it in the background. The list is in `shared/src/db/snapshot.ts`.
-- **Edition** (RFC D6): `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
+- **Edition**: `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
   (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
   Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run
   removes any license from the app env. See [Edition](#edition).

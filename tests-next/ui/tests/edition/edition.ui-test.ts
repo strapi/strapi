@@ -2,7 +2,8 @@ import { editionFromEnv } from '@strapi/tests-shared';
 
 import { expect, test } from '../../fixtures/app';
 
-// The edition contract in the ui suite (RFC D6). Runs in both editions.
+// The edition contract in the ui suite (see the Edition section of tests-next/README.md). Runs in
+// both editions.
 test('the instance runs in the edition of the run', { tag: '@smoke' }, async ({ features }) => {
   expect(features.edition).toBe(editionFromEnv());
 });
