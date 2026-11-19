@@ -7,15 +7,9 @@
  * (src/providers/__tests__/email.test.ts).
  */
 import type { Providers } from '@strapi/types';
+import { expectTypeOf } from 'vitest';
 
 import { createEmailProvider } from '../factories';
-
-type Assert<T extends true> = T;
-type IsEqual<Left, Right> = (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right
-  ? 1
-  : 2
-  ? true
-  : false;
 
 // An application provider: options, settings and send options are typed by the contract, extra
 // members are kept.
@@ -23,7 +17,7 @@ export const appProvider = createEmailProvider({
   name: 'test',
   init: (options: { url: string }, settings) => ({
     async send(email) {
-      email.subject satisfies string;
+      expectTypeOf(email.subject).toEqualTypeOf<string>();
 
       return `${options.url}?from=${settings.defaultFrom}`;
     },
@@ -33,15 +27,15 @@ export const appProvider = createEmailProvider({
   }),
 });
 
-true satisfies Assert<IsEqual<Parameters<typeof appProvider.init>[0], { url: string }>>;
-true satisfies Assert<IsEqual<ReturnType<ReturnType<typeof appProvider.init>['outbox']>, string>>;
+expectTypeOf(appProvider.init).parameter(0).toEqualTypeOf<{ url: string }>();
+expectTypeOf(appProvider.init).returns.toHaveProperty('outbox').returns.toEqualTypeOf<string>();
 
 // Without an annotation, the options are the `providerOptions` record of the email config.
 export const untypedOptionsProvider = createEmailProvider({
   name: 'test',
   init(options, settings) {
-    true satisfies Assert<IsEqual<typeof options, Record<string, unknown>>>;
-    true satisfies Assert<IsEqual<typeof settings, Providers.Email.Settings>>;
+    expectTypeOf(options).toEqualTypeOf<Record<string, unknown>>();
+    expectTypeOf(settings).toEqualTypeOf<Providers.Email.Settings>();
 
     return { send: () => Promise.resolve() };
   },
@@ -60,7 +54,7 @@ const interfaceOptionsModule = {
 
 export const interfaceOptionsProvider = createEmailProvider(interfaceOptionsModule);
 
-true satisfies Assert<IsEqual<Parameters<typeof interfaceOptionsProvider.init>[0], ApiOptions>>;
+expectTypeOf(interfaceOptionsProvider.init).parameter(0).toEqualTypeOf<ApiOptions>();
 
 export const interfaceOptionsLiteralProvider = createEmailProvider({
   name: 'test',
@@ -74,11 +68,13 @@ export const inlineOptionsModule = {
   init: (options: { url: string }) => ({ send: () => Promise.resolve(), url: () => options.url }),
 } satisfies Providers.Email.Factory<{ url: string }>;
 
-createEmailProvider(inlineOptionsModule).init({ url: '/' }).url() satisfies string;
+expectTypeOf(
+  createEmailProvider(inlineOptionsModule).init({ url: '/' }).url()
+).toEqualTypeOf<string>();
 
 // An explicit type argument is the module type, and keeps its members outside the contract.
 type QueueModule = {
-  name: 'test',
+  name: 'test';
   init(
     options: { queue: string },
     settings: Providers.Email.Settings
@@ -90,9 +86,9 @@ export const explicitModuleProvider = createEmailProvider<QueueModule>({
   init: (options) => ({ send: () => Promise.resolve(), queueName: () => options.queue }),
 });
 
-explicitModuleProvider
-  .init({ queue: 'mail' }, { defaultFrom: 'no-reply@strapi.io' })
-  .queueName() satisfies string;
+expectTypeOf(
+  explicitModuleProvider.init({ queue: 'mail' }, { defaultFrom: 'no-reply@strapi.io' }).queueName()
+).toEqualTypeOf<string>();
 
 // The module may carry members besides `name` and `init`.
 export const namedProvider = createEmailProvider({
@@ -101,7 +97,7 @@ export const namedProvider = createEmailProvider({
   init: () => ({ send: () => Promise.resolve() }),
 });
 
-namedProvider.name satisfies string;
+expectTypeOf(namedProvider.name).toEqualTypeOf<string>();
 
 // @ts-expect-error a provider module must export its `name`.
 createEmailProvider({

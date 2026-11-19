@@ -7,22 +7,17 @@
  * sources, since `@strapi/types` cannot depend on them. The application helper,
  * `factories.createEmailProvider`, is tested in @strapi/core (src/__type-tests__/email-provider.test.ts).
  */
-import type { Providers } from '../..';
+import { expectTypeOf } from 'vitest';
 
-type Assert<T extends true> = T;
-type IsEqual<Left, Right> = (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right
-  ? 1
-  : 2
-  ? true
-  : false;
+import type { Providers } from '../..';
 
 // A provider on the object literal: options, settings and send options are typed by the contract.
 export const appProvider = {
   name: 'test',
   init: (options: { url: string }, settings) => ({
     async send(email) {
-      email.to satisfies string;
-      settings.defaultFrom satisfies string;
+      expectTypeOf(email.to).toEqualTypeOf<string>();
+      expectTypeOf(settings.defaultFrom).toEqualTypeOf<string>();
 
       return `${options.url}/${email.subject}`;
     },
@@ -42,8 +37,8 @@ export const appProvider = {
 export const untypedOptionsProvider = {
   name: 'test',
   init(options, settings) {
-    true satisfies Assert<IsEqual<typeof options, Record<string, unknown>>>;
-    true satisfies Assert<IsEqual<typeof settings, Providers.Email.Settings>>;
+    expectTypeOf(options).toEqualTypeOf<Record<string, unknown>>();
+    expectTypeOf(settings).toEqualTypeOf<Providers.Email.Settings>();
 
     return { send: () => Promise.resolve() };
   },
