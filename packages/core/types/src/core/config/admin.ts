@@ -1,3 +1,6 @@
+import type * as PublicationStatus from '../../modules/documents/params/status';
+import type { IsStrict } from '../strictness';
+
 export interface ApiToken {
   salt: string;
 }
@@ -116,7 +119,8 @@ export interface Flags {
 export interface PreviewHandlerParams {
   documentId: string;
   locale?: string;
-  status?: string;
+  /** The preview URL validation only accepts document statuses. */
+  status?: IsStrict extends true ? PublicationStatus.Kind : string;
   [key: string]: unknown;
 }
 
@@ -137,6 +141,10 @@ export interface Ai {
   enabled?: boolean;
 }
 
+/**
+ * Input of `config/admin.ts`. Resolved contract, with loader defaults: `ResolvedConfig.Admin` in
+ * `@strapi/core`.
+ */
 export interface Admin {
   // required
   apiToken: ApiToken;
