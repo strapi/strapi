@@ -77,7 +77,25 @@ export type Delete<TContentTypeUID extends UID.ContentType> = Pick<
   documentId: ID;
   // Intersects with the `status` that the `hasPublishedVersion` kind also adds
   status?: DeleteStatus<TContentTypeUID>;
-};
+} & StrictParams<{ status?: StrictDeleteStatus<TContentTypeUID> }>;
+
+/** The content-type UIDs whose schema enables draft and publish. */
+type DraftAndPublishUID = {
+  [TUID in UID.ContentType]: [DraftAndPublishOption<TUID>] extends [true] ? TUID : never;
+}[UID.ContentType];
+
+/**
+ * With strict types, a union of UIDs only accepts the statuses every member accepts: `published`
+ * once one member enables draft and publish, as `draft` throws for that member. With generated
+ * schemas, `UID.ContentType` is the union of the application's UIDs, so a UID only known at runtime
+ * follows the same rule. Without generated schemas, no UID enables draft and publish, and every
+ * status stays accepted. A single UID resolves as {@link DeleteStatus}.
+ */
+type StrictDeleteStatus<TContentTypeUID extends UID.ContentType> = [
+  Extract<TContentTypeUID, DraftAndPublishUID>,
+] extends [never]
+  ? PublicationStatus.Kind
+  : Extract<PublicationStatus.Kind, 'published'>;
 
 type DraftAndPublishOption<TContentTypeUID extends UID.ContentType> = NonNullable<
   Schema.ContentType<TContentTypeUID>['options']
