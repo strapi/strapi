@@ -1,5 +1,10 @@
 import { describe, test, expect, vi } from 'vitest';
-import type { StandardSchemaWithJSON } from '@modelcontextprotocol/server';
+import { Client } from '@modelcontextprotocol/client';
+import {
+  InMemoryTransport,
+  McpServer,
+  type StandardSchemaWithJSON,
+} from '@modelcontextprotocol/server';
 import { z } from '@strapi/utils';
 import { assertSchemaConvertsToJsonSchema } from '../assertSchemaConvertsToJsonSchema';
 
@@ -10,6 +15,39 @@ const withoutStandardJsonSchema = (schema: z.ZodType) => {
 
   return { _zod: schema._zod, '~standard': standard } as unknown as StandardSchemaWithJSON;
 };
+
+/** Whether the SDK serves `prompts/list` for a prompt registered with `argsSchema`. */
+const sdkListsPrompt = async (argsSchema: StandardSchemaWithJSON) => {
+  const server = new McpServer({ name: 'parity-server', version: '1.0.0' });
+  server.registerPrompt('probe', { argsSchema }, async () => ({ messages: [] }));
+
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: 'parity-client', version: '1.0.0' });
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+  try {
+    await client.listPrompts();
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await client.close();
+    await server.close();
+  }
+};
+
+const helperAcceptsInput = (schema: StandardSchemaWithJSON) => {
+  try {
+    assertSchemaConvertsToJsonSchema(schema, 'input');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const recursiveNode: z.ZodTypeAny = z.lazy(() =>
+  z.object({ label: z.string(), child: recursiveNode.optional() })
+);
 
 describe('assertSchemaConvertsToJsonSchema', () => {
   test('accepts a schema JSON Schema can represent', () => {
@@ -78,6 +116,65 @@ describe('assertSchemaConvertsToJsonSchema', () => {
       expect(() => assertSchemaConvertsToJsonSchema(schema, 'input')).toThrow(
         'Schema library "acme" does not implement `~standard.jsonSchema`'
       );
+    });
+  });
+  /**
+   * The helper copies a converter the SDK does not export. If an SDK upgrade makes the SDK more
+   * lenient, the probe would hide prompts the SDK can list; if stricter, one prompt would fail the
+   * whole list again. Either drift fails here.
+   */
+  describe('agrees with what the SDK can list in prompts/list', () => {
+    test.each<[string, z.ZodType, boolean]>([
+      ['string fields', z.object({ topic: z.string(), note: z.string().optional() }), true],
+      ['an ISO date string', z.object({ due: z.iso.date() }), true],
+      ['enums and literals', z.object({ kind: z.enum(['a', 'b']), v: z.literal(1) }), true],
+      [
+        'defaults and nullables',
+        z.object({ n: z.number().default(1), s: z.string().nullable() }),
+        true,
+      ],
+      [
+        'arrays, tuples and records',
+        z.object({
+          a: z.array(z.string()),
+          t: z.tuple([z.string()]),
+          r: z.record(z.string(), z.string()),
+        }),
+        true,
+      ],
+      ['nested objects', z.object({ nested: z.object({ deep: z.boolean() }) }), true],
+      ['unions', z.object({ u: z.union([z.string(), z.number()]) }), true],
+      [
+        'a discriminated union root',
+        z.discriminatedUnion('kind', [
+          z.object({ kind: z.literal('a') }),
+          z.object({ kind: z.literal('b') }),
+        ]),
+        true,
+      ],
+      ['a recursive z.lazy()', z.object({ node: recursiveNode.optional() }), true],
+      [
+        'an input-side transform',
+        z.object({ due: z.string().transform((v) => new Date(v)) }),
+        true,
+      ],
+      ['an empty object', z.object({}), true],
+      ['z.date()', z.object({ due: z.date() }), false],
+      ['z.coerce.date()', z.object({ due: z.coerce.date() }), false],
+      ['a nested z.date()', z.object({ due: z.array(z.date().optional()) }), false],
+      ['z.bigint()', z.object({ n: z.bigint() }), false],
+      ['z.map()', z.object({ m: z.map(z.string(), z.string()) }), false],
+      ['z.set()', z.object({ s: z.set(z.string()) }), false],
+      ['z.custom()', z.object({ c: z.custom<string>() }), false],
+      ['z.instanceof()', z.object({ url: z.instanceof(URL) }), false],
+      ['z.symbol()', z.object({ s: z.symbol() }), false],
+      ['a z.string() root', z.string(), false],
+      ['a z.array() root', z.array(z.string()), false],
+    ])('%s', async (_label, schema, expected) => {
+      const argsSchema = schema as unknown as StandardSchemaWithJSON;
+
+      expect(helperAcceptsInput(argsSchema)).toBe(expected);
+      await expect(sdkListsPrompt(argsSchema)).resolves.toBe(expected);
     });
   });
 });
