@@ -12,6 +12,31 @@ const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 type FolderListArgs = { filters?: unknown; sort?: unknown };
 type Resolve = (parent: unknown, args: FolderListArgs, context: unknown, info: unknown) => unknown;
 
+/**
+ * Members of `@strapi/plugin-graphql` services this extension calls. GraphQL is an optional plugin
+ * that upload does not depend on, so its registered contracts are not loaded here.
+ */
+type GraphQLShadowCRUDField = {
+  disable(): void;
+  disableOutput(): void;
+};
+
+type GraphQLShadowCRUD = {
+  isEnabled(): boolean;
+  disable(): void;
+  disableMutations(): void;
+  field(fieldName: string): GraphQLShadowCRUDField;
+};
+
+type GraphQLExtensionService = {
+  shadowCRUD(uid: string): GraphQLShadowCRUD;
+  use(configuration: unknown): unknown;
+};
+
+type GraphQLUtilsService = {
+  naming: { getTypeName(contentType: unknown): string };
+};
+
 export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => {
   const { service: getGraphQLService, config: graphQLConfig } = strapi.plugin('graphql');
   const { service: getUploadService } = strapi.plugin('upload');
@@ -22,7 +47,8 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     return;
   }
 
-  const folderCRUD = getGraphQLService('extension').shadowCRUD(FOLDER_MODEL_UID);
+  const folderCRUD =
+    getGraphQLService<GraphQLExtensionService>('extension').shadowCRUD(FOLDER_MODEL_UID);
 
   folderCRUD.disableMutations();
   folderCRUD.field('files').disable();
@@ -30,9 +56,11 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
   folderCRUD.field('pathId').disableOutput();
   folderCRUD.field('publishedAt').disable();
 
-  getGraphQLService('extension').shadowCRUD(FILE_MODEL_UID).disableMutations();
+  getGraphQLService<GraphQLExtensionService>('extension')
+    .shadowCRUD(FILE_MODEL_UID)
+    .disableMutations();
 
-  const { getTypeName } = getGraphQLService('utils').naming;
+  const { getTypeName } = getGraphQLService<GraphQLUtilsService>('utils').naming;
 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
@@ -82,7 +110,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
   /**
    * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
    */
-  getGraphQLService('extension').use(({ nexus }: { nexus: any }) => {
+  getGraphQLService<GraphQLExtensionService>('extension').use(({ nexus }: { nexus: any }) => {
     const { inputObjectType, extendType, nonNull } = nexus;
 
     // Represents the input data payload for the file's information

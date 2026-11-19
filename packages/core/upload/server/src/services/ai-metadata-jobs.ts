@@ -24,7 +24,7 @@ type AIMetadataJobUpdate = Partial<
   Pick<AIMetadataJob, 'status'> & { completedAt: Date; heartbeatAtMs: number | null }
 >;
 
-export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => {
+export const createAIMetadataJobsService = (({ strapi }: { strapi: Core.Strapi }) => {
   // The jobs this process runs, each with the timer that writes its heartbeat
   const heartbeats = new Map<number, NodeJS.Timeout>();
 
@@ -51,6 +51,11 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
   };
 
   return {
+    /**
+     * Creates a `processing` job and resolves its ID.
+     *
+     * @internal
+     */
     async createJob(): Promise<number> {
       const now = Date.now();
       const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
@@ -70,6 +75,11 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
       });
     },
 
+    /**
+     * Updates the status or the completion date of a job.
+     *
+     * @internal
+     */
     async updateJob(jobId: number, updates: AIMetadataJobUpdate): Promise<void> {
       await strapi.db.query(AI_METADATA_JOB_UID).update({
         where: { id: jobId },
@@ -89,6 +99,11 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
       });
     },
 
+    /**
+     * Deletes a job.
+     *
+     * @internal
+     */
     async deleteJob(jobId: number): Promise<void> {
       await strapi.db.query(AI_METADATA_JOB_UID).delete({
         where: { id: jobId },
@@ -166,6 +181,6 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
       });
     },
   };
-};
+}) satisfies Core.ServiceImplementation<'plugin::upload.aiMetadataJobs'>;
 
 export type { AIMetadataJob };

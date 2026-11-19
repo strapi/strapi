@@ -79,7 +79,8 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
 
   if (!documentId) {
     return documentManager.create(model, {
-      data: sanitizedBody,
+      // `async.pipe` types its result as its first stage's, here the request body as `unknown`.
+      data: sanitizedBody as Modules.Documents.Params.Data.Input<UID.ContentType>,
       ...sanitizedQuery,
       locale,
     });
@@ -155,7 +156,7 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
   async delete(ctx: any) {
@@ -189,7 +190,8 @@ export default {
       }
     }
 
-    const deletedEntity = await documentManager.delete(documentLocales.at(0).documentId, model, {
+    // The length check above guarantees a first locale.
+    const deletedEntity = await documentManager.delete(documentLocales.at(0)!.documentId, model, {
       locale,
     });
 
@@ -248,7 +250,7 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
   async unpublish(ctx: any) {
