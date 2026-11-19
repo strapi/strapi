@@ -1,3 +1,4 @@
+import { Ability } from '@casl/ability';
 import type { Core } from '@strapi/types';
 
 import { ACTIONS, FILE_MODEL_UID } from '../../../constants';
@@ -28,14 +29,16 @@ describe('findEntityAndCheckPermissions', () => {
       }),
     } as unknown as Core.Strapi;
 
-    await findEntityAndCheckPermissions({}, ACTIONS.update, FILE_MODEL_UID, 1, strapi);
+    const ability = new Ability();
+
+    await findEntityAndCheckPermissions(ability, ACTIONS.update, FILE_MODEL_UID, 1, strapi);
 
     expect(strapi.plugin).toHaveBeenCalledWith('upload');
     expect(findOne).toHaveBeenCalledWith(1, ['createdBy', 'folder']);
     expect(strapi.service).toHaveBeenCalledWith('admin::permission');
     expect(strapi.service).toHaveBeenCalledWith('admin::user');
     expect(createPermissionsManager).toHaveBeenCalledWith({
-      ability: {},
+      ability,
       action: ACTIONS.update,
       model: FILE_MODEL_UID,
     });
