@@ -12,10 +12,9 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 // - The `entry` of the content-releases action rows (`Modules.Documents.AnyDocument`), and the
 //   members whose only `any` is that `entry` (`release.create`, `release.delete`,
 //   `release.recordMissedRun`, `release-action.groupActions`).
-// - The `@strapi/utils` hooks of the condition provider (`hooks`) and of `admin::role.hooks`, which
-//   their own units type now that https://github.com/strapi/strapi/pull/28663 merged.
-// - The rows the round left out: `admin::passport`, the content-manager `relations` controller, and
-//   the `strapi::responses`, `strapi::security` and `strapi::session` middlewares.
+// - The rows the round left out: `admin::passport`, the content-manager `relations` controller, the
+//   `strapi::responses` and `strapi::session` middlewares, and `PackageConfigs['middlewares']`,
+//   which re-exposes their configs.
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
@@ -217,6 +216,23 @@ declare const actionProviderHookChecks: [
   >,
 ];
 actionProviderHookChecks satisfies unknown;
+
+// Admin condition provider: the provider hooks.
+declare const conditionProviderHookChecks: [
+  Core.Assert<
+    Equal<
+      [HasAny<EngineHookHandlers<Service<'admin::permission'>['conditionProvider']['hooks']>>],
+      [false]
+    >
+  >,
+];
+conditionProviderHookChecks satisfies unknown;
+
+// Admin role hooks (H1).
+declare const roleHookChecks: [
+  Core.Assert<Equal<[HasAny<EngineHookHandlers<Service<'admin::role'>['hooks']>>], [false]>>,
+];
+roleHookChecks satisfies unknown;
 
 // Admin role service: `properties` (C01), the query parameters (C02), the EE IDs (C05b).
 declare const roleChecks: [

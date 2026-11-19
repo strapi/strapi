@@ -142,3 +142,24 @@ actionProvider.hooks.willRegister.register(
   // @ts-expect-error The registered action is `value`, not `action`.
   ({ action }: { action: { actionId: string } }) => action.actionId
 );
+
+// The condition provider hooks hand their handlers the registered condition: `domain.create` keeps
+// the condition fields only, so it has no `name`.
+const { conditionProvider } = app.service('admin::permission');
+conditionProvider.hooks.willRegister.register(({ key, value }) => {
+  key satisfies string;
+  value.id satisfies string;
+  value.displayName satisfies string;
+});
+conditionProvider.hooks.didRegister.register(
+  ({ value }) => value.plugin satisfies string | undefined
+);
+conditionProvider.hooks.willDelete.register(({ value }) => value?.id satisfies string | undefined);
+conditionProvider.hooks.didDelete.register(({ value }) => {
+  // @ts-expect-error The condition of a deleted key is read with `get`, so it may be `undefined`.
+  value.id;
+});
+conditionProvider.hooks.willRegister.register(
+  // @ts-expect-error The registered condition has no `name`.
+  ({ value }: { value: { name: string } }) => value.name
+);

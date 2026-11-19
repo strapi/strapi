@@ -21,6 +21,7 @@ import type CEMetricsService from '../services/metrics';
 import type CEPassportService from '../services/passport';
 import type * as PermissionService from '../services/permission';
 import type { Action, CreateActionPayload } from '../domain/action';
+import type { Condition } from '../domain/condition';
 import type * as ProjectSettingsService from '../services/project-settings';
 import type { actionRegistrationSchema } from '../validation/action-provider';
 import type CERoleService from '../services/role';
@@ -455,10 +456,37 @@ type StrictActionProvider = Omit<
 type ConditionProvider = (typeof PermissionService)['conditionProvider'];
 
 /**
- * The condition provider with strict types. `registerMany` resolves to the provider (`return
- * this`), named here because the declaration emitter prints `this` as `any`.
+ * A condition as the condition provider stores it: `domain.create` keeps the condition fields
+ * only (`conditionFields`), so it has no `name`.
  */
-type StrictConditionProvider = Omit<ConditionProvider, 'registerMany'> & {
+type RegisteredCondition = Omit<Condition, 'name'>;
+
+/** What the provider hooks of the condition provider receive: the key and the condition. */
+type ConditionProviderHookContext = { key: string; value: RegisteredCondition };
+
+/**
+ * What the delete hooks of the condition provider receive: the key and its condition, read with
+ * `get` (`@strapi/utils` `provider-factory.ts` `delete`).
+ */
+type ConditionProviderDeleteHookContext = { key: string; value: RegisteredCondition | undefined };
+
+/** The provider hooks of the condition provider (`@strapi/utils` `providerFactory`), with typed handlers. */
+type ConditionProviderHooks = {
+  willRegister: HooksUtils.AsyncSeriesHook<(context: ConditionProviderHookContext) => unknown>;
+  didRegister: HooksUtils.AsyncParallelHook<(context: ConditionProviderHookContext) => unknown>;
+  willDelete: HooksUtils.AsyncParallelHook<
+    (context: ConditionProviderDeleteHookContext) => unknown
+  >;
+  didDelete: HooksUtils.AsyncParallelHook<(context: ConditionProviderDeleteHookContext) => unknown>;
+};
+
+/**
+ * The condition provider with strict types. Its provider hooks take typed handlers
+ * ({@link ConditionProviderHooks}). `registerMany` resolves to the provider (`return this`), named
+ * here because the declaration emitter prints `this` as `any`.
+ */
+type StrictConditionProvider = Omit<ConditionProvider, 'hooks' | 'registerMany'> & {
+  hooks: Omit<ConditionProvider['hooks'], keyof ConditionProviderHooks> & ConditionProviderHooks;
   registerMany(
     ...args: Parameters<ConditionProvider['registerMany']>
   ): Promise<StrictConditionProvider>;

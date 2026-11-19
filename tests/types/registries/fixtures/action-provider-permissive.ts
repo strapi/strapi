@@ -47,3 +47,7 @@ contentManagerConfig.actions satisfies string[] | undefined;
 // Without strict types, the action provider hooks accept any handler.
 actionProvider.hooks.appliesPropertyToSubject.register((context: { actionId: number }) => context);
 actionProvider.hooks.willRegister.register((context: { action: string }) => context);
+
+// Without strict types, the condition provider hooks accept any handler.
+declare const conditionProvider: Strapi.Registries.PackageServices['admin::permission']['conditionProvider'];
+conditionProvider.hooks.willRegister.register((context: { condition: number }) => context);
