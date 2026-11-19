@@ -1,6 +1,8 @@
 import type { Core } from '../../src';
 import type { Equal, Expect } from './helpers';
 
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
 // Plural accessors keep the legacy records, even for registered keys.
 declare const mapChecks: [
   Expect<Equal<Core.Strapi['services'], Record<string, Core.Service>>>,
@@ -19,5 +21,6 @@ declare const mapChecks: [
   Expect<Equal<Core.PluginOf<'legacy'>['middlewares'], Record<string, Core.Middleware>>>,
   Expect<Equal<Core.ModuleOf<'api::legacy'>['middlewares'], Record<string, Core.Middleware>>>,
   Expect<Equal<Core.Strapi['middlewares']['plugin::legacy.timer'], Core.MiddlewareFactory>>,
+  Expect<IsAny<Parameters<Core.Strapi['middlewares'][string]>[0]>>,
 ];
 mapChecks satisfies unknown;
