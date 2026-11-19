@@ -36,3 +36,19 @@ export type ImageManipulationService = {
     getStream: () => NodeJS.ReadableStream;
   }): Promise<{ width: number | null; height: number | null }>;
 };
+
+/**
+ * Members of `strapi.plugin('upload').provider` the admin calls, see `@strapi/upload`
+ * `server/src/types/provider.ts` (`UploadPluginProvider`). Upload's `register` sets the provider:
+ * it implements `delete` and at least one of `upload` and `uploadStream`, and `isPrivate` defaults
+ * to the base version. Upload registers the provider's type, which the admin build cannot load, so
+ * `provider` is `unknown` there with strict types: `hasUploadProviderMethod` narrows it.
+ */
+export type UploadProvider = {
+  /** Sets the file's `url`. The file carries a `buffer`. */
+  upload(file: unknown): Promise<unknown>;
+  /** Sets the file's `url`. The file carries a `stream`. Used over `upload`. */
+  uploadStream(file: unknown): Promise<unknown>;
+  delete(file: unknown): Promise<unknown>;
+  isPrivate(): boolean | Promise<boolean>;
+};

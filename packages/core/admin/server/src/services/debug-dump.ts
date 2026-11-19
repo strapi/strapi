@@ -2,6 +2,7 @@ import os from 'os';
 import path from 'path';
 import type { Core } from '@strapi/types';
 import { scrub } from '../utils/debug-dump/redact';
+import { hasUploadProviderMethod } from '../utils/upload-provider';
 import type { DebugDumpPayload } from '../../../shared/contracts/admin';
 import { getLicensedPlan } from '../../../shared/utils/get-project-type';
 
@@ -62,7 +63,12 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     let uploadPrivate = false;
     try {
-      uploadPrivate = await strapi.plugin('upload').provider.isPrivate();
+      // A provider without `isPrivate` is not private, as when the call throws.
+      const provider = strapi.plugin('upload').provider;
+      uploadPrivate =
+        hasUploadProviderMethod(provider, 'isPrivate') === true
+          ? await provider.isPrivate()
+          : false;
     } catch {
       uploadPrivate = false;
     }

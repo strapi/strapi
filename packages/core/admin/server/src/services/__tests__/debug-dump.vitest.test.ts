@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import os from 'os';
 import path from 'path';
 
@@ -294,5 +294,18 @@ describe('debug-dump service', () => {
 
     expect(dump.providers.upload.name).toBe(`<home>${path.sep}providers${path.sep}my-upload`);
     expect(dump.providers.email.name).toBe(`<home>${path.sep}providers${path.sep}my-email`);
+  });
+
+  it("reports the upload provider's privacy, and not private without isPrivate", async () => {
+    const privateStrapi = makeStrapi();
+    privateStrapi.plugin = () => ({ provider: { isPrivate: async () => true } });
+    const withoutIsPrivate = makeStrapi();
+    withoutIsPrivate.plugin = () => ({ provider: { delete: vi.fn() } });
+
+    const privateDump = await debugDumpService({ strapi: privateStrapi }).generate();
+    const dumpWithoutIsPrivate = await debugDumpService({ strapi: withoutIsPrivate }).generate();
+
+    expect(privateDump.providers.upload.isPrivate).toBe(true);
+    expect(dumpWithoutIsPrivate.providers.upload.isPrivate).toBe(false);
   });
 });
