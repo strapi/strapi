@@ -642,6 +642,20 @@ describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
     expect(get).not.toHaveBeenCalled();
   });
 
+  it.each(['expired', 'unknown'])(
+    'is null for an %s license, even with a usage stored while it was active',
+    async (licenseStatus) => {
+      createStrapiMock({ stored: null, ee: { licenseStatus, seats: undefined } });
+      stubUserServices();
+      const get = withStoredCount(USAGE);
+
+      const { data } = await adminController.licenseLimitInformation();
+
+      expect(data.adminUsersAcrossInstances).toBeNull();
+      expect(get).not.toHaveBeenCalled();
+    }
+  );
+
   it('leaves the seat fields as they were', async () => {
     createStrapiMock({ stored: null, ee: { seats: 10 } });
     (global.strapi as any).service = () => ({

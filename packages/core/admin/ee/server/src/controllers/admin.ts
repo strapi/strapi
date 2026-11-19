@@ -154,9 +154,12 @@ export default {
     // came with it) stored by an earlier online run says nothing about its current state.
     const registryState = licenseMode === 'online' ? eeInformation : null;
 
-    // Offline licenses don't report their admin users
+    // Offline licenses don't report their admin users. A lapsed license (Community Edition) stops
+    // reporting, so its last count would be stale.
     const adminUsersAcrossInstances =
-      licenseMode === 'online' ? await getStoredAdminUsersAcrossInstances() : null;
+      licenseMode === 'online' && isActiveLicense
+        ? await getStoredAdminUsersAcrossInstances()
+        : null;
 
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
