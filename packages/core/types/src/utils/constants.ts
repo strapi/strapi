@@ -1,3 +1,4 @@
+import type { IsStrict } from '../core/strictness';
 import type * as Internal from '../internal';
 import type * as UID from '../uid';
 
@@ -37,6 +38,33 @@ export type BooleanValue = True | False;
 export type AreSchemaRegistriesExtended = Or<
   IsComponentRegistryExtended,
   IsContentTypeRegistryExtended
+>;
+
+/**
+ * Whether the schema of `TSchemaUID` is declared by a package in
+ * `Strapi.Registries.PackageContentTypeSchemas`. Always {@link False} without strict mode, which
+ * ignores that registry. A union is declared when each member is. An `any` UID, such as a value
+ * read from `ctx.params`, is not declared.
+ */
+type IsPackageSchema<TSchemaUID> = IsStrict extends false
+  ? False
+  : [TSchemaUID] extends [never]
+    ? False
+    : 0 extends 1 & TSchemaUID
+      ? False
+      : [TSchemaUID] extends [keyof Strapi.Registries.PackageContentTypeSchemas]
+        ? True
+        : False;
+
+/**
+ * Whether the schema of `TSchemaUID` is known precisely: the schema registries are extended
+ * ({@link AreSchemaRegistriesExtended}), or a package declares that schema. Without generated
+ * schemas, a package's own content types are then precise while every other UID stays generic.
+ * Without strict mode, it equals {@link AreSchemaRegistriesExtended}.
+ */
+export type IsSchemaRegistered<TSchemaUID> = Or<
+  AreSchemaRegistriesExtended,
+  IsPackageSchema<TSchemaUID>
 >;
 
 /**
