@@ -61,6 +61,8 @@ _above: Screenshot of the RBAC edit page showing the where are located the secti
 
 Arrays may hold `undefined` items. String values must be primitive strings: a boxed string (`new String('…')`) is rejected, unlike with the yup schema used before. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. `strapi develop` and `strapi build` print them in a `Details:` box; `strapi start` does not.
 
+With strict types, `register` and `registerMany` take the input type of this schema (`ActionRegistration` in `server/src/types/index.ts`), so most shapes the schema rejects also fail to compile. Read [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
+
 :::note
 `uid` and `pluginName` are used to create a global unique id.
 
@@ -73,10 +75,12 @@ An action can be registered in the backend during the `register` or `bootstrap` 
 
 Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions that have an unregistered action, a subject the action does not list, none of the properties its action applies to (role permissions only; a `null` or `undefined` property counts as missing, except `locales: null`, which means every locale and counts as set unless another applicable property is missing), or neither a role nor an admin token. It logs one warning with the count, reasons, actions, subjects and owners of the deleted permissions. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions.
 
+With strict types, a package or application also declares the IDs it registers in `Strapi.Registries.PermissionActions`, so that typed `hasPermissions` configs and action provider calls accept them. See [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
+
 Example:
 
 ```ts
-// bootstrap.ts
+// a plugin's bootstrap.ts
 module.exports = async () => {
   const actions = [
     {

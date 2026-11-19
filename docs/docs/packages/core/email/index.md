@@ -34,6 +34,18 @@ The plugin has two route sets. The `content-api` route `POST /` sends an email. 
 
 The plugin defines the middleware `plugin::email.rateLimit`, built on `koa2-ratelimit`. It keys the limit on `request.body.email`. The admin authentication routes use it. The email routes of the plugin do not. Read `plugin::email` config `ratelimit` to change the limits. See [`middlewares/rateLimit.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/middlewares/rateLimit.ts).
 
+### Typed contracts
+
+With strict types, lookups of the plugin resolve to the contracts it registers in `server/src/types/`. Read [TypeScript](../../../contributing/05-typescript.md) for the registries.
+
+- The `plugin::email.email` service is `EmailService`, a hand-written type that the factory is checked against with `Core.ServiceFactory`. `send` and `sendTemplatedEmail` resolve to `Promise<unknown>`, because the result depends on the provider. `getProviderSettings` is tagged `@internal`.
+- The `plugin::email.email` controller is `EmailController`, with the `send`, `test`, `getSettings` and `verify` actions. The admin and Content API routes are checked against it with `Core.RouterInputFor`.
+- The `plugin::email` config is `EmailPluginConfig`, and the `plugin::email.rateLimit` middleware takes `RateLimitOptions`.
+
+- `strapi.plugin('email').provider` is `EmailProvider`, registered in `PackagePluginProviders`. Its `send` takes `ProviderSendOptions`: the options as the service received them, with `subject`, `text` and `html` possibly missing after `sendTemplatedEmail`, and any other key as a provider option, such as the `headers` and `attachments` that nodemailer forwards. An application whose provider has members of its own declares its type in `AppPluginProviders`. Read [Plugin providers](../../../contributing/05-typescript.md#plugin-providers).
+
+Without strict types, the lookups keep their previous types, and `provider` stays `any`.
+
 ### Settings page
 
 The admin part adds an `Email Plugin` section to the admin settings with `app.addSettingsLink`. The page shows the config from the `settings` route and offers a test email. It also offers a connection check when the provider has a `verify` function. The `capabilities` and `isIdle` fields come from optional provider functions. The types are in [`shared/types.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/shared/types.ts).
