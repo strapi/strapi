@@ -37,7 +37,7 @@ const createStrapi = (
   ({
     config: createConfigProvider({ installId }),
     fetch: fetchImpl,
-  } as any);
+  }) as any;
 
 describe('fetchLicense', () => {
   it('POSTs the license key, project id and device id as JSON to the license registry', async () => {

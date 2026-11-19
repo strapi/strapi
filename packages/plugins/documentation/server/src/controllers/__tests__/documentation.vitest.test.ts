@@ -111,7 +111,7 @@ describe('Documentation plugin | Documentation controller', () => {
       ({
         params: { major: '1', minor: '0', patch: '0' },
         url: '/documentation/v1.0.0',
-      } as unknown as Koa.Context);
+      }) as unknown as Koa.Context;
 
     test('fills the Swagger UI layout with the server URL', async () => {
       global.strapi = createStrapi({}) as any;

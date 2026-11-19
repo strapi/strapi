@@ -25,7 +25,7 @@ const createContext = ({
 }: {
   session?: Record<string, unknown>;
   querystring?: string;
-}) => ({ session, querystring, redirect: vi.fn() } as unknown as Koa.Context & { redirect: Mock });
+}) => ({ session, querystring, redirect: vi.fn() }) as unknown as Koa.Context & { redirect: Mock };
 
 describe('Documentation plugin | restrict-access middleware', () => {
   test('calls next when access is not restricted', async () => {
