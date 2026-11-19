@@ -21,3 +21,11 @@ auth.register('custom', {
   authenticate: async () => ({ authenticated: true }),
   verify: async () => ({ anything: true }),
 });
+
+// The server awaits what a strategy's `verify` returns, so it may also return synchronously, as
+// the admin token strategies do (`packages/core/core/src/services/auth/index.ts`).
+auth.register('admin', {
+  name: 'sync-verify',
+  authenticate: async () => ({ authenticated: true }),
+  verify(): void {},
+});
