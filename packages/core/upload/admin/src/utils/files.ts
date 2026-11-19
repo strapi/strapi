@@ -1,5 +1,7 @@
 import byteSize from 'byte-size';
 
+import type { File } from '../../../shared/contracts/files';
+
 const MAX_URLS = 20;
 
 /**
@@ -40,6 +42,39 @@ export function formatBytes(receivedBytes: number | string, decimals = 0) {
  */
 export const getFileExtension = (ext?: string | null) =>
   ext && ext[0] === '.' ? ext.substring(1) : ext;
+
+type AssetSubtitleInput = Pick<File, 'ext' | 'width' | 'height' | 'size'>;
+
+/**
+ * Lists the parts of the secondary line shown under an asset's name: the file
+ * type, the dimensions when the asset has them, and the size. Missing parts are
+ * skipped.
+ *
+ * @param asset - The asset to describe
+ * @returns The known parts, in order (e.g. ['PNG', '2500×3209', '2.3MB'])
+ */
+export const getAssetSubtitleParts = ({ ext, width, height, size }: AssetSubtitleInput) =>
+  [
+    getFileExtension(ext)?.toUpperCase(),
+    width && height ? `${width}×${height}` : null,
+    size ? formatBytes(size, 1) : null,
+  ].filter((part): part is string => Boolean(part));
+
+/**
+ * Builds the secondary line shown under an asset's name on its card. An empty
+ * string is returned when no part is known.
+ *
+ * @param asset - The asset to describe
+ * @returns The parts joined with ' - ' (e.g. "PNG - 2500×3209 - 2.3MB")
+ *
+ * @example
+ * ```ts
+ * getAssetSubtitle({ ext: '.png', width: 2500, height: 3209, size: 2300 }) // 'PNG - 2500×3209 - 2.3MB'
+ * getAssetSubtitle({ ext: '.pdf', size: 120 }) // 'PDF - 120.0KB'
+ * ```
+ */
+export const getAssetSubtitle = (asset: AssetSubtitleInput) =>
+  getAssetSubtitleParts(asset).join(' - ');
 
 /**
  * Prefixes a relative file URL with the backend URL if needed.
