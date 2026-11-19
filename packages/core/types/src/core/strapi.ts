@@ -18,6 +18,7 @@ import type { PolicyLookup, PolicyLookupName, PolicyMap } from './policy';
 import type { ServiceLookup, ServiceLookupName, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
+import type { LifecycleMethod } from '../plugin/config/strapi-server/lifecycle';
 
 /**
  * Root lookups without strict mode: develop's signatures, verbatim, so mocks such as
@@ -190,7 +191,13 @@ export interface Strapi extends StrapiContainer, Lookups {
   admin: Core.Module;
   isLoaded: boolean;
   db: Database;
-  app: any;
+  /**
+   * The application's `src/index` module, not the Koa application (`server.app`): its `register`,
+   * `bootstrap` and `destroy` lifecycles, any other key failing validation at startup. `undefined`
+   * before loading, when the application has no `src` directory or `src/index` file, and after
+   * `destroy`.
+   */
+  app: IsStrict extends false ? any : AppModule | undefined;
   EE?: boolean;
   ai: Modules.AI.AiNamespace;
   ee: {
@@ -363,6 +370,13 @@ export interface Strapi extends StrapiContainer, Lookups {
    * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
    */
   query(uid: UID.Schema): ReturnType<Database['query']>;
+}
+
+/** The application's `src/index` module, as `loaders/src-index.ts` in `@strapi/core` validates it. */
+export interface AppModule {
+  register?: LifecycleMethod;
+  bootstrap?: LifecycleMethod;
+  destroy?: LifecycleMethod;
 }
 
 export interface Reloader {
