@@ -76,7 +76,7 @@
     "json-logic-js": "2.0.5",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
-    "zod": "4.4.3"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
