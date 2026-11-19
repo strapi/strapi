@@ -125,3 +125,7 @@ never from env vars. A test that needs one the instance doesn't have **fails**, 
   feature is missing. `requireFeatures(features, { future: [...] })` checks future flags.
 
 Set future flags with `scaffoldConfig(app, 'features', { future: { someFlag: true } })`.
+
+`STRAPI_TEST_EDITION` is for these suites only: `/tests` still reads `RUN_EE` and
+`STRAPI_E2E_EDITION`. CI runs the suites in CE only for now; the EE replay, with a license,
+comes with CMS-2242. Run EE locally with `STRAPI_TEST_EDITION=ee STRAPI_LICENSE=…`.

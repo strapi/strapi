@@ -4,8 +4,8 @@ import type { Server } from '../app/server';
 /**
  * The edition contract (RFC D6): one module decides whether a run is CE or EE, for every suite.
  *
- * - `STRAPI_TEST_EDITION=ce|ee`, default `ce`. It replaces `RUN_EE`, `STRAPI_E2E_EDITION` and
- *   `STRAPI_DISABLE_EE` in the test env.
+ * - `STRAPI_TEST_EDITION=ce|ee`, default `ce`. In the tests-next suites it replaces `RUN_EE`,
+ *   `STRAPI_E2E_EDITION` and `STRAPI_DISABLE_EE`; `/tests` still uses those until the cutover.
  * - EE needs `STRAPI_LICENSE`: without it, or when Strapi rejects it and boots as CE, the run
  *   fails instead of silently testing CE.
  * - Features and future flags are read from the running instance (test plugin), never from env.
