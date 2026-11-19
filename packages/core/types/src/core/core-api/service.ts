@@ -4,6 +4,7 @@ import type * as Utils from '../../utils';
 import type { Documents } from '../../modules';
 import type { IsStrict } from '../strictness';
 import type { Pick as ParamsPick, Pagination } from '../../modules/documents/params';
+import type { DeleteStatus } from '../../modules/documents/params/document-engine';
 import type { StrictResult } from '../../modules/documents/result';
 import type { CreateInput, UpdateInput } from '../../modules/documents/params/write';
 
@@ -157,6 +158,9 @@ type UpdateParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContent
 /**
  * The params of a core service `delete`, with strict types: those of the Document Service's
  * `delete`, except `documentId`, which the service sets, and `lookup` (see {@link NoLookup}).
+ * `status` follows the Document Service's `delete` ({@link DeleteStatus}): the service passes it
+ * as is, so `draft` on a draft and publish content type throws `Cannot delete a draft document`.
+ * Without a `status`, the service deletes with `published` (`core-api/service/core-service.ts`).
  */
 type DeleteParams<TContentTypeUID extends UID.ContentType> = ParamsPick<
   TContentTypeUID,
@@ -167,8 +171,7 @@ type DeleteParams<TContentTypeUID extends UID.ContentType> = ParamsPick<
   | 'publicationFilter'
   | 'hasPublishedVersion'
   | 'locale:string'
-> &
-  NoLookup;
+> & { status?: DeleteStatus<TContentTypeUID> } & NoLookup;
 
 /**
  * Base Core-API service type
