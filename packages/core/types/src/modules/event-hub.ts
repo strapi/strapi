@@ -54,7 +54,8 @@ export type EventListener<TName extends string> = [TName] extends [RegisteredEve
  * logs, that read the registered shape. Unregistered names keep the types they have without strict
  * types.
  *
- * Subscribers (`subscribe`) receive every event, registered or not, so they keep any arguments.
+ * Subscribers (`subscribe`) receive every event, registered or not, so their arguments are `unknown`:
+ * no registered payload holds for every event. A subscriber narrows them by event name.
  *
  * `destroy`, `removeAllListeners` and `removeAllSubscribers` return the hub they are called on, so a
  * chained emit keeps the registered contract. They return `StrictEventHub` rather than polymorphic
@@ -72,7 +73,13 @@ export interface StrictEventHub extends Omit<
   | 'destroy'
   | 'removeAllListeners'
   | 'removeAllSubscribers'
+  | 'subscribe'
+  | 'unsubscribe'
 > {
+  /** Adds a subscriber, which receives every event, registered or not. Returns the function that removes it. */
+  subscribe(subscriber: (eventName: string, ...args: unknown[]) => Promise<void>): () => void;
+  /** Removes a subscriber. It needs the function given to `subscribe`. */
+  unsubscribe(subscriber: (eventName: string, ...args: unknown[]) => Promise<void>): void;
   /** Runs the listeners of `eventName`, then every subscriber, one at a time, with `args`. */
   emit<const TName extends EventLookupName>(
     eventName: TName,
