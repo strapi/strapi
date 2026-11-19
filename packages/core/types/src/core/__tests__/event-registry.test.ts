@@ -60,11 +60,27 @@ strapi.eventHub.on('event-lab.unregistered', async (...args) => {
 });
 // @ts-expect-error An unregistered listener returns a promise, as without strict types.
 strapi.eventHub.on('event-lab.unregistered', () => {});
-// Subscribers receive every event, registered or not.
-strapi.eventHub.subscribe(async (eventName, ...args) => {
+// Subscribers receive every event, registered or not, so their arguments are unknown.
+const subscriber = async (eventName: string, ...args: unknown[]) => {
   eventName satisfies string;
   args satisfies unknown[];
+};
+const unsubscribe = strapi.eventHub.subscribe(subscriber);
+unsubscribe satisfies () => void;
+strapi.eventHub.unsubscribe(subscriber);
+strapi.eventHub.subscribe(async (eventName, ...args) => {
+  eventName satisfies string;
+  type Args = typeof args;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  type Check = Expect<Equal<Args, unknown[]>>;
 });
+const typedSubscriber = async (eventName: string, payload: { user: LabUser }) => {
+  payload.user satisfies LabUser;
+};
+// @ts-expect-error A subscriber cannot assume one event's arguments: it narrows by event name.
+strapi.eventHub.subscribe(typedSubscriber);
+// @ts-expect-error The same subscriber type is needed to remove it.
+strapi.eventHub.unsubscribe(typedSubscriber);
 
 // Cleanup methods return the hub, so a chained emit or listener keeps the registered contract.
 // @ts-expect-error A payload off the contract, after `removeAllListeners()`.
