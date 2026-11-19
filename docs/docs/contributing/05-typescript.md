@@ -105,8 +105,9 @@ The packages of this monorepo declare their contracts by hand (`*Contract` types
 these declared contracts first. A plugin author publishes contracts the same way: read
 [Declaring a package's contracts](#declaring-a-packages-contracts).
 
-A plugin's `provider` (`strapi.plugin(name).provider`) is the exception: without a registered
-provider type it stays `any`. Read [Plugin providers](#plugin-providers).
+A plugin's `provider` (`strapi.plugin(name).provider`) is the exception: it has its own registry.
+Without a registered provider type it is `unknown`, as every member the plugin object does not
+declare. Read [Plugin providers](#plugin-providers).
 
 ### Plugin providers
 
