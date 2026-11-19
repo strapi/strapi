@@ -1,17 +1,36 @@
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
+
 const authenticatedAdminRoute = (
   method: 'GET' | 'PUT' | 'DELETE' | 'POST',
   path: string,
-  handler: string
+  handler: Core.ControllerActionReference<Controllers>
 ) => ({
   method,
   path,
   handler,
   config: {
     policies: ['admin::isAuthenticatedAdmin'],
-  },
+  } satisfies Core.RouteConfigFor,
 });
 
-export default [
+// The published type stays the one develop infers; `satisfies` checks the literals.
+const routes: {
+  method: string;
+  path: string;
+  handler: string;
+  config: {
+    policies: (
+      | string
+      | {
+          name: string;
+          config: {
+            actions: string[];
+          };
+        }
+    )[];
+  };
+}[] = [
   authenticatedAdminRoute('GET', '/users/me', 'authenticated-user.getMe'),
   authenticatedAdminRoute('PUT', '/users/me', 'authenticated-user.updateMe'),
   authenticatedAdminRoute('GET', '/users/me/permissions', 'authenticated-user.getOwnPermissions'),
@@ -82,4 +101,6 @@ export default [
       policies: [{ name: 'admin::hasPermissions', config: { actions: ['admin::users.delete'] } }],
     },
   },
-];
+] satisfies Core.RouteInputFor<Controllers>[];
+
+export default routes;
