@@ -44,7 +44,8 @@ describe('startup logger', () => {
     });
     config.set('launchedAt', 1_000);
     config.set('environment', 'staging');
-    config.set('info.strapi', '5.0.0');
+    // Replace the whole `info` object: a nested `set('info.strapi', …)` would also reach the copy
+    config.set('info', { strapi: '5.0.0' });
 
     const output = captureLogStats(config);
 

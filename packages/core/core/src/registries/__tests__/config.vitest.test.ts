@@ -70,13 +70,14 @@ describe('config', () => {
     expect(config.get('server.probe')).toEqual(1);
   });
 
-  test('own properties are a startup copy: they miss `set` writes and module namespaces', () => {
+  test('own properties are a shallow startup copy: they miss top-level `set` replacements and module namespaces', () => {
     const config = createConfigProvider({ server: { url: 'http://initial' } });
 
     config.set('server', { url: 'http://updated' });
     config.set('plugin::myplugin', { foo: 'bar' });
 
-    // Documents why reads go through `get`: the spread copy is never updated.
+    // Documents why reads go through `get`: the spread copy shares nested objects, so a nested
+    // `set('server.url', …)` is visible on it, but a top-level replacement or a new namespace is not.
     expect(config.server).toEqual({ url: 'http://initial' });
     expect(config['plugin::myplugin']).toBeUndefined();
     expect(config.get('plugin::myplugin.foo')).toEqual('bar');

@@ -46,6 +46,20 @@ const VALUES = {
   database: { connection: { client: 'sqlite' } },
 };
 
+// Every key differs from VALUES, so a read of the startup copy shows up in the output
+const LIVE_VALUES = {
+  launchedAt: 1_200,
+  environment: 'production',
+  uuid: 'the-live-uuid',
+  info: {
+    name: 'live-app',
+    strapi: '5.1.0',
+    dependencies: { '@strapi/strapi': '5.1.0' },
+    devDependencies: { typescript: '5.1.0' },
+  },
+  database: { connection: { client: 'postgres' } },
+};
+
 describe('CLI commands reading the app config', () => {
   let logSpy: jest.SpyInstance;
 
@@ -83,11 +97,18 @@ describe('CLI commands reading the app config', () => {
     });
 
     test('prints values written with set after startup', async () => {
-      mockApp(createConfig(VALUES, { ...VALUES, environment: 'production' }));
+      mockApp(createConfig(VALUES, LIVE_VALUES));
 
-      await reportAction({ uuid: false, dependencies: false, all: false });
+      await reportAction({ uuid: false, dependencies: false, all: true });
 
-      expect(logSpy.mock.calls[0][0]).toContain('Environment: production');
+      const output = logSpy.mock.calls[0][0] as string;
+      expect(output).toContain('Launched In: 300 ms');
+      expect(output).toContain('Environment: production');
+      expect(output).toContain('Strapi Version: 5.1.0');
+      expect(output).toContain('Database: postgres');
+      expect(output).toContain('UUID: the-live-uuid');
+      expect(output).toContain('"@strapi/strapi": "5.1.0"');
+      expect(output).toContain('"typescript": "5.1.0"');
     });
   });
 
@@ -100,6 +121,16 @@ describe('CLI commands reading the app config', () => {
       await new Promise(process.nextTick);
 
       expect(REPL.start).toHaveBeenCalledWith('my-app > ');
+    });
+
+    test('prompts with an app name written with set after startup', async () => {
+      mockApp(createConfig(VALUES, LIVE_VALUES));
+      jest.mocked(REPL.start).mockReturnValue({ on: jest.fn() } as never);
+
+      await consoleAction();
+      await new Promise(process.nextTick);
+
+      expect(REPL.start).toHaveBeenCalledWith('live-app > ');
     });
   });
 });
