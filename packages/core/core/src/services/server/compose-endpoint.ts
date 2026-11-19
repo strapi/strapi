@@ -25,7 +25,9 @@ const createRouteInfoMiddleware =
     return next();
   };
 
-const getAuthConfig = property('config.auth');
+/** The route's `config.auth`, as `createRouteInfoMiddleware` stores the route in `ctx.state.route`. */
+const getAuthConfig: (route: Core.Route) => NonNullable<Core.Route['config']>['auth'] =
+  property('config.auth');
 
 const createAuthorizeMiddleware =
   (strapi: Core.Strapi): Core.MiddlewareHandler =>
