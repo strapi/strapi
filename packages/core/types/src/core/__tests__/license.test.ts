@@ -82,6 +82,15 @@ declare const featureChecks: [
 ];
 featureChecks satisfies unknown;
 
+// `features.list` lists each feature as `{ name, options? }`, like the retained license features.
+type ListedFeature = ReturnType<Core.Strapi['ee']['features']['list']>[number];
+declare const listChecks: [
+  Core.Assert<Equal<ListedFeature['name'], string>>,
+  Core.Assert<Equal<ListedFeature['options'], Record<string, unknown> | undefined>>,
+  Core.Assert<Equal<ListedFeature['other'], unknown>>,
+];
+listChecks satisfies unknown;
+
 strapi.ee.features.isEnabled('sso') satisfies boolean;
 strapi.ee.features.isEnabled(runtimeName) satisfies boolean;
 // @ts-expect-error A literal feature name is a feature of the inventory.
