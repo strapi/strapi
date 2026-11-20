@@ -199,6 +199,83 @@ describe('previewScript — blocks field forwarding', () => {
   });
 });
 
+// The admin sends a strapiFieldChange for every field when the preview loads, relations
+// included. getElementsByPath matches `path=<field>` as a substring, so field `categories`
+// also matches an element sourced at `categories.0.name`. Writing String(value) into that
+// element replaced the rendered category name with "[object Object]".
+describe('previewScript — field change text updates', () => {
+  const TITLE_SOURCE = 'documentId=doc1&type=string&path=title';
+  const CATEGORY_NAME_SOURCE = 'documentId=doc1&type=string&path=categories.0.name';
+
+  const textOf = (id: string) => document.getElementById(id)?.textContent;
+
+  beforeEach(async () => {
+    global.ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean }).STRAPI_DISABLE_STEGA_DECODING =
+      true;
+
+    document.body.innerHTML = `
+      <h1 id="title" data-strapi-source="${TITLE_SOURCE}">Original title</h1>
+      <span id="category" data-strapi-source="${CATEGORY_NAME_SOURCE}">Tech</span>
+    `;
+
+    previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  afterEach(() => {
+    (window as Window & { __strapi_previewCleanup?: () => void }).__strapi_previewCleanup?.();
+    delete (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean })
+      .STRAPI_DISABLE_STEGA_DECODING;
+  });
+
+  test('leaves a relation element unchanged when the field value is an object', () => {
+    sendMessage({
+      type: STRAPI_FIELD_CHANGE,
+      payload: { field: 'categories', value: { connect: [], disconnect: [] } },
+    });
+
+    expect(textOf('category')).toBe('Tech');
+  });
+
+  test('leaves a relation element unchanged when the field value is an array of objects', () => {
+    sendMessage({
+      type: STRAPI_FIELD_CHANGE,
+      payload: { field: 'categories', value: [{ id: 1, name: 'News' }] },
+    });
+
+    expect(textOf('category')).toBe('Tech');
+  });
+
+  test('writes a string value into the matching element', () => {
+    sendMessage({ type: STRAPI_FIELD_CHANGE, payload: { field: 'title', value: 'New title' } });
+
+    expect(textOf('title')).toBe('New title');
+  });
+
+  test('writes a number value into the matching element', () => {
+    sendMessage({ type: STRAPI_FIELD_CHANGE, payload: { field: 'title', value: 42 } });
+
+    expect(textOf('title')).toBe('42');
+  });
+
+  test('clears the matching element when the value is null', () => {
+    sendMessage({ type: STRAPI_FIELD_CHANGE, payload: { field: 'title', value: null } });
+
+    expect(textOf('title')).toBe('');
+  });
+});
+
 // @strapi/blocks-react-renderer renders nested lists as direct children of <ul>/<ol>
 // (not wrapped in a <li>), so the outer list container has a block-level child (<ol>/<ul>)
 // that satisfied the field-container check — incorrectly treating <ul> as the field

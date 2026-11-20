@@ -1937,7 +1937,15 @@ function previewScript(config) {
               const url = typeof value === 'object' && value !== null ? value.url : value;
               const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
               setMediaElement(element, url || null, mime);
-            } else {
+            } else if (
+              value == null ||
+              typeof value === 'string' ||
+              typeof value === 'number' ||
+              typeof value === 'boolean'
+            ) {
+              // Only values that render as text are written. An object value (a relation,
+              // component or JSON field) would become "[object Object]", so the element
+              // keeps what the frontend rendered.
               element.textContent = value == null ? '' : String(value);
             }
           });
