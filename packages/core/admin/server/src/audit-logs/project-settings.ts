@@ -41,18 +41,9 @@ export const getProjectSettingsChanges = (
   return changes;
 };
 
-/**
- * The part of the audit-logs lifecycle service used here.
- * The full service type lives in the Admin EE package.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>
-  ): void;
-}
-
-export const registerProjectSettingsAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerProjectSettingsAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   auditLogsLifecycle.registerEvent<UpdateDetails>(
     AUDITED_EVENTS.PROJECT_SETTINGS_UPDATE,
     (event: UpdateDetails) => ({
