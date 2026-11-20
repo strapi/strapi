@@ -124,6 +124,8 @@ await strapi.db.transaction(async ({ trx, rollback, commit }) => {
 });
 ```
 
+`strapi.db.queryBuilder(uid).transacting(trx)` applies `trx` only outside a `strapi.db.transaction` block. Inside one, `execute()` runs the query on the block's transaction and ignores the `trx` passed to `.transacting()`.
+
 ## When to use transactions
 
 Transactions should be used when several database operations must succeed or fail together. For example, creating a user and the profile row that belongs to them. If creating the profile throws, the user insert is rolled back too.
