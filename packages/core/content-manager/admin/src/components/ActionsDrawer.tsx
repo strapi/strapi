@@ -102,7 +102,8 @@ const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
   z-index: 1;
   pointer-events: auto;
 
-  [data-radix-scroll-area-viewport] > div {
+  /* Radix sets an inline display: table on this div, which lets long content overflow the drawer */
+  & > [data-radix-scroll-area-viewport] > div {
     display: block !important;
   }
 `;
