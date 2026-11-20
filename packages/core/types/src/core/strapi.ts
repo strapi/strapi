@@ -188,7 +188,8 @@ export interface Strapi extends StrapiContainer, Lookups {
   customFields: Modules.CustomFields.CustomFields;
   fetch: Modules.Fetch.Fetch;
   dirs: StrapiDirectories;
-  admin: Core.Module;
+  /** The admin module. With strict types enabled, see {@link Core.AdminModule}. */
+  admin: IsStrict extends false ? Core.Module : Core.AdminModule;
   isLoaded: boolean;
   db: Database;
   /**
