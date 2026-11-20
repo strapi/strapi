@@ -84,7 +84,7 @@ class Strapi extends Container implements Core.Strapi {
     }
   }
 
-  get admin(): Core.Module {
+  get admin(): Core.Strapi['admin'] {
     return this.get('admin');
   }
 
