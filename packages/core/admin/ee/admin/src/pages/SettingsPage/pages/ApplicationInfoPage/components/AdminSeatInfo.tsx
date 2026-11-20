@@ -1,10 +1,9 @@
-import type { ReactNode } from 'react';
-
-import { Flex, Tooltip, Typography } from '@strapi/design-system';
-import { WarningCircle } from '@strapi/icons';
+import { Badge, Flex, Tooltip, Typography } from '@strapi/design-system';
+import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { RelativeTime } from '../../../../../../../../admin/src/components/RelativeTime';
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
@@ -34,62 +33,84 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { enforcementUserCount, permittedSeats, seats } = license;
+  const { enforcementUserCount, permittedSeats, seats, adminUsersAcrossInstances } = license;
 
-  // `permittedSeats` is the live enforcement limit and is wiped once the licence stops being
-  // usable, so fall back to the retained `seats` to keep showing the count on an expired
-  // licence. Enforcement itself (`licenseLimitStatus`, `shouldStopCreate`) still runs off
-  // `permittedSeats` server-side and is untouched by this.
-  const seatLimit = permittedSeats ?? seats;
+  // `permittedSeats` is wiped once the licence stops being usable, so fall back to the retained
+  // `seats` to keep showing the limit on an expired licence. Enforcement is unchanged.
+  const instanceLimit = permittedSeats ?? seats;
 
-  if (!seatLimit) {
+  // The count across all instances when the license registry sent one, otherwise this instance's.
+  const count = adminUsersAcrossInstances?.activeUsers ?? enforcementUserCount;
+  const limit = adminUsersAcrossInstances
+    ? adminUsersAcrossInstances.contractedUsers
+    : instanceLimit || null;
+
+  if (!adminUsersAcrossInstances && !limit) {
     return null;
   }
 
-  // The red count and the warning follow the same displayed limit. Server-side
-  // `licenseLimitStatus` tracks only the live limit, so it is empty once the licence expires.
-  const isOverLimit = enforcementUserCount > seatLimit;
+  const overBy = limit ? count - limit : 0;
 
   return (
     <Flex direction="column" alignItems="start" gap={2}>
-      <Typography variant="sigma" textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.application.admin-seats',
-          defaultMessage: 'Admin seats',
-        })}
-      </Typography>
-      <Flex gap={2}>
-        <Flex>
-          <Typography tag="p">
+      <Flex gap={2} alignItems="center" tag="dt">
+        <Typography variant="sigma" textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.application.admin-seats',
+            defaultMessage: 'Admin users',
+          })}
+        </Typography>
+        <Tooltip
+          label={formatMessage({
+            id: 'Settings.application.admin-seats.tooltip',
+            defaultMessage:
+              'Unique active admin users across every instance using this license. Updated at each license check and when users are added or removed.',
+          })}
+        >
+          <Information width="1.4rem" height="1.4rem" fill="neutral500" />
+        </Tooltip>
+      </Flex>
+      <Flex direction="column" alignItems="start" gap={1} tag="dd">
+        <Flex gap={2} alignItems="center">
+          <Typography tag="p" textColor={overBy > 0 ? 'danger600' : undefined}>
+            {limit === null ? count : `${count}/${limit}`}
+          </Typography>
+          {overBy > 0 && (
+            <Badge size="S" variant="danger">
+              {formatMessage(
+                {
+                  id: 'Settings.application.admin-seats.over',
+                  defaultMessage: '{count} over',
+                },
+                { count: overBy }
+              )}
+            </Badge>
+          )}
+        </Flex>
+        {adminUsersAcrossInstances && (
+          <Typography variant="pi" textColor="neutral500">
             {formatMessage(
               {
-                id: 'Settings.application.ee.admin-seats.count',
-                defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
+                id: 'Settings.application.admin-seats.caption',
+                defaultMessage:
+                  'Across all environments · {count} in this environment · updated {updatedAt}',
               },
               {
-                permittedSeats: seatLimit,
-                enforcementUserCount,
-                text: (chunks: ReactNode) => (
-                  <Typography
-                    fontWeight="semiBold"
-                    textColor={isOverLimit ? 'danger500' : undefined}
-                  >
-                    {chunks}
-                  </Typography>
+                count: enforcementUserCount,
+                // Reports can fail or lag behind a change, so say how old the count is. The
+                // date comes from the registry's clock: never show it in the future.
+                updatedAt: (
+                  <RelativeTime
+                    timestamp={
+                      new Date(
+                        Math.min(Date.parse(adminUsersAcrossInstances.updatedAt), Date.now())
+                      )
+                    }
+                  />
                 ),
               }
             )}
           </Typography>
-        </Flex>
-        {isOverLimit && (
-          <Tooltip
-            label={formatMessage({
-              id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
-              defaultMessage: 'At limit: add seats to invite more users',
-            })}
-          >
-            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
-          </Tooltip>
         )}
       </Flex>
     </Flex>

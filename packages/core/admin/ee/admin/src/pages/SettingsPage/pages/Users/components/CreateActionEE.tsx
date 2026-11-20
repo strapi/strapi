@@ -5,6 +5,7 @@ import { Mail, WarningCircle } from '@strapi/icons';
 import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 
+import { getLicensedPlan } from '../../../../../../../../shared/utils/get-project-type';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
 import type { CreateActionCEProps } from '../../../../../../../../admin/src/pages/Settings/pages/Users/components/CreateActionCE';
@@ -20,14 +21,25 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
       return null;
     }
 
+    const isGrowth =
+      getLicensedPlan({
+        licenseStatus: license?.licenseStatus,
+        type: license?.type,
+        planPriceId: license?.planPriceId,
+      }) === 'Growth';
+
     return (
       <Flex width="100%" gap={2}>
         {!isNil(permittedSeats) && shouldStopCreate && (
           <Tooltip
-            label={formatMessage({
-              id: 'Settings.application.admin-seats.at-limit-tooltip',
-              defaultMessage: 'At limit: add seats to invite more users',
-            })}
+            label={formatMessage(
+              {
+                id: 'Settings.application.admin-seats.at-limit-tooltip',
+                defaultMessage:
+                  'Your license user limit is reached. Remove a user or {isGrowth, select, true {manage your seats} other {contact sales}}.',
+              },
+              { isGrowth: String(isGrowth) }
+            )}
             side="left"
           >
             <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
