@@ -93,6 +93,12 @@ const moduleWithMembers = {
       exists(stored: Providers.Upload.StoredProviderFile, key: string, retries: number) {
         return stored.hash === key && retries > 0;
       },
+      purge(prefix: string) {
+        return prefix.startsWith('/');
+      },
+      count() {
+        return 1;
+      },
       label: 'bucket',
     };
   },
@@ -115,6 +121,29 @@ bucketProvider.bucket() satisfies string;
 bucketProvider.exists(storedFile, 'hash') satisfies Promise<boolean>;
 // @ts-expect-error The wrapper forwards the first two arguments only.
 bucketProvider.exists(storedFile, 'hash', 1);
+// @ts-expect-error The first argument is forwarded as given: a required one stays required.
+bucketProvider.purge();
+bucketProvider.purge('/images') satisfies Promise<boolean>;
+// @ts-expect-error The first argument keeps its type.
+bucketProvider.purge(1);
+bucketProvider.count() satisfies Promise<number>;
+// An optional first argument stays optional, the second defaults, and rest arguments are optional.
+declare const argumentsProvider: UploadPluginProviderOf<{
+  init(): {
+    upload(): void;
+    delete(): void;
+    purgeOptional(prefix?: string): boolean;
+    move(prefix: string, mode: 'copy' | 'move'): boolean;
+    purgeAll(...prefixes: string[]): number;
+  };
+}>;
+argumentsProvider.purgeOptional() satisfies Promise<boolean>;
+argumentsProvider.move('/') satisfies Promise<boolean>;
+argumentsProvider.move('/', 'copy') satisfies Promise<boolean>;
+// @ts-expect-error The wrapper forwards the first two arguments only.
+argumentsProvider.move('/', 'copy', 'extra');
+argumentsProvider.purgeAll() satisfies Promise<number>;
+argumentsProvider.purgeAll('/a', '/b') satisfies Promise<number>;
 // @ts-expect-error Members that are not functions are not exposed.
 bucketProvider.label satisfies unknown;
 // @ts-expect-error The provider has no arbitrary members.
