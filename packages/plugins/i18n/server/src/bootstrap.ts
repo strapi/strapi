@@ -3,7 +3,10 @@ import { isEqual } from 'lodash';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
-import { getOriginalNonLocalizedLookup } from './utils/non-localized-original-data';
+import {
+  getOriginalNonLocalizedLookup,
+  getSiblingNonLocalizedLookups,
+} from './utils/non-localized-original-data';
 
 const registerModelsHooks = () => {
   strapi.db.lifecycles.subscribe({
@@ -50,12 +53,34 @@ const registerModelsHooks = () => {
       defaultLocale,
     });
 
-    const originalData = originalWhere
+    let originalData = originalWhere
       ? await strapi.db.query(schema.uid).findOne({
           where: originalWhere,
           populate: attributesToPopulate,
         })
       : null;
+
+    // A new locale has no row yet, and the document service fills it from a
+    // sibling. Compare that sibling so the copied values do not count as a
+    // change that rewrites every other locale.
+    if (!originalData) {
+      const siblingLookups = getSiblingNonLocalizedLookups({
+        original: originalWhere,
+        locale: localeParam,
+        defaultLocale,
+      });
+
+      for (const where of siblingLookups) {
+        originalData = await strapi.db.query(schema.uid).findOne({
+          where,
+          populate: attributesToPopulate,
+        });
+
+        if (originalData) {
+          break;
+        }
+      }
+    }
 
     // Get the result of the document service action
     const result = (await next()) as any;

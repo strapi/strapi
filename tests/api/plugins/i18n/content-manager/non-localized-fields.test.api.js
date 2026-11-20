@@ -991,6 +991,99 @@ describe('i18n', () => {
       });
     });
 
+    describe('Creating a locale does not rewrite the other locales', () => {
+      const uid = 'api::category.category';
+      const shared = { nonLocalized: 'same', nonLocalizedCompo: { name: 'same' } };
+
+      const findRow = (documentId, locale, status) =>
+        strapi.db.query(uid).findOne({
+          where: {
+            documentId,
+            locale,
+            publishedAt: status === 'published' ? { $notNull: true } : null,
+          },
+          populate: ['nonLocalizedCompo'],
+        });
+
+      const snapshot = (row) => ({
+        updatedAt: new Date(row.updatedAt).getTime(),
+        compoId: row.nonLocalizedCompo.id,
+      });
+
+      test('leaves the default locale draft and published rows when a new locale copies its shared values', async () => {
+        const { documentId } = await strapi.documents(uid).create({
+          locale: 'en',
+          data: { name: 'untouched sibling en', ...shared },
+          status: 'published',
+        });
+
+        const draftBefore = snapshot(await findRow(documentId, 'en', 'draft'));
+        const publishedBefore = snapshot(await findRow(documentId, 'en', 'published'));
+
+        await strapi.documents(uid).update({
+          documentId,
+          locale: 'fr',
+          data: { name: 'untouched sibling fr', ...shared },
+        });
+
+        expect(snapshot(await findRow(documentId, 'en', 'draft'))).toEqual(draftBefore);
+        expect(snapshot(await findRow(documentId, 'en', 'published'))).toEqual(publishedBefore);
+      });
+
+      test('leaves the other locale when a write without a locale creates the default locale row', async () => {
+        const { documentId } = await strapi.documents(uid).create({
+          locale: 'fr',
+          data: { name: 'no locale fr', ...shared },
+        });
+
+        const before = snapshot(await findRow(documentId, 'fr', 'draft'));
+
+        await strapi.documents(uid).update({
+          documentId,
+          data: { name: 'no locale en', ...shared },
+        });
+
+        expect(await findRow(documentId, 'en', 'draft')).toBeTruthy();
+        expect(snapshot(await findRow(documentId, 'fr', 'draft'))).toEqual(before);
+      });
+
+      test('leaves the published default locale on the first publish of a new locale', async () => {
+        const { documentId } = await strapi.documents(uid).create({
+          locale: 'en',
+          data: { name: 'first publish en', ...shared },
+          status: 'published',
+        });
+
+        await strapi.documents(uid).update({
+          documentId,
+          locale: 'fr',
+          data: { name: 'first publish fr', ...shared },
+        });
+
+        const before = snapshot(await findRow(documentId, 'en', 'published'));
+
+        await strapi.documents(uid).publish({ documentId, locale: 'fr' });
+
+        expect(await findRow(documentId, 'fr', 'published')).toBeTruthy();
+        expect(snapshot(await findRow(documentId, 'en', 'published'))).toEqual(before);
+      });
+
+      test('still copies a shared value that the new locale changes', async () => {
+        const { documentId } = await strapi.documents(uid).create({
+          locale: 'en',
+          data: { name: 'changed sibling en', ...shared },
+        });
+
+        await strapi.documents(uid).update({
+          documentId,
+          locale: 'fr',
+          data: { name: 'changed sibling fr', ...shared, nonLocalized: 'changed' },
+        });
+
+        expect((await findRow(documentId, 'en', 'draft')).nonLocalized).toBe('changed');
+      });
+    });
+
     describe('Creating a locale with a shallow nested non-localized component', () => {
       const nestedProfile = {
         name: 'shared-name',
