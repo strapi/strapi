@@ -102,6 +102,11 @@ export type {
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
+export type {
+  FormFieldsArgs as unstable_FormFieldsArgs,
+  FormFieldsForm as unstable_FormFieldsForm,
+  FormFieldsProps as unstable_FormFieldsProps,
+} from './core/apis/FormFields';
 
 /**
  * Utils

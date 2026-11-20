@@ -37,6 +37,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
       components={strapi.library.components}
       customFields={strapi.customFields}
       widgets={strapi.widgets}
+      formFields={strapi.formFields}
       fields={strapi.library.fields}
       menu={strapi.router.menu}
       getAdminInjectedComponents={strapi.getAdminInjectedComponents}

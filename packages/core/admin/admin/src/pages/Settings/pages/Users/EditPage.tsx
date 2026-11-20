@@ -12,9 +12,11 @@ import { Form, FormHelpers } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { PluginFormFields } from '../../../../components/PluginFormFields';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
+import { useStrapiApp } from '../../../../features/StrapiApp';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
@@ -43,6 +45,9 @@ const EDIT_VALIDATION_SCHEMA = yup.object().shape({
     }),
 });
 
+// A plugin that replaces the roles field may send none: the server checks the roles it saves
+const REPLACED_ROLES_SCHEMA = EDIT_VALIDATION_SCHEMA.shape({ roles: yup.array() });
+
 const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 'roles'] as const;
 
 /* -------------------------------------------------------------------------------------------------
@@ -55,6 +60,7 @@ const EditPage = () => {
   const id = match?.params?.id ?? '';
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
+  const formFields = useStrapiApp('EditPage', (state) => state.formFields);
   const MagicLink = useEnterprise(
     MagicLinkCE,
     async () =>
@@ -120,7 +126,7 @@ const EditPage = () => {
     return <Page.Loading />;
   }
 
-  type InitialData = Pick<Update.Request['body'], (typeof fieldsToPick)[number]> & {
+  type InitialData = Pick<Update.Request['body'], (typeof fieldsToPick)[number] | 'plugins'> & {
     confirmPassword: string;
     password: string;
   };
@@ -156,7 +162,7 @@ const EditPage = () => {
       });
 
       actions.setValues({
-        ...pick(body, fieldsToPick),
+        ...pick(body, [...fieldsToPick, 'plugins']),
         password: '',
         confirmPassword: '',
       });
@@ -177,7 +183,9 @@ const EditPage = () => {
         method="PUT"
         onSubmit={handleSubmit}
         initialValues={initialData}
-        validationSchema={EDIT_VALIDATION_SCHEMA}
+        validationSchema={
+          formFields.replaces('user', 'roles') ? REPLACED_ROLES_SCHEMA : EDIT_VALIDATION_SCHEMA
+        }
       >
         {({ isSubmitting, modified }) => {
           return (
@@ -279,9 +287,12 @@ const EditPage = () => {
                         })}
                       </Typography>
                       <Grid.Root gap={5}>
-                        <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
-                          <SelectRoles disabled={!canUpdate} />
-                        </Grid.Item>
+                        {formFields.replaces('user', 'roles') ? null : (
+                          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                            <SelectRoles disabled={!canUpdate} />
+                          </Grid.Item>
+                        )}
+                        <PluginFormFields form="user" entityId={id} disabled={!canUpdate} />
                       </Grid.Root>
                     </Flex>
                   </Box>
