@@ -50,7 +50,9 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
     these resets it itself: the admin login rate limit (`admin.rateLimit.enabled`,
     `POST /api/tests/rate-limit`), the fake AI calls (`DELETE /api/tests/ai/calls`), files in
     `public/uploads`, webhooks (loaded once at bootstrap), scheduled release cron jobs (synced at
-    bootstrap) and the custom-order cache (up to 10 s). The list is in `shared/src/db/snapshot.ts`.
+    bootstrap) and the custom-order cache (which content types have custom order on). That cache
+    is stale-while-revalidate: once it is 10 s old, the next read still answers from it and
+    refreshes it in the background. The list is in `shared/src/db/snapshot.ts`.
 - **Edition** (RFC D6): `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
   (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
   Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run

@@ -34,7 +34,11 @@ export const snapshotDatabase = async (server: Server) => {
  * - files in `public/uploads` (the upload rows go back, the files stay);
  * - webhooks, loaded into memory once at bootstrap;
  * - the cron jobs of scheduled releases, synced at bootstrap;
- * - the custom-order cache, kept up to 10 s.
+ * - the custom-order cache: which content types have custom order on (content-manager
+ *   `custom-order` service). It is stale-while-revalidate: once it is 10 s old, the next read
+ *   still answers from it and starts a refresh in the background, so the restored setting only
+ *   shows on a read after that refresh ends. The move route also refreshes it right away when it
+ *   finds custom order off for the content type.
  */
 export const restoreDatabase = async (server: Server) => {
   await call(server, 'POST', '/db/restore');
