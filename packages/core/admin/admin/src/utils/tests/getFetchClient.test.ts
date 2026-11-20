@@ -1077,6 +1077,36 @@ describe('getFetchClient', () => {
       }
     );
 
+    it.each(methods)(
+      '%s: a caller header replaces a registered header with the same name',
+      async (_method, send) => {
+        register(() => ({ 'x-strapi-space': 'france' }));
+
+        await send(getFetchClient(), '/x', { headers: { 'X-Strapi-Space': 'spain' } });
+
+        expect(sentHeaders().get('x-strapi-space')).toBe('spain');
+      }
+    );
+
+    it.each([
+      [
+        'post',
+        (client: FetchClient, body: FormData, options: FetchOptions) =>
+          client.post('/x', body, options),
+      ],
+      [
+        'put',
+        (client: FetchClient, body: FormData, options: FetchOptions) =>
+          client.put('/x', body, options),
+      ],
+    ])('%s: sends a FormData body without a caller Content-Type', async (_method, send) => {
+      await send(getFetchClient(), new FormData(), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      expect(sentHeaders().has('Content-Type')).toBe(false);
+    });
+
     it('leaves out a registered header whose value is undefined', async () => {
       register(() => ({ 'x-strapi-space': undefined }));
 

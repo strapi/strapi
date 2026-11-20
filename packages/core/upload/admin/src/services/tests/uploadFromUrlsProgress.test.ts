@@ -122,4 +122,15 @@ describe('headers a plugin registered on a URL upload', () => {
     const [, init] = (global.fetch as jest.Mock).mock.calls[0];
     expect(new Headers(init.headers).get('x-strapi-space')).toBe('france');
   });
+
+  it('sends no request and fails the upload when a provider throws', async () => {
+    removeHeaders = unstable_addRequestHeaders(() => {
+      throw new Error('provider failed');
+    });
+
+    const result = setup([['stream:complete', { data: [], errors: [] }]]);
+
+    await waitFor(() => expect(result.current.files.map((file) => file.status)).toEqual(['error']));
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
 });
