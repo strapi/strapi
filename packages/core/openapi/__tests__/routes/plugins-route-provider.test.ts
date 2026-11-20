@@ -50,8 +50,8 @@ describe('PluginRoutesProvider', () => {
       const { routes } = provider;
 
       expect(routes).toHaveLength(2);
-      expect(routes[0].path).toBe('/upload');
-      expect(routes[1].path).toBe('/upload/files/:id');
+      expect(routes[0].path).toBe('/api/upload');
+      expect(routes[1].path).toBe('/api/upload/files/:id');
     });
 
     it('should use route config.prefix instead of router prefix when present', () => {
@@ -89,8 +89,8 @@ describe('PluginRoutesProvider', () => {
 
       expect(routes).toHaveLength(2);
       // These routes have config.prefix = '', so they bypass the router prefix
-      expect(routes[0].path).toBe('/auth/local');
-      expect(routes[1].path).toBe('/users/me');
+      expect(routes[0].path).toBe('/api/auth/local');
+      expect(routes[1].path).toBe('/api/users/me');
     });
 
     it('should handle mix of routes with and without config.prefix', () => {
@@ -127,9 +127,9 @@ describe('PluginRoutesProvider', () => {
 
       expect(routes).toHaveLength(2);
       // config.prefix = '' bypasses router prefix
-      expect(routes[0].path).toBe('/auth/local');
+      expect(routes[0].path).toBe('/api/auth/local');
       // No config.prefix, uses router prefix
-      expect(routes[1].path).toBe('/users-permissions/roles');
+      expect(routes[1].path).toBe('/api/users-permissions/roles');
     });
 
     it('should handle routes with no router prefix', () => {
@@ -157,7 +157,7 @@ describe('PluginRoutesProvider', () => {
       const { routes } = provider;
 
       expect(routes).toHaveLength(1);
-      expect(routes[0].path).toBe('/items');
+      expect(routes[0].path).toBe('/api/items');
     });
   });
 
