@@ -1137,6 +1137,8 @@ describeOnCondition(edition === 'EE')('History API', () => {
       let documentId: string;
 
       const createLegacyVersion = async (createdBy: number) => {
+        await settleHistory();
+
         const historyVersions = strapi.db.query('plugin::content-manager.history-version');
         const { contentType, relatedDocumentId, locale, status, data, schema } =
           await historyVersions.findOne({ where: { relatedDocumentId: documentId } });
