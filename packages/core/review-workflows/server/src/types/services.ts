@@ -388,7 +388,7 @@ export type StagesService = {
    */
   find(params: {
     workflowId: Data.ID;
-    populate?: queryParams.Params['populate'];
+    populate?: queryParams.Query['populate'];
   }): Promise<PopulatedStageRow[]>;
   /**
    * Resolves the stage with this ID, `null` when there is none or, when `workflowId` is given, when
@@ -401,7 +401,7 @@ export type StagesService = {
    */
   findById(
     id: Data.ID,
-    params?: { workflowId?: Data.ID; populate?: queryParams.Params['populate'] }
+    params?: { workflowId?: Data.ID; populate?: queryParams.Query['populate'] }
   ): Promise<PopulatedStageRow | null>;
   /**
    * Creates the stages and their transition permissions. Resolves the created rows, with only the

@@ -3,6 +3,7 @@ import type { Core, Modules } from '@strapi/types';
 import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 
 import { async } from '@strapi/utils';
+import type { queryParams } from '@strapi/utils';
 import { getService } from '../utils';
 import type { StageWithPermissions } from '../services/stage-permissions';
 import type { PopulatedWorkflow } from '../types/services';
@@ -39,7 +40,10 @@ function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: UserAbi
  * Converts the query string populate (`'*'`, `'a,b'`, `['a']`, `{ a: 'true' }`) into the shape
  * the database query accepts. A populate it cannot convert throws a ValidationError (400).
  */
-function convertPopulate({ strapi }: { strapi: Core.Strapi }, populate: unknown) {
+function convertPopulate(
+  { strapi }: { strapi: Core.Strapi },
+  populate: queryParams.Params['populate']
+) {
   return strapi.get('query-params').transform(STAGE_MODEL_UID, { populate }).populate;
 }
 
