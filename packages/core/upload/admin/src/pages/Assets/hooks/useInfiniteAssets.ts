@@ -22,6 +22,8 @@ interface UseInfiniteAssetsOptions {
   folder?: number | null;
   sort?: string;
   search?: string;
+  /** Folder path a search is limited to (the folder and its subfolders). */
+  searchFolderPath?: string;
   /** Extra `filters[$and]` entries for the files query. */
   filters?: Record<string, unknown>[];
   /** Structural switch: an `is [folder]`-only type badge means no file can match. */
@@ -32,6 +34,7 @@ interface QueryArgs {
   folder: number | null;
   sort?: string;
   search?: string;
+  searchFolderPath?: string;
   filters?: Record<string, unknown>[];
 }
 
@@ -133,12 +136,13 @@ const useInfiniteAssets = ({
   folder = null,
   sort,
   search,
+  searchFolderPath,
   filters,
   enabled = true,
 }: UseInfiniteAssetsOptions = {}) => {
   // Derived from the request args themselves, so a new filter can't reach the
   // API without also invalidating what was accumulated under the old one.
-  const queryArgs: QueryArgs = { folder, sort, search, filters };
+  const queryArgs: QueryArgs = { folder, sort, search, searchFolderPath, filters };
   const queryKey = JSON.stringify(queryArgs);
   // Identifies the list being viewed, ignoring the search term. Folder, sort
   // and filter changes are single committed actions, so one clean reset per
