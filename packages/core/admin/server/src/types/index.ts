@@ -400,6 +400,20 @@ type DeepReadonly<T> = T extends readonly (infer TItem)[]
  */
 type ActionRegistration = DeepReadonly<z.input<typeof actionRegistrationSchema>>;
 
+/**
+ * Each key of `TAction` that the registration of its section does not have, typed `never`. The
+ * schema is strict (`z.strictObject`), so such a key fails at boot, and a type parameter turns off
+ * the excess property check of an inline action.
+ */
+type UnknownActionKeys<TAction> = {
+  [
+    TKey in Exclude<
+      keyof TAction,
+      keyof Extract<ActionRegistration, { readonly section: TAction[keyof TAction & 'section'] }>
+    >
+  ]: never;
+};
+
 /** What the provider hooks of the action provider receive: the key and the action. */
 type ActionProviderHookContext = { key: string; value: Action };
 
@@ -420,7 +434,8 @@ type ActionProviderHooks = {
 /**
  * The action provider with strict types. Its provider hooks take typed handlers
  * ({@link ActionProviderHooks}). `register` and `registerMany` check that each action's
- * computed ID is a registered permission action (`Core.PermissionActionCheck`); reads accept any
+ * computed ID is a registered permission action (`Core.PermissionActionCheck`), and reject a key
+ * the action's section does not have ({@link UnknownActionKeys}); reads accept any
  * runtime ID and reject an unregistered literal (`Core.PermissionActionLookup`). `registerMany`
  * resolves to the provider (`return this`), named here because the declaration emitter prints
  * `this` as `any`. Without strict types, the contract keeps the implementation's signatures.
@@ -431,10 +446,11 @@ type StrictActionProvider = Omit<
 > & {
   hooks: Omit<ActionProvider['hooks'], keyof ActionProviderHooks> & ActionProviderHooks;
   register<const TAction extends ActionRegistration>(
-    actionAttributes: Core.PermissionActionCheck<TAction>
+    actionAttributes: Core.PermissionActionCheck<TAction> & UnknownActionKeys<TAction>
   ): ReturnType<ActionProvider['register']>;
   registerMany<const TActions extends readonly ActionRegistration[]>(actionsAttributes: {
-    [TIndex in keyof TActions]: Core.PermissionActionCheck<TActions[TIndex]>;
+    [TIndex in keyof TActions]: Core.PermissionActionCheck<TActions[TIndex]> &
+      UnknownActionKeys<TActions[TIndex]>;
   }): Promise<StrictActionProvider>;
   get<TId extends Core.PermissionActionLookupName>(
     actionId: Core.PermissionActionLookup<TId>
