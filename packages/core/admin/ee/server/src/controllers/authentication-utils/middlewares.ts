@@ -16,6 +16,15 @@ import {
 
 const defaultConnectionError = () => new Error('Invalid connection payload');
 
+/**
+ * Not a middleware: given the request's context and `next`, it returns the function that completes
+ * the login with the user (or the SSO profile) and the provider.
+ */
+type LoginScenario = (
+  ctx: Parameters<Core.MiddlewareHandler>[0],
+  next: Parameters<Core.MiddlewareHandler>[1]
+) => (user: any, provider: any) => Promise<unknown>;
+
 export const authenticate: Core.MiddlewareHandler = async (ctx, next) => {
   const {
     params: { provider },
@@ -44,28 +53,27 @@ export const authenticate: Core.MiddlewareHandler = async (ctx, next) => {
   })(ctx, next);
 };
 
-const existingUserScenario: Core.MiddlewareHandler =
-  (ctx, next) => async (user: any, provider: any) => {
-    const redirectUrls = utils.getPrefixedRedirectUrls();
+const existingUserScenario: LoginScenario = (ctx, next) => async (user: any, provider: any) => {
+  const redirectUrls = utils.getPrefixedRedirectUrls();
 
-    if (!user.isActive) {
-      emitLoginFailure(
-        { strapi },
-        {
-          error: new Error(`Deactivated user tried to login (${user.id})`),
-          provider,
-          reason: 'account_inactive',
-          user,
-        }
-      );
-      return ctx.redirect(redirectUrls.error);
-    }
+  if (!user.isActive) {
+    emitLoginFailure(
+      { strapi },
+      {
+        error: new Error(`Deactivated user tried to login (${user.id})`),
+        provider,
+        reason: 'account_inactive',
+        user,
+      }
+    );
+    return ctx.redirect(redirectUrls.error);
+  }
 
-    ctx.state.user = user;
-    return next();
-  };
+  ctx.state.user = user;
+  return next();
+};
 
-const nonExistingUserScenario: Core.MiddlewareHandler =
+const nonExistingUserScenario: LoginScenario =
   (ctx, next) => async (profile: any, provider: any) => {
     const { email, firstname, lastname, username } = profile;
     const redirectUrls = utils.getPrefixedRedirectUrls();
