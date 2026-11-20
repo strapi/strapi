@@ -11,7 +11,7 @@ import {
   useIsDesktop,
   useIsMobile,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Tabs, Box } from '@strapi/design-system';
+import { Grid, Tabs, Box, ScrollArea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -291,11 +291,18 @@ const StickyPanels = styled.div`
   gap: ${({ theme }) => theme.spaces[2]};
 `;
 
-const ScrollingPanels = styled.div`
-  position: relative;
+const ScrollingPanels = styled(ScrollArea)`
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  height: auto;
+
+  [data-radix-scroll-area-viewport] {
+    position: relative;
+  }
+
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+  }
 `;
 
 /**
