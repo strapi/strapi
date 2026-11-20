@@ -237,7 +237,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   strapi.sessionManager.defineOrigin('admin', {
-    jwtSecret: strapi.config.get('admin.auth.secret'),
+    jwtSecret: strapi.config.get<Core.Config.Admin['auth']['secret']>('admin.auth.secret'),
     accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
     maxRefreshTokenLifespan: strapi.config.get(
       'admin.auth.sessions.maxRefreshTokenLifespan',
