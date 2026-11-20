@@ -142,6 +142,46 @@ actionProvider.register({
   pluginName: 'admin',
 });
 
+// A key the action's section does not have fails to compile: the schema is strict
+// (`z.strictObject`), so it fails at boot.
+actionProvider.register({
+  section: 'settings',
+  displayName: 'Export',
+  uid: dynamicUid,
+  category: 'reports',
+  // @ts-expect-error `subcategory` is not a key of a `settings` action: the schema is strict.
+  subcategory: 'export',
+});
+const unknownRootAction = {
+  section: 'settings',
+  category: 'reports',
+  displayName: 'Export',
+  uid: dynamicUid,
+  unknownRoot: true,
+} as const;
+// @ts-expect-error `unknownRoot` is not a key of a `settings` action.
+actionProvider.register(unknownRootAction);
+actionProvider.registerMany([
+  { section: 'internal', displayName: 'Read', uid: dynamicUid },
+  // @ts-expect-error `extra` is not a key of a `plugins` action.
+  { section: 'plugins', displayName: 'Read', uid: dynamicUid, pluginName: 'admin', extra: 1 },
+]);
+// The schema accepts a key of another section with `undefined`, and keeps `options` open.
+actionProvider.register({
+  section: 'internal',
+  displayName: 'Read',
+  uid: dynamicUid,
+  category: undefined,
+});
+actionProvider.register({
+  section: 'internal',
+  displayName: 'Read',
+  uid: dynamicUid,
+  options: { applyToProperties: [], extra: 'kept' },
+});
+declare const typedRegistration: ActionRegistration;
+actionProvider.register(typedRegistration);
+
 // A list not written `as const` types `section` as `string`, which matches no section.
 const wideActions = [
   { section: 'plugins', displayName: 'Read', uid: 'marketplace.read', pluginName: 'admin' },
