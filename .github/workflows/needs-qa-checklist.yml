@@ -90,3 +90,4 @@ jobs:
 
           claude_args: |
             --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh api repos/${{ github.repository }}/issues/comments/*:*)"
+            --model claude-opus-5-5
