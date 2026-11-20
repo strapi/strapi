@@ -1208,6 +1208,7 @@ describe('getFetchClient', () => {
       it.each([
         ['post', '/admin/login'],
         ['post', '/admin/logout'],
+        ['post', 'admin/logout'],
       ])('%s %s: still sends the request', async (_method, url) => {
         register(() => {
           throw new Error('provider failed');

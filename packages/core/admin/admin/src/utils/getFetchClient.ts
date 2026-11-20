@@ -591,7 +591,9 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   };
 
   const readProviderHeaders = (url: string) =>
-    SKIPS_REQUEST_HEADERS.test(url) ? new Headers() : unstable_getRequestHeaders();
+    SKIPS_REQUEST_HEADERS.test(addPrependingSlash(url))
+      ? new Headers()
+      : unstable_getRequestHeaders();
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
