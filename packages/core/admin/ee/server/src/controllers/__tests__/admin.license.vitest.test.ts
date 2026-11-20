@@ -571,12 +571,17 @@ describe('licenseLimitInformation (planEntitlements)', () => {
 describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
   const OLD_ENV = process.env;
   const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
+  const HOUR = 60 * 60 * 1000;
 
   beforeEach(() => {
     process.env = { ...OLD_ENV };
+    // Two hours after USAGE was stored
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-13T12:00:00.000Z'));
   });
   afterEach(() => {
     process.env = OLD_ENV;
+    vi.useRealTimers();
   });
 
   const withStoredCount = (value: unknown) => {
@@ -596,6 +601,20 @@ describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
     expect(data.adminUsersAcrossInstances).toEqual(USAGE);
   });
 
+  it('still reports a usage the registry sent less than 48 hours ago', async () => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+    const recent = {
+      ...USAGE,
+      updatedAt: new Date(Date.parse('2026-11-13T12:00:00.000Z') - 47 * HOUR).toISOString(),
+    };
+    withStoredCount(recent);
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.adminUsersAcrossInstances).toEqual(recent);
+  });
+
   it('reports a usage without a contracted number of users', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
@@ -609,6 +628,14 @@ describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
   it.each([
     ['nothing is stored', null],
     ['the stored value is malformed', { activeUsers: '12', updatedAt: 1 }],
+    ['the stored date is not a date', { ...USAGE, updatedAt: 'yesterday' }],
+    [
+      'the registry last answered more than 48 hours ago',
+      {
+        ...USAGE,
+        updatedAt: new Date(Date.parse('2026-11-13T12:00:00.000Z') - 49 * HOUR).toISOString(),
+      },
+    ],
   ])('is null when %s', async (_label, value) => {
     createStrapiMock({ stored: null });
     stubUserServices();
