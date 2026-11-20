@@ -53,7 +53,7 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
     bootstrap) and the custom-order cache (which content types have custom order on). That cache
     is stale-while-revalidate: once it is 10 s old, the next read still answers from it and
     refreshes it in the background. The list is in `shared/src/db/snapshot.ts`.
-- **Edition** (RFC D6): `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
+- **Edition**: `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
   (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
   Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run
   removes any license from the app env. See [Edition](#edition).
@@ -125,3 +125,8 @@ never from env vars. A test that needs one the instance doesn't have **fails**, 
   feature is missing. `requireFeatures(features, { future: [...] })` checks future flags.
 
 Set future flags with `scaffoldConfig(app, 'features', { future: { someFlag: true } })`.
+
+`STRAPI_TEST_EDITION` is for these suites only: until the cutover, `/tests` still reads
+`STRAPI_E2E_EDITION` and `STRAPI_DISABLE_EE`, and its CI actions `RUN_EE`. CI runs the suites in
+CE only for now; the EE replay, with a license, comes with CMS-2242. Run EE locally with
+`STRAPI_TEST_EDITION=ee STRAPI_LICENSE=…`.

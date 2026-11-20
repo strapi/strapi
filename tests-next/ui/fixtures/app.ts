@@ -44,7 +44,8 @@ export interface ResetOptions {
   /**
    * EE features and future flags the tests need, for example
    * `test.use({ requires: { ee: ['cms-content-releases'] } })`. A test fails when the instance
-   * lacks one: it never skips. Tag EE-only tests `@ee` so CE runs leave them out.
+   * lacks one, before its `beforeAll` runs: it never skips. Tag EE-only tests `@ee` so CE runs
+   * leave them out.
    */
   requires: Requirements;
 }
@@ -61,7 +62,7 @@ export interface AppWorkerFixtures {
 export interface ResetFixtures {
   /** Restores the snapshot before a test or hook, following `resetScope`. Automatic. */
   databaseReset: void;
-  /** Fails the test when the instance lacks one of `requires`. Automatic. */
+  /** Fails the test, and its hooks, when the instance lacks one of `requires`. Automatic. */
   requirementsCheck: void;
 }
 
@@ -135,7 +136,9 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
       requireFeatures(features, requires);
       await use();
     },
-    { auto: true },
+    // Also before `beforeAll` and `afterAll` hooks, like `databaseReset`: a `beforeAll` that
+    // writes data for a feature must not run on an instance without it.
+    { auto: 'all-hooks-included' as unknown as true },
   ],
 
   databaseReset: [
