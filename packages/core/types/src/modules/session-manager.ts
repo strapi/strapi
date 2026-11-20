@@ -1,3 +1,5 @@
+import type { IsStrict } from '../core/strictness';
+
 export type ValidateRefreshTokenResult =
   { isValid: true; userId: string; sessionId: string } | { isValid: false };
 
@@ -49,9 +51,43 @@ export interface OriginSessionManagerService {
   isSessionActive(sessionId: string): Promise<boolean>;
 }
 
+/**
+ * An algorithm `jsonwebtoken` signs and verifies tokens with (`Algorithm` in `@types/jsonwebtoken`).
+ * It rejects any other value when it signs.
+ */
+export type JwtAlgorithm =
+  | 'HS256'
+  | 'HS384'
+  | 'HS512'
+  | 'RS256'
+  | 'RS384'
+  | 'RS512'
+  | 'ES256'
+  | 'ES384'
+  | 'ES512'
+  | 'PS256'
+  | 'PS384'
+  | 'PS512'
+  | 'none';
+
+/**
+ * The config of one session origin, as `defineOrigin` stores it (`SessionManagerConfig` in
+ * `@strapi/core` `services/session-manager.ts`). Lifespans are in seconds.
+ */
+export interface SessionOriginConfig {
+  jwtSecret?: string;
+  accessTokenLifespan: number;
+  maxRefreshTokenLifespan: number;
+  idleRefreshTokenLifespan: number;
+  maxSessionLifespan: number;
+  idleSessionLifespan: number;
+  algorithm?: JwtAlgorithm;
+  jwtOptions?: Record<string, unknown>;
+}
+
 export interface SessionManagerService {
   generateSessionId(): string;
-  defineOrigin(origin: string, config: any): void;
+  defineOrigin(origin: string, config: IsStrict extends false ? any : SessionOriginConfig): void;
   hasOrigin(origin: string): boolean;
   (origin: string): OriginSessionManagerService;
 }
