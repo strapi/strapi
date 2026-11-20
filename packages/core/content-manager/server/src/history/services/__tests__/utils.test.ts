@@ -19,7 +19,7 @@ const createCtx = (pluginName: string, strategyName: string) =>
       route: { info: { pluginName, type: 'admin' } },
       auth: { strategy: { name: strategyName }, credentials: { id: 2 } },
     },
-  }) as unknown as RequestContext;
+  } as unknown as RequestContext);
 
 type LocalizationFixture = {
   defaultLocale: string;
@@ -323,6 +323,20 @@ describe('History utils', () => {
         source: 'admin-api',
         author: { type: 'token', model: 'admin::api-token', id: '2' },
       });
+    });
+
+    it('resolves a plugin admin strategy on a Content Manager route to the admin', () => {
+      expect(resolveHistoryOrigin(createCtx('content-manager', 'plugin-admin'))).toEqual({
+        source: 'admin-panel',
+        author: { type: 'person', model: 'admin::user', id: '1' },
+      });
+    });
+
+    it('resolves nothing for a plugin admin strategy without an admin', () => {
+      const ctx = createCtx('content-manager', 'plugin-admin');
+      ctx.state.user = undefined;
+
+      expect(resolveHistoryOrigin(ctx)).toBeNull();
     });
 
     it('resolves nothing on another admin route', () => {

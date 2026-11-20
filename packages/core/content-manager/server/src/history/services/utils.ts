@@ -536,15 +536,15 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
     if (isContentManagerRoute(requestContext)) {
       switch (requestContext.state.auth?.strategy?.name) {
-        case 'admin':
-          return { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) };
         case 'admin-token':
           return {
             source: 'admin-api',
             author: toApiTokenAuthor(requestContext.state.auth.credentials),
           };
         default:
-          return null;
+          return requestContext.state.user
+            ? { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) }
+            : null;
       }
     }
 
