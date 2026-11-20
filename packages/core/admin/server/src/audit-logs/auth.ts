@@ -78,29 +78,15 @@ export const emitLoginFailure = (
 export const isRecordedLoginFailure = (event: LoginFailureEvent) =>
   event.reason !== 'sso_connection_error' && !(event.provider === 'local' && !event.user);
 
-/**
- * The part of the audit-logs lifecycle service used here.
- * The full service type lives in the Admin EE package.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>,
-    options?: {
-      allowUnknownActor?: boolean;
-      alwaysUnknownActor?: boolean;
-      shouldRecord?: (...args: any[]) => boolean;
-    }
-  ): void;
-}
-
 const toResource = (user: { id: Data.ID; email?: string | null }): AdminUserResource => ({
   type: 'admin-user',
   id: user.id,
   email: user.email as string,
 });
 
-export const registerAuthAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerAuthAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   auditLogsLifecycle.registerEvent<LoginFailureDetails>(
     AUTH_EVENTS.LOGIN_FAILURE,
     (event: LoginFailureEvent) => ({
