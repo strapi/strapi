@@ -1,5 +1,9 @@
+import type { Database } from '@strapi/database';
+
+import type * as Data from '../../data';
 import type * as Lifecycles from '../../modules/lifecycles';
 import type { Lifecycles as CoreLifecycles } from '../lifecycles';
+import type { Strapi as StrapiInstance } from '../strapi';
 import type { Equal, Expect } from '../../../tests/helpers/assert';
 
 // This program registers no content type: lifecycles of an unregistered model receive `AnyEvent`.
@@ -29,3 +33,45 @@ export const everyModel: Lifecycles.SubscriberFn = (event) => {
     event.params.data satisfies Record<string, unknown> | undefined;
   }
 };
+
+// With strict types, `strapi.db` types `lifecycles.subscribe` and stays a `Database` for the code
+// that takes one.
+declare const strapi: StrapiInstance;
+
+declare const dbChecks: [
+  Expect<Equal<StrapiInstance['db'], Lifecycles.StrictDatabase>>,
+  Expect<Equal<StrapiInstance['db'] extends Database ? true : false, true>>,
+  Expect<Equal<ReturnType<StrapiInstance['db']['lifecycles']['subscribe']>, () => void>>,
+];
+dbChecks satisfies unknown;
+
+// A function subscriber receives every event of every model: a union narrowed by `action`.
+strapi.db.lifecycles.subscribe((event) => {
+  if (event.action === 'afterCount') {
+    event.result satisfies number;
+  }
+  if (event.action === 'beforeCreate') {
+    // @ts-expect-error `before*` events have no result.
+    event.result satisfies unknown;
+  }
+});
+
+// Dynamic models receive records of unknown values.
+declare const models: string[];
+strapi.db.lifecycles.subscribe({
+  models,
+  afterFindOne(event) {
+    event.result satisfies Record<string, unknown> | null;
+    event.model.uid satisfies string;
+  },
+});
+
+// So do models without a registered schema. An unknown hook name is an excess property.
+strapi.db.lifecycles.subscribe({
+  models: ['api::lifecycle-lab.lab'],
+  afterCreateMany(event) {
+    event.result satisfies { count: number; ids: Data.ID[] };
+  },
+  // @ts-expect-error `afterSave` is not a lifecycle action.
+  afterSave() {},
+});
