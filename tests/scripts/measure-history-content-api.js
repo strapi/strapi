@@ -581,6 +581,12 @@ const measure = async ({ client, level, sqliteFile }) => {
     report.tableBytesPerVersion = Math.round(tableSize / LEVELS[level].versions);
     report.indexes = await getHistoryTableIndexes(strapi);
 
+    // The SQLite fill blocks the event loop for longer than the server keeps idle sockets,
+    // so let the HTTP client see that its socket is closed before the next request
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1_000);
+    });
+
     const list = await measureVersionsList(request, {
       adminToken,
       listedArticle,
