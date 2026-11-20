@@ -41,9 +41,13 @@ export const computeRetentionDays = (
 
 export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.RequestContext['get']>>;
 
+interface HistoryOriginAuthor extends Omit<HistoryVersionAuthorReference, 'id'> {
+  entityId: Data.ID;
+}
+
 interface HistoryOrigin {
   source: HistoryVersionSource;
-  author: HistoryVersionAuthorReference;
+  author: HistoryOriginAuthor;
 }
 
 export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
@@ -56,16 +60,16 @@ export type AuthorColumns =
     }
   | { authorType: null; authorModel: null; authorId: null };
 
-const toAdminUserAuthor = (user: { id: Data.ID }): HistoryVersionAuthorReference => ({
+const toAdminUserAuthor = (user: { id: Data.ID }): HistoryOriginAuthor => ({
   type: 'person',
   model: 'admin::user',
-  id: String(user.id),
+  entityId: user.id,
 });
 
-const toApiTokenAuthor = (token: { id: Data.ID }): HistoryVersionAuthorReference => ({
+const toApiTokenAuthor = (token: { id: Data.ID }): HistoryOriginAuthor => ({
   type: 'token',
   model: 'admin::api-token',
-  id: String(token.id),
+  entityId: token.id,
 });
 
 export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
@@ -254,11 +258,11 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const findAuthorDocumentId = async ({
     model,
-    id,
-  }: HistoryVersionAuthorReference): Promise<string | null> => {
+    entityId,
+  }: HistoryOriginAuthor): Promise<string | null> => {
     const author: { documentId: string } | null = await strapi.db
       .query(model as UID.Schema)
-      .findOne({ select: ['documentId'], where: { id } });
+      .findOne({ select: ['documentId'], where: { id: entityId } });
 
     return author?.documentId ?? null;
   };

@@ -19,7 +19,7 @@ const createCtx = (pluginName: string, strategyName: string) =>
       route: { info: { pluginName, type: 'admin' } },
       auth: { strategy: { name: strategyName }, credentials: { id: 2 } },
     },
-  } as unknown as RequestContext);
+  }) as unknown as RequestContext;
 
 type LocalizationFixture = {
   defaultLocale: string;
@@ -314,21 +314,21 @@ describe('History utils', () => {
     it('resolves an admin session on a Content Manager route to the admin', () => {
       expect(resolveHistoryOrigin(createCtx('content-manager', 'admin'))).toEqual({
         source: 'admin-panel',
-        author: { type: 'person', model: 'admin::user', id: '1' },
+        author: { type: 'person', model: 'admin::user', entityId: 1 },
       });
     });
 
     it('resolves an admin token on a Content Manager route to the token, not its owner', () => {
       expect(resolveHistoryOrigin(createCtx('content-manager', 'admin-token'))).toEqual({
         source: 'admin-api',
-        author: { type: 'token', model: 'admin::api-token', id: '2' },
+        author: { type: 'token', model: 'admin::api-token', entityId: 2 },
       });
     });
 
     it('resolves a plugin admin strategy on a Content Manager route to the admin', () => {
       expect(resolveHistoryOrigin(createCtx('content-manager', 'plugin-admin'))).toEqual({
         source: 'admin-panel',
-        author: { type: 'person', model: 'admin::user', id: '1' },
+        author: { type: 'person', model: 'admin::user', entityId: 1 },
       });
     });
 
