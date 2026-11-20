@@ -55,25 +55,22 @@ const releaseController = {
     const { contentType, hasEntryAttached, entryDocumentId, locale } = query;
     const isEntryAttached =
       typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
+    const entryActions = {
+      contentType,
+      entryDocumentId: entryDocumentId ?? null,
+      ...(strapi.localization.isLocalizedContentType(model) && { locale: locale ?? null }),
+    };
 
     if (isEntryAttached) {
       const releases = await releaseService.findMany({
         where: {
           releasedAt: null,
-          actions: {
-            contentType,
-            entryDocumentId: entryDocumentId ?? null,
-            locale: locale ?? null,
-          },
+          actions: entryActions,
         },
         populate: {
           actions: {
             fields: ['type', 'isEntryValid', 'reason'],
-            filters: {
-              contentType,
-              entryDocumentId: entryDocumentId ?? null,
-              locale: locale ?? null,
-            },
+            filters: entryActions,
           },
         },
       });
@@ -83,11 +80,7 @@ const releaseController = {
       const relatedReleases = await releaseService.findMany({
         where: {
           releasedAt: null,
-          actions: {
-            contentType,
-            entryDocumentId: entryDocumentId ?? null,
-            locale: locale ?? null,
-          },
+          actions: entryActions,
         },
       });
 
