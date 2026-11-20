@@ -165,8 +165,9 @@ test.describe('releases', { tag: '@ee' }, () => {
   (`server.logs()`) or the Playwright trace, and fix the cause.
 - **EE tests declare what they need.** Vitest: `describeEE`, `describeIfFeature` (start the
   server in an outer `beforeAll`), `requireServerFeature`. Playwright: tag the test `@ee` and
-  set `test.use({ requires: { ee: [...], future: [...] } })`. A missing feature fails the test,
-  it never skips. The edition comes from `STRAPI_TEST_EDITION`, never from code.
+  set `test.use({ requires: { ee: [...], future: [...] } })`. In an EE run, a missing feature
+  fails the test instead of skipping it. In a CE run, EE blocks and `@ee` tests are skipped by
+  design. The edition comes from `STRAPI_TEST_EDITION`, never from code.
 - **A test passes on its own** (`--grep`, a single file, a shard). Put the data several tests
   share in `beforeAll`, not in an earlier test. With `resetScope: 'test'`, the restore before
   each test wipes what `beforeAll` wrote: seed in the test instead.
