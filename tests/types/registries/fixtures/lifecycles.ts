@@ -1,5 +1,5 @@
-// Database lifecycles in strict mode: the per-model `lifecycles.ts` of a content type, and the hook
-// maps a subscriber uses. Its own program.
+// Database lifecycles in strict mode: the per-model `lifecycles.ts` of a content type, and
+// `strapi.db.lifecycles.subscribe`. Its own program.
 // Runtime evidence: the examples/getstarted event recorder (every event of a scripted set of
 // Document Service and Query Engine calls, and the value kinds of each attribute).
 import type { Core, Data, Modules, Schema, Struct } from '@strapi/strapi';
@@ -127,11 +127,15 @@ export const rejectsUnknownHook = {
   beforeSave() {},
 } satisfies Core.Lifecycles<'api::article.article'>;
 
-// 2. The hooks of a subscriber on registered models.
-// A union of the two models' events. TypeScript does not narrow a union by a nested property
-// (`event.model.uid`), so narrow the entry with `in`, or subscribe once per model.
-export const twoModels = {
+// 2. `strapi.db.lifecycles.subscribe` with registered models: hooks receive the events of the
+// models in `models`, the only ones the subscriber runs for.
+declare const strapi: Core.Strapi;
+
+strapi.db.lifecycles.subscribe({
+  models: ['api::article.article', 'api::tag.tag'],
   afterUpdate(event) {
+    // A union of the two models' events. TypeScript does not narrow a union by a nested property
+    // (`event.model.uid`), so narrow the entry with `in`, or subscribe once per model.
     // @ts-expect-error `title` is not on a tag.
     void event.result.title;
     if ('title' in event.result) {
@@ -140,44 +144,67 @@ export const twoModels = {
     }
     type _Uid = Expect<Equal<typeof event.model.uid, 'api::article.article' | 'api::tag.tag'>>;
   },
-} satisfies Modules.Lifecycles.Hooks<'api::article.article' | 'api::tag.tag'>;
+});
 
-// Components are models too: their writes run their own lifecycles.
-export const componentHooks = {
-  afterCreate(event) {
-    const label: string | null | undefined = event.result.label;
-    void label;
-  },
-} satisfies Modules.Lifecycles.Hooks<'shared.seo'>;
-
-// 3. Dynamic models and subscribers for every model receive untyped events.
-export const dynamicHooks = {
-  afterDeleteMany(event) {
-    const uid: string = event.model.uid;
-    const count: number = event.result.count;
-    void [uid, count];
-  },
-  afterCreate(event) {
-    // @ts-expect-error entries of an unknown model are records of unknown values.
-    const title: string = event.result['title'];
-    void title;
-  },
-} satisfies Modules.Lifecycles.Hooks<string>;
-
-export const everyModel = ((event) => {
-  if (event.action === 'afterFindMany') {
-    const rows: Record<string, unknown>[] = event.result;
-    void rows;
-  }
-}) satisfies Modules.Lifecycles.SubscriberFn;
-
-export const subscriberMap = {
+strapi.db.lifecycles.subscribe({
   models: ['api::tag.tag'],
   afterCreate(event) {
     const name: string | null | undefined = event.result.name;
     void name;
   },
-} satisfies Modules.Lifecycles.SubscriberMap<'api::tag.tag'>;
+  beforeUpdate(event) {
+    // @ts-expect-error `where` keys are the attributes, `id`, `documentId` and logical operators.
+    void event.params.where?.title;
+  },
+  // @ts-expect-error `afterSave` is not a lifecycle action.
+  afterSave() {},
+});
+
+// Components are models too: their writes run their own lifecycles.
+strapi.db.lifecycles.subscribe({
+  models: ['shared.seo'],
+  afterCreate(event) {
+    const label: string | null | undefined = event.result.label;
+    void label;
+  },
+});
+
+// 3. Dynamic models, unregistered models and subscribers for every model receive untyped events.
+declare const dynamicModels: string[];
+strapi.db.lifecycles.subscribe({
+  models: dynamicModels,
+  afterDeleteMany(event) {
+    const uid: string = event.model.uid;
+    const count: number = event.result.count;
+    void [uid, count];
+  },
+});
+
+strapi.db.lifecycles.subscribe({
+  models: ['api::unregistered.unregistered'],
+  afterFindOne(event) {
+    type _Result = Expect<Equal<typeof event.result, Record<string, unknown> | null>>;
+  },
+});
+
+strapi.db.lifecycles.subscribe({
+  afterCreate(event) {
+    // @ts-expect-error entries of an unknown model are records of unknown values.
+    const title: string = event.result['title'];
+    void title;
+  },
+});
+
+strapi.db.lifecycles.subscribe((event) => {
+  if (event.action === 'afterFindMany') {
+    const rows: Record<string, unknown>[] = event.result;
+    void rows;
+  }
+});
+
+// `subscribe` returns the unsubscribe function, and `strapi.db` stays a database where code takes one.
+export const unsubscribe: () => void = strapi.db.lifecycles.subscribe({ models: ['api::tag.tag'] });
+type _Db = Expect<Equal<typeof strapi.db, Modules.Lifecycles.StrictDatabase>>;
 
 // 4. The action and query names.
 type _Query = Expect<Equal<Modules.Lifecycles.Query<'beforeCreateMany'>, 'createMany'>>;
