@@ -510,6 +510,10 @@ The JSDoc of each type links to the other. `@strapi/core` keeps one file per cor
 With strict types, `strapi.api(name).config(key)` reads the contract registered under `api::<name>`,
 as `strapi.plugin(name).config(key)` reads `plugin::<name>`; without one it returns `unknown`.
 
+With strict types, a direct read such as `strapi.config.server` is `unknown`. These properties are a
+copy of the config taken when the container is created, which a later `set` leaves stale. Read
+config with `strapi.config.get('server.url')`.
+
 ### Policy and middleware contracts
 
 `PackagePolicies` and `PackageMiddlewares` map a full UID to the config the policy or middleware
