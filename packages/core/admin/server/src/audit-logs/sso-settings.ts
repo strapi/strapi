@@ -73,18 +73,9 @@ export const getSsoSettingsChanges = (
   return changes as SsoSettingsChanges;
 };
 
-/**
- * The part of the audit-logs lifecycle service used here.
- * The full service type lives in the Admin EE package.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>
-  ): void;
-}
-
-export const registerSsoSettingsAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerSsoSettingsAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   auditLogsLifecycle.registerEvent<UpdateDetails>(
     AUDITED_EVENTS.SSO_SETTINGS_UPDATE,
     (event: UpdateDetails) => ({

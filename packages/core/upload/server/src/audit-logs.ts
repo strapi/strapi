@@ -310,19 +310,9 @@ export const emitMediaMoves = async (
   }
 };
 
-/**
- * The part of the audit-logs lifecycle service used by this plugin.
- * The full service type lives in the Admin EE package and cannot be imported here.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>,
-    options?: { action?: string; shouldRecord?: (...args: any[]) => boolean }
-  ): void;
-}
-
-export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   auditLogsLifecycle.registerEvent<SettingsUpdateDetails>(
     AUDITED_EVENTS.UPLOAD_SETTINGS_UPDATE,
     (event: SettingsUpdateDetails) => ({
