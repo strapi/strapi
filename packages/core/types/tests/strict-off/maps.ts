@@ -22,5 +22,11 @@ declare const mapChecks: [
   Expect<Equal<Core.ModuleOf<'api::legacy'>['middlewares'], Record<string, Core.Middleware>>>,
   Expect<Equal<Core.Strapi['middlewares']['plugin::legacy.timer'], Core.MiddlewareFactory>>,
   Expect<IsAny<Parameters<Core.Strapi['middlewares'][string]>[0]>>,
+  Expect<Equal<Core.Strapi['services'][string], Core.Service>>,
+  Expect<Equal<Core.PluginOf<'legacy'>['services']['example'], Core.Service>>,
+  Expect<Equal<Core.ModuleOf<'api::legacy'>['services']['example'], Core.Service>>,
+  Expect<Equal<Core.Strapi['admin'], Core.Module>>,
+  Expect<Equal<Core.Strapi['admin']['services']['example'], Core.Service>>,
+  Expect<IsAny<Core.Strapi['services'][string]['anything']>>,
 ];
 mapChecks satisfies unknown;
