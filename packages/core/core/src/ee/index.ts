@@ -184,7 +184,7 @@ const watchAdminUsers = ({ strapi }: { strapi: Core.Strapi }) => {
   const scheduleReport = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      reportActiveAdminUsers({ strapi });
+      reportActiveAdminUsers({ strapi }).catch(() => {});
     }, ADMIN_USERS_REPORT_DELAY_MS);
     timer.unref?.();
   };
@@ -318,7 +318,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Not awaited: it must not delay startup
   if (registryAnswered) {
-    reportActiveAdminUsers({ strapi });
+    reportActiveAdminUsers({ strapi }).catch(() => {});
   }
 };
 
