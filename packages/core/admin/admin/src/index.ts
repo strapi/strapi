@@ -102,6 +102,10 @@ export type {
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
+export type {
+  MainNavMenuArgs as unstable_MainNavMenuArgs,
+  MainNavMenuCurrent as unstable_MainNavMenuCurrent,
+} from './core/apis/MainNav';
 
 /**
  * Utils

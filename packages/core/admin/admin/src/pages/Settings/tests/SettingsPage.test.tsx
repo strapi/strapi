@@ -1,6 +1,7 @@
 import { render as baseRender, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
+import { MainNav } from '../../../core/apis/MainNav';
 import { RBAC } from '../../../core/apis/rbac';
 import { Widgets } from '../../../core/apis/Widgets';
 import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/StrapiApp';
@@ -40,6 +41,7 @@ const render = (settings: StrapiAppContextValue['settings']) =>
             components={{}}
             fields={{}}
             widgets={new Widgets()}
+            mainNav={new MainNav()}
             customFields={{
               customFields: {},
               get: jest.fn(),

@@ -14,6 +14,7 @@ interface StrapiAppContextValue
       | 'customFields'
       | 'getPlugin'
       | 'getAdminInjectedComponents'
+      | 'mainNav'
       | 'plugins'
       | 'runHookParallel'
       | 'runHookSeries'

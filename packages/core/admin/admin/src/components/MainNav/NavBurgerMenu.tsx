@@ -6,6 +6,7 @@ import { HEIGHT_TOP_NAVIGATION } from '../../constants/theme';
 import { MenuItem } from '../../core/apis/router';
 
 import { MainNavBurgerMenuLinks } from './MainNavLinks';
+import { NavMenus } from './NavMenus';
 import { NavUser } from './NavUser';
 
 interface NavBurgerMenuProps {
@@ -76,7 +77,10 @@ export const NavBurgerMenu = ({
                       <Divider />
                     </Box>
                     <Box paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} tag="li">
-                      <NavUser showDisplayName />
+                      <Flex direction="column" alignItems="stretch" gap={3}>
+                        <NavMenus showLabel />
+                        <NavUser showDisplayName />
+                      </Flex>
                     </Box>
                   </Flex>
                 </ScrollArea>
