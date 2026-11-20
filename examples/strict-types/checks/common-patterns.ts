@@ -7,6 +7,8 @@
 //   removes the directive once the pattern compiles.
 import { factories, type Core } from '@strapi/strapi';
 
+import articleLifecycles from '../src/api/article/content-types/article/lifecycles';
+
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 
@@ -109,6 +111,14 @@ export type Configs = [
 ({ name: 'global::has-role', config: { roles: ['editor'] } }) satisfies Core.PolicyReference;
 // @ts-expect-error `roles` is an array of strings in the policy's config.
 ({ name: 'global::has-role', config: { roles: 'editor' } }) satisfies Core.PolicyReference;
+
+// The article's `lifecycles.ts` satisfies `Core.Lifecycles`: each hook receives the event of its
+// action, typed from the article schema.
+type ArticleCreated = Parameters<typeof articleLifecycles.afterCreate>[0];
+export type ArticleLifecycles = [
+  Core.Assert<Equal<ArticleCreated['model']['uid'], 'api::article.article'>>,
+  Core.Assert<Equal<ArticleCreated['result']['documentId'], string>>,
+];
 
 // Intended `unknown`: users-permissions declares no service contract yet. Its contracts are owned
 // by https://github.com/strapi/strapi/pull/27928.
