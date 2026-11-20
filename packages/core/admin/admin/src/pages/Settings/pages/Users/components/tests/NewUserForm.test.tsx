@@ -1,6 +1,8 @@
 import { act, fireEvent } from '@testing-library/react';
-import { render, screen, waitFor } from '@tests/utils';
+import { render, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
+import { createTeamsFormFields } from '../../../../../../../tests/formFields';
 import { ModalForm } from '../NewUserForm';
 
 const UNSAVED_MESSAGE =
@@ -66,5 +68,41 @@ describe('ModalForm (invite user)', () => {
 
     expect(await screen.findByRole('alertdialog')).toHaveTextContent(UNSAVED_MESSAGE);
     expect(onToggle).not.toHaveBeenCalled();
+  });
+
+  it('lets a plugin replace the roles field and sends its values with the invite', async () => {
+    const bodies: unknown[] = [];
+
+    server.use(
+      http.post('/admin/users', async ({ request }) => {
+        bodies.push(await request.json());
+
+        return HttpResponse.json({ data: { id: 3, registrationToken: 'token' } });
+      })
+    );
+
+    render(<ModalForm onToggle={jest.fn()} />, {
+      providerOptions: {
+        formFields: createTeamsFormFields('user', { replaces: ['roles'] }),
+      },
+    });
+
+    fireEvent.change(await screen.findByRole('textbox', { name: 'First name' }), {
+      target: { value: 'Kai' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Email' }), {
+      target: { value: 'kai@doe.com' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Teams of new: null' }));
+
+    expect(screen.queryByRole('combobox', { name: "User's roles" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Invite user' }));
+
+    await waitFor(() =>
+      expect(bodies).toEqual([
+        expect.objectContaining({ roles: [], plugins: { teams: { teams: ['blue'] } } }),
+      ])
+    );
   });
 });
