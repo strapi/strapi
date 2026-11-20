@@ -89,6 +89,46 @@ test.describe('Relations UI - manage relations to existing entries', { tag: ['@e
     await clickAndWait(page, page.getByRole('gridcell', { name: ARTICLE }));
   };
 
+  test('keeps status badges visible when a relation option has a long name', async ({ page }) => {
+    const suffix = 'Harbor desk';
+    const longName = `${'Northern Regional Communications Office '.repeat(5)}${suffix}`;
+
+    await navToHeader(page, ['Content Manager', 'Author'], 'Author');
+    await page.getByRole('link', { name: 'Create new entry' }).last().click();
+    await page.getByRole('textbox', { name: 'name' }).fill(longName);
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    await openArticle(page);
+    const authors = page.getByRole('combobox', { name: 'authors' });
+    await authors.click();
+
+    const picker = page.getByRole('listbox');
+    const option = (name: string) =>
+      picker.getByRole('option').filter({ has: page.getByText(name, { exact: true }) });
+    await expect(option(longName)).toBeVisible();
+
+    for (const name of [ADDED_AUTHOR, longName]) {
+      const badge = option(name).getByRole('status', { name: 'draft' });
+      await expect(badge).toBeVisible();
+      const overflow = await badge.evaluate((element) => {
+        const listbox = element.closest('[role="listbox"]');
+        if (!listbox) {
+          throw new Error('Expected the status badge inside the relation picker');
+        }
+        const { left, right } = element.getBoundingClientRect();
+        const bounds = listbox.getBoundingClientRect();
+        return Math.max(bounds.left - left, right - bounds.right, 0);
+      });
+      expect(overflow, `Horizontal overflow of status badge for ${name}`).toBe(0);
+    }
+
+    await authors.fill(suffix);
+    await expect(option(ADDED_AUTHOR)).toHaveCount(0);
+    await option(longName).click();
+    await expect(page.getByRole('button', { name: longName, exact: true })).toBeVisible();
+  });
+
   test('connect, persist, reflect on the inverse side, and remove a many-to-many relation', async ({
     page,
   }) => {
