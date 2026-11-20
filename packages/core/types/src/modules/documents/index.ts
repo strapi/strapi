@@ -13,8 +13,31 @@ export * from './service-instance';
 
 export type ID = string;
 
+/**
+ * The options `strapi.documents.utils.transformData` reads: the schema of the data, and the source
+ * locale and status its relations resolve against.
+ */
+export type TransformDataOptions = {
+  uid: UID.Schema;
+  locale?: string | null;
+  status?: 'draft' | 'published';
+  /** Drops a relation to a missing document instead of throwing. */
+  allowMissingId?: boolean;
+  /** Reuses the document ids loaded earlier in the same request. Defaults to `true`. */
+  useRequestCache?: boolean;
+};
+
 type ServiceUtils = {
-  transformData: (data: any, opts: any) => Promise<AnyDocument>;
+  /**
+   * Replaces the relation document ids of `data` with entry ids. With strict types, it resolves to
+   * the data, whose values are `unknown`: it holds no `documentId` or `id` the caller did not give.
+   * Without strict types, the data and options are `any` and the result is `AnyDocument`, as on
+   * develop.
+   */
+  transformData: (
+    data: IsStrict extends false ? any : Record<string, unknown>,
+    opts: IsStrict extends false ? any : TransformDataOptions
+  ) => Promise<IsStrict extends false ? AnyDocument : Record<string, unknown>>;
 };
 
 export type Service = {
