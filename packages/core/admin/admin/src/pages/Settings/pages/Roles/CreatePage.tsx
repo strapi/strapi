@@ -22,6 +22,7 @@ import * as yup from 'yup';
 import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { FormikPluginFormFields } from '../../../../components/PluginFormFields';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
@@ -348,6 +349,7 @@ const CreatePage = () => {
                             <Textarea onChange={handleChange} value={values.description} />
                           </Field.Root>
                         </Grid.Item>
+                        <FormikPluginFormFields form="role" />
                       </Grid.Root>
                     </Flex>
                   </Box>
