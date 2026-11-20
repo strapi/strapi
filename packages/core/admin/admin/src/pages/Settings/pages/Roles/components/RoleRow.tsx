@@ -1,25 +1,19 @@
 import { Box, Flex, IconButton, IconButtonProps, Td, Tr, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import type { Table } from '../../../../../components/Table';
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
 
-interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | 'usersCount'> {
+interface RoleRowProps {
+  role: AdminRole;
+  headers: Table.Header<AdminRole, object>[];
   icons: Array<Required<Pick<IconButtonProps, 'children' | 'label' | 'onClick'>>>;
   rowIndex: number;
   canUpdate?: boolean;
   cursor?: string;
 }
 
-const RoleRow = ({
-  id,
-  name,
-  description,
-  usersCount,
-  icons,
-  rowIndex,
-  canUpdate,
-  cursor,
-}: RoleRowProps) => {
+const RoleRow = ({ role, headers, icons, rowIndex, canUpdate, cursor }: RoleRowProps) => {
   const { formatMessage } = useIntl();
   const [, editObject] = icons;
 
@@ -28,30 +22,45 @@ const RoleRow = ({
       id: `Roles.RoleRow.user-count`,
       defaultMessage: '{number, plural, =0 {#  user} one {#  user} other {# users}}',
     },
-    { number: usersCount }
+    { number: role.usersCount }
   );
 
   return (
     <Tr
       cursor={cursor}
       aria-rowindex={rowIndex}
-      key={id}
+      key={role.id}
       // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
       onClick={canUpdate ? editObject.onClick : undefined}
     >
-      <Td maxWidth={`13rem`}>
-        <Typography ellipsis textColor="neutral800">
-          {name}
-        </Typography>
-      </Td>
-      <Td maxWidth={`25rem`}>
-        <Typography ellipsis textColor="neutral800">
-          {description}
-        </Typography>
-      </Td>
-      <Td>
-        <Typography textColor="neutral800">{usersCountText}</Typography>
-      </Td>
+      {headers.map((header) => {
+        switch (header.name) {
+          case 'name':
+            return (
+              <Td key={header.name} maxWidth={`13rem`}>
+                <Typography ellipsis textColor="neutral800">
+                  {role.name}
+                </Typography>
+              </Td>
+            );
+          case 'description':
+            return (
+              <Td key={header.name} maxWidth={`25rem`}>
+                <Typography ellipsis textColor="neutral800">
+                  {role.description}
+                </Typography>
+              </Td>
+            );
+          case 'usersCount':
+            return (
+              <Td key={header.name}>
+                <Typography textColor="neutral800">{usersCountText}</Typography>
+              </Td>
+            );
+          default:
+            return <Td key={header.name}>{header.cellFormatter?.(role, header)}</Td>;
+        }
+      })}
       <Td>
         <Flex justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
           {icons.map((icon, i) => {

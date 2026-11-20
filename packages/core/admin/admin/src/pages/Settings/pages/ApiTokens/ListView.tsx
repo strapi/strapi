@@ -7,20 +7,31 @@ import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { Filters } from '../../../../components/Filters';
 import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useOnce } from '../../../../hooks/useOnce';
+import { deepEncodeQueryValues, useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
+import {
+  useSettingsListFilters,
+  useSettingsListHeaders,
+  useSettingsListPluginParams,
+  type InjectableSettingsListFilter,
+} from '../../../../hooks/useSettingsListExtensions';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
-import { Table } from '../../components/Tokens/Table';
+import { Table, type TableProps } from '../../components/Tokens/Table';
 
 import type { Data } from '@strapi/types';
+
+const NO_CORE_FILTERS: InjectableSettingsListFilter[] = [];
 
 const TABLE_HEADERS = [
   {
@@ -71,14 +82,25 @@ export const ListView = () => {
 
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  React.useEffect(() => {
-    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) }, { replace: true });
-  }, [navigate]);
+  const [{ query }] = useQueryParams<{ plugins?: unknown }>();
 
-  const headers = TABLE_HEADERS.map((header) => ({
-    ...header,
-    label: formatMessage(header.label),
-  }));
+  useOnce(() => {
+    navigate(
+      {
+        search: qs.stringify(
+          // Keep the plugin filters of a link or a reload
+          { sort: 'name:ASC', plugins: deepEncodeQueryValues(query.plugins) },
+          { encode: false }
+        ),
+      },
+      { replace: true }
+    );
+  });
+
+  const headers = useSettingsListHeaders('api-tokens', TABLE_HEADERS);
+  const { filters: filterOptions, selects } = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
+  const { plugins } = useSettingsListPluginParams();
+  const isFiltered = plugins !== undefined;
 
   useOnce(() => {
     trackUsage('willAccessTokenList', {
@@ -86,7 +108,7 @@ export const ListView = () => {
     });
   });
 
-  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery({ kind: 'content-api' });
+  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery({ plugins });
 
   React.useEffect(() => {
     if (error) {
@@ -170,18 +192,35 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
+          {(filterOptions.length > 0 || selects.length > 0) && (
+            <Layouts.Action
+              startActions={
+                filterOptions.length > 0 ? (
+                  <Filters.Root options={filterOptions}>
+                    <Filters.Trigger />
+                    <Filters.Popover zIndex={499} />
+                    <Filters.List />
+                  </Filters.Root>
+                ) : undefined
+              }
+              endActions={
+                selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined
+              }
+            />
+          )}
           <Layouts.Content>
-            {apiTokens.length > 0 && (
+            {(apiTokens.length > 0 || isFiltered) && (
               <Table
                 permissions={{ canRead, canDelete, canUpdate }}
-                headers={headers}
+                // The shared table also lists transfer tokens; these headers only get API tokens
+                headers={headers as TableProps['headers']}
                 isLoading={isLoading}
                 onConfirmDelete={handleDelete}
                 tokens={apiTokens}
                 tokenType={API_TOKEN_TYPE}
               />
             )}
-            {canCreate && apiTokens.length === 0 ? (
+            {canCreate && apiTokens.length === 0 && !isFiltered ? (
               <EmptyStateLayout
                 icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
@@ -203,7 +242,7 @@ export const ListView = () => {
                 }
               />
             ) : null}
-            {!canCreate && apiTokens.length === 0 ? (
+            {!canCreate && apiTokens.length === 0 && !isFiltered ? (
               <EmptyStateLayout
                 icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({

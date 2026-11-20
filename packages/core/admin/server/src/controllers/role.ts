@@ -64,7 +64,8 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async findAll(ctx: Context) {
-    const { query } = ctx.request as FindRoles.Request;
+    // Plugin list filters, read by the plugins that registered them
+    const { plugins: _plugins, ...query } = (ctx.request as FindRoles.Request).query;
 
     const permissionsManager = getService('permission').createPermissionsManager({
       ability: ctx.state.userAbility,

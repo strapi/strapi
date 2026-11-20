@@ -18,8 +18,10 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Filters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -28,6 +30,13 @@ import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
+import {
+  useSettingsListFilters,
+  useSettingsListHeaders,
+  useSettingsListPluginParams,
+  type InjectableSettingsListFilter,
+  type InjectableSettingsListHeader,
+} from '../../../../hooks/useSettingsListExtensions';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isFetchError } from '../../../../utils/getFetchClient';
 
@@ -45,8 +54,11 @@ const ListPage = () => {
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(permissions.settings?.roles);
 
+  const headers = useSettingsListHeaders('roles', TABLE_HEADERS);
+  const { filters: filterOptions, selects } = useSettingsListFilters('roles', NO_CORE_FILTERS);
+  const { plugins } = useSettingsListPluginParams();
   const { roles, refetch: refetchRoles } = useAdminRoles(
-    { filters: query?._q ? { name: { $containsi: query._q } } : undefined },
+    { filters: query?._q ? { name: { $containsi: query._q } } : undefined, plugins },
     {
       refetchOnMountOrArgChange: true,
       skip: isLoadingForPermissions || !canRead,
@@ -113,7 +125,7 @@ const ListPage = () => {
   };
 
   const rowCount = roles.length + 1;
-  const colCount = 6;
+  const colCount = headers.length + 3;
 
   if (isLoadingForPermissions) {
     return <Page.Loading />;
@@ -151,18 +163,28 @@ const ListPage = () => {
       />
       {canRead && (
         <Layouts.Action
+          endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
           startActions={
-            <SearchInput
-              label={formatMessage(
-                { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                {
-                  target: formatMessage({
-                    id: 'global.roles',
-                    defaultMessage: 'roles',
-                  }),
-                }
+            <>
+              <SearchInput
+                label={formatMessage(
+                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                  {
+                    target: formatMessage({
+                      id: 'global.roles',
+                      defaultMessage: 'roles',
+                    }),
+                  }
+                )}
+              />
+              {filterOptions.length > 0 && (
+                <Filters.Root options={filterOptions}>
+                  <Filters.Trigger />
+                  <Filters.Popover zIndex={499} />
+                  <Filters.List />
+                </Filters.Root>
               )}
-            />
+            </>
           }
         />
       )}
@@ -184,30 +206,13 @@ const ListPage = () => {
           >
             <Thead>
               <Tr aria-rowindex={1}>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'global.name',
-                      defaultMessage: 'Name',
-                    })}
-                  </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'global.description',
-                      defaultMessage: 'Description',
-                    })}
-                  </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'global.users',
-                      defaultMessage: 'Users',
-                    })}
-                  </Typography>
-                </Th>
+                {headers.map((header) => (
+                  <Th key={header.name}>
+                    <Typography variant="sigma" textColor="neutral600">
+                      {header.label}
+                    </Typography>
+                  </Th>
+                ))}
                 <Th>
                   <VisuallyHidden>
                     {formatMessage({
@@ -223,10 +228,8 @@ const ListPage = () => {
                 <RoleRow
                   cursor="pointer"
                   key={role.id}
-                  id={role.id}
-                  name={role.name}
-                  description={role.description}
-                  usersCount={role.usersCount}
+                  role={role}
+                  headers={headers}
                   icons={
                     [
                       canCreate &&
@@ -266,6 +269,14 @@ const ListPage = () => {
     </Page.Main>
   );
 };
+
+const NO_CORE_FILTERS: InjectableSettingsListFilter[] = [];
+
+const TABLE_HEADERS: InjectableSettingsListHeader<AdminRole>[] = [
+  { name: 'name', label: { id: 'global.name', defaultMessage: 'Name' } },
+  { name: 'description', label: { id: 'global.description', defaultMessage: 'Description' } },
+  { name: 'usersCount', label: { id: 'global.users', defaultMessage: 'Users' } },
+];
 
 /* -------------------------------------------------------------------------------------------------
  * Reducer

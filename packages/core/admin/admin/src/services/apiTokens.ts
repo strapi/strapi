@@ -13,9 +13,10 @@ const apiTokensService = adminApi
         ApiToken.List.Response['data'],
         ApiToken.List.Request['query'] | void
       >({
-        query: () => ({
+        query: ({ plugins } = {}) => ({
           url: '/admin/api-tokens',
           method: 'GET',
+          config: plugins ? { params: { plugins } } : undefined,
         }),
         transformResponse: (response: ApiToken.List.Response) => response.data,
         providesTags: (res, _err) => [
