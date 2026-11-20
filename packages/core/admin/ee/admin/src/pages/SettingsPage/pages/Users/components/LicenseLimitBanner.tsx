@@ -5,8 +5,11 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { RESPONSIVE_DEFAULT_SPACING } from '../../../../../../../../admin/src/constants/theme';
+import { getLicensedPlan } from '../../../../../../../../shared/utils/get-project-type';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
+// Growth customers manage their seats in the billing portal. Other plans go through sales.
+const MANAGE_SEATS_URL = 'https://billing.strapi.io';
 const CONTACT_SALES_URL = 'mailto:sales@strapi.io';
 
 /**
@@ -43,6 +46,12 @@ export const LicenseLimitBanner = () => {
   }
 
   const isOverLimit = count > limit;
+  const isGrowth =
+    getLicensedPlan({
+      licenseStatus: license.licenseStatus,
+      type: license.type,
+      planPriceId: license.planPriceId,
+    }) === 'Growth';
 
   return (
     <Box
@@ -67,12 +76,27 @@ export const LicenseLimitBanner = () => {
         onClose={() => setIsClosed(true)}
         action={
           <AlertAction>
-            <Button tag="a" href={CONTACT_SALES_URL} variant="default">
-              {formatMessage({
-                id: 'Settings.permissions.users.license-limit.contact-sales',
-                defaultMessage: 'Contact sales',
-              })}
-            </Button>
+            {isGrowth ? (
+              <Button
+                tag="a"
+                href={MANAGE_SEATS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="default"
+              >
+                {formatMessage({
+                  id: 'Settings.permissions.users.license-limit.manage-seats',
+                  defaultMessage: 'Manage seats',
+                })}
+              </Button>
+            ) : (
+              <Button tag="a" href={CONTACT_SALES_URL} variant="default">
+                {formatMessage({
+                  id: 'Settings.permissions.users.license-limit.contact-sales',
+                  defaultMessage: 'Contact sales',
+                })}
+              </Button>
+            )}
           </AlertAction>
         }
       >
@@ -81,17 +105,17 @@ export const LicenseLimitBanner = () => {
               {
                 id: 'Settings.permissions.users.license-limit.over.message',
                 defaultMessage:
-                  '{count} unique users are active across your environments, but your license includes {limit} users. Remove a user to free a seat, or contact sales to add more users to your license.',
+                  '{count} unique users are active across your environments, but your license includes {limit} users. Remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
               },
-              { count, limit }
+              { count, limit, isGrowth: String(isGrowth) }
             )
           : formatMessage(
               {
                 id: 'Settings.permissions.users.license-limit.at.message',
                 defaultMessage:
-                  '{count} unique users are active across your environments, which is the number included in your license. If needed, remove a user to free a seat, or contact sales to add more users to your license.',
+                  '{count} unique users are active across your environments, which is the number included in your license. If needed, remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
               },
-              { count }
+              { count, isGrowth: String(isGrowth) }
             )}
       </Alert>
     </Box>

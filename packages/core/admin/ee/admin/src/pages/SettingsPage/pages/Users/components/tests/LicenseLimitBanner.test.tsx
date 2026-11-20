@@ -11,6 +11,9 @@ const mockLicense = (license: Record<string, unknown>) => {
     isLoading: false,
     isError: false,
     license: {
+      licenseStatus: 'active',
+      type: 'gold',
+      planPriceId: 'Strapi-Enterprise-Platform-Tier-1-USD-Yearly',
       enforcementUserCount: 2,
       permittedSeats: 10,
       adminUsersAcrossInstances: null,
@@ -56,6 +59,37 @@ describe('<LicenseLimitBanner />', () => {
         /^14 unique users are active across your environments, but your license includes 10 users/
       )
     ).toBeInTheDocument();
+  });
+
+  test('sends a Growth admin to the billing portal to manage their seats', () => {
+    mockLicense({ type: 'silver', planPriceId: 'growth-v2-USD-Monthly', ...across(14) });
+
+    const { getByText, queryByText } = render(<LicenseLimitBanner />);
+
+    expect(
+      getByText(/or manage your seats to add more users to your license\.$/)
+    ).toBeInTheDocument();
+    expect(getByText('Manage seats').closest('a')).toHaveAttribute(
+      'href',
+      'https://billing.strapi.io'
+    );
+    expect(queryByText('Contact sales')).not.toBeInTheDocument();
+  });
+
+  test.each([
+    ['an Enterprise plan', 'Strapi-Enterprise-Platform-Tier-1-USD-Yearly'],
+    ['no plan id', null],
+  ])('tells the admin to contact sales for %s', (_label, planPriceId) => {
+    mockLicense({ planPriceId, ...across(14) });
+
+    const { getByText, queryByText } = render(<LicenseLimitBanner />);
+
+    expect(getByText(/or contact sales to add more users to your license\.$/)).toBeInTheDocument();
+    expect(getByText('Contact sales').closest('a')).toHaveAttribute(
+      'href',
+      'mailto:sales@strapi.io'
+    );
+    expect(queryByText('Manage seats')).not.toBeInTheDocument();
   });
 
   test("uses this instance's count until the registry has answered", () => {
