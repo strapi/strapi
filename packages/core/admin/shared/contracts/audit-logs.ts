@@ -7,7 +7,7 @@ export interface SanitizedAdminUserForAuditLogs extends SanitizedAdminUser {
 }
 
 interface AuditLog extends Pick<Entity, 'id'> {
-  date: string;
+  date: string | null;
   action: string;
   /**
    * TODO: could this be better typed – working on the server-side code could indicate this.
