@@ -29,17 +29,18 @@ type InjectableSettingsListHeader<TRow = unknown> = Omit<Table.Header<TRow, obje
 };
 
 type InjectableSettingsListPopoverFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
-  display?: 'popover';
+  unstable_display?: 'popover';
   label: string | MessageDescriptor;
   operators?: Array<{ value: string; label: string | MessageDescriptor }>;
 };
 
 /**
- * Renders as its own dropdown on the right of the list toolbar. Named `plugin::<pluginId>.<name>`,
- * its value goes to `plugins[<pluginId>][<name>]`, apart from the core filters
+ * Renders as its own dropdown on the right of the list toolbar. Its value goes to
+ * `plugins[<pluginId>][<name>]`, apart from the core filters
  */
 interface InjectableSettingsListSelectFilter {
-  display: 'select';
+  unstable_display: 'select';
+  pluginId: string;
   name: string;
   label: string | MessageDescriptor;
   /** The option that clears the filter, e.g. "All spaces" */
@@ -105,19 +106,6 @@ const useSettingsListHeaders = <TList extends SettingsList>(
   }, [runHookWaterfall, list, coreHeaders, formatMessage]);
 };
 
-const PLUGIN_FILTER_PREFIX = 'plugin::';
-
-const parsePluginFilterName = (key: string) => {
-  if (!key.startsWith(PLUGIN_FILTER_PREFIX)) {
-    return null;
-  }
-
-  const rest = key.slice(PLUGIN_FILTER_PREFIX.length);
-  const dot = rest.indexOf('.');
-
-  return dot > 0 ? { pluginId: rest.slice(0, dot), name: rest.slice(dot + 1) } : null;
-};
-
 const useSettingsListFilters = (
   list: SettingsList,
   coreFilters: InjectableSettingsListFilter[]
@@ -138,23 +126,22 @@ const useSettingsListFilters = (
     const selects: SettingsListSelectFilter[] = [];
 
     for (const filter of displayedFilters) {
-      if (filter.display === 'select') {
-        const pluginFilter = parsePluginFilterName(filter.name);
-
-        if (pluginFilter) {
-          selects.push({
-            ...pluginFilter,
-            label: resolveLabel(filter.label, formatMessage),
-            placeholder: resolveLabel(filter.placeholder, formatMessage),
-            options: filter.options.map((option) => ({
-              ...option,
-              label: resolveLabel(option.label, formatMessage),
-            })),
-          });
-        }
+      if (filter.unstable_display === 'select') {
+        selects.push({
+          pluginId: filter.pluginId,
+          name: filter.name,
+          label: resolveLabel(filter.label, formatMessage),
+          placeholder: resolveLabel(filter.placeholder, formatMessage),
+          options: filter.options.map((option) => ({
+            ...option,
+            label: resolveLabel(option.label, formatMessage),
+          })),
+        });
       } else {
+        const { unstable_display: _display, ...popoverFilter } = filter;
+
         filters.push({
-          ...filter,
+          ...popoverFilter,
           label: resolveLabel(filter.label, formatMessage),
           operators: filter.operators?.map((operator) => ({
             ...operator,
