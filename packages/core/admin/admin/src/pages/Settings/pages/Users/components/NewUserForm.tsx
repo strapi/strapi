@@ -16,8 +16,10 @@ import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { PluginFormFields } from '../../../../../components/PluginFormFields';
 import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { useNotification } from '../../../../../features/Notifications';
+import { useStrapiApp } from '../../../../../features/StrapiApp';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
@@ -28,6 +30,7 @@ import { translatedErrors } from '../../../../../utils/translatedErrors';
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
+import type { PluginInputValues } from '../../../../../../../shared/contracts/shared';
 import type { Data } from '@strapi/types';
 
 interface ModalFormProps {
@@ -42,6 +45,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const formFields = useStrapiApp('ModalForm', (state) => state.formFields);
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -161,7 +165,9 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
           method={currentStep === 'create' ? 'POST' : 'PUT'}
           initialValues={createdUserValues ?? initialValues ?? {}}
           onSubmit={handleSubmit}
-          validationSchema={FORM_SCHEMA}
+          validationSchema={
+            formFields.replaces('user', 'roles') ? REPLACED_ROLES_SCHEMA : FORM_SCHEMA
+          }
         >
           {({ isSubmitting }) => {
             return (
@@ -214,9 +220,11 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                       </Typography>
                       <Box paddingTop={4}>
                         <Grid.Root gap={5}>
-                          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
-                            <SelectRoles disabled={isDisabled} />
-                          </Grid.Item>
+                          {formFields.replaces('user', 'roles') ? null : (
+                            <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                              <SelectRoles disabled={isDisabled} />
+                            </Grid.Item>
+                          )}
                           {roleLayout.map((row) => {
                             return row.map(({ size, ...field }) => {
                               return (
@@ -241,6 +249,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                               );
                             });
                           })}
+                          <PluginFormFields form="user" disabled={isDisabled} />
                         </Grid.Root>
                       </Box>
                     </Box>
@@ -280,6 +289,7 @@ interface InitialData {
   email?: string;
   roles?: Data.ID[];
   useSSORegistration?: boolean;
+  plugins?: PluginInputValues;
 }
 
 const FORM_INITIAL_VALUES = {
@@ -368,6 +378,9 @@ const FORM_SCHEMA = yup.object().shape({
       defaultMessage: 'This field is required',
     }),
 });
+
+// A plugin that replaces the roles field may send none: the server checks the roles it saves
+const REPLACED_ROLES_SCHEMA = FORM_SCHEMA.shape({ roles: yup.array() });
 
 const STEPPER = {
   create: {
