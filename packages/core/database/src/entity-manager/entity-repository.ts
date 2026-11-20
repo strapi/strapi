@@ -158,7 +158,8 @@ export const createRepository = (uid: string, db: Database): Repository => {
 
       const [results, countResult] = await Promise.all([
         db.entityManager.load(uid, entity, field, query),
-        db.entityManager.load(uid, entity, field, { ...query, count: true }),
+        // A count needs no order, and Postgres and MySQL reject an orderBy with the count's GROUP BY
+        db.entityManager.load(uid, entity, field, { ...omit(query, 'orderBy'), count: true }),
       ]);
 
       // load returns null when the entity does not exist

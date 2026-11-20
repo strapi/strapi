@@ -48,6 +48,7 @@
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "yarn prettier:other --check",
     "lint:oxlint": "oxlint --config packages/utils/oxlint-config/oxlint.config.ts",
+    "actions:check": "node scripts/check-actions-pinned.mjs",
     "version:check": "node scripts/check-package-versions.mjs && syncpack lint",
     "version:fix": "node scripts/check-package-versions.mjs --fix --prompt && syncpack prompt && syncpack fix-mismatches",
     "ai:sync": "tsx scripts/ai-tooling/index.ts sync",

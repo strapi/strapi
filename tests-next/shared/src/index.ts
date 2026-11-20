@@ -1,4 +1,7 @@
-// The shared foundation of the test suites. Scaffolders, seeders, DB reset and edition land here
-// with the next Test Infrastructure Overhaul issues.
+// The shared foundation of the test suites.
 export * from './app';
+export * from './db';
 export * from './test-plugin';
+export * from './scaffold';
+export * from './seed';
+export * from './edition';

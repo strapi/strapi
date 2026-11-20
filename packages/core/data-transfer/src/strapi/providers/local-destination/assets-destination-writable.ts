@@ -23,6 +23,8 @@ export interface CreateAssetsDestinationWritableOptions {
  *    received and the stream ended). This gives the upload provider a pre-filled synchronous
  *    Readable rather than a lazy async wrapper, which avoids `Buffer.from(undefined)` crashes
  *    in upload providers that call `stream.read()` before any data has been buffered.
+ *    A provider without `uploadStream` gets the same chunks as a buffer through `upload`, at the
+ *    same point.
  */
 export function createAssetsDestinationWritable(
   options: CreateAssetsDestinationWritableOptions
@@ -70,17 +72,28 @@ export function createAssetsDestinationWritable(
       pendingUploads += 1;
 
       chunk.stream.once('end', () => {
+        const uploadProvider = strapi.plugin('upload').provider;
+        // A provider can implement only `upload`, which reads a buffer (same fallback as the
+        // upload plugin).
+        const canUploadStream = typeof uploadProvider.uploadStream === 'function';
+
         // Build uploadData here so the stream is fully populated before the provider reads it.
         const uploadData = {
           ...chunk.metadata,
-          stream: Readable.from(bufferedChunks),
+          ...(canUploadStream
+            ? { stream: Readable.from(bufferedChunks) }
+            : { buffer: Buffer.concat(bufferedChunks) }),
           ...(chunk.buffer != null ? { buffer: chunk.buffer } : {}),
         };
 
         transaction
           .attach(async () => {
             try {
-              await strapi.plugin('upload').provider.uploadStream(uploadData);
+              if (canUploadStream) {
+                await uploadProvider.uploadStream(uploadData);
+              } else {
+                await uploadProvider.upload(uploadData);
+              }
 
               if (!restoreMediaEntitiesContent) {
                 return;

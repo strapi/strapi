@@ -382,7 +382,7 @@ export const editContentType = async (
       strapi.log.error(error);
     }
 
-    strapi.eventHub.emit('content-type.update', { contentType: updatedContentType });
+    await emitSchemaEvent('content-type.update', { contentType: updatedContentType });
 
     return updatedContentType;
   }
