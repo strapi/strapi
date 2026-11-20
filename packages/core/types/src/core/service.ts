@@ -40,12 +40,12 @@ export type ServiceLookupName = SuggestedString<RegisteredServiceUID, UID.Servic
 
 /**
  * Services keyed by UID, e.g. `strapi.services`. With strict types enabled, registered UIDs resolve to
- * their contracts. Other keys, literal or dynamic, resolve to the legacy service: an index signature
- * cannot close literal keys while keeping dynamic keys open, unlike `strapi.service(uid)`.
+ * their contracts. Other keys, literal or dynamic, resolve to `unknown`, like `strapi.service(uid)`:
+ * they have no contract, so callers narrow the value or register one.
  */
 export type ServiceMap = IsStrict extends false
   ? Record<string, Service>
-  : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, Service>;
+  : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, unknown>;
 
 /**
  * A UID accepted by {@link ServiceFactory}. With strict types enabled, only registered UIDs: a
