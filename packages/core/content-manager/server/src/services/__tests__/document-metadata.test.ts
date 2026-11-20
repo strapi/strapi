@@ -195,8 +195,8 @@ describe('document-metadata service', () => {
       ]);
       expect(params.populate).toEqual({
         cover: { populate: { folder: true } },
-        createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
-        updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+        createdBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
+        updatedBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
       });
     });
 
@@ -211,8 +211,8 @@ describe('document-metadata service', () => {
         'publishedAt',
       ]);
       expect(params.populate).toEqual({
-        createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
-        updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+        createdBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
+        updatedBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
       });
     };
 
@@ -561,6 +561,92 @@ describe('document-metadata service', () => {
           },
         },
       });
+    });
+  });
+
+  describe('getMetadata creator populate', () => {
+    const CREATOR_FIELDS = ['id', 'firstname', 'lastname', 'email'];
+
+    const models: Record<string, unknown> = {
+      'api::article.article': {
+        uid: 'api::article.article',
+        modelType: 'contentType',
+        options: { draftAndPublish: true },
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          title: { type: 'string' },
+          createdBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
+          updatedBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
+        },
+      },
+      'admin::user': {
+        uid: 'admin::user',
+        modelType: 'contentType',
+        options: {},
+        attributes: {
+          firstname: { type: 'string' },
+          lastname: { type: 'string' },
+          username: { type: 'string' },
+          email: { type: 'email' },
+          password: { type: 'password' },
+          resetPasswordToken: { type: 'string' },
+          registrationToken: { type: 'string' },
+          isActive: { type: 'boolean' },
+          blocked: { type: 'boolean' },
+          preferedLanguage: { type: 'string' },
+        },
+      },
+    };
+
+    const getModel = (uid: string) => models[uid];
+
+    const createServiceWithQueries = () => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const findOne = jest.fn().mockResolvedValue(null);
+      const transformer = queryParams.createTransformer({ getModel: getModel as never });
+
+      const service = createService({
+        getModel,
+        get(key: string) {
+          if (key === 'query-params') {
+            return { transform: transformer.transformQueryParams };
+          }
+          return undefined;
+        },
+        db: { query: () => ({ findMany, findOne }) },
+      });
+
+      return { service, findMany, findOne };
+    };
+
+    it('only selects the creator display fields when the available status goes through query params', async () => {
+      const { service, findMany } = createServiceWithQueries();
+
+      await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { availableLocales: true, availableStatus: true }
+      );
+
+      // The transform adds the document id, as the admin user is a content type
+      const select = ['id', 'documentId', 'firstname', 'lastname', 'email'];
+      const [params] = findMany.mock.calls[0];
+      expect(params.populate.createdBy).toEqual({ select });
+      expect(params.populate.updatedBy).toEqual({ select });
+    });
+
+    it('only selects the creator display fields when only the available status is queried', async () => {
+      const { service, findOne } = createServiceWithQueries();
+
+      await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { availableLocales: false, availableStatus: true }
+      );
+
+      const [params] = findOne.mock.calls[0];
+      expect(params.populate.createdBy).toEqual({ select: CREATOR_FIELDS });
+      expect(params.populate.updatedBy).toEqual({ select: CREATOR_FIELDS });
     });
   });
 });
