@@ -19,7 +19,8 @@ const EXPORT_TOO_LARGE_MESSAGE =
 
 export default {
   async findMany(ctx: Context) {
-    const { query } = ctx.request;
+    // Plugin list filters, read by the plugins that registered them
+    const { plugins: _plugins, ...query } = ctx.request.query;
     await validateFindMany(query);
 
     const auditLogs = strapi.get('audit-logs');
@@ -50,7 +51,7 @@ export default {
   },
 
   async export(ctx: Context) {
-    const { query } = ctx.request;
+    const { plugins: _plugins, ...query } = ctx.request.query;
     const validatedQuery = await validateExport(query);
 
     const auditLogs = strapi.get('audit-logs');

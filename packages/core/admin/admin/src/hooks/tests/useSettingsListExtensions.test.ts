@@ -12,7 +12,7 @@ import type {
 } from '../useSettingsListExtensions';
 
 describe('useSettingsListHeaders', () => {
-  it('runs the plugin hook with the list and formats the labels', () => {
+  it('runs the plugin hook with the list, formats the labels, and never sorts plugin columns', () => {
     const runHookWaterfall = jest.fn((_name: string, value: unknown) => {
       const args = value as InjectSettingsListColumnsArgs;
 
@@ -20,7 +20,7 @@ describe('useSettingsListHeaders', () => {
         ...args,
         displayedHeaders: [
           ...args.displayedHeaders,
-          { name: 'space', label: { id: 'space', defaultMessage: 'Space' } },
+          { name: 'space', label: { id: 'space', defaultMessage: 'Space' }, sortable: true },
         ],
       };
     });
@@ -34,7 +34,7 @@ describe('useSettingsListHeaders', () => {
     );
 
     expect(runHookWaterfall).toHaveBeenCalledWith(
-      'Admin/Settings/pages/ListPage/inject-column-in-table',
+      'Admin/Settings/pages/ListPage/unstable_inject-column-in-table',
       expect.objectContaining({ list: 'users' })
     );
     expect(result.current).toEqual([

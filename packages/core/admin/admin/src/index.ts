@@ -93,10 +93,10 @@ export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
 export type { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from './core/apis/router';
 export type {
-  InjectSettingsListColumnsArgs,
-  InjectSettingsListFiltersArgs,
-  InjectableSettingsListFilter,
-  InjectableSettingsListHeader,
+  InjectSettingsListColumnsArgs as unstable_InjectSettingsListColumnsArgs,
+  InjectSettingsListFiltersArgs as unstable_InjectSettingsListFiltersArgs,
+  InjectableSettingsListFilter as unstable_InjectableSettingsListFilter,
+  InjectableSettingsListHeader as unstable_InjectableSettingsListHeader,
 } from './hooks/useSettingsListExtensions';
 export type {
   SanitizedAdminUser,

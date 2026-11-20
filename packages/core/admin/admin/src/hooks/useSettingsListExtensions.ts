@@ -69,10 +69,13 @@ const useSettingsListHeaders = <TList extends SettingsList>(
       displayedHeaders: coreHeaders,
     } as InjectSettingsListColumnsArgs) as { displayedHeaders: typeof coreHeaders };
 
+    const coreNames = new Set(coreHeaders.map(({ name }) => name));
+
     return displayedHeaders.map((header) => ({
       ...header,
       label: resolveLabel(header.label, formatMessage),
-      sortable: header.sortable ?? false,
+      // The server sorts on its own fields only
+      sortable: coreNames.has(header.name) ? (header.sortable ?? false) : false,
     }));
   }, [runHookWaterfall, list, coreHeaders, formatMessage]);
 };
