@@ -87,6 +87,18 @@ describe('EE user service audit events', () => {
     expect(JSON.stringify(vi.mocked(emitAudit).mock.calls)).not.toMatch(/Secret1234|hash/);
   });
 
+  test.each([[{ password: 'Secret1234' }], [{ firstname: 'Kai' }]])(
+    'updateById resolves null and records nothing for a missing user (%o)',
+    async (attributes) => {
+      setup({ updated: null as unknown as Record<string, unknown> });
+
+      await expect(updateById(404, attributes)).resolves.toBeNull();
+
+      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
+      expect(emitAudit).not.toHaveBeenCalled();
+    }
+  );
+
   test('deleteById records the deleted account', async () => {
     setup();
 
@@ -119,6 +131,28 @@ describe('EE user service audit events', () => {
       'user.delete',
       expect.objectContaining({ users: expect.any(Array) })
     );
+  });
+
+  test('deleteByIds skips an ID that matches no user', async () => {
+    const { del } = setup();
+    const first = { id: 1, email: 'a@strapi.io', roles: [] };
+    const second = { id: 3, email: 'b@strapi.io', roles: [] };
+    // The database query resolves `null` when no row matches the ID
+    del
+      .mockResolvedValueOnce(first)
+      .mockResolvedValueOnce(null as unknown as Record<string, unknown>)
+      .mockResolvedValueOnce(second);
+
+    const res = await deleteByIds([1, 2, 3]);
+
+    expect(res).toEqual([first, second]);
+    expect(vi.mocked(emitAudit).mock.calls.map((call) => call[2])).toEqual([
+      { userId: 1, email: 'a@strapi.io' },
+      { userId: 3, email: 'b@strapi.io' },
+    ]);
+    expect(global.strapi.eventHub.emit).toHaveBeenCalledWith('user.delete', {
+      users: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 3 })],
+    });
   });
 });
 

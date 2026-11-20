@@ -3,7 +3,7 @@ import path from 'path';
 import { test, expect, type Route, type APIRequestContext } from '@playwright/test';
 
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { describeOnCondition } from '../../../utils/shared';
 
@@ -98,8 +98,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('a content manager can upload assets through every path', async ({ page }) => {

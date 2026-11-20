@@ -10,6 +10,7 @@ import {
   reexecCurrentCommand,
   reportMissingAdminPeerDeps,
   validateDeclaredAdminPeerDeps,
+  validateStrapiPackageVersions,
   writeCachedHash,
 } from './dependencies';
 
@@ -38,6 +39,9 @@ const ensureAdminDependencies = async ({
     logger.warn('You are using experimental dependencies that may not be compatible with Strapi.');
     return { didInstall: false };
   }
+
+  // Before the hash cache: an install can change versions without touching package.json.
+  await validateStrapiPackageVersions(cwd, logger);
 
   // Hash-cache: skip the full check when package.json hasn't changed since
   // the last successful pass. The cache lives under node_modules so it's

@@ -69,6 +69,28 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       },
       response: validator.file,
     },
+    {
+      method: 'GET',
+      path: '/folders',
+      handler: 'folder.find',
+      request: {
+        query: {
+          sort: validator.querySort.optional(),
+          pagination: validator.pagination.optional(),
+          filters: validator.filters.optional(),
+        },
+      },
+      response: validator.paginatedFolders,
+    },
+    {
+      method: 'GET',
+      path: '/folders/:id',
+      handler: 'folder.findOne',
+      request: {
+        params: { id: validator.folderIdOrDocumentId },
+      },
+      response: z.object({ data: validator.folder }),
+    },
   ];
 });
 

@@ -18,7 +18,6 @@ const sanitizeStageFields = (stage: Record<string, unknown>) => pick(stage, sani
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi });
   const stagePermissionsService = getService('stage-permissions', { strapi });
-  const workflowValidator = getService('validation', { strapi });
 
   /**
    * Returns the table linking the entities of a content type to their stage, or undefined when
@@ -281,8 +280,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const stage = await this.findById(stageId);
       const { documentId, locale } = entityToUpdate;
 
-      await workflowValidator.validateWorkflowCount();
-
       if (!stage) {
         throw new ApplicationError(`Selected stage does not exist`);
       }
@@ -336,8 +333,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
-
-      await workflowValidator.validateWorkflowCount();
 
       return strapi.db.transaction(async ({ trx }) => {
         // Update all already existing links to the new stage

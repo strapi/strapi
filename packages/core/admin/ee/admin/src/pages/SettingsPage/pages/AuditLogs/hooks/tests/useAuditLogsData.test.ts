@@ -1,7 +1,7 @@
 import { renderHook, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { useAuditLogsData } from '../useAuditLogsData';
+import { useAuditLogUsers } from '../useAuditLogsData';
 
 const AUTHORS = Array.from({ length: 12 }, (_, index) => ({
   id: index + 1,
@@ -9,7 +9,7 @@ const AUTHORS = Array.from({ length: 12 }, (_, index) => ({
   displayName: `User ${index + 1}`,
 }));
 
-describe('useAuditLogsData', () => {
+describe('useAuditLogUsers', () => {
   beforeEach(() => {
     server.use(
       http.get('/admin/audit-logs/users', ({ request }) => {
@@ -30,9 +30,7 @@ describe('useAuditLogsData', () => {
   });
 
   it('should fetch audit log authors with the given page size and expose the pagination', async () => {
-    const { result } = renderHook(() =>
-      useAuditLogsData({ canReadAuditLogs: true, usersPageSize: 12 })
-    );
+    const { result } = renderHook(() => useAuditLogUsers({ canReadAuditLogs: true, pageSize: 12 }));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -41,9 +39,7 @@ describe('useAuditLogsData', () => {
   });
 
   it('should only expose the first page of audit log authors by default', async () => {
-    const { result } = renderHook(() =>
-      useAuditLogsData({ canReadAuditLogs: true, usersPageSize: 10 })
-    );
+    const { result } = renderHook(() => useAuditLogUsers({ canReadAuditLogs: true, pageSize: 10 }));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 

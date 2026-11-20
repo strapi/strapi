@@ -1,6 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-
 import type { Store } from '../store/configure';
 
 export type Handler<TArgs extends unknown[] = never[], TResult = unknown> = (

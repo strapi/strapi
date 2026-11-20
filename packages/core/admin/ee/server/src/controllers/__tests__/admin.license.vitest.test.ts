@@ -124,6 +124,52 @@ describe('getProjectType', () => {
   });
 });
 
+describe('licenseLimitInformation auditLogs', () => {
+  const setConfig = (config: Record<string, unknown>) => {
+    (global.strapi as any).config.get = vi.fn((key: string, defaultValue: unknown) =>
+      key in config ? config[key] : defaultValue
+    );
+  };
+
+  it('reports audit logs enabled when the license has them and the config is unset', async () => {
+    createStrapiMock();
+    stubUserServices();
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.auditLogs).toEqual({ enabled: true });
+  });
+
+  it('reports audit logs disabled when admin.auditLogs.enabled is false', async () => {
+    createStrapiMock();
+    stubUserServices();
+    setConfig({ 'admin.auditLogs.enabled': false });
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.auditLogs).toEqual({ enabled: false });
+  });
+
+  it('reports audit logs disabled when the license lacks them', async () => {
+    createStrapiMock({ ee: { features: { list: () => [], isEnabled: () => false } } });
+    stubUserServices();
+    setConfig({ 'admin.auditLogs.enabled': true });
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.auditLogs).toEqual({ enabled: false });
+  });
+
+  it('keeps the config state off the unauthenticated project-type response', async () => {
+    createStrapiMock();
+    setConfig({ 'admin.auditLogs.enabled': false });
+
+    const data = (await adminController.getProjectType()).data as any;
+
+    expect(data).not.toHaveProperty('auditLogs');
+  });
+});
+
 describe('licenseLimitInformation (extended fields)', () => {
   const OLD_ENV = process.env;
   beforeEach(() => {
@@ -131,6 +177,27 @@ describe('licenseLimitInformation (extended fields)', () => {
   });
   afterEach(() => {
     process.env = OLD_ENV;
+  });
+
+  it('sends license feature options and limits as numbers', async () => {
+    createStrapiMock({
+      ee: {
+        // `features.list()` reads numeric string options as numbers (see core ee feature-options).
+        features: {
+          list: () => [{ name: 'cms-content-releases', options: { maximumReleases: 90 } }],
+          isEnabled: () => true,
+        },
+      },
+    });
+    stubUserServices();
+
+    const data = JSON.parse(JSON.stringify((await adminController.licenseLimitInformation()).data));
+
+    expect(data.features).toEqual([
+      { name: 'cms-content-releases', options: { maximumReleases: 90 } },
+    ]);
+    expect(typeof data.features[0].options.maximumReleases).toBe('number');
+    expect(typeof data.entitlements[0].limits[0].value).toBe('number');
   });
 
   it('reports online mode with registry sync metadata from ee_information', async () => {

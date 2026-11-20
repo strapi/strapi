@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { Readable } from 'stream';
 
 jest.mock('sharp', () => {
   return {
@@ -13,6 +14,7 @@ jest.mock('sharp', () => {
 /* eslint-disable import/first -- mock runs before `sharp` import */
 import sharp from 'sharp';
 import { register } from '../register';
+import createProviderService from '../services/provider';
 /* eslint-enable import/first */
 
 const exampleMiddlewaresConfig = [
@@ -43,6 +45,40 @@ jest.mock('@strapi/provider-upload-local', () => ({
     };
   },
 }));
+
+// The upload service removes `file.buffer` once `upload` returns, so record it at call time.
+const uploadedContents: string[] = [];
+const uploadOnlyUpload = jest.fn(async (file: { buffer: Buffer }) => {
+  uploadedContents.push(file.buffer.toString());
+});
+
+// Not resolvable as `@strapi/provider-upload-*`, so register loads it by its own name.
+jest.mock(
+  'upload-only-with-undefined-stream',
+  () => ({
+    init() {
+      return {
+        upload: uploadOnlyUpload,
+        uploadStream: undefined,
+        delete: jest.fn(),
+      };
+    },
+  }),
+  { virtual: true }
+);
+
+const createStrapiMock = (uploadConfig: unknown): any => ({
+  dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+  plugins: { upload: {} },
+  db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+  server: { app: { on: jest.fn() }, routes: jest.fn() },
+  admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+  config: {
+    get: jest.fn().mockReturnValue(uploadConfig),
+    set: jest.fn(),
+  },
+  get: jest.fn().mockReturnValue({ add: jest.fn() }),
+});
 
 describe('Upload plugin register', () => {
   describe('routes and provider middlewares', () => {
@@ -166,6 +202,33 @@ describe('Upload plugin register', () => {
         expect(sharp.cache).toHaveBeenCalledWith(false);
         expect(sharp.concurrency).toHaveBeenCalledWith(1);
       }
+    });
+  });
+
+  describe('provider methods', () => {
+    test('a method the provider declares as undefined is not exposed as a function', async () => {
+      const emitWarning = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
+      global.strapi = createStrapiMock({ provider: 'upload-only-with-undefined-stream' });
+
+      await register({ strapi });
+
+      // The upload service falls back on `upload` with a buffer instead of crashing.
+      const file = {
+        hash: 'file_hash',
+        ext: '.png',
+        mime: 'image/png',
+        getStream: () => Readable.from([Buffer.from('content')]),
+      } as any;
+      await createProviderService({ strapi }).upload(file);
+
+      expect(uploadOnlyUpload).toHaveBeenCalledTimes(1);
+      expect(uploadedContents).toEqual(['content']);
+
+      const provider = strapi.plugin('upload').provider;
+      expect(provider.uploadStream).toBeUndefined();
+      expect(provider.upload).toEqual(expect.any(Function));
+
+      emitWarning.mockRestore();
     });
   });
 });

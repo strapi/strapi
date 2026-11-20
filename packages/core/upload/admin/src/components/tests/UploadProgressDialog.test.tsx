@@ -97,7 +97,6 @@ describe('UploadProgressDialog', () => {
 
       // The icon sizes itself through SVG attributes, which flex may override —
       // so without a shrink guard a long name squashes it instead of truncating.
-      // eslint-disable-next-line testing-library/no-node-access
       const icon = screen.getByText(longName).previousElementSibling;
 
       expect(icon).toBeInTheDocument();

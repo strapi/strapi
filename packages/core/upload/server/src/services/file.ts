@@ -14,7 +14,7 @@ import { getService } from '../utils';
 
 import { Config, type File } from '../types';
 
-const { ApplicationError } = errors;
+const { ApplicationError, ValidationError } = errors;
 const { bytesToHumanReadable } = fileUtils;
 
 const FETCH_TIMEOUT_MS = 60_000; // 60 seconds
@@ -271,6 +271,12 @@ const getFolderPath = async (folderId?: number | null) => {
   if (!folderId) return '/';
 
   const parentFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id: folderId } });
+
+  // Request validation checks the folder exists, but it can be deleted (e.g. by another admin)
+  // before this lookup runs. Answer like the validation does instead of crashing on `null.path`.
+  if (parentFolder === null) {
+    throw new ValidationError('the folder does not exist');
+  }
 
   return parentFolder.path;
 };

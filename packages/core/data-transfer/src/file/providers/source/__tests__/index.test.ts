@@ -7,6 +7,7 @@ import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
 
 import { createLocalFileSourceProvider } from '..';
+import * as esmDeps from '../../../../utils/esm-deps';
 import {
   isFilePathInDirname,
   isPathEquivalent,
@@ -15,6 +16,16 @@ import {
 } from '../utils';
 import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
 import { createEncryptionCipher } from '../../../../utils/encryption';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('File source provider', () => {
   const createTar = async (
@@ -29,6 +40,29 @@ describe('File source provider', () => {
     await pipeline(pack, fs.createWriteStream(tarPath));
     return tarPath;
   };
+
+  test('bootstrap surfaces a stream dependency load failure', async () => {
+    const loadError = new Error("Cannot find module 'stream-chain'");
+    const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+      typeof esmDeps.loadStreamDeps
+    >;
+    loadStreamDeps.mockRejectedValueOnce(loadError);
+
+    const provider = createLocalFileSourceProvider({
+      file: { path: './test-file' },
+      compression: { enabled: false },
+      encryption: { enabled: true, key: 'secret' },
+    });
+
+    try {
+      await expect(provider.bootstrap({ report: jest.fn() } as never)).rejects.toBe(loadError);
+    } finally {
+      loadStreamDeps.mockReset();
+      loadStreamDeps.mockImplementation(() =>
+        jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+      );
+    }
+  });
 
   test('exposes createAssetsReadStream (starting the stream opens the backup file on disk)', () => {
     const options: ILocalFileSourceProviderOptions = {
@@ -286,7 +320,7 @@ describe('File source provider', () => {
       await expect(provider.validateStage('assets')).resolves.toBeUndefined();
 
       const assets = [];
-      const stream = await provider.createAssetsReadStream();
+      const stream = provider.createAssetsReadStream();
       for await (const asset of stream) {
         assets.push(asset);
         asset.stream.resume();
@@ -320,7 +354,7 @@ describe('File source provider', () => {
       await expect(provider.validateStage('assets')).resolves.toBeUndefined();
 
       const assets = [];
-      const stream = await provider.createAssetsReadStream();
+      const stream = provider.createAssetsReadStream();
       for await (const asset of stream) {
         assets.push(asset);
         asset.stream.resume();
@@ -408,6 +442,77 @@ describe('File source provider', () => {
       );
 
       await fs.remove(tarPath);
+    });
+  });
+
+  test('rejects a malformed JSONL line', async () => {
+    const tarPath = await createTar([
+      {
+        name: 'metadata.json',
+        content: JSON.stringify({
+          createdAt: new Date().toISOString(),
+          strapi: { version: '1.0.0' },
+        }),
+      },
+      { name: 'entities/entities_00001.jsonl', content: '{not json\n' },
+    ]);
+    const provider = createLocalFileSourceProvider({
+      file: { path: tarPath },
+      compression: { enabled: false },
+      encryption: { enabled: false },
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const readAll = async () => {
+      for await (const chunk of stream) {
+        expect(chunk).toBeDefined();
+      }
+    };
+
+    await expect(readAll()).rejects.toThrow(/Error parsing backup files/);
+    await fs.remove(tarPath);
+  });
+
+  describe('last JSONL line without a trailing newline', () => {
+    const readEntities = async (content: string) => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'entities/entities_00001.jsonl', content },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      try {
+        await provider.bootstrap({ report: jest.fn() } as never);
+        const entities: unknown[] = [];
+        for await (const chunk of provider.createEntitiesReadStream()) {
+          entities.push(chunk);
+        }
+        return entities;
+      } finally {
+        await fs.remove(tarPath);
+      }
+    };
+
+    test('is read', async () => {
+      await expect(readEntities('{"id":1}\n{"id":2}')).resolves.toEqual([{ id: 1 }, { id: 2 }]);
+    });
+
+    test('is rejected when malformed', async () => {
+      await expect(readEntities('{"id":1}\n{not json')).rejects.toThrow(
+        /Error parsing backup files/
+      );
     });
   });
 

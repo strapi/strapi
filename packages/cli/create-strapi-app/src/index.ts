@@ -11,6 +11,7 @@ import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
+import { detectInvocation } from './utils/invocation';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
@@ -56,6 +57,10 @@ const command = new commander.Command('create-strapi-app')
 
   // Automation
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')
+  .option(
+    '--agent <name>',
+    'Name of the coding agent that runs this command (used for anonymous usage statistics)'
+  )
 
   // Database options
   .option('--dbclient <dbclient>', 'Database client')
@@ -143,6 +148,7 @@ async function run(args: string[]): Promise<void> {
   const randomUUID = crypto.randomUUID();
   const uuid = (process.env.STRAPI_UUID_PREFIX || '') + randomUUID;
   const installId = installID(uuid);
+  const { invocation, agentName } = await detectInvocation({ agentFlag: options.agent });
 
   const scope: Scope = {
     rootPath,
@@ -178,6 +184,8 @@ async function run(args: string[]): Promise<void> {
       'styled-components': '^6.0.0',
     },
     shouldCreateGrowthSsoTrial,
+    invocation,
+    agentName,
   };
 
   if (options.template !== undefined) {

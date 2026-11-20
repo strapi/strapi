@@ -6,7 +6,13 @@
 import * as React from 'react';
 
 import {
+  ConfirmDialog,
+  UnsavedChangesModal,
+  useUnsavedChangesModalDirty,
+} from '@strapi/admin/strapi-admin';
+import {
   Button,
+  Dialog,
   Field,
   Flex,
   Grid,
@@ -15,7 +21,7 @@ import {
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Form, Formik } from 'formik';
+import { Form, Formik, useFormikContext } from 'formik';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -91,6 +97,18 @@ interface FormInitialData {
   };
 }
 
+/**
+ * Compares against `initialFormData` rather than using Formik's `dirty`, because the initial data
+ * is only complete once the folder structure has loaded.
+ */
+const UnsavedChangesRegistrar = ({ initialValues }: { initialValues: FormInitialData }) => {
+  const { values, isSubmitting } = useFormikContext<FormInitialData>();
+
+  useUnsavedChangesModalDirty(!isEqual(initialValues, values) && !isSubmitting);
+
+  return null;
+};
+
 const toFolderId = (value: string | number | null | undefined): number | undefined => {
   if (value === null || value === undefined) {
     return undefined;
@@ -121,6 +139,7 @@ export const EditAssetContent = ({
   const [isCropping, setIsCropping] = React.useState(false);
   const [isFocalPointMode, setIsFocalPointMode] = React.useState(false);
   const [replacementFile, setReplacementFile] = React.useState<File | undefined>();
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = React.useState(false);
   const { editAsset, isLoading } = useEditAsset();
 
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
@@ -175,20 +194,6 @@ export const EditAssetContent = ({
 
   const formDisabled = !canUpdate || isCropping || isFocalPointMode;
 
-  const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
-    const confirm = window.confirm(
-      formatMessage({
-        id: 'window.confirm.close-modal.file',
-        defaultMessage: 'Are you sure? Your changes will be lost.',
-      })
-    );
-
-    if (confirm) {
-      onClose();
-    }
-  };
-
   const activeFolderId = asset?.folder?.id ?? toFolderId(initialFolderId);
   const initialFormData: FormInitialData = !folderStructureIsLoading
     ? {
@@ -205,9 +210,13 @@ export const EditAssetContent = ({
       }
     : {};
 
-  const handleClose = (values?: { [key: string]: unknown }) => {
+  /**
+   * Cancel asks here rather than through `UnsavedChangesModal`, because `onClose` does not always
+   * close the modal: inside the asset picker it goes back to the list of assets.
+   */
+  const handleCancel = (values: FormInitialData) => {
     if (!isEqual(initialFormData, values)) {
-      handleConfirmClose();
+      setIsConfirmCancelOpen(true);
     } else {
       onClose();
     }
@@ -226,7 +235,7 @@ export const EditAssetContent = ({
           </Loader>
         </LoadingBody>
         <Modal.Footer>
-          <Button onClick={() => handleClose()} variant="tertiary">
+          <Button onClick={() => onClose()} variant="tertiary">
             {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
           </Button>
         </Modal.Footer>
@@ -243,6 +252,16 @@ export const EditAssetContent = ({
     >
       {({ values, errors, handleChange, setFieldValue }) => (
         <>
+          <UnsavedChangesRegistrar initialValues={initialFormData} />
+          <Dialog.Root open={isConfirmCancelOpen} onOpenChange={setIsConfirmCancelOpen}>
+            <ConfirmDialog variant="danger" onConfirm={() => onClose()}>
+              {formatMessage({
+                id: 'global.prompt.unsaved-modal',
+                defaultMessage:
+                  'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.',
+              })}
+            </ConfirmDialog>
+          </Dialog.Root>
           <DialogHeader />
           <Modal.Body>
             <Grid.Root gap={4}>
@@ -427,7 +446,7 @@ export const EditAssetContent = ({
             </Grid.Root>
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={() => handleClose({ ...values })} variant="tertiary">
+            <Button onClick={() => handleCancel(values)} variant="tertiary">
               {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
             </Button>
             <Flex gap={2}>
@@ -474,7 +493,7 @@ export const EditAssetDialog = ({
   ...restProps
 }: EditAssetDialogProps) => {
   return (
-    <Modal.Root open={open} onOpenChange={onClose}>
+    <UnsavedChangesModal open={open} onOpenChange={onClose}>
       <Modal.Content>
         <EditAssetContent
           onClose={onClose}
@@ -484,6 +503,6 @@ export const EditAssetDialog = ({
           {...restProps}
         />
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

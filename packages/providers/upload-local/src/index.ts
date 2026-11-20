@@ -4,8 +4,8 @@ import path from 'path';
 import fse from 'fs-extra';
 import * as utils from '@strapi/utils';
 
-// Needed to load global.strapi without having to put @strapi/types in the regular dependencies
-import type {} from '@strapi/types';
+// Also loads global.strapi, without having to put @strapi/types in the regular dependencies
+import type { Providers } from '@strapi/types';
 
 interface File {
   name: string;
@@ -41,7 +41,7 @@ interface CheckFileSizeOptions {
   sizeLimit?: number;
 }
 
-export default {
+const providerModule = {
   init({ sizeLimit: providerOptionsSizeLimit }: InitOptions = {}) {
     // TODO V5: remove providerOptions sizeLimit
     if (providerOptionsSizeLimit) {
@@ -211,3 +211,9 @@ export default {
     };
   },
 };
+
+// Checked apart from its declaration, so the contract does not re-type the parameters the
+// provider leaves to inference.
+providerModule satisfies Providers.Upload.Factory<InitOptions>;
+
+export default providerModule;

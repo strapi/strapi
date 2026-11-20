@@ -4,6 +4,7 @@ import {
   createToken,
   expiresInToSeconds,
   hasUserConfiguredAuthOptionsExpiresIn,
+  getLegacyExpiresInSeconds,
 } from '../token';
 
 describe('expiresInToSeconds', () => {
@@ -303,6 +304,52 @@ describe('Token', () => {
 
     test('returns false when expiresIn is explicitly null', () => {
       expect(hasUserConfiguredAuthOptionsExpiresIn({ expiresIn: null })).toBe(false);
+    });
+  });
+
+  describe('getLegacyExpiresInSeconds', () => {
+    const mockConfig = (adminAuth: unknown, sessionsOptions: unknown = {}) => {
+      global.strapi = {
+        config: {
+          get: vi.fn((key: string) => {
+            if (key === 'admin.auth') return adminAuth;
+            if (key === 'admin.auth.sessions.options') return sessionsOptions;
+            return undefined;
+          }),
+        },
+      } as any;
+    };
+
+    test('returns undefined when the project sets no expiresIn', () => {
+      // The '30d' JWT default must not count as a configured value, otherwise it replaces the
+      // maxSessionLifespan default (see GitHub #25989).
+      mockConfig({ secret: '123' });
+
+      expect(getLegacyExpiresInSeconds()).toBeUndefined();
+    });
+
+    test('returns undefined when admin.auth.options omits expiresIn', () => {
+      mockConfig({ secret: '123', options: { algorithm: 'HS256' } }, { issuer: 'test-issuer' });
+
+      expect(getLegacyExpiresInSeconds()).toBeUndefined();
+    });
+
+    test('reads the deprecated admin.auth.options.expiresIn', () => {
+      mockConfig({ secret: '123', options: { expiresIn: '3d' } });
+
+      expect(getLegacyExpiresInSeconds()).toBe(3 * 24 * 60 * 60);
+    });
+
+    test('admin.auth.sessions.options.expiresIn takes precedence over admin.auth.options', () => {
+      mockConfig({ secret: '123', options: { expiresIn: '3d' } }, { expiresIn: '2h' });
+
+      expect(getLegacyExpiresInSeconds()).toBe(2 * 60 * 60);
+    });
+
+    test('returns undefined for an invalid expiresIn', () => {
+      mockConfig({ secret: '123', options: { expiresIn: 'bad' } });
+
+      expect(getLegacyExpiresInSeconds()).toBeUndefined();
     });
   });
 

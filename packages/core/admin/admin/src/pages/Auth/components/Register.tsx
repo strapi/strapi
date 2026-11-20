@@ -21,7 +21,6 @@ import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
-import { login } from '../../../reducer';
 import {
   useGetRegistrationInfoQuery,
   useRegisterAdminMutation,
@@ -29,6 +28,7 @@ import {
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
 import { getOrCreateDeviceId } from '../../../utils/deviceId';
+import { establishAdminSession } from '../../../utils/establishAdminSession';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
@@ -303,9 +303,17 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const { setNpsSurveySettings } = useNpsSurveySettings();
 
   const registrationToken = query.get('registrationToken');
+  // Once registration succeeds the token is consumed. Skipping here stops the
+  // session reset from refetching registration-info and toasting that 400.
+  const [hasRegistered, setHasRegistered] = React.useState(false);
+  const pendingRegistrationRef = React.useRef<{
+    token: string;
+    news: boolean;
+    hasAdmin?: boolean;
+  } | null>(null);
 
   const { data: userInfo, error } = useGetRegistrationInfoQuery(registrationToken as string, {
-    skip: !registrationToken,
+    skip: !registrationToken || hasRegistered,
   });
 
   React.useEffect(() => {
@@ -323,9 +331,35 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     }
   }, [error, formatAPIError, navigate, toggleNotification]);
 
+  const dispatch = useTypedDispatch();
+
+  // The reset re-renders subscribed queries before a setState in the submit
+  // handler is committed, so establish the session only after this skip has
+  // unsubscribed registration-info.
+  React.useEffect(() => {
+    const pending = pendingRegistrationRef.current;
+    if (!hasRegistered || !pending) {
+      return;
+    }
+
+    pendingRegistrationRef.current = null;
+    establishAdminSession(dispatch, { token: pending.token });
+
+    if (pending.news) {
+      // Only enable EE survey if user accepted the newsletter
+      setNpsSurveySettings((s) => ({ ...s, enabled: true }));
+
+      navigate({
+        pathname: '/usecase',
+        search: `?hasAdmin=${pending.hasAdmin}`,
+      });
+    } else {
+      navigate('/');
+    }
+  }, [dispatch, hasRegistered, navigate, setNpsSurveySettings]);
+
   const [registerAdmin] = useRegisterAdminMutation();
   const [registerUser] = useRegisterUserMutation();
-  const dispatch = useTypedDispatch();
 
   const handleRegisterAdmin = async (
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
@@ -334,19 +368,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerAdmin({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
-      dispatch(login({ token: res.data.token }));
-
-      if (news) {
-        // Only enable EE survey if user accepted the newsletter
-        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
-
-        navigate({
-          pathname: '/usecase',
-          search: `?hasAdmin=${true}`,
-        });
-      } else {
-        navigate('/');
-      }
+      pendingRegistrationRef.current = { token: res.data.token, news, hasAdmin: true };
+      setHasRegistered(true);
     } else {
       if (isBaseQueryError(res.error)) {
         trackUsage('didNotCreateFirstAdmin');
@@ -368,19 +391,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerUser({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
-      dispatch(login({ token: res.data.token }));
-
-      if (news) {
-        // Only enable EE survey if user accepted the newsletter
-        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
-
-        navigate({
-          pathname: '/usecase',
-          search: `?hasAdmin=${hasAdmin}`,
-        });
-      } else {
-        navigate('/');
-      }
+      pendingRegistrationRef.current = { token: res.data.token, news, hasAdmin };
+      setHasRegistered(true);
     } else {
       if (isBaseQueryError(res.error)) {
         trackUsage('didNotCreateFirstAdmin');

@@ -35,7 +35,19 @@ const isOptionalAdminType = (diff: Diff) => {
   return false;
 };
 
-const isIgnorableStrict = (diff: Diff) => isAttributeIgnorable(diff) || isOptionalAdminType(diff);
+/**
+ * Position of a document in the custom order of its collection type (Content Manager). The
+ * attribute only exists while the `unstableCustomOrder` future flag is on, and the position
+ * is not content: a transfer between an instance with the flag and one without goes on
+ * without it, the destination orders the entries again when it needs to.
+ */
+const CUSTOM_ORDER_ATTRIBUTE = 'strapi_position';
+
+const isCustomOrderAttribute = (diff: Diff) =>
+  diff.path[0] === 'attributes' && diff.path[1] === CUSTOM_ORDER_ATTRIBUTE;
+
+const isIgnorableStrict = (diff: Diff) =>
+  isAttributeIgnorable(diff) || isCustomOrderAttribute(diff) || isOptionalAdminType(diff);
 
 const strategies = {
   // No diffs

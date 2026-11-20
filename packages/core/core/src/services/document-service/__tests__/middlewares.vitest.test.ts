@@ -1,5 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, test, expect, vi } from 'vitest';
+import { errors as databaseErrors } from '@strapi/database';
+import { errors } from '@strapi/utils';
+
 import { createMiddlewareManager } from '../middlewares/middleware-manager';
+import { databaseErrorsMiddleware } from '../middlewares/errors';
 
 describe('middlewares', () => {
   describe('wrapObject', () => {
@@ -81,5 +85,27 @@ describe('middlewares', () => {
 
       expect(calls).toEqual(['second', 'third']);
     });
+  });
+});
+
+describe('databaseErrorsMiddleware', () => {
+  test.each([
+    ['InvalidBooleanError', databaseErrors.InvalidBooleanError],
+    ['InvalidDateError', databaseErrors.InvalidDateError],
+  ])('transforms %s into a ValidationError', async (_name, DatabaseErrorClass) => {
+    const error = new DatabaseErrorClass();
+    const next = vi.fn(() => Promise.reject(error));
+
+    const result = databaseErrorsMiddleware({} as any, next);
+
+    await expect(result).rejects.toBeInstanceOf(errors.ValidationError);
+    await expect(result).rejects.toHaveProperty('message', error.message);
+  });
+
+  test('rethrows other errors unchanged', async () => {
+    const error = new Error('boom');
+    const next = vi.fn(() => Promise.reject(error));
+
+    await expect(databaseErrorsMiddleware({} as any, next)).rejects.toBe(error);
   });
 });

@@ -6,7 +6,16 @@
 
 import * as React from 'react';
 
-import { Button, Flex, Grid, Modal, Breadcrumbs, Crumb } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  Grid,
+  Modal,
+  Breadcrumbs,
+  Crumb,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { FormikUnsavedChangesRegistrar, UnsavedChangesModal } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -26,7 +35,7 @@ const FormModal = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Modal.Root open={isOpen} onOpenChange={onToggle}>
+    <UnsavedChangesModal open={isOpen} onOpenChange={onToggle}>
       <Modal.Content>
         <Modal.Header>
           <Breadcrumbs label={headerBreadcrumbs.join(', ')}>
@@ -36,6 +45,9 @@ const FormModal = ({
               </Crumb>
             ))}
           </Breadcrumbs>
+          <VisuallyHidden>
+            <Modal.Title>{headerBreadcrumbs.join(', ')}</Modal.Title>
+          </VisuallyHidden>
         </Modal.Header>
         <Formik
           onSubmit={(values) => onSubmit(values)}
@@ -46,6 +58,7 @@ const FormModal = ({
           {({ errors, handleChange, values }) => {
             return (
               <Form>
+                <FormikUnsavedChangesRegistrar />
                 <Modal.Body>
                   <Flex direction="column" alignItems="stretch" gap={1}>
                     <Grid.Root gap={5}>
@@ -74,12 +87,14 @@ const FormModal = ({
                   </Flex>
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button variant="tertiary" onClick={onToggle} type="button">
-                    {formatMessage({
-                      id: 'app.components.Button.cancel',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary" type="button">
+                      {formatMessage({
+                        id: 'app.components.Button.cancel',
+                        defaultMessage: 'Cancel',
+                      })}
+                    </Button>
+                  </Modal.Close>
                   <Button type="submit" loading={isSubmiting}>
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
@@ -89,7 +104,7 @@ const FormModal = ({
           }}
         </Formik>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

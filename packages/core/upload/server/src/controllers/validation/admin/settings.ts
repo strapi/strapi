@@ -3,7 +3,7 @@ import { yup, validateYupSchema } from '@strapi/utils';
 export const settingsSchema = yup.object({
   sizeOptimization: yup.boolean().required(),
   responsiveDimensions: yup.boolean().required(),
-  autoOrientation: yup.boolean(),
+  autoOrientation: yup.boolean().default(false),
   aiMetadata: yup.boolean().default(true),
 });
 
