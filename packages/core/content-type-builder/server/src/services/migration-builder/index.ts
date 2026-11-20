@@ -343,8 +343,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     try {
-      const customField = strapi.get('custom-fields').get(attribute.customField as string) as
-        { type?: string } | undefined;
+      const customFields: Core.CustomFieldsRegistry = strapi.get('custom-fields');
+      const customField = customFields.get(attribute.customField as string);
       return customField?.type ?? attribute.type;
     } catch {
       // Unknown custom field (e.g. its plugin was removed).
