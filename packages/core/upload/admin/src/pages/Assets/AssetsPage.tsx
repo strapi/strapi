@@ -1,6 +1,12 @@
 import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
-import { Layouts, Page, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
+import {
+  Layouts,
+  Page,
+  useElementOnScreen,
+  useIsMobile,
+  usePersistentState,
+} from '@strapi/admin/strapi-admin';
 import { Box, Flex, MenuItem, SimpleMenu, Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronDown, Files, Folder as FolderIcon, Link } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -27,6 +33,7 @@ import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneCont
 import { FilterBadges } from './components/FilterBadges';
 import { FilterMenu } from './components/FilterMenu';
 import { FolderFormDialog } from './components/FolderFormDialog';
+import { FolderHeaderTitle } from './components/FolderHeaderTitle';
 import { FOLDER_TREE_ROOT_SELECTOR, FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { MainAreaContextMenu } from './components/MainAreaContextMenu';
@@ -162,7 +169,7 @@ const StickyHeader = styled(Box)<{ $compact: boolean }>`
 // New button aligns with the title, not the toolbar.
 const TitleRow = styled(Flex)`
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: ${({ theme }) => theme.spaces[4]};
 
   h1 {
@@ -253,6 +260,8 @@ export const AssetsPage = () => {
     isLoadingFolders,
   } = useAssetsList();
   const { title, itemCount } = useFolderInfo(currentFolderId);
+  const isMobile = useIsMobile();
+  const showFolderBreadcrumb = isMobile && currentFolderId !== null && !isSearching && !!title;
 
   // Both move affordances (drag and the bulk bar) resolve each item's parent
   // from the rows on screen — while searching, results are global and the
@@ -465,9 +474,17 @@ export const AssetsPage = () => {
                     />
                     <StickyHeader $compact={isHeaderCompact}>
                       <TitleRow>
-                        <Typography variant="alpha" tag="h1">
-                          {pageHeaderTitle}
-                        </Typography>
+                        {showFolderBreadcrumb ? (
+                          <FolderHeaderTitle
+                            currentFolderId={currentFolderId}
+                            title={title}
+                            onSelectFolder={navigateToFolderId}
+                          />
+                        ) : (
+                          <Typography variant="alpha" tag="h1">
+                            {pageHeaderTitle}
+                          </Typography>
+                        )}
                         {canCreate && (
                           <SimpleMenu
                             popoverPlacement="bottom-end"
@@ -505,6 +522,11 @@ export const AssetsPage = () => {
                           </SimpleMenu>
                         )}
                       </TitleRow>
+                      {showFolderBreadcrumb && (
+                        <Typography variant="epsilon" textColor="neutral600" tag="p">
+                          {itemCountLabel}
+                        </Typography>
+                      )}
 
                       <Toolbar $compact={isHeaderCompact}>
                         <FilterSearchGroup>
