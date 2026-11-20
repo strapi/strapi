@@ -22,14 +22,22 @@ let httpUrl: string;
 let httpHits = 0;
 
 let smtp: MinimalSmtpServer;
+let loggedErrors: unknown[];
 
 const send = (extra: Record<string, unknown>) =>
   provider
     .init(
-      { devPort: smtp.port, devHost: '127.0.0.1', silent: true },
+      {
+        devPort: smtp.port,
+        devHost: '127.0.0.1',
+        logger: { error: (...args: unknown[]) => loggedErrors.push(...args) },
+      },
       { defaultFrom: 'App <noreply@app.com>', defaultReplyTo: 'support@app.com' }
     )
     .send({ to: 'victim@target.com', subject: 'subject', text: 'text', ...extra });
+
+const accessWasRejected = () =>
+  loggedErrors.some((e) => /access rejected/i.test(String((e as Error)?.message ?? e)));
 
 const leaksSecret = (data: string | null) =>
   !!data &&
@@ -61,6 +69,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   httpHits = 0;
+  loggedErrors = [];
   smtp = new MinimalSmtpServer();
   await smtp.listen();
 });
@@ -117,9 +126,23 @@ describe('email-sendmail: local file and URL access from caller input', () => {
     ],
   ];
 
-  it.each(vectors)('does not read or fetch the resource for %s', async (_name, build) => {
-    await send(build()).catch(() => undefined);
+  it('delivers a message without file or URL references (harness sanity check)', async () => {
+    await expect(
+      send({ attachments: [{ filename: 'a.txt', content: 'INLINE_ATTACHMENT_CONTENT' }] })
+    ).resolves.toBeUndefined();
 
+    expect(smtp.lastData).toEqual(expect.stringContaining('subject'));
+    expect(smtp.lastData).toEqual(
+      expect.stringContaining(Buffer.from('INLINE_ATTACHMENT_CONTENT').toString('base64'))
+    );
+    expect(accessWasRejected()).toBe(false);
+  });
+
+  it.each(vectors)('does not read or fetch the resource for %s', async (_name, build) => {
+    await expect(send(build())).rejects.toThrow();
+
+    // nodemailer refuses the file/URL access instead of failing for an unrelated reason.
+    expect(accessWasRejected()).toBe(true);
     expect(leaksSecret(smtp.lastData)).toBe(false);
     expect(httpHits).toBe(0);
   });
