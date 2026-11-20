@@ -89,9 +89,9 @@ describe('formatGraphqlError', () => {
   });
 
   describe('errors from a request the client abandoned', () => {
-    it('does not log a RequestAbortedError as an error and still sends the generic 500', () => {
+    it('does not log a QueryAbortedError as an error and still sends the generic 500', () => {
       const aborted = new Error('The request was aborted before the query completed');
-      aborted.name = 'RequestAbortedError';
+      aborted.name = 'QueryAbortedError';
 
       const formatted = formatResolverError(aborted);
 

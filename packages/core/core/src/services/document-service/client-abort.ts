@@ -12,7 +12,7 @@ const WRITE_ACTIONS = [
 
 /**
  * A document write runs to completion even when the client that requested it disconnected
- * (`database.settings.cancelQueriesOnClientDisconnect`). Middlewares read outside the write's
+ * (`database.settings.abortReadsOnRequestDisconnect`). Middlewares read outside the write's
  * transaction, before it (e.g. review workflows) and after it commits (e.g. content history), so the
  * whole action, middlewares included, runs detached from the request's abort signal.
  */

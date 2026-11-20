@@ -89,11 +89,11 @@ interface Settings {
    */
   queryTimeout?: number;
   /**
-   * Stop issuing `select` queries (and cancel the running one on postgres and mysql) for a request
-   * whose client disconnected before the response ended. Writes and anything inside a transaction
-   * are never aborted. Off by default; set to true to enable it. Must be a boolean.
+   * Refuse reads (and cancel the running one on postgres and mysql) for a request whose client
+   * disconnected before the response ended, until the request has written. Writes are never
+   * aborted. Off by default; set to true to enable it. Must be a boolean.
    */
-  cancelQueriesOnClientDisconnect?: boolean;
+  abortReadsOnRequestDisconnect?: boolean;
   migrations: {
     dir: string;
   };
@@ -131,10 +131,10 @@ const assertValidQueryTimeout = (queryTimeout: unknown) => {
   }
 };
 
-const assertValidCancelQueriesOnClientDisconnect = (value: unknown) => {
+const assertValidAbortReadsOnRequestDisconnect = (value: unknown) => {
   if (value !== undefined && typeof value !== 'boolean') {
     throw new Error(
-      `Invalid database setting "cancelQueriesOnClientDisconnect": expected a boolean, received ${
+      `Invalid database setting "abortReadsOnRequestDisconnect": expected a boolean, received ${
         typeof value === 'string' ? JSON.stringify(value) : String(value)
       }. Use env.bool() when reading it from an environment variable.`
     );
@@ -192,9 +192,7 @@ class Database {
     this.logger = config.logger ?? console;
 
     assertValidQueryTimeout(this.config.settings.queryTimeout);
-    assertValidCancelQueriesOnClientDisconnect(
-      this.config.settings.cancelQueriesOnClientDisconnect
-    );
+    assertValidAbortReadsOnRequestDisconnect(this.config.settings.abortReadsOnRequestDisconnect);
 
     this.dialect = getDialect(this);
 
@@ -314,13 +312,15 @@ class Database {
 
   /**
    * Runs `cb` with `signal` as the abort signal of the work it starts. While the signal is
-   * aborted (or once it aborts), `select` queries issued from that flow outside a transaction are
-   * refused with a `RequestAbortedError`, and a running one is cancelled on clients that can
-   * (postgres, mysql). Writes and queries inside a transaction are never affected. A no-op when
-   * `settings.cancelQueriesOnClientDisconnect` is not true.
+   * aborted (or once it aborts), reads (`select`, `count`, `max`, `min`) issued from that flow are
+   * refused with a `QueryAbortedError`, and a running one is cancelled on clients that can
+   * (postgres, mysql). A read inside a transaction is aborted too, and the transaction rolls back.
+   * Once the flow writes (or locks rows with `forUpdate`), none of its later queries are aborted.
+   * Writes themselves are never aborted. A no-op when `settings.abortReadsOnRequestDisconnect` is
+   * not true.
    */
   runWithAbortSignal<T>(signal: AbortSignal, cb: () => T): T {
-    if (this.config.settings.cancelQueriesOnClientDisconnect !== true) {
+    if (this.config.settings.abortReadsOnRequestDisconnect !== true) {
       return cb();
     }
 
@@ -329,11 +329,13 @@ class Database {
 
   /**
    * Runs `cb` detached from the abort signal of the calling flow, so none of the queries it issues
-   * are refused or cancelled after a client disconnect. For units of work that write and must run
-   * to completion, including the reads they make before and after their writes.
+   * are refused or cancelled after a client disconnect, and marks the calling flow as written so
+   * nothing it does afterwards is aborted either. For units of work that must run to completion:
+   * writes, including the reads they make before and after them, and work with side effects
+   * outside the database (e.g. deleting a stored file, then its row).
    */
   runWithoutAbortSignal<T>(cb: () => T): T {
-    return abortCtx.exit(cb);
+    return abortCtx.detachWrite(cb);
   }
 
   /**

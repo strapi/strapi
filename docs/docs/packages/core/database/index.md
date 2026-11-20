@@ -48,25 +48,36 @@ The entity manager writes relations into join tables and keeps their order. Poly
 
 `db.runWithAbortSignal(signal, callback)` runs the callback with an `AbortSignal` stored in an async context (`abortCtx`, [`src/abort-context.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/abort-context.ts)), the same way `transactionCtx` holds a transaction. `@strapi/core` calls it for every HTTP request ([`services/server/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/client-abort.ts)): the signal aborts when the response closes before it ended, which means the client disconnected. It exists so a request nobody waits for stops holding pooled connections (issue #28646).
 
-When a signal is in context, `execute()` of the query builder changes only for a query that is a `select` and runs outside a transaction (neither `transactionCtx` nor `qb.transacting()` is set). Writes and anything inside a transaction always run to completion, so a disconnect never leaves partial work.
+When a signal is in context, `execute()` of the query builder changes only for reads: `select`, `count`, `max` and `min`. A read that locks rows (`forUpdate`) is not aborted.
 
-- If the signal is already aborted, the query is not issued and `execute()` throws `RequestAbortedError`. Populate sub-queries go through `execute()` too, and `stream()` refuses to start.
-- On clients that can cancel a query (`postgres`, `mysql`), the query builder acquires the connection itself, and cancels the running query with the client's `cancelQuery` when the signal aborts. The query then rejects with `RequestAbortedError` (the driver error is its `cause`). The connection is always released, and it is marked disposed when the cancel fails, as Knex does for a timed out query. `settings.queryTimeout` still applies to the same query.
+- If the signal is already aborted, the read is not issued and `execute()` throws `QueryAbortedError`. Populate sub-queries go through `execute()` too, and `stream()` refuses to start.
+- On clients that can cancel a query (`postgres`, `mysql`), the read is cancelled with the client's `cancelQuery` when the signal aborts. Outside a transaction the query builder acquires the pool connection itself to do this. Inside a transaction the cancel targets the transaction's connection. The query then rejects with `QueryAbortedError` (the driver error is its `cause`). A pool connection is always released, and it is marked disposed when the cancel fails, as Knex does for a timed out query. `settings.queryTimeout` still applies to the same query.
 - On `sqlite` only the refusal applies, because the driver cannot cancel a running query.
 
-The mechanism is opt-in: it runs only when `settings.cancelQueriesOnClientDisconnect` is `true` (default `false`). With the setting unset, `runWithAbortSignal` runs the callback without storing the signal, so nothing changes. It must be a boolean, and the constructor throws otherwise. It is off by default because work that a request starts without awaiting it inherits the signal (see the limits below), which would change behaviour for existing projects.
+A read inside a transaction is aborted like any other. `db.transaction` rolls the transaction back when its callback rejects, so the document service reads (`findMany`, `findFirst`, `findOne`, `count`, which run inside `wrapInTransaction`) are aborted without leaving anything behind.
+
+Once the flow writes, nothing is aborted anymore. The store in `abortCtx` is shared by everything the request runs, and the first write marks it as written: an `insert`, `update`, `delete` or `truncate` from the query builder, a `forUpdate` read, or a call to `db.runWithoutAbortSignal`. Every later query of the request runs to completion, including the reads that follow up on the write and the reads of other branches running at the same time. So the only reads that are aborted are those issued before the request wrote anything.
+
+Writes are never aborted:
+
+- The entity manager write methods (`create`, `createMany`, `update`, `updateMany`, `delete`, `deleteMany`, `attachRelations`, `updateRelations`, `deleteRelations`, `deleteManyRelations`, `insertJoinTableRows`) run through `db.runWithoutAbortSignal`, lifecycles included ([`entity-manager/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/entity-manager/index.ts)). `update` and `delete` read the row before they write, and `create` reads it back after the insert.
+- The document service runs its write actions (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) through `db.runWithoutAbortSignal`, middlewares included ([`document-service/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/client-abort.ts)). Document middlewares read outside the write's transaction, before it (review workflows) and after it commits (content history).
+- Commit and rollback hooks run detached from the signal (`abortCtx.exit`).
+
+`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal and marks the calling flow as written. Use it for work that must run to completion although it reads before its first database write. Admin and Users & Permissions logout use it, because the session read that picks what to revoke comes first and logout often happens as the page closes. Upload `remove()` uses it, because it deletes the stored files before it reads and deletes the row.
+
+The mechanism is opt-in: it runs only when `settings.abortReadsOnRequestDisconnect` is `true` (default `false`). With the setting unset, `runWithAbortSignal` runs the callback without storing the signal, so nothing changes. It must be a boolean, and the constructor throws otherwise. It is off by default because work that a request starts without awaiting it inherits the signal (see the limits below), which would change behaviour for existing projects.
 
 Limits:
 
-- Queries run directly on `strapi.db.connection` (including `connection.raw`) are not covered, like `queryTimeout`.
+- Queries run directly on `strapi.db.connection` (including `connection.raw`) are not covered, like `queryTimeout`. They are not aborted, and a write made this way does not mark the flow as written.
 - A stream that already started is not cancelled.
-- Work that a request starts without awaiting it inherits the signal, so its `select` queries are refused once the client disconnects. Its writes are not.
-
-`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal (`abortCtx.exit`). The document service runs its write actions (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) through it, middlewares included ([`document-service/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/client-abort.ts)). Document middlewares read outside the write's transaction, before it (review workflows) and after it commits (content history), and a refused read would fail a write that already committed.
-
+- Code that has a side effect outside the database (a file, an external API) and then reads before it writes can stop between the two. Run it in `db.runWithoutAbortSignal`.
+- Work that a request starts without awaiting it inherits the signal, so its reads are refused once the client disconnects, until the request writes. Its writes are not.
+- A cancel inside a transaction stops whatever statement runs on the transaction's connection. If concurrent branches share one transaction and one of them runs a detached read (`abortCtx.exit` without marking the flow), the cancel of a sibling read can hit that statement instead.
 - Cancelling is best effort: a signal that aborts in the instant between acquiring the connection and the driver sending the query can still let that one query run to completion.
 
-`RequestAbortedError` is not an internal error. The REST error middleware and the GraphQL error formatter log it at debug level instead of error.
+`QueryAbortedError` is not an internal error. The REST error middleware and the GraphQL error formatter log it at debug level instead of error.
 
 ### Migrations
 

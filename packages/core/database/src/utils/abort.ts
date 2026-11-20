@@ -2,57 +2,72 @@ import type { Knex } from 'knex';
 
 import type { Database } from '..';
 import { abortCtx } from '../abort-context';
-import { transactionCtx } from '../transaction-context';
-import { RequestAbortedError } from '../errors';
+import { QueryAbortedError } from '../errors';
+
+/** Query types that only read. Every other type writes. */
+const READ_TYPES = new Set(['select', 'count', 'max', 'min']);
+
+/** @internal */
+export const isReadQuery = (type: string) => READ_TYPES.has(type);
 
 /**
- * The signal that applies to a query, or undefined when none does. Only `select` queries that run
- * outside a transaction are ever aborted: a write, or anything inside a transaction, always runs
- * to completion so no partial work is left behind.
+ * The signal that applies to a query, or undefined when none does. Only reads are ever aborted,
+ * and only until the unit of work has written: after a write, every later query runs to
+ * completion so no partial work is left behind. A read inside a transaction that has not written
+ * is aborted too; the caller's transaction then rolls back.
  *
  * @internal
  */
 export function getActiveAbortSignal(
   db: Database,
-  { type, transaction, forUpdate }: { type: string; transaction?: unknown; forUpdate?: boolean }
+  { type, forUpdate }: { type: string; forUpdate?: boolean }
 ): AbortSignal | undefined {
   // `forUpdate` locks rows, so it belongs to a unit of work that must finish
-  if (type !== 'select' || transaction || forUpdate || transactionCtx.get()) {
+  if (!isReadQuery(type) || forUpdate) {
     return undefined;
   }
 
-  if (db.config.settings.cancelQueriesOnClientDisconnect !== true) {
+  if (db.config.settings.abortReadsOnRequestDisconnect !== true) {
     return undefined;
   }
 
   return abortCtx.get();
 }
 
+type Connection = { __knex__disposed?: unknown };
+
 type CancellableClient = {
   canCancelQuery?: boolean;
-  acquireConnection(): Promise<{ __knex__disposed?: unknown }>;
+  acquireConnection(): Promise<Connection>;
   releaseConnection(connection: unknown): Promise<void>;
   cancelQuery(connection: unknown): Promise<unknown>;
 };
 
 /**
- * Runs a knex select that is tied to `signal`: refuses it when the signal is already aborted and,
+ * Runs a knex read that is tied to `signal`: refuses it when the signal is already aborted and,
  * on clients that can cancel a running query (postgres, mysql), cancels it on the database when
  * the signal aborts, so it stops holding a pooled connection. Clients that cannot (sqlite) only get
- * the refusal. A query that was cancelled rejects with a `RequestAbortedError`.
+ * the refusal. A query that was cancelled rejects with a `QueryAbortedError`.
+ *
+ * Inside a transaction, the query runs on the transaction's connection and that connection is the
+ * one cancelled. The transaction is then unusable and must be rolled back, which `db.transaction`
+ * does when its callback rejects.
  *
  * @internal
  */
 export async function runAbortable<T>(
   db: Database,
   query: Knex.QueryBuilder,
-  signal: AbortSignal
+  signal: AbortSignal,
+  transaction?: Knex.Transaction
 ): Promise<T> {
   if (signal.aborted) {
-    throw new RequestAbortedError();
+    throw new QueryAbortedError();
   }
 
-  const client = db.connection.client as CancellableClient;
+  // A transaction's client always hands out the transaction's own connection and never releases
+  // it to the pool, so the same code path serves both cases
+  const client = (transaction?.client ?? db.connection.client) as CancellableClient;
 
   if (client.canCancelQuery !== true) {
     return (await query) as T;
@@ -79,15 +94,15 @@ export async function runAbortable<T>(
   try {
     // The pool can make a request wait for a connection long after the client left
     if (signal.aborted) {
-      throw new RequestAbortedError();
+      throw new QueryAbortedError();
     }
 
     signal.addEventListener('abort', onAbort, { once: true });
 
     return (await query.connection(connection as never)) as T;
   } catch (error) {
-    if (cancelled && !(error instanceof RequestAbortedError)) {
-      throw new RequestAbortedError(undefined, error);
+    if (cancelled && !(error instanceof QueryAbortedError)) {
+      throw new QueryAbortedError(undefined, error);
     }
 
     throw error;

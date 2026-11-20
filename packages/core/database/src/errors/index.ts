@@ -6,7 +6,7 @@ import InvalidDateTimeError from './invalid-datetime';
 import InvalidRelationError from './invalid-relation';
 import SavepointError from './savepoint';
 import InvalidBooleanError from './invalid-boolean';
-import RequestAbortedError from './request-aborted';
+import QueryAbortedError from './query-aborted';
 
 export {
   DatabaseError,
@@ -17,5 +17,5 @@ export {
   InvalidRelationError,
   SavepointError,
   InvalidBooleanError,
-  RequestAbortedError,
+  QueryAbortedError,
 };

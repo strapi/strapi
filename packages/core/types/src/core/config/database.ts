@@ -45,7 +45,9 @@ type Connection<TClient extends Database.ClientKind> = {
 type SharedDatabaseConnection<TClient extends Database.ClientKind> = {
   client: TClient;
   connection:
-    Connection<TClient> | (() => Promise<Connection<TClient>>) | (() => Connection<TClient>);
+    | Connection<TClient>
+    | (() => Promise<Connection<TClient>>)
+    | (() => Connection<TClient>);
   debug?: boolean;
   pool?: PoolConfig;
   acquireConnectionTimeout?: number;
@@ -77,11 +79,11 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
      */
     queryTimeout?: number;
     /**
-     * Stop issuing `select` queries (and cancel the running one on postgres and mysql) for a
-     * request whose client disconnected before the response ended. Writes and anything inside a
-     * transaction are never aborted. Off by default; set to true to enable it. Must be a boolean (for
-     * example `env.bool('DATABASE_CANCEL_QUERIES_ON_CLIENT_DISCONNECT', false)`).
+     * Refuse reads (and cancel the running one on postgres and mysql) for a request whose client
+     * disconnected before the response ended, until the request has written. Writes are never
+     * aborted. Off by default; set to true to enable it. Must be a boolean (for example
+     * `env.bool('DATABASE_ABORT_READS_ON_REQUEST_DISCONNECT', false)`).
      */
-    cancelQueriesOnClientDisconnect?: boolean;
+    abortReadsOnRequestDisconnect?: boolean;
   };
 }

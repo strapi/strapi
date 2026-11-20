@@ -135,7 +135,7 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
         s.config.set('database.connection.pool', { min: 0, max: POOL_MAX });
         s.config.set('database.connection.acquireConnectionTimeout', 3000);
         // Opt-in setting
-        s.config.set('database.settings.cancelQueriesOnClientDisconnect', true);
+        s.config.set('database.settings.abortReadsOnRequestDisconnect', true);
       },
       bootstrap: ({ strapi: s }: { strapi: Core.Strapi }) => {
         const query = () => s.db.queryBuilder(ITEM_UID);
@@ -186,6 +186,32 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
               path: '/abort-fast',
               handler: async (ctx: any) => {
                 ctx.body = await query().select('*').execute({ mapResults: false });
+              },
+              config: { auth: false },
+            },
+            {
+              // A slow read inside a transaction that has not written anything
+              method: 'GET',
+              path: '/abort-read-tx',
+              handler: async (ctx: any) => {
+                started.resolve();
+                ctx.body = await s.db.transaction(() => slow(SLEEP_SECONDS));
+              },
+              config: { auth: false },
+            },
+            {
+              // A document service read: it runs inside a transaction (wrapInTransaction)
+              method: 'GET',
+              path: '/abort-document-read',
+              handler: async (ctx: any) => {
+                started.resolve();
+                try {
+                  ctx.body = await s.documents(ITEM_UID).findMany();
+                  handlerSettled.resolve('done');
+                } catch (error: any) {
+                  handlerSettled.resolve(`failed: ${error?.name}`);
+                  throw error;
+                }
               },
               config: { auth: false },
             },
@@ -348,7 +374,56 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     expect(secondQueryIssued).toBe(false);
   });
 
-  test('guard: a transaction is not aborted by a disconnect, and still commits its writes', async () => {
+  test('REST: cancels a read inside a transaction that has not written', async () => {
+    const aborted = requestAndAbort({ port, path: '/api/abort-read-tx' });
+    await started.promise;
+    await aborted;
+    expect(await runningSleeps()).toBe(1);
+
+    const cancelled = await waitUntil(async () => (await runningSleeps()) === 0, CANCEL_BUDGET_MS);
+
+    expect(cancelled).toBe(true);
+    expect(await waitUntil(() => pool().numUsed() === 0, 1000)).toBe(true);
+  });
+
+  test('REST: cancels a document service findMany when the client disconnects', async () => {
+    // Hold a lock so the findMany waits on the database until it is cancelled. The lock holder
+    // takes one of the two pool connections, so the checks below run on it too.
+    const lock = await strapi.db.connection.transaction();
+    const waitingOnLock = async () => {
+      // pg_stat_activity is a snapshot taken once per transaction: refresh it on every check
+      await lock.raw('select pg_stat_clear_snapshot()');
+      const rows = await lock
+        .select('pid')
+        .from('pg_stat_activity')
+        .where('wait_event_type', 'Lock')
+        .andWhere('query', 'like', '%abort_items%')
+        .andWhereRaw('pid <> pg_backend_pid()');
+
+      return rows.length;
+    };
+
+    try {
+      await lock.raw('lock table abort_items in access exclusive mode');
+
+      const aborted = requestAndAbort({ port, path: '/api/abort-document-read' });
+      await started.promise;
+      expect(await waitUntil(async () => (await waitingOnLock()) === 1, 2000)).toBe(true);
+      await aborted;
+
+      // Cancelled while the lock is still held: without the cancel, the read would wait for it
+      expect(await waitUntil(async () => (await waitingOnLock()) === 0, CANCEL_BUDGET_MS)).toBe(
+        true
+      );
+      await expect(
+        Promise.race([handlerSettled.promise, sleep(CANCEL_BUDGET_MS).then(() => 'still waiting')])
+      ).resolves.toBe('failed: QueryAbortedError');
+    } finally {
+      await lock.rollback();
+    }
+  });
+
+  test('guard: a transaction that wrote is not aborted by a disconnect, and still commits its writes', async () => {
     const aborted = requestAndAbort(
       { port, method: 'POST', path: '/api/abort-write-tx', body: '{}' },
       300

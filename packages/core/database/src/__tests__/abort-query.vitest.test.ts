@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { Database } from '..';
-import { RequestAbortedError } from '../errors';
+import { QueryAbortedError } from '../errors';
 import { runAbortable } from '../utils/abort';
 
 type Conn = { id: number; __knex__disposed?: unknown };
@@ -56,7 +56,7 @@ describe('runAbortable with a cancellable client', () => {
     expect(client.cancelQuery).not.toHaveBeenCalled();
   });
 
-  it('cancels the running query on abort and rejects with RequestAbortedError', async () => {
+  it('cancels the running query on abort and rejects with QueryAbortedError', async () => {
     const { db, client, query, result, connection } = setup();
     const controller = new AbortController();
 
@@ -67,8 +67,8 @@ describe('runAbortable with a cancellable client', () => {
     result.reject(driverError);
 
     const error = await promise.catch((e) => e);
-    expect(error).toBeInstanceOf(RequestAbortedError);
-    expect((error as RequestAbortedError).cause).toBe(driverError);
+    expect(error).toBeInstanceOf(QueryAbortedError);
+    expect((error as QueryAbortedError).cause).toBe(driverError);
     expect(client.cancelQuery).toHaveBeenCalledWith(connection);
     expect(client.releaseConnection).toHaveBeenCalledTimes(1);
     expect(connection.__knex__disposed).toBeUndefined();
@@ -107,7 +107,7 @@ describe('runAbortable with a cancellable client', () => {
     controller.abort();
     result.reject(new Error('driver'));
 
-    await expect(promise).rejects.toBeInstanceOf(RequestAbortedError);
+    await expect(promise).rejects.toBeInstanceOf(QueryAbortedError);
     expect(connection.__knex__disposed).toBe(cancelError);
     expect(client.releaseConnection).toHaveBeenCalledTimes(1);
   });
@@ -134,7 +134,7 @@ describe('runAbortable with a cancellable client', () => {
     });
 
     await expect(runAbortable(db, query, controller.signal)).rejects.toBeInstanceOf(
-      RequestAbortedError
+      QueryAbortedError
     );
     expect(query.connection).not.toHaveBeenCalled();
     expect(client.cancelQuery).not.toHaveBeenCalled();
@@ -147,8 +147,31 @@ describe('runAbortable with a cancellable client', () => {
     controller.abort();
 
     await expect(runAbortable(db, query, controller.signal)).rejects.toBeInstanceOf(
-      RequestAbortedError
+      QueryAbortedError
     );
     expect(client.acquireConnection).not.toHaveBeenCalled();
+  });
+
+  it('cancels a query in a transaction on the transaction connection, not on a pool connection', async () => {
+    const { db, client: poolClient, query, result } = setup();
+    const trxConnection: Conn = { id: 2 };
+    const trxClient = {
+      canCancelQuery: true,
+      acquireConnection: vi.fn(async () => trxConnection),
+      releaseConnection: vi.fn(async () => undefined),
+      cancelQuery: vi.fn(async () => undefined),
+    };
+    const transaction = { client: trxClient } as any;
+    const controller = new AbortController();
+
+    const promise = runAbortable(db, query, controller.signal, transaction);
+    await vi.waitFor(() => expect(query.connection).toHaveBeenCalledWith(trxConnection));
+    controller.abort();
+    result.reject(new Error('canceling statement due to user request'));
+
+    await expect(promise).rejects.toBeInstanceOf(QueryAbortedError);
+    expect(trxClient.cancelQuery).toHaveBeenCalledWith(trxConnection);
+    expect(poolClient.acquireConnection).not.toHaveBeenCalled();
+    expect(poolClient.cancelQuery).not.toHaveBeenCalled();
   });
 });

@@ -9,7 +9,7 @@ import { getActiveAbortSignal } from '../utils/abort';
 /**
  * Reproduction for strapi/strapi#28646: once the request that issued a query is gone, the query
  * builder must stop issuing `select`s for it. Written ahead of the implementation: the names used
- * here (`db.runWithAbortSignal(signal, cb)` and `RequestAbortedError`) come from the planned
+ * here (`db.runWithAbortSignal(signal, cb)` and `QueryAbortedError`) come from the planned
  * design and are the only things to adjust if the implementation names them differently.
  */
 
@@ -32,7 +32,7 @@ const createSqliteDb = (settings: Record<string, unknown> = {}) =>
     },
     settings: {
       migrations: { dir: os.tmpdir() },
-      cancelQueriesOnClientDisconnect: true,
+      abortReadsOnRequestDisconnect: true,
       ...settings,
     },
     logger: silentLogger,
@@ -56,12 +56,12 @@ describe('abort signal on the query builder (#28646)', () => {
     return (db as any).runWithAbortSignal(signal, cb);
   };
 
-  const expectRequestAborted = async (promiseOrFn: unknown) => {
-    expect(errors, 'RequestAbortedError is not exported from errors').toHaveProperty(
-      'RequestAbortedError'
+  const expectQueryAborted = async (promiseOrFn: unknown) => {
+    expect(errors, 'QueryAbortedError is not exported from errors').toHaveProperty(
+      'QueryAbortedError'
     );
     const run = async () => (typeof promiseOrFn === 'function' ? promiseOrFn() : promiseOrFn);
-    await expect(run()).rejects.toBeInstanceOf((errors as any).RequestAbortedError);
+    await expect(run()).rejects.toBeInstanceOf((errors as any).QueryAbortedError);
   };
 
   const items = () => db.queryBuilder(ITEM_UID);
@@ -106,8 +106,8 @@ describe('abort signal on the query builder (#28646)', () => {
     expect(rows).toEqual([{ id: 1, name: 'first' }]);
   });
 
-  it('refuses a select with a RequestAbortedError when the signal is already aborted, without querying', async () => {
-    await expectRequestAborted(runWithAbortSignal(abortedSignal(), () => selectItems()));
+  it('refuses a select with a QueryAbortedError when the signal is already aborted, without querying', async () => {
+    await expectQueryAborted(runWithAbortSignal(abortedSignal(), () => selectItems()));
 
     expect(issued).toEqual([]);
   });
@@ -115,7 +115,7 @@ describe('abort signal on the query builder (#28646)', () => {
   it('refuses a select issued after the signal aborted later in the same async flow', async () => {
     const controller = new AbortController();
 
-    await expectRequestAborted(
+    await expectQueryAborted(
       runWithAbortSignal(controller.signal, async () => {
         await selectItems();
         controller.abort();
@@ -128,13 +128,13 @@ describe('abort signal on the query builder (#28646)', () => {
   });
 
   it('refuses a findOne style select (first) too', async () => {
-    await expectRequestAborted(
+    await expectQueryAborted(
       runWithAbortSignal(abortedSignal(), () => items().select('*').first().execute())
     );
   });
 
   it('refuses to start a stream when the signal is already aborted', async () => {
-    await expectRequestAborted(
+    await expectQueryAborted(
       runWithAbortSignal(abortedSignal(), async () => items().select('*').stream())
     );
 
@@ -160,8 +160,82 @@ describe('abort signal on the query builder (#28646)', () => {
     });
   });
 
-  describe('never aborts anything inside a transaction', () => {
-    it('still runs selects and writes in db.transaction with an aborted signal', async () => {
+  it('refuses count, max and min too', async () => {
+    await expectQueryAborted(runWithAbortSignal(abortedSignal(), () => items().count().execute()));
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => items().max('id').execute())
+    );
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => items().min('id').execute())
+    );
+
+    expect(issued).toEqual([]);
+  });
+
+  it('refuses a db.query() read (findMany, count) as well', async () => {
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => db.query(ITEM_UID).findMany())
+    );
+    await expectQueryAborted(runWithAbortSignal(abortedSignal(), () => db.query(ITEM_UID).count()));
+  });
+
+  describe('stops aborting once the flow wrote', () => {
+    it('runs the selects that follow a write in the same flow', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), async () => {
+        await items().insert({ name: 'second' }).execute();
+        return selectItems();
+      });
+
+      expect(rows).toHaveLength(2);
+    });
+
+    it('runs the selects of a sibling branch once another branch wrote', async () => {
+      const controller = new AbortController();
+
+      const rows = await runWithAbortSignal(controller.signal, async () => {
+        await Promise.all([
+          items().insert({ name: 'second' }).execute(),
+          (async () => {
+            await Promise.resolve();
+            controller.abort();
+          })(),
+        ]);
+        return selectItems();
+      });
+
+      expect(rows).toHaveLength(2);
+    });
+
+    it('runs the selects that follow a row lock (forUpdate)', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), () =>
+        db.transaction(async () => {
+          await items().select('*').forUpdate().execute();
+          return selectItems();
+        })
+      );
+
+      expect(rows).toHaveLength(1);
+    });
+  });
+
+  describe('reads inside a transaction', () => {
+    it('refuses a select in a transaction that has not written, and the transaction rolls back', async () => {
+      await expectQueryAborted(
+        runWithAbortSignal(abortedSignal(), () => db.transaction(() => selectItems()))
+      );
+
+      expect(issued.some((sql) => /select/i.test(sql) && /items/.test(sql))).toBe(false);
+    });
+
+    it('refuses a db.query() findMany wrapped in a transaction (document service reads)', async () => {
+      await expectQueryAborted(
+        runWithAbortSignal(abortedSignal(), () =>
+          db.transaction(() => db.query(ITEM_UID).findMany())
+        )
+      );
+    });
+
+    it('still runs selects and writes in db.transaction once the transaction wrote', async () => {
       const rows = await runWithAbortSignal(abortedSignal(), () =>
         db.transaction(async () => {
           await items().insert({ name: 'in trx' }).execute();
@@ -173,17 +247,86 @@ describe('abort signal on the query builder (#28646)', () => {
       expect(await db.connection('items').count({ count: '*' })).toEqual([{ count: 2 }]);
     });
 
-    it('still runs a select bound to an explicit transaction (qb.transacting) with an aborted signal', async () => {
+    it('refuses a select bound to an explicit transaction (qb.transacting)', async () => {
       const trx = await db.connection.transaction();
       try {
-        const rows = await runWithAbortSignal(abortedSignal(), () =>
-          items().select('*').transacting(trx).execute()
+        await expectQueryAborted(
+          runWithAbortSignal(abortedSignal(), () => items().select('*').transacting(trx).execute())
         );
-
-        expect(rows).toEqual([{ id: 1, name: 'first' }]);
       } finally {
         await trx.rollback();
       }
+    });
+  });
+
+  describe('db.query() writes run to completion', () => {
+    // The entity manager opens its transactions through the global `strapi.db`
+    beforeEach(() => {
+      (globalThis as any).strapi = { db };
+    });
+
+    afterEach(() => {
+      delete (globalThis as any).strapi;
+    });
+
+    const subscribeAfter = () => {
+      const calls: string[] = [];
+      db.lifecycles.subscribe({
+        models: [ITEM_UID],
+        async afterCreate() {
+          calls.push('afterCreate');
+        },
+        async afterUpdate() {
+          calls.push('afterUpdate');
+        },
+        async afterDelete() {
+          calls.push('afterDelete');
+        },
+      });
+      return calls;
+    };
+
+    it('create commits, reads the row back and runs afterCreate', async () => {
+      const calls = subscribeAfter();
+
+      const created = await runWithAbortSignal(abortedSignal(), () =>
+        db.query(ITEM_UID).create({ data: { name: 'second' } })
+      );
+
+      expect(created).toMatchObject({ id: 2, name: 'second' });
+      expect(calls).toEqual(['afterCreate']);
+    });
+
+    it('update selects the row, writes it and runs afterUpdate', async () => {
+      const calls = subscribeAfter();
+
+      const updated = await runWithAbortSignal(abortedSignal(), () =>
+        db.query(ITEM_UID).update({ where: { id: 1 }, data: { name: 'renamed' } })
+      );
+
+      expect(updated).toMatchObject({ id: 1, name: 'renamed' });
+      expect(await db.connection('items').select('name')).toEqual([{ name: 'renamed' }]);
+      expect(calls).toEqual(['afterUpdate']);
+    });
+
+    it('delete selects the row, deletes it and runs afterDelete', async () => {
+      const calls = subscribeAfter();
+
+      await runWithAbortSignal(abortedSignal(), () =>
+        db.query(ITEM_UID).delete({ where: { id: 1 } })
+      );
+
+      expect(await db.connection('items').select('name')).toEqual([]);
+      expect(calls).toEqual(['afterDelete']);
+    });
+
+    it('runs the reads that follow a db.query() write in the same flow', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), async () => {
+        await db.query(ITEM_UID).create({ data: { name: 'second' } });
+        return db.query(ITEM_UID).findMany();
+      });
+
+      expect(rows).toHaveLength(2);
     });
   });
 
@@ -203,13 +346,13 @@ describe('abort signal on the query builder (#28646)', () => {
       ]);
     });
 
-    it('applies the signal again once the detached work returned', async () => {
-      await expectRequestAborted(
-        runWithAbortSignal(abortedSignal(), async () => {
-          await db.runWithoutAbortSignal(() => selectItems());
-          return selectItems();
-        })
-      );
+    it('does not abort the flow once it ran detached work', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), async () => {
+        await db.runWithoutAbortSignal(() => selectItems());
+        return selectItems();
+      });
+
+      expect(rows).toEqual([{ id: 1, name: 'first' }]);
     });
 
     it('runs a commit hook select even though the signal aborted', async () => {
@@ -245,7 +388,8 @@ describe('abort signal on the query builder (#28646)', () => {
     it('does not apply the guard to a select that locks rows (forUpdate)', () => {
       runWithAbortSignal(abortedSignal(), () => {
         expect(getActiveAbortSignal(db, { type: 'select', forUpdate: true })).toBeUndefined();
-        expect(getActiveAbortSignal(db, { type: 'select', transaction: {} })).toBeUndefined();
+        expect(getActiveAbortSignal(db, { type: 'insert' })).toBeUndefined();
+        expect(getActiveAbortSignal(db, { type: 'count' })?.aborted).toBe(true);
         expect(getActiveAbortSignal(db, { type: 'select' })?.aborted).toBe(true);
       });
     });
@@ -254,10 +398,10 @@ describe('abort signal on the query builder (#28646)', () => {
   describe.each([
     ['set to false', false],
     ['unset (the default)', undefined],
-  ])('settings.cancelQueriesOnClientDisconnect %s', (_label, value) => {
+  ])('settings.abortReadsOnRequestDisconnect %s', (_label, value) => {
     it('lets selects run after a disconnect', async () => {
       await db.destroy();
-      db = createSqliteDb({ cancelQueriesOnClientDisconnect: value });
+      db = createSqliteDb({ abortReadsOnRequestDisconnect: value });
       await db.init({
         models: [
           {

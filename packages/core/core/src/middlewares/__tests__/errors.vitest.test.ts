@@ -74,8 +74,8 @@ describe('Errors middleware', () => {
     expect(global.strapi.log.error).toHaveBeenCalledWith(error);
   });
 
-  test('does not log a RequestAbortedError as an error', async () => {
-    const error = new databaseErrors.RequestAbortedError();
+  test('does not log a QueryAbortedError as an error', async () => {
+    const error = new databaseErrors.QueryAbortedError();
 
     const res = await request(createApp(error).callback()).get('/');
 

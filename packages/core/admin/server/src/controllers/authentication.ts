@@ -400,12 +400,16 @@ export default {
         const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
         const sessionId = (ctx.state.session as { id?: string } | undefined)?.id;
 
-        if (typeof bodyDeviceId === 'string' && bodyDeviceId.length > 0) {
-          const deviceId = await resolveLogoutDeviceId(userId, sessionId, bodyDeviceId);
-          await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
-        } else {
-          await sessionManager('admin').invalidateRefreshToken(userId);
-        }
+        // Logout often happens as the page closes: the revocation (and the session read that picks
+        // the device to revoke) must run even when the client is already gone
+        await strapi.db.runWithoutAbortSignal(async () => {
+          if (typeof bodyDeviceId === 'string' && bodyDeviceId.length > 0) {
+            const deviceId = await resolveLogoutDeviceId(userId, sessionId, bodyDeviceId);
+            await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
+          } else {
+            await sessionManager('admin').invalidateRefreshToken(userId);
+          }
+        });
       }
     } catch (err) {
       strapi.log.error('Failed to revoke admin sessions during logout', err as any);

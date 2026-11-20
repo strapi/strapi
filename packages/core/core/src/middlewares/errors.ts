@@ -44,7 +44,7 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
       }
 
       // The client is gone: nobody reads this response, and it is not a failure of the server
-      if (error instanceof databaseErrors.RequestAbortedError) {
+      if (error instanceof databaseErrors.QueryAbortedError) {
         strapi.log.debug(`Request aborted before the query completed: ${error.message}`);
       } else {
         strapi.log.error(error);

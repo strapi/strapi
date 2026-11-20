@@ -3,11 +3,11 @@ import _ from 'lodash';
 
 import type { Database } from '..';
 
-import { DatabaseError, RequestAbortedError } from '../errors';
+import { DatabaseError, QueryAbortedError } from '../errors';
 import { abortCtx } from '../abort-context';
 import { transactionCtx } from '../transaction-context';
 import { applyQueryTimeout, isKnexQuery } from '../utils/knex';
-import { getActiveAbortSignal, runAbortable } from '../utils/abort';
+import { getActiveAbortSignal, isReadQuery, runAbortable } from '../utils/abort';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
@@ -761,8 +761,15 @@ const createQueryBuilder = (
           qb.transacting(transaction);
         }
 
+        // From the first write (or row lock) on, nothing else the unit of work does is aborted
+        if (!isReadQuery(state.type) || state.forUpdate) {
+          abortCtx.markWritten();
+        }
+
         const abortSignal = getActiveAbortSignal(db, state);
-        const rows = abortSignal ? await runAbortable(db, qb, abortSignal) : await qb;
+        const rows = abortSignal
+          ? await runAbortable(db, qb, abortSignal, state.transaction ?? transaction)
+          : await qb;
 
         if (state.populate && rows != null) {
           const populateState = state.populate;
@@ -773,9 +780,9 @@ const createQueryBuilder = (
               db,
             });
 
-          // The sub-queries are fresh query builders that don't know the parent's transaction or
-          // lock: they must not be aborted when the parent is not
-          await (state.transaction || state.forUpdate ? abortCtx.exit(populate) : populate());
+          // The sub-queries are fresh query builders that don't know the parent's lock: they must
+          // not be aborted when the parent is not
+          await (state.forUpdate ? abortCtx.exit(populate) : populate());
         }
 
         let results = rows;
@@ -797,7 +804,7 @@ const createQueryBuilder = (
       if (state.type === 'select') {
         // A stream is not cancelled once started, but a disconnected request must not start one
         if (getActiveAbortSignal(db, state)?.aborted) {
-          throw new RequestAbortedError();
+          throw new QueryAbortedError();
         }
 
         return new helpers.ReadableQuery({ qb: this, db, uid, mapResults });

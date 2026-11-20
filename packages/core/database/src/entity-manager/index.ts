@@ -324,10 +324,44 @@ const processData = (
 
   return obj;
 };
+const WRITE_METHODS = [
+  'create',
+  'createMany',
+  'update',
+  'updateMany',
+  'delete',
+  'deleteMany',
+  'attachRelations',
+  'updateRelations',
+  'deleteRelations',
+  'deleteManyRelations',
+  'insertJoinTableRows',
+] as const satisfies ReadonlyArray<keyof EntityManager>;
+
+/**
+ * A write runs to completion even when the work that issued it was aborted (e.g. the client
+ * disconnected, see `settings.abortReadsOnRequestDisconnect`). A write method reads before it
+ * writes (`update` and `delete` select the row first) and after (`create` reads the row back),
+ * and runs lifecycles around it, so the whole method runs detached from the abort signal. The
+ * calling flow is marked as written, so the reads it makes after the write are not aborted either.
+ */
+const detachWritesFromAbort = (db: Database, entityManager: EntityManager): EntityManager => {
+  for (const name of WRITE_METHODS) {
+    const method = entityManager[name] as (...args: unknown[]) => unknown;
+
+    Object.assign(entityManager, {
+      [name]: (...args: unknown[]) =>
+        db.runWithoutAbortSignal(() => method.apply(entityManager, args)),
+    });
+  }
+
+  return entityManager;
+};
+
 export const createEntityManager = (db: Database): EntityManager => {
   const repoMap: Record<string, Repository> = {};
 
-  return {
+  const entityManager: EntityManager = {
     async findOne(uid, params) {
       const states = await db.lifecycles.run('beforeFindOne', uid, { params });
 
@@ -722,7 +756,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const dataset = uniqBy(
-              isSingle ? (attachData ?? []).slice(-1) : (attachData ?? []),
+              isSingle ? (attachData ?? []).slice(-1) : attachData ?? [],
               'id'
             );
 
@@ -785,13 +819,10 @@ export const createEntityManager = (db: Database): EntityManager => {
             )
             .get()
             // set the order based on the order of the ids
-            .reduce(
-              (acc, rel, idx) => {
-                acc[rel.id] = idx + 1;
-                return acc;
-              },
-              {} as Record<ID, number>
-            );
+            .reduce((acc, rel, idx) => {
+              acc[rel.id] = idx + 1;
+              return acc;
+            }, {} as Record<ID, number>);
 
           rows.forEach((row: Record<string, unknown>) => {
             const rowId = row[morphColumn.idColumn.name] as ID;
@@ -900,13 +931,10 @@ export const createEntityManager = (db: Database): EntityManager => {
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
-              .reduce(
-                (acc, rel, idx) => {
-                  acc[rel.id] = idx;
-                  return acc;
-                },
-                {} as Record<ID, number>
-              );
+              .reduce((acc, rel, idx) => {
+                acc[rel.id] = idx;
+                return acc;
+              }, {} as Record<ID, number>);
 
             insert.forEach((row: Record<string, unknown>) => {
               row[orderColumnName] = orderMap[row[inverseJoinColumn.name] as number];
@@ -1104,7 +1132,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 const connects = uniqBy(
                   isSingle
                     ? (cleanRelationData.connect ?? []).slice(-1)
-                    : (cleanRelationData.connect ?? []),
+                    : cleanRelationData.connect ?? [],
                   'id'
                 );
 
@@ -1158,7 +1186,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               // morphOne populate reads `order asc` + first — leave B observable with a
               // hidden C row, the same phantom-row defect the connect path guards against.
               const setData = uniqBy(
-                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? []),
+                isSingle ? (cleanRelationData.set ?? []).slice(-1) : cleanRelationData.set ?? [],
                 'id'
               );
 
@@ -2070,13 +2098,10 @@ export const createEntityManager = (db: Database): EntityManager => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: fieldsArr.reduce(
-          (acc, field) => {
-            acc[field] = populate || true;
-            return acc;
-          },
-          {} as Record<string, unknown>
-        ),
+        populate: fieldsArr.reduce((acc, field) => {
+          acc[field] = populate || true;
+          return acc;
+        }, {} as Record<string, unknown>),
       });
 
       if (!entry) {
@@ -2150,4 +2175,6 @@ export const createEntityManager = (db: Database): EntityManager => {
       return repoMap[uid];
     },
   };
+
+  return detachWritesFromAbort(db, entityManager);
 };
