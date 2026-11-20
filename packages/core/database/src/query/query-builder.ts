@@ -172,13 +172,52 @@ const createQueryBuilder = (
     return alias;
   };
 
+  const applyUpdate = (qb: Knex.QueryBuilder) => {
+    // knex keeps one counter per column and drops counters on columns that are also in the
+    // update data, so sum the amounts per column and reject the overlap.
+    const counters = new Map<string, number>();
+    const addCounter = (column: string, amount: number) => {
+      const columnName = helpers.toColumnName(meta, column);
+      counters.set(columnName, (counters.get(columnName) ?? 0) + amount);
+    };
+
+    state.increments.forEach((incr) => addCounter(incr.column, incr.amount));
+    state.decrements.forEach((decr) => addCounter(decr.column, -decr.amount));
+
+    if (state.data) {
+      const data = state.data as Record<string, unknown>;
+      counters.forEach((_amount, column) => {
+        if (_.has(data, column)) {
+          throw new DatabaseError(
+            `Cannot update and increment or decrement the column "${column}" in the same query`
+          );
+        }
+      });
+
+      qb.update(data);
+    }
+
+    counters.forEach((amount, column) => qb.increment(column, amount));
+  };
+
   return {
     alias: getAlias(),
     getAlias,
     state,
 
     clone() {
-      return createQueryBuilder(uid, db, state);
+      const copy = <T>(value: T): T => (Array.isArray(value) ? ([...value] as T) : value);
+
+      return createQueryBuilder(uid, db, {
+        ...state,
+        select: copy(state.select),
+        where: copy(state.where),
+        joins: copy(state.joins),
+        orderBy: copy(state.orderBy),
+        groupBy: copy(state.groupBy),
+        increments: copy(state.increments),
+        decrements: copy(state.decrements),
+      });
     },
 
     select(args) {
@@ -436,21 +475,32 @@ const createQueryBuilder = (
       const originalType = state.type;
 
       // Build the inner SELECT from a clone that stays `select`, so the outer write
-      // state is never mutated. clone() shallow-merges state (shared where/joins,
-      // new alias) — preserve the original alias because joins were already baked
-      // against it. The clone inherits processed: true and must only read shared arrays.
+      // state is never mutated. clone() gets a new alias — preserve the original one
+      // because joins were already baked against it. The clone inherits processed: true.
       const sub = this.clone();
       sub.alias = this.alias;
+      // Postgres rejects FOR UPDATE with DISTINCT, and Postgres/MySQL reject ORDER BY on a
+      // column missing from the DISTINCT select list. Ordering only matters with a limit.
+      sub.state.forUpdate = false;
+      if (state.limit == null && state.offset == null) {
+        sub.state.orderBy = [];
+      }
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const qb = db.getConnection(tableName);
+      const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
 
-      if (originalType === 'update') {
-        return qb.update(state.data).whereIn('id', nestedSubQuery);
+      if (state.transaction) {
+        qb.transacting(state.transaction);
       }
 
-      return qb.delete().whereIn('id', nestedSubQuery);
+      if (originalType === 'delete') {
+        return qb.delete();
+      }
+
+      applyUpdate(qb);
+
+      return qb;
     },
 
     processState() {
@@ -653,9 +703,7 @@ const createQueryBuilder = (
           break;
         }
         case 'update': {
-          if (state.data) {
-            qb.update(state.data);
-          }
+          applyUpdate(qb);
           break;
         }
         case 'delete': {
@@ -678,14 +726,6 @@ const createQueryBuilder = (
 
       if (state.forUpdate) {
         qb.forUpdate();
-      }
-
-      if (!_.isEmpty(state.increments)) {
-        state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
-      }
-
-      if (!_.isEmpty(state.decrements)) {
-        state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
       }
 
       if (state.onConflict) {

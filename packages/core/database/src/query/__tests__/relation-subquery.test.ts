@@ -33,6 +33,9 @@ const models = [
       name: { type: 'string' },
       locale: { type: 'string' },
       publishedAt: { type: 'string' },
+      views: { type: 'integer' },
+      likes: { type: 'integer' },
+      viewCount: { type: 'integer' },
       related: {
         type: 'relation',
         relation: 'manyToOne',
@@ -47,6 +50,9 @@ const makeDb = () => {
     client: 'better-sqlite3',
     connection: { filename: ':memory:' },
     useNullAsDefault: true,
+    // The sqlite pool has one connection, so a write that escapes an open transaction
+    // waits for it; fail fast instead of hitting the jest timeout.
+    acquireConnectionTimeout: 1000,
   });
 
   const metadata = createMetadata(models as any);
@@ -83,6 +89,9 @@ const setupTables = async (connection: knex.Knex) => {
     t.string('name');
     t.string('locale');
     t.string('published_at');
+    t.integer('views').defaultTo(10);
+    t.integer('likes').defaultTo(10);
+    t.integer('view_count').defaultTo(10);
   });
   await connection.schema.createTable('tests_related_lnk', (t) => {
     t.increments('id');
@@ -105,7 +114,7 @@ const setupTables = async (connection: knex.Knex) => {
   ]);
 };
 
-describe('relation subquery path (deleteMany / updateMany)', () => {
+describe('relation subquery path (delete / update writes)', () => {
   it.each([
     [
       'nested relation where',
@@ -217,4 +226,218 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
 
     await connection.destroy();
   });
+
+  it.each([
+    [
+      'increment',
+      (qb: any) => qb.increment('views', 2),
+      { views: [12, 10, 12], likes: [10, 10, 10] },
+    ],
+    [
+      'decrement',
+      (qb: any) => qb.decrement('views', 3),
+      { views: [7, 10, 7], likes: [10, 10, 10] },
+    ],
+    [
+      'increment + decrement on different columns',
+      (qb: any) => qb.increment('views', 1).decrement('likes', 2),
+      { views: [11, 10, 11], likes: [8, 10, 8] },
+    ],
+    [
+      'increment + decrement on the same column',
+      (qb: any) => qb.increment('views', 2).decrement('views', 1),
+      { views: [11, 10, 11], likes: [10, 10, 10] },
+    ],
+    [
+      'two increments on the same column',
+      (qb: any) => qb.increment('views', 2).increment('views', 3),
+      { views: [15, 10, 15], likes: [10, 10, 10] },
+    ],
+  ])('query builder %s: nested relation where', async (_label, apply, expected) => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } });
+    await apply(qb).execute();
+
+    const rows = await connection('tests').orderBy('id').select('views', 'likes');
+    expect(rows.map((r) => r.views)).toEqual(expected.views);
+    expect(rows.map((r) => r.likes)).toEqual(expected.likes);
+
+    await connection.destroy();
+  });
+
+  it.each([
+    ['nested relation where', { related: { title: 'Category A' } }, [12, 10, 12]],
+    ['scalar where (no subquery)', { name: 'Samuel UMTITI' }, [10, 12, 10]],
+  ])(
+    'query builder maps counter attribute names to columns: %s',
+    async (_label, where, expected) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      await em.createQueryBuilder(TEST_UID).init({ where }).increment('viewCount', 2).execute();
+
+      expect(await connection('tests').orderBy('id').pluck('view_count')).toEqual(expected);
+
+      await connection.destroy();
+    }
+  );
+
+  it.each([
+    ['nested relation where', { related: { title: 'Category A' } }],
+    ['scalar where (no subquery)', { name: 'Samuel UMTITI' }],
+  ])(
+    'query builder rejects a counter on a column also in update data: %s',
+    async (_label, where) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      await expect(
+        em
+          .createQueryBuilder(TEST_UID)
+          .init({ where })
+          .update({ views: 1 })
+          .increment('views', 2)
+          .execute()
+      ).rejects.toThrow('Cannot update and increment or decrement the column "views"');
+
+      expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 10, 10]);
+
+      await connection.destroy();
+    }
+  );
+
+  it('query builder ignores forUpdate and orderBy in the relation subquery', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } }, orderBy: { name: 'asc' } })
+      .forUpdate()
+      .increment('views', 1);
+
+    const sql = qb.getKnexQuery().toString();
+    expect(sql).not.toMatch(/order by/i);
+    expect(sql).not.toMatch(/for update/i);
+
+    await qb.execute();
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 11]);
+
+    await connection.destroy();
+  });
+
+  it('clone() does not share state arrays with the original', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const base = em.createQueryBuilder(TEST_UID).where({ name: 'Samuel UMTITI' });
+    const a = base.clone().increment('views', 1);
+    base.clone().increment('views', 100).where({ name: 'Hugo LLORIS' });
+
+    await a.execute();
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 11, 10]);
+
+    await connection.destroy();
+  });
+
+  it('query builder update data + increment: nested relation where', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    await em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } })
+      .update({ name: 'UPDATED' })
+      .increment('views', 1)
+      .execute();
+
+    const rows = await connection('tests').orderBy('id').select('name', 'views');
+    expect(rows).toEqual([
+      { name: 'UPDATED', views: 11 },
+      { name: 'Samuel UMTITI', views: 10 },
+      { name: 'UPDATED', views: 11 },
+    ]);
+
+    await connection.destroy();
+  });
+
+  it('query builder increment + decrement: scalar where (no subquery)', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    await em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { name: 'Samuel UMTITI' } })
+      .increment('views', 4)
+      .decrement('likes', 1)
+      .execute();
+
+    const rows = await connection('tests').orderBy('id').select('views', 'likes');
+    expect(rows).toEqual([
+      { views: 10, likes: 10 },
+      { views: 14, likes: 9 },
+      { views: 10, likes: 10 },
+    ]);
+
+    await connection.destroy();
+  });
+
+  it.each([
+    [
+      'increment',
+      (qb: any) => qb.increment('views', 5),
+      (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('views'),
+      [15, 10, 15],
+    ],
+    [
+      'update',
+      (qb: any) => qb.update({ name: 'UPDATED' }),
+      (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('name'),
+      ['UPDATED', 'Samuel UMTITI', 'UPDATED'],
+    ],
+    [
+      'delete',
+      (qb: any) => qb.delete(),
+      (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('name'),
+      ['Samuel UMTITI'],
+    ],
+  ])(
+    'query builder %s honours an explicit transaction',
+    async (_label, apply, read, expectedInTrx) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      const trx = await connection.transaction();
+      try {
+        const qb = em
+          .createQueryBuilder(TEST_UID)
+          .init({ where: { related: { title: 'Category A' } } });
+        await apply(qb).transacting(trx).execute();
+
+        expect(await read(trx)).toEqual(expectedInTrx);
+      } finally {
+        await trx.rollback();
+      }
+
+      expect(await connection('tests').orderBy('id').select('name', 'views')).toEqual([
+        { name: 'Hugo LLORIS', views: 10 },
+        { name: 'Samuel UMTITI', views: 10 },
+        { name: 'Lucas HERNANDEZ', views: 10 },
+      ]);
+
+      await connection.destroy();
+    }
+  );
 });
