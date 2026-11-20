@@ -53,6 +53,8 @@ A Media Library upload drop reads the providers once, when the user drops the fi
 
 If a provider throws, returns a value that is not a plain object (for example a promise from an `async` function, an array or `null`), or returns an invalid header name or value, the request fails with a `RequestHeadersError` and is not sent. For an invalid header, the message names the header. For a provider that throws, the thrown error is the `cause`. Header values must be Latin-1 without line breaks, so send identifiers rather than display names. A forbidden name such as `Cookie`, `Origin`, `Sec-*` or `Proxy-*` does not fail: the browser drops it without an error.
 
+When a provider has no context yet, for example before the user selects a space, it returns `undefined` for the header. It throws only on a real failure. A provider that throws too early also blocks requests such as `/admin/users/me`, so the admin cannot see that a stale session ended.
+
 The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. The RTK Query base query returns the error as a `SerializedError` named `RequestHeadersError`, so check `error.name` there. `instanceof RequestHeadersError` works only for errors from `getFetchClient` or `unstable_getRequestHeaders`.
 
 ## CORS
