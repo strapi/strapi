@@ -22,6 +22,8 @@ export const createEntitiesStream = (
         .queryBuilder(contentType.uid)
         // Fetch all columns
         .select('*')
+        // Ensure deterministic ordering for stream pagination
+        .orderBy('id')
         // Apply the populate
         .populate(query.deepPopulateComponentLikeQuery)
         // Get a readable stream
