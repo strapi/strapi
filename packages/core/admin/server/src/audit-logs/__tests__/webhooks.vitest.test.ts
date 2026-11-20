@@ -41,6 +41,7 @@ describe('webhook audit events', () => {
         events: ['entry.create', 'entry.update'],
         contentTypeEvents: {},
         headers: ['Authorization', 'X-Env'],
+        body: null,
         isEnabled: true,
       },
     });
@@ -84,8 +85,23 @@ describe('toAuditedWebhook', () => {
       events: ['entry.create', 'entry.update'],
       contentTypeEvents: {},
       headers: ['Authorization', 'X-Env'],
+      body: null,
       isEnabled: true,
     });
+  });
+
+  test('keeps the sorted top-level keys of the body template only', () => {
+    const audited = toAuditedWebhook({
+      ...webhook,
+      body: { token: 'glptt-s3cret', ref: 'main', variables: { TITLE: '{{ entry.title }}' } },
+    });
+
+    expect(audited.body).toEqual(['ref', 'token', 'variables']);
+    expect(JSON.stringify(audited)).not.toMatch(/s3cret|main|TITLE/);
+  });
+
+  test('records an empty body template as an empty key list, not as the default payload', () => {
+    expect(toAuditedWebhook({ ...webhook, body: {} }).body).toEqual([]);
   });
 
   test('sorts the events of each content type', () => {
@@ -176,6 +192,61 @@ describe('getWebhookChanges', () => {
 
     expect(changes).toEqual({ headers: { added: [], removed: [], changed: ['Authorization'] } });
     expect(JSON.stringify(changes)).not.toMatch(/s3cret|rotated/);
+  });
+
+  test('records a switch between the default payload and a body template', () => {
+    const custom = { ...webhook, body: { ref: 'main', token: 's3cret' } };
+
+    expect(getWebhookChanges(webhook, custom)).toEqual({
+      body: {
+        added: ['ref', 'token'],
+        removed: [],
+        changed: [],
+        before: null,
+        after: ['ref', 'token'],
+      },
+    });
+    expect(getWebhookChanges(custom, webhook)).toEqual({
+      body: {
+        added: [],
+        removed: ['ref', 'token'],
+        changed: [],
+        before: ['ref', 'token'],
+        after: null,
+      },
+    });
+    expect(JSON.stringify(getWebhookChanges(webhook, custom))).not.toMatch(/s3cret|main/);
+  });
+
+  test('records a switch between the default payload and an empty body template', () => {
+    const empty = { ...webhook, body: {} };
+
+    expect(getWebhookChanges(webhook, empty)).toEqual({
+      body: { added: [], removed: [], changed: [], before: null, after: [] },
+    });
+    expect(getWebhookChanges(empty, webhook)).toEqual({
+      body: { added: [], removed: [], changed: [], before: [], after: null },
+    });
+    expect(getWebhookChanges(empty, { ...webhook, body: {} })).toEqual({});
+  });
+
+  test('records a rotated body value by key, without the values', () => {
+    const changes = getWebhookChanges(
+      { ...webhook, body: { token: 'old-s3cret', ref: 'main', inputs: { a: 1 } } },
+      { ...webhook, body: { token: 'new-s3cret', ref: 'main', inputs: { a: 2 } } }
+    );
+
+    expect(changes).toEqual({ body: { added: [], removed: [], changed: ['inputs', 'token'] } });
+    expect(JSON.stringify(changes)).not.toMatch(/s3cret|main/);
+  });
+
+  test('returns an empty object when only the key order of the body differs', () => {
+    expect(
+      getWebhookChanges(
+        { ...webhook, body: { ref: 'main', inputs: {} } },
+        { ...webhook, body: { inputs: {}, ref: 'main' } }
+      )
+    ).toEqual({});
   });
 
   test('classifies a header named after an Object.prototype member by ownership', () => {
