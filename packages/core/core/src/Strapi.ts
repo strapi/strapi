@@ -113,7 +113,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('reload');
   }
 
-  get db(): Database {
+  get db(): Core.Strapi['db'] {
     return this.get('db');
   }
 
