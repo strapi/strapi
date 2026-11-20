@@ -133,18 +133,27 @@ app.plugin('i18n').controllers.locales.missing satisfies unknown;
 // @ts-expect-error Bundled admin contracts cover the plural accessors too.
 app.services['admin::permission'].missing();
 
-// Unregistered and dynamic keys keep the legacy types: records cannot close literal keys only.
-// With `noUncheckedIndexedAccess`, only these index-signature reads include `undefined`.
+// Unregistered and dynamic service keys resolve to `unknown`, like `strapi.service(uid)`: they have
+// no contract. Other unregistered and dynamic keys keep the legacy types: records cannot close
+// literal keys only. With `noUncheckedIndexedAccess`, only these index-signature reads include
+// `undefined`.
+// @ts-expect-error Unregistered services have no contract.
 app.services['plugin::i18n.unregistered']?.anything();
+// @ts-expect-error Dynamic service keys have no contract.
 app.services[dynamicName]?.anything();
+// @ts-expect-error Dynamic plugin service keys have no contract.
 app.plugin('i18n').services[dynamicName]?.anything();
+// @ts-expect-error Services of a dynamic plugin have no contract.
 app.plugins[dynamicName]?.services.greeting?.anything();
 app.controllers[dynamicName]?.anything satisfies Core.ControllerHandler | undefined;
 // @ts-expect-error Unregistered keys may be absent.
-app.services['plugin::i18n.unregistered'].anything();
+app.controllers['plugin::i18n.unregistered'].anything satisfies unknown;
 for (const service of Object.values(app.plugin(dynamicName).services)) {
+  // @ts-expect-error Iterated services are `unknown`: narrow before use.
   service.anything();
 }
+// The raw admin services keep the legacy service: `strapi.admin` is not built from the registries.
+app.admin.services.permission?.anything();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

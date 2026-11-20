@@ -108,47 +108,63 @@ if (typeof policy === 'function') {
   policy(ctx, { role: 1 }, { strapi });
 }
 
-// Unregistered keys, literal or dynamic, keep the legacy types: an index signature cannot close
-// literal keys while keeping dynamic keys open, unlike the singular lookups.
+// Unregistered service keys, literal or dynamic, resolve to `unknown`, like `strapi.service(uid)`:
+// they have no contract. Other unregistered keys keep the legacy types: an index signature cannot
+// close literal keys while keeping dynamic keys open, unlike the singular lookups. The raw admin
+// services keep the legacy service: `strapi.admin` is not built from the registries.
 const unregisteredService = strapi.services['plugin::map-lab.unregistered'];
 const dynamicService = strapi.services[dynamicKey];
 const dynamicController = strapi.controllers[dynamicKey];
 const dynamicPolicy = strapi.policies[dynamicKey];
 const unregisteredPluginService = strapi.plugin('map-lab').services.unregistered;
 const dynamicPluginService = strapi.plugin('map-lab').services[dynamicKey];
+const unregisteredApiService = strapi.api('map-lab').services.unregistered;
+const adminService = strapi.admin.services.unregistered;
+const adminServices = strapi.admin.services;
 const unregisteredPlugin = strapi.plugins['map-lab-unregistered'];
 const dynamicPlugin = strapi.plugins[dynamicKey];
 const dynamicPluginServices = strapi.plugin(dynamicKey).services;
 const unregisteredApi = strapi.apis['map-lab-unregistered'];
 const dynamicApi = strapi.api(dynamicKey);
 declare const open: [
-  Expect<Equal<typeof unregisteredService, Service>>,
-  Expect<Equal<typeof dynamicService, Service>>,
+  Expect<Equal<typeof unregisteredService, unknown>>,
+  Expect<Equal<typeof dynamicService, unknown>>,
   Expect<Equal<typeof dynamicController, Controller>>,
   Expect<Equal<typeof dynamicPolicy, Policy>>,
-  Expect<Equal<typeof unregisteredPluginService, Service>>,
-  Expect<Equal<typeof dynamicPluginService, Service>>,
+  Expect<Equal<typeof unregisteredPluginService, unknown>>,
+  Expect<Equal<typeof dynamicPluginService, unknown>>,
+  Expect<Equal<typeof unregisteredApiService, unknown>>,
+  Expect<Equal<typeof adminService, Service>>,
+  Expect<Equal<typeof adminServices, Record<string, Service>>>,
+  Expect<Equal<(typeof strapi.admin)['controllers'], Module['controllers']>>,
+  Expect<Equal<(typeof strapi.admin)['config'], Module['config']>>,
   Expect<Equal<typeof unregisteredPlugin, Plugin>>,
   Expect<Equal<typeof dynamicPlugin, Plugin>>,
-  Expect<Equal<typeof dynamicPluginServices, Record<string, Service>>>,
+  Expect<Equal<typeof dynamicPluginServices, Record<string, unknown>>>,
   Expect<Equal<typeof unregisteredApi, Module>>,
-  Expect<Equal<(typeof dynamicApi)['services'], Record<string, Service>>>,
+  Expect<Equal<(typeof dynamicApi)['services'], Record<string, unknown>>>,
 ];
 open satisfies unknown;
 
-// The maps stay assignable to the legacy records, iterable, and writable.
+// The maps stay iterable and writable. Service maps are no longer assignable to the legacy record:
+// their unregistered keys are `unknown`.
+// @ts-expect-error Unregistered services are not legacy services.
 const legacyServices: Record<string, Service> = strapi.services;
 const legacyControllers: Record<string, Controller> = strapi.controllers;
 const legacyPolicies: Record<string, Policy> = strapi.policies;
 const legacyPlugins: Record<string, Plugin> = strapi.plugins;
 const legacyApis: Record<string, Module> = strapi.apis;
+// @ts-expect-error Unregistered plugin services are not legacy services.
 const legacyPluginServices: Record<string, Service> = strapi.plugin('map-lab').services;
+const services: Record<string, unknown> = strapi.services;
+const pluginServices: Record<string, unknown> = strapi.plugin('map-lab').services;
 [legacyServices, legacyControllers, legacyPolicies, legacyPlugins, legacyApis] satisfies unknown[];
-legacyPluginServices satisfies unknown;
+[legacyPluginServices, services, pluginServices] satisfies unknown[];
 for (const [uid, entry] of Object.entries(strapi.services)) {
   uid satisfies string;
-  // Iterated values include the registered contracts; narrow before using members.
-  entry satisfies Service | LabService;
+  // Iterated values are `unknown`; narrow before using members.
+  const iterated: Expect<Equal<typeof entry, unknown>> = true;
+  iterated satisfies unknown;
 }
 Object.keys(strapi.plugin('map-lab').services) satisfies string[];
 strapi.services[dynamicKey] = { anything: () => undefined };
