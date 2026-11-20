@@ -1,3 +1,4 @@
+import { AUTH_COOKIE_NAME, deleteCookie } from '../cookies';
 import {
   ADMIN_REFRESH_LOCK,
   attemptTokenRefresh,
@@ -11,8 +12,6 @@ import {
   triggerSessionExpired,
   unstable_addRequestHeaders,
 } from '../getFetchClient';
-
-import { AUTH_COOKIE_NAME, deleteCookie } from '../cookies';
 
 import type { FetchClient, FetchOptions, RequestHeadersProvider } from '../getFetchClient';
 
