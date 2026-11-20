@@ -100,3 +100,21 @@ declare const unregisteredChecks: [
   Expect<Equal<IsAny<Modules.Documents.Params.Data.Input<UID.ContentType>[string]>, true>>,
 ];
 unregisteredChecks satisfies unknown;
+
+// `strapi.documents.utils.transformData` keeps develop's `any` data and options, and its
+// `AnyDocument` result.
+type TransformData = Core.Strapi['documents']['utils']['transformData'];
+declare const transformDataChecks: [
+  Expect<Equal<IsAny<Parameters<TransformData>[0]>, true>>,
+  Expect<Equal<IsAny<Parameters<TransformData>[1]>, true>>,
+  Expect<Equal<Awaited<ReturnType<TransformData>>, Modules.Documents.AnyDocument>>,
+];
+transformDataChecks satisfies unknown;
+declare const transformData: TransformData;
+const transformDataCalls = async () => {
+  // Any data and options compile, as on develop.
+  const result = await transformData('title', { locale: 1 });
+  result.documentId satisfies string;
+  result.title satisfies number;
+};
+transformDataCalls satisfies unknown;
