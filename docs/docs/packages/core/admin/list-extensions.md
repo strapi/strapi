@@ -27,7 +27,7 @@ app.registerHook(
 
     const index = displayedHeaders.findIndex(({ name }) => name === 'email');
     const team = {
-      name: 'plugin::my-plugin.team',
+      name: 'my-plugin.team',
       label: { id: 'my-plugin.users.team', defaultMessage: 'Team' },
       cellFormatter: (user) => <TeamChip user={user} />,
     };
@@ -45,7 +45,7 @@ app.registerHook(
 ```
 
 - `list` types the rows: after `list === 'users'`, `cellFormatter` gets a user.
-- Name plugin headers `plugin::<pluginId>.<name>`: a header named like a core column renders the core cell.
+- Give plugin headers a name no core column uses, for example prefixed with the plugin id: a header named like a core column renders the core cell.
 - `label` is a string or a message descriptor. Plugin headers are never sortable: the server sorts on its own fields only.
 - The core headers, in order: `api-tokens` `name`, `description`, `createdAt`, `lastUsedAt`; `audit-logs` `action`, `date`, `user`; `roles` `name`, `description`, `usersCount`; `users` `firstname`, `lastname`, `email`, `roles`, `username`, `isActive`.
 
@@ -55,7 +55,7 @@ app.registerHook(
 
 A filter on a field of the core model joins the list's Filters popover and is sent in `filters`, as in the Content Manager.
 
-A filter the core model does not have, such as a space, uses `display: 'select'`. It renders as its own dropdown on the right of the toolbar, like the Content Manager locale picker:
+A filter the core model does not have, such as a space, uses `unstable_display: 'select'`. It renders as its own dropdown on the right of the toolbar, like the Content Manager locale picker:
 
 ```ts
 app.registerHook(
@@ -65,8 +65,9 @@ app.registerHook(
     displayedFilters: [
       ...displayedFilters,
       {
-        display: 'select',
-        name: 'plugin::my-plugin.team',
+        unstable_display: 'select',
+        pluginId: 'my-plugin',
+        name: 'team',
         label: { id: 'my-plugin.team', defaultMessage: 'Team' },
         placeholder: { id: 'my-plugin.team.all', defaultMessage: 'All teams' },
         options: teams.map(({ slug, name }) => ({ label: name, value: slug })),
@@ -76,7 +77,8 @@ app.registerHook(
 );
 ```
 
-- The name is `plugin::<pluginId>.<name>`. The value goes to the URL and the list request as `plugins[<pluginId>][<name>]`, for example `plugins[my-plugin][team]=blue`, apart from `filters`, which the server validates against the core model. A dropdown filter with another name is left out.
+- The value goes to the URL and the list request as `plugins[<pluginId>][<name>]`, for example `plugins[my-plugin][team]=blue`, apart from `filters`, which the server validates against the core model.
+- `unstable_display` is experimental: the option can change in a minor release.
 - `placeholder` is the option that clears the filter. Picking an option brings a paginated list back to its first page.
 - The plugin applies the value on the server, for example with a route middleware. The four list routes and the audit logs export drop `plugins` before they query the database.
 - The audit logs export sends `plugins` too, but its continuation token and its audit event only cover `filters`. A plugin enforces its own scope on the server and never trusts `plugins`.

@@ -45,7 +45,7 @@ describe('useSettingsListHeaders', () => {
 });
 
 describe('useSettingsListFilters', () => {
-  it('keeps popover filters for the filter bar and turns plugin dropdowns into selects', () => {
+  it('keeps popover filters for the filter bar and turns dropdown filters into selects', () => {
     const runHookWaterfall = (_name: string, value: unknown) => {
       const args = value as InjectSettingsListFiltersArgs;
 
@@ -54,19 +54,12 @@ describe('useSettingsListFilters', () => {
         displayedFilters: [
           ...args.displayedFilters,
           {
-            display: 'select' as const,
-            name: 'plugin::spaces.space',
+            unstable_display: 'select' as const,
+            pluginId: 'spaces',
+            name: 'space',
             label: { id: 'space', defaultMessage: 'Space' },
             placeholder: { id: 'all', defaultMessage: 'All spaces' },
             options: [{ value: 'fr', label: { id: 'fr', defaultMessage: 'France' } }],
-          },
-          // Not named after a plugin: it has nowhere to store its value
-          {
-            display: 'select' as const,
-            name: 'space',
-            label: 'Space',
-            placeholder: 'All',
-            options: [],
           },
         ],
       };
