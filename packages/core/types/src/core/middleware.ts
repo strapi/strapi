@@ -19,7 +19,15 @@ export type MiddlewareConfig = {
   config?: unknown | undefined;
 };
 
-export type MiddlewareHandler = Koa.Middleware;
+/**
+ * A Koa middleware. With strict types, its result and what `next()` resolves to are `unknown`: Koa
+ * ignores the result, and `next()` resolves to whatever the next middleware returns (koa-compose).
+ * Each position is gated on its own: the context stays the one `Koa.Middleware` gives.
+ */
+export type MiddlewareHandler = (
+  context: Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, any>,
+  next: IsStrict extends false ? Koa.Next : () => Promise<unknown>
+) => IsStrict extends false ? any : unknown;
 
 export type Middleware = MiddlewareHandler | MiddlewareFactory;
 
