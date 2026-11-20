@@ -101,21 +101,30 @@ CLA Assistant comments "please sign the CLA"   (clock starts at that comment)
         │  (daily cron, still pending after 30 days, and the reminder is at least 7 days old)
         ▼
 [GitHub Action] Closes the PR with a short comment (it can be reopened once the CLA is signed)
-                Syncs the Linear ticket → "Canceled" (CMS team, same as the lifecycle above)
+                Syncs the Linear ticket → "Canceled" (looks in CPR first, then CMS, and uses
+                that team's Canceled state)
 ```
 
-Commit email addresses are never written to comments or logs. Comments carry a hidden marker (`<!-- community-pr-cla: reminder -->` / `closed`), so a PR never gets the same comment twice, and a PR that was reopened after being closed is left alone.
+Commit email addresses are never written to comments or logs. Comments start with a hidden marker (`<!-- community-pr-cla: reminder -->` / `closed`), so a PR never gets the same comment twice, and a PR that was reopened after being closed is left alone.
+
+If the check passes and later goes pending again (for example, a new commit from an email that isn't linked), the clock restarts: earlier reminders and close notices no longer count, and the PR gets a new reminder before it can be closed.
+
+A failure on one PR (for example, a locked conversation) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed.
 
 ### Settings
 
 Repository variables (Settings → Secrets and variables → Variables):
 
-| Variable                | Default        | Meaning                                                                                   |
-| ----------------------- | -------------- | ----------------------------------------------------------------------------------------- |
-| `CLA_FOLLOW_UP_ENABLED` | (unset)        | Scheduled runs only comment / close when this is `true`                                   |
-| `CLA_REMINDER_DAYS`     | 7              | Days the CLA is pending before the reminder (and the close grace)                         |
-| `CLA_CLOSE_DAYS`        | 30             | Days the CLA is pending before the PR is closed                                           |
-| `CLA_EXEMPT_LABELS`     | `pr: security` | Extra comma-separated labels that exempt a PR (on top of `waiting on author` and `stale`) |
+| Variable                | Default        | Meaning                                                           |
+| ----------------------- | -------------- | ----------------------------------------------------------------- |
+| `CLA_FOLLOW_UP_ENABLED` | (unset)        | Scheduled runs only comment / close when this is `true`           |
+| `CLA_REMINDER_DAYS`     | 7              | Days the CLA is pending before the reminder (and the close grace) |
+| `CLA_CLOSE_DAYS`        | 30             | Days the CLA is pending before the PR is closed                   |
+| `CLA_EXEMPT_LABELS`     | `pr: security` | Comma-separated labels that exempt a PR (see below)               |
+
+Setting `CLA_EXEMPT_LABELS` replaces the default, so include `pr: security` if you still want it. `waiting on author` and `stale` are always exempt, whatever the variable says.
+
+The `only_prs` input (or `CLA_ONLY_PRS` locally) takes PR numbers separated by spaces or commas, with or without `#`. Anything else fails the run instead of widening it to every PR.
 
 ### Dry run
 

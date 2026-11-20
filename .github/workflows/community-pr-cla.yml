@@ -64,5 +64,6 @@ jobs:
           CLA_CLOSE_DAYS: ${{ vars.CLA_CLOSE_DAYS || '30' }}
           CLA_EXEMPT_LABELS: "${{ vars.CLA_EXEMPT_LABELS || 'pr: security' }}"
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_CPR_TEAM_ID: ${{ vars.LINEAR_CPR_TEAM_ID }}
           LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
         run: node --experimental-strip-types .github/scripts/community-pr-cla-action.ts

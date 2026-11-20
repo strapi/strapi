@@ -60,9 +60,12 @@ export interface ClaDiagnosis {
   otherUnsigned: Array<{ login: string; shas: string[] }>;
   /** Commits whose email GitHub can't link to any account. */
   unlinked: Array<{ sha: string; name: string; fakeNoreply: boolean }>;
-  /** Number of non-merge commits, used to build the rebase command. */
-  commitCount: number;
-  hasMergeCommits: boolean;
+}
+
+/** The `license/cla` status of one commit in the PR. */
+export interface ClaStatus {
+  state: string;
+  createdAt: string;
 }
 
 export type PlannedAction =
@@ -71,6 +74,10 @@ export type PlannedAction =
   | { type: 'wait'; days: number; reason: string }
   | { type: 'close'; days: number }
   | { type: 'reopened'; days: number };
+
+/** Every comment this workflow posts starts with its marker. Markers are matched there only. */
+export const hasMarker = (body: string | null | undefined, marker: string) =>
+  (body ?? '').startsWith(marker);
 
 // ─── Pure helpers ───────────────────────────────────────────────────────────
 
@@ -83,10 +90,10 @@ export function isNoreplyEmail(email: string): boolean {
 /**
  * Renders a git author name as an inline code span, or null when it is unsafe to show
  * (empty, or looks like an email address). Code spans keep names from turning into
- * mentions, links or markdown.
+ * mentions, links or markdown; `<` and `>` are dropped so a name can't carry an HTML comment.
  */
 export function displayName(name: string): string | null {
-  const clean = name.replace(/[`\r\n]/g, '').trim();
+  const clean = name.replace(/[`<>\r\n]/g, '').trim();
   if (!clean || clean.includes('@')) return null;
   return `\`${clean}\``;
 }
@@ -118,30 +125,61 @@ export function diagnose(prAuthor: string, commits: CommitInfo[], bot: ClaBotCom
     shasByLogin.set(lc(c.login), entry);
   }
 
-  // With several committers the bot lists who signed. With one, there is no list and the
-  // pending status means that one committer hasn't signed.
+  // With several committers the bot lists who signed (✅) and who hasn't (❌). Only the ❌
+  // entries are trusted: anyone can author a commit with someone else's email, so a linked
+  // login alone never gets named or mentioned.
   const hasList = !!bot && bot.signed.length + bot.unsigned.length > 0;
   const unsignedNames = new Set((bot?.unsigned ?? []).map(lc));
-  const unsignedLogins = [...shasByLogin.keys()].filter((l) =>
-    hasList ? unsignedNames.has(l) : true
-  );
 
-  // The PR author counts as unsigned when their account has unsigned commits here, or when
-  // they have no commits at all but the bot still lists them as unsigned.
-  const authorUnsigned =
-    unsignedLogins.includes(lc(prAuthor)) || (hasList && unsignedNames.has(lc(prAuthor)));
+  // Without a list, the bot has a single committer to ask. That is the author when the
+  // author's account is the only linked one; otherwise we can't tell, and name no one.
+  const authorUnsigned = hasList
+    ? unsignedNames.has(lc(prAuthor))
+    : shasByLogin.size === 1 && shasByLogin.has(lc(prAuthor));
 
-  const otherUnsigned = unsignedLogins
-    .filter((l) => l !== lc(prAuthor))
-    .map((l) => shasByLogin.get(l)!);
+  const otherUnsigned = hasList
+    ? [...shasByLogin.keys()]
+        .filter((l) => l !== lc(prAuthor) && unsignedNames.has(l))
+        .map((l) => shasByLogin.get(l)!)
+    : [];
 
-  return {
-    authorUnsigned,
-    otherUnsigned,
-    unlinked,
-    commitCount: nonMerge.length,
-    hasMergeCommits: commits.some((c) => c.isMerge),
-  } satisfies ClaDiagnosis;
+  return { authorUnsigned, otherUnsigned, unlinked } satisfies ClaDiagnosis;
+}
+
+/**
+ * When the current pending period started: the CLA bot's first comment, unless the check has
+ * passed on a commit since. Then the period restarts when the check went pending again, and
+ * reminders or close notices from before that no longer count.
+ */
+export function pendingSince(opts: {
+  botCommentAt: string | null;
+  prCreatedAt: string;
+  statuses: ClaStatus[];
+}): number {
+  const first = new Date(opts.botCommentAt ?? opts.prCreatedAt).getTime();
+  const at = (s: ClaStatus) => new Date(s.createdAt).getTime();
+  const successes = opts.statuses.filter((s) => s.state === 'SUCCESS').map(at);
+  if (!successes.length) return first;
+  const lastSuccess = Math.max(...successes);
+  const pendingAfter = opts.statuses
+    .filter((s) => s.state !== 'SUCCESS')
+    .map(at)
+    .filter((t) => t > lastSuccess);
+  return pendingAfter.length ? Math.min(...pendingAfter) : lastSuccess;
+}
+
+/**
+ * Parses `CLA_ONLY_PRS` ("26424 #26864, 27513"). Returns undefined when it is empty, and
+ * throws on anything that isn't a PR number, so a typo never widens the run to every PR.
+ */
+export function parseOnlyPRs(value: string | undefined): number[] | undefined {
+  const tokens = (value ?? '').split(/[\s,]+/).filter(Boolean);
+  if (!tokens.length) return undefined;
+  return tokens.map((token) => {
+    const match = /^#?(\d+)$/.exec(token);
+    if (!match) throw new Error(`CLA_ONLY_PRS: "${token}" is not a PR number`);
+    return Number(match[1]);
+  });
 }
 
 export function planAction(opts: {
@@ -187,18 +225,43 @@ const formatDate = (d: Date) =>
 
 const codeList = (shas: string[]) => shas.map((s) => `\`${shortSha(s)}\``).join(', ');
 
-function rebaseSnippet(d: ClaDiagnosis): string {
-  const base = d.hasMergeCommits ? '<commit-before-your-first-change>' : `HEAD~${d.commitCount}`;
+export interface RepoRef {
+  owner: string;
+  repo: string;
+  /** The PR's base branch. */
+  baseRef: string;
+}
+
+/**
+ * Rewrites only the commits whose author (or committer) email is the one the contributor fills
+ * in, between the PR base and HEAD. Other people's commits, author dates and merge commits
+ * stay as they are.
+ */
+function reauthorSnippet(ref: RepoRef, exampleSha: string): string {
   return [
+    `To see that email, run \`git log -1 --format=%ae ${exampleSha}\`. ` +
+      'Fill in the placeholders below and run it on your PR branch. ' +
+      'It only rewrites commits with that email and keeps their dates. ' +
+      'If the commits use more than one email, run it once per email.',
+    '',
     '```sh',
-    'git config user.email "<an email on your GitHub account>"',
-    `git rebase --exec "git commit --amend --no-edit --reset-author" ${base}`,
+    `git fetch https://github.com/${ref.owner}/${ref.repo}.git ${ref.baseRef}`,
+    "FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --env-filter '",
+    'OLD="<that email>"',
+    'NEW_NAME="<your name>"',
+    'NEW_EMAIL="<an email on your GitHub account>"',
+    'if [ "$GIT_AUTHOR_EMAIL" = "$OLD" ]; then',
+    '  export GIT_AUTHOR_NAME="$NEW_NAME" GIT_AUTHOR_EMAIL="$NEW_EMAIL"',
+    'fi',
+    'if [ "$GIT_COMMITTER_EMAIL" = "$OLD" ]; then',
+    '  export GIT_COMMITTER_NAME="$NEW_NAME" GIT_COMMITTER_EMAIL="$NEW_EMAIL"',
+    "fi' FETCH_HEAD..HEAD",
     'git push --force-with-lease',
     '```',
   ].join('\n');
 }
 
-function unlinkedSection(d: ClaDiagnosis, recheckUrl: string): string {
+function unlinkedSection(d: ClaDiagnosis, recheckUrl: string, ref: RepoRef): string {
   const one = d.unlinked.length === 1;
   const lines: string[] = [
     one
@@ -249,21 +312,22 @@ function unlinkedSection(d: ClaDiagnosis, recheckUrl: string): string {
         `to the GitHub account of whoever wrote it ([how](${ADD_EMAIL_DOCS})), make sure that account has signed the CLA, then click [recheck](${recheckUrl}).`
     );
     lines.push(
-      `2. Or, if the email can't be added, remove ${
-        one ? 'that commit' : 'those commits'
-      } or re-author ${
-        one ? 'it' : 'them'
-      } with an email that's linked to your account, then force-push. For example:`
+      `2. Or, if ${
+        one ? 'that commit is' : 'those commits are'
+      } yours and the email can't be added, ` +
+        `re-author ${
+          one ? 'it' : 'them'
+        } with an email that's linked to your account, then force-push.`
     );
   } else {
     lines.push(
       `To fix it, re-author ${
         one ? 'that commit' : 'those commits'
-      } with an email that's linked to your account, then force-push. For example:`
+      } with an email that's linked to your account, then force-push.`
     );
   }
   lines.push('');
-  lines.push(rebaseSnippet(d));
+  lines.push(reauthorSnippet(ref, shortSha(d.unlinked[0].sha)));
   return lines.join('\n');
 }
 
@@ -274,6 +338,7 @@ export function buildReminderComment(opts: {
   recheckUrl: string;
   days: number;
   closeOn: Date;
+  repo: RepoRef;
 }): string {
   const { login, diagnosis: d, claUrl, recheckUrl } = opts;
   const sections: string[] = [];
@@ -284,7 +349,7 @@ export function buildReminderComment(opts: {
     );
   }
 
-  if (d.unlinked.length) sections.push(unlinkedSection(d, recheckUrl));
+  if (d.unlinked.length) sections.push(unlinkedSection(d, recheckUrl, opts.repo));
 
   if (d.otherUnsigned.length) {
     sections.push(
@@ -295,7 +360,7 @@ export function buildReminderComment(opts: {
         '',
         ...d.otherUnsigned.map((o) => `- @${o.login}: ${codeList(o.shas)}`),
         '',
-        `Each of them needs to [sign the CLA](${claUrl}). Otherwise, remove their commits or re-author them with your own email, then force-push.`,
+        `Each of them needs to [sign the CLA](${claUrl}). If they can't, drop their commits from this PR (for example with \`git rebase -i\`), then force-push.`,
       ].join('\n')
     );
   }
@@ -347,6 +412,7 @@ interface OpenPR {
   isBot: boolean;
   association: string;
   createdAt: string;
+  baseRef: string;
   labels: string[];
   cla: { state: string; targetUrl: string | null } | null;
 }
@@ -358,6 +424,7 @@ interface OpenPRsQuery {
       nodes: Array<{
         number: number;
         createdAt: string;
+        baseRefName: string;
         authorAssociation: string;
         author: { login: string; __typename: string } | null;
         labels: { nodes: Array<{ name: string }> };
@@ -385,6 +452,7 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
             nodes {
               number
               createdAt
+              baseRefName
               authorAssociation
               author { login __typename }
               labels(first: 50) { nodes { name } }
@@ -405,6 +473,7 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
         isBot: !n.author || n.author.__typename === 'Bot' || n.author.login.endsWith('[bot]'),
         association: n.authorAssociation,
         createdAt: n.createdAt,
+        baseRef: n.baseRefName,
         labels: n.labels.nodes.map((l) => l.name),
         cla: n.commits.nodes[0]?.commit.status?.context ?? null,
       });
@@ -432,6 +501,40 @@ async function listCommits(github: Octokit, owner: string, repo: string, pull_nu
   );
 }
 
+interface ClaStatusesQuery {
+  repository: {
+    pullRequest: {
+      commits: { nodes: Array<{ commit: { status: { context: ClaStatus | null } | null } }> };
+    } | null;
+  };
+}
+
+/** The `license/cla` status of each of the PR's last 100 commits that has one. */
+async function listClaStatuses(
+  github: Octokit,
+  owner: string,
+  repo: string,
+  number: number
+): Promise<ClaStatus[]> {
+  const res: ClaStatusesQuery = await github.graphql(
+    `query ($owner: String!, $repo: String!, $number: Int!, $context: String!) {
+      repository(owner: $owner, name: $repo) {
+        pullRequest(number: $number) {
+          commits(last: 100) {
+            nodes { commit { status { context(name: $context) { state createdAt } } } }
+          }
+        }
+      }
+    }`,
+    { owner, repo, number, context: CLA_STATUS_CONTEXT }
+  );
+  return (res.repository.pullRequest?.commits.nodes ?? [])
+    .map((n) => n.commit.status?.context)
+    .filter((c): c is ClaStatus => !!c);
+}
+
+const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
 // ─── Main entry ─────────────────────────────────────────────────────────────
 
 export interface ProcessOptions {
@@ -442,7 +545,10 @@ export interface ProcessOptions {
   reminderDays: number;
   closeDays: number;
   exemptLabels: string[];
-  /** Restrict the run to these PR numbers (for testing against known cases). */
+  /**
+   * Restrict the run to these PR numbers (for testing against known cases). When set, only
+   * these PRs are processed, so an empty list processes none.
+   */
   only?: number[];
   now?: number;
   log: (message: string) => void;
@@ -454,8 +560,10 @@ export interface ProcessResult {
   pr: number;
   login: string;
   days: number;
-  action: PlannedAction['type'];
+  action: PlannedAction['type'] | 'error';
   detail: string;
+  /** Set when processing this PR failed. Later PRs are still processed. */
+  error?: string;
 }
 
 export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<ProcessResult[]> {
@@ -466,7 +574,7 @@ export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<Proce
   const prefix = dryRun ? '[DRY RUN] ' : '';
 
   let prs = await listOpenPRs(github, owner, repo);
-  if (opts.only?.length) prs = prs.filter((p) => opts.only!.includes(p.number));
+  if (opts.only) prs = prs.filter((p) => opts.only!.includes(p.number));
   log(`Found ${prs.length} open PRs`);
 
   for (const pr of prs) {
@@ -483,91 +591,132 @@ export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<Proce
       continue;
     }
 
-    const comments = await github.paginate(github.rest.issues.listComments, {
-      owner,
-      repo,
-      issue_number: pr.number,
-      per_page: 100,
-    });
-    const botComment = comments.find((c) => c.user?.login === CLA_BOT_LOGIN);
-    const ours = comments.filter((c) => c.user?.login === ACTIONS_BOT_LOGIN);
-    const reminder = ours.find((c) => c.body?.includes(REMINDER_MARKER));
-    const closedNotice = ours.find((c) => c.body?.includes(CLOSED_MARKER));
-
-    const unsignedSince = new Date(botComment?.created_at ?? pr.createdAt).getTime();
-    const plan = planAction({
-      unsignedSince,
-      reminderAt: reminder ? new Date(reminder.created_at).getTime() : null,
-      closedNoticeAt: closedNotice ? new Date(closedNotice.created_at).getTime() : null,
-      now,
-      reminderDays: opts.reminderDays,
-      closeDays: opts.closeDays,
-    });
-
-    const claUrl =
-      pr.cla.targetUrl ?? `https://cla.strapi.io/${owner}/${repo}?pullRequest=${pr.number}`;
-    const recheckUrl = `https://cla.strapi.io/check/${owner}/${repo}?pullRequest=${pr.number}`;
     const result: ProcessResult = {
       pr: pr.number,
       login: pr.login,
-      days: plan.days,
-      action: plan.type,
+      days: 0,
+      action: 'error',
       detail: '',
     };
     results.push(result);
 
-    if (plan.type === 'remind') {
-      const commits = await listCommits(github, owner, repo, pr.number);
-      const diagnosis = diagnose(
-        pr.login,
-        commits,
-        botComment ? parseClaBotComment(botComment.body ?? '', botComment.created_at) : null
-      );
-      result.detail = describe(diagnosis);
-      const body = buildReminderComment({
-        login: pr.login,
-        diagnosis,
-        claUrl,
-        recheckUrl,
-        days: plan.days,
-        closeOn: closeDate({
-          unsignedSince,
-          now,
-          reminderDays: opts.reminderDays,
-          closeDays: opts.closeDays,
-        }),
-      });
-      log(
-        `${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → reminder [${result.detail}]`
-      );
-      if (dryRun) {
-        log(body.replace(/^/gm, '    | '));
-      } else {
-        await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
-      }
-    } else if (plan.type === 'close') {
-      log(`${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → close`);
-      if (!dryRun) {
-        await github.rest.issues.createComment({
-          owner,
-          repo,
-          issue_number: pr.number,
-          body: buildCloseComment({ login: pr.login, claUrl, closeDays: opts.closeDays }),
-        });
-        await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
-        await opts.onClosed?.(pr.number);
-      }
-    } else {
-      result.detail = plan.type === 'wait' ? plan.reason : '';
-      log(
-        `PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → ${plan.type}${
-          result.detail ? ` (${result.detail})` : ''
-        }`
-      );
+    try {
+      await processPR({ ...opts, pr, now, result, prefix });
+    } catch (error) {
+      result.action = 'error';
+      result.error = errorMessage(error);
+      log(`PR #${pr.number}: failed: ${result.error}`);
     }
   }
 
   return results;
+}
+
+async function processPR(
+  opts: ProcessOptions & { pr: OpenPR; now: number; result: ProcessResult; prefix: string }
+): Promise<void> {
+  const { github, owner, repo, dryRun, log, pr, now, result, prefix } = opts;
+  const cla = pr.cla!;
+
+  const [comments, statuses] = await Promise.all([
+    github.paginate(github.rest.issues.listComments, {
+      owner,
+      repo,
+      issue_number: pr.number,
+      per_page: 100,
+    }),
+    listClaStatuses(github, owner, repo, pr.number),
+  ]);
+  const botComment = comments.find((c) => c.user?.login === CLA_BOT_LOGIN);
+  const unsignedSince = pendingSince({
+    botCommentAt: botComment?.created_at ?? null,
+    prCreatedAt: pr.createdAt,
+    statuses,
+  });
+
+  // Only our comments from the current pending period count: if the check passed and went
+  // pending again since, the PR gets a fresh reminder and a fresh close date.
+  const ours = comments.filter(
+    (c) => c.user?.login === ACTIONS_BOT_LOGIN && new Date(c.created_at).getTime() >= unsignedSince
+  );
+  const reminder = ours.find((c) => hasMarker(c.body, REMINDER_MARKER));
+  const closedNotice = ours.find((c) => hasMarker(c.body, CLOSED_MARKER));
+
+  const plan = planAction({
+    unsignedSince,
+    reminderAt: reminder ? new Date(reminder.created_at).getTime() : null,
+    closedNoticeAt: closedNotice ? new Date(closedNotice.created_at).getTime() : null,
+    now,
+    reminderDays: opts.reminderDays,
+    closeDays: opts.closeDays,
+  });
+  result.days = plan.days;
+  result.action = plan.type;
+
+  const claUrl = cla.targetUrl ?? `https://cla.strapi.io/${owner}/${repo}?pullRequest=${pr.number}`;
+  const recheckUrl = `https://cla.strapi.io/check/${owner}/${repo}?pullRequest=${pr.number}`;
+
+  if (plan.type === 'remind') {
+    const commits = await listCommits(github, owner, repo, pr.number);
+    const diagnosis = diagnose(
+      pr.login,
+      commits,
+      botComment ? parseClaBotComment(botComment.body ?? '', botComment.created_at) : null
+    );
+    result.detail = describe(diagnosis);
+    const body = buildReminderComment({
+      login: pr.login,
+      diagnosis,
+      claUrl,
+      recheckUrl,
+      days: plan.days,
+      closeOn: closeDate({
+        unsignedSince,
+        now,
+        reminderDays: opts.reminderDays,
+        closeDays: opts.closeDays,
+      }),
+      repo: { owner, repo, baseRef: pr.baseRef },
+    });
+    log(
+      `${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → reminder [${result.detail}]`
+    );
+    if (dryRun) {
+      log(body.replace(/^/gm, '    | '));
+    } else {
+      await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+    }
+  } else if (plan.type === 'close') {
+    log(`${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → close`);
+    if (dryRun) return;
+    // Close first: if posting the comment fails, the PR is still closed, and an open PR never
+    // carries a close notice that wasn't followed by a close.
+    await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
+    const failures: string[] = [];
+    try {
+      await github.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: pr.number,
+        body: buildCloseComment({ login: pr.login, claUrl, closeDays: opts.closeDays }),
+      });
+    } catch (error) {
+      failures.push(`close comment: ${errorMessage(error)}`);
+    }
+    try {
+      await opts.onClosed?.(pr.number);
+    } catch (error) {
+      failures.push(`after close: ${errorMessage(error)}`);
+    }
+    if (failures.length) throw new Error(`closed, but ${failures.join('; ')}`);
+  } else {
+    result.detail = plan.type === 'wait' ? plan.reason : '';
+    log(
+      `PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → ${plan.type}${
+        result.detail ? ` (${result.detail})` : ''
+      }`
+    );
+  }
 }
 
 export function describe(d: ClaDiagnosis): string {
