@@ -121,6 +121,8 @@ yarn nx build @strapi/admin   # single package
 
 ## Testing
 
+A test domain lives in exactly one suite tree: a new test goes to `tests-next/` once its domain is migrated there, and to `tests/` before. To write, migrate or review a `tests-next/` test, use the [`test-suites` skill](.ai/skills/test-suites/SKILL.md).
+
 ### Unit tests (fastest — run first)
 
 Unit test files live in `__tests__/` subdirectories within each package.
