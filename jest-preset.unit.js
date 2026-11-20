@@ -12,7 +12,7 @@ module.exports = {
     // Prevent Jest from running Vitest test files
     '.vitest.test.ts',
   ],
-  prettierPath: require.resolve('prettier-2'),
+  prettierPath: null,
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
