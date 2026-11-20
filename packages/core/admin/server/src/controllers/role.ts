@@ -31,12 +31,16 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx: Context) {
-    const { body } = ctx.request as Create.Request;
+    const { plugins, ...body } = (ctx.request as Create.Request).body;
     await validateRoleCreateInput(body);
 
     const roleService = getService('role');
 
-    const role = await roleService.create(body);
+    const role = await getService('form-extensions').save(
+      'role',
+      { input: plugins, data: body, user: ctx.state.user },
+      (data) => roleService.create(data as typeof body)
+    );
     const sanitizedRole = roleService.sanitizeRole(role) as Omit<AdminRole, 'users' | 'permission'>;
 
     ctx.created({ data: sanitizedRole } satisfies Create.Response);
@@ -87,7 +91,7 @@ export default {
    */
   async update(ctx: Context) {
     const { id } = ctx.params as Update.Request['params'];
-    const { body } = ctx.request as Omit<Update.Request, 'params'>;
+    const { plugins, ...body } = (ctx.request as Omit<Update.Request, 'params'>).body;
 
     const roleService = getService('role');
 
@@ -103,7 +107,11 @@ export default {
       throw new ApplicationError("Super admin can't be edited.");
     }
 
-    const updatedRole = await roleService.update({ id }, body);
+    const updatedRole = await getService('form-extensions').save(
+      'role',
+      { input: plugins, data: body, user: ctx.state.user, entityId: id },
+      (data) => roleService.update({ id }, data as typeof body)
+    );
     const sanitizedRole = roleService.sanitizeRole(updatedRole) as Omit<
       AdminRole,
       'users' | 'permission'

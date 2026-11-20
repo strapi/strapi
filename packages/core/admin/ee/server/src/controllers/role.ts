@@ -13,11 +13,16 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx: Context) {
-    await validateRoleCreateInput(ctx.request.body);
+    const { plugins, ...body } = ctx.request.body;
+    await validateRoleCreateInput(body);
 
     const roleService = getService('role');
 
-    const role = await roleService.create(ctx.request.body);
+    const role = await getService('form-extensions').save(
+      'role',
+      { input: plugins, data: body, user: ctx.state.user },
+      (data: Record<string, unknown>) => roleService.create(data)
+    );
     const sanitizedRole = roleService.sanitizeRole(role);
 
     ctx.created({ data: sanitizedRole });

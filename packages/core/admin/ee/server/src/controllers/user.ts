@@ -36,7 +36,7 @@ export default {
       throw new ForbiddenError('License seat limit reached. You cannot create a new user');
     }
 
-    const { body } = ctx.request;
+    const { plugins, ...body } = ctx.request.body;
     const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
@@ -54,7 +54,11 @@ export default {
       Object.assign(attributes, { registrationToken: null, isActive: true });
     }
 
-    const createdUser = await getService('user').create(attributes);
+    const createdUser = await getService('form-extensions').save(
+      'user',
+      { input: plugins, data: attributes, user: ctx.state.user },
+      (data: Record<string, unknown>) => getService('user').create(data)
+    );
     const userInfo = getService('user').sanitizeUser(createdUser);
 
     // Note: We need to assign manually the registrationToken to the
@@ -66,7 +70,8 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const data = normalizeEmail(ctx.request.body);
+    const { plugins, ...body } = ctx.request.body;
+    const data = normalizeEmail(body);
 
     await validateUserUpdateInput(data);
 
@@ -91,7 +96,11 @@ export default {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
     }
 
-    const updatedUser = await getService('user').updateById(id, data);
+    const updatedUser = await getService('form-extensions').save(
+      'user',
+      { input: plugins, data, user: ctx.state.user, entityId: id },
+      (nextData: Record<string, unknown>) => getService('user').updateById(id, nextData)
+    );
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

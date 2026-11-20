@@ -23,7 +23,7 @@ const { ApplicationError } = errors;
 
 export default {
   async create(ctx: Context) {
-    const { body } = ctx.request as Create.Request;
+    const { plugins, ...body } = (ctx.request as Create.Request).body;
     const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
@@ -44,7 +44,11 @@ export default {
       throw new ApplicationError('Email already taken');
     }
 
-    const createdUser = await getService('user').create(attributes);
+    const createdUser = await getService('form-extensions').save(
+      'user',
+      { input: plugins, data: attributes, user: ctx.state.user },
+      (data) => getService('user').create(data as typeof attributes)
+    );
 
     const userInfo = getService('user').sanitizeUser(createdUser);
 
@@ -94,7 +98,8 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params as Update.Params;
-    const data = normalizeEmail((ctx.request as Update.Request).body);
+    const { plugins, ...body } = (ctx.request as Update.Request).body;
+    const data = normalizeEmail(body);
 
     await validateUserUpdateInput(data);
 
@@ -109,7 +114,11 @@ export default {
       }
     }
 
-    const updatedUser = await getService('user').updateById(id, data);
+    const updatedUser = await getService('form-extensions').save(
+      'user',
+      { input: plugins, data, user: ctx.state.user, entityId: id },
+      (nextData) => getService('user').updateById(id, nextData as typeof data)
+    );
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

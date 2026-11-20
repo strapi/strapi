@@ -5,6 +5,7 @@ import type {
   AdminUserCreationPayload,
   AdminUserUpdatePayload,
   Pagination,
+  PluginInputValues,
   SanitizedAdminUser,
 } from './shared';
 
@@ -13,7 +14,7 @@ import type {
  */
 export declare namespace Create {
   export interface Request {
-    body: AdminUserCreationPayload;
+    body: AdminUserCreationPayload & { plugins?: PluginInputValues };
     query: {};
   }
 
@@ -28,7 +29,7 @@ export declare namespace Create {
  */
 export declare namespace Create {
   export interface Request {
-    body: AdminUserCreationPayload;
+    body: AdminUserCreationPayload & { plugins?: PluginInputValues };
     query: {};
   }
 
@@ -82,7 +83,7 @@ export declare namespace FindOne {
  */
 export declare namespace Update {
   export interface Request {
-    body: AdminUserUpdatePayload;
+    body: AdminUserUpdatePayload & { plugins?: PluginInputValues };
     query: {};
   }
 

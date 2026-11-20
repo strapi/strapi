@@ -1,6 +1,8 @@
 import { errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
+import type { PluginInputValues } from './shared';
+
 export type ApiTokenBase = {
   accessKey?: string;
   encryptedKey?: string;
@@ -30,7 +32,7 @@ export type ContentApiApiTokenBody = Pick<ContentApiApiToken, 'name' | 'descript
  */
 export declare namespace Create {
   export interface Request {
-    body: ContentApiApiTokenBody;
+    body: ContentApiApiTokenBody & { plugins?: PluginInputValues };
     query: {};
   }
 
@@ -98,7 +100,7 @@ export declare namespace Get {
  */
 export declare namespace Update {
   export interface Request {
-    body: Partial<ContentApiApiTokenBody>;
+    body: Partial<ContentApiApiTokenBody> & { plugins?: PluginInputValues };
     query: {};
   }
 

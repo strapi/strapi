@@ -37,7 +37,11 @@ export default {
       throw new ApplicationError('Name already taken');
     }
 
-    const apiToken = await apiTokenService.create(attributes, ctx.state.user);
+    const apiToken = await getService('form-extensions').save(
+      'api-token',
+      { input: body.plugins, data: attributes, user: ctx.state.user },
+      (data) => apiTokenService.create(data as typeof attributes, ctx.state.user)
+    );
     ctx.created({ data: apiToken } satisfies Create.Response);
   },
 
@@ -99,7 +103,7 @@ export default {
   // Update
   // -------------------------------------------------------------------------
   async update(ctx: Context) {
-    const { body } = ctx.request as Update.Request;
+    const { plugins, ...body } = (ctx.request as Update.Request).body;
     const { id } = ctx.params as Update.Params;
     const apiTokenService = getService('api-token-content-api');
 
@@ -125,7 +129,11 @@ export default {
       }
     }
 
-    const apiToken = await apiTokenService.update(id, body);
+    const apiToken = await getService('form-extensions').save(
+      'api-token',
+      { input: plugins, data: body, user: ctx.state.user, entityId: id },
+      (data) => apiTokenService.update(id, data as typeof body)
+    );
     ctx.send({ data: apiToken } satisfies Update.Response);
   },
 };
