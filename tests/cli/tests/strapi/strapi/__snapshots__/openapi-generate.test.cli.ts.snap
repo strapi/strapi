@@ -13,9 +13,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "firstname": {
@@ -82,9 +80,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -155,9 +151,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -211,9 +205,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -317,9 +309,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "dynamic_zone": {
@@ -475,9 +465,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -558,9 +546,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -632,9 +618,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "array",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -748,9 +732,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -823,9 +805,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -881,9 +861,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -944,9 +922,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -1001,9 +977,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "founded": {
@@ -1068,9 +1042,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -1289,9 +1261,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "ext": {
@@ -1395,9 +1365,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -1445,9 +1413,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "id": {
@@ -1533,9 +1499,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "documentId": {
-            "description": "The document ID, represented by a UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The document ID",
             "type": "string",
           },
           "email": {
@@ -2037,9 +2001,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -2344,8 +2306,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "authors": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -2419,9 +2379,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -2523,9 +2481,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -2716,9 +2672,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -2818,9 +2772,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -3097,9 +3049,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -3199,9 +3149,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -3351,8 +3299,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "authors": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -3422,9 +3368,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -5037,9 +4981,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -5311,8 +5253,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "articles": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -5367,9 +5307,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -5454,9 +5392,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -5623,9 +5559,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -5708,9 +5642,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -5951,9 +5883,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -6036,9 +5966,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -6172,8 +6100,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "articles": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -6225,9 +6151,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -6571,9 +6495,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -6807,8 +6729,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "complexes": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -6864,9 +6784,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -6959,9 +6877,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -7083,9 +6999,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -7176,9 +7090,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -7378,9 +7290,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -7471,9 +7381,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -7561,8 +7469,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "complexes": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -7615,9 +7521,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -8149,9 +8053,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "dynamic_zone": {
@@ -8518,8 +8420,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "admin_users_o2m": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -8551,8 +8451,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "categories_m2m": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -8615,14 +8513,10 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       },
                       "morph2many": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "morph_to_many": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "nonlocal_text": {
@@ -8686,8 +8580,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       },
                       "up_user_o2o": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                     },
@@ -8772,9 +8664,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "dynamic_zone": {
@@ -8962,9 +8852,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -9186,9 +9074,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "dynamic_zone": {
@@ -9374,9 +9260,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -9756,9 +9640,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "dynamic_zone": {
@@ -9944,9 +9826,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -10072,8 +9952,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "admin_users_o2m": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -10105,8 +9983,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "categories_m2m": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -10169,14 +10045,10 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       },
                       "morph2many": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "morph_to_many": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "nonlocal_text": {
@@ -10240,8 +10112,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       },
                       "up_user_o2o": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                     },
@@ -10321,9 +10191,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "dynamic_zone": {
@@ -10812,9 +10680,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -11096,8 +10962,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "properties": {
                       "country": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "isActive": {
@@ -11168,9 +11032,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -11267,9 +11129,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -11433,9 +11293,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -11530,9 +11388,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -11774,9 +11630,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -11871,9 +11725,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -12005,8 +11857,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "properties": {
                       "country": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "isActive": {
@@ -12074,9 +11924,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -14324,9 +14172,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -14592,8 +14438,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       },
                       "product": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "publishedAt": {
@@ -14659,9 +14503,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -14771,9 +14613,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -14898,9 +14738,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -15008,9 +14846,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -15221,9 +15057,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -15331,9 +15165,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -15436,8 +15268,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       },
                       "product": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "publishedAt": {
@@ -15498,9 +15328,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -15842,9 +15670,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -16116,9 +15942,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -16352,8 +16176,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "properties": {
                       "admin_user": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "content": {
@@ -16414,9 +16236,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -16960,9 +16780,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "array",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -17326,8 +17144,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "countries": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -17455,9 +17271,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -17609,9 +17423,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -17814,9 +17626,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -17966,9 +17776,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -18269,9 +18077,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -18421,9 +18227,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -18582,8 +18386,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "countries": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -18704,9 +18506,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -19157,9 +18957,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -19463,8 +19261,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "manyToMany": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -19472,31 +19268,23 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "manyToManyBi": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
                       },
                       "manyToOne": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "oneToMany": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
                       },
                       "oneToOne": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "publishedAt": {
@@ -19540,9 +19328,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -19653,9 +19439,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -19821,9 +19605,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -19932,9 +19714,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -20174,9 +19954,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -20285,9 +20063,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -20427,8 +20203,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "manyToMany": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -20436,31 +20210,23 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "manyToManyBi": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
                       },
                       "manyToOne": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "oneToMany": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
                       },
                       "oneToOne": {
                         "description": "A relational field",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "publishedAt": {
@@ -20500,9 +20266,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -20904,9 +20668,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -21189,8 +20951,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "relationLabs": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -21227,9 +20987,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -21318,9 +21076,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -21478,9 +21234,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -21567,9 +21321,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -21801,9 +21553,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -21890,9 +21640,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -22033,8 +21781,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "relationLabs": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -22067,9 +21813,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -22304,9 +22048,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -22573,9 +22315,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -22861,9 +22601,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -23041,9 +22779,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -23237,9 +22973,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -23444,9 +23178,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -23613,9 +23345,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -23791,9 +23521,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -23936,8 +23664,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "complex_contents": {
                         "description": "A relational field",
                         "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "type": "string",
                         },
                         "type": "array",
@@ -23986,9 +23712,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -24132,9 +23856,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -24299,9 +24021,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -24474,9 +24194,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -24871,9 +24589,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "founded": {
@@ -25217,9 +24933,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "founded": {
@@ -25318,9 +25032,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -25493,9 +25205,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "founded": {
@@ -25592,9 +25302,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -25849,9 +25557,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "founded": {
@@ -25948,9 +25654,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -26139,9 +25843,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "founded": {
@@ -26580,9 +26282,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "documentId": {
-                            "description": "The document ID, represented by a UUID",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                            "description": "The document ID",
                             "type": "string",
                           },
                           "id": {
@@ -26980,9 +26680,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -27102,9 +26800,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -27291,9 +26987,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -27411,9 +27105,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -27694,9 +27386,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -27814,9 +27504,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "description": "The document ID, represented by a UUID",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The document ID",
               "type": "string",
             },
           },
@@ -28038,9 +27726,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -28283,9 +27969,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -28522,9 +28206,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
@@ -28777,9 +28459,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "The document ID",
                           "type": "string",
                         },
                         "id": {
