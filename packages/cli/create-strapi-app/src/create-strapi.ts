@@ -13,12 +13,12 @@ import { trackUsage } from './utils/usage';
 import { createPackageJSON } from './utils/package-json';
 import { writePnpmWorkspaceConfig } from './utils/pnpm-config';
 import { generateDotEnv } from './utils/dot-env';
-import { isStderrError } from './types';
 
 import type { Scope } from './types';
 import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
-import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
+import { getPackageManagerVersion } from './utils/get-package-manager-args';
+import { installProjectDependencies } from './utils/install-dependencies';
 
 const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
 
@@ -187,37 +187,7 @@ async function createApp(scope: Scope) {
   }
 
   if (installDependencies) {
-    try {
-      logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
-
-      await trackUsage({ event: 'willInstallProjectDependencies', scope });
-
-      await runInstall(scope);
-
-      await trackUsage({ event: 'didInstallProjectDependencies', scope });
-
-      logger.success(`Dependencies installed`);
-    } catch (error) {
-      const stderr = isStderrError(error) ? error.stderr : '';
-
-      await trackUsage({
-        event: 'didNotInstallProjectDependencies',
-        scope,
-        error: stderr.slice(-1024),
-      });
-
-      logger.fatal([
-        chalk.bold(
-          'Oh, it seems that you encountered an error while installing dependencies in your project'
-        ),
-        '',
-        `Don't give up, your project was created correctly`,
-        '',
-        `Fix the issues mentioned in the installation errors and try to run the following command:`,
-        '',
-        `cd ${chalk.green(rootPath)} && ${chalk.cyan(packageManager)} install`,
-      ]);
-    }
+    await installProjectDependencies(scope);
   }
 
   await trackUsage({ event: 'didCreateProject', scope });
@@ -324,31 +294,6 @@ function getDisplayFolder(relativeFolder: string) {
   }
 
   return `.${sep}${relativeFolder}`;
-}
-
-async function runInstall({ rootPath, packageManager }: Scope) {
-  // include same cwd and env to ensure version check returns same version we use below
-  const { envArgs, cmdArgs } = await getInstallArgs(packageManager, {
-    cwd: rootPath,
-    env: {
-      ...process.env,
-      NODE_ENV: 'development',
-    },
-  });
-
-  const options: execa.Options = {
-    cwd: rootPath,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      ...envArgs,
-      NODE_ENV: 'development',
-    },
-  };
-
-  const proc = execa(packageManager, cmdArgs, options);
-
-  return proc;
 }
 
 export { createStrapi };
