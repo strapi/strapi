@@ -1,5 +1,5 @@
 import { pipeline } from 'stream';
-import fs, { ReadStream } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import * as utils from '@strapi/utils';
@@ -7,37 +7,12 @@ import * as utils from '@strapi/utils';
 // Also loads global.strapi, without having to put @strapi/types in the regular dependencies
 import type { Providers } from '@strapi/types';
 
-interface File {
-  name: string;
-  alternativeText?: string;
-  caption?: string;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
-  hash: string;
-  ext?: string;
-  mime: string;
-  size: number;
-  sizeInBytes: number;
-  url: string;
-  previewUrl?: string;
-  path?: string;
-  provider?: string;
-  provider_metadata?: Record<string, unknown>;
-  stream?: ReadStream;
-  buffer?: Buffer;
-}
-
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 
 interface InitOptions {
-  sizeLimit?: number;
-}
-
-interface CheckFileSizeOptions {
   sizeLimit?: number;
 }
 
@@ -59,7 +34,11 @@ const providerModule = {
     }
 
     return {
-      checkFileSize(file: File, options: CheckFileSizeOptions) {
+      checkFileSize(
+        // The plugin always sets `size` before it checks the file
+        file: Providers.Upload.ProviderFile & { size: number },
+        options: Providers.Upload.CheckFileSizeOptions
+      ) {
         const { sizeLimit } = options ?? {};
 
         // TODO V5: remove providerOptions sizeLimit
@@ -77,7 +56,7 @@ const providerModule = {
             );
         }
       },
-      uploadStream(file: File): Promise<void> {
+      uploadStream(file: Providers.Upload.ProviderFile): Promise<void> {
         if (!file.stream) {
           return Promise.reject(new Error('Missing file stream'));
         }
@@ -100,7 +79,7 @@ const providerModule = {
           );
         });
       },
-      upload(file: File): Promise<void> {
+      upload(file: Providers.Upload.ProviderFile): Promise<void> {
         if (!file.buffer) {
           return Promise.reject(new Error('Missing file buffer'));
         }
@@ -120,7 +99,10 @@ const providerModule = {
           });
         });
       },
-      replaceStream(newFile: File, oldFile: File): Promise<void> {
+      replaceStream(
+        newFile: Providers.Upload.ProviderFile,
+        oldFile: Providers.Upload.StoredProviderFile
+      ): Promise<void> {
         if (!newFile.stream) {
           return Promise.reject(new Error('Missing file stream'));
         }
@@ -156,7 +138,10 @@ const providerModule = {
           });
         });
       },
-      replace(newFile: File, oldFile: File): Promise<void> {
+      replace(
+        newFile: Providers.Upload.ProviderFile,
+        oldFile: Providers.Upload.StoredProviderFile
+      ): Promise<void> {
         if (!newFile.buffer) {
           return Promise.reject(new Error('Missing file buffer'));
         }
@@ -189,7 +174,7 @@ const providerModule = {
           });
         });
       },
-      delete(file: File): Promise<string | void> {
+      delete(file: Providers.Upload.StoredProviderFile): Promise<string | void> {
         return new Promise((resolve, reject) => {
           const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
 

@@ -1,4 +1,5 @@
 import type { ReadStream } from 'node:fs';
+import type { Readable } from 'node:stream';
 import { get } from 'lodash';
 import {
   S3Client,
@@ -62,6 +63,9 @@ export interface MultipartConfig {
   leavePartsOnError?: boolean;
 }
 
+/**
+ * @deprecated Use {@link Providers.Upload.ProviderFile}. `File` also shadows the global `File` type.
+ */
 export interface File {
   name: string;
   alternativeText?: string;
@@ -83,6 +87,16 @@ export interface File {
   buffer?: Buffer;
   etag?: string;
 }
+
+/**
+ * The plugin passes a `Readable` (an fs read stream), which the S3 SDK requires.
+ */
+type UploadFile = Providers.Upload.ProviderFile & { stream?: Readable; etag?: string };
+
+/**
+ * The fields the object key is built from.
+ */
+type FileKeyParts = Pick<Providers.Upload.ProviderFile, 'path' | 'hash' | 'ext'>;
 
 export type UploadCommandOutput = (
   CompleteMultipartUploadCommandOutput | AbortMultipartUploadCommandOutput
@@ -166,7 +180,7 @@ const assertUrlProtocol = (url: string) => {
  * Sanitizes a path component to prevent path traversal attacks.
  * Removes directory traversal sequences and normalizes the path.
  */
-const sanitizePathComponent = (component: string | undefined): string => {
+const sanitizePathComponent = (component: string | null | undefined): string => {
   if (!component) return '';
   return component
     .replace(/\.\./g, '')
@@ -341,7 +355,7 @@ const providerModule = {
     const s3Client = new S3Client(config);
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
-    const getFileKey = (file: File) => {
+    const getFileKey = (file: FileKeyParts) => {
       const sanitizedPath = sanitizePathComponent(file.path);
       const path = sanitizedPath ? `${sanitizedPath}/` : '';
       const sanitizedHash = sanitizePathComponent(file.hash);
@@ -353,7 +367,7 @@ const providerModule = {
      * Builds the upload parameters including all configured features.
      */
     const buildUploadParams = (
-      file: File,
+      file: UploadFile,
       fileKey: string,
       customParams: Partial<PutObjectCommandInput> = {}
     ): PutObjectCommandInput => {
@@ -455,7 +469,7 @@ const providerModule = {
       return `https://${config.params.Bucket}.s3.amazonaws.com/${fileKey}`;
     };
 
-    const upload = async (file: File, customParams: Partial<PutObjectCommandInput> = {}) => {
+    const upload = async (file: UploadFile, customParams: Partial<PutObjectCommandInput> = {}) => {
       const fileKey = getFileKey(file);
       const params = buildUploadParams(file, fileKey, customParams);
 
@@ -498,7 +512,7 @@ const providerModule = {
      * This implements optimistic locking to prevent lost updates.
      */
     const uploadIfMatch = async (
-      file: File,
+      file: UploadFile,
       expectedETag: string,
       customParams: Partial<PutObjectCommandInput> = {}
     ) => {
@@ -525,7 +539,7 @@ const providerModule = {
     /**
      * Retrieves metadata for an object including its ETag.
      */
-    const getObjectMetadata = async (file: File) => {
+    const getObjectMetadata = async (file: FileKeyParts) => {
       const command = new HeadObjectCommand({
         Bucket: config.params.Bucket,
         Key: getFileKey(file),
@@ -546,7 +560,7 @@ const providerModule = {
     /**
      * Checks if an object exists in the bucket.
      */
-    const objectExists = async (file: File): Promise<boolean> => {
+    const objectExists = async (file: FileKeyParts): Promise<boolean> => {
       try {
         await getObjectMetadata(file);
         return true;
@@ -576,7 +590,10 @@ const providerModule = {
       /**
        * Generates a signed URL for accessing a private object.
        */
-      async getSignedUrl(file: File, customParams: any): Promise<{ url: string }> {
+      async getSignedUrl(
+        file: Providers.Upload.SignableProviderFile,
+        customParams: any
+      ): Promise<{ url: string }> {
         if (!isUrlFromBucket(file.url, config.params.Bucket, baseUrl)) {
           return { url: file.url };
         }
@@ -602,14 +619,14 @@ const providerModule = {
       /**
        * Uploads a file using streaming.
        */
-      uploadStream(file: File, customParams = {}) {
+      uploadStream(file: UploadFile, customParams = {}) {
         return upload(file, customParams);
       },
 
       /**
        * Uploads a file to S3.
        */
-      upload(file: File, customParams = {}) {
+      upload(file: UploadFile, customParams = {}) {
         return upload(file, customParams);
       },
 
@@ -619,7 +636,7 @@ const providerModule = {
        * — and if the key changed, we delete the old object afterwards so we
        * never leave the bucket in a state where the asset is missing.
        */
-      async replaceStream(newFile: File, oldFile: File, customParams = {}) {
+      async replaceStream(newFile: UploadFile, oldFile: FileKeyParts, customParams = {}) {
         const newKey = getFileKey(newFile);
         const oldKey = getFileKey(oldFile);
 
@@ -637,7 +654,7 @@ const providerModule = {
         }
       },
 
-      async replace(newFile: File, oldFile: File, customParams = {}) {
+      async replace(newFile: UploadFile, oldFile: FileKeyParts, customParams = {}) {
         const newKey = getFileKey(newFile);
         const oldKey = getFileKey(oldFile);
 
@@ -659,28 +676,28 @@ const providerModule = {
        * Uploads a file only if it matches the expected ETag (optimistic locking).
        * Throws PreconditionFailed error if ETag does not match.
        */
-      uploadIfMatch(file: File, expectedETag: string, customParams = {}) {
+      uploadIfMatch(file: UploadFile, expectedETag: string, customParams = {}) {
         return uploadIfMatch(file, expectedETag, customParams);
       },
 
       /**
        * Retrieves object metadata including ETag.
        */
-      getObjectMetadata(file: File) {
+      getObjectMetadata(file: FileKeyParts) {
         return getObjectMetadata(file);
       },
 
       /**
        * Checks if an object exists in the bucket.
        */
-      objectExists(file: File) {
+      objectExists(file: FileKeyParts) {
         return objectExists(file);
       },
 
       /**
        * Deletes an object from S3.
        */
-      delete(file: File, customParams = {}): Promise<DeleteObjectCommandOutput> {
+      delete(file: FileKeyParts, customParams = {}): Promise<DeleteObjectCommandOutput> {
         // Spread customParams first, then override with secure values
         // oxlint-disable-next-line no-unused-vars
         const { Bucket, Key, ...safeParams } = customParams as any;
