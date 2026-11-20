@@ -1,42 +1,25 @@
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
-import { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../constants/workflows';
-import { clampMaxWorkflows, clampMaxStagesPerWorkflow } from '../utils/review-workflows';
+import { ERRORS } from '../constants/workflows';
+import { resolveWorkflowLimits } from '../utils/review-workflows';
 
 const { ValidationError } = errors;
 
-/**
- * Reads a license limit. A missing, zero or non-numeric value keeps the default, so a malformed
- * license never removes the limit.
- */
-const toLimit = (value: unknown, fallback: number) => {
-  const parsed = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
-
-  if (typeof parsed !== 'number' || Number.isFinite(parsed) === false || parsed === 0) {
-    return fallback;
-  }
-
-  return parsed;
-};
-
 export default ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * Reads the limits from the current license on every check, so a license that changes after boot
+   * is enforced without a restart. A license without limits, such as an offline license, gets the
+   * default limits.
+   */
+  const getLimits = () => resolveWorkflowLimits(strapi.ee.features.get('review-workflows'));
+
   return {
     /**
-     * Reads the workflow limits from the current license on every call, so a license that the
-     * registry replaces after boot (`ee.update`) applies without a restart.
+     * The workflow and stage limits of the current license. Bootstrap uses them to size the
+     * default workflow.
      */
-    getLimits() {
-      const feature = strapi.ee.features.get('review-workflows');
-      const options = typeof feature === 'object' ? feature.options : undefined;
-
-      return {
-        numberOfWorkflows: clampMaxWorkflows(toLimit(options?.numberOfWorkflows, MAX_WORKFLOWS)),
-        stagesPerWorkflow: clampMaxStagesPerWorkflow(
-          toLimit(options?.stagesPerWorkflow, MAX_STAGES_PER_WORKFLOW)
-        ),
-      };
-    },
+    getLimits,
     /**
      * Validates the stages of a workflow.
      * @param {Array} stages - Array of stages to be validated.
@@ -46,22 +29,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (!stages || stages.length === 0) {
         throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
       }
-      if (stages.length > this.getLimits().stagesPerWorkflow) {
+      if (stages.length > getLimits().stagesPerWorkflow) {
         throw new ValidationError(ERRORS.STAGES_LIMIT);
       }
       // Validate stage names are not duplicated
       const stageNames = stages.map((stage: any) => stage.name);
       if (new Set(stageNames).size !== stageNames.length) {
         throw new ValidationError(ERRORS.DUPLICATED_STAGE_NAME);
-      }
-    },
-
-    async validateWorkflowCountStages(workflowId: any, countAddedStages = 0) {
-      const stagesService = getService('stages', { strapi });
-      const countWorkflowStages = await stagesService.count({ workflowId });
-
-      if (countWorkflowStages + countAddedStages > this.getLimits().stagesPerWorkflow) {
-        throw new ValidationError(ERRORS.STAGES_LIMIT);
       }
     },
 
@@ -74,7 +48,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async validateWorkflowCount(countAddedWorkflows = 0) {
       const workflowsService = getService('workflows', { strapi });
       const countWorkflows = await workflowsService.count();
-      if (countWorkflows + countAddedWorkflows > this.getLimits().numberOfWorkflows) {
+      if (countWorkflows + countAddedWorkflows > getLimits().numberOfWorkflows) {
         throw new ValidationError(ERRORS.WORKFLOWS_LIMIT);
       }
     },
