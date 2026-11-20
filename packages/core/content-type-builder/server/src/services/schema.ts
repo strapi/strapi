@@ -24,7 +24,6 @@ import {
   getRestrictRelationsTo,
   isContentTypeVisible,
 } from './content-types';
-import type { CoreContentStructureService } from './content-structure';
 import type { FormattedAttribute, SchemaService } from '../types/services';
 
 type ContentTypeKind = 'collectionType' | 'singleType';
@@ -610,7 +609,7 @@ export const getSchema = (async () => {
     };
   });
 
-  const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
+  const coreContentStructure: Core.ContentStructureService = strapi.get('content-structure');
   const contentStructure = await coreContentStructure.getCleanedFile();
 
   return {
