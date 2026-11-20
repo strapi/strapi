@@ -12,6 +12,8 @@ import {
   unstable_addRequestHeaders,
 } from '../getFetchClient';
 
+import { AUTH_COOKIE_NAME, deleteCookie } from '../cookies';
+
 import type { FetchClient, FetchOptions, RequestHeadersProvider } from '../getFetchClient';
 
 const buildJwt = (expSeconds: number): string => {
@@ -1117,6 +1119,28 @@ describe('getFetchClient', () => {
           cause: failure,
         });
         expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it('still sends an auth request', async () => {
+        register(() => {
+          throw new Error('provider failed');
+        });
+
+        await getFetchClient().post('/admin/logout', {});
+
+        expect(window.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      it('still sends a request without a token', async () => {
+        (window.localStorage.getItem as jest.Mock).mockReturnValue(null);
+        deleteCookie(AUTH_COOKIE_NAME);
+        register(() => {
+          throw new Error('provider failed');
+        });
+
+        await getFetchClient().get('/admin/init');
+
+        expect(window.fetch).toHaveBeenCalledTimes(1);
       });
 
       it('does not send the request when a header cannot be sent by the browser', async () => {

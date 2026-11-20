@@ -485,6 +485,7 @@ describe('ADMIN | new StrapiApp', () => {
     afterEach(() => {
       removeHeaders?.();
       window.fetch = originalFetch;
+      window.localStorage.removeItem('jwtToken');
     });
 
     it('adds the headers a plugin registers to admin requests', async () => {
@@ -502,7 +503,8 @@ describe('ADMIN | new StrapiApp', () => {
       });
 
       await app.register();
-      await getFetchClient().get('/admin/init');
+      window.localStorage.setItem('jwtToken', JSON.stringify('token'));
+      await getFetchClient().get('/admin/users/me');
 
       const sent: Headers = (window.fetch as jest.Mock).mock.calls[0][1].headers;
       expect(sent.get('x-strapi-space')).toBe('france');

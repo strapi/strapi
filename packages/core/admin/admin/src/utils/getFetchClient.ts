@@ -577,6 +577,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     return headers;
   };
 
+  // Auth and tokenless requests carry no context, so a failing provider must not block them
+  const readProviderHeaders = (url: string, token: string | null) =>
+    isAuthPath(url) || !token ? new Headers() : unstable_getRequestHeaders();
+
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
@@ -650,35 +654,35 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   /**
    * Execute a fetch request with automatic token refresh on 401 errors.
    * @param url - The request URL (used to check if it's an auth path)
+   * @param token - The token for the first attempt; the retry reads a fresh one
    * @param executeRequest - Function that performs the fetch (called again on retry with fresh headers)
    */
   const withTokenRefresh = async <TData>(
     url: string,
-    executeRequest: () => Promise<FetchResponse<TData>>,
-    getRequestToken: () => string | null
+    token: string | null,
+    executeRequest: (token: string | null) => Promise<FetchResponse<TData>>
   ): Promise<FetchResponse<TData>> => {
     try {
-      return await executeRequest();
+      return await executeRequest(token);
     } catch (error) {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
-        const tokenUsedByFailedRequest = getRequestToken();
-
         try {
-          await attemptTokenRefresh(tokenUsedByFailedRequest);
+          await attemptTokenRefresh(token);
         } catch {
           // If refresh fails, throw the original error
-          setFailedRequestSessionToken(error, tokenUsedByFailedRequest);
+          setFailedRequestSessionToken(error, token);
           throw error;
         }
 
         // Retry outside the refresh catch so a second 401 is attributed to the
         // refreshed token instead of the token used by the original request.
+        const retryToken = getToken();
         try {
-          return await executeRequest();
+          return await executeRequest(retryToken);
         } catch (retryError) {
           if (isFetchError(retryError) && retryError.status === 401) {
-            setFailedRequestSessionToken(retryError, getRequestToken());
+            setFailedRequestSessionToken(retryError, retryToken);
           }
           throw retryError;
         }
@@ -724,11 +728,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
-      const providerHeaders = unstable_getRequestHeaders();
-      let requestToken: string | null = null;
+      const token = getToken();
+      const providerHeaders = readProviderHeaders(url, token);
 
-      const executeRequest = async () => {
-        requestToken = getToken();
+      const executeRequest = async (requestToken: string | null) => {
         const { Authorization } = getDefaultHeaders(requestToken);
 
         // For non-JSON response types, omit content negotiation headers that imply JSON
@@ -747,7 +750,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus, responseType);
       };
 
-      return withTokenRefresh(url, executeRequest, () => requestToken);
+      return withTokenRefresh(url, token, executeRequest);
     },
     post: async <TData, TSend = unknown>(
       url: string,
@@ -755,11 +758,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
-      const providerHeaders = unstable_getRequestHeaders();
-      let requestToken: string | null = null;
+      const token = getToken();
+      const providerHeaders = readProviderHeaders(url, token);
 
-      const executeRequest = async () => {
-        requestToken = getToken();
+      const executeRequest = async (requestToken: string | null) => {
         const headers = buildHeaders(
           getDefaultHeaders(requestToken),
           providerHeaders,
@@ -784,7 +786,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, () => requestToken);
+      return withTokenRefresh(url, token, executeRequest);
     },
     put: async <TData, TSend = unknown>(
       url: string,
@@ -792,11 +794,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
-      const providerHeaders = unstable_getRequestHeaders();
-      let requestToken: string | null = null;
+      const token = getToken();
+      const providerHeaders = readProviderHeaders(url, token);
 
-      const executeRequest = async () => {
-        requestToken = getToken();
+      const executeRequest = async (requestToken: string | null) => {
         const headers = buildHeaders(
           getDefaultHeaders(requestToken),
           providerHeaders,
@@ -822,15 +823,14 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, () => requestToken);
+      return withTokenRefresh(url, token, executeRequest);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
-      const providerHeaders = unstable_getRequestHeaders();
-      let requestToken: string | null = null;
+      const token = getToken();
+      const providerHeaders = readProviderHeaders(url, token);
 
-      const executeRequest = async () => {
-        requestToken = getToken();
+      const executeRequest = async (requestToken: string | null) => {
         const headers = buildHeaders(
           getDefaultHeaders(requestToken),
           providerHeaders,
@@ -846,7 +846,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, () => requestToken);
+      return withTokenRefresh(url, token, executeRequest);
     },
   };
 
