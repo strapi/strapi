@@ -253,7 +253,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
           <Modal.Footer>
             <Button onClick={onClose} variant="tertiary">
               {formatMessage({
-                id: 'cancel',
+                id: 'global.cancel',
                 defaultMessage: 'Cancel',
               })}
             </Button>

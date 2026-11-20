@@ -20,6 +20,7 @@ import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useTypedSelector } from '../../../modules/hooks';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
+import { getTranslation } from '../../../utils/translations';
 
 const EMPTY_HEADERS: NonNullable<FieldPickerProps['headers']> = [];
 
@@ -134,7 +135,7 @@ const FieldPicker = ({ headers = EMPTY_HEADERS, resetHeaders, setHeaders }: Fiel
       <Flex justifyContent="space-between" gap={2}>
         <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({
-            id: 'containers.list.displayedFields',
+            id: getTranslation('containers.list.displayedFields'),
             defaultMessage: 'Displayed fields',
           })}
         </Typography>

@@ -236,7 +236,7 @@ export const EditAssetContent = ({
         </LoadingBody>
         <Modal.Footer>
           <Button onClick={() => onClose()} variant="tertiary">
-            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+            {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
           </Button>
         </Modal.Footer>
       </>
