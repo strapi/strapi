@@ -1,11 +1,6 @@
 import type { Core, Modules, UID, Struct } from '@strapi/types';
 import { get } from 'lodash';
 
-interface CoreContentStructureService {
-  getCleanedFile(): Promise<Modules.ContentStructure.ContentStructureFile | null>;
-  resolve(): Promise<Modules.ContentStructure.ResolvedContentStructure>;
-}
-
 type ResolvedGroupNode = Modules.ContentStructure.ResolvedGroupNode;
 
 const isInternalUid = (uid: string): boolean => {
@@ -13,7 +8,7 @@ const isInternalUid = (uid: string): boolean => {
 };
 
 const createContentStructureService = (({ strapi }: { strapi: Core.Strapi }) => {
-  const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
+  const coreContentStructure: Core.ContentStructureService = strapi.get('content-structure');
 
   const isContentTypeVisible = (model: Struct.ContentTypeSchema) => {
     return get(model, 'pluginOptions.content-manager.visible', true) === true;
