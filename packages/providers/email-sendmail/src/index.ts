@@ -1,5 +1,6 @@
 import type { SendMailOptions } from 'nodemailer';
 
+import type { Providers } from '@strapi/types';
 import { sendDirectSmtp } from './direct-smtp';
 import type { ProviderSendmailOptions, Settings } from './types';
 
@@ -16,6 +17,7 @@ interface SendOptions {
 }
 
 export default {
+  name: 'sendmail',
   init(providerOptions: ProviderSendmailOptions, settings: Settings) {
     const mergedOptions: ProviderSendmailOptions = {
       silent: true,
@@ -42,6 +44,6 @@ export default {
       },
     };
   },
-};
+} satisfies Providers.Email.Factory<ProviderSendmailOptions>;
 
 export type { ProviderSendmailOptions, Settings } from './types';

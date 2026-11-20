@@ -159,11 +159,55 @@ const createUploadProvider = <
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
 
+/**
+ * Types an email provider module where an application writes it, and returns it unchanged, with its
+ * own type: `init`'s parameters and the members outside the contract keep theirs. Editors complete
+ * the contract members in JavaScript too. Annotate `init`'s options; without an annotation they are
+ * the `providerOptions` record of the email config. `init` also receives the email `settings`.
+ *
+ * The email plugin `require`s the module and reads `init` from it, with no `.default` interop, so
+ * the module must be the CommonJS export itself: `export =` in TypeScript, `module.exports =` in
+ * JavaScript.
+ *
+ * A provider package checks its module with `satisfies Providers.Email.Factory<Options>` instead,
+ * which needs no runtime dependency on Strapi.
+ *
+ * @template TModule - The module itself. Pass it explicitly to type the module from a declared type.
+ * @template TOptions - `init`'s options, inferred from its annotation: an object type, inline or an
+ * interface. Inferred apart from the module, so the options need no index signature.
+ *
+ * @example
+ * import { factories } from '@strapi/strapi';
+ *
+ * export = factories.createEmailProvider({
+ *   name: 'webhook',
+ *   init(options: { url: string }, settings) {
+ *     return {
+ *       async send(email) {
+ *         await fetch(options.url, {
+ *           method: 'POST',
+ *           body: JSON.stringify({ from: settings.defaultFrom, ...email }),
+ *         });
+ *       },
+ *     };
+ *   },
+ * });
+ */
+const createEmailProvider = <
+  TModule extends Providers.Email.Factory<TOptions>,
+  TOptions extends object = TModule extends Providers.Email.Factory<infer TInit>
+    ? TInit
+    : Record<string, unknown>,
+>(
+  module: TModule & Providers.Email.Factory<TOptions>
+): TModule => module;
+
 export {
   createCoreController,
   createCoreService,
   createCoreRouter,
   createCoreValidator,
+  createEmailProvider,
   createUploadProvider,
   isCustomController,
 };
