@@ -57,3 +57,13 @@ type LicenseFeatureReadChecks = [
 ];
 declare const licenseFeatureReadChecks: LicenseFeatureReadChecks;
 licenseFeatureReadChecks satisfies unknown;
+
+// The listed features keep develop's `any` index signature.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+type ListedFeatureOff = ReturnType<Core.Strapi['ee']['features']['list']>[number];
+type ListedFeatureOffChecks = [
+  Expect<Equal<IsAny<ListedFeatureOff['other']>, true>>,
+  Expect<Equal<IsAny<ListedFeatureOff['options']>, true>>,
+];
+declare const listedFeatureOffChecks: ListedFeatureOffChecks;
+listedFeatureOffChecks satisfies unknown;
