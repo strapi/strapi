@@ -9,6 +9,7 @@ import registerAllRoutes from './register-routes';
 import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
+import { runWithClientAbortSignal } from './client-abort';
 
 const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -23,7 +24,9 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     keys: strapi.config.get('server.app.keys'),
   });
 
-  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
+  app.use((ctx, next) =>
+    requestCtx.run(ctx, () => runWithClientAbortSignal(strapi, ctx, () => next()))
+  );
 
   const router = new Router();
 

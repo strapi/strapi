@@ -40,6 +40,7 @@ describe('Auth controller - sessions', () => {
       },
       sessionManager: sessionManagerCallable,
       log: { error: jest.fn() },
+      db: { runWithoutAbortSignal: jest.fn((cb) => cb()) },
     });
 
     controller = createAuthController();
@@ -244,6 +245,17 @@ describe('Auth controller - sessions', () => {
       await controller.logout(ctx);
 
       expect(unauthorized).toHaveBeenCalledWith('Missing authentication');
+    });
+
+    test('Revokes the sessions detached from the request abort signal', async () => {
+      const ctx = createLogoutContext({
+        request: { body: { scope: 'all' }, header: {} },
+      });
+
+      await controller.logout(ctx);
+
+      expect(global.strapi.db.runWithoutAbortSignal).toHaveBeenCalledTimes(1);
+      expect(originApi.invalidateRefreshToken).toHaveBeenCalledWith('5');
     });
 
     test('Revokes every session when scope is all', async () => {

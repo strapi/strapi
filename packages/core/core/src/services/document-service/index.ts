@@ -3,6 +3,7 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
+import { detachWritesFromClientAbort } from './client-abort';
 
 import entityValidator from '../entity-validator';
 
@@ -40,12 +41,15 @@ export const createDocumentService = (
     const contentType = strapi.contentType(uid);
     const repository = createContentTypeRepository(uid, validator);
 
-    const instance = middlewares.wrapObject(
-      repository,
-      { uid, contentType },
-      {
-        exclude: ['updateComponents', 'omitComponentData'],
-      }
+    const instance = detachWritesFromClientAbort(
+      strapi,
+      middlewares.wrapObject(
+        repository,
+        { uid, contentType },
+        {
+          exclude: ['updateComponents', 'omitComponentData'],
+        }
+      )
     );
 
     repositories.set(uid, instance);

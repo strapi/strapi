@@ -369,7 +369,11 @@ module.exports = ({ strapi }) => ({
     const deviceId = extractDeviceId(body);
 
     try {
-      await revokeLogoutSessions(strapi, ctx, userId, { scope, deviceId, body });
+      // Logout often happens as the page closes: the revocation (and the session read that picks
+      // the session to revoke) must run even when the client is already gone
+      await strapi.db.runWithoutAbortSignal(() =>
+        revokeLogoutSessions(strapi, ctx, userId, { scope, deviceId, body })
+      );
     } catch (err) {
       strapi.log.error('UP logout failed', err);
     }

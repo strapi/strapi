@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { Knex } from 'knex';
 
 import { SavepointError } from './errors';
+import { abortCtx } from './abort-context';
 
 /**
  * After the user calls the Knex transactor’s `commit` or `rollback` (e.g. via
@@ -165,9 +166,13 @@ const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: Callback
 
   const owner = storage.getStore()?.owner ?? defaultHookOwner;
   const pending = hooksFor(owner);
-  const tracked = runCallbacks(callbacks, options).finally(() => {
-    pending.delete(tracked);
-  });
+  // Commit and rollback hooks outlive the request that triggered them (events, webhooks): they
+  // must not inherit its abort signal, or a client disconnect would make their reads fail
+  const tracked = abortCtx
+    .exit(() => runCallbacks(callbacks, options))
+    .finally(() => {
+      pending.delete(tracked);
+    });
   pending.add(tracked);
 };
 
