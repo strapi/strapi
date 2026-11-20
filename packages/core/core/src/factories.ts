@@ -60,14 +60,17 @@ type CoreServiceWithoutConfig<TUID extends UID.ContentType> = Core.IsStrict exte
 /**
  * Without config, as `strapi generate` writes a service, the factory has no override to infer:
  * `TService` would fall back to its constraint, whose legacy members win overload resolution over
- * the strict ones.
+ * the strict ones. A config that adds no member (`{}`, `() => ({})`, `undefined`) has none
+ * either: with strict types, `TService` then defaults to no override.
  */
 function createCoreService<TUID extends UID.ContentType>(
   uid: TUID
 ): ({ strapi }: { strapi: Core.Strapi }) => CoreServiceWithoutConfig<TUID>;
 function createCoreService<
   TUID extends UID.ContentType,
-  TService extends Core.CoreAPI.Service.Extendable<TUID>,
+  TService extends Core.CoreAPI.Service.Extendable<TUID> = Core.IsStrict extends true
+    ? NonNullable<unknown>
+    : Core.CoreAPI.Service.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>
