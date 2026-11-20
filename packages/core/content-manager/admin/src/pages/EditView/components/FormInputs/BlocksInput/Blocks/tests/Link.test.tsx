@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { render, screen } from '@tests/utils';
 import { createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
@@ -74,6 +76,34 @@ describe('Link', () => {
     expect(link).toHaveAttribute('href', 'https://example.com');
     expect(link).toHaveAttribute('rel', '');
     expect(link).toHaveAttribute('target', '');
+  });
+
+  it('renders a fragment-only URL as a clickable link', () => {
+    render(
+      linkBlocks.link.renderElement({
+        children: 'Some link',
+        element: {
+          type: 'link',
+          url: '#anchor',
+          rel: '',
+          target: '',
+          children: [{ type: 'text', text: 'Some link' }],
+        },
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      }),
+      {
+        renderOptions: {
+          wrapper: Wrapper,
+        },
+      }
+    );
+
+    const link = screen.getByRole('link', { name: 'Some link' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '#anchor');
   });
 
   it('toggles the popover when clicking on a link', async () => {
@@ -193,6 +223,67 @@ describe('Link', () => {
 
     await user.type(screen.getByPlaceholderText('noopener, nofollow, noreferrer'), 'noopener');
     expect(saveButton).toBeDisabled();
+  });
+
+  it.each(['#anchor', '#section-2'])('saves a fragment-only link URL: %s', async (url) => {
+    const element = {
+      type: 'link' as const,
+      url: 'https://example.com',
+      rel: '',
+      target: '',
+      children: [{ type: 'text' as const, text: 'Some link' }],
+    };
+    // The editor holds the link and a cursor inside it, so Save has a node to update
+    const baseEditor = linkBlocks.link.plugin!(createEditor());
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }, element, { type: 'text', text: '' }],
+      },
+    ];
+    baseEditor.selection = {
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    };
+
+    const { user } = render(
+      linkBlocks.link.renderElement({
+        children: 'Some link',
+        element,
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      }),
+      {
+        renderOptions: {
+          wrapper: ({ children }: { children: React.ReactNode }) => (
+            <Wrapper baseEditor={baseEditor}>{children}</Wrapper>
+          ),
+        },
+      }
+    );
+
+    await user.click(screen.getByRole('link', { name: 'Some link' }));
+    await user.clear(await screen.findByPlaceholderText('Paste link'));
+    await user.type(screen.getByPlaceholderText('Paste link'), url);
+
+    const saveButton = await screen.findByRole('button', { name: /save/i });
+    expect(saveButton).toBeEnabled();
+    await user.click(saveButton);
+
+    // The rendered element is a fixed prop, so assert on the editor value that Save wrote
+    expect(baseEditor.children).toEqual([
+      expect.objectContaining({
+        children: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'link',
+            url,
+            children: [{ type: 'text', text: 'Some link' }],
+          }),
+        ]),
+      }),
+    ]);
   });
 
   it('does not allow a historical unsafe link to be saved after changing only its text', async () => {

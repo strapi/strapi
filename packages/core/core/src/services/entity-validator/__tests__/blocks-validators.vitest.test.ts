@@ -265,7 +265,7 @@ describe('Blocks validator', () => {
       ).rejects.toThrow(errors.YupValidationError);
     });
 
-    it.each(['ftp://example.com', 'tel:+15555550123', '//example.com'])(
+    it.each(['ftp://example.com', 'tel:+15555550123', '//example.com', '#anchor', '#section-2'])(
       'accepts %s',
       async (url) => {
         const validator = strapiUtils.validateYupSchema(
