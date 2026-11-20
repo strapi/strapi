@@ -13,33 +13,48 @@ test('an EE-tagged test only runs in EE runs', { tag: '@ee' }, async ({ features
   expect(features.edition).toBe('ee');
 });
 
+const MISSING_FLAG = 'This test needs future flag "notAFlag"';
+
 test.describe('a test that needs a flag the instance does not have', () => {
   test.use({ requires: { future: ['notAFlag'] } });
-
-  const MISSING_FLAG = 'This test needs future flag "notAFlag"';
-
-  // The check also runs before hooks (`requirementsCheck` covers all hooks): a `beforeAll` that
-  // writes data for an EE feature must not run on an instance without it.
-  let beforeAllRan = false;
-  test.beforeAll(async () => {
-    beforeAllRan = true;
-  });
 
   // Declared as expected to fail: the requirements check throws before the body runs. test.fail
   // accepts any failure, so this hook checks why it failed:
   // - passed: test.fail already reports it, nothing to do here;
   // - skipped: expected status becomes `skipped`, so failing the hook turns the test red;
   // - failed for another reason (an unrelated throw in `requirementsCheck`, `features` or
-  //   `server`), or after the `beforeAll` body ran: failing the hook would only add a failure
-  //   test.fail accepts, so the hook makes the failure unexpected instead.
+  //   `server`): failing the hook would only add a failure test.fail accepts, so the hook makes
+  //   the failure unexpected instead.
+  // No `beforeAll` in this block: when one fails, which it does here since `requirementsCheck`
+  // also runs for hooks, Playwright skips `afterEach` and this check would never run.
   // eslint-disable-next-line no-empty-pattern
   test.afterEach(async ({}, testInfo) => {
     expect(testInfo.status).not.toBe('skipped');
-    const expectedFailure = !beforeAllRan && testInfo.error?.message?.includes(MISSING_FLAG);
-    if (testInfo.status === 'failed' && !expectedFailure) {
+    if (testInfo.status === 'failed' && !testInfo.error?.message?.includes(MISSING_FLAG)) {
       testInfo.expectedStatus = 'passed';
     }
   });
 
   test.fail('fails instead of skipping', async () => {});
+});
+
+// `requirementsCheck` also runs before hooks: a `beforeAll` that writes data for an EE feature
+// must not run on an instance without it. The block fails in its `beforeAll`, so the next block
+// checks the result.
+let gatedBeforeAllRan = false;
+
+test.describe('a beforeAll in a block that needs a flag the instance does not have', () => {
+  test.use({ requires: { future: ['notAFlag'] } });
+
+  test.beforeAll(async () => {
+    gatedBeforeAllRan = true;
+  });
+
+  test.fail('fails before its beforeAll runs', async () => {});
+});
+
+test.describe('after the block above', () => {
+  test('its beforeAll did not run', async () => {
+    expect(gatedBeforeAllRan).toBe(false);
+  });
 });
