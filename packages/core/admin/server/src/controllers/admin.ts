@@ -5,7 +5,7 @@ import path from 'path';
 
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
-import type { Schema, Struct } from '@strapi/types';
+import type { Core, Schema, Struct } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -137,8 +137,7 @@ export default {
 
     const getNumberOfFolders = async (): Promise<number> => {
       try {
-        const contentStructure = strapi.get('content-structure') as
-          { countGroups?: () => Promise<number> } | undefined;
+        const contentStructure: Core.ContentStructureService = strapi.get('content-structure');
 
         return (await contentStructure?.countGroups?.()) ?? 0;
       } catch {
