@@ -469,6 +469,7 @@ void homepageService.delete({ unknownParam: 1 });
 // A core service without config, as `strapi generate` writes it (`createCoreService(uid)`), is the
 // core service of its content type: the factory adds no override, so the strict signatures apply
 // alone. A factory with a config keeps the override types of `Core.CoreAPI.Service.Extendable`.
+// A config that adds no member (`{}`, `() => ({})`, `undefined`) is no override either.
 const scaffoldedArticles = factories.createCoreService('api::article.article');
 const scaffoldedHomepage = factories.createCoreService('api::homepage.homepage');
 const scaffoldedArticleService = scaffoldedArticles({ strapi: app });
@@ -501,6 +502,52 @@ void scaffoldedHomepageService.createOrUpdate({
   // @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
   lookup: { locale: 'fr' },
 });
+
+const emptyFnArticles = factories.createCoreService('api::article.article', () => ({}))({
+  strapi: app,
+});
+const emptyObjArticles = factories.createCoreService('api::article.article', {})({ strapi: app });
+const undefinedConfigArticles = factories.createCoreService(
+  'api::article.article',
+  undefined
+)({
+  strapi: app,
+});
+declare const emptyConfigServiceChecks: [
+  Expect<
+    Equal<[typeof emptyFnArticles], [Core.CoreAPI.Service.ContentType<'api::article.article'>]>
+  >,
+  Expect<
+    Equal<[typeof emptyObjArticles], [Core.CoreAPI.Service.ContentType<'api::article.article'>]>
+  >,
+  Expect<
+    Equal<
+      [typeof undefinedConfigArticles],
+      [Core.CoreAPI.Service.ContentType<'api::article.article'>]
+    >
+  >,
+];
+emptyConfigServiceChecks satisfies unknown;
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void emptyFnArticles.create({ data: { title: 'Title' }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void emptyFnArticles.update('a', { data: { views: 1 }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void emptyFnArticles.delete('a', { lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void emptyObjArticles.create({ data: { title: 'Title' }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void emptyObjArticles.update('a', { data: { views: 1 }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void emptyObjArticles.delete('a', { lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void undefinedConfigArticles.create({ data: { title: 'Title' }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void undefinedConfigArticles.update('a', { data: { views: 1 }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void undefinedConfigArticles.delete('a', { lookup: { locale: 'fr' } });
+// @ts-expect-error A draft and publish document cannot be deleted by its draft version
+void emptyFnArticles.delete('a', { status: 'draft' });
 
 // Known gap (filters): filter values are not checked against the attribute type. This compiles,
 // so it is not an `@ts-expect-error` case.
