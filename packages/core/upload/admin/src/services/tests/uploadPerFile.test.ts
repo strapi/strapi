@@ -1,4 +1,4 @@
-import { adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi, unstable_addRequestHeaders } from '@strapi/admin/strapi-admin';
 import { renderHook, act, waitFor } from '@tests/utils';
 
 import { useTypedDispatch, useTypedSelector } from '../../store/hooks';
@@ -288,5 +288,69 @@ describe('per-file upload control', () => {
 
     expect(outcome).toMatchObject({ error: { message: 'Original file not found' } });
     expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('headers a plugin registered', () => {
+  let removeHeaders: (() => void) | undefined;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    removeHeaders?.();
+  });
+
+  const sentSpaces = () =>
+    mockUploadFileViaXHR.mock.calls.map(([, , , , , headers]) => headers?.get('x-strapi-space'));
+
+  it('sends every file of a drop with the values read when it was dropped', async () => {
+    let space = 'france';
+    removeHeaders = unstable_addRequestHeaders(() => ({ 'x-strapi-space': space }));
+
+    const { request } = setup(['a.png', 'b.png', 'c.png']);
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    // The tab switches space while the first files upload
+    space = 'spain';
+    await act(async () => {
+      request('a.png').resolve();
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
+
+    expect(sentSpaces()).toEqual(['france', 'france', 'france']);
+  });
+
+  it('retries a file with the values read when it was dropped', async () => {
+    let space = 'france';
+    removeHeaders = unstable_addRequestHeaders(() => ({ 'x-strapi-space': space }));
+
+    const { request, result, statuses } = setup(['a.png']);
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+    space = 'spain';
+    await act(async () => {
+      request('a.png').reject(new UploadFileError('Server error'));
+    });
+    await waitFor(() => expect(statuses()).toEqual(['error']));
+
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 0 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    expect(sentSpaces()).toEqual(['france', 'france']);
+  });
+
+  it('fails every file of the drop when a provider throws', async () => {
+    removeHeaders = unstable_addRequestHeaders(() => {
+      throw new Error('provider failed');
+    });
+
+    const { statuses } = setup(['a.png', 'b.png']);
+
+    await waitFor(() => expect(statuses()).toEqual(['error', 'error']));
+    expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
   });
 });

@@ -317,6 +317,24 @@ describe('uploadFileViaXHR', () => {
       await promise;
     });
 
+    it('sends the headers it is given instead of reading the providers', async () => {
+      removeHeaders = unstable_addRequestHeaders(() => {
+        throw new Error('provider failed');
+      });
+
+      const promise = uploadFileViaXHR(
+        ENDPOINT,
+        'token',
+        new FormData(),
+        new AbortController().signal,
+        undefined,
+        new Headers({ 'x-strapi-space': 'france' })
+      );
+      expect(lastXHR().headers['x-strapi-space']).toBe('france');
+      lastXHR().respond(201, '{}');
+      await promise;
+    });
+
     it('does not send the upload when a provider throws', async () => {
       removeHeaders = unstable_addRequestHeaders(() => {
         throw new Error('provider failed');

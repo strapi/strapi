@@ -135,11 +135,10 @@ export const uploadFileViaXHR = async <T = File>(
   token: string | null | undefined,
   formData: FormData,
   signal: AbortSignal,
-  onProgress?: UploadProgressCallback
+  onProgress?: UploadProgressCallback,
+  // Read once, so a retry after a 401 sends the same values as the first attempt
+  requestHeaders: Headers = unstable_getRequestHeaders()
 ): Promise<T> => {
-  // Read once, so a retry after a 401 sends the same values as the first attempt.
-  const requestHeaders = unstable_getRequestHeaders();
-
   try {
     return await sendUploadViaXHR<T>(url, token, requestHeaders, formData, signal, onProgress);
   } catch (error) {
