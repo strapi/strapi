@@ -356,3 +356,11 @@ moduleConfigChecks satisfies unknown;
 strapi.api('config-lab').config('limit', 'ten');
 // @ts-expect-error The application contract replaces the package one for API modules too.
 strapi.api('config-lab').config('defaultOnly') satisfies true;
+
+// Direct reads such as `strapi.config.server` are `unknown`: the own keys are a copy taken at
+// startup, so config is read with `get`.
+declare const configMemberChecks: [
+  Expect<Equal<StrapiInstance['config']['server'], unknown>>,
+  Expect<Equal<StrapiInstance['config']['anything'], unknown>>,
+];
+configMemberChecks satisfies unknown;
