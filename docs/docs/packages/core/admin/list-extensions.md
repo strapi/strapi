@@ -11,7 +11,7 @@ tags:
 
 Plugins add columns and filters to four Settings lists, `api-tokens`, `roles`, `users` and `audit-logs`, with two waterfall hooks. They work like the Content Manager list view hooks `Admin/CM/pages/ListView/inject-column-in-table` and `Admin/CM/pages/ListView/inject-in-filters`. The lists run them with [`useSettingsListExtensions`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/hooks/useSettingsListExtensions.ts). With no handler, the lists are unchanged.
 
-Both hooks are experimental, hence the `unstable_` prefix on their names and on the exported types (`unstable_InjectSettingsListColumnsArgs`, `unstable_InjectSettingsListFiltersArgs`, `unstable_InjectableSettingsListHeader`, `unstable_InjectableSettingsListFilter`). They can change in a minor release.
+Both hooks are experimental, hence the `unstable_` prefix on their names and on the exported types (`unstable_InjectSettingsListColumnsArgs`, `unstable_InjectSettingsListFiltersArgs`, `unstable_InjectableSettingsListHeader`, `unstable_InjectableSettingsListFilter`, `unstable_InjectableSettingsListSelectFilter`). They can change in a minor release.
 
 ## Columns
 
