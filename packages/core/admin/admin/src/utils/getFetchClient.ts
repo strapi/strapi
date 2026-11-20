@@ -45,8 +45,8 @@ let onTokenUpdate: ((token: string) => void) | null = null;
  * HTTP header values (Latin-1, no line breaks): send identifiers, not display names.
  * Return a plain object, not a promise.
  *
- * The fetch client does not read the providers for `/admin/login`, `/admin/logout`,
- * `/admin/access-token` or a request without a session token.
+ * The fetch client does not read the providers for the login, logout, token and
+ * pre-login requests of the admin.
  */
 type RequestHeadersProvider = () => Record<string, string | null | undefined>;
 
@@ -223,6 +223,14 @@ const triggerSessionExpired = (expiredToken?: string | null): boolean => {
  * This differs from baseQuery.ts which uses ^/admin since it receives normalized paths.
  */
 const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.test(url);
+
+/**
+ * Login, logout, token and pre-login requests carry no context such as a space, so
+ * the fetch client does not read the providers for them: a failing provider must not
+ * block a login or a logout. Matches the path the caller passes, not its subpaths.
+ */
+const SKIPS_REQUEST_HEADERS =
+  /^\/admin\/(login|logout|access-token|init|registration-info|register|register-admin|forgot-password|reset-password|providers)(\?|$)/;
 
 /**
  * Store the new token in the appropriate storage (localStorage or cookie)
@@ -590,9 +598,8 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     return headers;
   };
 
-  // Auth and tokenless requests carry no context, so a failing provider must not block them
-  const readProviderHeaders = (url: string, token: string | null) =>
-    isAuthPath(url) || !token ? new Headers() : unstable_getRequestHeaders();
+  const readProviderHeaders = (url: string) =>
+    SKIPS_REQUEST_HEADERS.test(url) ? new Headers() : unstable_getRequestHeaders();
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
@@ -667,35 +674,35 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   /**
    * Execute a fetch request with automatic token refresh on 401 errors.
    * @param url - The request URL (used to check if it's an auth path)
-   * @param token - The token for the first attempt; the retry reads a fresh one
    * @param executeRequest - Function that performs the fetch (called again on retry with fresh headers)
    */
   const withTokenRefresh = async <TData>(
     url: string,
-    token: string | null,
-    executeRequest: (token: string | null) => Promise<FetchResponse<TData>>
+    executeRequest: () => Promise<FetchResponse<TData>>,
+    getRequestToken: () => string | null
   ): Promise<FetchResponse<TData>> => {
     try {
-      return await executeRequest(token);
+      return await executeRequest();
     } catch (error) {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
+        const tokenUsedByFailedRequest = getRequestToken();
+
         try {
-          await attemptTokenRefresh(token);
+          await attemptTokenRefresh(tokenUsedByFailedRequest);
         } catch {
           // If refresh fails, throw the original error
-          setFailedRequestSessionToken(error, token);
+          setFailedRequestSessionToken(error, tokenUsedByFailedRequest);
           throw error;
         }
 
         // Retry outside the refresh catch so a second 401 is attributed to the
         // refreshed token instead of the token used by the original request.
-        const retryToken = getToken();
         try {
-          return await executeRequest(retryToken);
+          return await executeRequest();
         } catch (retryError) {
           if (isFetchError(retryError) && retryError.status === 401) {
-            setFailedRequestSessionToken(retryError, retryToken);
+            setFailedRequestSessionToken(retryError, getRequestToken());
           }
           throw retryError;
         }
@@ -741,10 +748,11 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
-      const token = getToken();
-      const providerHeaders = readProviderHeaders(url, token);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
-      const executeRequest = async (requestToken: string | null) => {
+      const executeRequest = async () => {
+        requestToken = getToken();
         const { Authorization } = getDefaultHeaders(requestToken);
 
         // For non-JSON response types, omit content negotiation headers that imply JSON
@@ -763,7 +771,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus, responseType);
       };
 
-      return withTokenRefresh(url, token, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     post: async <TData, TSend = unknown>(
       url: string,
@@ -771,10 +779,11 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
-      const token = getToken();
-      const providerHeaders = readProviderHeaders(url, token);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
-      const executeRequest = async (requestToken: string | null) => {
+      const executeRequest = async () => {
+        requestToken = getToken();
         const headers = buildHeaders(
           getDefaultHeaders(requestToken),
           providerHeaders,
@@ -799,7 +808,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, token, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     put: async <TData, TSend = unknown>(
       url: string,
@@ -807,10 +816,11 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
-      const token = getToken();
-      const providerHeaders = readProviderHeaders(url, token);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
-      const executeRequest = async (requestToken: string | null) => {
+      const executeRequest = async () => {
+        requestToken = getToken();
         const headers = buildHeaders(
           getDefaultHeaders(requestToken),
           providerHeaders,
@@ -836,14 +846,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, token, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
-      const token = getToken();
-      const providerHeaders = readProviderHeaders(url, token);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
-      const executeRequest = async (requestToken: string | null) => {
+      const executeRequest = async () => {
+        requestToken = getToken();
         const headers = buildHeaders(
           getDefaultHeaders(requestToken),
           providerHeaders,
@@ -859,7 +870,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, token, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
   };
 

@@ -1107,6 +1107,47 @@ describe('getFetchClient', () => {
       expect(sentHeaders().has('Content-Type')).toBe(false);
     });
 
+    it('sends the headers on the retry of a request sent without a stored token', async () => {
+      const freshToken = buildJwt(Math.floor(Date.now() / 1000) + 3600);
+      let storageReads = 0;
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+        storageReads += 1;
+        return storageReads === 1 ? null : JSON.stringify(freshToken);
+      });
+      deleteCookie(AUTH_COOKIE_NAME);
+      register(() => ({ 'x-strapi-space': 'france' }));
+
+      let attempts = 0;
+      (window.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (url.endsWith('/admin/access-token')) {
+          return Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: freshToken } }),
+          });
+        }
+        attempts += 1;
+        return Promise.resolve(
+          attempts === 1
+            ? {
+                status: 401,
+                ok: false,
+                json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+              }
+            : { status: 200, ok: true, json: () => Promise.resolve({}) }
+        );
+      });
+
+      await getFetchClient().get('/x');
+
+      const retry = (window.fetch as jest.Mock).mock.calls.at(-1);
+      expect(retry[0]).toMatch(/\/x$/);
+      expect(retry[1].headers.get('x-strapi-space')).toBe('france');
+    });
+
     it('leaves out a registered header whose value is undefined', async () => {
       register(() => ({ 'x-strapi-space': undefined }));
 
@@ -1166,19 +1207,20 @@ describe('getFetchClient', () => {
         expect(window.fetch).not.toHaveBeenCalled();
       });
 
-      it('still sends an auth request', async () => {
+      it.each([
+        ['post', '/admin/login'],
+        ['post', '/admin/logout'],
+      ])('%s %s: still sends the request', async (_method, url) => {
         register(() => {
           throw new Error('provider failed');
         });
 
-        await getFetchClient().post('/admin/logout', {});
+        await getFetchClient().post(url, {});
 
         expect(window.fetch).toHaveBeenCalledTimes(1);
       });
 
-      it('still sends a request without a token', async () => {
-        (window.localStorage.getItem as jest.Mock).mockReturnValue(null);
-        deleteCookie(AUTH_COOKIE_NAME);
+      it('still sends a pre-login request with a stored token', async () => {
         register(() => {
           throw new Error('provider failed');
         });
@@ -1186,6 +1228,17 @@ describe('getFetchClient', () => {
         await getFetchClient().get('/admin/init');
 
         expect(window.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not send a request whose path only starts like an auth path', async () => {
+        register(() => {
+          throw new Error('provider failed');
+        });
+
+        await expect(getFetchClient().get('/admin/login-history')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
       });
 
       it('does not send the request when a header cannot be sent by the browser', async () => {
