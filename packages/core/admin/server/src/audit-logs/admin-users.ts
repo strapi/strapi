@@ -188,19 +188,9 @@ export const emitAdminUserUpdateAudits = async (
   }
 };
 
-/**
- * The part of the audit-logs lifecycle service used here.
- * The full service type lives in the Admin EE package.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>,
-    options?: { allowUnknownActor?: boolean }
-  ): void;
-}
-
-export const registerAdminUserAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerAdminUserAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   const resource = (event: AdminUserEvent): AdminUserResource => ({
     type: 'admin-user',
     id: event.userId,

@@ -10,24 +10,39 @@ import { hasStageAttribute } from '../utils/review-workflows';
 type Middleware = Modules.Documents.Middleware.Middleware;
 
 /**
+ * The stage of an entry, read with its workflow populated (only the fields read here)
+ */
+type EntityStage = { id: number; name: string; workflow: { id: number } };
+
+/**
+ * The fallback when the entry has no stage
+ */
+type NoEntityStage = { id?: undefined; name?: undefined; workflow?: undefined };
+
+/**
  * Get the stage information of an entity
  * @param {String} uid
  * @param {Number} id
  * @returns {Object}
  */
-const getEntityStage = async (uid: any, id: any, params: any) => {
-  const entity = await strapi.documents(uid).findOne({
-    ...params,
-    documentId: id,
-    status: 'draft',
-    populate: {
-      [ENTITY_STAGE_ATTRIBUTE]: {
-        populate: {
-          workflow: true,
+const getEntityStage = async (
+  uid: any,
+  id: any,
+  params: any
+): Promise<EntityStage | NoEntityStage> => {
+  const entity: (Modules.Documents.AnyDocument & { strapi_stage?: EntityStage | null }) | null =
+    await strapi.documents(uid).findOne({
+      ...params,
+      documentId: id,
+      status: 'draft',
+      populate: {
+        [ENTITY_STAGE_ATTRIBUTE]: {
+          populate: {
+            workflow: true,
+          },
         },
       },
-    },
-  });
+    });
 
   return entity?.[ENTITY_STAGE_ATTRIBUTE] ?? {};
 };

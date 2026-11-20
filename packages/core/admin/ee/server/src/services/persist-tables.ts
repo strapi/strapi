@@ -23,7 +23,10 @@ const transformTableName = (table: string | PersistedTable) => {
  * @param {RegExp} regex
  * @returns {Promise<string[]>}
  */
-export async function findTables({ strapi }: { strapi: Core.Strapi }, regex: any) {
+export async function findTables(
+  { strapi }: { strapi: Core.Strapi },
+  regex: Core.IsStrict extends true ? RegExp : any
+) {
   const tables = await strapi.db.dialect.schemaInspector.getTables();
   return tables.filter((tableName: string) => regex.test(tableName));
 }

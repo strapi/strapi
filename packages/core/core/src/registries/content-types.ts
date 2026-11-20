@@ -4,7 +4,8 @@ import { createContentType, ContentTypeDefinition } from '../domain/content-type
 import { addNamespace, hasNamespace } from './namespace';
 
 type ContentTypesInput = Record<string, ContentTypeDefinition>;
-type ContentTypeExtendFn = (contentType: Struct.ContentTypeSchema) => Struct.ContentTypeSchema;
+/** Mutates the registered schema in place: `extend` ignores its result. */
+type ContentTypeExtendFn = (contentType: Struct.ContentTypeSchema) => void;
 
 const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
   for (const ctName of Object.keys(contentTypes)) {

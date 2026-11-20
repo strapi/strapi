@@ -501,6 +501,7 @@ describe('Project setting', () => {
   describe('when the provider fails to delete the previous logo', () => {
     let uploadProvider: unknown;
     const deleteError = new Error('Storage unavailable');
+    const failingDelete = vi.fn();
 
     const previousLogo = {
       name: 'name',
@@ -513,9 +514,8 @@ describe('Project setting', () => {
 
     beforeEach(() => {
       uploadProvider = global.strapi.plugins.upload.provider;
-      global.strapi.plugins.upload.provider = {
-        delete: vi.fn().mockRejectedValue(deleteError),
-      };
+      failingDelete.mockReset().mockRejectedValue(deleteError);
+      global.strapi.plugins.upload.provider = { delete: failingDelete };
     });
 
     afterEach(() => {
@@ -528,7 +528,7 @@ describe('Project setting', () => {
 
       await expect(deleteOldFiles({ previousSettings, newSettings })).resolves.toBeDefined();
 
-      expect(global.strapi.plugins.upload.provider.delete).toHaveBeenCalledTimes(2);
+      expect(failingDelete).toHaveBeenCalledTimes(2);
       expect(logWarn).toHaveBeenCalledTimes(2);
       expect(logWarn).toHaveBeenCalledWith(
         expect.stringContaining('menuLogo'),

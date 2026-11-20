@@ -16,15 +16,6 @@ const expectedKindFor = (sectionKey: SectionKey): ContentTypeKind => {
 };
 
 /**
- * A mirror of the subset of the core `content-structure` service (strapi.get('content-structure'))
- * that this service consumes.
- */
-export interface CoreContentStructureService {
-  getCleanedFile(): Promise<ContentStructureFile | null>;
-  write(structure: ContentStructureFile): Promise<void>;
-}
-
-/**
  * This service handles the CTB orchestration of folder-group WRITES. It handles:
  * - Context-aware validation that requires the content-type registry
  * - Context-aware pruning of references invalidated by CTB transaction.
@@ -115,7 +106,7 @@ const cloneFile = (file: ContentStructureFile): ContentStructureFile => ({
 export function createContentStructureService(
   strapi: Core.Strapi
 ): ContentTypeBuilderContentStructureService {
-  const contentStructureService: CoreContentStructureService = strapi.get('content-structure');
+  const contentStructureService: Core.ContentStructureService = strapi.get('content-structure');
 
   const warn = (message: string) => {
     strapi.log.warn(`[content-structure] ${message}`);

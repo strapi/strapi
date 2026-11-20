@@ -4,6 +4,8 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { UID, Struct, Core } from '@strapi/types';
 
+import type { Configuration } from '../../../shared/contracts/content-types';
+import type { ContentManagerModel, ContentTypesService } from '../types/services';
 import type { ConfigurationUpdate } from './configuration';
 
 import { getService } from '../utils';
@@ -20,7 +22,7 @@ const configurationService = createConfigurationService({
   },
 });
 
-const service = ({ strapi }: { strapi: Core.Strapi }) => ({
+const service = (({ strapi }: { strapi: Core.Strapi }) => ({
   findAllContentTypes() {
     const { toContentManagerModel } = getService('data-mapper');
 
@@ -35,25 +37,35 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     return contentType == null ? contentType : toContentManagerModel(contentType);
   },
 
-  findDisplayedContentTypes() {
+  findDisplayedContentTypes(): Core.IsStrict extends true
+    ? ReturnType<ContentTypesService['findDisplayedContentTypes']>
+    : unknown[] {
     return this.findAllContentTypes().filter(
-      // TODO
-      // @ts-expect-error should be resolved from data-mapper types
-      ({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed === true
+      (contentType: ContentManagerModel<Struct.ContentTypeSchema>) =>
+        contentType.isDisplayed === true
     );
   },
 
-  findContentTypesByKind(kind: Struct.ContentTypeKind | null | undefined) {
+  findContentTypesByKind(
+    kind: Struct.ContentTypeKind | null | undefined
+  ): Core.IsStrict extends true
+    ? ReturnType<ContentTypesService['findContentTypesByKind']>
+    : unknown[] {
     if (kind === undefined || kind === null) {
       return this.findAllContentTypes();
     }
 
-    // @ts-expect-error should be resolved from data-mapper types
-    return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
+    // The models are `unknown` without strict types, as on develop.
+    return this.findAllContentTypes().filter(
+      contentTypesUtils.isKind(kind) as (contentType: unknown) => boolean
+    );
   },
 
   async findConfiguration(contentType: Struct.ContentTypeSchema) {
-    const configuration = await configurationService.getConfiguration(contentType.uid);
+    // The stored configuration carries the content type's uid once it has been set
+    const configuration: Core.IsStrict extends true
+      ? Configuration & { uid?: UID.ContentType }
+      : any = await configurationService.getConfiguration(contentType.uid);
 
     return {
       uid: contentType.uid,
@@ -64,7 +76,9 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   async updateConfiguration(
     contentType: Struct.ContentTypeSchema,
     newConfiguration: ConfigurationUpdate
-  ) {
+  ): Core.IsStrict extends true
+    ? ReturnType<ContentTypesService['updateConfiguration']>
+    : Promise<any> {
     await configurationService.setConfiguration(contentType.uid, newConfiguration);
 
     return this.findConfiguration(contentType);
@@ -78,6 +92,6 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   syncConfigurations() {
     return configurationService.syncConfigurations();
   },
-});
+})) satisfies Core.ServiceImplementation<'plugin::content-manager.content-types'>;
 
 export default service;

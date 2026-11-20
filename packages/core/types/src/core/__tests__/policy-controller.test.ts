@@ -4,6 +4,7 @@
  * the shapes that must keep failing.
  */
 import type { ExtendableContext } from 'koa';
+import { policy } from '@strapi/utils';
 
 import type { Core, Struct } from '../..';
 
@@ -54,3 +55,20 @@ declare const koaContext: ExtendableContext;
 isAuthenticated({ ...koaContext, type: 'koa', is: () => false }, undefined, {
   strapi: {} as Core.Strapi,
 });
+
+// With strict types too, the server awaits policy handlers, so async policies are allowed.
+export const asyncStrictPolicy: Core.Policy = async (policyContext) => {
+  return policyContext.state?.user !== undefined;
+};
+export const asyncStrictObjectPolicy: Core.Policy = {
+  name: 'async',
+  handler: async () => true,
+};
+// @ts-expect-error an async policy must resolve to a boolean or nothing, not any other value.
+export const invalidAsyncPolicy: Core.Policy = async () => 'allowed';
+
+// The server builds the context of a REST policy from the middleware context
+// (`packages/core/core/src/services/server/policy.ts`): it is a policy context.
+declare const middlewareContext: Parameters<Core.MiddlewareHandler>[0];
+declare const strapi: Core.Strapi;
+isAuthenticated(policy.createPolicyContext('koa', middlewareContext), undefined, { strapi });

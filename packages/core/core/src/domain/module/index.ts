@@ -2,7 +2,9 @@ import _, { type PropertyPath, flatten } from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Core, UID, Struct } from '@strapi/types';
 
+import type { ControllerFactory } from '../../registries/controllers';
 import { removeNamespace } from '../../registries/namespace';
+import type { ServiceFactory } from '../../registries/services';
 import { validateModule } from './validation';
 
 interface LifecyclesState {
@@ -11,17 +13,25 @@ interface LifecyclesState {
   destroy?: boolean;
 }
 
+/**
+ * Routers keyed by name: a router, or a factory called with `{ strapi }` when the routes are
+ * registered (`services/server/register-routes.ts`), as plugins declare them.
+ */
+type ModuleRoutes = Record<string, Core.RouterConfig>;
+
 export interface RawModule {
   config?: Record<string, unknown>;
-  routes?: Core.Module['routes'];
-  controllers?: Core.Module['controllers'];
-  services?: Core.Module['services'];
+  routes?: ModuleRoutes;
+  // Registered as is: the registries call a factory once, with `{ strapi }`.
+  controllers?: Record<string, ControllerFactory>;
+  services?: Record<string, ServiceFactory>;
   contentTypes?: Core.Module['contentTypes'];
   policies?: Core.Module['policies'];
   middlewares?: Core.Module['middlewares'];
-  bootstrap?: (params: { strapi: Core.Strapi }) => Promise<void>;
-  register?: (params: { strapi: Core.Strapi }) => Promise<void>;
-  destroy?: (params: { strapi: Core.Strapi }) => Promise<void>;
+  // `createModule` awaits the result: a lifecycle may be synchronous.
+  bootstrap?: (params: { strapi: Core.Strapi }) => void | Promise<void>;
+  register?: (params: { strapi: Core.Strapi }) => void | Promise<void>;
+  destroy?: (params: { strapi: Core.Strapi }) => void | Promise<void>;
 }
 
 export interface Module {
@@ -30,17 +40,20 @@ export interface Module {
   destroy: () => Promise<void>;
   isDestroyed: () => boolean;
   load: () => void;
-  routes: Core.Module['routes'];
+  routes: ModuleRoutes;
   config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
   contentType: (ctName: UID.ContentType) => Struct.ContentTypeSchema;
   contentTypes: Record<string, Struct.ContentTypeSchema>;
-  service: (serviceName: UID.Service) => Core.Service;
+  /** `undefined` when no service is registered under the name, as the services registry's `get`. */
+  service: (serviceName: UID.Service) => Core.Service | undefined;
   services: Record<string, Core.Service>;
-  policy: (policyName: UID.Policy) => Core.Policy;
+  /** `undefined` when no policy is registered under the name, as the policies registry's `get`. */
+  policy: (policyName: UID.Policy) => Core.Policy | undefined;
   policies: Record<string, Core.Policy>;
   middleware: (middlewareName: UID.Middleware) => Core.Middleware;
   middlewares: Record<string, Core.Middleware>;
-  controller: (controllerName: UID.Controller) => Core.Controller;
+  /** `undefined` when no controller is registered under the name, as the controllers registry's `get`. */
+  controller: (controllerName: UID.Controller) => Core.Controller | undefined;
   controllers: Record<string, Core.Controller>;
 }
 
@@ -116,10 +129,10 @@ export const createModule = (
     get routes() {
       return rawModule.routes ?? {};
     },
-    set routes(routes: Record<string, Core.Router>) {
+    set routes(routes: ModuleRoutes) {
       rawModule.routes = routes;
     },
-    config(path: PropertyPath, defaultValue: unknown) {
+    config<T = unknown>(path: PropertyPath, defaultValue?: T): T {
       const pathArray = flatten([namespace, path]);
       return strapi.get('config').get(pathArray, defaultValue);
     },

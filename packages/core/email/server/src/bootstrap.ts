@@ -1,23 +1,6 @@
 import type { Core } from '@strapi/types';
-import type { ProviderCapabilities } from '../../shared/types';
-import type { EmailConfig, SendOptions } from './types';
-
-interface EmailProvider {
-  send: (options: SendOptions) => Promise<any>;
-  verify?: () => Promise<boolean>;
-  isIdle?: () => boolean;
-  close?: () => void;
-  getCapabilities?: () => ProviderCapabilities;
-}
-
-interface EmailProviderModule {
-  init: (
-    options: EmailConfig['providerOptions'],
-    settings: EmailConfig['settings']
-  ) => EmailProvider;
-  name?: string;
-  provider?: string;
-}
+import type { EmailConfig } from './types';
+import type { EmailProviderModule } from './types/providers';
 
 const createProvider = (emailConfig: EmailConfig) => {
   const providerName = emailConfig.provider.toLowerCase();
@@ -74,7 +57,15 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       uid: 'settings.read',
       pluginName: 'email',
     },
-  ];
+  ] as const;
 
+  // The declared permission action IDs match the registered actions.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  type ActionIds = Core.Assert<
+    Core.SameNames<
+      Core.PermissionActionId<(typeof actions)[number]>,
+      Extract<Core.RegisteredPermissionAction, `plugin::email.${string}`>
+    >
+  >;
   await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };

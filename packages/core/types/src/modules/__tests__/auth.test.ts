@@ -1,0 +1,31 @@
+import type { AuthenticationService } from '../auth';
+import type { Equal } from '../../../tests/helpers/assert';
+
+declare const auth: AuthenticationService;
+declare const info: Parameters<AuthenticationService['verify']>[0];
+
+// With strict types, what `verify` resolves to depends on the strategy: it is `unknown`.
+async function checkVerify() {
+  const result = await auth.verify(info, { scope: ['api::article.article.find'] });
+  // @ts-expect-error The result must be narrowed before use.
+  result.credentials satisfies unknown;
+  const checks: [Equal<typeof result, unknown>] = [true];
+  checks satisfies unknown;
+  await auth.verify(info, false);
+}
+checkVerify satisfies unknown;
+
+// Strategies may resolve to anything.
+auth.register('custom', {
+  name: 'custom',
+  authenticate: async () => ({ authenticated: true }),
+  verify: async () => ({ anything: true }),
+});
+
+// The server awaits what a strategy's `verify` returns, so it may also return synchronously, as
+// the admin token strategies do (`packages/core/core/src/services/auth/index.ts`).
+auth.register('admin', {
+  name: 'sync-verify',
+  authenticate: async () => ({ authenticated: true }),
+  verify(): void {},
+});

@@ -3,12 +3,13 @@ import { errors } from '@strapi/utils';
 
 import { getService } from '../utils';
 import type { HandlerParams } from './preview-config';
+import type { PreviewConfigService } from '../../types/services';
 
 /**
  * Responsible of routing an entry to a preview URL.
  */
-const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const config = getService(strapi, 'preview-config');
+const createPreviewService = (({ strapi }: { strapi: Core.Strapi }) => {
+  const config: PreviewConfigService = getService(strapi, 'preview-config');
 
   return {
     async getPreviewUrl(uid: UID.ContentType, params: HandlerParams) {
@@ -31,6 +32,6 @@ const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
   };
-};
+}) satisfies Core.ServiceImplementation<'plugin::content-manager.preview'>;
 
 export { createPreviewService };
