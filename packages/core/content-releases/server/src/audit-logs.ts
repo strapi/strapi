@@ -173,18 +173,9 @@ export const runAsSystem = async <T>(
   return result!;
 };
 
-/**
- * The part of the audit-logs lifecycle service used by this plugin.
- * The full service type lives in the Admin EE package and cannot be imported here.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>
-  ): void;
-}
-
-export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   const releaseResource = (event: ReleaseEvent): Modules.AuditLogs.Resource => ({
     type: 'release',
     id: event.releaseId,

@@ -34,29 +34,24 @@ export interface HistoryRestoreDetails {
   version: { id: Data.ID; createdAt: string };
 }
 
-/**
- * The part of the audit-logs lifecycle service used by this plugin.
- * The full service type lives in the Admin EE package and cannot be imported here.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails, TResource extends Modules.AuditLogs.Resource>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails, TResource>
-  ): void;
-}
-
-export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
-  auditLogsLifecycle.registerEvent<DraftDiscardDetails, EntryResource>(
+export const registerAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
+  auditLogsLifecycle.registerEvent<DraftDiscardDetails>(
     AUDITED_EVENTS.ENTRY_DRAFT_DISCARD,
-    (event: DraftDiscardEvent) => ({
+    (
+      event: DraftDiscardEvent
+    ): Modules.AuditLogs.EventShape<DraftDiscardDetails, EntryResource> => ({
       resource: { type: 'entry', uid: event.uid, id: event.entry.documentId },
       details: { locale: event.entry.locale ?? null },
     })
   );
 
-  auditLogsLifecycle.registerEvent<HistoryRestoreDetails, EntryResource>(
+  auditLogsLifecycle.registerEvent<HistoryRestoreDetails>(
     AUDITED_EVENTS.ENTRY_HISTORY_RESTORE,
-    (event: HistoryRestoreEvent) => ({
+    (
+      event: HistoryRestoreEvent
+    ): Modules.AuditLogs.EventShape<HistoryRestoreDetails, EntryResource> => ({
       resource: { type: 'entry', uid: event.uid, id: event.documentId },
       details: {
         locale: event.locale,
