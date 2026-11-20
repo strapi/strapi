@@ -36,17 +36,9 @@ let refreshPromise: Promise<string | null> | null = null;
 let onTokenUpdate: ((token: string) => void) | null = null;
 
 /**
- * Returns headers to add to an admin request. A request reads the providers once,
- * when it starts, and sends the same values on its retry after a 401 (e.g. the
- * space a browser tab worked in when it sent a write). A value that is `undefined`
- * or `null` only skips this provider's entry: a value from an earlier provider with
- * the same name is still sent. Without any value the request goes out without the
- * header, so the server must reject a request that needs it. Values must be valid
- * HTTP header values (Latin-1, no line breaks): send identifiers, not display names.
- * Return a plain object, not a promise.
- *
- * The fetch client does not read the providers for the login, logout, token and
- * pre-login requests of the admin.
+ * Returns headers to add to an admin request, as a plain object (not a promise).
+ * A `null` or `undefined` value skips that entry. Values must be Latin-1 without
+ * line breaks: send identifiers, not display names.
  */
 type RequestHeadersProvider = () => Record<string, string | null | undefined>;
 

@@ -87,7 +87,8 @@ const readRequestHeaders = (): Headers | Error => {
   try {
     return unstable_getRequestHeaders();
   } catch (error) {
-    return error instanceof Error ? error : new Error(String(error));
+    // `unstable_getRequestHeaders` only throws `RequestHeadersError`
+    return error as Error;
   }
 };
 

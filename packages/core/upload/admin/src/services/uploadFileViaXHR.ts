@@ -131,24 +131,13 @@ const sendUploadViaXHR = <T>(
   });
 };
 
-/**
- * Uploads a single file with {@link sendUploadViaXHR}, and retries it once with a
- * fresh token after a 401 response.
- *
- * @param requestHeaders - Headers to add to the upload. Pass the values read once
- * for an upload drop. When absent, the function reads the providers itself.
- * @throws {RequestHeadersError} When `requestHeaders` is absent and a provider fails.
- * The upload is not sent.
- * @throws {UploadAbortedError} When the signal aborts.
- * @throws {UploadFileError} On a non-2xx response or network error.
- */
+/** @throws {RequestHeadersError} When `requestHeaders` is absent and a provider fails */
 export const uploadFileViaXHR = async <T = File>(
   url: string,
   token: string | null | undefined,
   formData: FormData,
   signal: AbortSignal,
   onProgress?: UploadProgressCallback,
-  // Read once, so a retry after a 401 sends the same values as the first attempt
   requestHeaders: Headers = unstable_getRequestHeaders()
 ): Promise<T> => {
   try {
