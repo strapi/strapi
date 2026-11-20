@@ -4,6 +4,7 @@ import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
 import { FIELDS_TO_IGNORE } from '../constants';
+import { getService } from '../utils';
 import type {
   CreateHistoryVersion,
   HistoryVersionAuthor,
@@ -45,9 +46,9 @@ interface HistoryOriginAuthor extends Omit<HistoryVersionAuthorReference, 'id'> 
   entityId: Data.ID;
 }
 
-interface HistoryOrigin {
+export interface HistoryOrigin {
   source: HistoryVersionSource;
-  author: HistoryOriginAuthor;
+  author: HistoryOriginAuthor | null;
 }
 
 export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
@@ -60,23 +61,14 @@ export type AuthorColumns =
     }
   | { authorType: null; authorModel: null; authorId: null };
 
-const toAdminUserAuthor = (user: { id: Data.ID }): HistoryOriginAuthor => ({
-  type: 'person',
-  model: 'admin::user',
-  entityId: user.id,
-});
-
-const toApiTokenAuthor = (token: { id: Data.ID }): HistoryOriginAuthor => ({
-  type: 'token',
-  model: 'admin::api-token',
-  entityId: token.id,
-});
-
-export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
-  authorType: author.type,
-  authorModel: author.model,
-  authorId: author.id,
-});
+export const toAuthorColumns = (author: HistoryVersionAuthorReference | null): AuthorColumns =>
+  author === null
+    ? { authorType: null, authorModel: null, authorId: null }
+    : {
+        authorType: author.type,
+        authorModel: author.model,
+        authorId: author.id,
+      };
 
 export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
   columns.authorType === null
@@ -133,7 +125,28 @@ type RelationResponse = {
 const isContentManagerRoute = ({ state }: RequestContext) =>
   state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
 
+const isContentApiRoute = ({ state }: RequestContext) => state.route?.info?.type === 'content-api';
+
+const resolveSource = (requestContext: RequestContext): HistoryVersionSource | null => {
+  if (isContentManagerRoute(requestContext)) {
+    switch (requestContext.state.auth?.strategy?.name) {
+      case 'admin-token':
+        return 'admin-api';
+      default:
+        return requestContext.state.user ? 'admin-panel' : null;
+    }
+  }
+
+  if (isContentApiRoute(requestContext)) {
+    return 'content-api';
+  }
+
+  return null;
+};
+
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
+  const historyAuthors = getService(strapi, 'history-authors');
+
   /**
    * @description
    * Get the difference between the version schema and the content type schema
@@ -267,46 +280,34 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     return author?.documentId ?? null;
   };
 
-  /**
-   * @description
-   * Finds the current names of the records of a model, keyed by document id
-   */
-  const findAuthorNames = async (
-    model: string,
-    documentIds: string[]
-  ): Promise<Record<string, string>> => {
-    switch (model) {
-      case 'admin::user': {
-        const users: Array<AdminUserNames & { documentId: string }> = await strapi.db
-          .query('admin::user')
-          .findMany({
-            select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
-            where: { documentId: { $in: documentIds } },
-          });
+  const findAdminUserNames = async (documentIds: string[]): Promise<Record<string, string>> => {
+    const users: Array<AdminUserNames & { documentId: string }> = await strapi.db
+      .query('admin::user')
+      .findMany({
+        select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
+        where: { documentId: { $in: documentIds } },
+      });
 
-        return users.reduce<Record<string, string>>((acc, user) => {
-          acc[user.documentId] = getDisplayName(user);
+    return users.reduce<Record<string, string>>((acc, user) => {
+      acc[user.documentId] = getDisplayName(user);
 
-          return acc;
-        }, {});
-      }
-      case 'admin::api-token': {
-        const tokens: Array<{ documentId: string; name: string }> = await strapi.db
-          .query('admin::api-token')
-          .findMany({
-            select: ['documentId', 'name'],
-            where: { documentId: { $in: documentIds } },
-          });
+      return acc;
+    }, {});
+  };
 
-        return tokens.reduce<Record<string, string>>((acc, token) => {
-          acc[token.documentId] = token.name;
+  const findApiTokenNames = async (documentIds: string[]): Promise<Record<string, string>> => {
+    const tokens: Array<{ documentId: string; name: string }> = await strapi.db
+      .query('admin::api-token')
+      .findMany({
+        select: ['documentId', 'name'],
+        where: { documentId: { $in: documentIds } },
+      });
 
-          return acc;
-        }, {});
-      }
-      default:
-        return {};
-    }
+    return tokens.reduce<Record<string, string>>((acc, token) => {
+      acc[token.documentId] = token.name;
+
+      return acc;
+    }, {});
   };
 
   /**
@@ -326,7 +327,8 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
     const namesByModel = await Promise.all(
       Object.entries(idsByModel).map(
-        async ([model, ids]) => [model, await findAuthorNames(model, Array.from(ids))] as const
+        async ([model, ids]) =>
+          [model, await historyAuthors.findNames(model, Array.from(ids))] as const
       )
     );
 
@@ -346,6 +348,9 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.config.get('admin.history.retentionDays')
     );
   };
+
+  const isContentApiHistoryEnabled = () =>
+    strapi.config.get('admin.history.contentApi.enabled', true);
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
@@ -531,6 +536,18 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
+  const resolveAuthor = ({ state }: RequestContext): HistoryOrigin['author'] => {
+    const strategyName = state.auth?.strategy?.name;
+    const provider = strategyName ? historyAuthors.findProviderByStrategy(strategyName) : undefined;
+    const recordId = provider?.getRecordId(state.auth?.credentials);
+
+    if (!provider || recordId === null || recordId === undefined) {
+      return null;
+    }
+
+    return { type: provider.type, model: provider.model, entityId: recordId };
+  };
+
   const resolveHistoryOrigin = (
     requestContext: RequestContext | undefined
   ): HistoryOrigin | null => {
@@ -538,21 +555,13 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
       return null;
     }
 
-    if (isContentManagerRoute(requestContext)) {
-      switch (requestContext.state.auth?.strategy?.name) {
-        case 'admin-token':
-          return {
-            source: 'admin-api',
-            author: toApiTokenAuthor(requestContext.state.auth.credentials),
-          };
-        default:
-          return requestContext.state.user
-            ? { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) }
-            : null;
-      }
+    const source = resolveSource(requestContext);
+
+    if (source === null) {
+      return null;
     }
 
-    return null;
+    return { source, author: resolveAuthor(requestContext) };
   };
 
   return {
@@ -563,8 +572,11 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     isLocalizedContentType,
     getLocaleDictionary,
     findAuthorDocumentId,
+    findAdminUserNames,
+    findApiTokenNames,
     getAuthorNameDictionary,
     getRetentionDays,
+    isContentApiHistoryEnabled,
     getVersionStatus,
     resolveHistoryOrigin,
     getDeepPopulate,
