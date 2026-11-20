@@ -137,7 +137,7 @@ Both commands must be running at same time; now you will be able to see the admi
 ### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
-- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn build` builds every package (code and types).
 - `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
 - `yarn setup` installs dependencies.
 - `yarn lint` lints the codebase.
@@ -146,25 +146,23 @@ Both commands must be running at same time; now you will be able to see the admi
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:api` runs the api integration tests.
-- `yarn test:generate-app` generates a test application.
-- `yarn test:run-app` runs a test application.
-- `yarn test:start-app` starts the test application.
+- `yarn test:generate-app` generates a test application in `test-apps/base`.
 
 ---
 
 ## Running the API Integration tests
 
-The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+The API integration tests require a Strapi app to be able to run. `yarn test:api` generates a fresh one in `test-apps/api` on every run, so you don't need to generate it yourself. A stale app makes the test suite fail.
+
+To generate a standalone test app (in `test-apps/base`, not used by `yarn test:api`), pass the database as a positional argument:
 
 ```bash
-$ yarn test:generate-app --db=sqlite
-$ yarn test:generate-app --db=postgres
-$ yarn test:generate-app --db=mysql
+$ yarn test:generate-app sqlite
+$ yarn test:generate-app postgres
+$ yarn test:generate-app mysql
 ```
 
-A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
-
-This command runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
+`yarn test:api` runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
 
 ### Changing the database
 

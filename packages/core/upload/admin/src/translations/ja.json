@@ -241,7 +241,5 @@
   "view-switch.list": "リスト表示",
   "view.grid": "グリッド表示",
   "view.switch.label": "表示オプション",
-  "view.table": "テーブル表示",
-  "window.confirm.close-modal.file": "保存されていない変更がありますが、いいですか？。",
-  "window.confirm.close-modal.files": "まだアップロードされていないファイルがありますが、いいですか？"
+  "view.table": "テーブル表示"
 }

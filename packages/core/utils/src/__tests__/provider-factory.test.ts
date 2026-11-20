@@ -83,6 +83,44 @@ describe('Provider Factory', () => {
         );
       });
 
+      test(`Can't register duplicated key concurrently by default`, async () => {
+        const provider = providerFactory();
+
+        const key = 'key';
+        const itemA = { foo: 'bar' };
+        const itemB = { bar: 'foo' };
+
+        const results = await Promise.allSettled([
+          provider.register(key, itemA),
+          provider.register(key, itemB),
+        ]);
+
+        expect(results[0].status).toBe('fulfilled');
+        expect(results[1]).toMatchObject({
+          status: 'rejected',
+          reason: new Error('Duplicated item key: key'),
+        });
+        expect(provider.keys()).toEqual([key]);
+        expect(provider.get(key)).toEqual(itemA);
+      });
+
+      test('Can register a key again when its willRegister hook failed', async () => {
+        const provider = providerFactory();
+        const key = 'key';
+        const item = { foo: 'bar' };
+
+        provider.hooks.willRegister.register(
+          jest.fn().mockRejectedValueOnce(new Error('willRegister failed'))
+        );
+
+        await expect(provider.register(key, item)).rejects.toThrowError('willRegister failed');
+        expect(provider.has(key)).toBe(false);
+
+        await provider.register(key, item);
+
+        expect(provider.get(key)).toEqual(item);
+      });
+
       test('Can register duplicated key when "throwOnDuplicates" is false', async () => {
         const provider = providerFactory({ throwOnDuplicates: false });
         const key = 'key';

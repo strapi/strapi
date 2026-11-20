@@ -51,7 +51,7 @@ type TabFormProps = {
   onChange: TabFormChangeHandler;
 };
 
-/* eslint-disable react/no-array-index-key */
+/* oxlint-disable react/no-array-index-key */
 export const TabForm = ({
   form,
   formErrors,

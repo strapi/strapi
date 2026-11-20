@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/media-has-caption */
 import * as React from 'react';
 
 import MuxPlayer from '@mux/mux-player-react';

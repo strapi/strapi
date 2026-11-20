@@ -58,7 +58,7 @@ describe('Admin Homepage API', () => {
         lifespan: null,
         description: '',
         type: 'full-access',
-        name: 'RW - Full Access',
+        name: 'Admin homepage - Full Access',
         permissions: null,
       },
     });

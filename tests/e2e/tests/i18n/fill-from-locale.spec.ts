@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import {
   clickAndWait,
   findAndClose,
@@ -12,8 +12,8 @@ import {
 test.describe('i18n - Fill from another locale', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to retrieve localized relations with the fill from another locale feature', async ({

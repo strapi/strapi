@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { Menu } from '@strapi/design-system';
 import { ChevronDown, Images, Link, Upload } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -64,6 +66,12 @@ const AddAssetTrigger = styled(Menu.Trigger)`
 
 interface AddAssetMenuProps {
   disabled?: boolean;
+  /**
+   * Ignore requests to open, without looking disabled. The press still reaches
+   * whatever listens for presses outside it, so an open drawer closes — or asks
+   * about unsaved edits — instead of having the menu stacked over it.
+   */
+  preventOpen?: boolean;
   onBrowseLibrary: () => void;
   onUploadFromDevice: () => void;
   onUploadFromUrl: () => void;
@@ -82,12 +90,14 @@ interface AddAssetMenuProps {
  */
 export const AddAssetMenu = ({
   disabled = false,
+  preventOpen = false,
   onBrowseLibrary,
   onUploadFromDevice,
   onUploadFromUrl,
 }: AddAssetMenuProps) => {
   const { formatMessage } = useIntl();
   const { canRead, canCreate, isLoading } = useMediaLibraryPermissions();
+  const [isOpen, setIsOpen] = useState(false);
 
   // `useRBAC` starts every instance at `isLoading: true` with the flags false.
   // Until it settles, every entry shows but none can be picked: hiding them
@@ -100,7 +110,7 @@ export const AddAssetMenu = ({
   }
 
   return (
-    <Menu.Root>
+    <Menu.Root open={isOpen} onOpenChange={(open) => setIsOpen(open && !preventOpen)}>
       <AddAssetTrigger variant="ghost" disabled={disabled} endIcon={<ChevronDown aria-hidden />}>
         {formatMessage({
           id: getTranslationKey('content-manager.input.add-asset'),

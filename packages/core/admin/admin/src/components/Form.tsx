@@ -20,6 +20,7 @@ import { useWarnIfUnsavedChanges } from '../hooks/useWarnIfUnsavedChanges';
 import { getIn, setIn } from '../utils/objects';
 
 import { createContext } from './Context';
+import { useUnsavedChangesModalDirty } from './UnsavedChangesModal';
 
 import type {
   InputProps as InputPropsImpl,
@@ -361,6 +362,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [state.values, initialValues.current]
     );
+
+    // Only has an effect when the form is rendered inside an `UnsavedChangesModal`.
+    useUnsavedChangesModalDirty(modified && !state.isSubmitting);
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
       if (typeof eventOrPath === 'string') {

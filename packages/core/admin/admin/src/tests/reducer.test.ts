@@ -131,9 +131,25 @@ describe('admin_app reducer', () => {
       expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
     });
 
-    it('login persist=false should not touch localStorage token', () => {
+    it('login persist=false should not persist a token in localStorage', () => {
       reducer(undefined, login({ token: 'abcd', persist: false }));
       expect(localStorage.getItem('jwtToken')).toBe(null);
+    });
+
+    it('login persist=false should clear a previously persisted token', () => {
+      localStorage.setItem('jwtToken', JSON.stringify('old-token'));
+
+      const result = reducer(undefined, login({ token: 'abcd', persist: false }));
+
+      expect(result.token).toBe('abcd');
+      expect(localStorage.getItem('jwtToken')).toBe(null);
+      expect(setCookie).toHaveBeenCalledWith('jwtToken', 'abcd');
+    });
+
+    it('login persist=true should clear a previous session cookie', () => {
+      reducer(undefined, login({ token: 'abcd', persist: true }));
+
+      expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
     });
   });
 });

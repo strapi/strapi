@@ -37,6 +37,23 @@ describe('buildFiltersSchema', () => {
     expect(schema.safeParse({ unknown: 'a' }).success).toBe(false);
   });
 
+  test.each(['$null', '$notNull'])('takes a boolean %s operand on every field type', (operator) => {
+    const schema = buildFiltersSchema({
+      ...attributes,
+      status: { type: 'enumeration', enum: ['draft', 'live'] },
+    } as unknown as Struct.SchemaAttributes);
+
+    for (const field of ['title', 'rank', 'featured', 'status']) {
+      expect(schema.safeParse({ [field]: { [operator]: true } }).success).toBe(true);
+      expect(schema.safeParse({ [field]: { [operator]: false } }).success).toBe(true);
+    }
+
+    // The query layer rejects non-boolean operands, so the schema does not offer them.
+    expect(schema.safeParse({ status: { [operator]: 'draft' } }).success).toBe(false);
+    expect(schema.safeParse({ title: { [operator]: 'a' } }).success).toBe(false);
+    expect(schema.safeParse({ rank: { [operator]: 2 } }).success).toBe(false);
+  });
+
   test('builds the recursive filters object once, however often it is traversed', () => {
     const counted = withReadCounter(attributes);
     const schema = buildFiltersSchema(counted.attributes);

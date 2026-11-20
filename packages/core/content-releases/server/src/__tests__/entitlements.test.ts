@@ -17,8 +17,20 @@ describe('content-releases entitlements', () => {
     );
   });
 
-  it('defaults to the 3 pending releases validation enforces', () => {
-    expect(resolveWith({ name: 'cms-content-releases', options: {} })).toBe(3);
-    expect(resolveWith(undefined)).toBe(3);
+  it('reads a numeric string cap as its number', () => {
+    expect(resolveWith({ name: 'cms-content-releases', options: { maximumReleases: '90' } })).toBe(
+      90
+    );
+  });
+
+  it.each([
+    ['"0"', { name: 'cms-content-releases', options: { maximumReleases: '0' } }],
+    ['0', { name: 'cms-content-releases', options: { maximumReleases: 0 } }],
+    ['a non-numeric cap', { name: 'cms-content-releases', options: { maximumReleases: 'many' } }],
+    ['a missing cap', { name: 'cms-content-releases', options: {} }],
+    ['a bare feature name', 'cms-content-releases'],
+    ['a missing feature', undefined],
+  ])('defaults to the 3 pending releases validation enforces for %s', (_, feature) => {
+    expect(resolveWith(feature)).toBe(3);
   });
 });

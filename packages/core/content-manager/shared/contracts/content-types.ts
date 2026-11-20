@@ -13,6 +13,11 @@ export type Settings = {
   defaultSortBy: string;
   defaultSortOrder: string;
   relationOpenMode?: RelationOpenMode;
+  /**
+   * Entries are arranged by hand in the list view, and the Content API returns them in that
+   * order when no sort is requested. Collection types only.
+   */
+  customOrder?: boolean;
 };
 
 export type Metadatas = {

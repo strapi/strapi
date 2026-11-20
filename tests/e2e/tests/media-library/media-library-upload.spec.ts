@@ -3,7 +3,7 @@ import path from 'path';
 import { test, expect, type Route, type APIRequestContext } from '@playwright/test';
 
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { describeOnCondition } from '../../../utils/shared';
 
@@ -98,8 +98,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('a content manager can upload assets through every path', async ({ page }) => {
@@ -287,10 +287,20 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         ).toBeVisible();
 
         // The count alone does not tell the user why the file was refused.
-        await expect(assetsPage.uploadProgressDialog.getByText('blocked-file.exe')).toBeVisible();
         await expect(
-          assetsPage.uploadProgressDialog.getByText(/not allowed|not supported/i)
+          assetsPage.uploadProgressDialog.getByText('blocked-file.exe', { exact: true })
         ).toBeVisible();
+        await expect(
+          assetsPage.uploadProgressDialog
+            .getByText(/not allowed|not supported/i)
+            .filter({ hasNotText: 'blocked-file.exe:' })
+        ).toBeVisible();
+        // Screen readers hear the file name with the cause.
+        await expect(
+          assetsPage.uploadProgressDialog.getByText(
+            /^blocked-file\.exe: .*(not allowed|not supported)/i
+          )
+        ).toBeAttached();
 
         await assetsPage.closeUploadProgressDialog();
 

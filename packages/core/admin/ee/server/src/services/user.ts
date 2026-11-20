@@ -130,8 +130,11 @@ const updateById = async (id: any, attributes: any) => {
       populate: ['roles'],
     });
 
-    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    // The update resolves null when no user has this id
+    if (updatedUser !== null) {
+      strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+      await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    }
 
     return updatedUser;
   }
@@ -218,6 +221,11 @@ const deleteByIds = async (ids: any) => {
       where: { id },
       populate: ['roles'],
     });
+
+    // The ID matches no user (e.g. deleted in the meantime): nothing to clean up or report
+    if (deletedUser === null) {
+      continue;
+    }
 
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();

@@ -29,6 +29,7 @@ export default defineProvider({
 
     strapi.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
     strapi.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
+    strapi.get('hooks').set('strapi::app.afterBootstrap', hooks.createAsyncSeriesHook());
 
     // Content migration to enable draft and publish
     strapi.hook('strapi::content-types.beforeSync').register(syncMigrations.disable);

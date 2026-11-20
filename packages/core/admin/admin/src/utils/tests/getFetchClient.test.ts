@@ -1,6 +1,8 @@
 import {
   ADMIN_REFRESH_LOCK,
   attemptTokenRefresh,
+  FetchError,
+  getFailedRequestSessionToken,
   getFetchClient,
   refreshAccessToken,
   resetSessionExpiredNotification,
@@ -337,6 +339,94 @@ describe('getFetchClient', () => {
     });
   });
 
+  describe('non-JSON response body', () => {
+    const nonJsonResponse = (status: number) => ({
+      status,
+      ok: status >= 200 && status < 300,
+      json: () => Promise.reject(new SyntaxError('Unexpected token <')),
+    });
+
+    it('should throw a FetchError with the status on a non-2xx response', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(nonJsonResponse(413))
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.post('/upload', {})).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Unknown Server Error',
+        status: 413,
+      });
+    });
+
+    it('should refresh the token and retry on a 401', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() => Promise.resolve(nonJsonResponse(401)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    it('should throw the 401 with the session token when the refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() => Promise.resolve(nonJsonResponse(401)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({ error: { message: 'Refresh token invalid', status: 401 } }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Unknown Server Error', status: 401 });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+      }
+    });
+
+    it('should rethrow the parse error when validateStatus accepts the status', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(nonJsonResponse(413))
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(
+        fetchClient.post('/upload', {}, { validateStatus: (status) => status === 413 })
+      ).rejects.toMatchObject({ name: 'SyntaxError' });
+    });
+  });
+
   describe('token refresh on 401', () => {
     it('should refresh token and retry on 401 error', async () => {
       // First call returns 401
@@ -385,6 +475,50 @@ describe('getFetchClient', () => {
       );
     });
 
+    it('attributes a failed retry to the refreshed token instead of the original token', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Original token expired', status: 401 },
+              }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Refreshed token rejected', status: 401 },
+              }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the retried request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Refreshed token rejected' });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('new-token');
+        expect(Object.keys(error as object)).not.toContain('sessionToken');
+        expect(JSON.stringify(error)).not.toContain('new-token');
+      }
+    });
+
     it('should not refresh token for auth paths', async () => {
       // Call to login endpoint returns 401
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
@@ -409,6 +543,8 @@ describe('getFetchClient', () => {
     });
 
     it('should throw original error if token refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+
       // First call returns 401
       (window.fetch as jest.Mock)
         .mockImplementationOnce(() =>
@@ -435,7 +571,16 @@ describe('getFetchClient', () => {
 
       const fetchClient = getFetchClient();
 
-      await expect(fetchClient.get('/api/test')).rejects.toThrow('Token expired');
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Token expired' });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+        expect(Object.keys(error as object)).not.toContain('sessionToken');
+        expect(JSON.stringify(error)).not.toContain('token-a');
+      }
 
       // Original request plus one access-token attempt
       expect(window.fetch).toHaveBeenCalledTimes(2);
@@ -896,6 +1041,20 @@ describe('getFetchClient', () => {
       resetSessionExpiredNotification();
       triggerSessionExpired();
 
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('deduplicates one expired token without suppressing a newer session expiry', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired('token-a');
+      triggerSessionExpired();
+      triggerSessionExpired('token-a');
+      triggerSessionExpired('token-b');
+
+      expect(callback).toHaveBeenNthCalledWith(1, 'token-a');
+      expect(callback).toHaveBeenNthCalledWith(2, 'token-b');
       expect(callback).toHaveBeenCalledTimes(2);
     });
 

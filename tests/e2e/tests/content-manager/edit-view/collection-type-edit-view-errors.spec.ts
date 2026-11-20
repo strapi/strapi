@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../../utils/login';
+import { login, loginWithApi } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../../../utils/shared';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
@@ -7,8 +7,8 @@ import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test.describe('Collection Type - Errors', () => {
@@ -20,7 +20,9 @@ test.describe('Edit View', () => {
 
       await page.getByLabel('opponent*').click();
       await page.getByLabel('opponent*').fill('Test');
+      // on a collection type the placeholder offers an empty entry or a copy of an existing one
       await page.getByRole('button', { name: 'No entry yet. Click to add' }).first().click();
+      await page.getByRole('menuitem', { name: 'Empty entry' }).click();
       await page.getByRole('button', { name: 'Publish' }).click();
 
       await expect(

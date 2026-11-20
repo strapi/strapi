@@ -69,14 +69,50 @@ describe('schema-handler flush', () => {
 
   it('tolerates an already-removed directory while rolling back a newly created schema', async () => {
     const handler = createSchemaHandler({
+      uid: 'api::new.new',
+      isNew: true,
       dir: '/tmp/api/new/content-types/new',
       filename: 'schema.json',
     });
-    handler.setUID('api::new.new');
     vi.mocked(fse.readdir).mockRejectedValueOnce(
       Object.assign(new Error('missing'), { code: 'ENOENT' })
     );
 
     await expect(handler.rollback()).resolves.toBeUndefined();
+  });
+});
+
+describe('schema-handler rollback', () => {
+  beforeEach(() => {
+    vi.mocked(fse.writeJSON).mockClear();
+    vi.mocked(fse.remove).mockClear();
+  });
+
+  it('removes the written file of a newly created schema', async () => {
+    const handler = createSchemaHandler({
+      uid: 'api::new.new',
+      isNew: true,
+      dir: '/tmp/api/new/content-types/new',
+      filename: 'schema.json',
+    });
+    handler.set('collectionName', 'news');
+
+    await handler.rollback();
+
+    expect(fse.remove).toHaveBeenCalledWith('/tmp/api/new/content-types/new/schema.json');
+    expect(fse.writeJSON).not.toHaveBeenCalled();
+  });
+
+  it('restores the initial schema of an existing schema', async () => {
+    const handler = createTestHandler();
+    handler.setAttribute('extra', { type: 'string' });
+
+    await handler.rollback();
+
+    expect(fse.writeJSON).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fse.writeJSON).mock.calls[0][0]).toBe(
+      '/tmp/api/test/content-types/test/schema.json'
+    );
+    expect(vi.mocked(fse.writeJSON).mock.calls[0][1]).not.toHaveProperty('attributes.extra');
   });
 });

@@ -5,6 +5,7 @@ import type {
   GetProjectType,
 } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
+import { isAuditLogsEnabled } from '../audit-logs/utils';
 
 type RetainedFeature = { name: string; [key: string]: any };
 
@@ -172,6 +173,7 @@ export default {
       features: (strapi.ee.features.list() ??
         []) as GetLicenseLimitInformation.Response['data']['features'],
       entitlements: strapi.ee.entitlements.list(),
+      auditLogs: { enabled: isAuditLogsEnabled(strapi) },
     };
 
     return { data } satisfies GetLicenseLimitInformation.Response;

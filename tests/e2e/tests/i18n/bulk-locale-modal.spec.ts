@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Bulk locale actions', () => {
@@ -9,8 +9,8 @@ test.describe('Bulk locale actions', () => {
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('Bulk locale modal lists all locales after creating a new localization', async ({

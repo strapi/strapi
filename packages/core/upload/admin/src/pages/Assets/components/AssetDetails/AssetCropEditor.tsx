@@ -29,6 +29,9 @@ import type {
 const FOCAL_DIAMETER_REM = 5.6;
 const HANDLE_PX = 12;
 
+/** The editor, portaled out of the drawer that opens it */
+export const CROP_EDITOR_SELECTOR = '[data-asset-crop-editor]';
+
 /* -------------------------------------------------------------------------------------------------
  * Styled
  * -----------------------------------------------------------------------------------------------*/
@@ -570,7 +573,7 @@ export const AssetCropEditor = ({
   return (
     <Portal>
       <FocusTrap onEscape={onClose} skipAutoFocus>
-        <Overlay ref={overlayRef} tabIndex={-1}>
+        <Overlay ref={overlayRef} tabIndex={-1} data-asset-crop-editor="">
           <HeaderBar alignItems="center">
             <Crop aria-hidden />
             <Typography variant="omega" fontWeight="bold">
