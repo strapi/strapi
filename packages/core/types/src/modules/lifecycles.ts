@@ -1,4 +1,4 @@
-import type { Event as DatabaseEvent } from '@strapi/database';
+import type { Database, Event as DatabaseEvent } from '@strapi/database';
 
 import type * as Data from '../data';
 import type * as Schema from '../schema';
@@ -198,3 +198,24 @@ export type Lifecycles<TContentTypeUID extends UID.ContentType> = {
     ? (event: DatabaseEvent) => Promise<void> | void
     : (event: ModelEvent<TContentTypeUID, TAction>) => unknown;
 };
+
+/**
+ * `strapi.db.lifecycles` with strict types: a subscriber object's hooks receive the events of the
+ * models in its `models`, the only ones it runs for.
+ */
+export interface StrictLifecycleProvider extends Omit<Database['lifecycles'], 'subscribe'> {
+  /**
+   * Adds a subscriber and returns the function that removes it. Hooks receive {@link ModelEvent}s:
+   * typed for the registered models listed in `models`, {@link AnyEvent} for other models, for a
+   * `models` known only at runtime, and without `models`. A subscriber on several models receives
+   * the union of their events.
+   */
+  subscribe<const TModel extends string = never>(
+    subscriber: SubscriberFn | SubscriberMap<TModel>
+  ): () => void;
+}
+
+/** `strapi.db` with strict types: a `Database` whose `lifecycles.subscribe` is typed by `models`. */
+export interface StrictDatabase extends Database {
+  lifecycles: StrictLifecycleProvider;
+}
