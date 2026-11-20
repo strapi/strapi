@@ -19,6 +19,7 @@ import { AssetsSearchInput } from '../../pages/Assets/components/AssetsSearchInp
 import { AssetsView } from '../../pages/Assets/components/AssetsView';
 import { FilterBadges } from '../../pages/Assets/components/FilterBadges';
 import { FilterMenu } from '../../pages/Assets/components/FilterMenu';
+import { SearchScopeControls } from '../../pages/Assets/components/SearchScopeControls';
 import { SortMenu } from '../../pages/Assets/components/SortMenu';
 import { ViewToggle } from '../../pages/Assets/components/ViewToggle';
 import { localStorageKeys, viewOptions } from '../../pages/Assets/constants';
@@ -143,6 +144,9 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
     navigateToFolderId,
     searchQuery,
     isSearching,
+    canSearchAll,
+    isSearchingAll,
+    setSearchingAll,
     clearSearch,
     listSort,
     listFilters,
@@ -172,6 +176,14 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
           <Flex gap={2}>
             <FilterMenu listFilters={listFilters} />
             <AssetsSearchInput collapsible />
+            {isSearching && (
+              <SearchScopeControls
+                canSearchAll={canSearchAll}
+                isSearchingAll={isSearchingAll}
+                onSearchingAllChange={setSearchingAll}
+                resultCount={folders.length + (pagination?.total ?? 0)}
+              />
+            )}
           </Flex>
           <Flex gap={2}>
             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
@@ -180,9 +192,9 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
         </Flex>
         <FilterBadges listFilters={listFilters} />
         {/* In the fixed header with the toolbar, so the way back up stays in
-            reach however far the list is scrolled. Search results are global,
-            so a folder trail would be misleading there. */}
-        {currentFolderId !== null && !isSearching && (
+            reach however far the list is scrolled. A search across all media
+            isn't in this folder, so the trail would be misleading there. */}
+        {currentFolderId !== null && !isSearchingAll && (
           <Box paddingTop={2}>
             <FolderBreadcrumbs
               currentFolderId={currentFolderId}

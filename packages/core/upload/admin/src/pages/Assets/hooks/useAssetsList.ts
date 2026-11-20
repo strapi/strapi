@@ -21,7 +21,7 @@ export const useAssetsList = () => {
 
   // Deleted or missing folders (404) need a fetch — handled here, not in
   // `useFolderNavigation` (which only strips malformed ?folder= values).
-  const { error: currentFolderError } = useGetFolderQuery(
+  const { currentData: currentFolder, error: currentFolderError } = useGetFolderQuery(
     { id: currentFolderId! },
     { skip: currentFolderId === null }
   );
@@ -33,7 +33,14 @@ export const useAssetsList = () => {
   }, [currentFolderError, navigateToRoot]);
 
   const assetSearch = useAssetSearch();
-  const { searchQuery } = assetSearch;
+  const { searchQuery, isSearching } = assetSearch;
+
+  const canSearchAll = isSearching && currentFolderId !== null;
+  const isSearchingAll = canSearchAll && assetSearch.isSearchingAll;
+  const isSearchScopedToFolder = canSearchAll && !isSearchingAll;
+  const searchFolderPath = isSearchScopedToFolder ? currentFolder?.path : undefined;
+  // Without the folder's path yet, the search would run library-wide.
+  const isWaitingForSearchScope = isSearchScopedToFolder && !searchFolderPath;
   const listSort = useListSort();
   const listFilters = useListFilters();
 
@@ -55,24 +62,26 @@ export const useAssetsList = () => {
     fetchNextPage,
     error: assetsError,
   } = useInfiniteAssets({
-    // The real folder is passed even while searching: the service drops the folder
-    // filter when `search` is set, so results are still global. List filters
+    // The real folder is passed even while searching: the service swaps the
+    // folder filter for `searchFolderPath` when `search` is set. List filters
     // compose with both modes.
     folder: currentFolderId,
     search: searchQuery || undefined,
+    searchFolderPath,
     sort: listSort.assetsSort,
     filters: builtFilters.fileClauses,
-    enabled: builtFilters.showFiles,
+    enabled: builtFilters.showFiles && !isWaitingForSearchScope,
   });
 
   const { data: fetchedFolders = [], isLoading: isLoadingFolders } = useGetFoldersQuery(
     {
       parentId: currentFolderId,
       search: searchQuery || undefined,
+      searchFolderPath,
       sort: listSort.foldersSort,
       filters: builtFilters.folderClauses,
     },
-    { skip: !builtFilters.showFolders }
+    { skip: !builtFilters.showFolders || isWaitingForSearchScope }
   );
   // A type badge can exclude folders structurally (e.g. "Type is Picture").
   const folders = useMemo(
@@ -83,17 +92,19 @@ export const useAssetsList = () => {
   return {
     ...folderNavigation,
     ...assetSearch,
+    canSearchAll,
+    isSearchingAll,
     listSort,
     listFilters,
     assets,
     subscribers,
     pagination,
-    isLoadingAssets,
+    isLoadingAssets: isLoadingAssets || isWaitingForSearchScope,
     isFetchingMore,
     hasNextPage,
     fetchNextPage,
     assetsError,
     folders,
-    isLoadingFolders,
+    isLoadingFolders: isLoadingFolders || isWaitingForSearchScope,
   };
 };

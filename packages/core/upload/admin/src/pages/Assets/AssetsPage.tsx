@@ -30,6 +30,7 @@ import { FolderFormDialog } from './components/FolderFormDialog';
 import { FOLDER_TREE_ROOT_SELECTOR, FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { MainAreaContextMenu } from './components/MainAreaContextMenu';
+import { SearchScopeControls } from './components/SearchScopeControls';
 import { SortMenu } from './components/SortMenu';
 import { ViewToggle } from './components/ViewToggle';
 import { localStorageKeys, viewOptions } from './constants';
@@ -50,39 +51,11 @@ const ITEM_COUNT_MESSAGE = {
   defaultMessage: '{count, plural, =1 {# item} other {# items}}',
 };
 
-const SEARCH_RESULTS_COUNT_MESSAGES = {
-  both: {
-    id: getTranslationKey('header.search-results.count'),
-    defaultMessage:
-      '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
-  },
-  folders: {
-    id: getTranslationKey('header.search-results.count.folders'),
-    defaultMessage: '{numberFolders, plural, one {1 folder} other {# folders}}',
-  },
-  assets: {
-    id: getTranslationKey('header.search-results.count.assets'),
-    defaultMessage: '{numberAssets, plural, =0 {0 assets} one {1 asset} other {# assets}}',
-  },
-};
-
-const getSearchResultsCountMessage = (numberFolders: number, numberAssets: number) => {
-  if (numberFolders === 0) {
-    return SEARCH_RESULTS_COUNT_MESSAGES.assets;
-  }
-
-  if (numberAssets === 0) {
-    return SEARCH_RESULTS_COUNT_MESSAGES.folders;
-  }
-
-  return SEARCH_RESULTS_COUNT_MESSAGES.both;
-};
-
 /* -------------------------------------------------------------------------------------------------
  * ClearSelectionOnChange
  *
  * Selection is list-scoped: it resets when the user is looking at a different list.
- * The list fingerprint is getListQueryKey() — folder, search, sort, filter.
+ * The list fingerprint is getListQueryKey() — folder, search (term and scope), sort, filter.
  *
  * Hybrid rule: infinite scroll does not change the key (selection persists), and
  * neither does the table/grid toggle — both views render the same list.
@@ -123,10 +96,7 @@ const StickyHeader = styled(Box)<{ $compact: boolean }>`
   /* Horizontal padding matches the list's default spacing (Layouts.Content /
      RESPONSIVE_DEFAULT_SPACING: 4 / 6 / 10) so the header lines up with the rows. */
   padding: ${({ theme }) => `${theme.spaces[6]} ${theme.spaces[4]}`};
-  transition:
-    padding 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: padding 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 
   ${({ theme }) => theme.breakpoints.medium} {
     padding-left: ${({ theme }) => theme.spaces[6]};
@@ -238,6 +208,9 @@ export const AssetsPage = () => {
     navigateToFolderId,
     searchQuery,
     isSearching,
+    canSearchAll,
+    isSearchingAll,
+    setSearchingAll,
     clearSearch,
     listSort,
     listFilters,
@@ -255,35 +228,15 @@ export const AssetsPage = () => {
   const { title, itemCount } = useFolderInfo(currentFolderId);
 
   // Both move affordances (drag and the bulk bar) resolve each item's parent
-  // from the rows on screen — while searching, results are global and the
+  // from the rows on screen — while searching, results span subfolders and the
   // folder currently open says nothing about where an item lives.
   const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
 
   const itemCountLabel = formatMessage(ITEM_COUNT_MESSAGE, { count: itemCount });
 
-  const searchResultsTitle = formatMessage(
-    {
-      id: getTranslationKey('header.search-results'),
-      defaultMessage: 'Search results for "{query}"',
-    },
-    { query: searchQuery }
-  );
-  const numberFolders = folders.length;
-  const numberAssets = pagination?.total ?? 0;
-
-  const searchResultsCountLabel = formatMessage(
-    getSearchResultsCountMessage(numberFolders, numberAssets),
-    { numberFolders, numberAssets }
-  );
-
-  let pageHeaderTitle: string;
-  if (isSearching) {
-    pageHeaderTitle = `${searchResultsTitle} (${searchResultsCountLabel})`;
-  } else if (title) {
-    pageHeaderTitle = `${title} (${itemCountLabel})`;
-  } else {
-    pageHeaderTitle = formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
-  }
+  const pageHeaderTitle = title
+    ? `${title} (${itemCountLabel})`
+    : formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
@@ -408,6 +361,7 @@ export const AssetsPage = () => {
   const listQueryKey = getListQueryKey({
     folderId: currentFolderId,
     search: searchQuery,
+    searchAll: isSearchingAll,
     // Folder position changes the render order too — selection must reset.
     sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
     filter: listFilters.serialized || null,
@@ -426,7 +380,7 @@ export const AssetsPage = () => {
                 sideNav={
                   <FolderTree
                     currentFolderId={currentFolderId}
-                    showActiveFolder={!isSearching}
+                    showActiveFolder={!isSearchingAll}
                     onSelectFolder={navigateToFolderId}
                     backgroundContextMenu={
                       <MainAreaContextMenu
@@ -514,6 +468,14 @@ export const AssetsPage = () => {
                           <SearchSlot>
                             <AssetsSearchInput />
                           </SearchSlot>
+                          {isSearching && (
+                            <SearchScopeControls
+                              canSearchAll={canSearchAll}
+                              isSearchingAll={isSearchingAll}
+                              onSearchingAllChange={setSearchingAll}
+                              resultCount={folders.length + (pagination?.total ?? 0)}
+                            />
+                          )}
                         </FilterSearchGroup>
                         <SortToggleGroup>
                           <Box>
