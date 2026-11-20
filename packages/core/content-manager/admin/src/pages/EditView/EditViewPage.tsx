@@ -11,7 +11,7 @@ import {
   useIsDesktop,
   useIsMobile,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Tabs, Box } from '@strapi/design-system';
+import { Grid, Tabs, Box, ScrollArea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -245,7 +245,12 @@ const EditViewPage = () => {
                   </Grid.Item>
                   {isDesktop && (
                     <Grid.Item col={3} direction="column" alignItems="stretch">
-                      <Panels />
+                      <StickyPanels>
+                        <Panels actionsOnly />
+                        <ScrollingPanels>
+                          <Panels withActions={false} />
+                        </ScrollingPanels>
+                      </StickyPanels>
                     </Grid.Item>
                   )}
                 </Grid.Root>
@@ -274,6 +279,30 @@ const EditViewPage = () => {
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
+`;
+
+const StickyPanels = styled.div`
+  position: sticky;
+  top: ${({ theme }) => theme.spaces[4]};
+  max-height: calc(100dvh - 2 * ${({ theme }) => theme.spaces[4]});
+  margin-bottom: calc(${({ theme }) => theme.spaces[4]} - ${({ theme }) => theme.spaces[10]});
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[2]};
+`;
+
+const ScrollingPanels = styled(ScrollArea)`
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+
+  [data-radix-scroll-area-viewport] {
+    position: relative;
+  }
+
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+  }
 `;
 
 /**
