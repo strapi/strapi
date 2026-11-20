@@ -48,6 +48,15 @@ actionProvider.registerMany([
   // @ts-expect-error The computed ID `api::read` is not declared: the plugin name is missing.
   { section: 'plugins', displayName: 'Read', uid: 'read' },
 ]);
+// A key the action's section does not have fails at boot, and fails to compile.
+actionProvider.register({
+  section: 'plugins',
+  displayName: 'Read',
+  uid: 'read',
+  pluginName: 'example',
+  // @ts-expect-error `subcategory` is not a key of a `plugins` action: the schema is strict.
+  subcategory: 'general',
+});
 
 // Reads accept a declared literal or a runtime ID, and reject an undeclared literal.
 actionProvider.get('plugin::example.read');
