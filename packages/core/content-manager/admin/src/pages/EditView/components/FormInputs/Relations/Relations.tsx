@@ -914,11 +914,11 @@ const RelationModalWithContext = ({
             return (
               <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
                 <Flex gap={2} justifyContent="space-between">
-                  <Flex gap={2}>
-                    <LinkIcon fill="neutral500" />
+                  <Flex gap={2} width={0} flex={1} minWidth={0}>
+                    <LinkIcon fill="neutral500" style={{ flexShrink: 0 }} />
                     <Typography ellipsis>{textValue}</Typography>
                   </Flex>
-                  {opt.status ? <DocumentStatus status={opt.status} /> : null}
+                  {opt.status ? <DocumentStatus status={opt.status} shrink={0} /> : null}
                 </Flex>
               </ComboboxOption>
             );
