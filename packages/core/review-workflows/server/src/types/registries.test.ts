@@ -175,6 +175,13 @@ stages?.findById(1, {
   workflowId: '2',
   populate: { permissions: { populate: ['role'] } },
 }) satisfies Promise<PopulatedStageRow | null> | undefined;
+// The stages controller converts the query string populate with `query-params` and reads with it.
+declare const queryParams: Core.QueryParamsService;
+const stagePopulate = queryParams.transform('plugin::review-workflows.workflow-stage', {
+  populate: '*',
+}).populate;
+stages?.find({ workflowId: 1, populate: stagePopulate });
+stages?.findById(1, { workflowId: 1, populate: stagePopulate });
 stages
   ?.createMany([{ name: 'Draft', fromPermissions: [{ role: 1, action: 'transition' }] }])
   .then((created) => created.map((stage) => stage.name));
