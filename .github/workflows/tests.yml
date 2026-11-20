@@ -1035,12 +1035,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Labels only for now: the run step doesn't read them yet and always runs Chromium CE.
-        # The suites read STRAPI_TEST_EDITION (default ce, CMS-1944); the EE replay of the @ee
-        # and @smoke tests (an `ee` entry with the license secret) comes with CMS-2242, and
-        # WebKit with the browser projects (CMS-1949).
+        # `project` is a Playwright project of tests-next/ui/playwright.config.ts (WebKit is
+        # defined when CI is set). One worker per job, no sharding yet (CMS-2483). `edition` is a
+        # label for now: the suites read STRAPI_TEST_EDITION (default ce, CMS-1944), and the EE
+        # replay of the @ee and @smoke tests (an `ee` entry with the license secret) comes with
+        # CMS-2242.
         edition: [ce]
-        project: [chromium]
+        project: [chromium, webkit]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -1051,7 +1052,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run tests-next ui
-        run: yarn nx run @strapi/tests-e2e:test --skip-nx-cache
+        run: yarn nx run @strapi/tests-e2e:test --skip-nx-cache -- --project=${{ matrix.project }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:

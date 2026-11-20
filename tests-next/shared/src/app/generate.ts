@@ -22,6 +22,12 @@ export interface GenerateAppOptions {
   overwrite?: boolean;
 }
 
+/** The paths of an app, whether it exists or not. */
+export const appPaths = (name: string): App => {
+  const dir = path.join(APPS_DIR, name);
+  return { name, dir, dbFile: path.join(dir, '.tmp', 'data.db') };
+};
+
 const strapiVersion = (): string =>
   JSON.parse(fs.readFileSync(require.resolve('@strapi/strapi/package.json'), 'utf8')).version;
 
@@ -32,8 +38,8 @@ const strapiVersion = (): string =>
  * No dependency is installed in the app: `@strapi/*` resolves from the repo root (see `APPS_DIR`).
  */
 export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions): Promise<App> => {
-  const dir = path.join(APPS_DIR, name);
-  const app: App = { name, dir, dbFile: path.join(dir, '.tmp', 'data.db') };
+  const app = appPaths(name);
+  const { dir } = app;
 
   if (fs.existsSync(dir)) {
     if (!overwrite) {
