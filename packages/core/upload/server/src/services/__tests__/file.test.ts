@@ -246,7 +246,10 @@ describe('file', () => {
       const onProgress = jest.fn();
       await expect(
         fileService.fetchUrlToInputFile(url, tmpWorkingDirectory, 1024 * 1024, onProgress)
-      ).rejects.toThrow('File too large: maximum allowed size is 1 MB');
+      ).rejects.toMatchObject({
+        message: 'File too large: maximum allowed size is 1 MB',
+        details: { code: 'SizeLimitExceeded', limit: 1024 * 1024 },
+      });
       expect(response.arrayBuffer).not.toHaveBeenCalled();
       // Rejected on the header fast-path, so no progress is ever announced
       expect(onProgress).not.toHaveBeenCalled();

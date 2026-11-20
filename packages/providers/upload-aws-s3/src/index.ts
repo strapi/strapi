@@ -16,6 +16,7 @@ import {
   ServerSideEncryption,
 } from '@aws-sdk/client-s3';
 import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
+import type { Providers } from '@strapi/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
@@ -330,7 +331,7 @@ const getConfig = ({
   };
 };
 
-export default {
+const providerModule = {
   init({ baseUrl, rootPath, s3Options, providerConfig, ...legacyS3Options }: InitOptions) {
     // Validate configuration and emit warnings for potential issues
     validateProviderConfig(providerConfig, s3Options as DefaultOptions);
@@ -693,3 +694,9 @@ export default {
     };
   },
 };
+
+// Checked apart from its declaration, so the contract does not re-type the parameters the
+// provider leaves to inference.
+providerModule satisfies Providers.Upload.Factory<InitOptions>;
+
+export default providerModule;

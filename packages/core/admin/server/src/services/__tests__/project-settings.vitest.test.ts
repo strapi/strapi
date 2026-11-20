@@ -27,7 +27,9 @@ const actualFs = await vi.importActual<typeof import('fs')>('fs');
 
 const storeSet = vi.fn();
 const providerDelete = vi.fn();
+const logWarn = vi.fn();
 global.strapi = {
+  log: { warn: logWarn },
   dirs: {
     public: 'publicDir',
   },
@@ -389,6 +391,15 @@ describe('Project setting', () => {
       });
     });
 
+    it('Deletes the replaced files only after the new settings are saved', async () => {
+      await updateProjectSettings({ menuLogo: '', authLogo: '' } as any);
+
+      expect(providerDelete).toHaveBeenCalledTimes(2);
+      expect(storeSet.mock.invocationCallOrder[0]).toBeLessThan(
+        Math.min(...providerDelete.mock.invocationCallOrder)
+      );
+    });
+
     it('Keeps the previous project settings', async () => {
       const body = {};
       const files = {};
@@ -484,6 +495,57 @@ describe('Project setting', () => {
       expect(uploadedFile.buffer?.toString()).toBe(logoContent);
       expect(uploadedFile.stream).toBeUndefined();
       expect(storeSet.mock.calls[0][0].value.menuLogo.url).toBe('/uploads/logo_123.png');
+    });
+  });
+
+  describe('when the provider fails to delete the previous logo', () => {
+    let uploadProvider: unknown;
+    const deleteError = new Error('Storage unavailable');
+
+    const previousLogo = {
+      name: 'name',
+      hash: 'previous_hash',
+      url: 'file/url',
+      ext: 'png',
+      size: 123,
+      provider: 'local',
+    };
+
+    beforeEach(() => {
+      uploadProvider = global.strapi.plugins.upload.provider;
+      global.strapi.plugins.upload.provider = {
+        delete: vi.fn().mockRejectedValue(deleteError),
+      };
+    });
+
+    afterEach(() => {
+      global.strapi.plugins.upload.provider = uploadProvider;
+    });
+
+    it('deleteOldFiles resolves and logs the failure', async () => {
+      const previousSettings = { menuLogo: previousLogo, authLogo: previousLogo };
+      const newSettings = { menuLogo: null, authLogo: null };
+
+      await expect(deleteOldFiles({ previousSettings, newSettings })).resolves.toBeDefined();
+
+      expect(global.strapi.plugins.upload.provider.delete).toHaveBeenCalledTimes(2);
+      expect(logWarn).toHaveBeenCalledTimes(2);
+      expect(logWarn).toHaveBeenCalledWith(
+        expect.stringContaining('menuLogo'),
+        expect.objectContaining({ error: deleteError })
+      );
+    });
+
+    it('updateProjectSettings still saves the settings', async () => {
+      await expect(
+        updateProjectSettings({ menuLogo: '', authLogo: '' } as any)
+      ).resolves.toBeDefined();
+
+      expect(storeSet).toBeCalledWith({
+        key: 'project-settings',
+        value: { menuLogo: null, authLogo: null },
+      });
+      expect(logWarn).toHaveBeenCalledTimes(2);
     });
   });
 });
