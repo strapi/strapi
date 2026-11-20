@@ -16,7 +16,12 @@ import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
-import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+import {
+  getPopulateForLocalizations,
+  buildDeepPopulate,
+  getFieldsForListView,
+  getPopulateOverridesForListView,
+} from '../services/utils/populate';
 import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
 
 /**
@@ -344,12 +349,24 @@ export default {
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(queryWithoutStatusSort);
 
+    const { metadatas } = await getService('content-types').findConfiguration(
+      strapi.getModel(model)
+    );
+
+    // Only fetch what the list can display: rows of large content types are otherwise several
+    // hundred KB each (dynamic zones, rich text, full related entries…)
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
       .withPopulateOverride(getPopulateForLocalizations(model))
+      .withPopulateOverride(getPopulateOverridesForListView(model, metadatas))
       .build();
+
+    const listFields = getFieldsForListView(model);
+    const fields = Array.isArray(permissionQuery.fields)
+      ? listFields.filter((field) => (permissionQuery.fields as string[]).includes(field))
+      : listFields;
 
     // "Modified" is a UI-only filter; not a real document status. Read and strip it
     // so we never pass it to validation or the document service.
@@ -365,6 +382,7 @@ export default {
     >;
     let findPageParams: Record<string, unknown> = {
       ...paramsForDocumentService,
+      fields,
       populate,
       locale,
       status,

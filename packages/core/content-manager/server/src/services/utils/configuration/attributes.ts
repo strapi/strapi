@@ -195,6 +195,7 @@ const getSortableAttributes = (schema: any) => {
 };
 
 export {
+  NON_LISTABLES,
   isSortable,
   isVisible,
   isSearchable,
