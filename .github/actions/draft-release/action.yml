@@ -1,5 +1,5 @@
 name: 'Draft release'
-description: 'Pins the release range, computes the version, cuts or advances the release branch, opens or refreshes the draft PR and reconciles milestones.'
+description: 'Pins the release range, computes the version, cuts or advances the release branch, and opens or refreshes the draft PR.'
 
 inputs:
   token:

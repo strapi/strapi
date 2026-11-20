@@ -169,36 +169,6 @@ export function createGithubAdapter(
       return rest.paginate(`${base}/pulls/${pullNumber}/commits?${query({})}`);
     },
 
-    /**
-     * Paged on purpose. The repository carries hundreds of closed milestones, and an unpaged read
-     * would report a real milestone as missing.
-     */
-    async listMilestones(state) {
-      return rest.paginate(`${base}/milestones?${query({ state })}`);
-    },
-
-    async createMilestone(title) {
-      return rest.send('POST', `${base}/milestones`, { title });
-    },
-
-    async updateMilestone(milestoneNumber, patch) {
-      return rest.send('PATCH', `${base}/milestones/${milestoneNumber}`, patch);
-    },
-
-    /**
-     * Issues and pull requests carrying a milestone, in any state. The issues endpoint returns
-     * pull requests too, distinguishable by the `pull_request` key.
-     */
-    async listMilestoneItems(milestoneNumber) {
-      return rest.paginate(
-        `${base}/issues?${query({ milestone: String(milestoneNumber), state: 'all' })}`
-      );
-    },
-
-    async setIssueMilestone(issueNumber, milestoneNumber) {
-      await rest.send('PATCH', `${base}/issues/${issueNumber}`, { milestone: milestoneNumber });
-    },
-
     async createPull(input) {
       return rest.send('POST', `${base}/pulls`, { ...input, draft: true });
     },

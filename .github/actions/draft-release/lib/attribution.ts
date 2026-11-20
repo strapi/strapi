@@ -156,8 +156,6 @@ export function summarisePull(pull: MergedPull, integration: Integration): PullS
     url: pull.html_url ?? '',
     baseRef: pull.base?.ref ?? '',
     headRef: pull.head?.ref ?? '',
-    milestone: pull.milestone?.title ?? null,
-    milestoneNumber: pull.milestone?.number ?? null,
     mergedAt: pull.merged_at,
   };
 }

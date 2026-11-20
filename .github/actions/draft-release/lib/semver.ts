@@ -100,8 +100,3 @@ export function increment(version: string, bump: BumpKind): string {
 
   return formatStable({ major: parsed.major, minor: parsed.minor, patch: parsed.patch + 1 });
 }
-
-/** The milestone that collects work for the release after this one. */
-export function nextPatchOf(version: string): string {
-  return increment(version, 'patch');
-}
