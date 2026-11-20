@@ -1,4 +1,5 @@
 import type * as PublicationStatus from '../../modules/documents/params/status';
+import type { JwtAlgorithm } from '../../modules/session-manager';
 import type { IsStrict } from '../strictness';
 
 export interface ApiToken {
@@ -7,7 +8,8 @@ export interface ApiToken {
 
 export interface AuthSessions {
   options?: {
-    algorithm?: string;
+    /** With strict types, a `jsonwebtoken` algorithm: it rejects any other value when it signs. */
+    algorithm?: IsStrict extends true ? JwtAlgorithm : string;
     [key: string]: unknown;
   };
   accessTokenLifespan?: number | undefined;
@@ -41,10 +43,13 @@ export interface Auth {
   sessions?: AuthSessions;
   events?: AuthEvents;
   providers?: AuthProvider[];
-  options?: {
-    expiresIn?: string | number;
-    [key: string]: unknown;
-  };
+  /**
+   * Legacy JWT options, merged under `sessions.options`. With strict types, `algorithm` is a
+   * `jsonwebtoken` algorithm: it rejects any other value when it signs.
+   */
+  options?: IsStrict extends true
+    ? { expiresIn?: string | number; algorithm?: JwtAlgorithm; [key: string]: unknown }
+    : { expiresIn?: string | number; [key: string]: unknown };
 }
 
 export interface TransferToken {
