@@ -1,5 +1,7 @@
-import { render, waitFor } from '@tests/utils';
+import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
+import { createTeamsFormFields } from '../../../../../../../tests/formFields';
 import { EditView } from '../EditViewPage';
 
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
@@ -47,5 +49,42 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
         expect(queryByText('Bound route to')).not.toBeInTheDocument();
       });
     });
+  });
+
+  it('sends the values of plugin fields with the token', async () => {
+    const bodies: unknown[] = [];
+
+    server.use(
+      http.get('/admin/api-tokens/1', () =>
+        HttpResponse.json({
+          data: {
+            id: '1',
+            name: 'My super token',
+            kind: 'content-api',
+            type: 'read-only',
+            lifespan: null,
+            permissions: [],
+          },
+        })
+      ),
+      http.put('/admin/api-tokens/1', async ({ request }) => {
+        bodies.push(await request.json());
+
+        return HttpResponse.json({ data: { id: 1, name: 'My super token', type: 'read-only' } });
+      })
+    );
+
+    const { user } = render(<EditView />, {
+      initialEntries: ['/settings/api-tokens/1'],
+      providerOptions: {
+        formFields: createTeamsFormFields('content-api-token'),
+      },
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Teams of 1: null' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(bodies).toEqual([expect.objectContaining({ plugins: { teams: { teams: ['blue'] } } })])
+    );
   });
 });

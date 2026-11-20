@@ -14,6 +14,7 @@ import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/adm
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
+import { FormFields } from './core/apis/FormFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
@@ -134,6 +135,7 @@ class StrapiApp {
   store: Store | null = null;
   customFields = new CustomFields();
   widgets = new Widgets();
+  formFields = new FormFields();
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.appPlugins = appPlugins || {};

@@ -3,14 +3,17 @@ import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { SUPER_ADMIN_CODE } from '../../../../../../../shared/utils/super-admin';
+import { createTeamsFormFields } from '../../../../../../tests/formFields';
 import { initialState } from '../../../../../../tests/store';
 import { EditPage } from '../EditPage';
+
+import type { FormFields } from '../../../../../core/apis/FormFields';
 
 /**
  * Logs in a user with the given role code who holds every permission except the email settings
  * one. A token is needed for the auth provider to load the user and their permissions.
  */
-const renderEditPage = (roleCode: string) => {
+const renderEditPage = (roleCode: string, formFields?: FormFields) => {
   server.use(
     http.get('/admin/users/me', () =>
       HttpResponse.json({
@@ -39,7 +42,7 @@ const renderEditPage = (roleCode: string) => {
 
   return render(<EditPage />, {
     initialEntries: ['/settings/roles/1'],
-    providerOptions: { storeConfig: { preloadedState } },
+    providerOptions: { storeConfig: { preloadedState }, formFields },
   });
 };
 
@@ -136,6 +139,30 @@ describe('Roles | EditPage', () => {
 
       expect(await screen.findByText('Forbidden')).toBeInTheDocument();
       expect(screen.queryByText(CEILING_ERROR_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('sends the values of plugin fields with the role', async () => {
+      const bodies: unknown[] = [];
+
+      server.use(
+        http.put('/admin/roles/:id/permissions', () => HttpResponse.json({ data: [] })),
+        http.put('/admin/roles/:id', async ({ request }) => {
+          bodies.push(await request.json());
+
+          return HttpResponse.json({ data: { id: 1, code: 'strapi-editor', name: 'Editor' } });
+        })
+      );
+
+      const { user } = renderEditPage('strapi-editor', createTeamsFormFields('role'));
+
+      await user.click(await screen.findByRole('button', { name: 'Teams of 1: null' }));
+      await renameAndSave(user);
+
+      await waitFor(() =>
+        expect(bodies).toEqual([
+          expect.objectContaining({ plugins: { teams: { teams: ['blue'] } } }),
+        ])
+      );
     });
 
     it('saves the permissions first, then the name', async () => {

@@ -1,17 +1,49 @@
 ---
 title: Admin form extensions
-description: 'How a plugin sends, checks and saves its own values with the role, user and API token forms.'
+description: 'How a plugin adds fields to the role, user and API token forms, and checks and saves their values.'
 status: draft
 review_notes:
   - New experimental API, written with the code; needs a maintainer review.
 tags:
   - backend
+  - frontend
   - public-api
 ---
 
-Plugins can send their own values with three admin forms: roles (create, edit, duplicate), users (invite, edit) and content API tokens (create, edit). Requests carry them under `plugins.<pluginId>` in the body. Core hands them to the plugin and stores none of them. The code is in [`server/src/services/form-extensions.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/services/form-extensions.ts).
+Plugins can add their own fields to three admin forms: roles (create, edit, duplicate), users (invite, edit) and content API tokens (create, edit). The admin sends their values under `plugins.<pluginId>` in the request body. Core hands them to the plugin and stores none of them. A plugin uses both parts:
 
-The API is experimental, hence the `unstable_` prefix: it can change in a minor release.
+- the admin part renders the fields: [`admin/src/core/apis/FormFields.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/core/apis/FormFields.ts);
+- the server part checks and saves the values: [`server/src/services/form-extensions.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/services/form-extensions.ts).
+
+Both APIs are experimental, hence the `unstable_` prefix: they can change in a minor release.
+
+## Adding fields
+
+Like `app.widgets.register`, a plugin adds fields in its admin `register`, with a list or a reducer of the form's fields:
+
+```tsx
+app.formFields.unstable_register('role', [
+  {
+    pluginId: 'my-plugin',
+    Component: ({ value, onChange, disabled, entityId, error }) => (
+      <TeamsSelect value={value} onChange={onChange} disabled={disabled} />
+    ),
+  },
+]);
+```
+
+- Forms: `role`, `user`, `content-api-token` (content API tokens only). Adding the same plugin id twice to a form throws.
+- `Component` renders on a row of its own, at the end of the role details, the user roles and the token details. It gets:
+  - `value` and `onChange`: the plugin's value, sent as `plugins.<pluginId>`. It is `undefined` until the component changes it, also on edit: core answers never contain plugin values, so the component loads them from `entityId`. After a save, the forms can set it back to `undefined`: load the values again then.
+  - `disabled`: true when the form cannot be edited, for example without the update permission.
+  - `entityId`: the edited entity, `undefined` when the form creates one. On role duplicate it is `undefined` too: plugin values start empty.
+  - `error`: the server error at `plugins.<pluginId>`, a string or an object of errors by path. Render it: on the role and token pages, a refused save shows its validation errors on the fields only, without a notification.
+  - `replacedFields`: the core fields the plugin replaces, see below.
+- `replaces` (optional, user forms only): `['roles']` hides the core roles field. The component shows it instead, and sets it with `replacedFields.roles.onChange`. The admin then sends the roles as the component sets them, even none: the server checks the roles that `beforeSave` returns, and its error comes back as `replacedFields.roles.error`.
+
+On role edit, the page saves the permissions before the name, the description and the plugin values. When the server refuses the plugin values, the new permissions stay saved, as they do today when it refuses the name.
+
+Types: `unstable_FormFieldsArgs`, `unstable_FormFieldsForm` and `unstable_FormFieldsProps` from `@strapi/admin/strapi-admin`.
 
 ## Adding params
 

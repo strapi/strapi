@@ -12,6 +12,7 @@ interface StrapiAppContextValue
     Pick<
       StrapiApp,
       | 'customFields'
+      | 'formFields'
       | 'getPlugin'
       | 'getAdminInjectedComponents'
       | 'plugins'
