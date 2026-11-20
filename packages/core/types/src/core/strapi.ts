@@ -101,13 +101,13 @@ type StrapiContainer = IsStrict extends false ? Container : StrictContainer;
 /**
  * License feature reads with strict types: a literal name must be a feature of the inventory, and
  * `get` returns the feature with the options of its inventory entry. A name known only at runtime
- * is accepted.
+ * is accepted. `list` lists each feature as `{ name, options? }`, like the retained license features.
  */
 type StrictLicenseFeatureReads = {
   isEnabled: <TName extends Core.LicenseFeatureLookupName>(
     feature: Core.LicenseFeatureLookup<TName>
   ) => boolean;
-  list: () => { name: string; [key: string]: any }[];
+  list: () => { name: string; options?: Record<string, unknown>; [key: string]: unknown }[];
   get: <TName extends Core.LicenseFeatureLookupName>(
     feature: Core.LicenseFeatureLookup<TName>
   ) => Core.LicenseFeatureEntry<TName> | undefined;
