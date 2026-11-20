@@ -33,7 +33,7 @@ type ModuleEntryNames<TUID, TNamespace extends string> =
 
 /**
  * The module's services keyed by name. With strict types enabled, registered names resolve to their
- * contracts; other names, literal or dynamic, resolve to the legacy service, like `strapi.services`.
+ * contracts; other names, literal or dynamic, resolve to `unknown`, like `strapi.services`.
  */
 export type ModuleServiceMap<TNamespace extends string> = IsStrict extends false
   ? Record<string, Service>
@@ -43,7 +43,7 @@ export type ModuleServiceMap<TNamespace extends string> = IsStrict extends false
           TName in ModuleEntryNames<RegisteredServiceUID, TNamespace>
         ]: ServiceFor<`${TNamespace}.${TName}`>;
       },
-      Service
+      unknown
     >;
 
 /**
@@ -360,6 +360,17 @@ export interface ModuleOf<TNamespace extends string>
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface -- a non-generic interface prints `Module`
 export interface Module extends ModuleOf<string> {}
+
+/**
+ * The admin module, `strapi.admin`, with strict types enabled. `strapi.admin` is the raw module of
+ * `@strapi/admin/strapi-server`, not a module built by `@strapi/core`: its `services` map holds the
+ * raw entries, such as the `homepage` and `debug-dump` factories, not the instances registered under
+ * `admin::`. So its services keep the legacy service; use `strapi.service('admin::<name>')` to
+ * resolve a registered contract.
+ */
+export interface AdminModule extends Omit<Module, 'services'> {
+  services: Record<string, Service>;
+}
 
 /** The API name of an `api::<api>.<name>` UID. */
 type ApiNameOf<TUID> = TUID extends `api::${infer TApi}.${string}` ? TApi : never;
