@@ -1,4 +1,5 @@
 import flow from 'lodash/flow';
+import isPlainObject from 'lodash/isPlainObject';
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
@@ -33,6 +34,99 @@ let refreshPromise: Promise<string | null> | null = null;
  * Callback to notify the app when the token is updated (e.g., to update Redux state)
  */
 let onTokenUpdate: ((token: string) => void) | null = null;
+
+/**
+ * Returns headers to add to an admin request, as a plain object (not a promise).
+ * A `null` or `undefined` value skips that entry. Values must be Latin-1 without
+ * line breaks: send identifiers, not display names.
+ */
+type RequestHeadersProvider = () => Record<string, string | null | undefined>;
+
+/**
+ * Thrown, instead of sending the request, when a provider fails or returns an
+ * invalid header name or value. Sending the request without the header could
+ * run it in the wrong context (e.g. the wrong space), so the request fails.
+ */
+class RequestHeadersError extends Error {
+  constructor(message: string, cause: unknown) {
+    super(message, { cause });
+    this.name = 'RequestHeadersError';
+  }
+}
+
+const requestHeadersProviders = new Set<RequestHeadersProvider>();
+
+/**
+ * Headers that core sets itself. A provider that returns one of them is ignored
+ * for that header: replacing them would break authentication or how the server
+ * reads the request body.
+ */
+const CORE_HEADERS = new Set(['authorization', 'content-type', 'accept']);
+
+/**
+ * Registers a function whose headers are added to every request the admin sends
+ * to the Strapi server through the fetch client. Unstable: the API can change in
+ * a minor release.
+ *
+ * @returns A function that removes the provider.
+ */
+const unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => void) => {
+  requestHeadersProviders.add(provider);
+
+  return () => {
+    requestHeadersProviders.delete(provider);
+  };
+};
+
+/**
+ * Calls every registered provider and returns the headers to add to a request,
+ * for request code that does not go through `getFetchClient` (e.g. an
+ * `XMLHttpRequest` upload). Call it once per request and reuse the result for a
+ * retry. Values that are `undefined` or `null` are left out, and so are
+ * `Authorization`, `Content-Type` and `Accept`, which core sets itself.
+ * Unstable: the API can change in a minor release.
+ *
+ * @throws {RequestHeadersError} When a provider throws, returns a value that is
+ * not a plain object, or returns an invalid header name or value. Do not send the
+ * request.
+ */
+const unstable_getRequestHeaders = (): Headers => {
+  const headers = new Headers();
+
+  for (const provider of requestHeadersProviders) {
+    let entries: Array<[string, string | null | undefined]>;
+    try {
+      const result = provider();
+      // A promise or array has no own header entries, so it would silently send no header
+      if (!isPlainObject(result)) {
+        throw new TypeError('A request headers provider must return a plain object.');
+      }
+      entries = Object.entries(result);
+    } catch (error) {
+      throw new RequestHeadersError(
+        'A plugin failed to provide its request headers, so the request was not sent.',
+        error
+      );
+    }
+
+    for (const [name, value] of entries) {
+      if (value === undefined || value === null || CORE_HEADERS.has(name.toLowerCase())) {
+        continue;
+      }
+
+      try {
+        headers.set(name, value);
+      } catch (error) {
+        throw new RequestHeadersError(
+          `The request header "${name}" from a plugin is not valid, so the request was not sent.`,
+          error
+        );
+      }
+    }
+  }
+
+  return headers;
+};
 
 /**
  * Callback to notify the app when the session has been terminated and the user
@@ -121,6 +215,14 @@ const triggerSessionExpired = (expiredToken?: string | null): boolean => {
  * This differs from baseQuery.ts which uses ^/admin since it receives normalized paths.
  */
 const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.test(url);
+
+/**
+ * Login, logout, token and pre-login requests carry no context such as a space, so
+ * the fetch client does not read the providers for them: a failing provider must not
+ * block a login or a logout. Matches the path the caller passes, not its subpaths.
+ */
+const SKIPS_REQUEST_HEADERS =
+  /^\/admin\/(login|logout|access-token|init|registration-info|register|register-admin|forgot-password|reset-password|providers)(\?|$)/;
 
 /**
  * Store the new token in the appropriate storage (localStorage or cookie)
@@ -466,6 +568,33 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     Authorization: `Bearer ${token}`,
   });
 
+  /**
+   * Header names are case-insensitive, so the merge goes through `Headers.set()`:
+   * a later source replaces an earlier one whatever its casing. Spreading objects
+   * would keep `Authorization` and `authorization` as two keys, and `Headers`
+   * would then join them into one comma-separated value.
+   *
+   * `providerHeaders` is read once per call, outside `executeRequest`, so a retry
+   * after a 401 sends the same values as the first attempt.
+   */
+  const buildHeaders = (
+    defaults: Record<string, string>,
+    providerHeaders: Headers,
+    perCall?: Record<string, string>
+  ) => {
+    const headers = new Headers(defaults);
+
+    providerHeaders.forEach((value, name) => headers.set(name, value));
+    Object.entries(perCall ?? {}).forEach(([name, value]) => headers.set(name, value));
+
+    return headers;
+  };
+
+  const readProviderHeaders = (url: string) =>
+    SKIPS_REQUEST_HEADERS.test(addPrependingSlash(url))
+      ? new Headers()
+      : unstable_getRequestHeaders();
+
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
@@ -613,6 +742,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
+      const providerHeaders = readProviderHeaders(url);
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
@@ -623,10 +753,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const defaultHeaders =
           responseType === 'json' ? getDefaultHeaders(requestToken) : { Authorization };
 
-        const headers = new Headers({
-          ...defaultHeaders,
-          ...options?.headers,
-        });
+        const headers = buildHeaders(defaultHeaders, providerHeaders, options?.headers);
 
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
@@ -646,14 +773,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = readProviderHeaders(url);
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
         requestToken = getToken();
-        const headers = new Headers({
-          ...getDefaultHeaders(requestToken),
-          ...options?.headers,
-        });
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         /**
          * we have to remove the Content-Type value if it was a formData request
@@ -681,14 +810,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = readProviderHeaders(url);
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
         requestToken = getToken();
-        const headers = new Headers({
-          ...getDefaultHeaders(requestToken),
-          ...options?.headers,
-        });
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         /**
          * we have to remove the Content-Type value if it was a formData request
@@ -713,14 +844,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = readProviderHeaders(url);
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
         requestToken = getToken();
-        const headers = new Headers({
-          ...getDefaultHeaders(requestToken),
-          ...options?.headers,
-        });
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
@@ -742,6 +875,7 @@ export {
   getFetchClient,
   isFetchError,
   FetchError,
+  RequestHeadersError,
   getFailedRequestSessionToken,
   setFailedRequestSessionToken,
   attemptTokenRefresh,
@@ -751,6 +885,15 @@ export {
   setOnSessionExpired,
   triggerSessionExpired,
   resetSessionExpiredNotification,
+  unstable_addRequestHeaders,
+  unstable_getRequestHeaders,
   ADMIN_REFRESH_LOCK,
 };
-export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
+export type {
+  FetchOptions,
+  FetchResponse,
+  FetchConfig,
+  FetchClient,
+  ErrorResponse,
+  RequestHeadersProvider,
+};
