@@ -29,7 +29,11 @@ export default class SqliteDialect extends Dialect {
     const connection =
       conn || (this.db.config.connection.connection as Knex.Sqlite3ConnectionConfig);
     if (typeof connection !== 'string') {
-      connection.filename = path.resolve(connection.filename);
+      // ':memory:' is a special filename for an in-memory database, not a
+      // path on disk, so it must not be resolved against the cwd.
+      if (connection.filename !== ':memory:') {
+        connection.filename = path.resolve(connection.filename);
+      }
     }
 
     const dbDir = path.dirname(connection.filename);
