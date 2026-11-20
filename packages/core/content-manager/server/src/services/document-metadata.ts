@@ -25,10 +25,18 @@ const AVAILABLE_STATUS_SCALAR_FIELDS = [
   'createdAt',
   'publishedAt',
 ];
-// Relation populate shared by both the fast path and the full path
-const AVAILABLE_STATUS_POPULATE = {
-  createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
-  updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+// Admin user fields loaded for the creator relations of the other versions
+const AVAILABLE_STATUS_CREATOR_FIELDS = ['id', 'firstname', 'lastname', 'email'];
+// Creator populate of the fast path, which queries the database directly (`select`)
+const AVAILABLE_STATUS_DB_POPULATE = {
+  createdBy: { select: AVAILABLE_STATUS_CREATOR_FIELDS },
+  updatedBy: { select: AVAILABLE_STATUS_CREATOR_FIELDS },
+};
+// Creator populate of the full path, which goes through the query params transform.
+// The transform only reads `fields` in a nested populate and drops `select`.
+const AVAILABLE_STATUS_QUERY_POPULATE = {
+  createdBy: { fields: AVAILABLE_STATUS_CREATOR_FIELDS },
+  updatedBy: { fields: AVAILABLE_STATUS_CREATOR_FIELDS },
 };
 // All fields to pick from a hydrated result (scalars + populated relations + virtual)
 const AVAILABLE_STATUS_FIELDS = [
@@ -347,7 +355,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
               publishedAt: oppositePublishStatus(version.publishedAt),
             },
             select: AVAILABLE_STATUS_SCALAR_FIELDS,
-            populate: AVAILABLE_STATUS_POPULATE,
+            populate: AVAILABLE_STATUS_DB_POPULATE,
           })
         : null;
       return {
@@ -471,7 +479,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: {
         ...nestedPopulate,
         ...mediaPopulate,
-        ...AVAILABLE_STATUS_POPULATE,
+        ...AVAILABLE_STATUS_QUERY_POPULATE,
       },
       fields: [...new Set([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields])],
       filters: {
