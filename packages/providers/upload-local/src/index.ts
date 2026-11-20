@@ -68,12 +68,18 @@ const providerModule = {
             throw new PayloadTooLargeError(
               `${file.name} exceeds size limit of ${bytesToHumanReadable(
                 providerOptionsSizeLimit
-              )}.`
+              )}.`,
+              {
+                code: 'SizeLimitExceeded',
+                limit: providerOptionsSizeLimit,
+                setting: 'upload.config.providerOptions.sizeLimit',
+              }
             );
         } else if (sizeLimit) {
           if (kbytesToBytes(file.size) > sizeLimit)
             throw new PayloadTooLargeError(
-              `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+              `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`,
+              { code: 'SizeLimitExceeded', limit: sizeLimit }
             );
         }
       },

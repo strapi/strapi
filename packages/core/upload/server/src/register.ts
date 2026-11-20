@@ -10,6 +10,8 @@ import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
 import { aiMetadataJob } from './models/ai-metadata-job';
 import { registerUploadMcpTools } from './mcp';
+import { warnOnSizeLimitMismatch } from './size-limit-warning';
+import type { UploadTooLargeDetails } from '../../shared/contracts/files';
 
 const { PayloadTooLargeError } = errors;
 const { bytesToHumanReadable, kbytesToBytes } = file;
@@ -36,6 +38,8 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   sharp.concurrency(concurrency);
 
   strapi.plugin('upload').provider = createProvider(uploadConfig);
+
+  warnOnSizeLimitMismatch({ strapi });
 
   // Rewrites richtext / blocks URLs persisted with a (now expired) signature
   strapi.db.migrations.providers.internal.register(unsignRichtextAndBlocksUrls);
@@ -137,7 +141,8 @@ const baseProvider = {
   checkFileSize(file: InputFile, { sizeLimit }: { sizeLimit: number }) {
     if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
       throw new PayloadTooLargeError(
-        `${file.originalFilename} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+        `${file.originalFilename} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`,
+        { code: 'SizeLimitExceeded', limit: sizeLimit } satisfies UploadTooLargeDetails
       );
     }
   },
