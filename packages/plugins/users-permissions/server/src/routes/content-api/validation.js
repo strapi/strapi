@@ -273,6 +273,10 @@ class UsersPermissionsRouteValidator extends AbstractRouteValidator {
   get providerParam() {
     return z.string();
   }
+
+  get sessionIdParam() {
+    return z.string();
+  }
 }
 
 module.exports = {
