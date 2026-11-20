@@ -191,7 +191,7 @@ export interface Strapi extends StrapiContainer, Lookups {
   /** The admin module. With strict types enabled, see {@link Core.AdminModule}. */
   admin: IsStrict extends false ? Core.Module : Core.AdminModule;
   isLoaded: boolean;
-  db: Database;
+  db: IsStrict extends false ? Database : Modules.Lifecycles.StrictDatabase;
   /**
    * The application's `src/index` module, not the Koa application (`server.app`): its `register`,
    * `bootstrap` and `destroy` lifecycles, any other key failing validation at startup. `undefined`
