@@ -12,6 +12,7 @@ import { Filters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
+import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { SearchInput } from '../../../../components/SearchInput';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -21,9 +22,9 @@ import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import {
-  useSettingsListFilterParams,
   useSettingsListFilters,
   useSettingsListHeaders,
+  useSettingsListPluginParams,
 } from '../../../../hooks/useSettingsListExtensions';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';
@@ -48,12 +49,11 @@ const ListPageCE = () => {
   const { search } = useLocation();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
-  const filterOptions = useSettingsListFilters('users', FILTERS);
-  const { filters, plugins } = useSettingsListFilterParams();
+  const { filters: filterOptions, selects } = useSettingsListFilters('users', FILTERS);
+  const pluginParams = useSettingsListPluginParams();
   const { data, isError, isLoading } = useAdminUsers({
     ...qs.parse(search, { ignoreQueryPrefix: true }),
-    filters,
-    plugins,
+    ...pluginParams,
   });
   const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
@@ -158,6 +158,7 @@ const ListPageCE = () => {
             </Filters.Root>
           </>
         }
+        endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
       />
       <Layouts.Content>
         <Table.Root rows={users} headers={headers}>

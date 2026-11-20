@@ -21,6 +21,7 @@ import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Filters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -30,9 +31,9 @@ import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import {
-  useSettingsListFilterParams,
   useSettingsListFilters,
   useSettingsListHeaders,
+  useSettingsListPluginParams,
   type InjectableSettingsListFilter,
   type InjectableSettingsListHeader,
 } from '../../../../hooks/useSettingsListExtensions';
@@ -54,8 +55,8 @@ const ListPage = () => {
   } = useRBAC(permissions.settings?.roles);
 
   const headers = useSettingsListHeaders('roles', TABLE_HEADERS);
-  const filterOptions = useSettingsListFilters('roles', NO_CORE_FILTERS);
-  const { plugins } = useSettingsListFilterParams();
+  const { filters: filterOptions, selects } = useSettingsListFilters('roles', NO_CORE_FILTERS);
+  const { plugins } = useSettingsListPluginParams();
   const { roles, refetch: refetchRoles } = useAdminRoles(
     { filters: query?._q ? { name: { $containsi: query._q } } : undefined, plugins },
     {
@@ -162,6 +163,7 @@ const ListPage = () => {
       />
       {canRead && (
         <Layouts.Action
+          endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
           startActions={
             <>
               <SearchInput

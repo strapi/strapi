@@ -8,6 +8,7 @@ import { Filters, toApiFilters } from '../../../../../../../admin/src/components
 import { Layouts } from '../../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
+import { PluginFilterSelects } from '../../../../../../../admin/src/components/PluginFilterSelects';
 import { Table } from '../../../../../../../admin/src/components/Table';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import {
@@ -16,9 +17,9 @@ import {
 } from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import {
-  useSettingsListFilterParams,
   useSettingsListFilters,
   useSettingsListHeaders,
+  useSettingsListPluginParams,
   type InjectableSettingsListHeader,
 } from '../../../../../../../admin/src/hooks/useSettingsListExtensions';
 import { NotFoundPage } from '../../../../../../../admin/src/pages/NotFoundPage';
@@ -99,10 +100,13 @@ const ListPage = () => {
       }),
     [formatMessage, users, isLoadingUsers, hasMoreUsers, handleLoadMoreUsers]
   );
-  const filterOptions = useSettingsListFilters('audit-logs', displayedFilters);
-  const { filters: coreFilters, plugins } = useSettingsListFilterParams();
+  const { filters: filterOptions, selects } = useSettingsListFilters(
+    'audit-logs',
+    displayedFilters
+  );
+  const { plugins } = useSettingsListPluginParams();
   // A date filter stores a day or a minute: the API reads it as the instants it covers
-  const apiFilters = toApiFilters(coreFilters, displayedFilters);
+  const apiFilters = toApiFilters(query?.filters, displayedFilters);
   const {
     auditLogs,
     isLoading: isLoadingAuditLogs,
@@ -173,6 +177,7 @@ const ListPage = () => {
             <Filters.List />
           </Filters.Root>
         }
+        endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
       />
       <Layouts.Content>
         <Table.Root rows={results} headers={headers} isLoading={isLoading}>

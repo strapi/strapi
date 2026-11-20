@@ -6,10 +6,10 @@ import type { Core } from '@strapi/types';
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 /**
- * The Settings lists send plugin filters as `plugins[<pluginId>][$and]`, apart from the core
- * filters. Core routes must accept the param and leave it to the plugins.
+ * The Settings lists send the values of plugin dropdown filters as `plugins[<pluginId>][<name>]`.
+ * Core routes must accept the param and leave it to the plugins.
  */
-const PLUGIN_FILTERS = { plugins: { spaces: { $and: [{ space: { $eq: 'france' } }] } } };
+const PLUGIN_FILTERS = { plugins: { spaces: { space: 'france' } } };
 
 describe('Settings lists with plugin filters (api)', () => {
   let strapi: Core.Strapi;

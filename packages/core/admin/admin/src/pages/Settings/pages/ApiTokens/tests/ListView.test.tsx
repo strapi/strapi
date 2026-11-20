@@ -45,12 +45,12 @@ describe('API tokens | ListView | plugin columns and filters', () => {
 
     render(<ListView />, {
       providerOptions,
-      initialEntries: ['/?filters[$and][0][plugin::spaces.space][$eq]=france'],
+      initialEntries: ['/?plugins[spaces][space]=france'],
     });
 
-    expect(await screen.findByText('Space $eq france')).toBeInTheDocument();
+    expect(await screen.findByRole('combobox', { name: 'Space' })).toHaveTextContent('France');
     await waitFor(() => expect(requests).toHaveLength(1));
-    expect(requests[0].searchParams.get('plugins[spaces][$and][0][space][$eq]')).toBe('france');
+    expect(requests[0].searchParams.get('plugins[spaces][space]')).toBe('france');
   });
 
   it('says that no token matches the filter instead of inviting to create the first one', async () => {
@@ -58,7 +58,7 @@ describe('API tokens | ListView | plugin columns and filters', () => {
 
     render(<ListView />, {
       providerOptions,
-      initialEntries: ['/?filters[$and][0][plugin::spaces.space][$eq]=france'],
+      initialEntries: ['/?plugins[spaces][space]=france'],
     });
 
     expect(await screen.findByText('No content found')).toBeInTheDocument();

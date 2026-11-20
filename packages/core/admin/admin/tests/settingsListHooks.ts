@@ -45,9 +45,10 @@ const settingsListHooks =
   };
 
 const SPACE_FILTER: InjectableSettingsListFilter = {
+  display: 'select',
   name: 'plugin::spaces.space',
   label: 'Space',
-  type: 'enumeration',
+  placeholder: 'All spaces',
   options: [{ label: 'France', value: 'france' }],
 };
 

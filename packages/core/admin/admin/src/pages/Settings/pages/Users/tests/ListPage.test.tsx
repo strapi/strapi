@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { settingsListHooks, SPACE_FILTER } from '../../../../../../tests/settingsListHooks';
@@ -47,7 +47,7 @@ describe('Users | ListPage | plugin columns and filters', () => {
     expect(headers.indexOf('Spaces')).toBe(headers.indexOf('Email') + 1);
   });
 
-  it('shows the plugin filter in the filter bar and sends it apart from the core filters', async () => {
+  it('shows the plugin dropdown and sends its value with the core filters', async () => {
     const requests: URL[] = [];
 
     server.use(
@@ -62,32 +62,36 @@ describe('Users | ListPage | plugin columns and filters', () => {
 
     render(<ListPageCE />, {
       providerOptions,
-      initialEntries: [
-        '/?filters[$and][0][firstname][$eq]=John&filters[$and][1][plugin::spaces.space][$eq]=france',
-      ],
+      initialEntries: ['/?filters[$and][0][firstname][$eq]=John&plugins[spaces][space]=france'],
     });
 
-    expect(await screen.findByText('Space $eq france')).toBeInTheDocument();
+    expect(await screen.findByRole('combobox', { name: 'Space' })).toHaveTextContent('France');
     await waitFor(() => expect(requests).toHaveLength(1));
-    expect(requests[0].searchParams.get('plugins[spaces][$and][0][space][$eq]')).toBe('france');
-    // The core filters keep only the core entries
+    expect(requests[0].searchParams.get('plugins[spaces][space]')).toBe('france');
     expect(requests[0].searchParams.get('filters[$and][0][firstname][$eq]')).toBe('John');
-    expect(requests[0].search).not.toContain('plugin::');
   });
 
-  it('adds the plugin filter through the filter popover', async () => {
-    const { user } = render(<ListPageCE />, {
-      providerOptions,
-    });
+  it('picks a space in the dropdown and goes back to the first page', async () => {
+    const requests: URL[] = [];
 
-    await user.click(await screen.findByRole('button', { name: 'Filters' }));
-    await user.click(screen.getByRole('combobox', { name: 'Select field' }));
-    await user.click(await screen.findByRole('option', { name: 'Space' }));
-    await user.click(screen.getByRole('combobox', { name: 'Space' }));
+    server.use(
+      http.get('/admin/users', ({ request }) => {
+        requests.push(new URL(request.url));
+
+        return HttpResponse.json({
+          data: { results: [{ id: 1, firstname: 'John', roles: [] }], pagination: { page: 1 } },
+        });
+      })
+    );
+
+    const { user } = render(<ListPageCE />, { providerOptions, initialEntries: ['/?page=3'] });
+
+    await user.click(await screen.findByRole('combobox', { name: 'Space' }));
     await user.click(await screen.findByRole('option', { name: 'France' }));
-    // As in the Filters tests: the popover's submit button needs a plain click event
-    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
-    expect(await screen.findByText('Space $eq france')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(requests.at(-1)!.searchParams.get('plugins[spaces][space]')).toBe('france')
+    );
+    expect(requests.at(-1)!.searchParams.get('page')).toBe('1');
   });
 });

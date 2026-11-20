@@ -11,6 +11,7 @@ import { Filters } from '../../../../components/Filters';
 import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -19,9 +20,9 @@ import { useOnce } from '../../../../hooks/useOnce';
 import { deepEncodeQueryValues, useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import {
-  useSettingsListFilterParams,
   useSettingsListFilters,
   useSettingsListHeaders,
+  useSettingsListPluginParams,
   type InjectableSettingsListFilter,
 } from '../../../../hooks/useSettingsListExtensions';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
@@ -81,14 +82,14 @@ export const ListView = () => {
 
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const [{ query }] = useQueryParams<{ filters?: unknown }>();
+  const [{ query }] = useQueryParams<{ plugins?: unknown }>();
 
   useOnce(() => {
     navigate(
       {
         search: qs.stringify(
           // Keep the plugin filters of a link or a reload
-          { sort: 'name:ASC', filters: deepEncodeQueryValues(query.filters) },
+          { sort: 'name:ASC', plugins: deepEncodeQueryValues(query.plugins) },
           { encode: false }
         ),
       },
@@ -97,8 +98,8 @@ export const ListView = () => {
   });
 
   const headers = useSettingsListHeaders('api-tokens', TABLE_HEADERS);
-  const filterOptions = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
-  const { plugins } = useSettingsListFilterParams();
+  const { filters: filterOptions, selects } = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
+  const { plugins } = useSettingsListPluginParams();
   const isFiltered = plugins !== undefined;
 
   useOnce(() => {
@@ -191,14 +192,19 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          {filterOptions.length > 0 && (
+          {(filterOptions.length > 0 || selects.length > 0) && (
             <Layouts.Action
               startActions={
-                <Filters.Root options={filterOptions}>
-                  <Filters.Trigger />
-                  <Filters.Popover zIndex={499} />
-                  <Filters.List />
-                </Filters.Root>
+                filterOptions.length > 0 ? (
+                  <Filters.Root options={filterOptions}>
+                    <Filters.Trigger />
+                    <Filters.Popover zIndex={499} />
+                    <Filters.List />
+                  </Filters.Root>
+                ) : undefined
+              }
+              endActions={
+                selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined
               }
             />
           )}
