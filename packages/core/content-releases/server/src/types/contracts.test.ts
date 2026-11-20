@@ -4,6 +4,7 @@ import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { AdminUser } from '@strapi/admin/strapi-server';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
+import type { ReleaseActionService as ReleaseActionImplementation } from '../services/release-action';
 import type { Services } from './index';
 
 type Equal<T, U> =
@@ -78,6 +79,33 @@ export type ReleaseActionServiceContractAssertions = [
     >
   >,
   Expect<Equal<[Result<'countActions'>], [number]>>,
+];
+
+// `controllers/release-action.ts` groups the rows of a page, which have no `release`, by the query's
+// `sort`. `groupActions` reads the content type, the locale and the entry of each action.
+declare const releaseActionService: ReleaseActionService;
+export const groupPageRows = async () => {
+  const page = await releaseActionService.findPage('1', { page: 1, pageSize: 10 });
+  const grouped = await releaseActionService.groupActions(page.results, 'contentType');
+  // @ts-expect-error Each action names its content type.
+  await releaseActionService.groupActions([{ locale: 'en', entry: null }], 'type');
+  // @ts-expect-error Not a grouping.
+  await releaseActionService.groupActions(page.results, 'unknown');
+  return grouped;
+};
+
+type GroupedPageRow = Awaited<ReturnType<typeof groupPageRows>>[string][number];
+// The item that the implementation formats: the action with its locale and content type resolved.
+type FormattedAction = Awaited<
+  ReturnType<ReleaseActionImplementation['groupActions']>
+>[string][number];
+
+export type GroupActionsContractAssertions = [
+  Expect<Equal<['release' extends keyof GroupedPageRow ? true : false], [false]>>,
+  Expect<Equal<[GroupedPageRow['locale']], [FormattedAction['locale']]>>,
+  Expect<Equal<[GroupedPageRow['contentType']], [FormattedAction['contentType']]>>,
+  Expect<Equal<[GroupedPageRow['entry']], [ReleaseAction['entry']]>>,
+  Expect<Equal<[GroupedPageRow['status']], [ReleaseAction['status']]>>,
 ];
 
 type ReleaseService = Services['release'];
