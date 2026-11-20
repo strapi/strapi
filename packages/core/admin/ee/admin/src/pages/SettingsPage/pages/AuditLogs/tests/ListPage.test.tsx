@@ -570,20 +570,16 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage | plugin columns and filters', (
 
     const { user } = render(<ListPage />, {
       providerOptions,
-      initialEntries: ['/?filters[$and][0][plugin::spaces.space][$eq]=france'],
+      initialEntries: ['/?plugins[spaces][space]=france'],
     });
 
-    expect(await screen.findByText('Space $eq france')).toBeInTheDocument();
+    expect(await screen.findByRole('combobox', { name: 'Space' })).toHaveTextContent('France');
     await waitFor(() => expect(listRequests.length).toBeGreaterThan(0));
-    expect(listRequests.at(-1)!.searchParams.get('plugins[spaces][$and][0][space][$eq]')).toBe(
-      'france'
-    );
+    expect(listRequests.at(-1)!.searchParams.get('plugins[spaces][space]')).toBe('france');
 
     await user.click(await screen.findByRole('button', { name: 'Export as CSV' }));
 
     await waitFor(() => expect(exportRequests).toHaveLength(1));
-    expect(exportRequests[0].searchParams.get('plugins[spaces][$and][0][space][$eq]')).toBe(
-      'france'
-    );
+    expect(exportRequests[0].searchParams.get('plugins[spaces][space]')).toBe('france');
   });
 });

@@ -1,9 +1,9 @@
 import { renderHook } from '@tests/utils';
 
 import {
-  splitSettingsListFilters,
   useSettingsListFilters,
   useSettingsListHeaders,
+  useSettingsListPluginParams,
 } from '../useSettingsListExtensions';
 
 import type {
@@ -45,63 +45,68 @@ describe('useSettingsListHeaders', () => {
 });
 
 describe('useSettingsListFilters', () => {
-  it('runs the plugin hook with the list and formats the labels', () => {
+  it('keeps popover filters for the filter bar and turns plugin dropdowns into selects', () => {
     const runHookWaterfall = (_name: string, value: unknown) => {
       const args = value as InjectSettingsListFiltersArgs;
 
       return {
         ...args,
         displayedFilters: [
+          ...args.displayedFilters,
           {
+            display: 'select' as const,
             name: 'plugin::spaces.space',
             label: { id: 'space', defaultMessage: 'Space' },
-            type: 'enumeration' as const,
-            operators: [{ value: '$eq', label: { id: 'is', defaultMessage: 'is' } }],
+            placeholder: { id: 'all', defaultMessage: 'All spaces' },
+            options: [{ value: 'fr', label: { id: 'fr', defaultMessage: 'France' } }],
+          },
+          // Not named after a plugin: it has nowhere to store its value
+          {
+            display: 'select' as const,
+            name: 'space',
+            label: 'Space',
+            placeholder: 'All',
+            options: [],
           },
         ],
       };
     };
 
-    const { result } = renderHook(() => useSettingsListFilters('api-tokens', []), {
-      providerOptions: { runHookWaterfall },
-    });
+    const { result } = renderHook(
+      () =>
+        useSettingsListFilters('users', [
+          { name: 'email', label: { id: 'email', defaultMessage: 'Email' }, type: 'email' },
+        ]),
+      { providerOptions: { runHookWaterfall } }
+    );
 
-    expect(result.current).toEqual([
-      {
-        name: 'plugin::spaces.space',
-        label: 'Space',
-        type: 'enumeration',
-        operators: [{ value: '$eq', label: 'is' }],
-      },
-    ]);
+    expect(result.current).toEqual({
+      filters: [{ name: 'email', label: 'Email', type: 'email', operators: undefined }],
+      selects: [
+        {
+          pluginId: 'spaces',
+          name: 'space',
+          label: 'Space',
+          placeholder: 'All spaces',
+          options: [{ value: 'fr', label: 'France' }],
+        },
+      ],
+    });
   });
 });
 
-describe('splitSettingsListFilters', () => {
-  it('sends the plugin filters apart from the core ones, encoded', () => {
-    expect(
-      splitSettingsListFilters({
-        $and: [{ name: { $eq: 'a' } }, { 'plugin::spaces.space': { $eq: 'fr & es' } }],
-      })
-    ).toEqual({
-      filters: { $and: [{ name: { $eq: 'a' } }] },
-      plugins: { spaces: { $and: [{ space: { $eq: 'fr%20%26%20es' } }] } },
+describe('useSettingsListPluginParams', () => {
+  it('sends the plugin values of the URL, encoded', () => {
+    const { result } = renderHook(() => useSettingsListPluginParams(), {
+      initialEntries: ['/?plugins[spaces][space]=fr%20%26%20es&filters[$and][0][a][$eq]=b'],
     });
+
+    expect(result.current).toEqual({ plugins: { spaces: { space: 'fr%20%26%20es' } } });
   });
 
-  it('leaves the filters as they are when no plugin filter is applied', () => {
-    const filters = { $and: [{ name: { $eq: 'a' } }] };
+  it('sends nothing without plugin values', () => {
+    const { result } = renderHook(() => useSettingsListPluginParams());
 
-    expect(splitSettingsListFilters(filters)).toEqual({ filters });
-    expect(splitSettingsListFilters(undefined)).toEqual({ filters: undefined });
-  });
-
-  it('drops the core filters when only plugin filters are applied', () => {
-    expect(splitSettingsListFilters({ $and: [{ 'plugin::spaces.space': { $ne: 'fr' } }] })).toEqual(
-      {
-        filters: undefined,
-        plugins: { spaces: { $and: [{ space: { $ne: 'fr' } }] } },
-      }
-    );
+    expect(result.current).toEqual({});
   });
 });

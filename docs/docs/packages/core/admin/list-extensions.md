@@ -51,7 +51,11 @@ app.registerHook(
 
 ## Filters
 
-`Admin/Settings/pages/ListPage/unstable_inject-in-filters` gets `{ list, displayedFilters }` and returns it, as `Admin/CM/pages/ListView/inject-in-filters` does. The filters join the list's filter bar. API tokens and roles have no core filters, so they show the bar only when a handler adds one.
+`Admin/Settings/pages/ListPage/unstable_inject-in-filters` gets `{ list, displayedFilters }` and returns it, as `Admin/CM/pages/ListView/inject-in-filters` does. A filter takes one of two shapes.
+
+A filter on a field of the core model joins the list's Filters popover and is sent in `filters`, as in the Content Manager.
+
+A filter the core model does not have, such as a space, uses `display: 'select'`. It renders as its own dropdown on the right of the toolbar, like the Content Manager locale picker:
 
 ```ts
 app.registerHook(
@@ -61,22 +65,22 @@ app.registerHook(
     displayedFilters: [
       ...displayedFilters,
       {
+        display: 'select',
         name: 'plugin::my-plugin.team',
         label: { id: 'my-plugin.team', defaultMessage: 'Team' },
-        type: 'enumeration',
+        placeholder: { id: 'my-plugin.team.all', defaultMessage: 'All teams' },
         options: teams.map(({ slug, name }) => ({ label: name, value: slug })),
-        formatValue: (slug) => teams.find((team) => team.slug === slug)?.name ?? slug,
       },
     ],
   })
 );
 ```
 
-- A filter on a field of the core model keeps its name and is sent in `filters`, as in the Content Manager.
-- A filter the core model does not have is named `plugin::<pluginId>.<name>`. The list takes it out of `filters`, which the server validates against the core model, and sends it as `plugins[<pluginId>][$and]` with the plugin's own name: `plugins[my-plugin][$and][0][team][$eq]=blue`. The plugin applies it on the server, for example with a route middleware. The four list routes and the audit logs export drop `plugins` before they query the database.
-- Only top-level `$and` entries are moved: a plugin filter nested in `$or`, in a hand-written URL, reaches the server in `filters` and is refused.
-- Give an `enumeration` filter its `options` as `{ label, value }` objects: the value input of the popover cannot render plain strings. Give `formatValue` so the tag shows the label instead of the value.
-- The audit logs export sends the plugin filters too, but its continuation token and its audit event only cover `filters`. A plugin enforces its own scope on the server and never trusts `plugins`. The API tokens page keeps the filters of the URL when it sets its default sort, and shows the empty table instead of the "Add your first API Token" invitation when a plugin filter matches no token.
+- The name is `plugin::<pluginId>.<name>`. The value goes to the URL and the list request as `plugins[<pluginId>][<name>]`, for example `plugins[my-plugin][team]=blue`, apart from `filters`, which the server validates against the core model. A dropdown filter with another name is left out.
+- `placeholder` is the option that clears the filter. Picking an option brings a paginated list back to its first page.
+- The plugin applies the value on the server, for example with a route middleware. The four list routes and the audit logs export drop `plugins` before they query the database.
+- The audit logs export sends `plugins` too, but its continuation token and its audit event only cover `filters`. A plugin enforces its own scope on the server and never trusts `plugins`.
+- The API tokens page keeps `plugins` when it sets its default sort, and shows the empty table instead of the "Add your first API Token" invitation when a plugin filter matches no token.
 
 ## Related
 

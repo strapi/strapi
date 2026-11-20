@@ -28,10 +28,35 @@ type InjectableSettingsListHeader<TRow = unknown> = Omit<Table.Header<TRow, obje
   label: string | MessageDescriptor;
 };
 
-type InjectableSettingsListFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
+type InjectableSettingsListPopoverFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
+  display?: 'popover';
   label: string | MessageDescriptor;
   operators?: Array<{ value: string; label: string | MessageDescriptor }>;
 };
+
+/**
+ * Renders as its own dropdown on the right of the list toolbar. Named `plugin::<pluginId>.<name>`,
+ * its value goes to `plugins[<pluginId>][<name>]`, apart from the core filters
+ */
+interface InjectableSettingsListSelectFilter {
+  display: 'select';
+  name: string;
+  label: string | MessageDescriptor;
+  /** The option that clears the filter, e.g. "All spaces" */
+  placeholder: string | MessageDescriptor;
+  options: Array<{ value: string; label: string | MessageDescriptor }>;
+}
+
+type InjectableSettingsListFilter =
+  InjectableSettingsListPopoverFilter | InjectableSettingsListSelectFilter;
+
+interface SettingsListSelectFilter {
+  pluginId: string;
+  name: string;
+  label: string;
+  placeholder: string;
+  options: Array<{ value: string; label: string }>;
+}
 
 /**
  * Arguments of the `INJECT_COLUMN_IN_SETTINGS_TABLE` hook. Narrow on `list` to type the rows.
@@ -80,44 +105,7 @@ const useSettingsListHeaders = <TList extends SettingsList>(
   }, [runHookWaterfall, list, coreHeaders, formatMessage]);
 };
 
-const useSettingsListFilters = (
-  list: SettingsList,
-  coreFilters: InjectableSettingsListFilter[]
-): Filters.Filter[] => {
-  const runHookWaterfall = useStrapiApp(
-    'useSettingsListFilters',
-    (state) => state.runHookWaterfall
-  );
-  const { formatMessage } = useIntl();
-
-  return React.useMemo(() => {
-    const { displayedFilters } = runHookWaterfall<InjectSettingsListFiltersArgs>(
-      HOOKS.INJECT_SETTINGS_LIST_FILTERS,
-      { list, displayedFilters: coreFilters }
-    );
-
-    return displayedFilters.map((filter) => ({
-      ...filter,
-      label: resolveLabel(filter.label, formatMessage),
-      operators: filter.operators?.map((operator) => ({
-        ...operator,
-        label: resolveLabel(operator.label, formatMessage),
-      })),
-    }));
-  }, [runHookWaterfall, list, coreFilters, formatMessage]);
-};
-
 const PLUGIN_FILTER_PREFIX = 'plugin::';
-
-type FilterEntry = Record<string, unknown>;
-
-interface SettingsListFilterParams {
-  filters?: Filters.Query['filters'];
-  plugins?: Record<string, { $and: FilterEntry[] }>;
-}
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
 
 const parsePluginFilterName = (key: string) => {
   if (!key.startsWith(PLUGIN_FILTER_PREFIX)) {
@@ -130,65 +118,83 @@ const parsePluginFilterName = (key: string) => {
   return dot > 0 ? { pluginId: rest.slice(0, dot), name: rest.slice(dot + 1) } : null;
 };
 
-/**
- * Filters named `plugin::<pluginId>.<name>` are sent apart, as `plugins[<pluginId>][$and]`: the
- * server would refuse them in `filters`, which it validates against the core model
- */
-const splitSettingsListFilters = (filters: unknown): SettingsListFilterParams => {
-  const entries = isRecord(filters) && Array.isArray(filters.$and) ? filters.$and : [];
-  const coreEntries: unknown[] = [];
-  const plugins: NonNullable<SettingsListFilterParams['plugins']> = {};
+const useSettingsListFilters = (
+  list: SettingsList,
+  coreFilters: InjectableSettingsListFilter[]
+): { filters: Filters.Filter[]; selects: SettingsListSelectFilter[] } => {
+  const runHookWaterfall = useStrapiApp(
+    'useSettingsListFilters',
+    (state) => state.runHookWaterfall
+  );
+  const { formatMessage } = useIntl();
 
-  for (const entry of entries) {
-    const keys = isRecord(entry) ? Object.keys(entry) : [];
-    const pluginFilter = keys.length === 1 ? parsePluginFilterName(keys[0]) : null;
+  return React.useMemo(() => {
+    const { displayedFilters } = runHookWaterfall<InjectSettingsListFiltersArgs>(
+      HOOKS.INJECT_SETTINGS_LIST_FILTERS,
+      { list, displayedFilters: coreFilters }
+    );
 
-    if (!pluginFilter) {
-      coreEntries.push(entry);
-      continue;
+    const filters: Filters.Filter[] = [];
+    const selects: SettingsListSelectFilter[] = [];
+
+    for (const filter of displayedFilters) {
+      if (filter.display === 'select') {
+        const pluginFilter = parsePluginFilterName(filter.name);
+
+        if (pluginFilter) {
+          selects.push({
+            ...pluginFilter,
+            label: resolveLabel(filter.label, formatMessage),
+            placeholder: resolveLabel(filter.placeholder, formatMessage),
+            options: filter.options.map((option) => ({
+              ...option,
+              label: resolveLabel(option.label, formatMessage),
+            })),
+          });
+        }
+      } else {
+        filters.push({
+          ...filter,
+          label: resolveLabel(filter.label, formatMessage),
+          operators: filter.operators?.map((operator) => ({
+            ...operator,
+            label: resolveLabel(operator.label, formatMessage),
+          })),
+        });
+      }
     }
 
-    const { $and = [] } = plugins[pluginFilter.pluginId] ?? {};
-
-    plugins[pluginFilter.pluginId] = {
-      $and: [
-        ...$and,
-        deepEncodeQueryValues({ [pluginFilter.name]: (entry as FilterEntry)[keys[0]] }),
-      ],
-    };
-  }
-
-  if (coreEntries.length === entries.length) {
-    return { filters: filters as SettingsListFilterParams['filters'] };
-  }
-
-  return {
-    filters:
-      coreEntries.length > 0
-        ? ({ ...(filters as object), $and: coreEntries } as SettingsListFilterParams['filters'])
-        : undefined,
-    plugins,
-  };
+    return { filters, selects };
+  }, [runHookWaterfall, list, coreFilters, formatMessage]);
 };
 
-const useSettingsListFilterParams = (): SettingsListFilterParams => {
-  const [{ query }] = useQueryParams<{ filters?: unknown }>();
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
 
-  return React.useMemo(() => splitSettingsListFilters(query.filters), [query.filters]);
+/**
+ * The values of the dropdown filters, to send with the list request. The fetch client does not
+ * encode params, so they are encoded here
+ */
+const useSettingsListPluginParams = (): { plugins?: Record<string, unknown> } => {
+  const [{ query }] = useQueryParams<{ plugins?: unknown }>();
+
+  return React.useMemo(
+    () =>
+      isRecord(query.plugins) && Object.keys(query.plugins).length > 0
+        ? { plugins: deepEncodeQueryValues(query.plugins) }
+        : {},
+    [query.plugins]
+  );
 };
 
-export {
-  splitSettingsListFilters,
-  useSettingsListFilterParams,
-  useSettingsListFilters,
-  useSettingsListHeaders,
-};
+export { useSettingsListFilters, useSettingsListHeaders, useSettingsListPluginParams };
 export type {
   InjectSettingsListColumnsArgs,
   InjectSettingsListFiltersArgs,
   InjectableSettingsListFilter,
   InjectableSettingsListHeader,
+  InjectableSettingsListSelectFilter,
   SettingsList,
-  SettingsListFilterParams,
   SettingsListRows,
+  SettingsListSelectFilter,
 };

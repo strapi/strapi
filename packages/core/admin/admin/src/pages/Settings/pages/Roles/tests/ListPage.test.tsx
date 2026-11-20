@@ -57,16 +57,16 @@ describe('<ListPage /> | plugin columns and filters', () => {
     expect(headers.slice(0, 4)).toEqual(['Name', 'Description', 'Available in', 'Users']);
   });
 
-  it('shows the plugin filter in the filter bar and sends it apart with the roles request', async () => {
+  it('shows the plugin dropdown and sends its value with the roles request', async () => {
     render(<ListPage />, {
       providerOptions,
-      initialEntries: ['/?filters[$and][0][plugin::spaces.space][$eq]=france'],
+      initialEntries: ['/?plugins[spaces][space]=france'],
     });
 
-    expect(await screen.findByText('Space $eq france')).toBeInTheDocument();
+    expect(await screen.findByRole('combobox', { name: 'Space' })).toHaveTextContent('France');
     expect(useAdminRoles).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        plugins: { spaces: { $and: [{ space: { $eq: 'france' } }] } },
+        plugins: { spaces: { space: 'france' } },
       }),
       expect.anything()
     );
