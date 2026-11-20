@@ -11,7 +11,8 @@ test.use({ resetScope: 'test' });
 // an empty probe when a restore ran right before it.
 
 test.beforeAll(async ({ server }) => {
-  // A restore also runs before beforeAll.
+  // The file reset ran before it. The nested describe below checks the test-scope reset before a
+  // hook, which this one can't tell apart.
   expect(await writeProbe(server)).toBe(true);
 });
 
@@ -26,4 +27,20 @@ test('with test scope, a test starts on the snapshot', async ({ server }) => {
 
 test('with test scope, the next test starts on the snapshot too', async ({ server }) => {
   expect(await writeProbe(server)).toBe(true);
+});
+
+test.describe('a nested describe', () => {
+  let createdInBeforeAll: boolean | undefined;
+
+  // Runs after the file's `beforeAll` (and, in a full run, after the tests above), which leave
+  // the probe in the database. Same file, so only the test-scope reset can remove it.
+  test.beforeAll(async ({ server }) => {
+    createdInBeforeAll = await writeProbe(server);
+  });
+
+  test('with test scope, a restore also runs before a beforeAll hook', async ({ server }) => {
+    expect(createdInBeforeAll).toBe(true);
+    // And before the test: what beforeAll wrote is gone.
+    expect(await writeProbe(server)).toBe(true);
+  });
 });
