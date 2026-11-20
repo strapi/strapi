@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import type { Core } from '@strapi/types';
 
 export const MAX_USER_HASHES = 10_000;
