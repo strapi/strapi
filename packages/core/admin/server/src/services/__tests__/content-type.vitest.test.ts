@@ -393,19 +393,39 @@ describe('Content-Type', () => {
       expect(result.map(({ subject }) => subject)).toEqual(['country']);
     });
 
-    test.each([
-      ['applies to fields', ['fields']],
-      ['does not apply to fields', null],
-    ])('skips a subject that is not a loaded content type, when the action %s', (_, properties) => {
+    test('skips a subject that is not a loaded content type when the action applies to fields', () => {
       const result = getPermissionsWithNestedFields([
         createContentTypeAction({
           actionId: 'action-1',
           subjects: ['api::missing.missing', 'constructor', 'country'],
-          options: { applyToProperties: properties },
+          options: { applyToProperties: ['fields'] },
         }),
       ]);
 
       expect(result.map(({ subject }) => subject)).toEqual(['country']);
+    });
+
+    test('keeps a subject that is not a loaded content type when the action does not apply to fields', () => {
+      const result = getPermissionsWithNestedFields([
+        createContentTypeAction({
+          actionId: 'plugin::my-plugin.action',
+          subjects: ['plugin::my-plugin.thing', 'country'],
+          options: { applyToProperties: null },
+        }),
+      ]);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          action: 'plugin::my-plugin.action',
+          subject: 'plugin::my-plugin.thing',
+          properties: {},
+        }),
+        expect.objectContaining({
+          action: 'plugin::my-plugin.action',
+          subject: 'country',
+          properties: {},
+        }),
+      ]);
     });
 
     test('skips restricted subjects', () => {

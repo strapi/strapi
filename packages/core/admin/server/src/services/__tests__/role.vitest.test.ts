@@ -5,6 +5,7 @@ import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import roleContentType from '../../content-types/Role';
 import roleService from '../role';
+import { getPermissionsWithNestedFields } from '../content-type';
 import * as permissionQueries from '../permission/queries';
 
 const {
@@ -927,6 +928,60 @@ describe('Role', () => {
           }))
         )
       );
+    });
+
+    test('Keeps a contentTypes action whose subject is not a loaded content type when it does not apply to fields', async () => {
+      const roleId = 1;
+      const actions = [
+        {
+          actionId: 'plugin::my-plugin.read',
+          subjects: ['country', 'plugin::my-plugin.thing'],
+          section: 'contentTypes',
+          options: { applyToProperties: ['fields'] },
+        },
+        {
+          actionId: 'plugin::my-plugin.sync',
+          subjects: ['plugin::my-plugin.thing'],
+          section: 'contentTypes',
+          options: { applyToProperties: null },
+        },
+      ];
+      const createMany = vi.fn(() => []);
+
+      global.strapi = {
+        contentTypes: {
+          country: { uid: 'country', attributes: { name: { type: 'text' } } },
+        },
+        components: {},
+        admin: {
+          services: {
+            permission: {
+              createMany,
+              findMany: vi.fn(() => []),
+              actionProvider: { values: vi.fn(() => actions) },
+              conditionProvider: { getAll: vi.fn(() => []) },
+              deleteByIds: vi.fn(),
+            },
+            condition: { isValidCondition: vi.fn(() => true) },
+            'content-type': { getPermissionsWithNestedFields },
+            role: { getSuperAdmin: vi.fn(() => Promise.resolve({ id: roleId })) },
+            'api-token-admin': { syncPermissionsForRole: vi.fn() },
+          },
+        },
+        eventHub: { emit: vi.fn() },
+      } as any;
+
+      await resetSuperAdminPermissions();
+
+      expect(createMany).toHaveBeenCalledTimes(1);
+      const created = (createMany.mock.calls[0] as unknown[][])[0] as {
+        action: string;
+        subject: string;
+      }[];
+      expect(created.map(({ action, subject }) => ({ action, subject }))).toEqual([
+        { action: 'plugin::my-plugin.read', subject: 'country' },
+        { action: 'plugin::my-plugin.sync', subject: 'plugin::my-plugin.thing' },
+      ]);
     });
   });
 

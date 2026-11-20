@@ -118,31 +118,40 @@ const getNestedFieldsWithIntermediate = (
  * Whether the subject is the UID of a loaded content type. Own keys only, so an inherited key
  * such as `constructor` does not pass.
  */
-const isContentTypeUID = (subject: string | undefined): subject is UID.ContentType => {
-  return subject !== undefined && Object.hasOwn(strapi.contentTypes, subject);
+const isContentTypeUID = (subject: string): subject is UID.ContentType => {
+  return Object.hasOwn(strapi.contentTypes, subject);
 };
 
 /**
  * Creates an array of permissions with the "properties.fields" attribute filled.
- * An action without subjects, and a subject that is not a loaded content type, create no permission.
+ * An action without subjects and an undefined subject create no permission. When the action
+ * applies to fields, a subject that is not a loaded content type creates no permission either,
+ * since its fields cannot be resolved.
  */
 const getPermissionsWithNestedFields = (
   actions: readonly Action[],
   { nestingLevel, restrictedSubjects = [] }: FieldOptions = {}
 ): Modules.Permissions.PermissionRule[] => {
   return actions.reduce<Modules.Permissions.PermissionRule[]>((permissions, action) => {
+    const appliesToFields = actionDomain.appliesToProperty('fields', action);
     const validSubjects = (action.subjects ?? [])
-      .filter(isContentTypeUID)
+      .filter((subject): subject is string => subject !== undefined)
       .filter((subject) => restrictedSubjects.includes(subject) === false);
 
-    // Create a Permission for each subject (content-type uid) within the action
+    // Create a Permission for each subject within the action
     for (const subject of validSubjects) {
-      const fields = actionDomain.appliesToProperty('fields', action)
-        ? getNestedFields(strapi.contentTypes[subject], {
-            components: strapi.components,
-            nestingLevel,
-          })
-        : undefined;
+      let fields: string[] | undefined;
+
+      if (appliesToFields === true) {
+        if (isContentTypeUID(subject) === false) {
+          continue;
+        }
+
+        fields = getNestedFields(strapi.contentTypes[subject], {
+          components: strapi.components,
+          nestingLevel,
+        });
+      }
 
       const permission = permissionDomain.create({
         action: action.actionId,
