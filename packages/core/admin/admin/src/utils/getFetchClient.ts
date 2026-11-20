@@ -1,4 +1,5 @@
 import flow from 'lodash/flow';
+import isPlainObject from 'lodash/isPlainObject';
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
@@ -96,7 +97,12 @@ const unstable_getRequestHeaders = (): Headers => {
   for (const provider of requestHeadersProviders) {
     let entries: Array<[string, string | null | undefined]>;
     try {
-      entries = Object.entries(provider());
+      const result = provider();
+      // A promise or array has no own header entries, so it would silently send no header
+      if (!isPlainObject(result)) {
+        throw new TypeError('A request headers provider must return a plain object.');
+      }
+      entries = Object.entries(result);
     } catch (error) {
       throw new RequestHeadersError(
         'A plugin failed to provide its request headers, so the request was not sent.',

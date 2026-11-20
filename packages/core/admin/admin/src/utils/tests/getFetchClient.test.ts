@@ -1121,6 +1121,21 @@ describe('getFetchClient', () => {
         expect(window.fetch).not.toHaveBeenCalled();
       });
 
+      it.each([
+        ['a promise', async () => ({ 'x-strapi-space': 'france' })],
+        ['an array', () => [['x-strapi-space', 'france']]],
+        ['null', () => null],
+        ['a string', () => 'france'],
+      ])('does not send the request when a provider returns %s', async (_name, provider) => {
+        // Plain JavaScript plugins can return anything, which the type does not allow
+        register(provider as unknown as RequestHeadersProvider);
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
       it('still sends an auth request', async () => {
         register(() => {
           throw new Error('provider failed');
