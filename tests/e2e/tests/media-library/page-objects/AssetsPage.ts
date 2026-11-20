@@ -708,8 +708,8 @@ export class AssetsPage {
           ? this.getFolderCard(itemName)
           : this.getAssetCard(itemName)
         : itemType === 'folder'
-        ? this.getFolderRow(itemName)
-        : this.getAssetRow(itemName);
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
     const target = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
 
     const itemBox = await item.boundingBox();
@@ -756,8 +756,8 @@ export class AssetsPage {
           ? this.getFolderCard(itemName)
           : this.getAssetCard(itemName)
         : itemType === 'folder'
-        ? this.getFolderRow(itemName)
-        : this.getAssetRow(itemName);
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
 
     const itemBox = await item.boundingBox();
 
@@ -840,8 +840,8 @@ export class AssetsPage {
           ? this.getFolderCard(itemName)
           : this.getAssetCard(itemName)
         : itemType === 'folder'
-        ? this.getFolderRow(itemName)
-        : this.getAssetRow(itemName);
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
     const target = this.getTreeFolderRow(treeFolderName);
 
     await this.dragBetweenLocators(item, target);
@@ -861,8 +861,8 @@ export class AssetsPage {
           ? this.getFolderCard(itemName)
           : this.getAssetCard(itemName)
         : itemType === 'folder'
-        ? this.getFolderRow(itemName)
-        : this.getAssetRow(itemName);
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
     const target = this.getHomeTreeRow();
 
     await this.dragBetweenLocators(item, target);
@@ -905,8 +905,8 @@ export class AssetsPage {
           ? this.getFolderCard(itemName)
           : this.getAssetCard(itemName)
         : itemType === 'folder'
-        ? this.getFolderRow(itemName)
-        : this.getAssetRow(itemName);
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
 
     const itemBox = await item.boundingBox();
     const targetBox = await target.boundingBox();
