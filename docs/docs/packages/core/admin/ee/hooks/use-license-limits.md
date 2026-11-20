@@ -56,7 +56,8 @@ interface License {
   isHostedOnStrapiCloud: boolean;
   features: LicenseFeature[];
   // Active admin users counted across all instances. Information only.
-  // null for offline licenses and until the registry answered.
+  // null for offline or inactive licenses, until the registry answered, and when its last
+  // answer is older than 48 hours (this instance's count is shown instead).
   adminUsersAcrossInstances?: {
     activeUsers: number;
     contractedUsers: number | null;

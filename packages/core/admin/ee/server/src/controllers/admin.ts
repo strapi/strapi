@@ -27,6 +27,10 @@ const isAdminUsersAcrossInstances = (value: unknown): value is AdminUsersAcrossI
   );
 };
 
+// Older than this, the registry has missed several reports in a row (404, 429, another license
+// key), so the count is likely stale. The admin shows this instance's count instead.
+const ADMIN_USERS_ACROSS_INSTANCES_MAX_AGE_MS = 48 * 60 * 60 * 1000;
+
 /** Count stored by the online license check (`reportActiveAdminUsers` in @strapi/core). */
 const getStoredAdminUsersAcrossInstances = async (): Promise<AdminUsersAcrossInstances | null> => {
   try {
@@ -37,6 +41,12 @@ const getStoredAdminUsersAcrossInstances = async (): Promise<AdminUsersAcrossIns
     }
 
     const { activeUsers, contractedUsers, updatedAt } = stored;
+
+    // Also rejects an unparsable date (NaN)
+    if (!(Date.now() - Date.parse(updatedAt) <= ADMIN_USERS_ACROSS_INSTANCES_MAX_AGE_MS)) {
+      return null;
+    }
+
     return { activeUsers, contractedUsers, updatedAt };
   } catch {
     return null;
