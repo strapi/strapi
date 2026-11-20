@@ -1,4 +1,4 @@
-import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
+import { Box, Flex, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 
 import {
   deepEncodeQueryValues,
@@ -45,12 +45,17 @@ const PluginFilterSelects = ({ selects }: { selects: SettingsListSelectFilter[] 
     };
 
   return (
-    <>
+    // On small screens the dropdowns share a full-width row, like the search input above them
+    <Flex gap={2} width={{ initial: '100%', medium: 'auto' }}>
       {selects.map((select) => {
         const value = plugins[select.pluginId]?.[select.name];
 
         return (
-          <Box key={`${select.pluginId}.${select.name}`} minWidth="16rem">
+          <Box
+            key={`${select.pluginId}.${select.name}`}
+            flex={{ initial: '1 1 0', medium: '0 0 auto' }}
+            minWidth={{ initial: 0, medium: '16rem' }}
+          >
             <SingleSelect
               size="S"
               aria-label={select.label}
@@ -67,7 +72,7 @@ const PluginFilterSelects = ({ selects }: { selects: SettingsListSelectFilter[] 
           </Box>
         );
       })}
-    </>
+    </Flex>
   );
 };
 
