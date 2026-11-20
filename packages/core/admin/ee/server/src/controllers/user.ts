@@ -36,7 +36,12 @@ export default {
       throw new ForbiddenError('License seat limit reached. You cannot create a new user');
     }
 
-    const { plugins, ...body } = ctx.request.body;
+    const { plugins, ...input } = ctx.request.body;
+    const { data: body, save } = await getService('form-extensions').prepare('user', {
+      input: plugins,
+      data: input,
+      user: ctx.state.user,
+    });
     const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
@@ -54,11 +59,7 @@ export default {
       Object.assign(attributes, { registrationToken: null, isActive: true });
     }
 
-    const createdUser = await getService('form-extensions').save(
-      'user',
-      { input: plugins, data: attributes, user: ctx.state.user },
-      (data: Record<string, unknown>) => getService('user').create(data)
-    );
+    const createdUser = await save(() => getService('user').create(attributes));
     const userInfo = getService('user').sanitizeUser(createdUser);
 
     // Note: We need to assign manually the registrationToken to the
@@ -70,7 +71,13 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const { plugins, ...body } = ctx.request.body;
+    const { plugins, ...input } = ctx.request.body;
+    const { data: body, save } = await getService('form-extensions').prepare('user', {
+      input: plugins,
+      data: input,
+      user: ctx.state.user,
+      entityId: id,
+    });
     const data = normalizeEmail(body);
 
     await validateUserUpdateInput(data);
@@ -96,11 +103,7 @@ export default {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
     }
 
-    const updatedUser = await getService('form-extensions').save(
-      'user',
-      { input: plugins, data, user: ctx.state.user, entityId: id },
-      (nextData: Record<string, unknown>) => getService('user').updateById(id, nextData)
-    );
+    const updatedUser = await save(() => getService('user').updateById(id, data));
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

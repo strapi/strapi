@@ -16,11 +16,14 @@ describe('Admin form extensions (api)', () => {
   const prefix = 'form_extensions_test';
   const afterSave = jest.fn();
   const roleIds: number[] = [];
+  // The role a user holds in another place, which the plugin keeps on save
+  let keptRoleId: number;
 
+  const spacesSchema = zod.object({ space: zod.string().min(1) });
   const spacesParam = {
-    schema: (z: typeof zod) => z.object({ space: z.string().min(1) }),
-    validate: (values: unknown) => {
-      if ((values as { space?: string } | undefined)?.space === 'forbidden') {
+    schema: spacesSchema,
+    validate: (values?: zod.infer<typeof spacesSchema>) => {
+      if (values?.space === 'forbidden') {
         throw new errors.ValidationError('This space is not allowed');
       }
     },
@@ -37,18 +40,21 @@ describe('Admin form extensions (api)', () => {
     formExtensions.unstable_addInputParams('user', {
       spaces: {
         ...spacesParam,
-        // A plugin can change the core values before core saves them
-        beforeSave: ({ data }: { data: Record<string, unknown> }) => ({
-          ...data,
-          lastname: 'Saved by the plugin',
-        }),
+        // A plugin can change the core values before core checks and saves them
+        beforeSave: ({ values, data }) => {
+          if (values?.space === 'bad-email') {
+            return { ...data, email: 'not an email' };
+          }
+
+          return Array.isArray(data.roles) ? { ...data, roles: [...data.roles, keptRoleId] } : data;
+        },
       },
     });
     formExtensions.unstable_addInputParams('api-token', { spaces: spacesParam });
   });
 
   beforeEach(() => {
-    afterSave.mockClear();
+    afterSave.mockReset();
   });
 
   afterAll(async () => {
@@ -114,6 +120,20 @@ describe('Admin form extensions (api)', () => {
       expect(afterSave).not.toHaveBeenCalled();
     });
 
+    test('saves nothing when afterSave fails', async () => {
+      afterSave.mockRejectedValue(new Error('Plugin save failed'));
+
+      const res = await createRole({
+        name: `${prefix}_rolled_back`,
+        plugins: { spaces: { space: 'france' } },
+      });
+
+      expect(res.statusCode).toBe(500);
+      expect(
+        await strapi.db.query('admin::role').findOne({ where: { name: `${prefix}_rolled_back` } })
+      ).toBeNull();
+    });
+
     test('refuses the values of a plugin that added no params', async () => {
       const res = await createRole({ name: `${prefix}_unknown`, plugins: { other: {} } });
 
@@ -123,8 +143,10 @@ describe('Admin form extensions (api)', () => {
   });
 
   describe('users', () => {
-    test('invite and update run the plugin steps, beforeSave included', async () => {
-      const role = await createRole({ name: `${prefix}_user_role` });
+    const roleIdsOf = (user: { roles: Array<{ id: number }> }) => user.roles.map(({ id }) => id);
+
+    test('core checks the roles beforeSave returns, so the form can send none', async () => {
+      keptRoleId = (await createRole({ name: `${prefix}_kept_role` })).body.data.id;
 
       const invited = await rq({
         method: 'POST',
@@ -133,13 +155,13 @@ describe('Admin form extensions (api)', () => {
           firstname: 'Sofia',
           lastname: 'García',
           email: `sofia@${prefix}.test`,
-          roles: [role.body.data.id],
+          roles: [],
           plugins: { spaces: { space: 'france' } },
         },
       });
 
       expect(invited.statusCode).toBe(201);
-      expect(invited.body.data.lastname).toBe('Saved by the plugin');
+      expect(roleIdsOf(invited.body.data)).toEqual([keptRoleId]);
       expect(afterSave).toHaveBeenCalledWith(
         expect.objectContaining({ entityId: invited.body.data.id, values: { space: 'france' } })
       );
@@ -152,9 +174,29 @@ describe('Admin form extensions (api)', () => {
 
       expect(updated.statusCode).toBe(200);
       expect(updated.body.data.firstname).toBe('Sofía');
+
+      const withoutRoles = await rq({
+        method: 'PUT',
+        url: `/admin/users/${invited.body.data.id}`,
+        body: { roles: [], plugins: { spaces: { space: 'spain' } } },
+      });
+
+      expect(withoutRoles.statusCode).toBe(200);
+      expect(roleIdsOf(withoutRoles.body.data)).toEqual([keptRoleId]);
       expect(afterSave).toHaveBeenLastCalledWith(
         expect.objectContaining({ entityId: invited.body.data.id, values: { space: 'spain' } })
       );
+    });
+
+    test('refuses core values from beforeSave that core would refuse', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/admin/users/1',
+        body: { firstname: 'Renamed', plugins: { spaces: { space: 'bad-email' } } },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(afterSave).not.toHaveBeenCalled();
     });
 
     test('refuses an unknown plugin key', async () => {

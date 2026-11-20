@@ -31,16 +31,17 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx: Context) {
-    const { plugins, ...body } = (ctx.request as Create.Request).body;
+    const { plugins, ...input } = (ctx.request as Create.Request).body;
+    const { data: body, save } = await getService('form-extensions').prepare('role', {
+      input: plugins,
+      data: input,
+      user: ctx.state.user,
+    });
     await validateRoleCreateInput(body);
 
     const roleService = getService('role');
 
-    const role = await getService('form-extensions').save(
-      'role',
-      { input: plugins, data: body, user: ctx.state.user },
-      (data) => roleService.create(data as typeof body)
-    );
+    const role = await save(() => roleService.create(body));
     const sanitizedRole = roleService.sanitizeRole(role) as Omit<AdminRole, 'users' | 'permission'>;
 
     ctx.created({ data: sanitizedRole } satisfies Create.Response);
@@ -91,7 +92,13 @@ export default {
    */
   async update(ctx: Context) {
     const { id } = ctx.params as Update.Request['params'];
-    const { plugins, ...body } = (ctx.request as Omit<Update.Request, 'params'>).body;
+    const { plugins, ...input } = (ctx.request as Omit<Update.Request, 'params'>).body;
+    const { data: body, save } = await getService('form-extensions').prepare('role', {
+      input: plugins,
+      data: input,
+      user: ctx.state.user,
+      entityId: id,
+    });
 
     const roleService = getService('role');
 
@@ -107,11 +114,7 @@ export default {
       throw new ApplicationError("Super admin can't be edited.");
     }
 
-    const updatedRole = await getService('form-extensions').save(
-      'role',
-      { input: plugins, data: body, user: ctx.state.user, entityId: id },
-      (data) => roleService.update({ id }, data as typeof body)
-    );
+    const updatedRole = await save(() => roleService.update({ id }, body));
     const sanitizedRole = roleService.sanitizeRole(updatedRole) as Omit<
       AdminRole,
       'users' | 'permission'
