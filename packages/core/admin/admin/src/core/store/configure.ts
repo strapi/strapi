@@ -8,6 +8,7 @@ import {
   isRejected,
 } from '@reduxjs/toolkit';
 
+import { getLoginSearch } from '../../pages/Auth/utils';
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
 import { triggerSessionExpired } from '../../utils/getFetchClient';
@@ -112,7 +113,13 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     if (isRejected(action) && action.payload?.status === 401 && !triggerSessionExpired()) {
       dispatch(logout());
       const basename = getBasename();
-      window.location.href = `${basename}/auth/login`;
+      // Come back to this page after logging in again, as `PrivateRoute` does.
+      const pathname = window.location.pathname ?? '';
+      const here = pathname.startsWith(basename) ? pathname.slice(basename.length) : '';
+      window.location.href = `${basename}/auth/login${getLoginSearch(
+        here,
+        window.location.search
+      )}`;
       return;
     }
 

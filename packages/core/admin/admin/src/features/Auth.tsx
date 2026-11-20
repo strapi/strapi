@@ -11,6 +11,7 @@ import { useTypedDispatch, useTypedSelector, useTypedStore } from '../core/store
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
+import { getLoginSearch } from '../pages/Auth/utils';
 import { getStoredToken, logout as logoutAction, setLocale, setToken } from '../reducer';
 import { resetAdminApiState } from '../services/admin';
 import { adminApi } from '../services/api';
@@ -44,13 +45,11 @@ import type {
 const EMPTY_DEFAULT_PERMISSIONS: NonNullable<AuthProviderProps['_defaultPermissions']> = [];
 
 interface Permission
-  extends
-    Pick<PermissionContract, 'action' | 'subject'>,
+  extends Pick<PermissionContract, 'action' | 'subject'>,
     Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
 interface User
-  extends
-    Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
+  extends Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
     Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
 
 type AdminUserRef = Pick<User, 'id' | 'email'> | null;
@@ -254,23 +253,35 @@ const AuthProvider = ({
     []
   );
 
-  const performGlobalLogout = React.useCallback(() => {
-    void (async () => {
-      try {
-        const { post } = getFetchClient();
-        await post('/admin/logout');
-      } catch {
-        // The session may already be invalid.
-      }
-    })();
+  /**
+   * `returnHere`: the session ended under the user (expired, revoked, logged out in
+   * another tab), so logging in again should bring them back to the page they were on,
+   * as `PrivateRoute` does for visitors without a token. A deliberate logout does not.
+   */
+  const performGlobalLogout = React.useCallback(
+    (returnHere = false) => {
+      void (async () => {
+        try {
+          const { post } = getFetchClient();
+          await post('/admin/logout');
+        } catch {
+          // The session may already be invalid.
+        }
+      })();
 
-    dispatch(adminApi.util.resetApiState());
-    dispatch(logoutAction());
-    navigate('/auth/login');
-  }, [dispatch, navigate]);
+      dispatch(adminApi.util.resetApiState());
+      dispatch(logoutAction());
+      const { pathname, search } = locationRef.current;
+      navigate({
+        pathname: '/auth/login',
+        search: returnHere ? getLoginSearch(pathname, search) : '',
+      });
+    },
+    [dispatch, navigate]
+  );
 
   const clearStateAndLogout = React.useCallback(() => {
-    runLogoutWithGuard(performGlobalLogout, 'session-dead');
+    runLogoutWithGuard(() => performGlobalLogout(true), 'session-dead');
   }, [performGlobalLogout, runLogoutWithGuard]);
 
   const handleSessionDead = React.useCallback(
