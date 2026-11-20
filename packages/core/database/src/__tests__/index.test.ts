@@ -1,5 +1,6 @@
-import knex from 'knex';
+import knex, { Knex } from 'knex';
 import { Database, DatabaseConfig } from '../index';
+import { SavepointError } from '../errors';
 import { HOOK_DRAIN_TIMEOUT_MS } from '../transaction-context';
 import createQueryBuilder from '../query/query-builder';
 import type { Model } from '../types';
@@ -341,6 +342,47 @@ describe('Database', () => {
         await db.destroy();
       });
 
+      it(`rejects with the database error and skips commit hooks when COMMIT is rejected with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        // A real connection: knex resolves `trx.commit()` even when COMMIT is rejected
+        const real = knex({
+          client: 'better-sqlite3',
+          connection: { filename: ':memory:' },
+          useNullAsDefault: true,
+        });
+        await real.raw('PRAGMA foreign_keys = ON');
+        await real.raw('create table parents (id integer primary key)');
+        // Checked when SQLite commits, not when the row is inserted
+        await real.raw(
+          'create table children (id integer primary key, parent_id integer references parents (id) deferrable initially deferred)'
+        );
+        Object.defineProperty(db.connection, 'transaction', {
+          value: () => real.transaction(),
+          configurable: true,
+        });
+
+        const onCommit = jest.fn();
+        let rolledBackTrx: Knex.Transaction | undefined;
+        await expect(
+          db.transaction(async ({ trx, onCommit: register }) => {
+            rolledBackTrx = trx;
+            register(onCommit);
+            await trx('children').insert({ parent_id: 999 });
+          })
+        ).rejects.toMatchObject({
+          message: expect.stringMatching(/FOREIGN KEY constraint failed/),
+        });
+
+        await db.settleTransactionHooks();
+        expect(onCommit).not.toHaveBeenCalled();
+        expect(rolledBackTrx?.isCompleted()).toBe(true);
+
+        await real.destroy();
+        await db.destroy();
+      });
+
       it(`resolves before a slow commit hook finishes with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
@@ -553,7 +595,7 @@ describe('Database', () => {
       }
     });
 
-    it('keeps the write error when a rollback hook throws and still runs the hooks after it', async () => {
+    it('keeps the write error when a rollback hook throws and skips the hooks after it', async () => {
       const db = new Database(configConnectionObject);
       await db.init({ models });
       jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
@@ -575,7 +617,7 @@ describe('Database', () => {
 
       await db.settleTransactionHooks();
       expect(runs).toBe(1);
-      expect(later).toHaveBeenCalledTimes(1);
+      expect(later).not.toHaveBeenCalled();
       await db.destroy();
     });
 
@@ -690,6 +732,102 @@ describe('Database', () => {
         true
       );
       expect((db.connection as any).rollback).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('keeps the write error when a savepoint onRollback hook throws and logs it', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+
+      const later = jest.fn();
+      const hookError = new Error('rollback hook failed');
+      const savepointTrx = {
+        commit: jest.fn(async () => undefined),
+        rollback: jest.fn(async () => undefined),
+        executionPromise: Promise.resolve(),
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+      const outerTrx = {
+        commit: jest.fn(async () => undefined),
+        rollback: jest.fn(async () => undefined),
+        transaction: jest.fn(async () => savepointTrx),
+      };
+      Object.defineProperty(db.connection, 'transaction', {
+        value: jest.fn(async () => outerTrx),
+        configurable: true,
+      });
+
+      await db.transaction(async ({ onRollback }) => {
+        await expect(
+          db.savepoint(async () => {
+            onRollback(() => {
+              throw hookError;
+            });
+            onRollback(later);
+            throw new Error('write failed');
+          })
+        ).rejects.toThrow('write failed');
+      });
+
+      expect(later).not.toHaveBeenCalled();
+      expect(logged).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Rollback hook failed after the transaction rolled back: ${hookError.stack}`
+        )
+      );
+      await db.destroy();
+    });
+
+    it('keeps the savepoint error when a savepoint onRollback hook throws during release', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+
+      const later = jest.fn();
+      const hookError = new Error('rollback hook failed');
+      const releaseError = new Error('no such savepoint');
+      const savepointTrx = {
+        commit: jest.fn(async () => {
+          throw releaseError;
+        }),
+        rollback: jest.fn(async () => undefined),
+        executionPromise: Promise.resolve(),
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+      const outerTrx = {
+        commit: jest.fn(async () => undefined),
+        rollback: jest.fn(async () => undefined),
+        transaction: jest.fn(async () => savepointTrx),
+      };
+      Object.defineProperty(db.connection, 'transaction', {
+        value: jest.fn(async () => outerTrx),
+        configurable: true,
+      });
+
+      const failing = db.transaction(async ({ onRollback }) => {
+        await db.savepoint(async () => {
+          onRollback(() => {
+            throw hookError;
+          });
+          onRollback(later);
+        });
+      });
+
+      await expect(failing).rejects.toBeInstanceOf(SavepointError);
+      await expect(failing).rejects.toMatchObject({
+        message: 'Failed to release the savepoint',
+        cause: releaseError,
+      });
+
+      expect(later).not.toHaveBeenCalled();
+      expect(logged).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Rollback hook failed after the transaction rolled back: ${hookError.stack}`
+        )
+      );
       await db.destroy();
     });
 
