@@ -41,11 +41,14 @@ describe('<AdminSeatInfo />', () => {
   test('shows the count across all instances against the license limit', () => {
     mockLicense({ adminUsersAcrossInstances: ADMIN_USERS });
 
-    const { getByText, queryByText } = render(<AdminSeatInfoEE />);
+    const { getByText, getByRole, queryByText } = render(<AdminSeatInfoEE />);
 
     expect(getByText('Admin users')).toBeInTheDocument();
     expect(getByText('7/10')).toBeInTheDocument();
-    expect(getByText('Across all environments · 2 in this environment')).toBeInTheDocument();
+    expect(
+      getByText(/^Across all environments · 2 in this environment · updated/)
+    ).toBeInTheDocument();
+    expect(getByRole('time')).toHaveAttribute('datetime', ADMIN_USERS.updatedAt);
     expect(queryByText(/over$/)).not.toBeInTheDocument();
   });
 
@@ -59,7 +62,7 @@ describe('<AdminSeatInfo />', () => {
 
     expect(getByText('14/10')).toBeInTheDocument();
     expect(getByText('4 over')).toBeInTheDocument();
-    expect(getByText('Across all environments · 6 in this environment')).toBeInTheDocument();
+    expect(getByText(/^Across all environments · 6 in this environment/)).toBeInTheDocument();
   });
 
   test('shows only the count when the license sets no limit', () => {
@@ -76,11 +79,12 @@ describe('<AdminSeatInfo />', () => {
   test("shows this instance's count without the caption until the registry has answered", () => {
     mockLicense({ enforcementUserCount: 4, permittedSeats: 3 });
 
-    const { getByText, queryByText } = render(<AdminSeatInfoEE />);
+    const { getByText, queryByText, queryByRole } = render(<AdminSeatInfoEE />);
 
     expect(getByText('4/3')).toBeInTheDocument();
     expect(getByText('1 over')).toBeInTheDocument();
     expect(queryByText(/Across all environments/)).not.toBeInTheDocument();
+    expect(queryByRole('time')).not.toBeInTheDocument();
   });
 
   test('falls back to the retained seats once the live limit is wiped after expiry', () => {

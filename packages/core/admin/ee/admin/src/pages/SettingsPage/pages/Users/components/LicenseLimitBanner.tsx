@@ -22,6 +22,41 @@ const AlertAction = styled(Box)`
   }
 `;
 
+const MESSAGES = {
+  across: {
+    at: {
+      id: 'Settings.permissions.users.license-limit.at.message',
+      defaultMessage:
+        '{count} unique users are active across your environments, which is the number included in your license. If needed, remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
+    },
+    over: {
+      id: 'Settings.permissions.users.license-limit.over.message',
+      defaultMessage:
+        '{count} unique users are active across your environments, but your license includes {limit} users. Remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
+    },
+  },
+  instance: {
+    at: {
+      id: 'Settings.permissions.users.license-limit.instance.at.message',
+      defaultMessage:
+        '{count} users are active in this environment, which is the number included in your license. If needed, remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
+    },
+    over: {
+      id: 'Settings.permissions.users.license-limit.instance.over.message',
+      defaultMessage:
+        '{count} users are active in this environment, but your license includes {limit} users. Remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
+    },
+  },
+};
+
+const getMessage = ({
+  isOverLimit,
+  isAcrossInstances,
+}: {
+  isOverLimit: boolean;
+  isAcrossInstances: boolean;
+}) => MESSAGES[isAcrossInstances ? 'across' : 'instance'][isOverLimit ? 'over' : 'at'];
+
 /**
  * Shown on the Users page when the license limit is reached or exceeded. Uses the count across
  * all instances when the license registry sent one, otherwise this instance's count.
@@ -46,6 +81,8 @@ export const LicenseLimitBanner = () => {
   }
 
   const isOverLimit = count > limit;
+  // Without a count from the license registry, the banner only knows about this instance
+  const isAcrossInstances = Boolean(adminUsersAcrossInstances);
   const isGrowth =
     getLicensedPlan({
       licenseStatus: license.licenseStatus,
@@ -100,23 +137,11 @@ export const LicenseLimitBanner = () => {
           </AlertAction>
         }
       >
-        {isOverLimit
-          ? formatMessage(
-              {
-                id: 'Settings.permissions.users.license-limit.over.message',
-                defaultMessage:
-                  '{count} unique users are active across your environments, but your license includes {limit} users. Remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
-              },
-              { count, limit, isGrowth: String(isGrowth) }
-            )
-          : formatMessage(
-              {
-                id: 'Settings.permissions.users.license-limit.at.message',
-                defaultMessage:
-                  '{count} unique users are active across your environments, which is the number included in your license. If needed, remove a user to free a seat, or {isGrowth, select, true {manage your seats} other {contact sales}} to add more users to your license.',
-              },
-              { count, isGrowth: String(isGrowth) }
-            )}
+        {formatMessage(getMessage({ isOverLimit, isAcrossInstances }), {
+          count,
+          limit,
+          isGrowth: String(isGrowth),
+        })}
       </Alert>
     </Box>
   );
