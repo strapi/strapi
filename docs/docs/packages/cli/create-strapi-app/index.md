@@ -15,8 +15,23 @@ Provides the official CLI for Strapi app developers to create new Strapi project
 ## Key concepts
 
 - **Entry point**: `run()` function processes CLI arguments and guides project creation. See [index.ts](https://github.com/strapi/strapi/tree/develop/packages/cli/create-strapi-app).
-- **Interactive prompts**: Collects project name, database choice, and optional Cloud integration via `prompts.ts`.
+- **Interactive prompts**: Collects project name, database choice, and optional Cloud integration via `prompts.ts`. The CLI shows the prompts only when somebody can answer them. See [Prompt mode](#prompt-mode).
 - **Dual mode**: Supports local project creation and Strapi Cloud project creation with API integration.
+
+## Prompt mode
+
+`resolvePromptMode()` in `src/utils/invocation.ts` decides whether the CLI shows prompts. The CLI uses the first rule that matches:
+
+1. `--non-interactive`: the CLI shows no prompts.
+2. `--interactive`: the CLI always shows the prompts, also in CI or without a terminal. Use it to pipe answers on stdin, as in older versions.
+3. A CI environment, which `ci-info` detects: the CLI shows no prompts, because nobody answers them.
+4. No terminal on stdin or on stdout: the CLI shows no prompts.
+
+If you use both flags, the CLI stops with an error. When rule 3 or 4 matches, the CLI logs the reason and runs as if you used `--non-interactive`. It uses your flags and the default values for the other options, and it skips the Strapi Cloud login. In this mode, you must give the project directory as an argument.
+
+The default TypeScript dependencies apply to built-in templates. When you pass `--template`, the CLI keeps the template's TypeScript dependency versions.
+
+`detectInvocation()` and `resolvePromptMode()` read the same CI and terminal facts from `readEnvironment()`. The two results can still differ. For example, an agent that has a terminal gets `agent` and the prompts, and `--interactive` in CI gives `ci` and the prompts.
 
 ## Telemetry
 

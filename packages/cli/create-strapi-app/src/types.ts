@@ -24,6 +24,7 @@ export interface Options {
   example?: boolean;
   gitInit?: boolean;
   nonInteractive?: boolean;
+  interactive?: boolean;
   templateBranch?: string;
   templatePath?: string;
 }
