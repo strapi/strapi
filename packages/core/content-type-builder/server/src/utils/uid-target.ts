@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 import { VALID_UID_TARGETS } from '../services/constants';
 
 type AttributeLike = { type?: unknown; customField?: unknown };
@@ -18,8 +20,8 @@ export const resolveStorageType = (attribute: AttributeLike): string | undefined
   }
 
   try {
-    const customField = strapi.get('custom-fields').get(attribute.customField) as
-      { type?: string } | undefined;
+    const customFields: Core.CustomFieldsRegistry = strapi.get('custom-fields');
+    const customField = customFields.get(attribute.customField);
     return customField?.type;
   } catch {
     return undefined;
