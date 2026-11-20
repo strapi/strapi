@@ -92,3 +92,11 @@ type PreviewStatusChecks = [
 ];
 declare const previewStatusChecks: PreviewStatusChecks;
 previewStatusChecks satisfies unknown;
+
+// Without strict types, direct config reads such as `strapi.config.server` keep develop's `any`.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+declare const configMemberOffChecks: [
+  Expect<IsAny<typeof strapi.config.server>>,
+  Expect<IsAny<Core.Strapi['config']['anything']>>,
+];
+configMemberOffChecks satisfies unknown;
