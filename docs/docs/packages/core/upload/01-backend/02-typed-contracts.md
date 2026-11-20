@@ -42,7 +42,7 @@ The `upload` service contract, `UploadService`, is the inferred implementation w
 - `delete` takes `unknown`: the plugin also passes the `formats` entries of a file, which `File` types as `unknown`.
 - `isPrivate`, `getSignedUrl`, `checkFileSize` and `extend` are always present. Without the provider's own, the base versions answer synchronously, so their results are a value or a promise.
 
-`UploadPluginProviderOf<typeof module>` is `UploadPluginProvider` for a given provider module. It checks the module against `Providers.Upload.Factory`, whatever `init` options it declares, and adds the members outside the contract as the wrapper exposes them: async, with their first two arguments. Members that are not functions are dropped, as the wrapper drops them. An application declares it in `AppPluginProviders` to call those members. Read [Plugin providers](../../../../contributing/05-typescript.md#plugin-providers).
+`UploadPluginProviderOf<typeof module>` is `UploadPluginProvider` for a given provider module. It checks the module against `Providers.Upload.Factory`, whatever `init` options it declares, and adds the members outside the contract as the wrapper exposes them: async, with their first two arguments. The first stays required when the member requires it; the second defaults to the member's `actionOptions`. Members that are not functions are dropped, as the wrapper drops them. An application declares it in `AppPluginProviders` to call those members. Read [Plugin providers](../../../../contributing/05-typescript.md#plugin-providers).
 
 ## Config, stores and events
 
