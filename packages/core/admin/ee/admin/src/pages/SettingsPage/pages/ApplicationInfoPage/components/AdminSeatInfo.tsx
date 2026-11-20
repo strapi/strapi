@@ -97,9 +97,16 @@ export const AdminSeatInfoEE = () => {
               },
               {
                 count: enforcementUserCount,
-                // Reports can fail or lag behind a change, so say how old the count is
+                // Reports can fail or lag behind a change, so say how old the count is. The
+                // date comes from the registry's clock: never show it in the future.
                 updatedAt: (
-                  <RelativeTime timestamp={new Date(adminUsersAcrossInstances.updatedAt)} />
+                  <RelativeTime
+                    timestamp={
+                      new Date(
+                        Math.min(Date.parse(adminUsersAcrossInstances.updatedAt), Date.now())
+                      )
+                    }
+                  />
                 ),
               }
             )}
