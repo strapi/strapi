@@ -314,11 +314,7 @@ export const advancedForm = {
       ],
     };
   },
-  media(data: { multiple?: boolean } | undefined, _step: string, options?: AdvancedFormOptions) {
-    // The admin already requires a single media field on publish without strictRelations.
-    const required =
-      data?.multiple === true ? relationalRequiredOption(options) : attributeOptions.required;
-
+  media() {
     return {
       sections: [
         {
@@ -342,7 +338,7 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [required, attributeOptions.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
         conditionSection,
       ],

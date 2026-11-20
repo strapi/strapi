@@ -88,6 +88,7 @@ test.describe('Create a new component', () => {
         type: 'media',
         name: 'testmediamultiple',
         media: { multiple: true },
+        advanced: advancedRequired,
       },
       {
         type: 'relation',

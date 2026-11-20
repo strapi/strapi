@@ -82,6 +82,7 @@ test.describe('Create collection type with all field types', () => {
           type: 'media',
           name: 'testmediamultiple',
           media: { multiple: true },
+          advanced: advancedRequired,
         },
         {
           type: 'relation',

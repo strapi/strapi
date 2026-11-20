@@ -17,11 +17,9 @@ const findRequired = (sections: Array<{ items: Item[] }>) =>
 const gatedForms = {
   relation: (options?: { strictRelations?: boolean }) =>
     advancedForm.relation(undefined, '', options).sections,
-  'multiple media': (options?: { strictRelations?: boolean }) =>
-    advancedForm.media({ multiple: true }, '', options).sections,
 };
 
-describe('advancedForm | required on relations and media', () => {
+describe('advancedForm | required on relations', () => {
   describe.each(Object.keys(gatedForms) as Array<keyof typeof gatedForms>)('%s', (type) => {
     it.each([
       ['off', { strictRelations: false }],
@@ -50,13 +48,9 @@ describe('advancedForm | required on relations and media', () => {
     });
   });
 
-  it.each([
-    ['single', { multiple: false }],
-    ['without a multiple setting', {}],
-  ])('leaves required editable on %s media when strictRelations is off', (_label, data) => {
-    expect(findRequired(advancedForm.media(data, '', { strictRelations: false }).sections)).toBe(
-      attributeOptions.required
-    );
+  // The Content Manager already requires media on publish, single and multiple alike.
+  it('leaves required editable on media', () => {
+    expect(findRequired(advancedForm.media().sections)).toBe(attributeOptions.required);
   });
 
   it('leaves required editable on other attribute types', () => {
