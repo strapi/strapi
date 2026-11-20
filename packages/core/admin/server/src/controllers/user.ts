@@ -64,8 +64,11 @@ export default {
       model: 'admin::user',
     });
 
-    await permissionsManager.validateQuery(ctx.query);
-    const sanitizedQuery = await permissionsManager.sanitizeQuery(ctx.query);
+    // Plugin list filters, read by the plugins that registered them
+    const { plugins: _plugins, ...query } = ctx.query;
+
+    await permissionsManager.validateQuery(query);
+    const sanitizedQuery = await permissionsManager.sanitizeQuery(query);
 
     // @ts-expect-error update the service type
     const { results, pagination } = await userService.findPage(sanitizedQuery);

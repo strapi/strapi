@@ -19,6 +19,7 @@ import {
   useSettingsListFilterParams,
   useSettingsListFilters,
   useSettingsListHeaders,
+  type InjectableSettingsListHeader,
 } from '../../../../../../../admin/src/hooks/useSettingsListExtensions';
 import { NotFoundPage } from '../../../../../../../admin/src/pages/NotFoundPage';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
@@ -77,26 +78,30 @@ const ListPage = () => {
   const { page = 1, pageCount = 1 } = usersPagination ?? {};
   const hasMoreUsers = page < pageCount;
 
-  const handleLoadMoreUsers = () => {
+  const handleLoadMoreUsers = React.useCallback(() => {
     if (hasMoreUsers) {
       setUsersPageSize((prevPageSize) => prevPageSize + USERS_PAGE_SIZE);
     }
-  };
+  }, [hasMoreUsers]);
 
   const formatTimeStamp = useFormatTimeStamp();
 
-  const displayedFilters = getDisplayedFilters({
-    formatMessage,
-    users,
-    usersFilter: {
-      loading: isLoadingUsers,
-      hasMoreItems: hasMoreUsers,
-      onLoadMore: handleLoadMoreUsers,
-    },
-  });
-  // A date filter stores a day or a minute: the API reads it as the instants it covers
+  const displayedFilters = React.useMemo(
+    () =>
+      getDisplayedFilters({
+        formatMessage,
+        users,
+        usersFilter: {
+          loading: isLoadingUsers,
+          hasMoreItems: hasMoreUsers,
+          onLoadMore: handleLoadMoreUsers,
+        },
+      }),
+    [formatMessage, users, isLoadingUsers, hasMoreUsers, handleLoadMoreUsers]
+  );
   const filterOptions = useSettingsListFilters('audit-logs', displayedFilters);
   const { filters: coreFilters, plugins } = useSettingsListFilterParams();
+  // A date filter stores a day or a minute: the API reads it as the instants it covers
   const apiFilters = toApiFilters(coreFilters, displayedFilters);
   const {
     auditLogs,
@@ -109,35 +114,7 @@ const ListPage = () => {
   const isLoadingData = isLoadingAuditLogUsers || isLoadingAuditLogs;
   const hasError = hasUsersError || hasAuditLogsError;
 
-  const coreHeaders: Table.Header<AuditLog, object>[] = [
-    {
-      name: 'action',
-      label: formatMessage({
-        id: 'Settings.permissions.auditLogs.action',
-        defaultMessage: 'Action',
-      }),
-      sortable: true,
-    },
-    {
-      name: 'date',
-      label: formatMessage({
-        id: 'Settings.permissions.auditLogs.date',
-        defaultMessage: 'Date',
-      }),
-      sortable: true,
-    },
-    {
-      name: 'user',
-      label: formatMessage({
-        id: 'Settings.permissions.auditLogs.user',
-        defaultMessage: 'User',
-      }),
-      sortable: false,
-      // System actions, such as a scheduled release publish, have no user
-      cellFormatter: ({ user }) => (user ? user.displayName : '-'),
-    },
-  ];
-  const headers = useSettingsListHeaders('audit-logs', coreHeaders);
+  const headers = useSettingsListHeaders('audit-logs', TABLE_HEADERS);
 
   if (hasError) {
     return <Page.Error />;
@@ -295,6 +272,26 @@ const ListPage = () => {
     </Page.Main>
   );
 };
+
+const TABLE_HEADERS: InjectableSettingsListHeader<AuditLog>[] = [
+  {
+    name: 'action',
+    label: { id: 'Settings.permissions.auditLogs.action', defaultMessage: 'Action' },
+    sortable: true,
+  },
+  {
+    name: 'date',
+    label: { id: 'Settings.permissions.auditLogs.date', defaultMessage: 'Date' },
+    sortable: true,
+  },
+  {
+    name: 'user',
+    label: { id: 'Settings.permissions.auditLogs.user', defaultMessage: 'User' },
+    sortable: false,
+    // System actions, such as a scheduled release publish, have no user
+    cellFormatter: ({ user }) => (user ? user.displayName : '-'),
+  },
+];
 
 const ProtectedListPage = () => {
   const permissions = useTypedSelector(
