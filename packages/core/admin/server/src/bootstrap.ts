@@ -1,6 +1,9 @@
 import { map, merge, difference, isEmpty } from 'lodash';
 
 import type { Core } from '@strapi/types';
+// The admin schemas type the events of the `admin::user` and `admin::role` subscribers, also in the
+// EE program, which compiles this file through `ee/server/src/bootstrap.ts`.
+import type {} from './types/content-types';
 import { async, quoteForLog } from '@strapi/utils';
 import { getService } from './utils';
 import {
