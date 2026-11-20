@@ -45,6 +45,7 @@ export type UploadProgressCallback = (bytes: number, total: number) => void;
  *
  * @param url - The full endpoint URL to POST to.
  * @param token - Admin auth token; the `Authorization` header is only set when present.
+ * @param requestHeaders - Headers from `unstable_getRequestHeaders()`, read by the caller.
  * @param formData - Prebuilt multipart body containing the single file and its `fileInfo`.
  * @param signal - Aborts the in-flight request when triggered.
  * @param onProgress - Called with `(loaded, total)` bytes as the upload progresses.
@@ -130,6 +131,17 @@ const sendUploadViaXHR = <T>(
   });
 };
 
+/**
+ * Uploads a single file with {@link sendUploadViaXHR}, and retries it once with a
+ * fresh token after a 401 response.
+ *
+ * @param requestHeaders - Headers to add to the upload. Pass the values read once
+ * for an upload drop. When absent, the function reads the providers itself.
+ * @throws {RequestHeadersError} When `requestHeaders` is absent and a provider fails.
+ * The upload is not sent.
+ * @throws {UploadAbortedError} When the signal aborts.
+ * @throws {UploadFileError} On a non-2xx response or network error.
+ */
 export const uploadFileViaXHR = async <T = File>(
   url: string,
   token: string | null | undefined,

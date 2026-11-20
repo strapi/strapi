@@ -38,9 +38,15 @@ let onTokenUpdate: ((token: string) => void) | null = null;
 /**
  * Returns headers to add to an admin request. A request reads the providers once,
  * when it starts, and sends the same values on its retry after a 401 (e.g. the
- * space a browser tab worked in when it sent a write). A header whose value is
- * `undefined` or `null` is not sent. Values must be valid HTTP header values
- * (Latin-1, no line breaks): send identifiers, not display names.
+ * space a browser tab worked in when it sent a write). A value that is `undefined`
+ * or `null` only skips this provider's entry: a value from an earlier provider with
+ * the same name is still sent. Without any value the request goes out without the
+ * header, so the server must reject a request that needs it. Values must be valid
+ * HTTP header values (Latin-1, no line breaks): send identifiers, not display names.
+ * Return a plain object, not a promise.
+ *
+ * The fetch client does not read the providers for `/admin/login`, `/admin/logout`,
+ * `/admin/access-token` or a request without a session token.
  */
 type RequestHeadersProvider = () => Record<string, string | null | undefined>;
 
@@ -88,8 +94,9 @@ const unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => vo
  * `Authorization`, `Content-Type` and `Accept`, which core sets itself.
  * Unstable: the API can change in a minor release.
  *
- * @throws {RequestHeadersError} When a provider throws or returns an invalid
- * header name or value. Do not send the request.
+ * @throws {RequestHeadersError} When a provider throws, returns a value that is
+ * not a plain object, or returns an invalid header name or value. Do not send the
+ * request.
  */
 const unstable_getRequestHeaders = (): Headers => {
   const headers = new Headers();
