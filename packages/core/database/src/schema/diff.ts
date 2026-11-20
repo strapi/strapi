@@ -37,6 +37,7 @@ type SchemaDiffContext = {
 const RESERVED_TABLE_NAMES = [
   'strapi_migrations',
   'strapi_migrations_internal',
+  'strapi_migrations_post',
   'strapi_database_schema',
 ];
 

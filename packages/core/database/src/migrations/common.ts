@@ -16,7 +16,10 @@ export interface InternalMigrationProvider {
   down(): Promise<void>;
 }
 export interface MigrationProvider {
-  providers: { internal: InternalMigrationProvider };
+  providers: {
+    internal: InternalMigrationProvider;
+    postSync: UserMigrationProvider;
+  };
   createFileBuilder(): MigrationFileBuilder;
   shouldRun(): Promise<boolean>;
   up(): Promise<void>;
