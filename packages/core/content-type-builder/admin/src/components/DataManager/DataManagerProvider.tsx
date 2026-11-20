@@ -249,6 +249,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       toggleNotification({
         type: 'info',
         message: formatMessage({ id: getTrad('notification.info.autoreaload-disable') }),
+        link: {
+          label: 'Learn more about the intended workflow',
+          url: 'https://docs.strapi.io/cms/cli',
+          target: '_blank',
+        },
       });
     }
   }, [autoReload, toggleNotification, formatMessage]);
