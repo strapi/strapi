@@ -18,6 +18,7 @@ const config = {
         strict: 'off',
         // The shared lint config targets old Node versions; the repo requires Node >= 22.
         'node/no-unsupported-features/es-builtins': 'off',
+        'node/no-unsupported-features/node-builtins': 'off',
       },
     },
   ],

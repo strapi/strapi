@@ -5,6 +5,7 @@ import {
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
 } from '../license';
+import { createConfigProvider } from '../../services/config';
 
 const VALIDATE_URL = `${LICENSE_REGISTRY_URI}/api/licenses/validate`;
 
@@ -42,10 +43,7 @@ const createStrapi = (
   }: { installId?: string; strapiVersion?: string } = {}
 ) =>
   ({
-    config: {
-      installId,
-      get: vi.fn((key: string) => (key === 'info.strapi' ? strapiVersion : undefined)),
-    },
+    config: createConfigProvider({ installId, info: { strapi: strapiVersion } }),
     fetch: fetchImpl,
     log: { debug: vi.fn(), warn: vi.fn() },
   }) as any;
