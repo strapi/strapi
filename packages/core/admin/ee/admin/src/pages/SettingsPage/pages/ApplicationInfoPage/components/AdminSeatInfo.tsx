@@ -3,6 +3,7 @@ import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { RelativeTime } from '../../../../../../../../admin/src/components/RelativeTime';
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
@@ -91,9 +92,16 @@ export const AdminSeatInfoEE = () => {
             {formatMessage(
               {
                 id: 'Settings.application.admin-seats.caption',
-                defaultMessage: 'Across all environments · {count} in this environment',
+                defaultMessage:
+                  'Across all environments · {count} in this environment · updated {updatedAt}',
               },
-              { count: enforcementUserCount }
+              {
+                count: enforcementUserCount,
+                // Reports can fail or lag behind a change, so say how old the count is
+                updatedAt: (
+                  <RelativeTime timestamp={new Date(adminUsersAcrossInstances.updatedAt)} />
+                ),
+              }
             )}
           </Typography>
         )}

@@ -92,12 +92,27 @@ describe('<LicenseLimitBanner />', () => {
     expect(queryByText('Manage seats')).not.toBeInTheDocument();
   });
 
-  test("uses this instance's count until the registry has answered", () => {
+  test("uses this instance's count and wording until the registry has answered", () => {
     mockLicense({ enforcementUserCount: 11 });
+
+    const { getByText, queryByText } = render(<LicenseLimitBanner />);
+
+    expect(getByText("You're using more users than your license includes")).toBeInTheDocument();
+    expect(
+      getByText(/^11 users are active in this environment, but your license includes 10 users/)
+    ).toBeInTheDocument();
+    expect(queryByText(/across your environments/)).not.toBeInTheDocument();
+  });
+
+  test('tells the admin this instance uses every included user until the registry has answered', () => {
+    mockLicense({ enforcementUserCount: 10 });
 
     const { getByText } = render(<LicenseLimitBanner />);
 
-    expect(getByText("You're using more users than your license includes")).toBeInTheDocument();
+    expect(getByText("You're using all the users included in your license")).toBeInTheDocument();
+    expect(
+      getByText(/^10 users are active in this environment, which is the number included/)
+    ).toBeInTheDocument();
   });
 
   test('renders nothing when the license sets no limit', () => {
