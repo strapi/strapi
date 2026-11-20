@@ -199,6 +199,34 @@ describe('per-file upload control', () => {
     expect(statuses()).toEqual(['complete', 'complete']);
   });
 
+  it('records which limit rejected a file, and clears it on retry', async () => {
+    const { request, result, statuses } = setup(['big.png', 'proxied.png']);
+
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      request('big.png').reject(
+        new UploadFileError('FileTooBig', 413, true, {
+          errorName: 'PayloadTooLargeError',
+          details: { code: 'FileTooBig', limit: 209715200 },
+        })
+      );
+      request('proxied.png').reject(new UploadFileError('Upload failed with status 413', 413));
+    });
+    await waitFor(() => expect(statuses()).toEqual(['error', 'error']));
+
+    expect(result.current.progress.files.map((file) => file.tooLarge)).toEqual([
+      { reason: 'requestLimit', limit: 209715200 },
+      { reason: 'external' },
+    ]);
+
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 0 });
+    });
+
+    await waitFor(() => expect(result.current.progress.files[0].tooLarge).toBeUndefined());
+  });
+
   it('uploads a queued file cancelled before the batch when retrying the batch', async () => {
     const { requests, request, result, statuses } = setup(['a.png', 'b.png', 'c.png']);
 

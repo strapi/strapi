@@ -1,19 +1,22 @@
 import { describe, test, expect, vi, type Mock } from 'vitest';
-import { get } from 'lodash';
 import metrics from '../index';
+import { createConfigProvider } from '../../config';
 
-const createMetrics = (fetch: Mock) =>
-  metrics({
-    config: {
-      get(path: string | string[]) {
-        return get(this, path);
-      },
+const createMetrics = (
+  fetch: Mock,
+  {
+    config = createConfigProvider({
       uuid: 'test',
       environment: 'dev',
       info: {
         strapi: '0.0.0',
       },
-    },
+    }),
+    userEmail,
+  }: { config?: ReturnType<typeof createConfigProvider>; userEmail?: string } = {}
+) =>
+  metrics({
+    config,
     server: {
       use() {},
     },
@@ -22,14 +25,18 @@ const createMetrics = (fetch: Mock) =>
         root: process.cwd(),
       },
     },
+    has: vi.fn((name: string) => name === 'requestContext'),
     requestContext: {
-      get: vi.fn(() => ({})),
+      get: vi.fn(() => (userEmail === undefined ? {} : { state: { user: { email: userEmail } } })),
     },
     cron: {
       add: vi.fn(),
     },
     fetch,
   } as any);
+
+const getSentBody = (fetch: Mock, callIndex = 0) =>
+  JSON.parse((fetch.mock.calls[callIndex] as unknown as [string, { body: string }])[1].body);
 
 describe('metrics sender', () => {
   test('passes an AbortSignal and no timeout option to fetch', async () => {
@@ -83,5 +90,48 @@ describe('metrics sender', () => {
     expect(result).toBe(false);
     expect(elapsed).toBeGreaterThanOrEqual(950);
     expect(elapsed).toBeLessThan(2000);
+  });
+
+  test('sends the config values read at startup', async () => {
+    const fetch = vi.fn(() => Promise.resolve({ ok: true }));
+    const config = createConfigProvider({
+      uuid: 'the-project-id',
+      installId: 'the-install-id',
+      environment: 'staging',
+      packageJsonStrapi: { template: 'blog' },
+      info: { strapi: '5.0.0' },
+    });
+    const { send } = createMetrics(fetch, { config, userEmail: 'admin@example.com' });
+
+    await send('someEvent');
+
+    const body = getSentBody(fetch);
+    expect(body.installId).toBe('the-install-id');
+    expect(body.userProperties.environment).toBe('staging');
+    expect(body.groupProperties).toMatchObject({
+      projectId: 'the-project-id',
+      version: '5.0.0',
+      template: 'blog',
+    });
+  });
+
+  test('reads config values written with set before the sender is created', async () => {
+    const fetch = vi.fn(() => Promise.resolve({ ok: true }));
+    const config = createConfigProvider({ uuid: 'stale', info: { strapi: '5.0.0' } });
+    config.set('uuid', 'the-project-id');
+    config.set('installId', 'the-install-id');
+    config.set('environment', 'staging');
+    config.set('packageJsonStrapi', { template: 'blog' });
+    const { send } = createMetrics(fetch, { config, userEmail: 'admin@example.com' });
+
+    await send('someEvent');
+
+    const body = getSentBody(fetch);
+    expect(body.installId).toBe('the-install-id');
+    expect(body.userProperties.environment).toBe('staging');
+    expect(body.groupProperties).toMatchObject({
+      projectId: 'the-project-id',
+      template: 'blog',
+    });
   });
 });
