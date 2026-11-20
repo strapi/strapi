@@ -4,9 +4,11 @@ import { expect, test } from '../../fixtures/app';
 
 test.use({ resetScope: 'test' });
 
-// The database holds the probe before this file (the previous file or the worker wrote it), and
-// `beforeAll` writes it again: each test, even alone (--grep, shard), only gets an empty probe
-// when a restore ran right before it.
+// Before this file, the database holds the previous file's data, or the worker's probe (written
+// after the snapshot) when this file is the first one the worker runs (single file, --grep,
+// shard). Both have the probe: in the default order the previous file is reset-file-scope-3,
+// whose `beforeAll` writes it. `beforeAll` writes it again, so each test, even alone, only gets
+// an empty probe when a restore ran right before it.
 
 test.beforeAll(async ({ server }) => {
   // A restore also runs before beforeAll.
