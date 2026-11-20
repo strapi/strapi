@@ -19,6 +19,7 @@ import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
+import { isValidAbsoluteLink, isValidLink } from '../utils/links';
 import { type Block } from '../utils/types';
 
 import type { Schema } from '@strapi/types';
