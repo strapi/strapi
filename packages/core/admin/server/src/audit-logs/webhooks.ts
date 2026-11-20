@@ -130,18 +130,9 @@ export const getWebhookChanges = (previous: Webhook, next: Webhook): WebhookChan
   return changes;
 };
 
-/**
- * The part of the audit-logs lifecycle service used here.
- * The full service type lives in the Admin EE package.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>
-  ): void;
-}
-
-export const registerWebhookAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerWebhookAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   const webhookResource = (event: WebhookEvent): Modules.AuditLogs.Resource => ({
     type: 'webhook',
     id: event.webhookId,

@@ -153,20 +153,9 @@ export const toWorkflowEvent = (row: WorkflowRow): WorkflowEvent => ({
   name: row.name,
 });
 
-/**
- * The part of the audit-logs lifecycle service used by this plugin.
- * The full service type lives in the Admin EE package and cannot be imported here.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails, TResource extends Modules.AuditLogs.Resource>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails, TResource>
-  ): void;
-}
-
 export const registerAuditEvents = (
   { strapi }: { strapi: Core.Strapi },
-  auditLogsLifecycle: AuditLogsLifecycle
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
 ) => {
   const workflowResource = (event: WorkflowEvent): WorkflowResource => ({
     type: 'workflow',
@@ -180,7 +169,7 @@ export const registerAuditEvents = (
     id: 'entity' in event ? event.entity.documentId : event.documentId,
   });
 
-  auditLogsLifecycle.registerEvent<WorkflowCreateDetails, WorkflowResource>(
+  auditLogsLifecycle.registerEvent<WorkflowCreateDetails>(
     AUDITED_EVENTS.WORKFLOW_CREATE,
     (event: WorkflowCreateEvent) => ({
       resource: workflowResource(event),
@@ -192,7 +181,7 @@ export const registerAuditEvents = (
     })
   );
 
-  auditLogsLifecycle.registerEvent<WorkflowUpdateDetails, WorkflowResource>(
+  auditLogsLifecycle.registerEvent<WorkflowUpdateDetails>(
     AUDITED_EVENTS.WORKFLOW_UPDATE,
     (event: WorkflowUpdateEvent) => ({
       resource: workflowResource(event),
@@ -200,12 +189,12 @@ export const registerAuditEvents = (
     })
   );
 
-  auditLogsLifecycle.registerEvent<undefined, WorkflowResource>(
+  auditLogsLifecycle.registerEvent<undefined>(
     AUDITED_EVENTS.WORKFLOW_DELETE,
     (event: WorkflowEvent) => ({ resource: workflowResource(event) })
   );
 
-  auditLogsLifecycle.registerEvent<AssigneeUpdateDetails, EntryResource>(
+  auditLogsLifecycle.registerEvent<AssigneeUpdateDetails>(
     AUDITED_EVENTS.ENTRY_ASSIGNEE_UPDATE,
     (event: AssigneeUpdateEvent) => ({
       resource: entryResource(event),
@@ -214,7 +203,7 @@ export const registerAuditEvents = (
   );
 
   // The webhook payload carries the workflow id only; its name is read here.
-  auditLogsLifecycle.registerEvent<StageUpdateDetails, EntryResource>(
+  auditLogsLifecycle.registerEvent<StageUpdateDetails>(
     WORKFLOW_UPDATE_STAGE,
     async (event: StageUpdateEvent) => {
       const workflow = await strapi.db
