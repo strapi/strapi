@@ -25,9 +25,8 @@ register(app) {
 
 Requests that do not get the headers:
 
-- Requests of the fetch client to `/admin/login`, `/admin/logout` and `/admin/access-token`. The fetch client does not read the providers for these paths, so a provider that fails cannot block a login or a logout.
-- Requests of the fetch client when no session token is stored, for example `/admin/init`, `/admin/providers` and the password reset pages. A request without a user session is not scoped to a context such as a space.
-- The token refresh call to `/admin/access-token` (`postAccessToken`).
+- Requests of the fetch client to `/admin/login`, `/admin/logout`, `/admin/access-token`, `/admin/init`, `/admin/registration-info`, `/admin/register`, `/admin/register-admin`, `/admin/forgot-password`, `/admin/reset-password` and `/admin/providers`. These requests have no context such as a space, so the fetch client does not read the providers for them, and a provider that fails cannot block a login or a logout. The match is on the exact path that the caller gives: `/admin/login-history` or `/admin/providers/options` still get the headers.
+- The token refresh call to `/admin/access-token` in `postAccessToken`, which does not use the fetch client.
 - The call to `/content-manager/preview/script` in [`Preview.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/preview/pages/Preview.tsx). It uses a plain `fetch`.
 - The call to `/admin/project-type` in [`browserStrapi.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/utils/browserStrapi.ts). It runs before the plugins register.
 - A plugin's own `fetch` or `XMLHttpRequest`. Code that does not use the fetch client must call `unstable_getRequestHeaders()` and add the result to its request.
@@ -60,7 +59,7 @@ The request fails instead of going out without the header, because the server co
 
 When the admin is hosted on another origin than the server, the browser sends a preflight request before a request with a custom header. The `strapi::cors` middleware only allows `Content-Type`, `Authorization`, `Origin` and `Accept` by default ([`cors.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/middlewares/cors.ts)). Core does not add the provider headers to this list. The project adds the header names to the `headers` option of `strapi::cors`, or the browser blocks the requests.
 
-The middleware merges the options with `{ ...defaults, ...config }`, so a `headers` option replaces the default list. It does not add to it. Keep the default headers in the list:
+The middleware merges the options with `{ ...defaults, ...config }`, so a `headers` option replaces the default list. It does not add to it. Keep the default headers in the list. The object entry replaces the `'strapi::cors'` string entry in `config/middlewares.js`: do not keep both, because two cors entries break the preflight.
 
 ```js title="config/middlewares.js"
 module.exports = [
