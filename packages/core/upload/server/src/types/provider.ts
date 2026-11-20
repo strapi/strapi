@@ -48,11 +48,21 @@ export type UploadPluginProvider = PluginUploadMethods & {
 type ContractMember = keyof Providers.Upload.Provider | 'extend';
 
 /**
+ * The arguments of a wrapped method: its first two. The first is forwarded as given, so it stays
+ * required when the method requires it; the second defaults to the method's `actionOptions`.
+ */
+type WrappedArgs<TArgs extends unknown[]> = TArgs extends []
+  ? []
+  : TArgs extends [unknown, ...unknown[]]
+    ? [file: TArgs[0], options?: TArgs[1]]
+    : [file?: TArgs[0], options?: TArgs[1]];
+
+/**
  * A provider method after wrapping: async, forwarding its first two arguments only, the second
  * defaulting to the method's `actionOptions`.
  */
 type WrappedMember<T> = T extends (...args: infer TArgs) => infer TResult
-  ? (...args: Partial<[TArgs[0], TArgs[1]]>) => Promise<Awaited<TResult>>
+  ? (...args: WrappedArgs<TArgs>) => Promise<Awaited<TResult>>
   : never;
 
 /**
