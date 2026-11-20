@@ -587,7 +587,11 @@ type ConfigGetter = IsStrict extends false ? LegacyConfigGetter : StrictConfigGe
 export interface ConfigProvider extends ConfigGetter {
   set(path: string, val: unknown): this;
   has(path: string): boolean;
-  [key: string]: any;
+  /**
+   * The top-level config as it was when the provider was created, before plugin namespaces are set.
+   * With strict types, `unknown`: read config with `get`, which a later `set` keeps up to date.
+   */
+  [key: string]: IsStrict extends false ? any : unknown;
 }
 
 export interface StrapiDirectories {
