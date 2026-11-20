@@ -196,7 +196,7 @@ describe('query scopes', () => {
     expect(calls).toEqual(expected);
   });
 
-  it.each<[string, () => unknown, string]>([
+  it.each<[string, QueryScope['where'], string]>([
     [
       'throws',
       () => {
@@ -204,7 +204,7 @@ describe('query scopes', () => {
       },
       'scope failed',
     ],
-    // A scope that forgets to return
+    // @ts-expect-error a scope that forgets to return
     ['returns undefined', () => undefined, 'returned undefined'],
     // Empty groups and operator objects add no SQL, so the query would read and write every row
     ['returns {}', () => ({}), 'empty condition'],
@@ -220,7 +220,6 @@ describe('query scopes', () => {
     ['gives a column a $not of [{}]', () => ({ deleted_at: { $not: [{}] } }), 'empty condition'],
     ['gives a column a $not of [[]]', () => ({ deleted_at: { $not: [[]] } }), 'empty $not'],
     ['nests an $eq of [] in $not', () => ({ title: { $not: { $eq: [] } } }), 'empty $eq'],
-    ['returns an array with an empty condition', () => [{}], 'empty condition'],
     ['nests an array with an empty condition in $and', () => ({ $and: [[{}]] }), 'empty condition'],
     // Only part is empty: the rest still compiles to a WHERE, but the empty part drops out
     [
@@ -242,11 +241,18 @@ describe('query scopes', () => {
       'relation targets',
     ],
   ])('rejects the query before SQL when a scope %s', async (_, where, message) => {
-    // @ts-expect-error some rows return shapes that the type forbids, as a JavaScript scope can
     db.unstable_scopes.register({ where });
 
     await expect(em.findMany(ARTICLE, {})).rejects.toThrow(message);
     await expect(em.deleteMany(ARTICLE, { where: {} })).rejects.toThrow(message);
+    expect(sqls).toEqual([]);
+  });
+
+  it('rejects the query before SQL when a scope returns an array with an empty condition', async () => {
+    // @ts-expect-error a plain JS scope can return an array
+    db.unstable_scopes.register({ where: () => [{}] });
+
+    await expect(em.findMany(ARTICLE, {})).rejects.toThrow('empty condition');
     expect(sqls).toEqual([]);
   });
 

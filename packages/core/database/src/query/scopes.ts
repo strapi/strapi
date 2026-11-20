@@ -1,7 +1,7 @@
-import _ from 'lodash';
 import { isOperatorOfType } from '@strapi/utils';
 import type { Meta } from '../metadata';
 import { isRelation } from '../utils/types';
+import { isRecord } from './helpers/where';
 
 export type QueryScopeContext = {
   /** Model uid, or join-table name */
@@ -20,14 +20,12 @@ export interface QueryScope {
   where(ctx: QueryScopeContext): Record<string, unknown> | null;
 }
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
-
-const emptyError = (ctx: QueryScopeContext, what = 'condition') =>
-  new Error(`A query scope returned an empty ${what} for ${ctx.uid}: it would match every row`);
+const emptyError = (ctx: QueryScopeContext, key = 'condition') =>
+  new Error(`A query scope returned an empty ${key} for ${ctx.uid}: it would match every row`);
 
 // An empty column object adds no SQL. [], { $in: [] } and { $notIn: [] } say what they match
 const assertValidColumn = (value: unknown, ctx: QueryScopeContext): void => {
-  if (!isPlainObject(value)) {
+  if (!isRecord(value)) {
     return;
   }
 
@@ -49,7 +47,10 @@ const assertValidOperand = (operator: string, operand: unknown, ctx: QueryScopeC
     }
 
     operand.forEach((sub) => assertValidOperand(operator, sub, ctx));
-  } else if (operator === '$not') {
+    return;
+  }
+
+  if (operator === '$not') {
     assertValidColumn(operand, ctx);
   }
 };
