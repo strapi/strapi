@@ -205,6 +205,15 @@ With strict types, the permission actions named in typed configs, such as the `a
 from its `as const` action list with `Core.PermissionActionsOf`. Read
 [Permission action contracts](#permission-action-contracts).
 
+### Database lifecycles
+
+With strict types, a content type's `lifecycles.ts` checks its hooks with
+`satisfies Core.Lifecycles<'<uid>'>`, and `strapi.db.lifecycles.subscribe` types the hooks of a
+subscriber by its `models`. Each hook receives the event of its action, typed from the model's
+registered schema. A subscriber on several models receives the union of their events. Values that
+the caller passes, in `params.data` and `params.where`, stay `unknown`. Read
+[Lifecycles](../packages/core/database/04-lifecycles.md#with-strict-types).
+
 ## Strict mode in the monorepo
 
 Strapi's server packages type-check in strict mode. The shared `tsconfig/server.json` preset
