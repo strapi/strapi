@@ -1,0 +1,68 @@
+# SECURITY (read before editing):
+# Checks out the BASE branch only — PR head code is never executed.
+# run: steps only use env vars — no ${{ }} interpolation of user-controlled data.
+#
+# Follows up on open PRs from people outside the org whose CLA (license/cla) is still unsigned:
+#   unsigned ≥ CLA_REMINDER_DAYS → one reminder explaining exactly what blocks the check
+#   unsigned ≥ CLA_CLOSE_DAYS    → close the PR (at least CLA_REMINDER_DAYS after the reminder)
+#
+# Scheduled runs are a dry run until the CLA_FOLLOW_UP_ENABLED repository variable is "true".
+# See .github/scripts/README.md.
+
+name: Community PR — CLA Follow-up
+
+on:
+  schedule:
+    - cron: '30 10 * * *' # Daily at 10:30am UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — log what would happen without commenting or closing'
+        type: boolean
+        default: true
+      only_prs:
+        description: 'Only process these PR numbers (space separated, optional)'
+        type: string
+        required: false
+
+permissions: {}
+
+jobs:
+  cla-follow-up:
+    name: Remind / close PRs with an unsigned CLA
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      statuses: read
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Install scripts
+        run: cd .github/scripts && npm install --ignore-scripts
+
+      - name: Load Linear config
+        run: grep -v '^#' .github/scripts/.env | grep -v '^$' >> "$GITHUB_ENV"
+
+      - name: Follow up on unsigned CLAs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          CLA_ONLY_PRS: ${{ inputs.only_prs }}
+          CLA_FOLLOW_UP_ENABLED: ${{ vars.CLA_FOLLOW_UP_ENABLED }}
+          CLA_REMINDER_DAYS: ${{ vars.CLA_REMINDER_DAYS || '7' }}
+          CLA_CLOSE_DAYS: ${{ vars.CLA_CLOSE_DAYS || '30' }}
+          CLA_EXEMPT_LABELS: "${{ vars.CLA_EXEMPT_LABELS || 'pr: security' }}"
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
+        run: node --experimental-strip-types .github/scripts/community-pr-cla-action.ts

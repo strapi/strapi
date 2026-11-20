@@ -48,7 +48,7 @@ async function linearGQL(
   return res.json() as Promise<LinearResponse>;
 }
 
-async function findLinearTicket(
+export async function findLinearTicket(
   apiKey: string,
   teamId: string,
   prNumber: number
@@ -66,7 +66,7 @@ async function findLinearTicket(
   return data.data?.issues?.nodes?.[0] ?? null;
 }
 
-async function updateLinearState(
+export async function updateLinearState(
   apiKey: string,
   issueId: string,
   stateId: string
@@ -252,7 +252,9 @@ export async function processLifecycle({ github, context, core }: ScriptArgs): P
       if (!labeledAt) continue;
       const daysWaiting = (now - labeledAt) / DAY_MS;
       core.info(
-        `PR #${pr.number}: waiting on author for ${Math.floor(daysWaiting)}d (threshold: ${waitingOnAuthorDays}d)`
+        `PR #${pr.number}: waiting on author for ${Math.floor(
+          daysWaiting
+        )}d (threshold: ${waitingOnAuthorDays}d)`
       );
 
       if (daysWaiting >= waitingOnAuthorDays) {
