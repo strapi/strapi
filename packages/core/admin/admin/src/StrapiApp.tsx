@@ -14,7 +14,7 @@ import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/adm
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
-import { MainNav, type MainNavMenuArgs } from './core/apis/MainNav';
+import { MainNav, type MainNavMenuArgs, type UseMainNavTint } from './core/apis/MainNav';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
@@ -217,6 +217,12 @@ class StrapiApp {
    * trigger and the menu, the plugin renders the items
    */
   unstable_addMainNavMenu = (menu: MainNavMenuArgs) => this.mainNav.addMenu(menu);
+
+  /**
+   * Tints the main navigation with the colour a hook returns, for example the colour of the space
+   * the user works in. The first tint that returns a colour wins
+   */
+  unstable_addMainNavTint = (useTint: UseMainNavTint) => this.mainNav.addTint(useTint);
 
   /**
    * @deprecated use `addSettingsLink` instead, it internally supports

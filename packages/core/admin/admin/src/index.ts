@@ -105,6 +105,7 @@ export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widget
 export type {
   MainNavMenuArgs as unstable_MainNavMenuArgs,
   MainNavMenuCurrent as unstable_MainNavMenuCurrent,
+  UseMainNavTint as unstable_UseMainNavTint,
 } from './core/apis/MainNav';
 
 /**

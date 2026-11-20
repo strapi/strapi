@@ -31,8 +31,12 @@ interface MainNavMenuArgs {
   Content: React.ComponentType;
 }
 
+/** A hook that returns a CSS colour to tint the main navigation with, or `null` */
+type UseMainNavTint = () => string | null;
+
 class MainNav {
   menus: MainNavMenuArgs[] = [];
+  tints: UseMainNavTint[] = [];
   private isLocked = false;
 
   /**
@@ -59,7 +63,13 @@ class MainNav {
 
     this.menus.push(menu);
   };
+
+  addTint = (useTint: UseMainNavTint) => {
+    invariant(typeof useTint === 'function', 'A tint must be a hook that returns a colour or null');
+
+    this.tints.push(useTint);
+  };
 }
 
 export { MainNav };
-export type { MainNavMenuArgs, MainNavMenuCurrent };
+export type { MainNavMenuArgs, MainNavMenuCurrent, UseMainNavTint };

@@ -47,4 +47,16 @@ describe('MainNav', () => {
       })
     ).toThrow('Main navigation menus must be added in register');
   });
+
+  test('keeps the tints in the order plugins add them, and refuses one that is not a hook', () => {
+    const mainNav = new MainNav();
+    const useSpaceTint = () => '#2e7d32';
+
+    mainNav.addTint(useSpaceTint);
+
+    expect(mainNav.tints).toEqual([useSpaceTint]);
+    expect(() => mainNav.addTint('#c62828' as never)).toThrow(
+      'A tint must be a hook that returns a colour or null'
+    );
+  });
 });
