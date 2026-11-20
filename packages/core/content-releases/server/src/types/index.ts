@@ -53,6 +53,46 @@ type ReleaseActionFilters =
 type CountActionsFilters =
   ReleaseActionFilters | (Omit<ReleaseActionFilters, 'release'> & { release: Release['id'] });
 
+/**
+ * What `groupActions` reads of an action: its content type, its locale (`null` without i18n) and
+ * the main field of its entry, when it has one. The rows of `findPage` have no `release`.
+ */
+type GroupableReleaseAction = Pick<ReleaseAction, 'contentType'> & {
+  locale?: string | null | undefined;
+  entry?: ReleaseAction['entry'] | undefined;
+};
+
+/** A grouped action: the action with its `locale` and `contentType` resolved. */
+type GroupedReleaseAction<TAction> = Omit<TAction, 'locale' | 'contentType'> &
+  Pick<
+    Awaited<ReturnType<ReleaseActionService['groupActions']>>[string][number],
+    'locale' | 'contentType'
+  >;
+
+/** The groupings of `groupActions`: the implementation's, or the controller's query `sort`. */
+type ReleaseActionGrouping =
+  Parameters<ReleaseActionService['groupActions']>[1] | FindPageQuery['sort'];
+
+/**
+ * `groupActions` with strict types: it groups any actions it can read, such as the rows of a page,
+ * and each grouped action keeps the fields of its input. Without strict types, the actions are
+ * release actions.
+ */
+type GroupActionsContract = Core.IsStrict extends true
+  ? {
+      /** Groups the actions, such as the rows of a page, each with its locale and content type. */
+      groupActions<TAction extends GroupableReleaseAction>(
+        actions: readonly TAction[],
+        groupBy?: ReleaseActionGrouping
+      ): Promise<Record<string, GroupedReleaseAction<TAction>[]>>;
+    }
+  : {
+      groupActions(
+        actions: Parameters<ReleaseActionService['groupActions']>[0],
+        groupBy?: ReleaseActionGrouping
+      ): ReturnType<ReleaseActionService['groupActions']>;
+    };
+
 type ReleaseActionServiceOverride =
   | 'groupActions'
   | 'getContentTypeModelsFromActions'
@@ -64,16 +104,13 @@ type ReleaseActionServiceOverride =
   | 'delete';
 
 /**
- * The `release-action` service. The controller groups a page by its query's `sort`, so the `action`
- * grouping arrives as `type`; the implementation keeps its published develop parameter type.
+ * The `release-action` service. The controller groups the rows of a page by its query's `sort`, so
+ * the `action` grouping arrives as `type`; the implementation keeps its published develop parameter
+ * type.
  * The query engine's results stay `any` in the implementation; the results below are the ones the
  * runtime returns.
  */
 type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServiceOverride> & {
-  groupActions(
-    actions: Parameters<ReleaseActionService['groupActions']>[0],
-    groupBy?: Parameters<ReleaseActionService['groupActions']>[1] | FindPageQuery['sort']
-  ): ReturnType<ReleaseActionService['groupActions']>;
   /** Reads only the content type of each action, so it takes the rows of a page. */
   getContentTypeModelsFromActions(
     actions: Array<Pick<ReleaseAction, 'contentType'>>
@@ -97,7 +134,7 @@ type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServ
   update(...args: Parameters<ReleaseActionService['update']>): Promise<ReleaseActionRow>;
   /** The deleted action, without its release. */
   delete(...args: Parameters<ReleaseActionService['delete']>): Promise<ReleaseActionRow>;
-};
+} & GroupActionsContract;
 
 /**
  * A release as the query engine returns it: its columns, without the relations
