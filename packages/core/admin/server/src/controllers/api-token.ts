@@ -21,14 +21,18 @@ export default {
     const { body } = ctx.request as Create.Request;
     const apiTokenService = getService('api-token-content-api');
 
-    const attributes = {
-      kind: 'content-api' as const,
-      name: trim(body.name),
-      description: trim(body.description),
-      type: body.type,
-      permissions: body.permissions,
-      lifespan: body.lifespan,
-    };
+    const { data: attributes, save } = await getService('form-extensions').prepare('api-token', {
+      input: body.plugins,
+      data: {
+        kind: 'content-api' as const,
+        name: trim(body.name),
+        description: trim(body.description),
+        type: body.type,
+        permissions: body.permissions,
+        lifespan: body.lifespan,
+      },
+      user: ctx.state.user,
+    });
 
     await validateApiTokenCreationInput(attributes);
 
@@ -37,7 +41,7 @@ export default {
       throw new ApplicationError('Name already taken');
     }
 
-    const apiToken = await apiTokenService.create(attributes, ctx.state.user);
+    const apiToken = await save(() => apiTokenService.create(attributes, ctx.state.user));
     ctx.created({ data: apiToken } satisfies Create.Response);
   },
 
@@ -99,8 +103,14 @@ export default {
   // Update
   // -------------------------------------------------------------------------
   async update(ctx: Context) {
-    const { body } = ctx.request as Update.Request;
+    const { plugins, ...input } = (ctx.request as Update.Request).body;
     const { id } = ctx.params as Update.Params;
+    const { data: body, save } = await getService('form-extensions').prepare('api-token', {
+      input: plugins,
+      data: input,
+      user: ctx.state.user,
+      entityId: id,
+    });
     const apiTokenService = getService('api-token-content-api');
 
     const mutableBody = body as Record<string, unknown>;
@@ -125,7 +135,7 @@ export default {
       }
     }
 
-    const apiToken = await apiTokenService.update(id, body);
+    const apiToken = await save(() => apiTokenService.update(id, body));
     ctx.send({ data: apiToken } satisfies Update.Response);
   },
 };

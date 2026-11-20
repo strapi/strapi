@@ -33,6 +33,12 @@ export interface AdminUser extends Entity {
   preferedLanguage?: string;
 }
 
+/**
+ * The values of the fields plugins add to a core admin form, by plugin id. Core hands them to
+ * the plugins and stores none of them.
+ */
+export type PluginInputValues = Record<string, unknown>;
+
 export type AdminUserCreationPayload = Omit<
   AdminUser,
   keyof Entity | 'roles' | 'isActive' | 'blocked'

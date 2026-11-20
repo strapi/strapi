@@ -16,6 +16,7 @@ import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
 import debugDump from './debug-dump';
+import formExtensions from './form-extensions';
 
 const contentApiTokenService = createTokenService('content-api');
 const adminTokenService = createTokenService('admin');
@@ -40,6 +41,7 @@ export default {
   transfer,
   'project-settings': projectSettings,
   encryption,
+  'form-extensions': formExtensions,
   homepage: homepageService,
   'debug-dump': debugDump,
 };

@@ -7,5 +7,6 @@ module.exports = ({ params = {}, query = {}, body = {} }, overrides = {}) => ({
     query,
     body,
   },
+  state: {},
   ...overrides,
 });

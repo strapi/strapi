@@ -22,7 +22,12 @@ describe('EE user controller', () => {
         },
       } as any;
 
-      const ctx = { params: { id: 404 }, request: { body: { isActive: true } }, notFound } as any;
+      const ctx = {
+        params: { id: 404 },
+        request: { body: { isActive: true } },
+        state: {},
+        notFound,
+      } as any;
 
       await userController.update(ctx);
 
@@ -48,7 +53,7 @@ describe('EE user controller', () => {
         },
       } as any;
 
-      const ctx = { params: { id: 2 }, request: { body: { isActive: true } } } as any;
+      const ctx = { params: { id: 2 }, state: {}, request: { body: { isActive: true } } } as any;
 
       await expect(userController.update(ctx)).rejects.toThrowError(
         'License seat limit reached. You cannot active this user'
