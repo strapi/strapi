@@ -336,7 +336,7 @@ export const MediaLibraryInput = ({
    * left off the field, which is also what the Media Library page does with it.
    */
   const handleUrlUpload = async (urls: string[]) => {
-    if (disabled || urls.length === 0 || rejectsBatch(urls.length)) {
+    if (disabled || !canUpload || urls.length === 0 || rejectsBatch(urls.length)) {
       return;
     }
 
@@ -374,9 +374,7 @@ export const MediaLibraryInput = ({
         });
       }
 
-      if (allowedFiles.length > 0) {
-        setAssets(multiple ? [...assetsRef.current, ...allowedFiles] : [allowedFiles[0]]);
-      }
+      allowedFiles.forEach(attachUploadedFile);
     } catch {
       // Errors reach the user through the progress dialog, which the mutation
       // populates itself.
