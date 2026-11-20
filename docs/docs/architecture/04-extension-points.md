@@ -102,6 +102,8 @@ There are two ways to add a subscriber:
 - `strapi.db.lifecycles.subscribe(subscriber)`. A function subscriber receives all events. An object subscriber has action keys (`beforeCreate`, `afterUpdate` and so on) and an optional `models` list of UIDs.
 - A `lifecycles` file next to a content-type schema, for example `src/api/article/content-types/article/lifecycles.js`. The built-in models subscriber calls it.
 
+With strict types, the hooks of a content-type `lifecycles` file checked with `Core.Lifecycles` and of a subscriber with `models` receive events typed from the model's schema. Read [Lifecycles](../packages/core/database/04-lifecycles.md). The types do not change the runtime.
+
 A second built-in subscriber sets `createdAt` and `updatedAt`. Each subscriber gets its own `event.state` object, which carries data from the `before*` call to the `after*` call of the same query. `strapi.db.lifecycles.disable()` and `enable()` turn all subscribers off and on. The data-transfer package uses them.
 
 ## Document Service middlewares
