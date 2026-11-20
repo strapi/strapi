@@ -121,17 +121,57 @@ const createProvider = (config: Config) => {
     );
   }
 
-  // Wrap only real methods: a key declared as `undefined` (e.g. `uploadStream: undefined`) must stay
-  // missing, so callers fall back on `upload` and the base provider defaults still apply.
-  const providerMethods = _.pickBy(providerInstance, (method) => typeof method === 'function');
+  return Object.assign(
+    Object.create(baseProvider),
+    wrapWithActionOptions(providerInstance, actionOptions)
+  );
+};
 
-  const wrappedProvider = _.mapValues(providerMethods, (method, methodName) => {
-    return async (file: File, options = actionOptions[methodName]) =>
-      // Every member is called as a method, contract or not
-      (providerInstance[methodName] as (file: File, options: unknown) => unknown)(file, options);
-  });
+// Contract methods whose last (options) argument defaults to `actionOptions[methodName]`,
+// grouped by arity: (file, options) and (newFile, oldFile, options).
+// Other methods of the provider (e.g. provider-specific helpers) keep their signature.
+// Every method runs with `this` bound to the provider instance, so a call like
+// `this.upload(file)` inside the provider does not receive `actionOptions`.
+const TWO_ARG_METHODS = ['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'];
+const THREE_ARG_METHODS = ['replace', 'replaceStream'];
 
-  return Object.assign(Object.create(baseProvider), wrappedProvider);
+const wrapWithActionOptions = (
+  providerInstance: Record<string, unknown>,
+  actionOptions: Config['actionOptions']
+) => {
+  // A key declared as `undefined` (e.g. `uploadStream: undefined`) must stay missing, so callers
+  // fall back on `upload` and the base provider defaults still apply.
+  const definedMembers = _.omitBy(providerInstance, _.isUndefined);
+  const wrapped: Record<string, unknown> = _.mapValues(definedMembers, (value) =>
+    typeof value === 'function' ? value.bind(providerInstance) : value
+  );
+  const methodOf = (name: string) => {
+    const method = providerInstance[name];
+    return typeof method === 'function' ? (method as (...args: unknown[]) => unknown) : undefined;
+  };
+
+  for (const name of TWO_ARG_METHODS) {
+    const method = methodOf(name);
+    if (method) {
+      wrapped[name] = async (file: File, options = actionOptions[name]) =>
+        method.call(providerInstance, file, options);
+    }
+  }
+
+  for (const name of THREE_ARG_METHODS) {
+    const method = methodOf(name);
+    if (method) {
+      wrapped[name] = async (newFile: File, oldFile: File, options = actionOptions[name]) =>
+        method.call(providerInstance, newFile, oldFile, options);
+    }
+  }
+
+  const isPrivate = methodOf('isPrivate');
+  if (isPrivate) {
+    wrapped.isPrivate = async () => isPrivate.call(providerInstance);
+  }
+
+  return wrapped;
 };
 
 const baseProvider = {
