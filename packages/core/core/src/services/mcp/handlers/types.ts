@@ -4,11 +4,11 @@ import type {
   McpCapabilityDefinitions,
   createMcpServerWithRegistries,
 } from '../internal/McpServerFactory';
-import type { createMcpAdminTokenAuthenticator } from '../authentication';
+import type { McpAuthenticationStrategy } from '../authentication';
 
 export type McpHandlerDependencies = {
   strapi: Core.Strapi;
-  authenticationStrategy: ReturnType<typeof createMcpAdminTokenAuthenticator>;
+  authenticationStrategy: McpAuthenticationStrategy;
   config: McpConfiguration;
   createServerWithRegistries: typeof createMcpServerWithRegistries;
   capabilityDefinitions: McpCapabilityDefinitions;

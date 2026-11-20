@@ -22,6 +22,16 @@ const getImmutableRoutes = (): RouteObject[] => [
       };
     },
   },
+  {
+    path: 'mcp/oauth/consent',
+    lazy: async () => {
+      const { PrivateOAuthConsentPage } = await import('./pages/OAuthConsentPage');
+
+      return {
+        Component: PrivateOAuthConsentPage,
+      };
+    },
+  },
   // this needs to go before auth/:authType because otherwise it won't match the route
   ...getBaseEERoutes(),
   {

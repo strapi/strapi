@@ -31,6 +31,50 @@ const extractBearerToken = (ctx: Context): string | null => {
   return parts[1];
 };
 
+export type McpAuthenticationStrategy = {
+  authenticate(ctx: Context): Promise<McpAdminTokenAuthResult>;
+};
+
+export type McpOAuthAccessTokenAuthenticator = {
+  authenticate(token: string): Promise<McpAdminTokenAuthResult>;
+};
+
+/**
+ * Admin API tokens are long random hex strings and can never contain a dot, while OAuth
+ * access tokens are JWTs, which always contain two. The dispatch is therefore unambiguous.
+ */
+const isJwtShaped = (token: string): boolean => token.split('.').length === 3;
+
+/**
+ * Dispatches /mcp bearer tokens to the admin API token authenticator or, when MCP OAuth is
+ * enabled, to the OAuth access token authenticator.
+ */
+export const createMcpAuthenticationStrategy = (
+  strapi: Core.Strapi,
+  options: {
+    isOAuthEnabled: () => boolean;
+    oauthAuthenticator: McpOAuthAccessTokenAuthenticator;
+  }
+): McpAuthenticationStrategy => {
+  const adminTokenAuthenticator = createMcpAdminTokenAuthenticator(strapi);
+
+  return {
+    async authenticate(ctx: Context): Promise<McpAdminTokenAuthResult> {
+      const token = extractBearerToken(ctx);
+
+      if (token === null) {
+        return { authenticated: false, reason: 'missing_token' };
+      }
+
+      if (options.isOAuthEnabled() && isJwtShaped(token)) {
+        return options.oauthAuthenticator.authenticate(token);
+      }
+
+      return adminTokenAuthenticator.authenticate(ctx);
+    },
+  };
+};
+
 export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
   async authenticate(ctx: Context): Promise<McpAdminTokenAuthResult> {
     const token = extractBearerToken(ctx);

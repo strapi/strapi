@@ -5,7 +5,7 @@ import { getService } from '../utils';
 import { normalizeEmail } from '../utils/normalize-email';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
-import { getSessionManager } from '../../../shared/utils/session-auth';
+import { getSessionManager, invalidateMcpSessions } from '../../../shared/utils/session-auth';
 
 export default {
   async getMe(ctx: Context) {
@@ -59,6 +59,7 @@ export default {
       if (sessionManager && sessionManager.hasOrigin('admin')) {
         await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));
       }
+      await invalidateMcpSessions(String(ctx.state.user.id));
     }
 
     const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
