@@ -57,6 +57,8 @@ export interface DataManagerContextValue {
   }) => Promise<boolean | null>;
   /** Effective `renameMigrations.attributes` plugin setting. */
   attributeRenameMigrationMode: AttributeRenameMigrationMode;
+  /** Whether `api.documents.strictRelations` is on, so required relations and media are enforced. */
+  strictRelations: boolean;
   addCreatedComponentToDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
