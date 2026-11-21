@@ -188,6 +188,45 @@ describe('Upload', () => {
     });
   });
 
+  describe('Delete', () => {
+    test('Prevents deleting a file that is referenced by content', async () => {
+      const uploadRes = await uploadFile(rq);
+      const file = uploadRes.body[0];
+      let dogEntity;
+
+      try {
+        dogEntity = await strapi.db.query('api::dog.dog').create({
+          data: {
+            profilePicture: file.id,
+          },
+        });
+
+        const deleteRes = await rq({
+          method: 'DELETE',
+          url: `/upload/files/${file.id}`,
+        });
+
+        expect(deleteRes.statusCode).toBe(400);
+
+        const remainingFile = await strapi.db
+          .query('plugin::upload.file')
+          .findOne({ where: { id: file.id } });
+
+        expect(remainingFile).not.toBeNull();
+      } finally {
+        if (dogEntity) {
+          await strapi.db.query('api::dog.dog').delete({ where: { id: dogEntity.id } });
+        }
+
+        // Clean up the uploaded file after removing its reference.
+        await rq({
+          method: 'DELETE',
+          url: `/upload/files/${file.id}`,
+        });
+      }
+    });
+  });
+
   describe('File restriction', () => {
     afterEach(() => {
       // Reset config after each test
