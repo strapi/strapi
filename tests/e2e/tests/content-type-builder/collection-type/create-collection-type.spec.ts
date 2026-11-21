@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../fixtures';
 import { resetFiles } from '../../../../utils/file-reset';
 import { createCollectionType, type AddAttribute } from '../../../../utils/content-types';
 import { sharedSetup } from '../../../../utils/setup';
