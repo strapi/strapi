@@ -79,7 +79,7 @@ export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[
   const { attributes } = meta;
 
   if (typeof orderBy === 'string') {
-    if (orderBy === 'status') {
+    if (orderBy === 'status' && !attributes.status) {
       if (!attributes.publishedAt || !attributes.documentId) {
         throw new Error(
           `Cannot order by status on model ${uid}: missing publishedAt or documentId`
@@ -108,7 +108,7 @@ export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[
     return Object.entries(orderBy).flatMap(([key, direction]) => {
       const value = orderBy[key];
 
-      if (key === 'status') {
+      if (key === 'status' && !attributes.status) {
         if (!attributes.publishedAt || !attributes.documentId) {
           throw new Error(
             `Cannot order by status on model ${uid}: missing publishedAt or documentId`
