@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import type { Core, UID } from '@strapi/types';
 
 import { ALLOWED_WEBHOOK_EVENTS, OVERDUE_SWEEP_CRON_RULE } from './constants';
@@ -37,7 +36,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             getService('release-action', { strapi }).deletePlannedActions({
               contentType: model.uid,
               locale: where?.locale ?? null,
-              ...(where?.documentId && { entryDocumentId: where.documentId }),
+              ...(where?.documentId ? { entryDocumentId: where.documentId } : {}),
             }),
           'Error while deleting release actions after entry deleteMany',
           { strapi }

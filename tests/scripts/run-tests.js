@@ -78,6 +78,12 @@ const cwd = path.resolve(__dirname, '../..');
  */
 const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
 
+// These domains need setup that the default runs do not have, so they run only when named with `--domains`.
+const OPT_IN_DOMAINS_BY_TYPE = {
+  e2e: ['enterprise-plugins'],
+  cli: [],
+};
+
 const pathExists = async (filePath) => {
   try {
     await fs.access(filePath);
@@ -127,6 +133,9 @@ yargs
 
         // Read domains
         const domains = await fs.readdir(testDomainRoot);
+        const defaultDomains = domains.filter(
+          (domain) => !OPT_IN_DOMAINS_BY_TYPE[type].includes(domain)
+        );
 
         // Parse test-specific arguments - need to reconstruct the full argv without --type
         // The outer yargs already parsed --type, so we need to get the remaining args
@@ -144,7 +153,7 @@ yargs
           .option('concurrency', {
             alias: 'c',
             type: 'number',
-            default: domains.length,
+            default: defaultDomains.length,
             describe: `Number of concurrent test ${type === 'cli' ? 'domains' : 'apps'} to run`,
           })
           .option('domains', {
@@ -152,7 +161,7 @@ yargs
             describe: 'Run a specific test suite domain',
             type: 'array',
             choices: domains,
-            default: domains,
+            default: defaultDomains,
           })
           .option('setup', {
             alias: 'f',

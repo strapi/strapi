@@ -12,6 +12,8 @@
  * 1, ...., 7, `8`, 9, 10
  * 1, ... 6, `7`, 8, 9, 10
  */
+import { JSX } from 'react';
+
 import { Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronLeft, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -61,15 +63,13 @@ const linkWrapperStyles = css<{ $active?: boolean }>`
   }
 `;
 
-const LinkWrapperButton = styled.button<{ $active?: boolean }>`
+const LinkWrapperButton = styled.button.attrs({ type: 'button' })<{ $active?: boolean }>`
   ${linkWrapperStyles}
 `;
 
 const LinkWrapperDiv = styled.div<{ $active?: boolean }>`
   ${linkWrapperStyles}
 `;
-
-LinkWrapperButton.defaultProps = { type: 'button' };
 
 const PageLinkWrapper = styled(LinkWrapperButton)`
   color: ${({ theme, $active }) => ($active ? theme.colors.primary700 : theme.colors.neutral800)};

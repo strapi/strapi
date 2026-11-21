@@ -120,15 +120,15 @@ This route returns the details of a specific stage identified by the id paramete
 
 This route updates the stages associated with a specific workflow identified by the workflow_id parameter. The updated stages are passed in the request body.
 
-#### PUT `/content-manager/collection-types/:model_uid/:id/stage` and `/content-manager/single-types/:model_uid/:id/stage`
+#### PUT `/content-manager/(collection|single)-types/:model_uid/:id/stage`
 
-This route updates the stage of a specific entity identified by the id parameter and belonging to a specific collection identified by the model_uid parameter. The new stage value is passed in the request body. Collection types and single types are separate routes, so another kind does not match.
+This route updates the stage of a specific entity identified by the id parameter and belonging to a specific collection identified by the model_uid parameter. The new stage value is passed in the request body.
 
-#### GET `/content-manager/collection-types/:model_uid/:id/stages` and `/content-manager/single-types/:model_uid/:id/stages`
+#### GET `/content-manager/(collection|single)-types/:model_uid/:id/stages`
 
 Returns a list of stages that a user has permission to transition into (based on the permission settings of a stage).
 
-#### PUT `/content-manager/collection-types/:model_uid/:id/assignee` and `/content-manager/single-types/:model_uid/:id/assignee`
+#### PUT `/content-manager/(collection|single)-types/:model_uid/:id/assignee`
 
 This route updates the assignee of the entity identified by the model_uid and id parameters. The updated entity is passed to the request body.
 

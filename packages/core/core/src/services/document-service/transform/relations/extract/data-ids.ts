@@ -1,15 +1,17 @@
 import { curry } from 'lodash';
 
 import type { UID } from '@strapi/types';
-import { relations } from '@strapi/utils';
+import { contentTypes, relations } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
 import { LongHandDocument } from '../utils/types';
+import { getInverseMorphTargetUid } from '../utils/inverse-morph-target';
 
 const { isPolymorphic } = relations;
+const { isMorphToRelationalAttribute } = contentTypes;
 const MEDIA_UID = 'plugin::upload.file' as UID.ContentType;
 
 interface Options {
@@ -72,9 +74,14 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
         let targetUid: UID.Schema;
         if (attribute.type === 'media') {
           targetUid = MEDIA_UID;
-        } else if (isPolymorphicRelation) {
+        } else if (isMorphToRelationalAttribute(attribute)) {
+          // morphToOne / morphToMany entries name their target with __type
           targetUid = relation.__type;
+        } else if (isPolymorphicRelation) {
+          // The inverse morphOne / morphMany have a single target
+          targetUid = getInverseMorphTargetUid(attribute.target, relation);
         } else {
+          // Regular relations have a single target
           targetUid = attribute.target;
         }
 

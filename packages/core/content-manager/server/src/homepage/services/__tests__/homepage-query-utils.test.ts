@@ -2,7 +2,6 @@ import type { Schema } from '@strapi/types';
 
 import {
   buildHomepageQueryFields,
-  compactSanitizedFields,
   FALLBACK_MAIN_FIELD,
   formatRecentDocumentTitle,
   resolveReadableMainField,
@@ -35,21 +34,6 @@ const createPermissionChecker = (unreadableFields: string[] = []): HomepagePermi
 });
 
 describe('Homepage query utils', () => {
-  describe('compactSanitizedFields', () => {
-    it('drops undefined and non-string entries left after admin field sanitization', () => {
-      expect(compactSanitizedFields(['documentId', 'updatedAt', undefined, 'title'])).toEqual([
-        'documentId',
-        'updatedAt',
-        'title',
-      ]);
-    });
-
-    it('returns undefined when fields is not a string array', () => {
-      expect(compactSanitizedFields(undefined)).toBeUndefined();
-      expect(compactSanitizedFields('title')).toBeUndefined();
-    });
-  });
-
   describe('resolveReadableMainField', () => {
     const configuration = { settings: { mainField: 'title' } };
 
@@ -123,21 +107,27 @@ describe('Homepage query utils', () => {
     it.each([
       ['a string', 'Article 1', 'Article 1'],
       ['an integer', 42, '42'],
+      ['zero', 0, '0'],
       ['a decimal', 9.5, '9.5'],
+      ['a bigint', BigInt('9007199254740993'), '9007199254740993'],
       ['false', false, 'false'],
       ['true', true, 'true'],
       ['a date string', '2026-11-09', '2026-11-09'],
       ['a Date', new Date('2026-11-09T10:30:00.000Z'), '2026-11-09T10:30:00.000Z'],
     ])('returns %s as a string', (_label, value, expected) => {
-      expect(formatRecentDocumentTitle(value, 'doc-1')).toBe(expected);
+      expect(formatRecentDocumentTitle(value)).toBe(expected);
     });
 
     it.each([
       ['null', null],
       ['undefined', undefined],
       ['an empty string', ''],
-    ])('falls back to the document id for %s', (_label, value) => {
-      expect(formatRecentDocumentTitle(value, 'doc-1')).toBe('doc-1');
+      // No main field type returns an object, so it has no text form to show
+      ['a plain object', { id: 1, name: 'Related' }],
+      ['an array', ['a', 'b']],
+    ])('returns an empty string for %s', (_label, value) => {
+      // The widgets render an empty title as a translated "Untitled"
+      expect(formatRecentDocumentTitle(value)).toBe('');
     });
   });
 });

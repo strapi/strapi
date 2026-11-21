@@ -35,6 +35,13 @@ const {
   UPDATED_BY_ATTRIBUTE,
 } = constants;
 
+const removeNilFields = (value: unknown) =>
+  Array.isArray(value) ? value.filter((field) => field !== null && field !== undefined) : value;
+
+// The fields traversal only walks an array made of strings, so drop any other entry first.
+const keepStringFields = (value: unknown) =>
+  Array.isArray(value) ? value.filter((field) => typeof field === 'string') : value;
+
 const COMPONENT_FIELDS = ['__component'];
 const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
@@ -83,11 +90,17 @@ export default ({ action, ability, model }: any) => {
         }, ctx)
       );
 
+    // A removed field leaves an `undefined` hole in the fields array, which the query
+    // conversion rejects. Drop the holes after each step, as the content API sanitizer does.
     const createSanitizeFields = (ctx: any) =>
       async.pipe(
+        keepStringFields,
         traverse.traverseQueryFields(removeDisallowedFields(permittedFields), ctx),
+        removeNilFields,
         traverse.traverseQueryFields(omitHiddenFields, ctx),
-        traverse.traverseQueryFields(removePassword, ctx)
+        removeNilFields,
+        traverse.traverseQueryFields(removePassword, ctx),
+        removeNilFields
       );
 
     const sanitizeFilters = createSanitizeFilters(ctx);

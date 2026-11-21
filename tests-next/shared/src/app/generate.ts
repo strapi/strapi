@@ -3,11 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
-// Type only: `create-strapi-app` points `types` at dist/src/index.d.ts, but its build emits
-// dist/types.d.ts next to dist/index.d.ts.
-import type { Scope } from 'create-strapi-app/dist/types';
+import type { Scope } from 'create-strapi-app';
 
-import { APPS_DIR, baseEnv } from './config';
+import { testPluginConfigEntry } from '../test-plugin';
+import { APPS_DIR, baseEnv, inheritedEnv } from './config';
 
 export interface App {
   name: string;
@@ -68,7 +67,6 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
     useTypescript: false,
     useExample: false,
     isQuickstart: false,
-    shouldCreateGrowthSsoTrial: false,
     invocation: 'ci',
     agentName: null,
   };
@@ -78,9 +76,23 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
     {
       // Telemetry off: create-strapi-app tracks events unless NODE_ENV=test, which Jest sets
       // but Playwright doesn't.
-      env: { ...process.env, ...baseEnv() },
+      env: { ...inheritedEnv(), ...baseEnv() },
       maxBuffer: 10 * 1024 * 1024,
     }
+  );
+
+  // Load the test plugin (only when STRAPI_TEST_PLUGIN=true, see test-plugin.ts).
+  const pluginsFile = path.join(dir, 'config', 'plugins.js');
+  const plugins = fs.readFileSync(pluginsFile, 'utf8');
+  if (!plugins.includes('module.exports = () => ({')) {
+    throw new Error(`Unexpected ${pluginsFile}: cannot add the test plugin to it.`);
+  }
+  fs.writeFileSync(
+    pluginsFile,
+    plugins.replace(
+      'module.exports = () => ({',
+      `module.exports = () => ({\n  ${testPluginConfigEntry()}`
+    )
   );
 
   // `strapi develop` opens the admin in a browser tab when the app has no admin user yet, which

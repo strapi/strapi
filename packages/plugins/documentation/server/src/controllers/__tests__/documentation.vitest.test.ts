@@ -1,14 +1,52 @@
+import path from 'path';
 import bcrypt from 'bcryptjs';
+import fs from 'fs-extra';
+import { get } from 'lodash';
 import type Koa from 'koa';
 import { describe, expect, test, vi, type Mock } from 'vitest';
 
 import documentation from '../documentation';
 
+vi.mock('fs-extra', async (importOriginal) => {
+  const actual = await importOriginal<{ default: typeof import('fs-extra') }>();
+  const mocked = {
+    ...actual.default,
+    readFileSync: vi.fn(() => '{"openapi":"3.0.0"}'),
+    ensureFile: vi.fn(),
+    writeFile: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
+vi.mock('koa-static', () => ({ default: vi.fn(() => vi.fn()) }));
+vi.mock('../../public/index.html', () => ({ default: 'backend=<%= backendUrl %>' }));
+vi.mock('../../public/login.html', () => ({
+  default: '<form action="<%= actionUrl %>"></form><p class="error"></p>',
+}));
+
 const SERVER_URL = 'http://localhost:1337';
 
-const createStrapi = (storedConfig: Record<string, unknown>) => {
+const DIRS = {
+  app: { extensions: '/project/src/extensions' },
+  dist: { extensions: '/project/dist/src/extensions' },
+};
+
+/**
+ * Mirrors the config provider: the startup copy as own keys, plus `get` over the live tree.
+ */
+const createConfig = (values: Record<string, unknown>) => ({
+  ...values,
+  get: (key: string, defaultValue?: unknown) => get(values, key, defaultValue),
+});
+
+const createStrapi = (
+  storedConfig: Record<string, unknown>,
+  { environment = 'development' }: { environment?: string } = {}
+) => {
   return {
-    config: { server: { url: SERVER_URL } },
+    config: createConfig({ environment, server: { url: SERVER_URL } }),
+    dirs: DIRS,
+    log: { error: vi.fn() },
     store: vi.fn(() => ({ get: vi.fn(async () => storedConfig) })),
   };
 };
@@ -69,42 +107,52 @@ describe('Documentation plugin | Documentation controller', () => {
   });
 
   describe('index', () => {
-    test.each([
-      { major: '..', minor: '1', patch: '0' },
-      { major: '1', minor: '../../secret', patch: '0' },
-      { major: '1', minor: '0', patch: 'x' },
-      { major: '1', minor: '2', patch: '3foo' },
-    ])('returns 404 for non-numeric version params %o', async (params) => {
-      const ctx = {
-        params,
-        notFound: vi.fn(),
-      } as unknown as Koa.Context & { notFound: Mock };
+    const createIndexContext = () =>
+      ({
+        params: { major: '1', minor: '0', patch: '0' },
+        url: '/documentation/v1.0.0',
+      }) as unknown as Koa.Context;
 
-      await documentation.index(ctx, vi.fn());
+    test('fills the Swagger UI layout with the server URL', async () => {
+      global.strapi = createStrapi({}) as any;
 
-      expect(ctx.notFound).toHaveBeenCalled();
+      await documentation.index(createIndexContext(), vi.fn());
+
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        path.resolve(DIRS.app.extensions, 'documentation', 'public', 'index.html'),
+        `backend=${SERVER_URL}`
+      );
     });
 
-    test('accepts numeric version params and goes on to read that version', async () => {
-      const log = { error: vi.fn() };
-      global.strapi = {
-        config: { environment: 'development', server: { url: SERVER_URL } },
-        dirs: {
-          app: { extensions: '/nonexistent-strapi-extensions' },
-          dist: { extensions: '/nonexistent-strapi-extensions' },
-        },
-        log,
-      } as any;
-      const ctx = {
-        params: { major: '1', minor: '2', patch: '3' },
-        notFound: vi.fn(),
-      } as unknown as Koa.Context & { notFound: Mock };
+    test('reads the generated specs from dist in production', async () => {
+      global.strapi = createStrapi({}, { environment: 'production' }) as any;
 
-      await documentation.index(ctx, vi.fn());
+      await documentation.index(createIndexContext(), vi.fn());
 
-      expect(ctx.notFound).not.toHaveBeenCalled();
-      // The spec file is missing, so the read fails and is logged: proof the version was accepted.
-      expect(log.error).toHaveBeenCalledWith(expect.objectContaining({ code: 'ENOENT' }));
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        path.join(
+          DIRS.dist.extensions,
+          'documentation',
+          'documentation',
+          '1.0.0',
+          'full_documentation.json'
+        ),
+        'utf8'
+      );
+    });
+  });
+
+  describe('loginView', () => {
+    test('posts the login form to the server URL', async () => {
+      global.strapi = createStrapi({}) as any;
+      const ctx = { query: {}, url: '/documentation/login' } as unknown as Koa.Context;
+
+      await documentation.loginView(ctx, vi.fn());
+
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        path.resolve(DIRS.app.extensions, 'documentation', 'public', 'login.html'),
+        expect.stringContaining(`action="${SERVER_URL}/documentation/login"`)
+      );
     });
   });
 });

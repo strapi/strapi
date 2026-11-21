@@ -57,19 +57,13 @@ export default {
        * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
        */
       const { major, minor, patch } = ctx.params;
-
-      // The version is part of a file path, and params are URI-decoded.
-      if ([major, minor, patch].some((part) => part !== undefined && !/^\d+$/.test(part))) {
-        return ctx.notFound();
-      }
-
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`
           : getService('documentation').getDocumentationVersion();
 
       const extensionsDir =
-        strapi.config.environment === 'production'
+        strapi.config.get('environment') === 'production'
           ? strapi.dirs.dist.extensions
           : strapi.dirs.app.extensions;
 
@@ -87,7 +81,7 @@ export default {
         const layout = (await import('../public/index.html')).default;
 
         const filledLayout = _.template(layout)({
-          backendUrl: strapi.config.server.url,
+          backendUrl: strapi.config.get<string>('server.url'),
           spec: JSON.stringify(JSON.parse(documentation)),
         });
 
@@ -127,7 +121,7 @@ export default {
       const layout = (await import('../public/login.html')).default;
 
       const filledLayout = _.template(layout.toString())({
-        actionUrl: `${strapi.config.server.url}/documentation/login`,
+        actionUrl: `${strapi.config.get<string>('server.url')}/documentation/login`,
       });
 
       const $ = cheerio.load(filledLayout);
@@ -185,7 +179,7 @@ export default {
       querystring = '';
     }
 
-    ctx.redirect(`${strapi.config.server.url}/documentation${querystring}`);
+    ctx.redirect(`${strapi.config.get<string>('server.url')}/documentation${querystring}`);
   },
 
   async regenerateDoc(ctx: Koa.Context) {

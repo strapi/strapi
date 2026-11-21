@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import localProvider from '../index';
 
@@ -45,6 +45,49 @@ describe('Local provider', () => {
 
       expect(file.url).toBeDefined();
       expect(file.url).toEqual('/uploads/test.json');
+    });
+  });
+
+  describe('checkFileSize', () => {
+    // `size` is in KB, `sizeLimit` in bytes
+    const file = { name: 'big.png', size: 2000 } as any;
+
+    test('Puts the code and the limit in the error details', () => {
+      const providerInstance = localProvider.init({});
+
+      expect(() => providerInstance.checkFileSize(file, { sizeLimit: 1000000 })).toThrow(
+        expect.objectContaining({
+          name: 'PayloadTooLargeError',
+          message: 'big.png exceeds size limit of 1 MB.',
+          details: { code: 'SizeLimitExceeded', limit: 1000000 },
+        })
+      );
+    });
+
+    test('Accepts a file within the limit', () => {
+      const providerInstance = localProvider.init({});
+
+      expect(() => providerInstance.checkFileSize(file, { sizeLimit: 2000000 })).not.toThrow();
+    });
+
+    test('Names the deprecated providerOptions.sizeLimit when it is the limit that applied', () => {
+      const emitWarning = vi.spyOn(process, 'emitWarning').mockImplementation(() => {});
+      const providerInstance = localProvider.init({ sizeLimit: 1000000 });
+
+      expect(emitWarning).toHaveBeenCalledWith(expect.stringContaining('[deprecated]'));
+      expect(() => providerInstance.checkFileSize(file, { sizeLimit: 5000000 })).toThrow(
+        expect.objectContaining({
+          name: 'PayloadTooLargeError',
+          message: 'big.png exceeds size limit of 1 MB.',
+          details: {
+            code: 'SizeLimitExceeded',
+            limit: 1000000,
+            setting: 'upload.config.providerOptions.sizeLimit',
+          },
+        })
+      );
+
+      emitWarning.mockRestore();
     });
   });
 

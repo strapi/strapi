@@ -1330,6 +1330,50 @@ describe('DocumentActionsMenu', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('leaves the focus in a modal opened from the menu instead of giving it back to the trigger', async () => {
+    const { user } = render(
+      <DocumentActionsMenu
+        actions={[
+          {
+            id: '1',
+            label: 'Action 1',
+            // The dialog is only set once the click handler resolves, after the menu has closed
+            onClick: async () => {},
+            dialog: {
+              type: 'modal',
+              title: 'hello world',
+              content: <input aria-label="New position" autoFocus />,
+              footer: null,
+            },
+          },
+          { id: '2', label: 'Action 2', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    const trigger = screen.getByRole('button', { name: 'More document actions' });
+
+    await user.click(trigger);
+
+    // jsdom doesn't reproduce the browser timing (the closing menu took the focus back from the
+    // field that just got it), so check that the menu doesn't give it back to the trigger
+    const focusTrigger = jest.spyOn(trigger, 'focus');
+
+    await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
+
+    await waitFor(() => expect(screen.getByLabelText('New position')).toHaveFocus());
+    expect(focusTrigger).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Close modal' }));
+
+    // An action without a dialog still gives the focus back to the trigger
+    focusTrigger.mockClear();
+    await user.click(trigger);
+    await user.click(screen.getByRole('menuitem', { name: 'Action 2' }));
+
+    await waitFor(() => expect(focusTrigger).toHaveBeenCalled());
+  });
+
   it('should show correct background colors on hover for different variants', async () => {
     const { user } = render(
       <DocumentActionsMenu
