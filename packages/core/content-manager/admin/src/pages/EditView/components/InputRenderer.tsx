@@ -37,7 +37,7 @@ import { RelationsInput } from './FormInputs/Relations/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
-import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
+import type { EditFieldLayout, EditLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
@@ -46,6 +46,11 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   /** The field's width in the edit layout, out of 12. */
   size?: number;
 };
+
+const getComponentLayout = (
+  components: EditLayout['components'],
+  componentUid: string
+): EditLayout['components'][string]['layout'] => components[componentUid]?.layout ?? [];
 
 /**
  * @internal
@@ -224,7 +229,7 @@ const BaseInputRenderer = ({
           key={`input-${props.name}-${localeKey}`}
           {...componentProps}
           hint={hint}
-          layout={components[props.attribute.component].layout}
+          layout={getComponentLayout(components, props.attribute.component)}
           disabled={fieldIsDisabled}
         >
           {renderComponentInput}
@@ -434,4 +439,4 @@ const MemoizedInputRenderer = React.memo((props: InputRendererProps) => {
 });
 
 export type { InputRendererProps };
-export { MemoizedInputRenderer as InputRenderer, useFieldHint };
+export { MemoizedInputRenderer as InputRenderer, getComponentLayout, useFieldHint };
