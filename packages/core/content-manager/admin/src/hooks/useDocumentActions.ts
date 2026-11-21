@@ -57,7 +57,8 @@ type OperationResponse<TResponse extends { data: unknown; meta?: unknown; error?
   | { error: BaseQueryError | SerializedError };
 
 type BulkOperationResponse<TResponse extends { data: unknown; error?: unknown }> =
-  Pick<TResponse, 'data'> | { error: BaseQueryError | SerializedError };
+  | Pick<TResponse, 'data'>
+  | { error: BaseQueryError | SerializedError };
 
 type QueryParams = Record<string, unknown>;
 
@@ -511,7 +512,7 @@ const useDocumentActions: UseDocumentActions = () => {
     ]
   );
 
-  const [unpublishDocument] = useUnpublishDocumentMutation();
+  const [unpublishDocument, { isLoading: isUnpublishing }] = useUnpublishDocumentMutation();
   const unpublish: IUseDocumentActs['unpublish'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, discardDraft = false) => {
       try {
@@ -773,6 +774,7 @@ const useDocumentActions: UseDocumentActions = () => {
   return {
     isLoading:
       isPublishing ||
+      isUnpublishing ||
       isUpdating ||
       isDiscardingDocument ||
       isDeleting ||
