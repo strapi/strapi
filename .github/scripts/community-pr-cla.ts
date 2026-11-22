@@ -521,15 +521,13 @@ async function listCommits(github: Octokit, owner: string, repo: string, pull_nu
     pull_number,
     per_page: 100,
   });
-  return commits.map(
-    (c): CommitInfo => ({
-      sha: c.sha,
-      login: c.author?.login ?? null,
-      name: c.commit.author?.name ?? '',
-      email: c.commit.author?.email ?? '',
-      isMerge: c.parents.length > 1,
-    })
-  );
+  return commits.map((c): CommitInfo => ({
+    sha: c.sha,
+    login: c.author?.login ?? null,
+    name: c.commit.author?.name ?? '',
+    email: c.commit.author?.email ?? '',
+    isMerge: c.parents.length > 1,
+  }));
 }
 
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
