@@ -2,8 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 import { assertGithubToken } from './issue-template-check.ts';
-import { parseOnlyPRs, processUnsignedClaPRs } from './community-pr-cla.ts';
-import { findLinearTicket, updateLinearState } from './community-pr-lifecycle.ts';
+import { cancelLinearTicket, parseOnlyPRs, processUnsignedClaPRs } from './community-pr-cla.ts';
 
 /**
  * Dry run unless explicitly enabled:
@@ -21,52 +20,6 @@ const intEnv = (name: string, fallback: number) => {
   const value = parseInt(process.env[name] ?? '', 10);
   return Number.isFinite(value) && value > 0 ? value : fallback;
 };
-
-async function linearCanceledStateId(apiKey: string, teamId: string): Promise<string | null> {
-  const res = await fetch('https://api.linear.app/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: apiKey },
-    body: JSON.stringify({
-      query: `query ($teamId: String!) {
-        team(id: $teamId) { states(filter: { type: { eq: "canceled" } }) { nodes { id } } }
-      }`,
-      variables: { teamId },
-    }),
-  });
-  const data = (await res.json()) as {
-    data?: { team?: { states?: { nodes: Array<{ id: string }> } } };
-  };
-  return data.data?.team?.states?.nodes?.[0]?.id ?? null;
-}
-
-/**
- * Cancels the PR's Linear ticket. New community tickets live in CPR, and only move to CMS once
- * picked up, so CPR is checked first. Each team's own Canceled state is used.
- */
-async function cancelLinearTicket(prNumber: number): Promise<void> {
-  const apiKey = process.env.LINEAR_API_KEY;
-  if (!apiKey) return;
-  const teams = [
-    { name: 'CPR', id: process.env.LINEAR_CPR_TEAM_ID, canceled: undefined },
-    {
-      name: 'CMS',
-      id: process.env.LINEAR_CMS_TEAM_ID,
-      canceled: process.env.LINEAR_CMS_STATUS_CANCELED,
-    },
-  ];
-  for (const team of teams) {
-    if (!team.id) continue;
-    const issue = await findLinearTicket(apiKey, team.id, prNumber);
-    if (!issue) continue;
-    const stateId = team.canceled || (await linearCanceledStateId(apiKey, team.id));
-    if (!stateId) throw new Error(`Linear ${team.name}: no Canceled state found`);
-    if (!(await updateLinearState(apiKey, issue.id, stateId))) {
-      throw new Error(`Linear ${team.name}: could not cancel ${issue.title}`);
-    }
-    core.info(`PR #${prNumber}: Linear ${team.name} → "Canceled"`);
-    return;
-  }
-}
 
 async function run() {
   const token = process.env.GITHUB_TOKEN;
@@ -100,7 +53,17 @@ async function run() {
     exemptLabels,
     only,
     log: (message) => core.info(message),
-    onClosed: cancelLinearTicket,
+    onClosed: (prNumber) =>
+      cancelLinearTicket(
+        prNumber,
+        {
+          apiKey: process.env.LINEAR_API_KEY,
+          cprTeamId: process.env.LINEAR_CPR_TEAM_ID,
+          cmsTeamId: process.env.LINEAR_CMS_TEAM_ID,
+          cmsCanceledStateId: process.env.LINEAR_CMS_STATUS_CANCELED,
+        },
+        (message) => core.info(message)
+      ),
   });
 
   const count = (type: string) => results.filter((r) => r.action === type).length;

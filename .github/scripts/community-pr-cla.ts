@@ -2,9 +2,11 @@
  * Follows up on community PRs whose CLA (CLA Assistant, `license/cla` status) is still unsigned.
  *
  *   unsigned ≥ CLA_REMINDER_DAYS → one reminder comment that says exactly what blocks the check
- *   unsigned ≥ CLA_CLOSE_DAYS    → close the PR (only once the reminder is CLA_REMINDER_DAYS old)
+ *   new blockers after that      → at most one follow-up reminder
+ *   unsigned ≥ CLA_CLOSE_DAYS    → close the PR (once the latest reminder is CLA_REMINDER_DAYS old)
  *
- * Commit emails are never written to comments or logs: commits are referred to by short SHA.
+ * The clock starts at the CLA bot's first comment. Commit emails are never written to comments
+ * or logs: commits are referred to by SHA.
  */
 
 import type { getOctokit } from '@actions/github';
@@ -14,12 +16,13 @@ type Octokit = ReturnType<typeof getOctokit>;
 export const CLA_STATUS_CONTEXT = 'license/cla';
 export const CLA_BOT_LOGIN = 'strapi-cla';
 export const ACTIONS_BOT_LOGIN = 'github-actions[bot]';
-
-/** REST reports the Actions bot as `github-actions[bot]`, GraphQL as `github-actions`. */
-export const isActionsBot = (login: string | null | undefined) =>
-  !!login && login.replace(/\[bot\]$/, '') === ACTIONS_BOT_LOGIN.replace(/\[bot\]$/, '');
-export const REMINDER_MARKER = '<!-- community-pr-cla: reminder -->';
 export const CLOSED_MARKER = '<!-- community-pr-cla: closed -->';
+
+/** A PR gets its first reminder, and at most one more when something new blocks the check. */
+export const MAX_REMINDERS = 2;
+
+/** The blocker token for "the PR author hasn't signed". Every other blocker is a commit SHA. */
+export const AUTHOR_BLOCKER = 'author';
 
 /** Associations that mean the author is part of the org (or has write access). */
 const INTERNAL_ASSOCIATIONS = new Set(['MEMBER', 'OWNER', 'COLLABORATOR']);
@@ -66,15 +69,15 @@ export interface ClaDiagnosis {
   unlinked: Array<{ sha: string; name: string; fakeNoreply: boolean }>;
 }
 
-/** A `license/cla` status of a commit that is (or was) in the PR. */
-export interface ClaStatus {
-  state: string;
-  createdAt: string;
+/** A reminder this workflow posted, and the blockers its marker says it named. */
+export interface SentReminder {
+  at: number;
+  blockers: string[];
 }
 
 export type PlannedAction =
   | { type: 'too-early'; days: number }
-  | { type: 'remind'; days: number }
+  | { type: 'remind'; days: number; followUp: boolean }
   | { type: 'wait'; days: number; reason: string }
   | { type: 'close'; days: number }
   | { type: 'reopened'; days: number };
@@ -82,6 +85,24 @@ export type PlannedAction =
 /** Every comment this workflow posts starts with its marker. Markers are matched there only. */
 export const hasMarker = (body: string | null | undefined, marker: string) =>
   (body ?? '').startsWith(marker);
+
+const BLOCKER_RE = /^(author|[0-9a-f]{7,40})$/;
+
+/**
+ * The reminder marker records what the reminder named: `author` and commit SHAs only, never a
+ * name or an email.
+ */
+export function reminderMarker(blockers: string[]): string {
+  const safe = blockers.filter((b) => BLOCKER_RE.test(b));
+  return `<!-- community-pr-cla: reminder blockers=${safe.join(',')} -->`;
+}
+
+/** The blockers a reminder named, or null when `body` doesn't start with a reminder marker. */
+export function parseReminderMarker(body: string | null | undefined): string[] | null {
+  const m = /^<!-- community-pr-cla: reminder blockers=([0-9a-z,]*) -->/.exec(body ?? '');
+  if (!m) return null;
+  return m[1].split(',').filter((b) => BLOCKER_RE.test(b));
+}
 
 // ─── Pure helpers ───────────────────────────────────────────────────────────
 
@@ -136,10 +157,12 @@ export function diagnose(prAuthor: string, commits: CommitInfo[], bot: ClaBotCom
   const unsignedNames = new Set((bot?.unsigned ?? []).map(lc));
 
   // Without a list, the bot has a single committer to ask. That is the author when the
-  // author's account is the only linked one; otherwise we can't tell, and name no one.
+  // author's account is the only linked one and no commit is unlinked. With an unlinked commit,
+  // that commit is likely the one the bot asks about (#26424: the author had signed, a commit
+  // used a fake noreply email), so we can't tell, and don't claim the author hasn't signed.
   const authorUnsigned = hasList
     ? unsignedNames.has(lc(prAuthor))
-    : shasByLogin.size === 1 && shasByLogin.has(lc(prAuthor));
+    : !unlinked.length && shasByLogin.size === 1 && shasByLogin.has(lc(prAuthor));
 
   const otherUnsigned = hasList
     ? [...shasByLogin.keys()]
@@ -150,29 +173,10 @@ export function diagnose(prAuthor: string, commits: CommitInfo[], bot: ClaBotCom
   return { authorUnsigned, otherUnsigned, unlinked } satisfies ClaDiagnosis;
 }
 
-/**
- * When the current pending period started: the CLA bot's first comment, unless the check has
- * passed on a commit since. Then the period restarts when the check went pending again, and
- * reminders or close notices from before that no longer count.
- *
- * `statuses` should include the head commit's whole status history (CLA Assistant can set a
- * passing commit back to pending) and the heads that force-pushes removed from the PR.
- */
-export function pendingSince(opts: {
-  botCommentAt: string | null;
-  prCreatedAt: string;
-  statuses: ClaStatus[];
-}): number {
-  const first = new Date(opts.botCommentAt ?? opts.prCreatedAt).getTime();
-  const at = (s: ClaStatus) => new Date(s.createdAt).getTime();
-  const successes = opts.statuses.filter((s) => s.state === 'SUCCESS').map(at);
-  if (!successes.length) return first;
-  const lastSuccess = Math.max(...successes);
-  const pendingAfter = opts.statuses
-    .filter((s) => s.state !== 'SUCCESS')
-    .map(at)
-    .filter((t) => t > lastSuccess);
-  return pendingAfter.length ? Math.min(...pendingAfter) : lastSuccess;
+/** What blocks the check: `author`, plus the SHAs of unlinked and unsigned co-author commits. */
+export function blockersOf(d: ClaDiagnosis): string[] {
+  const shas = [...d.unlinked.map((c) => c.sha), ...d.otherUnsigned.flatMap((o) => o.shas)];
+  return [...new Set([...(d.authorUnsigned ? [AUTHOR_BLOCKER] : []), ...shas])];
 }
 
 /**
@@ -190,21 +194,34 @@ export function parseOnlyPRs(value: string | undefined): number[] | undefined {
 }
 
 export function planAction(opts: {
+  /** The CLA bot's first comment (or the PR's creation, when there is none). */
   unsignedSince: number;
-  reminderAt: number | null;
-  /** When this workflow closed the PR (close event or close notice) in the current period. */
-  closedAt: number | null;
+  /** Reminders this workflow posted on the PR. */
+  reminders: SentReminder[];
+  /** What blocks the check now (see `blockersOf`). */
+  blockers: string[];
+  /** When this workflow posted its close notice, if it did. */
+  closedNoticeAt: number | null;
   now: number;
   reminderDays: number;
   closeDays: number;
 }): PlannedAction {
   const days = Math.floor((opts.now - opts.unsignedSince) / DAY_MS);
-  // We closed the PR in this period but it is open: someone reopened it on purpose. Leave it.
-  if (opts.closedAt) return { type: 'reopened', days };
+  // Our close notice exists but the PR is open: someone reopened it on purpose. Leave it.
+  if (opts.closedNoticeAt) return { type: 'reopened', days };
   if (days < opts.reminderDays) return { type: 'too-early', days };
-  if (!opts.reminderAt) return { type: 'remind', days };
+  const latest = [...opts.reminders].sort((a, b) => b.at - a.at)[0];
+  if (!latest) return { type: 'remind', days, followUp: false };
+  // Something the latest reminder didn't name blocks the check now (say the author signed, then
+  // a commit with an unlinked email came in): tell the author, once. A force-push that keeps
+  // the same blockers, or fewer, changes nothing.
+  const named = new Set(latest.blockers);
+  const fresh = opts.blockers.filter((b) => !named.has(b));
+  if (fresh.length && opts.reminders.length < MAX_REMINDERS) {
+    return { type: 'remind', days, followUp: true };
+  }
   if (days < opts.closeDays) return { type: 'wait', days, reason: 'reminder sent' };
-  const sinceReminder = Math.floor((opts.now - opts.reminderAt) / DAY_MS);
+  const sinceReminder = Math.floor((opts.now - latest.at) / DAY_MS);
   if (sinceReminder < opts.reminderDays) {
     return { type: 'wait', days, reason: `reminder is only ${sinceReminder}d old` };
   }
@@ -347,6 +364,8 @@ export function buildReminderComment(opts: {
   days: number;
   closeOn: Date;
   repo: RepoRef;
+  /** A second reminder, sent because something new blocks the check. */
+  followUp?: boolean;
 }): string {
   const { login, diagnosis: d, claUrl, recheckUrl } = opts;
   const sections: string[] = [];
@@ -379,13 +398,17 @@ export function buildReminderComment(opts: {
     );
   }
 
+  const intro = opts.followUp
+    ? `The [Contributor License Agreement](${claUrl}) check on this PR is still pending, and something new is blocking it since our last reminder. Here's what's blocking it now:`
+    : `Thank you for your contribution! The [Contributor License Agreement](${claUrl}) check on this PR has been pending for **${opts.days} days**, and we can't merge it until it passes. Here's what's blocking it:`;
+
   return [
-    REMINDER_MARKER,
+    reminderMarker(blockersOf(d)),
     '> This is a templated message',
     '',
     `Hello @${login},`,
     '',
-    `Thank you for your contribution! The [Contributor License Agreement](${claUrl}) check on this PR has been pending for **${opts.days} days**, and we can't merge it until it passes. Here's what's blocking it:`,
+    intro,
     '',
     sections.join('\n\n'),
     '',
@@ -422,7 +445,6 @@ interface OpenPR {
   createdAt: string;
   baseRef: string;
   labels: string[];
-  headSha: string | null;
   cla: { state: string; targetUrl: string | null } | null;
 }
 
@@ -440,7 +462,6 @@ interface OpenPRsQuery {
         commits: {
           nodes: Array<{
             commit: {
-              oid: string;
               status: { context: { state: string; targetUrl: string | null } | null } | null;
             };
           }>;
@@ -467,7 +488,7 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
               author { login __typename }
               labels(first: 50) { nodes { name } }
               commits(last: 1) {
-                nodes { commit { oid status { context(name: $context) { state targetUrl } } } }
+                nodes { commit { status { context(name: $context) { state targetUrl } } } }
               }
             }
           }
@@ -485,7 +506,6 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
         createdAt: n.createdAt,
         baseRef: n.baseRefName,
         labels: n.labels.nodes.map((l) => l.name),
-        headSha: n.commits.nodes[0]?.commit.oid ?? null,
         cla: n.commits.nodes[0]?.commit.status?.context ?? null,
       });
     }
@@ -510,108 +530,6 @@ async function listCommits(github: Octokit, owner: string, repo: string, pull_nu
       isMerge: c.parents.length > 1,
     })
   );
-}
-
-type StatusContext = { context: ClaStatus | null } | null;
-
-interface PRHistoryQuery {
-  repository: {
-    pullRequest: {
-      commits: { nodes: Array<{ commit: { status: StatusContext } }> };
-      timelineItems: {
-        nodes: Array<
-          | {
-              __typename: 'HeadRefForcePushedEvent';
-              createdAt: string;
-              beforeCommit: { status: StatusContext } | null;
-            }
-          | { __typename: 'ClosedEvent'; createdAt: string; actor: { login: string } | null }
-        >;
-      };
-    } | null;
-  };
-}
-
-interface PRHistory {
-  /**
-   * `license/cla` statuses: the latest one of each of the PR's last 100 commits, the latest one
-   * of each head a force-push replaced, and the head commit's full history.
-   */
-  statuses: ClaStatus[];
-  /** Force-pushes to the PR branch. */
-  forcePushedAt: number[];
-  /** Times this workflow (the Actions bot) closed the PR. */
-  closedByUsAt: number[];
-}
-
-async function headClaStatuses(
-  github: Octokit,
-  owner: string,
-  repo: string,
-  headSha: string | null
-): Promise<ClaStatus[]> {
-  if (!headSha) return [];
-  // GraphQL only has the latest status per commit: a SUCCESS that was later set back to pending
-  // on the same commit only shows up in this list (newest first).
-  const { data } = await github.rest.repos.listCommitStatusesForRef({
-    owner,
-    repo,
-    ref: headSha,
-    per_page: 100,
-  });
-  return data
-    .filter((s) => s.context === CLA_STATUS_CONTEXT)
-    .map((s) => ({ state: s.state.toUpperCase(), createdAt: s.created_at }));
-}
-
-async function loadPRHistory(
-  github: Octokit,
-  owner: string,
-  repo: string,
-  number: number,
-  headSha: string | null
-): Promise<PRHistory> {
-  const [res, headStatuses] = await Promise.all([
-    github.graphql<PRHistoryQuery>(
-      `query ($owner: String!, $repo: String!, $number: Int!, $context: String!) {
-        repository(owner: $owner, name: $repo) {
-          pullRequest(number: $number) {
-            commits(last: 100) {
-              nodes { commit { status { context(name: $context) { state createdAt } } } }
-            }
-            timelineItems(last: 100, itemTypes: [HEAD_REF_FORCE_PUSHED_EVENT, CLOSED_EVENT]) {
-              nodes {
-                __typename
-                ... on HeadRefForcePushedEvent {
-                  createdAt
-                  beforeCommit { status { context(name: $context) { state createdAt } } }
-                }
-                ... on ClosedEvent { createdAt actor { login } }
-              }
-            }
-          }
-        }
-      }`,
-      { owner, repo, number, context: CLA_STATUS_CONTEXT }
-    ),
-    headClaStatuses(github, owner, repo, headSha),
-  ]);
-
-  const pr = res.repository.pullRequest;
-  const history: PRHistory = { statuses: headStatuses, forcePushedAt: [], closedByUsAt: [] };
-  for (const n of pr?.commits.nodes ?? []) {
-    if (n.commit.status?.context) history.statuses.push(n.commit.status.context);
-  }
-  for (const item of pr?.timelineItems.nodes ?? []) {
-    if (item.__typename === 'HeadRefForcePushedEvent') {
-      history.forcePushedAt.push(new Date(item.createdAt).getTime());
-      const before = item.beforeCommit?.status?.context;
-      if (before) history.statuses.push(before);
-    } else if (item.__typename === 'ClosedEvent' && isActionsBot(item.actor?.login)) {
-      history.closedByUsAt.push(new Date(item.createdAt).getTime());
-    }
-  }
-  return history;
 }
 
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -698,46 +616,42 @@ async function processPR(
 ): Promise<void> {
   const { github, owner, repo, dryRun, log, pr, now, result, prefix } = opts;
   const cla = pr.cla!;
-
-  const [comments, history] = await Promise.all([
-    github.paginate(github.rest.issues.listComments, {
-      owner,
-      repo,
-      issue_number: pr.number,
-      per_page: 100,
-    }),
-    loadPRHistory(github, owner, repo, pr.number, pr.headSha),
-  ]);
-  const botComment = comments.find((c) => c.user?.login === CLA_BOT_LOGIN);
-  const unsignedSince = pendingSince({
-    botCommentAt: botComment?.created_at ?? null,
-    prCreatedAt: pr.createdAt,
-    statuses: history.statuses,
-  });
   const at = (iso: string) => new Date(iso).getTime();
 
-  // Only our comments from the current pending period count: if the check passed and went
-  // pending again since, the PR gets a fresh reminder and a fresh close date.
-  const ours = comments.filter(
-    (c) => isActionsBot(c.user?.login) && at(c.created_at) >= unsignedSince
-  );
-  // A force-push can drop the commit the check passed on, or change what blocks it, so a
-  // reminder from before the last force-push no longer counts: the PR gets a new one first.
-  const lastForcePush = Math.max(-Infinity, ...history.forcePushedAt);
-  const reminder = ours.find(
-    (c) => hasMarker(c.body, REMINDER_MARKER) && at(c.created_at) > lastForcePush
-  );
+  const comments = await github.paginate(github.rest.issues.listComments, {
+    owner,
+    repo,
+    issue_number: pr.number,
+    per_page: 100,
+  });
+  const botComment = comments.find((c) => c.user?.login === CLA_BOT_LOGIN);
+  const unsignedSince = at(botComment?.created_at ?? pr.createdAt);
+
+  // Only our own comments count, and only when the marker is the first thing in the body.
+  const ours = comments.filter((c) => c.user?.login === ACTIONS_BOT_LOGIN);
+  const reminders = ours.flatMap((c): SentReminder[] => {
+    const blockers = parseReminderMarker(c.body);
+    return blockers ? [{ at: at(c.created_at), blockers }] : [];
+  });
   const closedNotice = ours.find((c) => hasMarker(c.body, CLOSED_MARKER));
-  // Our close event counts too, so a reopen is respected even when the close notice failed.
-  const closedTimes = [
-    ...(closedNotice ? [at(closedNotice.created_at)] : []),
-    ...history.closedByUsAt.filter((t) => t >= unsignedSince),
-  ];
+
+  // The commits only matter once a reminder is due: to write it, or to see whether something
+  // new blocks the check since the last one.
+  const days = Math.floor((now - unsignedSince) / DAY_MS);
+  let diagnosis: ClaDiagnosis | null = null;
+  if (!closedNotice && days >= opts.reminderDays) {
+    diagnosis = diagnose(
+      pr.login,
+      await listCommits(github, owner, repo, pr.number),
+      botComment ? parseClaBotComment(botComment.body ?? '', botComment.created_at) : null
+    );
+  }
 
   const plan = planAction({
     unsignedSince,
-    reminderAt: reminder ? at(reminder.created_at) : null,
-    closedAt: closedTimes.length ? Math.max(...closedTimes) : null,
+    reminders,
+    blockers: diagnosis ? blockersOf(diagnosis) : [],
+    closedNoticeAt: closedNotice ? at(closedNotice.created_at) : null,
     now,
     reminderDays: opts.reminderDays,
     closeDays: opts.closeDays,
@@ -748,14 +662,8 @@ async function processPR(
   const claUrl = cla.targetUrl ?? `https://cla.strapi.io/${owner}/${repo}?pullRequest=${pr.number}`;
   const recheckUrl = `https://cla.strapi.io/check/${owner}/${repo}?pullRequest=${pr.number}`;
 
-  if (plan.type === 'remind') {
-    const commits = await listCommits(github, owner, repo, pr.number);
-    const diagnosis = diagnose(
-      pr.login,
-      commits,
-      botComment ? parseClaBotComment(botComment.body ?? '', botComment.created_at) : null
-    );
-    result.detail = describe(diagnosis);
+  if (plan.type === 'remind' && diagnosis) {
+    result.detail = `${plan.followUp ? 'new blockers: ' : ''}${describe(diagnosis)}`;
     const body = buildReminderComment({
       login: pr.login,
       diagnosis,
@@ -769,9 +677,12 @@ async function processPR(
         closeDays: opts.closeDays,
       }),
       repo: { owner, repo, baseRef: pr.baseRef },
+      followUp: plan.followUp,
     });
     log(
-      `${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → reminder [${result.detail}]`
+      `${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → ${
+        plan.followUp ? 'follow-up reminder' : 'reminder'
+      } [${result.detail}]`
     );
     if (dryRun) {
       log(body.replace(/^/gm, '    | '));
@@ -781,27 +692,7 @@ async function processPR(
   } else if (plan.type === 'close') {
     log(`${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → close`);
     if (dryRun) return;
-    // Close first: if posting the comment fails, the PR is still closed, and an open PR never
-    // carries a close notice that wasn't followed by a close. If only the notice fails, a later
-    // reopen is still recognised from our close event in the timeline.
-    await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
-    const failures: string[] = [];
-    try {
-      await github.rest.issues.createComment({
-        owner,
-        repo,
-        issue_number: pr.number,
-        body: buildCloseComment({ login: pr.login, claUrl, closeDays: opts.closeDays }),
-      });
-    } catch (error) {
-      failures.push(`close comment: ${errorMessage(error)}`);
-    }
-    try {
-      await opts.onClosed?.(pr.number);
-    } catch (error) {
-      failures.push(`after close: ${errorMessage(error)}`);
-    }
-    if (failures.length) throw new Error(`closed, but ${failures.join('; ')}`);
+    await closeWithNotice({ ...opts, claUrl });
   } else {
     result.detail = plan.type === 'wait' ? plan.reason : '';
     log(
@@ -809,6 +700,54 @@ async function processPR(
         result.detail ? ` (${result.detail})` : ''
       }`
     );
+  }
+}
+
+/**
+ * Closes the PR, then posts the close notice. A PR this workflow closed always carries the
+ * notice, because the notice is how a deliberate reopen is recognised: if posting fails twice,
+ * the PR is reopened so the next run closes it again. Only if that reopen also fails can a
+ * closed PR lack the notice, and the error says so.
+ */
+async function closeWithNotice(
+  opts: ProcessOptions & { pr: OpenPR; claUrl: string }
+): Promise<void> {
+  const { github, owner, repo, pr } = opts;
+  const body = buildCloseComment({
+    login: pr.login,
+    claUrl: opts.claUrl,
+    closeDays: opts.closeDays,
+  });
+  const postNotice = () =>
+    github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+
+  await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
+  try {
+    await postNotice();
+  } catch {
+    try {
+      await postNotice();
+    } catch (error) {
+      const noticeError = errorMessage(error);
+      try {
+        await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'open' });
+      } catch (reopenError) {
+        throw new Error(
+          `closed WITHOUT a close notice (notice failed twice: ${noticeError}; reopen failed: ${errorMessage(
+            reopenError
+          )}). Post the notice by hand, or the PR is closed again if someone reopens it`
+        );
+      }
+      throw new Error(
+        `close notice failed twice (${noticeError}), so the PR was reopened; the next run closes it again`
+      );
+    }
+  }
+
+  try {
+    await opts.onClosed?.(pr.number);
+  } catch (error) {
+    throw new Error(`closed, but after close: ${errorMessage(error)}`);
   }
 }
 
@@ -823,4 +762,114 @@ export function describe(d: ClaDiagnosis): string {
     parts.push(`co-authors unsigned: ${d.otherUnsigned.map((o) => o.login).join(', ')}`);
   }
   return parts.join('; ') || 'unknown cause';
+}
+
+// ─── Linear ─────────────────────────────────────────────────────────────────
+
+export interface LinearConfig {
+  apiKey?: string;
+  cprTeamId?: string;
+  cmsTeamId?: string;
+  /** The CMS team's Canceled state. Looked up when unset (and always for CPR). */
+  cmsCanceledStateId?: string;
+}
+
+type Fetch = (url: string, init: RequestInit) => Promise<Response>;
+
+/**
+ * Calls the Linear API, and throws on an HTTP error, a GraphQL `errors` list or a missing
+ * `data`, so a failed lookup is never read as "no ticket".
+ */
+export async function linearRequest<T>(
+  apiKey: string,
+  query: string,
+  variables: Record<string, string>,
+  fetchImpl: Fetch = fetch
+): Promise<T> {
+  const res = await fetchImpl('https://api.linear.app/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: apiKey },
+    body: JSON.stringify({ query, variables }),
+  });
+  let json: { data?: T | null; errors?: Array<{ message?: string }> } | null = null;
+  try {
+    json = await res.json();
+  } catch {
+    // Reported below with the HTTP status.
+  }
+  const errors = (json?.errors ?? []).map((e) => e.message ?? 'unknown error');
+  if (!res.ok || errors.length || !json?.data) {
+    throw new Error(`Linear: ${errors.join('; ') || `HTTP ${res.status}, no data`}`);
+  }
+  return json.data;
+}
+
+/**
+ * Cancels the PR's Linear ticket. New community tickets live in CPR, and only move to CMS once
+ * picked up, so CPR is checked first. Each team's own Canceled state is used. Throws when
+ * Linear can't be read or updated.
+ */
+export async function cancelLinearTicket(
+  prNumber: number,
+  config: LinearConfig,
+  log: (message: string) => void,
+  fetchImpl: Fetch = fetch
+): Promise<void> {
+  const { apiKey } = config;
+  if (!apiKey) {
+    log(`PR #${prNumber}: Linear not synced (LINEAR_API_KEY is not set)`);
+    return;
+  }
+  const teams = [
+    { name: 'CPR', id: config.cprTeamId, canceled: undefined },
+    { name: 'CMS', id: config.cmsTeamId, canceled: config.cmsCanceledStateId },
+  ];
+  const missing = teams.filter((t) => !t.id).map((t) => t.name);
+  if (missing.length) log(`PR #${prNumber}: Linear team id not set for ${missing.join(', ')}`);
+
+  for (const team of teams) {
+    if (!team.id) continue;
+    const found = await linearRequest<{ issues: { nodes: Array<{ id: string; title: string }> } }>(
+      apiKey,
+      `query ($teamId: ID!, $title: String!) {
+        issues(
+          filter: { team: { id: { eq: $teamId } }, title: { startsWith: $title } }
+          first: 1
+        ) { nodes { id title } }
+      }`,
+      { teamId: team.id, title: `PR #${prNumber}:` },
+      fetchImpl
+    );
+    const issue = found.issues.nodes[0];
+    if (!issue) continue;
+
+    let stateId = team.canceled;
+    if (!stateId) {
+      const states = await linearRequest<{ team: { states: { nodes: Array<{ id: string }> } } }>(
+        apiKey,
+        `query ($teamId: String!) {
+          team(id: $teamId) { states(filter: { type: { eq: "canceled" } }) { nodes { id } } }
+        }`,
+        { teamId: team.id },
+        fetchImpl
+      );
+      stateId = states.team.states.nodes[0]?.id;
+    }
+    if (!stateId) throw new Error(`Linear ${team.name}: no Canceled state found`);
+
+    const updated = await linearRequest<{ issueUpdate: { success: boolean } }>(
+      apiKey,
+      `mutation ($id: String!, $stateId: String!) {
+        issueUpdate(id: $id, input: { stateId: $stateId }) { success }
+      }`,
+      { id: issue.id, stateId },
+      fetchImpl
+    );
+    if (!updated.issueUpdate.success) {
+      throw new Error(`Linear ${team.name}: could not cancel ${issue.title}`);
+    }
+    log(`PR #${prNumber}: Linear ${team.name} → "Canceled"`);
+    return;
+  }
+  log(`PR #${prNumber}: no Linear ticket found`);
 }

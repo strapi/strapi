@@ -48,7 +48,7 @@ async function linearGQL(
   return res.json() as Promise<LinearResponse>;
 }
 
-export async function findLinearTicket(
+async function findLinearTicket(
   apiKey: string,
   teamId: string,
   prNumber: number
@@ -66,7 +66,7 @@ export async function findLinearTicket(
   return data.data?.issues?.nodes?.[0] ?? null;
 }
 
-export async function updateLinearState(
+async function updateLinearState(
   apiKey: string,
   issueId: string,
   stateId: string

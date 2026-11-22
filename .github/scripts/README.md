@@ -98,20 +98,27 @@ CLA Assistant comments "please sign the CLA"   (clock starts at that comment)
                   (fake `users.noreply.github.com` addresses only get the re-author fix)
                 - other authors haven't signed → names them and their commits
         │
-        │  (daily cron, still pending after 30 days, and the reminder is at least 7 days old)
+        │  (daily cron, only if something the reminder didn't name now blocks the check)
+        ▼
+[GitHub Action] Posts one follow-up reminder about what blocks the check now
+        │
+        │  (daily cron, still pending 30 days after the CLA Assistant comment,
+        │   and the latest reminder is at least 7 days old)
         ▼
 [GitHub Action] Closes the PR with a short comment (it can be reopened once the CLA is signed)
                 Syncs the Linear ticket → "Canceled" (looks in CPR first, then CMS, and uses
                 that team's Canceled state)
 ```
 
-Commit email addresses are never written to comments or logs. Comments start with a hidden marker (`<!-- community-pr-cla: reminder -->` / `closed`), so a PR never gets the same comment twice. A PR that the workflow closed and someone reopened is left alone. The reopen is recognised from the workflow's close event in the PR timeline, so it works even if the close notice failed to post.
+The clock never restarts: it runs from the CLA Assistant's first comment (or the PR's creation, if there is none), even if the check passed in between.
 
-If the check passes and later goes pending again (for example, a new commit from an email that isn't linked), the clock restarts: earlier reminders and close notices no longer count, and the PR gets a new reminder before it can be closed. This also holds when a force-push removed the commit the check passed on, or when the check on the same commit went from passed back to pending.
+A PR gets at most two reminders. Each reminder's hidden marker records what it named: `<!-- community-pr-cla: reminder blockers=author,<sha>,… -->`, where `author` means the author hadn't signed and each SHA is an unlinked or unsigned co-author's commit. A follow-up is only sent when something the latest reminder didn't name now blocks the check, for example when the author signed and then a commit with an unlinked email came in. A force-push that keeps the same blockers, or fewer, sends nothing. A rebase does give commits new SHAs, so it can bring the one follow-up, but never a third reminder.
 
-A reminder sent before the PR's latest force-push no longer counts either, since the commits that block the check may have changed. The PR gets a new reminder, and is closed no sooner than 7 days after it.
+Commit email addresses are never written to comments, markers or logs. Markers are only read at the start of the workflow's own comments.
 
-A failure on one PR (for example, a locked conversation) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed.
+A PR that the workflow closed and someone reopened is left alone. The workflow recognises this from its close notice (`<!-- community-pr-cla: closed -->`), so it makes sure every PR it closes has one. It closes the PR, then posts the notice. If the notice fails twice, it reopens the PR and the next run tries the whole close again. A PR closed by someone else, or by the lifecycle flow, has no CLA close notice, so after a reopen it is reminded and closed as usual.
+
+A failure on one PR (for example, a locked conversation, or a Linear error after the close) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed. If `LINEAR_API_KEY` or a team id is missing, the run logs that it didn't sync Linear.
 
 ### Settings
 
