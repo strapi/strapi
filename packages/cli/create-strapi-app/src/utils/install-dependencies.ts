@@ -16,6 +16,30 @@ import { trackUsage } from './usage';
 export const MAX_INSTALL_OUTPUT_LENGTH = 64 * 1024;
 
 /**
+ * Time to wait for the last install output after the package manager exits with an error.
+ * A background process started by a lifecycle script can keep the output pipe open
+ * after the package manager exits, so the wait has a limit.
+ */
+export const OUTPUT_DRAIN_TIMEOUT_MS = 1000;
+
+/**
+ * Resolves when `done` settles or after `ms` milliseconds, whichever comes first.
+ */
+const waitAtMost = async (done: Promise<unknown>, ms: number) => {
+  let timer: NodeJS.Timeout | undefined;
+
+  const timeout = new Promise<void>((resolve) => {
+    timer = setTimeout(resolve, ms);
+  });
+
+  try {
+    await Promise.race([done, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+/**
  * Keeps the last `maxLength` characters of a stream of text, so memory stays bounded
  * whatever the package manager or a lifecycle script prints.
  */
@@ -115,8 +139,15 @@ export async function runInstall({ rootPath, packageManager }: Scope) {
   try {
     await proc;
   } catch (error) {
-    // The process can exit before the last output is read
-    await outputDone;
+    // The process can exit before the last output is read, so wait a short time for it.
+    // Do not wait longer: a background process can keep the pipe open for a long time.
+    await waitAtMost(outputDone, OUTPUT_DRAIN_TIMEOUT_MS);
+
+    // Release our end of the pipes, so a process that still holds them cannot keep the CLI alive
+    proc.all?.destroy();
+    proc.stdout?.destroy();
+    proc.stderr?.destroy();
+
     throw new InstallError(error, tail.read());
   }
 }

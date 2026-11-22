@@ -5,6 +5,7 @@ import execa from 'execa';
 import {
   InstallError,
   MAX_INSTALL_OUTPUT_LENGTH,
+  OUTPUT_DRAIN_TIMEOUT_MS,
   createOutputTail,
   installProjectDependencies,
   runInstall,
@@ -35,7 +36,11 @@ const scope = { rootPath: '/tmp/my-app', packageManager: 'npm' } as Scope;
  * Returns a fake execa child process. It writes `output` to `all`, then resolves,
  * or rejects with `error` when one is given.
  */
-const fakeProcess = (output: string[], error?: unknown) => {
+const fakeProcess = (
+  output: string[],
+  error?: unknown,
+  { keepOutputOpen = false }: { keepOutputOpen?: boolean } = {}
+) => {
   const stdout = new PassThrough();
   const stderr = new PassThrough();
   const all = new PassThrough();
@@ -43,7 +48,12 @@ const fakeProcess = (output: string[], error?: unknown) => {
   const done = new Promise<void>((resolve, reject) => {
     setImmediate(() => {
       output.forEach((chunk) => all.write(chunk));
-      all.end();
+
+      // A background process started by a lifecycle script can keep the pipe open
+      // after the package manager exits
+      if (!keepOutputOpen) {
+        all.end();
+      }
 
       if (error) {
         reject(error);
@@ -121,6 +131,36 @@ describe('runInstall', () => {
     expect(error.output.length).toBeLessThanOrEqual(MAX_INSTALL_OUTPUT_LENGTH);
     expect(error.output.endsWith('npm error the real error\n')).toBe(true);
     expect(error.output.startsWith('line ')).toBe(true);
+  });
+
+  it('does not wait for the output to end longer than the time limit', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    try {
+      const proc = fakeProcess(['npm error the real error\n'], execaError('Command failed'), {
+        keepOutputOpen: true,
+      });
+      execaMock.mockReturnValue(proc);
+
+      let settled = false;
+      const result = runInstall(scope)
+        .catch((e) => e)
+        .finally(() => {
+          settled = true;
+        });
+
+      await vi.advanceTimersByTimeAsync(OUTPUT_DRAIN_TIMEOUT_MS - 1);
+      expect(settled).toBe(false);
+
+      await vi.advanceTimersByTimeAsync(1);
+      const error = await result;
+
+      expect(error).toBeInstanceOf(InstallError);
+      expect(error.output).toBe('npm error the real error\n');
+      expect(proc.all?.destroyed).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
