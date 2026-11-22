@@ -14,6 +14,10 @@ type Octokit = ReturnType<typeof getOctokit>;
 export const CLA_STATUS_CONTEXT = 'license/cla';
 export const CLA_BOT_LOGIN = 'strapi-cla';
 export const ACTIONS_BOT_LOGIN = 'github-actions[bot]';
+
+/** REST reports the Actions bot as `github-actions[bot]`, GraphQL as `github-actions`. */
+export const isActionsBot = (login: string | null | undefined) =>
+  !!login && login.replace(/\[bot\]$/, '') === ACTIONS_BOT_LOGIN.replace(/\[bot\]$/, '');
 export const REMINDER_MARKER = '<!-- community-pr-cla: reminder -->';
 export const CLOSED_MARKER = '<!-- community-pr-cla: closed -->';
 
@@ -62,7 +66,7 @@ export interface ClaDiagnosis {
   unlinked: Array<{ sha: string; name: string; fakeNoreply: boolean }>;
 }
 
-/** The `license/cla` status of one commit in the PR. */
+/** A `license/cla` status of a commit that is (or was) in the PR. */
 export interface ClaStatus {
   state: string;
   createdAt: string;
@@ -150,6 +154,9 @@ export function diagnose(prAuthor: string, commits: CommitInfo[], bot: ClaBotCom
  * When the current pending period started: the CLA bot's first comment, unless the check has
  * passed on a commit since. Then the period restarts when the check went pending again, and
  * reminders or close notices from before that no longer count.
+ *
+ * `statuses` should include the head commit's whole status history (CLA Assistant can set a
+ * passing commit back to pending) and the heads that force-pushes removed from the PR.
  */
 export function pendingSince(opts: {
   botCommentAt: string | null;
@@ -185,14 +192,15 @@ export function parseOnlyPRs(value: string | undefined): number[] | undefined {
 export function planAction(opts: {
   unsignedSince: number;
   reminderAt: number | null;
-  closedNoticeAt: number | null;
+  /** When this workflow closed the PR (close event or close notice) in the current period. */
+  closedAt: number | null;
   now: number;
   reminderDays: number;
   closeDays: number;
 }): PlannedAction {
   const days = Math.floor((opts.now - opts.unsignedSince) / DAY_MS);
-  // Our close comment exists but the PR is open: someone reopened it on purpose. Leave it.
-  if (opts.closedNoticeAt) return { type: 'reopened', days };
+  // We closed the PR in this period but it is open: someone reopened it on purpose. Leave it.
+  if (opts.closedAt) return { type: 'reopened', days };
   if (days < opts.reminderDays) return { type: 'too-early', days };
   if (!opts.reminderAt) return { type: 'remind', days };
   if (days < opts.closeDays) return { type: 'wait', days, reason: 'reminder sent' };
@@ -414,6 +422,7 @@ interface OpenPR {
   createdAt: string;
   baseRef: string;
   labels: string[];
+  headSha: string | null;
   cla: { state: string; targetUrl: string | null } | null;
 }
 
@@ -431,6 +440,7 @@ interface OpenPRsQuery {
         commits: {
           nodes: Array<{
             commit: {
+              oid: string;
               status: { context: { state: string; targetUrl: string | null } | null } | null;
             };
           }>;
@@ -457,7 +467,7 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
               author { login __typename }
               labels(first: 50) { nodes { name } }
               commits(last: 1) {
-                nodes { commit { status { context(name: $context) { state targetUrl } } } }
+                nodes { commit { oid status { context(name: $context) { state targetUrl } } } }
               }
             }
           }
@@ -475,6 +485,7 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
         createdAt: n.createdAt,
         baseRef: n.baseRefName,
         labels: n.labels.nodes.map((l) => l.name),
+        headSha: n.commits.nodes[0]?.commit.oid ?? null,
         cla: n.commits.nodes[0]?.commit.status?.context ?? null,
       });
     }
@@ -501,36 +512,106 @@ async function listCommits(github: Octokit, owner: string, repo: string, pull_nu
   );
 }
 
-interface ClaStatusesQuery {
+type StatusContext = { context: ClaStatus | null } | null;
+
+interface PRHistoryQuery {
   repository: {
     pullRequest: {
-      commits: { nodes: Array<{ commit: { status: { context: ClaStatus | null } | null } }> };
+      commits: { nodes: Array<{ commit: { status: StatusContext } }> };
+      timelineItems: {
+        nodes: Array<
+          | {
+              __typename: 'HeadRefForcePushedEvent';
+              createdAt: string;
+              beforeCommit: { status: StatusContext } | null;
+            }
+          | { __typename: 'ClosedEvent'; createdAt: string; actor: { login: string } | null }
+        >;
+      };
     } | null;
   };
 }
 
-/** The `license/cla` status of each of the PR's last 100 commits that has one. */
-async function listClaStatuses(
+interface PRHistory {
+  /**
+   * `license/cla` statuses: the latest one of each of the PR's last 100 commits, the latest one
+   * of each head a force-push replaced, and the head commit's full history.
+   */
+  statuses: ClaStatus[];
+  /** Force-pushes to the PR branch. */
+  forcePushedAt: number[];
+  /** Times this workflow (the Actions bot) closed the PR. */
+  closedByUsAt: number[];
+}
+
+async function headClaStatuses(
   github: Octokit,
   owner: string,
   repo: string,
-  number: number
+  headSha: string | null
 ): Promise<ClaStatus[]> {
-  const res: ClaStatusesQuery = await github.graphql(
-    `query ($owner: String!, $repo: String!, $number: Int!, $context: String!) {
-      repository(owner: $owner, name: $repo) {
-        pullRequest(number: $number) {
-          commits(last: 100) {
-            nodes { commit { status { context(name: $context) { state createdAt } } } }
+  if (!headSha) return [];
+  // GraphQL only has the latest status per commit: a SUCCESS that was later set back to pending
+  // on the same commit only shows up in this list (newest first).
+  const { data } = await github.rest.repos.listCommitStatusesForRef({
+    owner,
+    repo,
+    ref: headSha,
+    per_page: 100,
+  });
+  return data
+    .filter((s) => s.context === CLA_STATUS_CONTEXT)
+    .map((s) => ({ state: s.state.toUpperCase(), createdAt: s.created_at }));
+}
+
+async function loadPRHistory(
+  github: Octokit,
+  owner: string,
+  repo: string,
+  number: number,
+  headSha: string | null
+): Promise<PRHistory> {
+  const [res, headStatuses] = await Promise.all([
+    github.graphql<PRHistoryQuery>(
+      `query ($owner: String!, $repo: String!, $number: Int!, $context: String!) {
+        repository(owner: $owner, name: $repo) {
+          pullRequest(number: $number) {
+            commits(last: 100) {
+              nodes { commit { status { context(name: $context) { state createdAt } } } }
+            }
+            timelineItems(last: 100, itemTypes: [HEAD_REF_FORCE_PUSHED_EVENT, CLOSED_EVENT]) {
+              nodes {
+                __typename
+                ... on HeadRefForcePushedEvent {
+                  createdAt
+                  beforeCommit { status { context(name: $context) { state createdAt } } }
+                }
+                ... on ClosedEvent { createdAt actor { login } }
+              }
+            }
           }
         }
-      }
-    }`,
-    { owner, repo, number, context: CLA_STATUS_CONTEXT }
-  );
-  return (res.repository.pullRequest?.commits.nodes ?? [])
-    .map((n) => n.commit.status?.context)
-    .filter((c): c is ClaStatus => !!c);
+      }`,
+      { owner, repo, number, context: CLA_STATUS_CONTEXT }
+    ),
+    headClaStatuses(github, owner, repo, headSha),
+  ]);
+
+  const pr = res.repository.pullRequest;
+  const history: PRHistory = { statuses: headStatuses, forcePushedAt: [], closedByUsAt: [] };
+  for (const n of pr?.commits.nodes ?? []) {
+    if (n.commit.status?.context) history.statuses.push(n.commit.status.context);
+  }
+  for (const item of pr?.timelineItems.nodes ?? []) {
+    if (item.__typename === 'HeadRefForcePushedEvent') {
+      history.forcePushedAt.push(new Date(item.createdAt).getTime());
+      const before = item.beforeCommit?.status?.context;
+      if (before) history.statuses.push(before);
+    } else if (item.__typename === 'ClosedEvent' && isActionsBot(item.actor?.login)) {
+      history.closedByUsAt.push(new Date(item.createdAt).getTime());
+    }
+  }
+  return history;
 }
 
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -618,34 +699,45 @@ async function processPR(
   const { github, owner, repo, dryRun, log, pr, now, result, prefix } = opts;
   const cla = pr.cla!;
 
-  const [comments, statuses] = await Promise.all([
+  const [comments, history] = await Promise.all([
     github.paginate(github.rest.issues.listComments, {
       owner,
       repo,
       issue_number: pr.number,
       per_page: 100,
     }),
-    listClaStatuses(github, owner, repo, pr.number),
+    loadPRHistory(github, owner, repo, pr.number, pr.headSha),
   ]);
   const botComment = comments.find((c) => c.user?.login === CLA_BOT_LOGIN);
   const unsignedSince = pendingSince({
     botCommentAt: botComment?.created_at ?? null,
     prCreatedAt: pr.createdAt,
-    statuses,
+    statuses: history.statuses,
   });
+  const at = (iso: string) => new Date(iso).getTime();
 
   // Only our comments from the current pending period count: if the check passed and went
   // pending again since, the PR gets a fresh reminder and a fresh close date.
   const ours = comments.filter(
-    (c) => c.user?.login === ACTIONS_BOT_LOGIN && new Date(c.created_at).getTime() >= unsignedSince
+    (c) => isActionsBot(c.user?.login) && at(c.created_at) >= unsignedSince
   );
-  const reminder = ours.find((c) => hasMarker(c.body, REMINDER_MARKER));
+  // A force-push can drop the commit the check passed on, or change what blocks it, so a
+  // reminder from before the last force-push no longer counts: the PR gets a new one first.
+  const lastForcePush = Math.max(-Infinity, ...history.forcePushedAt);
+  const reminder = ours.find(
+    (c) => hasMarker(c.body, REMINDER_MARKER) && at(c.created_at) > lastForcePush
+  );
   const closedNotice = ours.find((c) => hasMarker(c.body, CLOSED_MARKER));
+  // Our close event counts too, so a reopen is respected even when the close notice failed.
+  const closedTimes = [
+    ...(closedNotice ? [at(closedNotice.created_at)] : []),
+    ...history.closedByUsAt.filter((t) => t >= unsignedSince),
+  ];
 
   const plan = planAction({
     unsignedSince,
-    reminderAt: reminder ? new Date(reminder.created_at).getTime() : null,
-    closedNoticeAt: closedNotice ? new Date(closedNotice.created_at).getTime() : null,
+    reminderAt: reminder ? at(reminder.created_at) : null,
+    closedAt: closedTimes.length ? Math.max(...closedTimes) : null,
     now,
     reminderDays: opts.reminderDays,
     closeDays: opts.closeDays,
@@ -690,7 +782,8 @@ async function processPR(
     log(`${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → close`);
     if (dryRun) return;
     // Close first: if posting the comment fails, the PR is still closed, and an open PR never
-    // carries a close notice that wasn't followed by a close.
+    // carries a close notice that wasn't followed by a close. If only the notice fails, a later
+    // reopen is still recognised from our close event in the timeline.
     await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
     const failures: string[] = [];
     try {

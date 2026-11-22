@@ -105,9 +105,11 @@ CLA Assistant comments "please sign the CLA"   (clock starts at that comment)
                 that team's Canceled state)
 ```
 
-Commit email addresses are never written to comments or logs. Comments start with a hidden marker (`<!-- community-pr-cla: reminder -->` / `closed`), so a PR never gets the same comment twice, and a PR that was reopened after being closed is left alone.
+Commit email addresses are never written to comments or logs. Comments start with a hidden marker (`<!-- community-pr-cla: reminder -->` / `closed`), so a PR never gets the same comment twice. A PR that the workflow closed and someone reopened is left alone. The reopen is recognised from the workflow's close event in the PR timeline, so it works even if the close notice failed to post.
 
-If the check passes and later goes pending again (for example, a new commit from an email that isn't linked), the clock restarts: earlier reminders and close notices no longer count, and the PR gets a new reminder before it can be closed.
+If the check passes and later goes pending again (for example, a new commit from an email that isn't linked), the clock restarts: earlier reminders and close notices no longer count, and the PR gets a new reminder before it can be closed. This also holds when a force-push removed the commit the check passed on, or when the check on the same commit went from passed back to pending.
+
+A reminder sent before the PR's latest force-push no longer counts either, since the commits that block the check may have changed. The PR gets a new reminder, and is closed no sooner than 7 days after it.
 
 A failure on one PR (for example, a locked conversation) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed.
 

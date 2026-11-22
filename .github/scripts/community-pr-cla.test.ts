@@ -324,7 +324,7 @@ describe('buildCloseComment', () => {
 });
 
 describe('planAction', () => {
-  const base = { now: NOW, reminderDays: 7, closeDays: 30, reminderAt: null, closedNoticeAt: null };
+  const base = { now: NOW, reminderDays: 7, closeDays: 30, reminderAt: null, closedAt: null };
 
   it('waits during the first week', () => {
     assert.equal(planAction({ ...base, unsignedSince: NOW - 6 * DAY }).type, 'too-early');
@@ -354,7 +354,7 @@ describe('planAction', () => {
       ...base,
       unsignedSince: NOW - 60 * DAY,
       reminderAt: NOW - 40 * DAY,
-      closedNoticeAt: NOW - 10 * DAY,
+      closedAt: NOW - 10 * DAY,
     });
     assert.equal(plan.type, 'reopened');
   });
@@ -391,7 +391,14 @@ interface FakePR {
   association?: string;
   labels?: string[];
   claState?: string | null;
+  /** Latest `license/cla` status of each commit in the PR (GraphQL). */
   statuses?: Array<{ state: string; createdAt: string }>;
+  /** Full status history of the head commit (REST, newest first). */
+  headStatuses?: Array<{ context: string; state: string; created_at: string }>;
+  /** Force-pushes, with the latest CLA status of the head they replaced. */
+  forcePushes?: Array<{ createdAt: string; before?: { state: string; createdAt: string } }>;
+  /** Close events, by actor login as GraphQL reports it. */
+  closedEvents?: Array<{ createdAt: string; actor: string }>;
   comments?: Array<{ login: string; body: string; created_at: string }>;
   commits?: Array<{ sha: string; login: string | null; email: string }>;
 }
@@ -429,6 +436,7 @@ function fakeGithub(prs: FakePR[], fail: { update?: number[]; comment?: number[]
                   nodes: [
                     {
                       commit: {
+                        oid: `head${p.number}`.padEnd(40, '0'),
                         status:
                           p.claState === null
                             ? null
@@ -449,6 +457,20 @@ function fakeGithub(prs: FakePR[], fail: { update?: number[]; comment?: number[]
             commits: {
               nodes: (p.statuses ?? []).map((context) => ({ commit: { status: { context } } })),
             },
+            timelineItems: {
+              nodes: [
+                ...(p.forcePushes ?? []).map((f) => ({
+                  __typename: 'HeadRefForcePushedEvent',
+                  createdAt: f.createdAt,
+                  beforeCommit: { status: f.before ? { context: f.before } : null },
+                })),
+                ...(p.closedEvents ?? []).map((c) => ({
+                  __typename: 'ClosedEvent',
+                  createdAt: c.createdAt,
+                  actor: { login: c.actor },
+                })),
+              ],
+            },
           },
         },
       };
@@ -456,6 +478,12 @@ function fakeGithub(prs: FakePR[], fail: { update?: number[]; comment?: number[]
     paginate: async (method: (params: unknown) => Promise<{ data: unknown[] }>, params: unknown) =>
       (await method(params)).data,
     rest: {
+      repos: {
+        listCommitStatusesForRef: async ({ ref }: { ref: string }) => {
+          const p = prs.find((x) => `head${x.number}`.padEnd(40, '0') === ref)!;
+          return { data: p.headStatuses ?? [] };
+        },
+      },
       issues: {
         listComments: async ({ issue_number }: { issue_number: number }) => ({
           data: (byNumber.get(issue_number)!.comments ?? []).map((c) => ({
@@ -601,6 +629,89 @@ describe('processUnsignedClaPRs', () => {
     assert.deepEqual(actions(results), { 1: 'remind' });
     assert.equal(results[0].days, 8);
     assert.deepEqual(calls, [`comment #1 ${REMINDER_MARKER}`]);
+  });
+
+  it('sends a new reminder after a force-push, even with no SUCCESS in sight', async () => {
+    // Reminder on day 7, force-push on day 40 (a rebase dropped the commit the check passed on,
+    // or brought in a new unlinked one), now day 60.
+    const { github, calls } = fakeGithub([
+      {
+        number: 1,
+        comments: [botComment(60), ours(REMINDER_MARKER, 53)],
+        statuses: [{ state: 'PENDING', createdAt: iso(20) }],
+        forcePushes: [{ createdAt: iso(20) }],
+      },
+    ]);
+    assert.deepEqual(actions(await run(github)), { 1: 'remind' });
+    assert.deepEqual(calls, [`comment #1 ${REMINDER_MARKER}`]);
+  });
+
+  it('restarts the clock when the passing commit was force-pushed away', async () => {
+    const { github } = fakeGithub([
+      {
+        number: 1,
+        comments: [botComment(60), ours(REMINDER_MARKER, 53)],
+        statuses: [{ state: 'PENDING', createdAt: iso(20) }],
+        forcePushes: [{ createdAt: iso(20), before: { state: 'SUCCESS', createdAt: iso(50) } }],
+      },
+    ]);
+    const results = await run(github);
+    assert.deepEqual(actions(results), { 1: 'remind' });
+    assert.equal(results[0].days, 20);
+  });
+
+  it('restarts the clock when the head commit went from SUCCESS back to pending', async () => {
+    const { github, calls } = fakeGithub([
+      {
+        number: 1,
+        comments: [botComment(60), ours(REMINDER_MARKER, 53)],
+        statuses: [{ state: 'PENDING', createdAt: iso(9) }],
+        headStatuses: [
+          { context: 'license/cla', state: 'pending', created_at: iso(9) },
+          { context: 'other/check', state: 'success', created_at: iso(15) },
+          { context: 'license/cla', state: 'success', created_at: iso(30) },
+          { context: 'license/cla', state: 'pending', created_at: iso(60) },
+        ],
+      },
+    ]);
+    const results = await run(github);
+    assert.deepEqual(actions(results), { 1: 'remind' });
+    assert.equal(results[0].days, 9);
+    assert.deepEqual(calls, [`comment #1 ${REMINDER_MARKER}`]);
+  });
+
+  it('still counts a reminder sent after the last force-push', async () => {
+    const { github, calls } = fakeGithub([
+      {
+        number: 1,
+        comments: [botComment(60), ours(REMINDER_MARKER, 3)],
+        forcePushes: [{ createdAt: iso(20) }],
+      },
+    ]);
+    assert.deepEqual(actions(await run(github)), { 1: 'wait' });
+    assert.deepEqual(calls, []);
+  });
+
+  it('leaves a reopened PR alone when the close notice failed to post', async () => {
+    const pr = { number: 1, comments: [botComment(40), ours(REMINDER_MARKER, 10)] };
+    const first = fakeGithub([pr], { comment: [1] });
+    const results = await run(first.github);
+    assert.equal(results[0].action, 'error');
+    assert.match(results[0].error ?? '', /^closed, but close comment: locked/);
+    assert.deepEqual(first.calls, ['close #1', `comment #1 ${CLOSED_MARKER}`]);
+
+    // A maintainer reopens it: the timeline has our close event, but no close notice exists.
+    const reopened = fakeGithub([
+      { ...pr, closedEvents: [{ createdAt: iso(0), actor: 'github-actions' }] },
+    ]);
+    assert.deepEqual(actions(await run(reopened.github)), { 1: 'reopened' });
+    assert.deepEqual(reopened.calls, []);
+
+    // Someone else closing and reopening the PR doesn't stop the follow-up.
+    const byOther = fakeGithub([
+      { ...pr, closedEvents: [{ createdAt: iso(1), actor: 'a-maintainer' }] },
+    ]);
+    assert.deepEqual(actions(await run(byOther.github)), { 1: 'close' });
   });
 
   it('keeps going after a PR fails, and reports it', async () => {
