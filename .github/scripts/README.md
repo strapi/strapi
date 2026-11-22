@@ -84,7 +84,7 @@ Trigger the workflow manually from the GitHub Actions tab. The `dry_run` input d
 
 Follows up on open PRs from people outside the org whose CLA ([CLA Assistant](https://cla.strapi.io), `license/cla` status) is still unsigned. Org members, collaborators, bots and PRs whose `license/cla` passed are skipped.
 
-PRs labeled `waiting on author` or `stale` are also skipped: the lifecycle flow above already follows up on them and decides when they close. If you've already followed up on a CLA problem by hand, add `waiting on author` so the PR doesn't get a second, automated reminder.
+PRs labeled `community` and `waiting on author` (or `stale`) are also skipped: the lifecycle flow above already follows up on them and decides when they close. The lifecycle flow only handles `community` PRs, so on any other PR these labels don't stop the CLA follow-up, or nothing would ever close the PR. If you've already followed up on a CLA problem by hand on a `community` PR, add `waiting on author` so it doesn't get a second, automated reminder. To stop the CLA follow-up on any other PR, use a label from `CLA_EXEMPT_LABELS`.
 
 ```
 CLA Assistant comments "please sign the CLA"   (clock starts at that comment)
@@ -102,21 +102,29 @@ CLA Assistant comments "please sign the CLA"   (clock starts at that comment)
         ▼
 [GitHub Action] Posts one follow-up reminder about what blocks the check now
         │
-        │  (daily cron, still pending 30 days after the CLA Assistant comment,
-        │   and the latest reminder is at least 7 days old)
+        │  (daily cron, still pending 30 days after the CLA Assistant comment)
+        ▼
+[GitHub Action] If the latest reminder is 30 days old or more (for example, the check was
+                green for months and went pending again), posts one final reminder first
+        │
+        │  (daily cron, and the latest reminder is at least 7 days old)
         ▼
 [GitHub Action] Closes the PR with a short comment (it can be reopened once the CLA is signed)
                 Syncs the Linear ticket → "Canceled" (looks in CPR first, then CMS, and uses
                 that team's Canceled state)
 ```
 
-The clock never restarts: it runs from the CLA Assistant's first comment (or the PR's creation, if there is none), even if the check passed in between.
+The clock never restarts: it runs from the CLA Assistant's first comment (or the PR's creation, if there is none), even if the check passed in between. So a PR whose check goes pending again long after its last reminder can be closed soon, but it first gets one final reminder (once per PR) and at least 7 days to act on it. The close notice states no duration, since the check may have passed in between.
 
-A PR gets at most two reminders. Each reminder's hidden marker records what it named: `<!-- community-pr-cla: reminder blockers=author,<sha>,… -->`, where `author` means the author hadn't signed and each SHA is an unlinked or unsigned co-author's commit. A follow-up is only sent when something the latest reminder didn't name now blocks the check, for example when the author signed and then a commit with an unlinked email came in. A force-push that keeps the same blockers, or fewer, sends nothing. A rebase does give commits new SHAs, so it can bring the one follow-up, but never a third reminder.
+A PR gets at most two regular reminders. Each reminder's hidden marker records what it named: `<!-- community-pr-cla: reminder blockers=author,<sha>,… -->`, where `author` means the author hadn't signed and each SHA is an unlinked or unsigned co-author's commit. A follow-up is only sent when something the latest reminder didn't name now blocks the check, for example when the author signed and then a commit with an unlinked email came in. A force-push that keeps the same blockers, or fewer, sends nothing. A rebase does give commits new SHAs, so it can bring the one follow-up, but never a third regular reminder.
+
+The final reminder (`<!-- community-pr-cla: reminder final blockers=… -->`) is sent at most once per PR, whatever the cap, and only when the latest reminder's close date is long stale. The close then waits at least 7 days after it.
 
 Commit email addresses are never written to comments, markers or logs. Markers are only read at the start of the workflow's own comments.
 
-A PR that the workflow closed and someone reopened is left alone. The workflow recognises this from its close notice (`<!-- community-pr-cla: closed -->`), so it makes sure every PR it closes has one. It closes the PR, then posts the notice. If the notice fails twice, it reopens the PR and the next run tries the whole close again. A PR closed by someone else, or by the lifecycle flow, has no CLA close notice, so after a reopen it is reminded and closed as usual.
+A PR that the workflow closed and someone reopened is left alone. The workflow recognises this from its close notice (`<!-- community-pr-cla: closed -->`), so it makes sure every PR it closes has one. It closes the PR, then posts the notice. If posting fails, it checks whether GitHub stored the notice anyway before it retries once. If the notice still isn't there, it reopens the PR and the next run tries the whole close again.
+
+A PR closed by someone else, or by the lifecycle flow, has no CLA close notice, so after a reopen it isn't treated as reopened. It gets a reminder only if it never got one, and is closed on the usual schedule.
 
 A failure on one PR (for example, a locked conversation, or a Linear error after the close) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed. If `LINEAR_API_KEY` or a team id is missing, the run logs that it didn't sync Linear.
 

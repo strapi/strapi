@@ -13,6 +13,7 @@ import {
   diagnose,
   displayName,
   hasMarker,
+  isFinalReminder,
   parseClaBotComment,
   parseOnlyPRs,
   parseReminderMarker,
@@ -348,14 +349,12 @@ describe('parseOnlyPRs', () => {
 });
 
 describe('buildCloseComment', () => {
-  it('has the marker and a reopen hint', () => {
-    const body = buildCloseComment({
-      login: 'author',
-      claUrl: 'https://cla.example',
-      closeDays: 30,
-    });
+  it('has the marker and a reopen hint, and states no duration', () => {
+    const body = buildCloseComment({ login: 'author', claUrl: 'https://cla.example' });
     assert.ok(body.startsWith(CLOSED_MARKER));
     assert.match(body, /reopen/);
+    // The check may have passed in between, so "pending for N days" could be false.
+    assert.doesNotMatch(body, /\d+ days/);
   });
 });
 
@@ -368,9 +367,10 @@ describe('planAction', () => {
     blockers: [AUTHOR_BLOCKER],
     closedNoticeAt: null,
   };
-  const sent = (daysAgo: number, blockers = [AUTHOR_BLOCKER]) => ({
+  const sent = (daysAgo: number, blockers = [AUTHOR_BLOCKER], final = false) => ({
     at: NOW - daysAgo * DAY,
     blockers,
+    final,
   });
 
   it('waits during the first week', () => {
@@ -381,8 +381,41 @@ describe('planAction', () => {
     assert.deepEqual(planAction({ ...base, unsignedSince: NOW - 7 * DAY }), {
       type: 'remind',
       days: 7,
-      followUp: false,
+      kind: 'first',
     });
+  });
+
+  it('sends a final reminder before closing when the latest one is stale', () => {
+    const plan = planAction({ ...base, unsignedSince: NOW - 100 * DAY, reminders: [sent(93)] });
+    assert.deepEqual(plan, { type: 'remind', days: 100, kind: 'final' });
+  });
+
+  it('sends the final reminder outside the cap', () => {
+    const plan = planAction({
+      ...base,
+      blockers: ['beef000'],
+      unsignedSince: NOW - 100 * DAY,
+      reminders: [sent(93), sent(92, ['c0ffee0'])],
+    });
+    assert.deepEqual(plan, { type: 'remind', days: 100, kind: 'final' });
+  });
+
+  it('sends the final reminder only once', () => {
+    const plan = planAction({
+      ...base,
+      unsignedSince: NOW - 200 * DAY,
+      reminders: [sent(193), sent(100, [AUTHOR_BLOCKER], true)],
+    });
+    assert.equal(plan.type, 'close');
+  });
+
+  it('waits a week after the final reminder', () => {
+    const plan = planAction({
+      ...base,
+      unsignedSince: NOW - 100 * DAY,
+      reminders: [sent(93), sent(3, [AUTHOR_BLOCKER], true)],
+    });
+    assert.equal(plan.type, 'wait');
   });
 
   it('does not remind again for the same blockers, or fewer', () => {
@@ -404,7 +437,7 @@ describe('planAction', () => {
       unsignedSince: NOW - 40 * DAY,
       reminders: [sent(20)],
     });
-    assert.deepEqual(plan, { type: 'remind', days: 40, followUp: true });
+    assert.deepEqual(plan, { type: 'remind', days: 40, kind: 'follow-up' });
   });
 
   it(`never sends more than ${MAX_REMINDERS} reminders`, () => {
@@ -498,8 +531,10 @@ interface FakeFailures {
   reopen?: number[];
   /** PRs where every comment fails to post. */
   comment?: number[];
-  /** PR number → how many close-notice posts fail before one succeeds. */
+  /** PR number → how many close-notice posts fail (without storing) before one succeeds. */
   closeNotice?: Record<number, number>;
+  /** PR number → how many close-notice posts are stored but still answer with an error. */
+  closeNoticeStored?: Record<number, number>;
 }
 
 const iso = (daysAgo: number) => new Date(NOW - daysAgo * DAY).toISOString();
@@ -519,12 +554,21 @@ const reminded = (daysAgo: number, blockers = [AUTHOR_BLOCKER]) =>
 const closedNotice = (daysAgo: number) => ours(CLOSED_MARKER, daysAgo);
 
 const kind = (body: string) =>
-  parseReminderMarker(body) ? 'reminder' : hasMarker(body, CLOSED_MARKER) ? 'closed' : 'other';
+  isFinalReminder(body)
+    ? 'final reminder'
+    : parseReminderMarker(body)
+      ? 'reminder'
+      : hasMarker(body, CLOSED_MARKER)
+        ? 'closed'
+        : 'other';
 
 function fakeGithub(prs: FakePR[], fail: FakeFailures = {}, clock = { now: NOW }) {
   const calls: string[] = [];
   const byNumber = new Map(prs.map((p) => [p.number, p]));
-  const noticeFailures = new Map(Object.entries(fail.closeNotice ?? {}).map(([k, v]) => [+k, v]));
+  const counts = (r?: Record<number, number>) =>
+    new Map(Object.entries(r ?? {}).map(([k, v]) => [+k, v]));
+  const noticeFailures = counts(fail.closeNotice);
+  const storedFailures = counts(fail.closeNoticeStored);
   const github = {
     graphql: async () => ({
       repository: {
@@ -579,6 +623,11 @@ function fakeGithub(prs: FakePR[], fail: FakeFailures = {}, clock = { now: NOW }
             ...(p.comments ?? []),
             { login: 'github-actions[bot]', body, created_at: new Date(clock.now).toISOString() },
           ];
+          const stored = storedFailures.get(issue_number) ?? 0;
+          if (kind(body) === 'closed' && stored > 0) {
+            storedFailures.set(issue_number, stored - 1);
+            throw new Error('504 after storing');
+          }
           return {};
         },
       },
@@ -640,6 +689,7 @@ async function simulate(pr: FakePR, days: number, onDay: (day: number) => void =
   pr.comments = [{ login: 'strapi-cla', body: SINGLE_COMMITTER_BODY, created_at: iso(200) }];
   const { github, calls } = fakeGithub([pr], {}, clock);
   const reminderDays: number[] = [];
+  const finalDays: number[] = [];
   let closedOn: number | null = null;
   for (let day = 0; day <= days && !pr.closed; day++) {
     clock.now = start + day * DAY + 10.5 * 3_600_000; // the 10:30 UTC cron
@@ -648,10 +698,11 @@ async function simulate(pr: FakePR, days: number, onDay: (day: number) => void =
     await run(github, { now: clock.now });
     for (const call of calls.slice(before)) {
       if (call.endsWith(' reminder')) reminderDays.push(day);
+      if (call.endsWith(' final reminder')) finalDays.push(day);
       if (call.startsWith('close #')) closedOn = day;
     }
   }
-  return { reminderDays, closedOn, pr };
+  return { reminderDays, finalDays, closedOn, pr };
 }
 
 const sha = (prefix: string) => prefix.padEnd(40, '0');
@@ -662,8 +713,8 @@ describe('processUnsignedClaPRs', () => {
       { number: 1, login: 'dependabot[bot]', typename: 'Bot', comments: [botComment(20)] },
       { number: 2, association: 'MEMBER', comments: [botComment(20)] },
       { number: 3, claState: 'SUCCESS', comments: [botComment(20)] },
-      { number: 4, labels: ['waiting on author'], comments: [botComment(20)] },
-      { number: 5, labels: ['Stale'], comments: [botComment(20)] },
+      { number: 4, labels: ['waiting on author', 'community'], comments: [botComment(20)] },
+      { number: 5, labels: ['Stale', 'Community'], comments: [botComment(20)] },
       { number: 6, labels: ['pr: security'], comments: [botComment(20)] },
       { number: 7, claState: null, comments: [botComment(20)] },
       { number: 8, comments: [botComment(20)] },
@@ -671,6 +722,19 @@ describe('processUnsignedClaPRs', () => {
     const results = await run(github);
     assert.deepEqual(actions(results), { 8: 'remind' });
     assert.deepEqual(calls, ['comment #8 reminder']);
+  });
+
+  it('only leaves lifecycle-labelled PRs to the lifecycle flow when they are `community`', async () => {
+    // The lifecycle flow only handles `community` PRs: without that label, nothing else would
+    // ever follow up on or close the PR.
+    const { github, calls } = fakeGithub([
+      { number: 1, labels: ['waiting on author'], comments: [botComment(20)] },
+      { number: 2, labels: ['stale'], comments: [botComment(20)] },
+      { number: 3, labels: ['waiting on author', 'community'], comments: [botComment(20)] },
+      { number: 4, labels: ['pr: security'], comments: [botComment(20)] },
+    ]);
+    assert.deepEqual(actions(await run(github)), { 1: 'remind', 2: 'remind' });
+    assert.deepEqual(calls, ['comment #1 reminder', 'comment #2 reminder']);
   });
 
   it('writes nothing in a dry run', async () => {
@@ -714,7 +778,7 @@ describe('processUnsignedClaPRs', () => {
     assert.deepEqual(calls, []);
   });
 
-  it('handles a PR closed and reopened by someone else (or the lifecycle job) as usual', async () => {
+  it('does not treat a PR closed by someone else (or the lifecycle job) as reopened', async () => {
     const lifecycleClose = ours('> This is a templated message\n\nClosing this PR', 3);
     const { github } = fakeGithub([
       { number: 1, comments: [botComment(40), lifecycleClose] },
@@ -781,6 +845,31 @@ describe('processUnsignedClaPRs', () => {
     const { github } = fakeGithub([pr], { closeNotice: { 1: 2 }, reopen: [1] });
     const results = await run(github);
     assert.match(results[0].error ?? '', /closed WITHOUT a close notice/);
+    assert.equal(pr.closed, true);
+  });
+
+  it('keeps the PR closed when GitHub stored the notice but answered with an error', async () => {
+    const pr: FakePR = { number: 1, comments: [botComment(40), reminded(10)] };
+    const { github, calls } = fakeGithub([pr], { closeNoticeStored: { 1: 1 } });
+    const closed: number[] = [];
+    const results = await run(github, { onClosed: async (n) => void closed.push(n) });
+    assert.equal(results[0].error, undefined);
+    // No retry (it would post a second notice) and no reopen.
+    assert.deepEqual(calls, ['close #1', 'comment #1 closed']);
+    assert.equal(pr.closed, true);
+    assert.equal(pr.comments!.filter((c) => hasMarker(c.body, CLOSED_MARKER)).length, 1);
+    assert.deepEqual(closed, [1]);
+  });
+
+  it('does not reopen when the retried notice was stored despite an error', async () => {
+    const pr: FakePR = { number: 1, comments: [botComment(40), reminded(10)] };
+    const { github, calls } = fakeGithub([pr], {
+      closeNotice: { 1: 1 },
+      closeNoticeStored: { 1: 1 },
+    });
+    const results = await run(github);
+    assert.equal(results[0].error, undefined);
+    assert.deepEqual(calls, ['close #1', 'comment #1 closed', 'comment #1 closed']);
     assert.equal(pr.closed, true);
   });
 
@@ -899,6 +988,48 @@ describe('processUnsignedClaPRs over time', () => {
     });
     assert.deepEqual(second.reminderDays, [7, 25]);
     assert.equal(second.closedOn, 32);
+  });
+
+  it('warns once more before closing a PR whose check was green for months', async () => {
+    // Reminded on day 7, green on days 9-99, pending again on day 100.
+    const pr: FakePR = { number: 1 };
+    const { reminderDays, finalDays, closedOn } = await simulate(pr, 150, (day) => {
+      if (day === 9) pr.claState = 'SUCCESS';
+      if (day === 100) pr.claState = 'PENDING';
+    });
+    assert.deepEqual(reminderDays, [7, 100]);
+    assert.deepEqual(finalDays, [100]);
+    assert.equal(closedOn, 107);
+
+    const final = pr.comments!.find((c) => isFinalReminder(c.body))!.body;
+    assert.doesNotMatch(final, /has been pending for/);
+    const notice = pr.comments!.at(-1)!.body;
+    assert.ok(hasMarker(notice, CLOSED_MARKER));
+    assert.doesNotMatch(notice, /\d+ days/);
+  });
+
+  it('sends the final reminder after the cap is used, and never a third regular one', async () => {
+    const pr: FakePR = { number: 1 };
+    const author = { sha: sha('a1'), login: 'author', email: 'a@example.com' };
+    const unlinked = (prefix: string) => ({
+      sha: sha(prefix),
+      login: null,
+      email: 'u@example.com',
+    });
+    const { reminderDays, finalDays, closedOn } = await simulate(pr, 150, (day) => {
+      // Day 8: an unlinked commit (follow-up, cap used). Green on days 9-99. Day 100: pending
+      // again with another unlinked commit. Day 103: yet another one.
+      if (day === 8) pr.commits = [author, unlinked('c0ffee')];
+      if (day === 9) pr.claState = 'SUCCESS';
+      if (day === 100) {
+        pr.claState = 'PENDING';
+        pr.commits = [author, unlinked('c0ffee'), unlinked('beef')];
+      }
+      if (day === 103) pr.commits = [...pr.commits!, unlinked('d00d')];
+    });
+    assert.deepEqual(reminderDays, [7, 8, 100]);
+    assert.deepEqual(finalDays, [100]);
+    assert.equal(closedOn, 107);
   });
 });
 
