@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { baseEnv, strapiBin } from './config';
+import { baseEnv, inheritedEnv, strapiBin } from './config';
 import type { App } from './generate';
 
 export const adminIndexFile = (app: App) => path.join(app.dir, 'build', 'index.html');
@@ -26,7 +26,7 @@ export const buildAdmin = async (app: App, { env }: BuildAdminOptions = {}) => {
   const code = await new Promise<number | null>((resolve, reject) => {
     const child = spawn(process.execPath, [strapiBin(), 'build'], {
       cwd: app.dir,
-      env: { ...process.env, ...baseEnv(), ...env },
+      env: { ...inheritedEnv(), ...baseEnv(), ...env },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     child.stdout.on('data', (chunk) => output.push(chunk.toString()));

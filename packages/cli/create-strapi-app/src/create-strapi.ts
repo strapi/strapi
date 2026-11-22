@@ -5,8 +5,6 @@ import execa from 'execa';
 import fse from 'fs-extra';
 import semver from 'semver';
 
-import { createGrowthSsoTrial } from '@strapi/cloud-cli';
-
 import { copyTemplate } from './utils/template';
 import { tryGitInit } from './utils/git';
 import { trackUsage } from './utils/usage';
@@ -170,20 +168,6 @@ async function createApp(scope: Scope) {
   } catch (err) {
     await fse.remove(rootPath);
     throw err;
-  }
-
-  // Create and save a growth sso trial license
-  if (scope.shouldCreateGrowthSsoTrial) {
-    try {
-      const data = await createGrowthSsoTrial({ strapiVersion: scope.strapiVersion });
-
-      if (data?.license) {
-        fse.writeFile(join(rootPath, 'license.txt'), data.license);
-        logger.log('Your 30 days trial will be applied automatically to your project. Enjoy!');
-      }
-    } catch {
-      logger.error('Error while trying to create your trial. Please try again later.');
-    }
   }
 
   if (installDependencies) {

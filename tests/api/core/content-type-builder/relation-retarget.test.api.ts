@@ -1,0 +1,1239 @@
+/**
+ * Integration test: retargeting a relation in the Content-Type Builder while keeping its field
+ * name and its counterpart name writes a valid owner and inverse pair, the app boots on it, and
+ * attributes of the old target type that are not the other side keep their schema and links.
+ */
+import path from 'path';
+import fse from 'fs-extra';
+import type { Core } from '@strapi/types';
+
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
+import { createTestBuilder } from 'api-tests/builder';
+
+const SHELF_UID = 'api::rt-shelf.rt-shelf';
+const BOOKCASE_UID = 'api::rt-bookcase.rt-bookcase';
+const BOOK_UID = 'api::rt-book.rt-book';
+const MAGAZINE_UID = 'api::rt-magazine.rt-magazine';
+const TYPE_FOLDERS = ['rt-book', 'rt-bookcase', 'rt-shelf', 'rt-magazine'];
+
+type Request = (options: {
+  method: string;
+  url: string;
+  body?: Record<string, unknown>;
+}) => Promise<{ statusCode: number; body: Record<string, any> }>;
+
+let strapi: Core.Strapi;
+let rq: Request;
+let contentAPI: Request;
+let apiDir: string;
+
+const builder = createTestBuilder();
+
+const boot = async () => {
+  strapi = await createStrapiInstance();
+  rq = await createAuthRequest({ strapi });
+  contentAPI = createContentAPIRequest({ strapi });
+  apiDir = strapi.dirs.app.api;
+};
+
+const restart = async () => {
+  await strapi.destroy();
+  await boot();
+};
+
+const updateSchema = (data: Record<string, unknown>) =>
+  rq({ method: 'POST', url: '/content-type-builder/update-schema', body: { data } });
+
+const relation = (relationKind: string, target: string, targetAttribute?: string) => ({
+  type: 'relation',
+  relation: relationKind,
+  target,
+  ...(targetAttribute === undefined ? {} : { targetAttribute }),
+});
+
+const contentType = (
+  action: string,
+  singularName: string,
+  attributes: Array<Record<string, unknown>>
+) => ({
+  action,
+  uid: `api::${singularName}.${singularName}`,
+  displayName: singularName,
+  singularName,
+  pluralName: `${singularName}s`,
+  kind: 'collectionType',
+  draftAndPublish: false,
+  attributes,
+});
+
+const attribute = (action: string, name: string, properties: Record<string, unknown>) => ({
+  action,
+  name,
+  properties,
+});
+
+const nameAttribute = (action: string, name: string) => attribute(action, name, { type: 'string' });
+
+const attributesOf = (uid: string) =>
+  strapi.contentTypes[uid as keyof typeof strapi.contentTypes].attributes as Record<
+    string,
+    Record<string, unknown>
+  >;
+
+/** Creates Book (`shelf` owns Shelf.books), Bookcase and Shelf, then restarts. */
+const createTypes = async (shelfBooksOptions: Record<string, unknown> = {}) => {
+  const created = await updateSchema({
+    contentTypes: [
+      contentType('create', 'rt-book', [
+        nameAttribute('create', 'title'),
+        attribute('create', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+      ]),
+      contentType('create', 'rt-bookcase', [nameAttribute('create', 'name')]),
+      contentType('create', 'rt-shelf', [
+        nameAttribute('create', 'name'),
+        attribute('create', 'books', {
+          ...relation('oneToMany', BOOK_UID, 'shelf'),
+          ...shelfBooksOptions,
+        }),
+      ]),
+    ],
+    components: [],
+  });
+  expect(created.statusCode).toBe(200);
+
+  await restart();
+};
+
+/**
+ * Deletes the types of this file and boots a new instance. The type folders are also removed
+ * from the disk, so that a schema that failed to boot cannot break the suites that run after.
+ */
+const resetTypes = async () => {
+  try {
+    await updateSchema({
+      contentTypes: [BOOK_UID, BOOKCASE_UID, SHELF_UID]
+        .filter((uid) => strapi.contentTypes[uid as keyof typeof strapi.contentTypes] !== undefined)
+        .map((uid) => ({ action: 'delete', uid })),
+      components: [],
+    });
+  } catch {
+    // The instance did not boot: the folders are removed below
+  }
+
+  try {
+    await strapi.destroy();
+  } catch {
+    // Already destroyed by a restart that failed
+  }
+
+  await Promise.all(TYPE_FOLDERS.map((folder) => fse.remove(path.join(apiDir, folder))));
+  await boot();
+};
+
+/** The save of the retarget of Book.shelf from Shelf to Bookcase, with only Book in it. */
+const bookOnlyRetarget = (extraAttributes: Array<Record<string, unknown>> = []) =>
+  contentType('update', 'rt-book', [
+    nameAttribute('update', 'title'),
+    attribute('update', 'shelf', relation('manyToOne', BOOKCASE_UID, 'books')),
+    ...extraAttributes,
+  ]);
+
+const schemaFile = (folder: string) =>
+  path.join(apiDir, folder, 'content-types', folder, 'schema.json');
+
+/** Sends the GET response of the single-type route back, after `change` edits its schema. */
+const putBookFromGet = async (change: (schema: Record<string, any>) => void) => {
+  const url = `/content-type-builder/content-types/${BOOK_UID}`;
+  const { body } = await rq({ method: 'GET', url });
+  change(body.data.schema);
+
+  return rq({ method: 'PUT', url, body: { contentType: body.data.schema } });
+};
+
+/** Sends the GET response of the single-type route of `uid` back, after `change` edits it. */
+const putFromGet = async (uid: string, change: (schema: Record<string, any>) => void) => {
+  const url = `/content-type-builder/content-types/${uid}`;
+  const { body } = await rq({ method: 'GET', url });
+  change(body.data.schema);
+
+  return rq({ method: 'PUT', url, body: { contentType: body.data.schema } });
+};
+
+/**
+ * Checks the result of a retarget of Shelf.books from Book to Bookcase: the old owner Book.shelf
+ * is deleted with its link table, Bookcase.shelf owns Shelf.books, and the relation works.
+ */
+const expectInverseSideRetargeted = async (oldLinkTable: string, shelfId: string) => {
+  expect(attributesOf(BOOK_UID)).not.toHaveProperty('shelf');
+  expect(attributesOf(BOOKCASE_UID).shelf).toMatchObject({
+    type: 'relation',
+    relation: 'manyToOne',
+    target: SHELF_UID,
+    inversedBy: 'books',
+  });
+  expect(attributesOf(SHELF_UID).books).toMatchObject({
+    type: 'relation',
+    relation: 'oneToMany',
+    target: BOOKCASE_UID,
+    mappedBy: 'shelf',
+  });
+  expect(await strapi.db.connection.schema.hasTable(oldLinkTable)).toBe(false);
+
+  const bookcase = await strapi.documents(BOOKCASE_UID).create({
+    data: { name: 'Bookcase 1', shelf: shelfId },
+  });
+  const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+    documentId: shelfId,
+    populate: ['books'],
+  });
+  expect(shelfWithBooks?.books).toMatchObject([{ documentId: bookcase.documentId }]);
+};
+
+/** Creates a shelf with one book, and returns the link table of Book.shelf. */
+const seedLinkedBook = async () => {
+  const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+  await strapi.documents(BOOK_UID).create({ data: { title: 'Book 1', shelf: shelf.documentId } });
+
+  const { joinTable } = strapi.db.metadata.get(BOOK_UID).attributes.shelf as {
+    joinTable: { name: string };
+  };
+  const [{ count }] = await strapi.db.connection(joinTable.name).count({ count: '*' });
+  expect(Number(count)).toBe(1);
+
+  return { shelfId: shelf.documentId, oldLinkTable: joinTable.name };
+};
+
+/** Every order of `items`, as the order of the types in a save. */
+const permutations = <T>(items: T[]): T[][] =>
+  items.length <= 1
+    ? [items]
+    : items.flatMap((item, index) =>
+        permutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) => [
+          item,
+          ...rest,
+        ])
+      );
+
+/** Reads a schema file of this file's types from the disk (written by a save, before a restart). */
+const readSchemaAttributes = async (folder: string) =>
+  (await fse.readJSON(schemaFile(folder))).attributes as Record<string, Record<string, unknown>>;
+
+describe('Content Type Builder - retarget a relation under its own name', () => {
+  beforeAll(async () => {
+    await boot();
+  });
+
+  afterEach(async () => {
+    await resetTypes();
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('moves Book.shelf to Bookcase and keeps a valid pair after the restart', async () => {
+    await createTypes();
+
+    // A link that exists before the retarget
+    const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+    const linkedBook = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Linked book', shelf: shelf.documentId },
+    });
+
+    // The save the admin sends, with the types in the order that deleted Book.shelf
+    const res = await updateSchema({
+      contentTypes: [
+        bookOnlyRetarget(),
+        contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('delete', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    // Boot runs the database check that every inverse side has an owner pointing back
+    await restart();
+
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      type: 'relation',
+      relation: 'manyToOne',
+      target: BOOKCASE_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOKCASE_UID).books).toMatchObject({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+      mappedBy: 'shelf',
+    });
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+
+    // The link to the old target does not point to a bookcase
+    const bookcase = await strapi.documents(BOOKCASE_UID).create({ data: { name: 'Bookcase 1' } });
+    const unlinked = await strapi.documents(BOOK_UID).findOne({
+      documentId: linkedBook.documentId,
+      populate: ['shelf'],
+    });
+    expect(unlinked?.shelf).toBeNull();
+
+    // The relation stores and reads back from both sides, for a new and for the old book
+    const newBook = await strapi.documents(BOOK_UID).create({
+      data: { title: 'New book', shelf: bookcase.documentId },
+    });
+    await strapi.documents(BOOK_UID).update({
+      documentId: linkedBook.documentId,
+      data: { shelf: bookcase.documentId },
+    });
+
+    const bookcaseWithBooks = await strapi.documents(BOOKCASE_UID).findOne({
+      documentId: bookcase.documentId,
+      populate: ['books'],
+    });
+    const newBookWithShelf = await strapi.documents(BOOK_UID).findOne({
+      documentId: newBook.documentId,
+      populate: ['shelf'],
+    });
+
+    expect(
+      (bookcaseWithBooks?.books as Array<{ documentId: string }>)
+        .map((book) => book.documentId)
+        .sort()
+    ).toEqual([linkedBook.documentId, newBook.documentId].sort());
+    expect(newBookWithShelf?.shelf).toMatchObject({ documentId: bookcase.documentId });
+  });
+
+  // A body in the stored format names the other side with inversedBy or mappedBy, without
+  // targetAttribute: direct clients and the api-tests modifyContentType helper send it
+  test.each(['oneToOne', 'manyToMany'])(
+    'changes Book.shelf to %s through the single-type route with a body in the stored format',
+    async (kind) => {
+      await createTypes();
+
+      const res = await putFromGet(BOOK_UID, (schema) => {
+        expect(schema.attributes.shelf).toMatchObject({ inversedBy: 'books' });
+        delete schema.attributes.shelf.targetAttribute;
+        schema.attributes.shelf.relation = kind;
+      });
+      expect(res.statusCode).toBe(201);
+
+      await restart();
+
+      expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+        relation: kind,
+        target: SHELF_UID,
+        inversedBy: 'books',
+      });
+      expect(attributesOf(SHELF_UID).books).toMatchObject({
+        relation: kind,
+        target: BOOK_UID,
+        mappedBy: 'shelf',
+      });
+
+      const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+      const book = await strapi.documents(BOOK_UID).create({
+        data: {
+          title: 'Book 1',
+          shelf: kind === 'oneToOne' ? shelf.documentId : [shelf.documentId],
+        },
+      });
+      const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+        documentId: shelf.documentId,
+        populate: ['books'],
+      });
+      const books = shelfWithBooks?.books;
+      expect(Array.isArray(books) ? books : [books]).toMatchObject([
+        { documentId: book.documentId },
+      ]);
+    }
+  );
+
+  test('changes the kind of Book.shelf in a save with only Book', async () => {
+    await createTypes();
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToMany', SHELF_UID, 'books')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      relation: 'manyToMany',
+      inversedBy: 'books',
+    });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({
+      relation: 'manyToMany',
+      mappedBy: 'shelf',
+    });
+  });
+
+  test('keeps the owner of a hidden inverse side when Shelf is saved with a body in the stored format', async () => {
+    await createTypes();
+
+    // Shelf.books is not visible: the GET response of the route does not have it
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.books.visible = false;
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const res = await putFromGet(SHELF_UID, (schema) => {
+      expect(schema.attributes).not.toHaveProperty('books');
+      // A client that sends the stored schema also sends Shelf.books, in the stored format
+      schema.attributes.books = shelfSchema.attributes.books;
+      schema.attributes.label = { type: 'string' };
+    });
+    expect(res.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ target: SHELF_UID, inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({
+      target: BOOK_UID,
+      mappedBy: 'shelf',
+      visible: false,
+    });
+  });
+
+  // Retargeting an inverse side deletes its old owner and the link rows of that owner
+  test('retargets the inverse side as the admin form sends it, and deletes the old owner', async () => {
+    await createTypes();
+    const { shelfId, oldLinkTable } = await seedLinkedBook();
+
+    // The admin form deletes the old owner, creates the new owner and retargets Shelf.books
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('delete', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('oneToMany', BOOKCASE_UID, 'shelf')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    await expectInverseSideRetargeted(oldLinkTable, shelfId);
+  });
+
+  test('retargets the inverse side in a save with only Shelf, and deletes the old owner', async () => {
+    await createTypes();
+    const { shelfId, oldLinkTable } = await seedLinkedBook();
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('oneToMany', BOOKCASE_UID, 'shelf')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    await expectInverseSideRetargeted(oldLinkTable, shelfId);
+  });
+
+  test('keeps a one-way relation of the old target when the save has only Book', async () => {
+    await createTypes();
+
+    // Shelf.books is a one-way relation to Book: not the other side of Book.shelf
+    const shelfSchemaPath = schemaFile('rt-shelf');
+    const shelfSchema = await fse.readJSON(shelfSchemaPath);
+    shelfSchema.attributes.books = { type: 'relation', relation: 'oneToMany', target: BOOK_UID };
+    await fse.writeJSON(shelfSchemaPath, shelfSchema, { spaces: 2 });
+    await restart();
+
+    const book = await strapi.documents(BOOK_UID).create({ data: { title: 'Book 1' } });
+    const shelf = await strapi.documents(SHELF_UID).create({
+      data: { name: 'Shelf 1', books: [book.documentId] },
+    });
+
+    const res = await updateSchema({ contentTypes: [bookOnlyRetarget()], components: [] });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).books).toEqual({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+    });
+
+    const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+      documentId: shelf.documentId,
+      populate: ['books'],
+    });
+    expect(shelfWithBooks?.books).toMatchObject([{ documentId: book.documentId }]);
+  });
+
+  test('keeps the options of a counterpart that another attribute takes over', async () => {
+    await createTypes({ private: true });
+
+    // Book.mainShelf takes over Shelf.books, which is private, in a save with only Book
+    const res = await updateSchema({
+      contentTypes: [
+        bookOnlyRetarget([
+          attribute('create', 'mainShelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).books).toMatchObject({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+      mappedBy: 'mainShelf',
+      private: true,
+    });
+    expect(attributesOf(BOOKCASE_UID).books).toMatchObject({ mappedBy: 'shelf' });
+
+    const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+    await strapi.documents(BOOK_UID).create({
+      data: { title: 'Book 1', mainShelf: shelf.documentId },
+    });
+
+    const shelves = await contentAPI({ method: 'GET', url: '/rt-shelfs?populate=*' });
+    expect(shelves.statusCode).toBe(200);
+    expect(shelves.body.data).toHaveLength(1);
+    expect(shelves.body.data[0]).not.toHaveProperty('books');
+  });
+  test('renames the counterpart through the single-type route', async () => {
+    await createTypes();
+
+    // The GET response has the stored inversedBy next to targetAttribute
+    const res = await putBookFromGet((schema) => {
+      expect(schema.attributes.shelf).toMatchObject({
+        targetAttribute: 'books',
+        inversedBy: 'books',
+      });
+      schema.attributes.shelf.targetAttribute = 'tomes';
+    });
+    expect(res.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+    expect(attributesOf(SHELF_UID).tomes).toMatchObject({ mappedBy: 'shelf' });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'tomes' });
+  });
+
+  test('retargets through the single-type route next to a non-configurable owner of the same inverse side', async () => {
+    await createTypes();
+
+    // Book.mainShelf, not configurable, is the owner of Shelf.books
+    const bookSchema = await fse.readJSON(schemaFile('rt-book'));
+    bookSchema.attributes.mainShelf = {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: SHELF_UID,
+      inversedBy: 'books',
+      configurable: false,
+    };
+    await fse.writeJSON(schemaFile('rt-book'), bookSchema, { spaces: 2 });
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.books.mappedBy = 'mainShelf';
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const res = await putBookFromGet((schema) => {
+      schema.attributes.shelf.target = BOOKCASE_UID;
+    });
+    expect(res.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'mainShelf' });
+    expect(attributesOf(BOOK_UID).mainShelf).toMatchObject({
+      target: SHELF_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      target: BOOKCASE_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOKCASE_UID).books).toMatchObject({ mappedBy: 'shelf' });
+  });
+  test('retargets in a save with only Book, and removes the inverse side on the old target', async () => {
+    await createTypes();
+
+    const res = await updateSchema({ contentTypes: [bookOnlyRetarget()], components: [] });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      target: BOOKCASE_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOKCASE_UID).books).toMatchObject({ mappedBy: 'shelf' });
+  });
+
+  test('retargets with Bookcase before Book and no Shelf in the save', async () => {
+    await createTypes();
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+        bookOnlyRetarget(),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      target: BOOKCASE_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOKCASE_UID).books).toMatchObject({ mappedBy: 'shelf' });
+  });
+
+  test('keeps a one-way relation that an owner names when a save of Book does not change it', async () => {
+    await createTypes();
+
+    // Book.shelf names Shelf.books, which is a one-way relation to Book
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.books = { type: 'relation', relation: 'oneToMany', target: BOOK_UID };
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const book = await strapi.documents(BOOK_UID).create({ data: { title: 'Book 1' } });
+    const shelf = await strapi.documents(SHELF_UID).create({
+      data: { name: 'Shelf 1', books: [book.documentId] },
+    });
+
+    // Book gets a new text field, and shelf is sent as the schema route returns it
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          nameAttribute('create', 'subtitle'),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).books).toEqual({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+    });
+    const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+      documentId: shelf.documentId,
+      populate: ['books'],
+    });
+    expect(shelfWithBooks?.books).toMatchObject([{ documentId: book.documentId }]);
+  });
+
+  test('rejects a new relation whose counterpart name is a scalar attribute of the target', async () => {
+    await createTypes();
+    const bookcase = await strapi.documents(BOOKCASE_UID).create({ data: { name: 'Bookcase 1' } });
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'bookcase', relation('manyToOne', BOOKCASE_UID, 'name')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('bookcase');
+    expect(attributesOf(BOOKCASE_UID).name).toEqual({ type: 'string' });
+    const stored = await strapi.documents(BOOKCASE_UID).findOne({
+      documentId: bookcase.documentId,
+    });
+    expect(stored?.name).toBe('Bookcase 1');
+  });
+
+  test('rejects a new relation whose counterpart name is a one-way relation of the target', async () => {
+    await createTypes();
+
+    // Bookcase.items is a one-way relation to Book with one link
+    const created = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'items', relation('oneToMany', BOOK_UID)),
+        ]),
+      ],
+      components: [],
+    });
+    expect(created.statusCode).toBe(200);
+    await restart();
+
+    const book = await strapi.documents(BOOK_UID).create({ data: { title: 'Book 1' } });
+    const bookcase = await strapi.documents(BOOKCASE_UID).create({
+      data: { name: 'Bookcase 1', items: [book.documentId] },
+    });
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'bookcase', relation('manyToOne', BOOKCASE_UID, 'items')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(attributesOf(BOOKCASE_UID).items).toEqual({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+    });
+    const bookcaseWithItems = await strapi.documents(BOOKCASE_UID).findOne({
+      documentId: bookcase.documentId,
+      populate: ['items'],
+    });
+    expect(bookcaseWithItems?.items).toMatchObject([{ documentId: book.documentId }]);
+  });
+  test('keeps the options of the counterpart when a save of Book renames it', async () => {
+    await createTypes({ private: true, required: true });
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'tomes')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+    expect(attributesOf(SHELF_UID).tomes).toMatchObject({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+      mappedBy: 'shelf',
+      private: true,
+      required: true,
+    });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'tomes' });
+  });
+  test.each(permutations(['rt-book', 'rt-bookcase', 'rt-shelf']))(
+    'retargets Book.shelf as the admin form sends it, with the types in the order %s, %s, %s',
+    async (...order) => {
+      await createTypes();
+
+      const payloads: Record<string, Record<string, unknown>> = {
+        'rt-book': bookOnlyRetarget(),
+        'rt-bookcase': contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+        'rt-shelf': contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('delete', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+      };
+
+      const res = await updateSchema({
+        contentTypes: order.map((type) => payloads[type]),
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+      expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+        target: BOOKCASE_UID,
+        inversedBy: 'books',
+      });
+      expect(attributesOf(BOOKCASE_UID).books).toMatchObject({
+        target: BOOK_UID,
+        mappedBy: 'shelf',
+      });
+    }
+  );
+
+  test.each(permutations(['rt-book', 'rt-shelf']))(
+    'makes a one-way Book.shelf two-way as the admin form sends it, with the types in the order %s, %s',
+    async (...order) => {
+      await createTypes();
+
+      // Book.shelf is a one-way relation to Shelf
+      const bookSchema = await fse.readJSON(schemaFile('rt-book'));
+      delete bookSchema.attributes.shelf.inversedBy;
+      await fse.writeJSON(schemaFile('rt-book'), bookSchema, { spaces: 2 });
+      const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+      delete shelfSchema.attributes.books;
+      await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+      await restart();
+
+      const payloads: Record<string, Record<string, unknown>> = {
+        'rt-book': contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        'rt-shelf': contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+      };
+
+      const res = await updateSchema({
+        contentTypes: order.map((type) => payloads[type]),
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+      expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'shelf' });
+    }
+  );
+
+  test.each(permutations(['rt-book', 'rt-bookcase']))(
+    'gives a new relation a counterpart name that Bookcase frees in the same save, with the types in the order %s, %s',
+    async (...order) => {
+      await createTypes();
+
+      const payloads: Record<string, Record<string, unknown>> = {
+        'rt-book': contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'bookcase', relation('manyToOne', BOOKCASE_UID, 'name')),
+        ]),
+        'rt-bookcase': {
+          ...contentType('update', 'rt-bookcase', [
+            nameAttribute('update', 'label'),
+            attribute('create', 'name', relation('oneToMany', BOOK_UID, 'bookcase')),
+          ]),
+          renames: [{ oldName: 'name', newName: 'label' }],
+        },
+      };
+
+      const res = await updateSchema({
+        contentTypes: order.map((type) => payloads[type]),
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(attributesOf(BOOKCASE_UID).label).toMatchObject({ type: 'string' });
+      expect(attributesOf(BOOK_UID).bookcase).toMatchObject({ inversedBy: 'name' });
+      expect(attributesOf(BOOKCASE_UID).name).toMatchObject({ mappedBy: 'bookcase' });
+    }
+  );
+
+  test('renames a string of Book and gives its name to the other side of a self relation', async () => {
+    await createTypes();
+
+    const added = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          nameAttribute('create', 'children'),
+        ]),
+      ],
+      components: [],
+    });
+    expect(added.statusCode).toBe(200);
+    await restart();
+
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          ...contentType('update', 'rt-book', [
+            nameAttribute('update', 'title'),
+            attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+            nameAttribute('update', 'kids'),
+            attribute('create', 'parent', relation('manyToOne', BOOK_UID, 'children')),
+            attribute('create', 'children', relation('oneToMany', BOOK_UID, 'parent')),
+          ]),
+          renames: [{ oldName: 'children', newName: 'kids' }],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).kids).toMatchObject({ type: 'string' });
+    expect(attributesOf(BOOK_UID).parent).toMatchObject({ inversedBy: 'children' });
+    expect(attributesOf(BOOK_UID).children).toMatchObject({ mappedBy: 'parent' });
+  });
+
+  test('removes the old counterpart when a new relation in the stored format names it', async () => {
+    await createTypes();
+
+    // Book drops shelf and adds rack, in the stored format, with the other side of shelf
+    const res = await putFromGet(BOOK_UID, (schema) => {
+      delete schema.attributes.shelf;
+      schema.attributes.rack = {
+        type: 'relation',
+        relation: 'manyToOne',
+        target: SHELF_UID,
+        inversedBy: 'books',
+      };
+    });
+    expect(res.statusCode).toBe(201);
+
+    // A later save of Shelf cannot rebuild a second owner from a stale Shelf.books
+    expect(await readSchemaAttributes('rt-shelf')).not.toHaveProperty('books');
+
+    // The second save of the pair, in the stored format, completes it
+    const completed = await putFromGet(SHELF_UID, (schema) => {
+      schema.attributes.books = {
+        type: 'relation',
+        relation: 'oneToMany',
+        target: BOOK_UID,
+        mappedBy: 'rack',
+      };
+    });
+    expect(completed.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('shelf');
+    expect(attributesOf(BOOK_UID).rack).toMatchObject({ inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'rack' });
+  });
+
+  test('rejects a relation whose other side in the stored format is a scalar attribute', async () => {
+    await createTypes();
+    const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+
+    const res = await putFromGet(BOOK_UID, (schema) => {
+      delete schema.attributes.shelf.targetAttribute;
+      schema.attributes.shelf.inversedBy = 'name';
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).name).toMatchObject({ type: 'string' });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+    const stored = await strapi.documents(SHELF_UID).findOne({ documentId: shelf.documentId });
+    expect(stored?.name).toBe('Shelf 1');
+  });
+
+  test('rejects a new type whose relation names a scalar attribute of an existing type', async () => {
+    await createTypes();
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('create', 'rt-magazine', [
+          nameAttribute('create', 'title'),
+          attribute('create', 'bookcase', relation('manyToOne', BOOKCASE_UID, 'name')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(strapi.contentTypes[MAGAZINE_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
+    expect(attributesOf(BOOKCASE_UID).name).toMatchObject({ type: 'string' });
+  });
+  test('renames the owner of a self relation with the rename:field command', async () => {
+    await createTypes();
+
+    const added = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'parent', relation('manyToOne', BOOK_UID, 'children')),
+          attribute('create', 'children', relation('oneToMany', BOOK_UID, 'parent')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(added.statusCode).toBe(200);
+    await restart();
+
+    const parent = await strapi.documents(BOOK_UID).create({ data: { title: 'Parent' } });
+    const child = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Child', parent: parent.documentId },
+    });
+
+    // The service of `strapi rename:field`
+    await strapi
+      .plugin('content-type-builder')
+      .service('schema')
+      .renameAttribute(BOOK_UID, 'parent', 'mother');
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('parent');
+    expect(attributesOf(BOOK_UID).mother).toMatchObject({ inversedBy: 'children' });
+    expect(attributesOf(BOOK_UID).children).toMatchObject({ mappedBy: 'mother' });
+
+    const childWithMother = await strapi.documents(BOOK_UID).findOne({
+      documentId: child.documentId,
+      populate: ['mother'],
+    });
+    expect(childWithMother?.mother).toMatchObject({ documentId: parent.documentId });
+  });
+
+  test('deletes Shelf in a save that also sends Book with its relation to Shelf', async () => {
+    await createTypes();
+
+    // Book first in the save: its relation to Shelf is removed with Shelf
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        { action: 'delete', uid: SHELF_UID },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(strapi.contentTypes[SHELF_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('shelf');
+  });
+
+  test('rejects a rename of an inverse side whose mappedBy names another attribute, when the save keeps its owner', async () => {
+    await createTypes();
+
+    // Shelf.books names oldShelf, which Book does not have: the database pairs it with
+    // Book.shelf (inversedBy books), and the app boots
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.books.mappedBy = 'oldShelf';
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    // Rename of Shelf.books to tomes, as the admin form sends it from that state
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'oldShelf', relation('manyToOne', SHELF_UID, 'tomes')),
+        ]),
+        {
+          ...contentType('update', 'rt-shelf', [
+            nameAttribute('update', 'name'),
+            attribute('update', 'tomes', relation('oneToMany', BOOK_UID, 'oldShelf')),
+          ]),
+          renames: [{ oldName: 'books', newName: 'tomes' }],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'oldShelf' });
+  });
+  test.each([
+    ['the deletion first', true],
+    ['Bookcase first', false],
+  ])(
+    'deletes Book and gives the other side name it frees to a new relation, with %s',
+    async (_label, deleteFirst) => {
+      await createTypes();
+
+      const deletion = { action: 'delete', uid: BOOK_UID };
+      const bookcase = contentType('update', 'rt-bookcase', [
+        nameAttribute('update', 'name'),
+        attribute('create', 'rack', relation('manyToOne', SHELF_UID, 'books')),
+      ]);
+
+      const res = await updateSchema({
+        contentTypes: deleteFirst ? [deletion, bookcase] : [bookcase, deletion],
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(strapi.contentTypes[BOOK_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
+      expect(attributesOf(BOOKCASE_UID).rack).toMatchObject({ inversedBy: 'books' });
+      expect(attributesOf(SHELF_UID).books).toMatchObject({
+        target: BOOKCASE_UID,
+        mappedBy: 'rack',
+      });
+    }
+  );
+  test('makes a one-way manyToMany two-way with Shelf first and keeps its links', async () => {
+    await createTypes();
+
+    // Book.shelf is a one-way manyToMany to Shelf, with one link
+    const bookSchema = await fse.readJSON(schemaFile('rt-book'));
+    bookSchema.attributes.shelf = { type: 'relation', relation: 'manyToMany', target: SHELF_UID };
+    await fse.writeJSON(schemaFile('rt-book'), bookSchema, { spaces: 2 });
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    delete shelfSchema.attributes.books;
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+    const book = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Book 1', shelf: [shelf.documentId] },
+    });
+
+    // The admin form sends both types; Shelf comes first
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('manyToMany', BOOK_UID, 'shelf')),
+        ]),
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToMany', SHELF_UID, 'books')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    // Book.shelf, which held the links, stays the owner
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'shelf' });
+
+    const bookWithShelf = await strapi.documents(BOOK_UID).findOne({
+      documentId: book.documentId,
+      populate: ['shelf'],
+    });
+    const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+      documentId: shelf.documentId,
+      populate: ['books'],
+    });
+    expect(bookWithShelf?.shelf).toMatchObject([{ documentId: shelf.documentId }]);
+    expect(shelfWithBooks?.books).toMatchObject([{ documentId: book.documentId }]);
+  });
+  test('gives a new relation the name of a one-way relation to a deleted type, and owns the pair', async () => {
+    await createTypes();
+
+    // Shelf.alias is a one-way manyToMany to Bookcase, with one link
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.alias = {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: BOOKCASE_UID,
+    };
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const bookcase = await strapi.documents(BOOKCASE_UID).create({ data: { name: 'Bookcase 1' } });
+    const shelf = await strapi.documents(SHELF_UID).create({
+      data: { name: 'Shelf 1', alias: [bookcase.documentId] },
+    });
+
+    // The save deletes Bookcase, and Book.rack takes alias as its other side
+    const res = await updateSchema({
+      contentTypes: [
+        { action: 'delete', uid: BOOKCASE_UID },
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'rack', relation('manyToMany', SHELF_UID, 'alias')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).rack).toMatchObject({ inversedBy: 'alias' });
+    expect(attributesOf(SHELF_UID).alias).toMatchObject({ target: BOOK_UID, mappedBy: 'rack' });
+
+    const book = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Book 1', rack: [shelf.documentId] },
+    });
+    const shelfWithAlias = await strapi.documents(SHELF_UID).findOne({
+      documentId: shelf.documentId,
+      populate: ['alias'],
+    });
+    expect(shelfWithAlias?.alias).toMatchObject([{ documentId: book.documentId }]);
+  });
+
+  test('writes one owner for a self pair on Shelf that takes the name of the inverse side of a deleted type', async () => {
+    await createTypes();
+
+    // Shelf.books is the inverse side of Book.shelf. The save deletes Book first, then gives
+    // Shelf the self pair books / mates
+    const res = await updateSchema({
+      contentTypes: [
+        { action: 'delete', uid: BOOK_UID },
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('manyToMany', SHELF_UID, 'mates')),
+          attribute('create', 'mates', relation('manyToMany', SHELF_UID, 'books')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    const { books, mates } = attributesOf(SHELF_UID);
+    expect([books.inversedBy, mates.inversedBy].filter((name) => name !== undefined)).toHaveLength(
+      1
+    );
+    expect([books.mappedBy, mates.mappedBy].filter((name) => name !== undefined)).toHaveLength(1);
+  });
+});

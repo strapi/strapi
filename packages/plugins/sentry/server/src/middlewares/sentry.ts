@@ -34,7 +34,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           // Manually add transaction name
           scope.setTag('transaction', `${ctx.method} ${ctx._matchedRoute}`);
           // Manually add Strapi version
-          scope.setTag('strapi_version', strapi.config.info.strapi);
+          scope.setTag('strapi_version', strapi.config.get<string>('info.strapi'));
           scope.setTag('method', ctx.method);
         });
       }
