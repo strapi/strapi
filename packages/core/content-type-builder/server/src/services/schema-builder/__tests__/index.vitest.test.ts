@@ -182,6 +182,65 @@ describe('createBuilder', () => {
     });
   });
 
+  it('writes no file of a plugin content type when it rolls back a save rejected before the write', async () => {
+    const userUid = 'plugin::users-permissions.user';
+    const articleUid = 'api::article.article';
+    const strapiState = (global as any).strapi;
+    strapiState.contentTypes[userUid] = {
+      modelName: 'user',
+      plugin: 'users-permissions',
+      uid: userUid,
+      info: { singularName: 'user' },
+      __schema__: {
+        info: { singularName: 'user' },
+        options: {},
+        attributes: { username: { type: 'string' } },
+      },
+    };
+    strapiState.contentTypes[articleUid] = {
+      modelName: 'article',
+      apiName: 'article',
+      uid: articleUid,
+      info: { singularName: 'article' },
+      __schema__: {
+        info: { singularName: 'article', displayName: 'article' },
+        options: {},
+        attributes: { title: { type: 'string' } },
+      },
+    };
+
+    const builder = createBuilder();
+    // author writes User.articles. The save is rejected: reviewer names a string of User
+    builder.editContentType({
+      uid: articleUid,
+      kind: 'collectionType',
+      displayName: 'article',
+      attributes: {
+        title: { type: 'string' },
+        author: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: userUid,
+          targetAttribute: 'articles',
+        },
+        reviewer: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: userUid,
+          targetAttribute: 'username',
+        },
+      },
+    });
+    expect(builder.contentTypes.get(userUid).schema.attributes).toHaveProperty('articles');
+
+    await expect(builder.writeFiles()).rejects.toThrow('stores its own data');
+    // The update-schema service then rolls the save back
+    await builder.rollback();
+
+    expect(fse.ensureFile).not.toHaveBeenCalled();
+    expect(fse.writeJSON).not.toHaveBeenCalled();
+  });
+
   it('keeps the content types of the admin plugin not writable', () => {
     const builder = createBuilder();
 
