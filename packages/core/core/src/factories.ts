@@ -129,7 +129,7 @@ const isCustomController = <T extends Core.Controller>(controller: T): boolean =
  *
  * The upload plugin `require`s the module and reads `init` from it, with no `.default` interop, so
  * the module must be the CommonJS export itself: `export =` in TypeScript, `module.exports =` in
- * JavaScript. Omit the provider members you do not implement: never set one to `undefined`.
+ * JavaScript. A contract member that is not a function, such as `undefined`, counts as omitted.
  *
  * A provider package checks its module with `satisfies Providers.Upload.Factory<Options>` instead,
  * which needs no runtime dependency on Strapi.

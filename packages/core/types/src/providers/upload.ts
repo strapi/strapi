@@ -3,8 +3,10 @@
  *
  * The upload plugin `require`s the configured provider module, calls its `init` with the
  * `providerOptions` of the upload config, and checks the result: it throws without `delete`, or
- * without both `upload` and `uploadStream`. It then wraps each member of the result in an async
- * function, so `strapi.plugin('upload').provider` is not the object `init` returns.
+ * without both `upload` and `uploadStream`. It then wraps the contract methods in async functions
+ * that default their options argument to the method's `actionOptions` entry, so
+ * `strapi.plugin('upload').provider` is not the object `init` returns. Members outside the contract
+ * keep their signature.
  *
  * The members use method syntax, so their parameters are checked bivariantly: a provider can
  * declare its own, narrower file and options types, as the published providers do.
@@ -91,17 +93,28 @@ type UploadMethods =
  * one of `upload` and `uploadStream`; the other members are optional, and members outside this
  * contract are allowed. Each method may answer synchronously or with a promise.
  *
- * Omit the members you do not implement: never set one to `undefined`. The upload plugin wraps every
- * own key of this object, so an `undefined` member becomes a function that throws when called.
+ * A contract member that is not a function, such as `undefined`, `null` or `false`, counts as
+ * omitted: the plugin falls back on `upload`, or on its own default. Provider-specific members must
+ * be own enumerable properties of this object: the plugin does not copy prototype members.
  */
 export type Provider = UploadMethods & {
   /**
-   * Replaces a stored file, used over `delete` then `upload`. The new file carries a `buffer`. The
-   * plugin forwards two arguments only: the old file takes the place of the action options.
+   * Replaces a stored file, used over `delete` then `upload`. The new file carries a `buffer`.
+   *
+   * The options are the `actionOptions.replace` entry. The plugin prefers `replaceStream`, which
+   * gets `actionOptions.replaceStream`, so set both entries when the provider implements both.
    */
-  replace?(newFile: ProviderFile, oldFile: StoredProviderFile): Awaitable<unknown>;
+  replace?(
+    newFile: ProviderFile,
+    oldFile: StoredProviderFile,
+    options?: ActionOptions
+  ): Awaitable<unknown>;
   /** Like `replace`, used over it. The new file carries a `stream`. */
-  replaceStream?(newFile: ProviderFile, oldFile: StoredProviderFile): Awaitable<unknown>;
+  replaceStream?(
+    newFile: ProviderFile,
+    oldFile: StoredProviderFile,
+    options?: ActionOptions
+  ): Awaitable<unknown>;
   /** Deletes a stored file or one of its `formats`. */
   delete(file: StoredProviderFile, options?: ActionOptions): Awaitable<unknown>;
   /** Throws when the file is too large. Without it, the plugin checks `sizeLimit` itself. */

@@ -33,9 +33,11 @@ The object `init` returns has the following methods:
 - `isPrivate()` (optional): whether files need a signed URL. Without it, files are public.
 - `getSignedUrl(file)` (optional): returns `{ url }`, called only when `isPrivate()` returns `true`. Besides stored files, it signs the URLs the plugin finds in rich text and blocks. For those, the file has only `url`, `hash`, `ext` and `provider`, taken from the URL.
 
-Each method can answer synchronously or with a promise. `upload`, `uploadStream`, `delete` and `getSignedUrl` get the method's entry of the `actionOptions` config as their second argument. `checkFileSize` gets `{ sizeLimit }` instead, and `replace` and `replaceStream` get the old file, then their `actionOptions` entry as a third argument. The plugin wraps these contract methods in async functions, and calls `isPrivate()` without arguments. Members outside this list are allowed and keep their signature. Every method runs with `this` bound to the object `init` returns, but `strapi.plugin('upload').provider` is a different object.
+Each method can answer synchronously or with a promise. `upload`, `uploadStream`, `delete` and `getSignedUrl` get the method's entry of the `actionOptions` config as their second argument. `checkFileSize` gets `{ sizeLimit }` instead, and `replace` and `replaceStream` get the old file, then their `actionOptions` entry as a third argument. The plugin wraps these contract methods in async functions, and calls `isPrivate()` without arguments. Members outside this list are allowed and keep their signature. They must be own enumerable properties of the object `init` returns: the plugin does not copy members of its prototype, such as the methods of a class. The provider's own methods run with `this` bound to the object `init` returns, but `strapi.plugin('upload').provider` is a different object.
 
-A member set to `undefined`, as in `uploadStream: canStream ? uploadStream : undefined`, counts as omitted: the plugin falls back on `upload`, or on its default for `isPrivate`, `getSignedUrl` and `checkFileSize`.
+The plugin calls `replaceStream` when the provider implements it, with `actionOptions.replaceStream`, and `replace` otherwise, with `actionOptions.replace`. Neither reads the `upload` or `uploadStream` entries, so options such as a Cloudinary `folder` must be repeated under the replace entries.
+
+A contract member that is not a function, as in `uploadStream: canStream ? uploadStream : undefined` or `isPrivate: false`, counts as omitted: the plugin falls back on `upload`, or on its default for `isPrivate`, `getSignedUrl` and `checkFileSize`. Other members set to `undefined` are dropped too.
 
 ### Typing a provider
 
