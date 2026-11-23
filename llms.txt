@@ -111,6 +111,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Transactions](https://contributor.strapi.io/packages/core/database/transactions): Conceptual guide to transactions in Strapi
 - [Migrations](https://contributor.strapi.io/packages/core/database/migrations): Conceptual guide to migrations in Strapi
 - [Lifecycles](https://contributor.strapi.io/packages/core/database/lifecycles): TypeScript types for content-type lifecycle hooks
+- [Query scopes (unstable)](https://contributor.strapi.io/packages/core/database/query-scopes): How db.unstable_scopes narrows query builder queries with a where condition per model, where the scopes apply, and the paths they do not cover.
 - [@strapi/database](https://contributor.strapi.io/packages/core/database): Database layer on top of Knex: model metadata, schema sync, migrations, queries, relations, lifecycles and transactions.
 - [@strapi/email](https://contributor.strapi.io/packages/core/email): Core plugin that sends emails through a configurable provider and adds an admin settings page to check the setup.
 - [Technologies](https://contributor.strapi.io/packages/core/openapi/technologies): Technologies and frameworks used in Strapi OpenAPI implementation.
