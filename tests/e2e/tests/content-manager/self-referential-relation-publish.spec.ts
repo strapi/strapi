@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import {
   resetDatabaseAndImportDataFromPath,
   resyncSuperAdminPermissionsAfterImport,
@@ -25,8 +25,8 @@ test.describe('Self-referential relation - publish reflects in the admin without
     // The restored permissions snapshot predates the `related` field, so Super Admin would see
     // "No permissions to see this field". Resync rebuilds CM config + Super Admin permissions.
     await resyncSuperAdminPermissionsAfterImport();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('a draft entry related to itself keeps the relation visible after publishing (no refresh)', async ({

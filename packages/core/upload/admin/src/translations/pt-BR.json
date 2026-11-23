@@ -126,8 +126,6 @@
   "tabs.title": "Como quer enviar mídias?",
   "sort.updated_at_asc": "Atualizações mais antigas",
   "sort.updated_at_desc": "Atualizações mais recentes",
-  "window.confirm.close-modal.file": "Você tem certeza? Suas alterações serão perdidas.",
-  "window.confirm.close-modal.files": "Você tem certeza? Alguns arquivos ainda não foram enviados.",
   "config.back": "Voltar",
   "config.subtitle": "Definir opções de visualização da biblioteca de mídia.",
   "config.entries.title": "Items por página",

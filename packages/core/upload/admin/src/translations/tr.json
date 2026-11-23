@@ -112,7 +112,5 @@
   "sort.name_desc": "Ters Alfabetik Sıra (Z to A)",
   "sort.updated_at_asc": "En eski yüklemeler",
   "sort.updated_at_desc": "En yeni yüklemeler",
-  "tabs.title": "Dosyalarını nasıl yüklemek istersin?",
-  "window.confirm.close-modal.file": "Emin misin? Değişikliklerin kaybolacak.",
-  "window.confirm.close-modal.files": "Emin misin? Henüz yüklenmemiş dosyaların var."
+  "tabs.title": "Dosyalarını nasıl yüklemek istersin?"
 }

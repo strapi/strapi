@@ -68,7 +68,7 @@ export const FreeTrialEndedModal = () => {
   if (!previouslyOpen && isTrialEndedRecently) {
     return (
       <Modal.Root open={open} onOpenChange={handleOnOpenChange}>
-        <StyledModalContent aria-labelledby="title">
+        <StyledModalContent>
           <StyledModalBody>
             <Box position="absolute" top={0} right={0} padding={2}>
               <StyledButton
@@ -91,12 +91,12 @@ export const FreeTrialEndedModal = () => {
               padding={8}
               gap={4}
             >
-              <Typography variant="alpha" fontWeight="bold" fontSize={4} id="title">
+              <Modal.Title variant="alpha" fontWeight="bold" fontSize={4}>
                 {formatMessage({
                   id: 'app.components.FreeTrialEndedModal.title',
                   defaultMessage: 'Your trial has ended',
                 })}
-              </Typography>
+              </Modal.Title>
               <Typography>
                 {formatMessage({
                   id: 'app.components.FreeTrialEndedModal.description',

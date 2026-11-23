@@ -131,6 +131,12 @@ describe('Image manipulation - sharp instance options (limitInputPixels)', () =>
 
       await expect(imageManipulation.isFaultyImage(file)).resolves.toBe(true);
     });
+
+    test('isFaultyImage reports the image as faulty (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(staticPngPath, '.png', 'image/png', 1500, 1000);
+
+      await expect(imageManipulation.isFaultyImage(file)).resolves.toBe(true);
+    });
   });
 
   describe('limitInputPixels: false disables the pixel limit', () => {
@@ -223,10 +229,18 @@ describe('Image manipulation - sharp instance options (limitInputPixels)', () =>
       });
     });
 
-    test('isFaultyImage succeeds with sharp defaults (stream-only, no filepath)', async () => {
+    test('isFaultyImage reports a valid image as valid (stream-only, no filepath)', async () => {
       const file = makeStreamOnlyFile(staticPngPath, '.png', 'image/png', 1500, 1000);
 
-      await expect(imageManipulation.isFaultyImage(file)).resolves.toBeDefined();
+      await expect(imageManipulation.isFaultyImage(file)).resolves.toBe(false);
+    });
+
+    test('isFaultyImage reports an unreadable image as faulty (stream-only, no filepath)', async () => {
+      const faultyPath = path.join(tmpDir, 'faulty.png');
+      await fse.writeFile(faultyPath, 'not an image');
+      const file = makeStreamOnlyFile(faultyPath, '.png', 'image/png', 1500, 1000);
+
+      await expect(imageManipulation.isFaultyImage(file)).resolves.toBe(true);
     });
   });
 });

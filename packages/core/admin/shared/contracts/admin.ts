@@ -278,6 +278,11 @@ export declare namespace GetLicenseLimitInformation {
         feature: string;
         limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
       }>;
+      /**
+       * Whether audit logs run: the license includes them and `admin.auditLogs.enabled` is not
+       * `false`. `features` lists `audit-logs` from the license alone.
+       */
+      auditLogs: { enabled: boolean };
     };
     error?: errors.ApplicationError;
   }

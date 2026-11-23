@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 
 import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { MenuItem } from '../../hooks/useMenu';
+import { getLicenseIconFill } from '../../utils/licenseFeature';
 import { tours } from '../GuidedTour/Tours';
 
 import { NavLink } from './NavLink';
@@ -62,7 +63,8 @@ const MainNavIcons = ({
   return listLinks.length > 0
     ? listLinks.map((link) => {
         const LinkIcon = link.icon;
-        const badgeContentLock = link?.licenseOnly ? <Lightning fill="primary600" /> : undefined;
+        const lightningFill = getLicenseIconFill(link);
+        const badgeContentLock = lightningFill ? <Lightning fill={lightningFill} /> : undefined;
 
         const badgeContentNumeric =
           link.notificationsCount && link.notificationsCount > 0
@@ -135,7 +137,8 @@ const MainNavBurgerMenuLinks = ({
   return listLinks.length > 0
     ? listLinks.map((link) => {
         const LinkIcon = link.icon;
-        const badgeContentLock = link?.licenseOnly ? <Lightning fill="primary600" /> : undefined;
+        const lightningFill = getLicenseIconFill(link);
+        const badgeContentLock = lightningFill ? <Lightning fill={lightningFill} /> : undefined;
 
         const badgeContentNumeric =
           link.notificationsCount && link.notificationsCount > 0

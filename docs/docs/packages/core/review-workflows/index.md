@@ -23,7 +23,7 @@ The package is an Enterprise Edition plugin. It has a server part (`strapi-serve
 
 ### Workflow and stage content types
 
-`plugin::review-workflows.workflow` has a unique `name`, its `stages`, an optional `stageRequiredToPublish` and a JSON list `contentTypes`. `plugin::review-workflows.workflow-stage` has a `name`, a `color`, its `workflow` and a many-to-many relation `permissions` to `admin::permission`. Both are hidden from the content manager. On the first boot, `bootstrap` creates a workflow named "Default" with four stages when the database has none.
+`plugin::review-workflows.workflow` has a unique `name`, its `stages`, an optional `stageRequiredToPublish` and a JSON list `contentTypes`. `plugin::review-workflows.workflow-stage` has a `name`, a `color`, its `workflow` and a many-to-many relation `permissions` to `admin::permission`. Both are hidden from the content manager. On the first boot, `bootstrap` creates a workflow named "Default" with four stages when the database has none. It keeps only the first `stagesPerWorkflow` stages when the license allows fewer than four.
 
 ### Stage and assignee attributes
 
@@ -31,7 +31,7 @@ In `register`, `extendReviewWorkflowContentTypes` adds two one-to-one relations 
 
 ### Document Service middlewares
 
-Three middlewares in `services/document-service-middleware.ts` connect the workflow to the write path. `assignStageOnCreate` sets the first stage on `create` and `clone`. `handleStageOnUpdate` emits the `review-workflows.updateEntryStage` event when the stage changes. `checkStageBeforePublish` rejects `publish` when the entry is not at `stageRequiredToPublish`. See [Document write path](../../../architecture/05-document-write-path.md).
+Three middlewares in `services/document-service-middleware.ts` connect the workflow to the write path. `assignStageOnCreate` sets the first stage on `create` and `clone`, and on an `update` that creates a new locale of the document. `handleStageOnUpdate` emits the `review-workflows.updateEntryStage` event when the stage changes. `checkStageBeforePublish` rejects `publish` when the entry is not at `stageRequiredToPublish`. See [Document write path](../../../architecture/05-document-write-path.md).
 
 ### Stage permissions
 
@@ -39,7 +39,7 @@ A role can change the stage of an entry only with the `admin::review-workflows.s
 
 ### Workflow assignment and limits
 
-The `workflows` service creates and updates workflows. The `workflow-content-types` service moves the entries of a content type to a stage when the content type changes workflow, and updates the content manager configuration. The `validation` service applies the limits `numberOfWorkflows` and `stagesPerWorkflow`. The license feature options set them, and the default is 200 each.
+The `workflows` service creates and updates workflows. The `workflow-content-types` service moves the entries of a content type to a stage when the content type changes workflow, and updates the content manager configuration. The `validation` service applies the limits `numberOfWorkflows` and `stagesPerWorkflow`. It reads them from the license feature options at each check, so a license the registry replaces after boot applies without a restart. The default is 200 each, also when a value is missing, zero or not a number. The workflow limit is checked only when a workflow is created, in the admin API and in the admin UI, so an instance already above it can still update its workflows and change the stage of its entries. The stage limit is checked whenever the stages of a workflow are set.
 
 ### Admin part
 

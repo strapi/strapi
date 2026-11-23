@@ -239,7 +239,6 @@ describe('AssetActionsMenu', () => {
     it("offers only the asset's own type in the file picker", async () => {
       setup();
 
-      // eslint-disable-next-line testing-library/no-node-access
       expect(document.querySelector('input[type="file"]')).toHaveAttribute('accept', 'image/png');
     });
 
@@ -412,7 +411,10 @@ describe('AssetActionsMenu', () => {
     it('surfaces the server message when the replace fails', async () => {
       server.use(
         http.post('*/upload/files/:id/replace', () =>
-          HttpResponse.json({ error: { message: 'File too large' } }, { status: 413 })
+          HttpResponse.json(
+            { error: { status: 413, name: 'PayloadTooLargeError', message: 'File too large' } },
+            { status: 413 }
+          )
         )
       );
 
@@ -432,6 +434,77 @@ describe('AssetActionsMenu', () => {
         })
       );
     });
+
+    it.each([
+      {
+        rejectedBy: 'the body parser',
+        response: () =>
+          HttpResponse.json(
+            {
+              data: null,
+              error: {
+                status: 413,
+                name: 'PayloadTooLargeError',
+                message: 'FileTooBig',
+                details: { code: 'FileTooBig', limit: 200 * 1024 * 1024 },
+              },
+            },
+            { status: 413 }
+          ),
+        message:
+          'Exceeds the server request limit of 210 MB. To raise it, a developer can increase formidable.maxFileSize on the strapi::body middleware, together with upload.config.sizeLimit.',
+      },
+      {
+        rejectedBy: 'the upload plugin',
+        response: () =>
+          HttpResponse.json(
+            {
+              data: null,
+              error: {
+                status: 413,
+                name: 'PayloadTooLargeError',
+                message: 'new.png exceeds size limit of 100 KB.',
+                details: { code: 'SizeLimitExceeded', limit: 100000 },
+              },
+            },
+            { status: 413 }
+          ),
+        message:
+          'Exceeds the Media Library upload limit of 100 KB. To raise it, a developer can increase upload.config.sizeLimit.',
+      },
+      {
+        rejectedBy: 'a proxy',
+        response: () =>
+          new HttpResponse('<html><body>413 Request Entity Too Large</body></html>', {
+            status: 413,
+            headers: { 'Content-Type': 'text/html' },
+          }),
+        message:
+          'Rejected as too large before reaching Strapi. A limit outside Strapi, such as a reverse proxy, is the likely cause.',
+      },
+    ])(
+      'names the limit and keeps the notification when $rejectedBy rejects the file as too large',
+      async ({ response, message }) => {
+        server.use(http.post('*/upload/files/:id/replace', response));
+
+        const { user } = setup();
+
+        await openMenu(user);
+        await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));
+        await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+        const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+        await user.upload(input, new globalThis.File(['x'], 'new.png', { type: 'image/png' }));
+
+        await waitFor(() =>
+          expect(mockToggleNotification).toHaveBeenCalledWith({
+            type: 'danger',
+            message,
+            blockTransition: true,
+          })
+        );
+      }
+    );
   });
 
   describe('Move to folder', () => {

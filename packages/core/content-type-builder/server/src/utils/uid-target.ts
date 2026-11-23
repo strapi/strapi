@@ -32,5 +32,7 @@ export const resolveStorageType = (attribute: AttributeLike): string | undefined
  */
 export const isValidUidTarget = (attribute: AttributeLike): boolean => {
   const type = resolveStorageType(attribute);
-  return VALID_UID_TARGETS.some((validType) => validType === type);
+  const validUidTargets: readonly string[] = VALID_UID_TARGETS;
+
+  return type !== undefined && validUidTargets.includes(type);
 };

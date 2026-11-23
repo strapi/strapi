@@ -12,12 +12,16 @@ import {
   createTestLogger,
   expectedSetupWarning,
   loggedText,
+  NOT_LICENSED_MESSAGE,
+  readFilePermissions,
 } from './test-helpers';
 
 type InstallDependencies = Parameters<typeof runInstall>[0]['dependencies'];
 
 const LICENSE = createTestLicense();
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
+
+const LOCKED_PLUGIN = '@strapi-enterprise/plugin-locked';
 
 const AI_BYOK_METADATA = { name: 'ai-byok', displayName: 'AI BYOK', kind: 'plugin' };
 
@@ -59,10 +63,15 @@ const installLikeAPackageManager = async ({
 const createApp = async ({
   strapiVersion = '5.54.1',
   installedPackages = {},
-}: { strapiVersion?: string; installedPackages?: Record<string, string> } = {}) => {
+  packageManager = 'npm@10.9.0',
+}: {
+  strapiVersion?: string;
+  installedPackages?: Record<string, string>;
+  packageManager?: string;
+} = {}) => {
   const appDir = await createTemporaryDirectory();
   await fse.writeJson(path.join(appDir, 'package.json'), {
-    packageManager: 'npm@10.9.0',
+    packageManager,
     dependencies: installedPackages,
   });
   await fse.outputJson(path.join(appDir, 'node_modules', '@strapi', 'strapi', 'package.json'), {
@@ -86,8 +95,8 @@ const createDependencies = async (
     env: { STRAPI_LICENSE: LICENSE },
     homeDir: await createTemporaryDirectory(),
     fetchImplementation: createRegistryFetch({
-      searchResult: [AI_BYOK],
       packuments: { [AI_BYOK]: aiByokPackument },
+      catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
     }),
     promptForLicense: jest.fn(),
     promptForPlugins: jest.fn(),
@@ -182,7 +191,6 @@ describe('runInstall with package names', () => {
   it('installs the exact version a tag points to', async () => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK],
         packuments: {
           [AI_BYOK]: {
             ...aiByokPackument,
@@ -268,7 +276,6 @@ describe('runInstall with package names', () => {
   ])('installs nothing when %s is already installed', async (_case, requestedVersion) => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK],
         packuments: {
           [AI_BYOK]: {
             ...aiByokPackument,
@@ -456,6 +463,108 @@ describe('runInstall with package names', () => {
     expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
   });
 
+  it('says the license does not include a plugin the catalog lists, with the server message', async () => {
+    const dependencies = await createDependencies({
+      fetchImplementation: createRegistryFetch({
+        packuments: { [LOCKED_PLUGIN]: 403 },
+        catalog: {
+          plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(new EnterpriseInstallError(`${LOCKED_PLUGIN}: ${NOT_LICENSED_MESSAGE}`));
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
+  });
+
+  it('says the license does not include a plugin the catalog lists, when the server sends no message', async () => {
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked'],
+        logger: createTestLogger(),
+        dependencies: await createDependencies({
+          fetchImplementation: createRegistryFetch({
+            packuments: { [LOCKED_PLUGIN]: 403 },
+            catalog: { plugins: [{ name: LOCKED_PLUGIN, licensed: false }] },
+          }),
+        }),
+      })
+    ).rejects.toThrow(
+      new EnterpriseInstallError(
+        `Your license does not include ${LOCKED_PLUGIN}. Run strapi enterprise install without a name to see the plugins you can install.`
+      )
+    );
+  });
+
+  it('asks the catalog once, on the first plugin outside the license', async () => {
+    const dependencies = await createDependencies({
+      fetchImplementation: createRegistryFetch({
+        packuments: { [LOCKED_PLUGIN]: 403, [AI_BYOK]: 403 },
+        catalog: {
+          plugins: [
+            { name: LOCKED_PLUGIN, licensed: false },
+            { name: AI_BYOK, licensed: false },
+          ],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked', 'plugin-ai-byok'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(`${LOCKED_PLUGIN}: ${NOT_LICENSED_MESSAGE}`);
+    expect(
+      (dependencies.fetchImplementation as jest.Mock).mock.calls.filter(([input]) =>
+        String(input).endsWith('/-/strapi/plugins')
+      )
+    ).toHaveLength(1);
+  });
+
+  it('does not ask the catalog when every named plugin is in the license', async () => {
+    const dependencies = await createDependencies();
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: ['plugin-ai-byok'],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(
+      (dependencies.fetchImplementation as jest.Mock).mock.calls.map(([input]) => String(input))
+    ).toEqual([`https://packages.strapi.io/${AI_BYOK}`]);
+  });
+
+  it('keeps the general message when the catalog does not list the plugin', async () => {
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked'],
+        logger: createTestLogger(),
+        dependencies: await createDependencies({
+          fetchImplementation: createRegistryFetch({
+            packuments: { [LOCKED_PLUGIN]: 403 },
+            catalog: { plugins: [] },
+          }),
+        }),
+      })
+    ).rejects.toThrow(`Your license does not include ${LOCKED_PLUGIN}, or it does not exist.`);
+  });
+
   it('stops when no version fits the app Strapi version', async () => {
     await expect(
       runInstall({
@@ -484,24 +593,26 @@ describe('runInstall with the checklist', () => {
       dependencies,
     });
 
-    expect(dependencies.promptForPlugins).toHaveBeenCalledWith([
-      expect.objectContaining({
-        state: 'upgrade',
-        installedVersion: '1.1.0',
-        targetVersion: '1.2.0',
-      }),
-    ]);
+    expect(dependencies.promptForPlugins).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          state: 'upgrade',
+          installedVersion: '1.1.0',
+          targetVersion: '1.2.0',
+        }),
+      ],
+      undefined
+    );
     expect(dependencies.installPackages).toHaveBeenCalledWith(
       expect.objectContaining({ installSpecs: [`${AI_BYOK}@1.2.0`] })
     );
   });
 
-  it('offers a plugin this CLI does not know, found through the registry search', async () => {
+  it('offers every licensed plugin the catalog lists', async () => {
     const newPlugin = '@strapi-enterprise/plugin-new';
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK, newPlugin],
         packuments: {
           [AI_BYOK]: aiByokPackument,
           [newPlugin]: createPackument(
@@ -515,6 +626,12 @@ describe('runInstall with the checklist', () => {
             ],
             { latest: '2.0.0' }
           ),
+        },
+        catalog: {
+          plugins: [
+            { name: AI_BYOK, licensed: true },
+            { name: newPlugin, licensed: true },
+          ],
         },
       }),
       promptForPlugins: jest.fn().mockResolvedValue([]),
@@ -534,7 +651,8 @@ describe('runInstall with the checklist', () => {
           targetVersion: '2.0.0',
           entry: expect.objectContaining({ packageName: newPlugin, displayName: 'New plugin' }),
         }),
-      ])
+      ]),
+      undefined
     );
   });
 
@@ -542,8 +660,8 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
-        packuments: { [AI_BYOK]: 403 },
+        packuments: {},
+        catalog: { plugins: [] },
       }),
     });
 
@@ -556,6 +674,187 @@ describe('runInstall with the checklist', () => {
       })
     ).rejects.toThrow('Your license does not include any Enterprise plugins.');
     expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+  });
+
+  it('shows the plugins outside the license as locked, and installs only the selection', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument, [LOCKED_PLUGIN]: 403 },
+        catalog: {
+          plugins: [
+            { name: AI_BYOK, licensed: true },
+            { name: LOCKED_PLUGIN, displayName: 'Locked', licensed: false },
+          ],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: [],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(dependencies.promptForPlugins).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          state: 'install',
+          entry: expect.objectContaining({ packageName: AI_BYOK }),
+        }),
+        {
+          entry: expect.objectContaining({ packageName: LOCKED_PLUGIN, displayName: 'Locked' }),
+          state: 'locked',
+        },
+      ],
+      NOT_LICENSED_MESSAGE
+    );
+    expect(dependencies.installPackages).toHaveBeenCalledWith(
+      expect.objectContaining({ installSpecs: [`${AI_BYOK}@1.2.0`] })
+    );
+  });
+
+  it('warns with the server message when an installed plugin is outside the license', async () => {
+    const appDir = await createApp({ installedPackages: { [LOCKED_PLUGIN]: '1.0.0' } });
+    await fse.outputJson(path.join(appDir, 'node_modules', LOCKED_PLUGIN, 'package.json'), {
+      version: '1.0.0',
+      strapi: { kind: 'plugin' },
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir,
+      packageArguments: [],
+      logger,
+      dependencies: await createDependencies({
+        isInteractive: true,
+        fetchImplementation: createRegistryFetch({
+          packuments: { [LOCKED_PLUGIN]: 403 },
+          catalog: {
+            plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
+            notLicensedMessage: NOT_LICENSED_MESSAGE,
+          },
+        }),
+      }),
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${LOCKED_PLUGIN} (installed): ${NOT_LICENSED_MESSAGE}`
+    );
+  });
+
+  it('keeps the general warning when the catalog does not list the installed plugin', async () => {
+    const appDir = await createApp({ installedPackages: { [LOCKED_PLUGIN]: '1.0.0' } });
+    await fse.outputJson(path.join(appDir, 'node_modules', LOCKED_PLUGIN, 'package.json'), {
+      version: '1.0.0',
+      strapi: { kind: 'plugin' },
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir,
+      packageArguments: [],
+      logger,
+      dependencies: await createDependencies({
+        isInteractive: true,
+        fetchImplementation: createRegistryFetch({
+          packuments: { [LOCKED_PLUGIN]: 403 },
+          catalog: { plugins: [], notLicensedMessage: NOT_LICENSED_MESSAGE },
+        }),
+      }),
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${LOCKED_PLUGIN} is installed but is not included in your license.`
+    );
+  });
+
+  it('lists the locked plugins when the license includes no plugin', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        packuments: {},
+        catalog: {
+          plugins: [{ name: LOCKED_PLUGIN, displayName: 'Locked', licensed: false }],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
+
+    expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
+    expect(logger.info.mock.calls.slice(-3)).toEqual([
+      ['Your license does not include any Enterprise plugins yet.'],
+      [[NOT_LICENSED_MESSAGE, `  ✕ Locked (${LOCKED_PLUGIN})`].join('\n')],
+      ['Nothing to install.'],
+    ]);
+    expect(loggedText(logger)).not.toContain('Try again later');
+  });
+
+  it('asks nothing when the plugins in the license are up to date, and lists the locked ones', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: {
+          plugins: [
+            { name: AI_BYOK, licensed: true },
+            {
+              name: LOCKED_PLUGIN,
+              displayName: 'Locked',
+              description: 'Does locked things.',
+              licensed: false,
+            },
+          ],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.2.0' } }),
+      packageArguments: [],
+      logger,
+      dependencies,
+    });
+
+    expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(logger.info.mock.calls.slice(-3)).toEqual([
+      ['The Enterprise plugins in your license are installed and up to date.'],
+      [[NOT_LICENSED_MESSAGE, `  ✕ Locked (${LOCKED_PLUGIN})  Does locked things.`].join('\n')],
+      ['Nothing to install.'],
+    ]);
+  });
+
+  it('lists no locked group when the plugins in the license are up to date on Growth', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
+      }),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.2.0' } }),
+      packageArguments: [],
+      logger,
+      dependencies,
+    });
+
+    expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      'The Enterprise plugins in your license are installed and up to date.'
+    );
+    expect(loggedText(logger)).not.toContain('Not in your license.');
   });
 
   it('asks nothing when everything is up to date', async () => {
@@ -579,7 +878,6 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK],
         packuments: {
           [AI_BYOK]: createPackument(
             AI_BYOK,
@@ -593,6 +891,7 @@ describe('runInstall with the checklist', () => {
             { latest: '0.0.0-experimental.658048e' }
           ),
         },
+        catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
       }),
     });
     const logger = createTestLogger();
@@ -639,6 +938,375 @@ describe('runInstall with the checklist', () => {
       })
     ).rejects.toThrow('Pass package names, or run the command in an interactive terminal.');
     expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
+  });
+});
+
+describe('runInstall with --registry', () => {
+  const LOCAL_REGISTRY = 'http://localhost:4873';
+  const requestedUrls = (dependencies: jest.Mocked<InstallDependencies>) =>
+    (dependencies.fetchImplementation as jest.Mock).mock.calls.map(([input]) => String(input));
+
+  it('sends every request to the Strapi registry without the option', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
+
+    expect(requestedUrls(dependencies)).toEqual(
+      expect.arrayContaining([
+        'https://packages.strapi.io/-/strapi/plugins',
+        `https://packages.strapi.io/${AI_BYOK}`,
+      ])
+    );
+    expect(
+      requestedUrls(dependencies).every((url) => url.startsWith('https://packages.strapi.io/'))
+    ).toBe(true);
+    expect(loggedText(logger)).not.toContain('--registry');
+    expect(loggedText(logger)).not.toContain('lockfile');
+    expect(dependencies.installPackages.mock.calls[0][0].env).toBeUndefined();
+  });
+
+  it('ignores STRAPI_ENTERPRISE_REGISTRY_URL, which the app .env can set', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      env: { STRAPI_LICENSE: LICENSE, STRAPI_ENTERPRISE_REGISTRY_URL: LOCAL_REGISTRY },
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
+
+    expect(requestedUrls(dependencies).length).toBeGreaterThan(0);
+    expect(
+      requestedUrls(dependencies).every((url) => url.startsWith('https://packages.strapi.io/'))
+    ).toBe(true);
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.stringContaining('Using the Enterprise registry')
+    );
+    expect(await fse.readFile(path.join(dependencies.homeDir, '.npmrc'), 'utf8')).toBe(
+      `@strapi-enterprise:registry=https://packages.strapi.io/\n//packages.strapi.io/:_authToken=${LICENSE}\n`
+    );
+  });
+
+  it('sends every request to that registry, and saves nothing to ~/.npmrc', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: [],
+      registry: `${LOCAL_REGISTRY}/`,
+      logger,
+      dependencies,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Using the Enterprise registry at ${LOCAL_REGISTRY} (--registry).`
+    );
+    expect(requestedUrls(dependencies)).toEqual(
+      expect.arrayContaining([`${LOCAL_REGISTRY}/-/strapi/plugins`, `${LOCAL_REGISTRY}/${AI_BYOK}`])
+    );
+    expect(requestedUrls(dependencies).every((url) => url.startsWith(`${LOCAL_REGISTRY}/`))).toBe(
+      true
+    );
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+
+  it('asks that registry about a named plugin outside the license', async () => {
+    const dependencies = await createDependencies({
+      fetchImplementation: createRegistryFetch({
+        packuments: { [LOCKED_PLUGIN]: 403 },
+        catalog: {
+          plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked'],
+        registry: LOCAL_REGISTRY,
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(NOT_LICENSED_MESSAGE);
+    expect(requestedUrls(dependencies)).toEqual([
+      `${LOCAL_REGISTRY}/${LOCKED_PLUGIN}`,
+      `${LOCAL_REGISTRY}/-/strapi/plugins`,
+    ]);
+  });
+
+  it('names that registry when it cannot list the plugins, and writes nothing', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: 503,
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.1.0' } }),
+        packageArguments: [],
+        registry: LOCAL_REGISTRY,
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(
+      new EnterpriseInstallError(
+        'Could not list the Enterprise plugins from localhost:4873. Try again later, or name the plugin to install.'
+      )
+    );
+    expect(requestedUrls(dependencies)).toEqual([`${LOCAL_REGISTRY}/-/strapi/plugins`]);
+    expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+
+  it('stops before any request or write when the value is not allowed', async () => {
+    const dependencies = await createDependencies();
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-ai-byok'],
+        registry: 'http://registry.example.com',
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow('--registry must be http(s) on localhost');
+    expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+});
+
+describe('runInstall with --registry, during the install', () => {
+  const LOCAL_REGISTRY = 'http://localhost:4873';
+  const OVERRIDE_NPMRC = `@strapi-enterprise:registry=${LOCAL_REGISTRY}/\n//localhost:4873/:_authToken=${LICENSE}\n`;
+  const overrideYarnrc = (registryUrl: string) =>
+    `npmScopes:\n  strapi-enterprise:\n    npmRegistryServer: '${registryUrl}/'\n    npmAlwaysAuth: true\n    npmAuthToken: '${LICENSE}'\n`;
+
+  /** Stands in for the package manager, and keeps the configuration file it would read. */
+  const createConfigReadingInstall = (
+    configFileOf: (env: NodeJS.ProcessEnv) => string,
+    { fails = false }: { fails?: boolean } = {}
+  ) => {
+    const seen = { env: {} as NodeJS.ProcessEnv, configPath: '', config: '', permissions: '' };
+    const installPackages = jest.fn(async ({ env = {} }: { env?: NodeJS.ProcessEnv }) => {
+      seen.env = env;
+      seen.configPath = configFileOf(env);
+      seen.config = await fse.readFile(seen.configPath, 'utf8');
+      seen.permissions = await readFilePermissions(seen.configPath);
+
+      if (fails) {
+        throw new PackageManagerError(1);
+      }
+    });
+
+    return { seen, installPackages };
+  };
+
+  const installWithRegistry = async (
+    dependencies: jest.Mocked<InstallDependencies>,
+    {
+      registry = `${LOCAL_REGISTRY}/`,
+      packageManager,
+    }: { registry?: string; packageManager?: string } = {}
+  ) => {
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ packageManager }),
+      packageArguments: ['plugin-ai-byok'],
+      registry,
+      logger,
+      dependencies,
+    });
+
+    return logger;
+  };
+
+  it('gives npm a temporary user configuration with only that registry, readable by its owner, and deletes it', async () => {
+    const { seen, installPackages } = createConfigReadingInstall(
+      (env) => env.NPM_CONFIG_USERCONFIG ?? ''
+    );
+    const dependencies = await createDependencies({ installPackages });
+
+    const logger = await installWithRegistry(dependencies);
+
+    expect(seen.env.npm_config_userconfig).toBe(seen.configPath);
+    expect(seen.config).toBe(OVERRIDE_NPMRC);
+    expect(seen.permissions).toBe('600');
+    expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The lockfile may now contain localhost:4873 URLs. Do not commit it.'
+    );
+  });
+
+  it('leaves the user ~/.npmrc as it was, and gives npm none of its lines', async () => {
+    const { seen, installPackages } = createConfigReadingInstall(
+      (env) => env.NPM_CONFIG_USERCONFIG ?? ''
+    );
+    const dependencies = await createDependencies({ installPackages });
+    const userNpmrcPath = path.join(dependencies.homeDir, '.npmrc');
+    const userNpmrc = `fund=false\n@strapi-enterprise:registry=https://packages.strapi.io/\n//packages.strapi.io/:_authToken=${LICENSE}\n//localhost:4873/:_authToken=old-license`;
+    await fse.writeFile(userNpmrcPath, userNpmrc);
+
+    await installWithRegistry(dependencies);
+
+    expect(seen.config).toBe(OVERRIDE_NPMRC);
+    expect(await fse.readFile(userNpmrcPath, 'utf8')).toBe(userNpmrc);
+  });
+
+  it('deletes the temporary configuration when the install fails', async () => {
+    const { seen, installPackages } = createConfigReadingInstall(
+      (env) => env.NPM_CONFIG_USERCONFIG ?? '',
+      { fails: true }
+    );
+    const dependencies = await createDependencies({ installPackages });
+
+    await expect(installWithRegistry(dependencies)).rejects.toBeInstanceOf(PackageManagerError);
+    expect(seen.config).toBe(OVERRIDE_NPMRC);
+    expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
+  });
+
+  it('gives Yarn 2+ a temporary home folder, and leaves the user ~/.yarnrc.yml as it was', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({ installPackages });
+    const userYarnrcPath = path.join(dependencies.homeDir, '.yarnrc.yml');
+    await fse.writeFile(userYarnrcPath, 'enableTelemetry: false\n');
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.config).toBe(overrideYarnrc(LOCAL_REGISTRY));
+    expect(seen.permissions).toBe('600');
+    expect(seen.env).toEqual({
+      HOME: path.dirname(seen.configPath),
+      USERPROFILE: path.dirname(seen.configPath),
+      YARN_GLOBAL_FOLDER: path.join(dependencies.homeDir, '.yarn', 'berry'),
+      COREPACK_HOME: path.join(dependencies.homeDir, '.cache', 'node', 'corepack'),
+      YARN_UNSAFE_HTTP_WHITELIST: 'localhost',
+    });
+    expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
+    expect(await fse.readFile(userYarnrcPath, 'utf8')).toBe('enableTelemetry: false\n');
+  });
+
+  it('keeps the Yarn cache and http allow list already set in the environment', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: {
+        STRAPI_LICENSE: LICENSE,
+        YARN_GLOBAL_FOLDER: '/yarn-cache',
+        YARN_UNSAFE_HTTP_WHITELIST: 'registry.local',
+      },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.env.YARN_GLOBAL_FOLDER).toBeUndefined();
+    expect(seen.env.YARN_UNSAFE_HTTP_WHITELIST).toBe('registry.local,localhost');
+  });
+
+  it('leaves the Yarn cache alone when XDG_DATA_HOME places it outside the home folder', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, XDG_DATA_HOME: '/data' },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.config).toBe(overrideYarnrc(LOCAL_REGISTRY));
+    expect(seen.env).not.toHaveProperty('YARN_GLOBAL_FOLDER');
+  });
+
+  it('keeps the Corepack folder already set in the environment', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, COREPACK_HOME: '/corepack' },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.env).toEqual({
+      HOME: path.dirname(seen.configPath),
+      USERPROFILE: path.dirname(seen.configPath),
+      YARN_GLOBAL_FOLDER: path.join(dependencies.homeDir, '.yarn', 'berry'),
+      YARN_UNSAFE_HTTP_WHITELIST: 'localhost',
+    });
+  });
+
+  it('leaves the Corepack folder alone when XDG_CACHE_HOME places it outside the home folder', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, XDG_CACHE_HOME: '/cache' },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.env).not.toHaveProperty('COREPACK_HOME');
+  });
+
+  it('allows no http host in Yarn 2+ for an https registry', async () => {
+    const registryUrl = 'https://packages.staging.strapi.team';
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({ installPackages });
+
+    await installWithRegistry(dependencies, {
+      registry: registryUrl,
+      packageManager: 'yarn@4.5.0',
+    });
+
+    expect(seen.config).toBe(overrideYarnrc(registryUrl));
+    expect(seen.env).not.toHaveProperty('YARN_UNSAFE_HTTP_WHITELIST');
+  });
+
+  it('stops before installing when a project .npmrc sets another license for that registry', async () => {
+    const dependencies = await createDependencies();
+    const appDir = await createApp();
+    await fse.writeFile(
+      path.join(appDir, '.npmrc'),
+      '//localhost:4873/:_authToken=other-license\n'
+    );
+
+    await expect(
+      runInstall({
+        appDir,
+        packageArguments: ['plugin-ai-byok'],
+        registry: LOCAL_REGISTRY,
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(
+      new EnterpriseInstallError(
+        `${path.join(appDir, '.npmrc')} sets another license for localhost:4873 and takes precedence over --registry.\nUpdate or remove that line, then run the command again.`
+      )
+    );
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
   });
 });
 

@@ -82,6 +82,22 @@ export const assertWriteStreamBackpressure = async <T = unknown>(
 /**
  * Collect every entity in a Readable stream
  */
+/**
+ * Entity sources for `maxSizeJsonl: 10` tests. The oversized row is rejected asynchronously by
+ * the entry writer, so it can surface either after the input ended or while it is still flowing.
+ */
+export async function* oversizedLast() {
+  yield { id: 1, title: 'longer than ten bytes' };
+}
+
+export async function* oversizedThenMore() {
+  yield { id: 1, title: 'longer than ten bytes' };
+  await new Promise((resolve) => {
+    setTimeout(resolve, 20);
+  });
+  yield { id: 2 };
+}
+
 export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
   const chunks: T[] = [];
 

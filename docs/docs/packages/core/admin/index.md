@@ -26,7 +26,7 @@ The package has one entry point per runtime. `./strapi-admin` is the React code,
 
 ### Shared UI and state
 
-`admin/src/index.ts` exports the components, hooks and features that plugins reuse: `Form`, `Table`, `Filters`, `useFetchClient`, `useRBAC`, `useAuth`, `useTracking`, `useNotification` and others. The store uses Redux Toolkit. `adminApi` is the shared RTK Query API, and plugins add their endpoints to it with `injectEndpoints`. Plugins add reducers with `addReducers`, and the store injects them at runtime. Read the hook pages [`useContentTypes`](./hooks/use-content-types.md) and [`usePersistentState`](./hooks/use-persistent-state.md).
+`admin/src/index.ts` exports the components, hooks and features that plugins reuse: `Form`, `Table`, `Filters`, `useFetchClient`, `useRBAC`, `useAuth`, `useTracking`, `useNotification` and others. The store uses Redux Toolkit. `adminApi` is the shared RTK Query API, and plugins add their endpoints to it with `injectEndpoints`. Plugins add reducers with `addReducers`, and the store injects them at runtime. Read the hook pages [`useContentTypes`](./hooks/use-content-types.md) and [`usePersistentState`](./hooks/use-persistent-state.md), and [Filters](./filters.md).
 
 ### RBAC
 

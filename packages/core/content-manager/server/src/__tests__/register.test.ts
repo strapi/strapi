@@ -1,6 +1,7 @@
 import register from '../register';
 import history from '../history';
 import preview from '../preview';
+import customOrder from '../custom-order';
 
 jest.mock('../history', () => ({
   __esModule: true,
@@ -8,6 +9,11 @@ jest.mock('../history', () => ({
 }));
 
 jest.mock('../preview', () => ({
+  __esModule: true,
+  default: { register: jest.fn() },
+}));
+
+jest.mock('../custom-order', () => ({
   __esModule: true,
   default: { register: jest.fn() },
 }));
@@ -23,5 +29,6 @@ describe('content-manager register', () => {
     expect(typeof registerAttributeRenameHandler.mock.calls[0][0]).toBe('function');
     expect(history.register).toHaveBeenCalledWith({ strapi });
     expect(preview.register).toHaveBeenCalledWith({ strapi });
+    expect(customOrder.register).toHaveBeenCalledWith({ strapi });
   });
 });

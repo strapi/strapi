@@ -2,8 +2,12 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "target": "ES2021",
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "checkJs": true,
-    "allowJs": true
-  }
+    "allowJs": true,
+    "skipLibCheck": true,
+    "maxNodeModuleJsDepth": 0
+  },
+  "exclude": ["node_modules/", "build/", "dist/", ".cache/", ".tmp/", ".strapi/", "src/admin/"]
 }

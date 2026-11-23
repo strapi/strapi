@@ -251,21 +251,33 @@ type RemovedFieldPath = string;
 
 /**
  * @internal
- * @description Finds the initial value for a component or dynamic zone item (based on its __temp_key__ and not its index).
- * @param initialValue - The initial values object.
+ * @description Finds the initial value of a component or of a dynamic zone item: by its
+ * __temp_key__ (not its index) in a list, and only when it's the stored component the item is
+ * an edit of. A component that takes the place of a saved one (a new one after a reset, a copy
+ * from another entry, a row reusing the key of a deleted row) is a different component: it must
+ * not inherit anything from the saved one, its id above all, or the saved one would be updated
+ * in place and keep its relations.
+ * @param initialValue - The initial value of the field.
  * @param item - The item to find the initial value for.
  * @returns The initial value for the item.
  */
-const getItemInitialValue = (initialValue: AnyData, item: AnyData) => {
-  if (initialValue && Array.isArray(initialValue)) {
-    const matchingInitialItem = initialValue.find(
-      (initialItem) => initialItem.__temp_key__ === item.__temp_key__
-    );
-    if (matchingInitialItem) {
-      return matchingInitialItem;
-    }
+const getItemInitialValue = (initialValue: unknown, item: AnyData): AnyData => {
+  const initialItem: unknown = Array.isArray(initialValue)
+    ? initialValue.find((candidate) => candidate?.__temp_key__ === item.__temp_key__)
+    : initialValue;
+
+  if (!initialItem || typeof initialItem !== 'object') {
+    return {};
   }
-  return {};
+
+  const { id, __component } = initialItem as AnyData;
+  const isSameComponent =
+    (id ?? null) === (item.id ?? null) &&
+    (__component === undefined ||
+      item.__component === undefined ||
+      __component === item.__component);
+
+  return isSameComponent ? (initialItem as AnyData) : {};
 };
 
 /**
@@ -426,7 +438,7 @@ const filterDataByRemovedPaths = (
       } else {
         result[attrName] = filterDataByRemovedPaths(
           value,
-          initialValue ?? {},
+          getItemInitialValue(initialValue, value),
           compSchema,
           components,
           removedPaths,

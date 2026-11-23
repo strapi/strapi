@@ -60,9 +60,10 @@ const foldersApi = uploadApi.injectEndpoints({
         // only the parent scope is dropped while searching.
         if (search) {
           // Search is global: the parent filter is dropped so matching folders
-          // anywhere in the library surface. The endpoint is unpaginated — it
-          // returns every match — so callers can treat the array length as the
-          // true total. Bounding it is a separate decision.
+          // anywhere in the library surface. No `page`/`pageSize` is sent, so
+          // the endpoint returns every match and callers can treat the array
+          // length as the true total. Opting into its pagination is a separate
+          // decision.
           queryParams['_q'] = encodeSearchQuery(search);
 
           if (filters.length > 0) {
@@ -136,12 +137,7 @@ const foldersApi = uploadApi.injectEndpoints({
         url: '/upload/folder-structure',
         method: 'GET',
       }),
-      // TODO: align GetFolderStructure contract with the real /upload/folder-structure
-      // envelope and drop this defensive unwrap (data[] vs { data: [] }).
-      transformResponse: (response: GetFolderStructure.Response['data']) =>
-        ((response as unknown as { data: FolderNode[] })?.data ??
-          (response as unknown as FolderNode[]) ??
-          []) as FolderNode[],
+      transformResponse: (response: GetFolderStructure.Response['data']) => response.data,
       providesTags: [{ type: 'Folder', id: 'STRUCTURE' }],
     }),
     /**

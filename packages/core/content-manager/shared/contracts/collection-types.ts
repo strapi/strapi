@@ -19,6 +19,13 @@ export type DocumentMetadata = {
   availableStatus: AvailableStatusDocument[];
   // Available locales within the same status of the returned document
   availableLocales: AvailableLocaleDocument[];
+  /**
+   * i18n default locale code (e.g. `en`). Present when the content type is
+   * localized; used by the admin to lock non-localized fields on secondary
+   * locales. Not inferred from `availableLocales[0]` because that list
+   * excludes the currently viewed locale.
+   */
+  defaultLocale?: string | null;
 };
 
 /**

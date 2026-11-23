@@ -1,7 +1,7 @@
 import { render as renderRTL, screen } from '@tests/utils';
 import { IntlProvider } from 'react-intl';
 
-import { listViewFilters as Filters } from '../Filters';
+import { listViewFilters as Filters, useListViewFilterOptions } from '../Filters';
 
 import type { Schema } from '../../../../hooks/useDocument';
 import type { ListLayout } from '../../../../hooks/useDocumentLayout';
@@ -58,6 +58,21 @@ jest.mock('../../../../services/contentTypes', () => ({
   })),
 }));
 
+/**
+ * Wires the filters like `ListViewPage`: the options come from `useListViewFilterOptions`.
+ */
+const ListViewFilters = ({ schema, layout }: { schema: Schema; layout: ListLayout }) => {
+  const options = useListViewFilterOptions(schema, layout);
+
+  return (
+    <Filters.Root schema={schema} options={options}>
+      <Filters.Trigger />
+      <Filters.Popover />
+      <Filters.List />
+    </Filters.Root>
+  );
+};
+
 const enumerationSchema = {
   uid: 'api::article.article',
   isDisplayed: true,
@@ -104,11 +119,7 @@ const enumerationLayout = {
 
 const renderEnumerationFilters = (messages?: Record<string, string>) =>
   renderRTL(
-    <Filters.Root schema={enumerationSchema} layout={enumerationLayout}>
-      <Filters.Trigger />
-      <Filters.Popover />
-      <Filters.List />
-    </Filters.Root>,
+    <ListViewFilters schema={enumerationSchema} layout={enumerationLayout} />,
     messages
       ? {
           renderOptions: {
@@ -187,13 +198,7 @@ describe('ListView Filters', () => {
       },
     } satisfies ListLayout;
 
-    renderRTL(
-      <Filters.Root schema={schema} layout={layout}>
-        <Filters.Trigger />
-        <Filters.Popover />
-        <Filters.List />
-      </Filters.Root>
-    );
+    renderRTL(<ListViewFilters schema={schema} layout={layout} />);
 
     expect(screen.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
   });

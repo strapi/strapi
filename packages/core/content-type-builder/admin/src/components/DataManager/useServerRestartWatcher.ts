@@ -1,45 +1,25 @@
+import * as React from 'react';
+
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 
-const TIMEOUT = 'timeout';
-
-const timeout = 30 * 1000;
-
-type UpdateSchemaStatusResponse = {
-  data?: {
-    isUpdating?: boolean;
-  };
-};
+import { watchServerRestart } from './watchServerRestart';
 
 export const useServerRestartWatcher = () => {
   const { get } = useFetchClient();
+  // Aborts the request in flight when the component unmounts, as useFetchClient's own signal did.
+  // watchServerRestart passes each request a signal of its own, which replaces that one.
+  const unmount = React.useRef<AbortController | null>(null);
 
-  const serverRestartWatcher = async (initTime?: number) => {
-    const startTime = initTime ?? Date.now();
+  React.useEffect(() => {
+    const controller = new AbortController();
+    unmount.current = controller;
 
-    if (Date.now() - startTime > timeout) {
-      throw new Error(TIMEOUT);
-    }
+    return () => controller.abort();
+  }, []);
 
-    try {
-      const res = await get<UpdateSchemaStatusResponse>(
-        `/content-type-builder/update-schema-status`
-      );
-
-      if (res?.data?.data?.isUpdating === true) {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            return serverRestartWatcher(startTime).then(resolve);
-          }, 200);
-        });
-      }
-    } catch {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          return serverRestartWatcher(startTime).then(resolve);
-        }, 200);
-      });
-    }
-  };
-
-  return serverRestartWatcher;
+  return React.useCallback(
+    (initTime?: number) =>
+      watchServerRestart(get, { initTime, signal: unmount.current?.signal ?? undefined }),
+    [get]
+  );
 };

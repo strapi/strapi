@@ -93,7 +93,5 @@
   "sort.name_desc": "Omvendt alfabetisk (Z til A)",
   "sort.updated_at_asc": "Ældste opdatering",
   "sort.updated_at_desc": "Nyeste opdatering",
-  "tabs.title": "Hvordan ønsker du at uploade dine medier?",
-  "window.confirm.close-modal.file": "Er du sikker? Dine ændringer går tabt.",
-  "window.confirm.close-modal.files": "Er du sikker? Du har filer som ikke er blevet uploaded endnu."
+  "tabs.title": "Hvordan ønsker du at uploade dine medier?"
 }

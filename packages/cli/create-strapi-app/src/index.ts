@@ -6,11 +6,11 @@ import crypto from 'crypto';
 import fse from 'fs-extra';
 
 import * as prompts from './prompts';
-import { handleCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
+import { detectInvocation } from './utils/invocation';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
@@ -39,9 +39,6 @@ const command = new commander.Command('create-strapi-app')
   .option('--install', 'Install dependencies')
   .option('--no-install', 'Do not install dependencies')
 
-  // Cloud options
-  .option('--skip-cloud', 'Skip cloud login and project creation')
-
   // Example app
   .option('--example', 'Use an example app')
   .option('--no-example', 'Do not use an example app')
@@ -53,9 +50,14 @@ const command = new commander.Command('create-strapi-app')
   // Legacy no-ops (hidden from --help): accept old flags so existing CI/scripts keep working
   .addOption(new commander.Option('--enable-ab-tests', 'ignored').hideHelp())
   .addOption(new commander.Option('--no-enable-ab-tests', 'ignored').hideHelp())
+  .addOption(new commander.Option('--skip-cloud', 'ignored').hideHelp())
 
   // Automation
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')
+  .option(
+    '--agent <name>',
+    'Name of the coding agent that runs this command (used for anonymous usage statistics)'
+  )
 
   // Database options
   .option('--dbclient <dbclient>', 'Database client')
@@ -88,13 +90,17 @@ async function run(args: string[]): Promise<void> {
     options.template !== undefined
   ) {
     logger.fatal(
-      `You cannot use ${chalk.bold('--javascript')} or ${chalk.bold('--typescript')} with ${chalk.bold('--template')}`
+      `You cannot use ${chalk.bold('--javascript')} or ${chalk.bold(
+        '--typescript'
+      )} with ${chalk.bold('--template')}`
     );
   }
 
   if (options.javascript === true && options.typescript === true) {
     logger.fatal(
-      `You cannot use both ${chalk.bold('--typescript')} (--ts) and ${chalk.bold('--javascript')} (--js) flags together`
+      `You cannot use both ${chalk.bold('--typescript')} (--ts) and ${chalk.bold(
+        '--javascript'
+      )} (--js) flags together`
     );
   }
 
@@ -109,19 +115,25 @@ async function run(args: string[]): Promise<void> {
 
   if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
     logger.fatal(
-      `You cannot specify multiple package managers at the same time ${chalk.bold('(--use-npm, --use-pnpm, --use-yarn)')}`
+      `You cannot specify multiple package managers at the same time ${chalk.bold(
+        '(--use-npm, --use-pnpm, --use-yarn)'
+      )}`
     );
   }
 
   if (options.quickstart && !directory) {
     logger.fatal(
-      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--quickstart')}`
+      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold(
+        '--quickstart'
+      )}`
     );
   }
 
   if (options.nonInteractive && !directory) {
     logger.fatal(
-      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--non-interactive')}`
+      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold(
+        '--non-interactive'
+      )}`
     );
   }
 
@@ -133,16 +145,12 @@ async function run(args: string[]): Promise<void> {
 
   const rootPath = await checkInstallPath(appDirectory);
 
-  let shouldCreateGrowthSsoTrial = false;
-  if (!options.skipCloud && !options.nonInteractive) {
-    shouldCreateGrowthSsoTrial = await handleCloudLogin();
-  }
-
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
 
   const randomUUID = crypto.randomUUID();
   const uuid = (process.env.STRAPI_UUID_PREFIX || '') + randomUUID;
   const installId = installID(uuid);
+  const { invocation, agentName } = await detectInvocation({ agentFlag: options.agent });
 
   const scope: Scope = {
     rootPath,
@@ -177,7 +185,8 @@ async function run(args: string[]): Promise<void> {
       'react-router-dom': '^6.30.3',
       'styled-components': '^6.0.0',
     },
-    shouldCreateGrowthSsoTrial,
+    invocation,
+    agentName,
   };
 
   if (options.template !== undefined) {
@@ -206,7 +215,7 @@ async function run(args: string[]): Promise<void> {
     scope.devDependencies = {
       ...scope.devDependencies,
       typescript: '^5',
-      '@types/node': '^20',
+      '@types/node': '^22',
       '@types/react': '^18',
       '@types/react-dom': '^18',
     };

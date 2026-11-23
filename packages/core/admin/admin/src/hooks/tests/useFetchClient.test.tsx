@@ -1,7 +1,12 @@
 // eslint-disable-next-line check-file/filename-naming-convention
 import * as React from 'react';
 
-import { render, renderHook, waitFor } from '@tests/utils';
+import {
+  render as renderWithoutProviders,
+  renderHook as renderHookWithoutProviders,
+} from '@testing-library/react';
+import { render, renderHook, server, waitFor } from '@tests/utils';
+import { delay, http, HttpResponse } from 'msw';
 
 import { useFetchClient } from '../useFetchClient';
 
@@ -58,5 +63,69 @@ describe('useFetchClient', () => {
     rerender(<Component />);
 
     expect(getByRole('heading')).toHaveTextContent('called data times 1');
+  });
+
+  it('should still complete requests after a React.StrictMode remount', async () => {
+    /**
+     * StrictMode mounts, runs the effect cleanup (which aborts the controller),
+     * then mounts again. Requests made afterwards must not use the aborted signal.
+     */
+    const { result } = renderHookWithoutProviders(() => useFetchClient(), {
+      wrapper: React.StrictMode,
+    });
+
+    const { data } = await result.current.get('/use-fetch-client-test');
+
+    expect(data).toHaveProperty('data.results');
+  });
+
+  it('should complete requests made from a child effect under React.StrictMode', async () => {
+    const results: string[] = [];
+
+    const Child = ({ get }: { get: ReturnType<typeof useFetchClient>['get'] }) => {
+      React.useEffect(() => {
+        get('/use-fetch-client-test').then(
+          () => results.push('ok'),
+          (e) => results.push(e.name)
+        );
+      }, [get]);
+
+      return null;
+    };
+
+    const Parent = () => {
+      const { get } = useFetchClient();
+
+      return <Child get={get} />;
+    };
+
+    renderWithoutProviders(
+      <React.StrictMode>
+        <Parent />
+      </React.StrictMode>
+    );
+
+    // The first request is aborted by StrictMode's simulated unmount, the second must succeed.
+    await waitFor(() => expect(results).toEqual(['AbortError', 'ok']));
+  });
+
+  it('should abort pending requests when the component unmounts', async () => {
+    server.use(
+      http.get('/use-fetch-client-slow', async () => {
+        await delay('infinite');
+
+        return HttpResponse.json({});
+      })
+    );
+
+    const { result, unmount } = renderHookWithoutProviders(() => useFetchClient(), {
+      wrapper: React.StrictMode,
+    });
+
+    const request = result.current.get('/use-fetch-client-slow');
+
+    unmount();
+
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
   });
 });

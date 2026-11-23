@@ -9,6 +9,7 @@ import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
 
 const Panel: PanelComponent = ({
@@ -41,15 +42,19 @@ const Panel: PanelComponent = ({
   );
   const releases = response.data?.data;
 
+  // A publish entry that isn't valid will be skipped or block the release: warn, don't reassure
+  const isNotReady = (action: Pick<ReleaseAction, 'type' | 'isEntryValid'>) =>
+    action.type === 'publish' && action.isEntryValid !== true;
+
   const getReleaseColorVariant = (
-    actionType: 'publish' | 'unpublish',
+    action: Pick<ReleaseAction, 'type' | 'isEntryValid'>,
     shade: '100' | '200' | '600'
   ) => {
-    if (actionType === 'unpublish') {
+    if (action.type === 'unpublish') {
       return `secondary${shade}`;
     }
 
-    return `success${shade}`;
+    return isNotReady(action) ? `warning${shade}` : `success${shade}`;
   };
 
   // Project is not EE or contentType does not have draftAndPublish enabled
@@ -79,7 +84,7 @@ const Panel: PanelComponent = ({
             alignItems="start"
             borderWidth="1px"
             borderStyle="solid"
-            borderColor={getReleaseColorVariant(release.actions[0].type, '200')}
+            borderColor={getReleaseColorVariant(release.actions[0], '200')}
             overflow="hidden"
             hasRadius
           >
@@ -88,22 +93,27 @@ const Panel: PanelComponent = ({
               paddingBottom={3}
               paddingLeft={4}
               paddingRight={4}
-              background={getReleaseColorVariant(release.actions[0].type, '100')}
+              background={getReleaseColorVariant(release.actions[0], '100')}
               width="100%"
             >
               <Typography
                 fontSize={1}
                 variant="pi"
-                textColor={getReleaseColorVariant(release.actions[0].type, '600')}
+                textColor={getReleaseColorVariant(release.actions[0], '600')}
               >
-                {formatMessage(
-                  {
-                    id: 'content-releases.content-manager-edit-view.list-releases.title',
-                    defaultMessage:
-                      '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
-                  },
-                  { isPublish: release.actions[0].type === 'publish' }
-                )}
+                {isNotReady(release.actions[0])
+                  ? formatMessage({
+                      id: 'content-releases.content-manager-edit-view.list-releases.not-ready',
+                      defaultMessage: 'Not ready to be published in',
+                    })
+                  : formatMessage(
+                      {
+                        id: 'content-releases.content-manager-edit-view.list-releases.title',
+                        defaultMessage:
+                          '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
+                      },
+                      { isPublish: release.actions[0].type === 'publish' }
+                    )}
               </Typography>
             </Box>
             <Flex padding={4} direction="column" gap={2} width="100%" alignItems="flex-start">

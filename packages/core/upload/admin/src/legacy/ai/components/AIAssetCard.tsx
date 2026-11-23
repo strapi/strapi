@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Card,
@@ -126,7 +126,7 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
         <ConfirmDialog onConfirm={handleConfirmRemove} />
       </Dialog.Root>
 
-      <Modal.Root open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <UnsavedChangesModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <Modal.Trigger>
           <IconButton
             label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
@@ -152,7 +152,7 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
             omitActions={['replace']}
           />
         </Modal.Content>
-      </Modal.Root>
+      </UnsavedChangesModal>
     </CardActionsContainer>
   );
 };

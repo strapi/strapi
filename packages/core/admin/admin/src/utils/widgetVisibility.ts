@@ -38,6 +38,26 @@ export const hideDeployNowWidgetInProduction = (
 };
 
 /**
+ * UID of the "Last activity" widget, which lists the latest audit logs.
+ */
+export const AUDIT_LOGS_WIDGET_UID = 'plugin::admin.audit-logs';
+
+/**
+ * Hides the audit logs widget when `admin.auditLogs.enabled: false` turns off audit logs that the
+ * license includes: the server then mounts no audit-logs route for the widget to read.
+ */
+export const hideAuditLogsWidgetWhenDisabled = (
+  widgets: WidgetWithUID[],
+  isAuditLogsDisabledByConfig: boolean
+): WidgetWithUID[] => {
+  if (isAuditLogsDisabledByConfig === false) {
+    return widgets;
+  }
+
+  return widgets.filter((widget) => widget.uid !== AUDIT_LOGS_WIDGET_UID);
+};
+
+/**
  * Hides the Strapi Cloud deploy sidebar link when the project runs in production.
  */
 export const hideCloudDeployMenuLinkInProduction = <T extends { to: string }>(

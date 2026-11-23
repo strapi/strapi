@@ -20,7 +20,7 @@ export const EmptyCardGrid = () => {
       {[...Array(4)].map((_, idx) => {
         return (
           <EmptyCard
-            // eslint-disable-next-line react/no-array-index-key
+            // oxlint-disable-next-line react/no-array-index-key
             key={`empty-card-${idx}`}
             height="138px"
             width="375px"

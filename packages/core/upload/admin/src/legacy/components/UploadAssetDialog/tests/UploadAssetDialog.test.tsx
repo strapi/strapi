@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import { within } from '@testing-library/react';
 import { fireEvent, render, screen } from '@tests/utils';
 
@@ -14,7 +13,6 @@ describe('UploadAssetDialog', () => {
 
   beforeAll(() => {
     confirmSpy = jest.spyOn(window, 'confirm');
-    confirmSpy.mockImplementation(jest.fn(() => true));
   });
 
   afterAll(() => {
@@ -31,7 +29,7 @@ describe('UploadAssetDialog', () => {
       expect(onCloseSpy).toBeCalled();
     });
 
-    it('open confirm box when clicking on cancel on the pending asset step', async () => {
+    it('asks for confirmation when clicking on cancel on the pending asset step', async () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
 
       const onCloseMock = jest.fn();
@@ -44,7 +42,32 @@ describe('UploadAssetDialog', () => {
 
       await user.click(getByRole('button', { name: 'cancel' }));
 
-      expect(window.confirm).toBeCalled();
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+      );
+      expect(onCloseMock).not.toHaveBeenCalled();
+      expect(window.confirm).not.toHaveBeenCalled();
+    });
+
+    it('asks for confirmation when closing from the add asset step with files still queued', async () => {
+      const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
+
+      const onCloseMock = jest.fn();
+      const { user, getByRole, getByLabelText } = render(
+        <UploadAssetDialog open onClose={onCloseMock} />
+      );
+
+      await user.upload(getByLabelText('Drag & Drop here or'), file);
+      // "Add new assets" goes back to the add asset step but keeps the queued file.
+      await user.click(getByRole('button', { name: 'Add new assets' }));
+      expect(getByLabelText('Drag & Drop here or')).toBeInTheDocument();
+
+      await user.click(getByRole('button', { name: 'cancel' }));
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+      );
+      expect(onCloseMock).not.toHaveBeenCalled();
     });
 
     [
@@ -90,7 +113,6 @@ describe('UploadAssetDialog', () => {
         'http://localhost:1234/some-where-not-existing.jpg',
       ];
 
-      // eslint-disable-next-line no-restricted-syntax
       for (const url of urls) {
         await user.type(getByRole('textbox', { name: 'URL' }), url);
 
@@ -124,7 +146,6 @@ describe('UploadAssetDialog', () => {
         'http://localhost:5000/not-working-like-cors.lutin',
       ];
 
-      // eslint-disable-next-line no-restricted-syntax
       for (const url of urls) {
         await user.type(getByRole('textbox', { name: 'URL' }), url);
 

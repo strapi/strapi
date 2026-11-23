@@ -155,7 +155,7 @@ describe('useRemoveAsset', () => {
 
     await waitFor(() =>
       expect(toggleNotification).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'danger', message: 'Unexpected end of JSON input' })
+        expect.objectContaining({ type: 'danger', message: 'Unknown Server Error' })
       )
     );
 
