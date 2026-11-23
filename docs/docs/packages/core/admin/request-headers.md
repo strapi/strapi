@@ -47,7 +47,7 @@ A value that is `undefined` or `null` only skips the entry of that provider. If 
 
 A call reads the providers once, when it starts. The retry after a 401 sends the same values as the first attempt. Without this, a write sent while the tab worked in one space could be replayed in another space if the tab switched while the token refreshed. `uploadFileViaXHR` also reads the providers once and reuses them for its retry.
 
-A new Media Library drop reads the providers once, when the user drops the files. All files of the drop and all retries of these files send the same values, also when the tab switches space while the drop uploads. If the read fails, every file of the drop shows an upload error and no file is sent. `uploadFileViaXHR` reads the providers itself only when its caller does not give it the headers. The legacy Media Library (`useLegacyMediaLibrary`) does not give them, so it reads the providers once per file.
+A new Media Library drop reads the providers once, when the user drops the files. All files of the drop and all retries of these files send the same values, also when the tab switches space while the drop uploads. If the read fails, every file of the drop shows an upload error and no file is sent. A retry then reads the providers again, once for the whole drop, and all later retries of the drop send these values. `uploadFileViaXHR` reads the providers itself only when its caller does not give it the headers. The legacy Media Library (`useLegacyMediaLibrary`) does not give them, so it reads the providers once per file.
 
 ## When a provider fails
 
