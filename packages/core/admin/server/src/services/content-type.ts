@@ -132,13 +132,23 @@ const isContentTypeUID = (subject: string): subject is UID.ContentType => {
 };
 
 /**
+ * What {@link getPermissionsWithNestedFields} reads from an action. With strict types, both a stored
+ * action (`actionProvider.values()` and `get`) and an {@link Action} are accepted.
+ */
+type NestedFieldsAction = {
+  actionId: string;
+  subjects?: readonly (string | undefined)[] | undefined;
+  options: { applyToProperties: readonly (string | undefined)[] | null };
+};
+
+/**
  * Creates an array of permissions with the "properties.fields" attribute filled.
  * An action without subjects and an undefined subject create no permission. When the action
  * applies to fields, a subject that is not a loaded content type creates no permission either,
  * since its fields cannot be resolved.
  */
 const getPermissionsWithNestedFields = (
-  actions: readonly Action[],
+  actions: readonly (Core.IsStrict extends true ? NestedFieldsAction : Action)[],
   { nestingLevel, restrictedSubjects = [] }: FieldOptions = {}
 ): Modules.Permissions.PermissionRule[] => {
   return actions.reduce<Modules.Permissions.PermissionRule[]>((permissions, action) => {
