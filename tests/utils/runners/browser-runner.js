@@ -8,7 +8,8 @@ const execa = require('execa');
  * planned file list), often side by side and with `--shard` removed, so processes that share the
  * CI label would cancel each other's live run on the dashboard. Each process gets its own label
  * instead: the CI label, then the job's shard, the domain and the lane.
- * Returns undefined when no CI label is set, so the reporter keeps its own default.
+ * run-tests.js passes a per-invocation `local-<timestamp>` base when no CI label is set.
+ * Returns undefined when no base label is given, so the reporter keeps its own default.
  */
 const piwiRunLabel = ({ baseLabel, shard, domain, lane }) => {
   if (!baseLabel) {

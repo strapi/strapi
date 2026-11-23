@@ -272,6 +272,11 @@ yargs
 
           const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
 
+          // Without a CI label, the reporter would give every local process the same
+          // `hostname|project` id, and parallel domains would cancel each other's run. One base
+          // per invocation keeps the shard, domain and lane suffixes working locally too.
+          const piwiBaseLabel = process.env.PIWI_RUN_LABEL || `local-${Date.now()}`;
+
           const runDomain = async ({ domain, testAppPath, port, testArgs, lane }) => {
             const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
@@ -311,7 +316,7 @@ module.exports = config
                 testAppPath,
                 testArgs,
                 runLabel: piwiRunLabel({
-                  baseLabel: process.env.PIWI_RUN_LABEL,
+                  baseLabel: piwiBaseLabel,
                   shard,
                   domain,
                   lane,
