@@ -8840,6 +8840,8 @@ The `content-structure` service writes the folder groups that the admin navigati
 
 The admin part registers a menu link and the plugin API `forms`, which other plugins use to add fields and validation to the CTB modals. `DataManagerProvider` keeps the working copy of the schema in a Redux slice with undo and redo (`undoRedo.ts`). Modals in `components/FormModal` edit attributes and types. The read permission is `plugin::content-type-builder.read`, which `bootstrap` registers.
 
+`GET /content-type-builder/schema` returns `settings` next to the schemas: the `renameMigrations` plugin setting, and `strictRelations`, which is `true` only when `api.documents.strictRelations` is the literal `true` (the document service rejects other non-boolean values). The document service enforces `required` on relations and media only under that flag. When `strictRelations` is `false`, the advanced form of relation attributes disables the **Required** checkbox, with a hint and a tooltip explaining the flag. Media attributes, single or multiple, keep an editable checkbox because the Content Manager already requires them on publish. A `required: true` already in the schema stays checked, and the save keeps it.
+
 ### Related
 
 - [Schema sync](../../../architecture/07-schema-sync.md): what happens to the tables after CTB writes a file.
@@ -9012,6 +9014,7 @@ module.exports = {
 - Enforced only on **published** (non-draft) writes — drafts stay lenient so you can save work in progress with associations still missing.
 - Applies to required media and relations, including those nested inside components and dynamic zones.
 - On by default in newly scaffolded apps only; existing projects keep the legacy (lenient) behaviour until they opt in, so enabling it will start rejecting previously-accepted writes that omit a required association.
+- While the flag is off, the Content-Type Builder disables the **Required** checkbox of relation attributes and explains how to turn enforcement on. Media stays editable because the Content Manager already requires it on publish. A `required: true` already in the schema stays checked and is kept on save.
 
 ### Content API authentication (refresh tokens)
 
