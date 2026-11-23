@@ -1,6 +1,6 @@
 {
   "Plugin.name": "部署",
-  "Homepage.title": "部署您的项目。",
+  "Homepage.title": "使用 Strapi Cloud 部署",
   "Homepage.subTitle": "在我们的托管云平台上托管你的 Strapi 项目，支持自动部署和全球 CDN。",
   "Homepage.features.cdn": "全球 CDN",
   "Homepage.features.pushToDeploy": "推送以部署",
