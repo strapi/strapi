@@ -651,8 +651,8 @@ export const relationToInputSchema = (attribute: Schema.Attribute.Relation) => {
   const { required } = attribute;
 
   const isToMany = relations.isAnyToMany(attribute);
-  const uuid = z.string().uuid();
-  const baseSchema = isToMany ? z.array(uuid) : uuid;
+  const documentId = z.string();
+  const baseSchema = isToMany ? z.array(documentId) : documentId;
 
   const schema = augmentSchema(baseSchema, [maybeRequired(required)]);
 

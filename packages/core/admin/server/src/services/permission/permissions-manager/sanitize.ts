@@ -205,7 +205,12 @@ export default ({ action, ability, model }: any) => {
 
     /**
      * The result keeps the type of `data` (`unknown` stays `unknown`), so callers can type
-     * their sanitized data. At runtime, fields the user is not allowed to see are removed.
+     * their sanitized data. `sanitizeQuery` types its result as `unknown`.
+     * At runtime, fields outside the user's permitted fields for the action are removed: from the
+     * data for `sanitizeInput` and `sanitizeOutput`, and from `filters`, `sort`, `populate` and
+     * `fields` for `sanitizeQuery`. Some fields are always permitted, such as `__component`, and
+     * `id` and `documentId` for output and query: see `getInputFields`, `getOutputFields` and
+     * `getQueryFields`.
      */
     function wrappedSanitize<T>(data: T, options?: any): Promise<T>;
     async function wrappedSanitize(data: unknown, options = {} as any): Promise<unknown> {
