@@ -150,7 +150,10 @@ const useInfiniteAssets = ({
   // and blanking the list on each one would strobe as the user types.
   // The cost: through the search window the previous rows stay rendered and
   // `hasNextPage` is false, so the list reads as complete until page 1 lands.
-  const listKey = JSON.stringify({ folder, sort, filters });
+  // Widening a folder search to all media is a single committed action too, so
+  // it resets like a folder change rather than riding the keystroke path.
+  const searchesAll = Boolean(search) && folder !== null && !searchFolderPath;
+  const listKey = JSON.stringify({ folder, sort, filters, searchesAll });
 
   const [pageState, setPageState] = useState<PageState>({ queryKey, page: 1 });
   const [accumulated, setAccumulated] = useState<Accumulated>({ queryKey, listKey, pages: {} });

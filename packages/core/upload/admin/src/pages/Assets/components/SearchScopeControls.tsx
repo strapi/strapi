@@ -9,7 +9,8 @@ interface SearchScopeControlsProps {
   canSearchAll: boolean;
   isSearchingAll: boolean;
   onSearchingAllChange: (value: boolean) => void;
-  resultCount: number;
+  /** Left out while the list loads, so the count never reads a false zero. */
+  resultCount?: number;
 }
 
 export const SearchScopeControls = ({
@@ -22,7 +23,7 @@ export const SearchScopeControls = ({
   const switchId = useId();
 
   return (
-    <Flex gap={3} alignItems="center" shrink={0}>
+    <Flex gap={3} alignItems="center" wrap="wrap">
       {canSearchAll && (
         <Flex gap={2} alignItems="center">
           <Switch id={switchId} checked={isSearchingAll} onCheckedChange={onSearchingAllChange} />
@@ -35,13 +36,14 @@ export const SearchScopeControls = ({
         </Flex>
       )}
       <Typography role="status" variant="omega" textColor="neutral600">
-        {formatMessage(
-          {
-            id: getTranslationKey('search.results-count'),
-            defaultMessage: '{count, plural, one {# result} other {# results}}',
-          },
-          { count: resultCount }
-        )}
+        {resultCount !== undefined &&
+          formatMessage(
+            {
+              id: getTranslationKey('search.results-count'),
+              defaultMessage: '{count, plural, one {# result} other {# results}}',
+            },
+            { count: resultCount }
+          )}
       </Typography>
     </Flex>
   );

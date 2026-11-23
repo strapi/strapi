@@ -110,6 +110,16 @@ const Footer = styled(Modal.Footer)`
   flex: 0 0 auto;
 `;
 
+// Own line on small screens, so the search field keeps its width; inline from
+// medium up, wrapping only if the toolbar runs out of room.
+const SearchScopeSlot = styled(Box)`
+  flex-basis: 100%;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    flex: 0 0 auto;
+  }
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * Shared
  * -----------------------------------------------------------------------------------------------*/
@@ -173,16 +183,22 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
     <>
       <Box paddingLeft={7} paddingRight={7} paddingTop={6} paddingBottom={6}>
         <Flex justifyContent="space-between" gap={2} wrap="wrap">
-          <Flex gap={2}>
+          <Flex gap={2} wrap="wrap">
             <FilterMenu listFilters={listFilters} />
             <AssetsSearchInput collapsible />
             {isSearching && (
-              <SearchScopeControls
-                canSearchAll={canSearchAll}
-                isSearchingAll={isSearchingAll}
-                onSearchingAllChange={setSearchingAll}
-                resultCount={folders.length + (pagination?.total ?? 0)}
-              />
+              <SearchScopeSlot>
+                <SearchScopeControls
+                  canSearchAll={canSearchAll}
+                  isSearchingAll={isSearchingAll}
+                  onSearchingAllChange={setSearchingAll}
+                  resultCount={
+                    isLoadingAssets || isLoadingFolders
+                      ? undefined
+                      : folders.length + (pagination?.total ?? 0)
+                  }
+                />
+              </SearchScopeSlot>
             )}
           </Flex>
           <Flex gap={2}>

@@ -228,12 +228,20 @@ describe('AssetsPage search', () => {
   // outside jsdom's accessibility tree — hence the test ids rather than roles.
   const findFolderTreeRows = () => screen.findAllByTestId(/^folder-tree-/);
 
-  it('keeps the folder tree highlight while the search is scoped to the current folder', async () => {
+  it('keeps the Home highlight while searching from the root', async () => {
     renderPage('?_q=img');
 
     await findFolderTreeRows();
 
     expect(screen.getByTestId('folder-tree-home')).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('keeps the folder tree highlight while the search is scoped to the current folder', async () => {
+    renderPage('?folder=1&_q=img');
+
+    const row = await screen.findByTestId('folder-tree-node-1');
+
+    await waitFor(() => expect(row).toHaveAttribute('aria-current', 'page'));
   });
 
   it('suppresses the folder tree highlight while searching all media', async () => {
@@ -698,6 +706,43 @@ describe('AssetsPage search', () => {
 
       expect(await findHeading()).toHaveTextContent('test');
       expect(screen.queryByRole('switch', { name: 'Search all media' })).not.toBeInTheDocument();
+    });
+
+    it('shows no result count while the folder scope is still loading', async () => {
+      captureListRequests();
+      let releaseFolder: () => void = () => {};
+      const folderResponded = new Promise<void>((resolve) => {
+        releaseFolder = resolve;
+      });
+      server.use(
+        http.get('*/upload/folders/:id', async () => {
+          await folderResponded;
+          return HttpResponse.json({ data: { ...createFolder(1, 'test'), parent: null } });
+        })
+      );
+
+      renderPage('?folder=1&_q=cat');
+
+      await screen.findByRole('switch', { name: 'Search all media' });
+      expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
+
+      releaseFolder();
+
+      await waitFor(async () => expect(await findResultCount()).toHaveTextContent('1 result'));
+    });
+
+    it('shows an error rather than loading forever when the folder request fails', async () => {
+      server.use(
+        http.get('*/upload/folders/:id', () =>
+          HttpResponse.json({ error: { status: 500, name: 'ApplicationError' } }, { status: 500 })
+        )
+      );
+
+      renderPage('?folder=1&_q=cat');
+
+      expect(
+        await screen.findByText('An error occurred while fetching assets.')
+      ).toBeInTheDocument();
     });
 
     it('widens the search and records it in the URL when the switch is turned on', async () => {

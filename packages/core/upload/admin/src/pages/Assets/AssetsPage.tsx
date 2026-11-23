@@ -176,9 +176,24 @@ const ToolbarGroup = styled(Flex)`
   gap: ${({ theme }) => theme.spaces[3]};
 `;
 
-// Filter + Search. On mobile the group fills the row (search grows into it);
-// on desktop it keeps its intrinsic size and sits at the left edge.
-const FilterSearchGroup = styled(ToolbarGroup)``;
+// Filter + Search (+ search scope). On mobile the group fills the row (search
+// grows into it) and the scope controls wrap onto their own line; on desktop it
+// keeps its intrinsic size and sits at the left edge.
+const FilterSearchGroup = styled(ToolbarGroup)`
+  flex-wrap: wrap;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex-wrap: nowrap;
+  }
+`;
+
+const SearchScopeSlot = styled(Box)`
+  flex-basis: 100%;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex: 0 0 auto;
+  }
+`;
 
 // Sort + Toggle. Mobile: spread across the row (Sort left, Toggle right).
 // Desktop: sit together at the right edge (space-between on the toolbar leaves
@@ -472,12 +487,18 @@ export const AssetsPage = () => {
                             <AssetsSearchInput />
                           </SearchSlot>
                           {isSearching && (
-                            <SearchScopeControls
-                              canSearchAll={canSearchAll}
-                              isSearchingAll={isSearchingAll}
-                              onSearchingAllChange={setSearchingAll}
-                              resultCount={folders.length + (pagination?.total ?? 0)}
-                            />
+                            <SearchScopeSlot>
+                              <SearchScopeControls
+                                canSearchAll={canSearchAll}
+                                isSearchingAll={isSearchingAll}
+                                onSearchingAllChange={setSearchingAll}
+                                resultCount={
+                                  isLoadingAssets || isLoadingFolders
+                                    ? undefined
+                                    : folders.length + (pagination?.total ?? 0)
+                                }
+                              />
+                            </SearchScopeSlot>
                           )}
                         </FilterSearchGroup>
                         <SortToggleGroup>

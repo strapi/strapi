@@ -41,6 +41,9 @@ export const useAssetsList = () => {
   const searchFolderPath = isSearchScopedToFolder ? currentFolder?.path : undefined;
   // Without the folder's path yet, the search would run library-wide.
   const isWaitingForSearchScope = isSearchScopedToFolder && !searchFolderPath;
+  // A failed folder request would otherwise leave the list waiting forever.
+  const searchScopeError = isWaitingForSearchScope ? currentFolderError : undefined;
+  const isLoadingSearchScope = isWaitingForSearchScope && !searchScopeError;
   const listSort = useListSort();
   const listFilters = useListFilters();
 
@@ -99,12 +102,12 @@ export const useAssetsList = () => {
     assets,
     subscribers,
     pagination,
-    isLoadingAssets: isLoadingAssets || isWaitingForSearchScope,
+    isLoadingAssets: isLoadingAssets || isLoadingSearchScope,
     isFetchingMore,
     hasNextPage,
     fetchNextPage,
-    assetsError,
+    assetsError: assetsError ?? searchScopeError,
     folders,
-    isLoadingFolders: isLoadingFolders || isWaitingForSearchScope,
+    isLoadingFolders: isLoadingFolders || isLoadingSearchScope,
   };
 };
