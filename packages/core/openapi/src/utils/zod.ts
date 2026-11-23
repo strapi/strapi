@@ -6,9 +6,9 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 
 /**
  * OpenAPI 3.1 uses the JSON Schema 2020-12 dialect, so `draft-2020-12` preserves valid 3.1
- * schemas. Zod 4.6 added an `openapi-3.1` target; switching to it changes the generated
- * document, so it is left for a separate change. Explicit output mode preserves the
- * conversion direction used before these defaults were pinned.
+ * schemas. Zod has no OpenAPI 3.1 target: its only OpenAPI target is `openapi-3.0`.
+ * Explicit output mode preserves the conversion direction used before these defaults
+ * were pinned.
  */
 export const OPENAPI_SCHEMA_CONVERSION_OPTIONS = {
   target: 'draft-2020-12',
