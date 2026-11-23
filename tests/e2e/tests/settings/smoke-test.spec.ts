@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { describeOnCondition, navToHeader } from '../../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
@@ -9,8 +9,8 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 test.describe('Settings', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('every expected feature is displayed', async ({ page }) => {

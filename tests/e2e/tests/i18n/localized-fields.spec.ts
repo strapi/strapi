@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { navToHeader } from '../../../utils/shared';
 import { findAndClose } from '../../../utils/shared';
 import { resetFiles } from '../../../utils/file-reset';
@@ -11,8 +11,8 @@ test.describe('Locale Isolation', () => {
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test.afterAll(async () => {

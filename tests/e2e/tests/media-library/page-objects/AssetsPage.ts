@@ -40,6 +40,9 @@ export class AssetsPage {
   }
 
   async goto() {
+    // A full navigation can cancel an in-flight login request, particularly in WebKit.
+    await expect(this.page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+
     // Deliberately no wait for `New` here: a role without `assets.create` never gets it,
     // so a spec covering a read-only user would hang rather than fail. A spec that acts
     // on a create affordance as its first move waits for it itself.
@@ -420,6 +423,19 @@ export class AssetsPage {
   }
 
   /**
+   * Read the drawer's Dimensions detail ("5,616 × 3,744") as numbers.
+   */
+  async readDrawerDimensions() {
+    const [width, height] = (
+      (await this.getDrawerDetailValue('Dimensions').first().textContent()) ?? ''
+    )
+      .replace(/[,\s]/g, '')
+      .split(/[x×]/)
+      .map(Number);
+    return { width, height };
+  }
+
+  /**
    * Close the asset details drawer
    */
   async closeAssetDetailsDrawer() {
@@ -544,11 +560,30 @@ export class AssetsPage {
   }
 
   /**
+   * Read a number field of the crop editor. They render with the locale's group
+   * separator ("5,616"), so the value is parsed rather than compared as text.
+   */
+  async readCropEditorNumber(label: string) {
+    return Number(
+      (await this.page.getByLabel(label, { exact: true }).inputValue()).replace(/[^\d.-]/g, '')
+    );
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {
     await this.openNewMenu();
     await this.newFolderMenuItem.click();
+  }
+
+  /**
+   * Confirm the "You have unsaved changes" prompt shown when dismissing a dialog with typed changes
+   */
+  async confirmDiscardChanges() {
+    const confirm = this.page.getByRole('alertdialog');
+    await expect(confirm).toContainText('You have unsaved changes');
+    await confirm.getByRole('button', { name: 'Confirm' }).click();
   }
 
   /**
@@ -759,6 +794,13 @@ export class AssetsPage {
     return this.folderTreeNav.getByRole('button', { name, exact: true });
   }
 
+  /**
+   * The "N parent folders" row that stands in for a deep branch's hidden folders.
+   */
+  getTreeHiddenAncestorsRow() {
+    return this.folderTreeNav.getByTestId('folder-tree-hidden-ancestors');
+  }
+
   getHomeTreeRow() {
     // The tree's own test id rather than the button name: "Home" is a partial match
     // and the rail carries more than one control containing it.
@@ -819,6 +861,26 @@ export class AssetsPage {
     itemType: 'file' | 'folder' = 'file',
     dwellMs = 650
   ) {
+    await this.springLoadOnto(
+      itemName,
+      this.getTreeFolderRow(treeFolderName),
+      view,
+      itemType,
+      dwellMs
+    );
+  }
+
+  /**
+   * Same as `springLoadFolder`, for any sidebar target — e.g. the hidden-ancestors row.
+   * Leaves the pointer over `target` with the mouse button held down.
+   */
+  async springLoadOnto(
+    itemName: string,
+    target: Locator,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file',
+    dwellMs = 650
+  ) {
     const item =
       view === 'grid'
         ? itemType === 'folder'
@@ -827,15 +889,12 @@ export class AssetsPage {
         : itemType === 'folder'
           ? this.getFolderRow(itemName)
           : this.getAssetRow(itemName);
-    const target = this.getTreeFolderRow(treeFolderName);
 
     const itemBox = await item.boundingBox();
     const targetBox = await target.boundingBox();
 
     if (!itemBox || !targetBox) {
-      throw new Error(
-        `Could not resolve drag source "${itemName}" or tree folder "${treeFolderName}"`
-      );
+      throw new Error(`Could not resolve drag source "${itemName}" or spring-load target`);
     }
 
     const startX = itemBox.x + itemBox.width / 2;

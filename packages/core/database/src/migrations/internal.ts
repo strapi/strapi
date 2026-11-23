@@ -13,6 +13,7 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
 
   const runner = createMigrationRunner({
     storage: createStorage({ db, tableName: 'strapi_migrations_internal' }),
+    withPhase: (phase, fn) => db.runInPhase(phase, fn),
     logger: {
       info(message) {
         db.logger.info(transformLogMessage('info', message));

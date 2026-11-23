@@ -60,7 +60,8 @@ const fixtures = {
       cards: [card[0].id, card[1].id],
     },
     (self) => ({
-      name: 'Isabelle',
+      // Contains a space so a `_q` on the full name can never match a cuid2 documentId.
+      name: 'Isabelle Martin',
       age: 55,
       cards: [card[0].id],
       collector_friends: [self[0].id],
@@ -377,7 +378,7 @@ describe('Deep Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
 
-      test('collector_friends.name + search isa', async () => {
+      test('collector_friends.name + search full name', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
@@ -387,7 +388,10 @@ describe('Deep Filtering API', () => {
                 name: data.collector[0].name,
               },
             },
-            _q: 'isa',
+            // `_q` also searches `documentId`, a random cuid2 over [a-z0-9], so any term
+            // without a space can occur inside another row's documentId by chance and add
+            // a row. Search the full name, which contains a space, so that cannot happen.
+            _q: data.collector[1].name,
           },
         });
 

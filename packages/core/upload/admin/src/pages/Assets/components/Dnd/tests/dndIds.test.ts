@@ -1,4 +1,10 @@
-import { HOME_TREE_TARGET_ID, parseFolderTreeTargetId, toFolderTreeTargetId } from '../dndIds';
+import {
+  HOME_TREE_TARGET_ID,
+  parseFolderTargetId,
+  parseFolderTreeTargetId,
+  toFolderTreeSummaryId,
+  toFolderTreeTargetId,
+} from '../dndIds';
 
 describe('folder-tree-target dnd ids', () => {
   it('builds a tree target id from a folder id', () => {
@@ -20,5 +26,11 @@ describe('folder-tree-target dnd ids', () => {
   it('returns null for garbage ids', () => {
     expect(parseFolderTreeTargetId('not-a-target')).toBeNull();
     expect(parseFolderTreeTargetId(123)).toBeNull();
+  });
+
+  it('never resolves the sidebar summary row to a destination', () => {
+    // A drop on "N parent folders" must not move anything into its root folder.
+    expect(parseFolderTreeTargetId(toFolderTreeSummaryId(7))).toBeNull();
+    expect(parseFolderTargetId(toFolderTreeSummaryId(7))).toBeNull();
   });
 });

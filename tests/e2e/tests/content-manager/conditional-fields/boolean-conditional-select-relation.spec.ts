@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { createContent, fillField } from '../../../../utils/content-creation';
 import { findAndClose, navToHeader } from '../../../../utils/shared';
 
 test.describe('Conditional Fields - Boolean-controlled conditional relation fields and select relation', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
 
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });

@@ -136,6 +136,53 @@ describe('File', () => {
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('the folder does not exist');
     });
+
+    test('Cannot create a file inside a folder deleted after the request was validated', async () => {
+      const folderRes = await rq({
+        method: 'POST',
+        url: '/upload/folders',
+        body: { name: 'folder deleted during upload' },
+      });
+      const folder = folderRes.body.data;
+
+      // Delete the folder (as another admin would) right after the request validation
+      // has checked that it exists, so the upload service looks up a folder that is gone.
+      const folderService = strapi.plugin('upload').service('folder');
+      const originalExists = folderService.exists;
+      let deleteRes;
+      folderService.exists = async (...args) => {
+        const exists = await originalExists.apply(folderService, args);
+        if (exists === true && deleteRes === undefined) {
+          deleteRes = await rq({
+            method: 'POST',
+            url: '/upload/actions/bulk-delete',
+            body: { folderIds: [folder.id] },
+          });
+        }
+        return exists;
+      };
+
+      let res;
+      try {
+        res = await rq({
+          method: 'POST',
+          url: '/upload/files',
+          formData: {
+            files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fileInfo: JSON.stringify({ name: 'rec.jpg', folder: folder.id }),
+          },
+        });
+      } finally {
+        folderService.exists = originalExists;
+      }
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'the folder does not exist',
+      });
+    });
   });
 
   describe('Update info', () => {
@@ -165,8 +212,8 @@ describe('File', () => {
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
-          width: expect.any(Number),
-          height: expect.any(Number),
+          width: null,
+          height: null,
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[1].id },
@@ -199,8 +246,8 @@ describe('File', () => {
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
-          width: expect.any(Number),
-          height: expect.any(Number),
+          width: null,
+          height: null,
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[0].id },
@@ -236,8 +283,8 @@ describe('File', () => {
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
-          width: expect.any(Number),
-          height: expect.any(Number),
+          width: null,
+          height: null,
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[0].id },
@@ -270,8 +317,8 @@ describe('File', () => {
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
-          width: expect.any(Number),
-          height: expect.any(Number),
+          width: null,
+          height: null,
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[1].id },
@@ -341,8 +388,8 @@ describe('File', () => {
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
-          width: expect.any(Number),
-          height: expect.any(Number),
+          width: null,
+          height: null,
           url: expect.any(String),
           provider: 'local',
           folder: null,

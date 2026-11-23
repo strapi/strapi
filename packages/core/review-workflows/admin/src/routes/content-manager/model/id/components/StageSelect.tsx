@@ -19,10 +19,7 @@ import { useParams } from 'react-router-dom';
 
 import { Stage } from '../../../../../../../shared/contracts/review-workflows';
 import { LimitsModal, LimitsModalProps } from '../../../../../components/LimitsModal';
-import {
-  CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
-  CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
-} from '../../../../../constants';
+import { CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME } from '../../../../../constants';
 import { useGetStagesQuery, useUpdateStageMutation } from '../../../../../services/content-manager';
 import { buildValidParams } from '../../../../../utils/api';
 import { getStageColorByHex } from '../../../../../utils/colors';
@@ -34,28 +31,6 @@ import type { Data } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * LimitModals
  * -----------------------------------------------------------------------------------------------*/
-
-const WorkflowLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    <LimitsModal.Root open={open} onOpenChange={onOpenChange}>
-      <LimitsModal.Title>
-        {formatMessage({
-          id: 'review-workflows.workflows.limit.title',
-          defaultMessage: 'You’ve reached the limit of workflows in your plan',
-        })}
-      </LimitsModal.Title>
-
-      <LimitsModal.Body>
-        {formatMessage({
-          id: 'review-workflows.workflows.limit.body',
-          defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
-        })}
-      </LimitsModal.Body>
-    </LimitsModal.Root>
-  );
-};
 
 const StageLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
   const { formatMessage } = useIntl();
@@ -200,7 +175,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const { meta, stages = [] } = data ?? {};
 
   const { getFeature } = useLicenseLimits();
-  const [showLimitModal, setShowLimitModal] = React.useState<'stage' | 'workflow' | null>(null);
+  const [showLimitModal, setShowLimitModal] = React.useState<'stage' | null>(null);
 
   const limits = getFeature<string>('review-workflows') ?? {};
 
@@ -211,31 +186,18 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const handleChange = async (stageId: Data.ID) => {
     try {
       /**
+       * The workflow limit is enforced only when a workflow is created, so an instance above it
+       * can still change the stage of its entries.
+       *
        * If the current license has a limit:
-       * check if the total count of workflows exceeds that limit and display
+       * check if the total count of stages exceeds that limit and display
        * the limits modal.
        *
        * If the current license does not have a limit (e.g. offline license):
        * do nothing (for now).
        *
        */
-
       if (
-        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) < (meta?.workflowCount ?? 0)
-      ) {
-        setShowLimitModal('workflow');
-
-        /**
-         * If the current license has a limit:
-         * check if the total count of stages exceeds that limit and display
-         * the limits modal.
-         *
-         * If the current license does not have a limit (e.g. offline license):
-         * do nothing (for now).
-         *
-         */
-      } else if (
         limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
         parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) < stages.length
       ) {
@@ -343,10 +305,6 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
             </>
           </Field.Root>
         </Tooltip>
-        <WorkflowLimitModal
-          open={showLimitModal === 'workflow'}
-          onOpenChange={() => setShowLimitModal(null)}
-        />
         <StageLimitModal
           open={showLimitModal === 'stage'}
           onOpenChange={() => setShowLimitModal(null)}
@@ -379,10 +337,6 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
         <Field.Hint />
         <Field.Error />
       </Field.Root>
-      <WorkflowLimitModal
-        open={showLimitModal === 'workflow'}
-        onOpenChange={() => setShowLimitModal(null)}
-      />
       <StageLimitModal
         open={showLimitModal === 'stage'}
         onOpenChange={() => setShowLimitModal(null)}

@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from 'react';
 
-import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
+import { withEncodedUserParams } from '@strapi/admin/strapi-admin';
+
+import { useListQueryParams } from './useListQueryParams';
 
 import type { Folder } from '../../../../../shared/contracts/folders';
 
@@ -20,7 +22,7 @@ interface FolderNavigationQuery {
 }
 
 export const useFolderNavigation = () => {
-  const [{ query }, setQuery] = useQueryParams<FolderNavigationQuery>();
+  const [{ query }, setQuery] = useListQueryParams<FolderNavigationQuery>();
 
   const currentFolderId = parseFolderIdFromQuery(query?.folder);
 

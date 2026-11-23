@@ -11,7 +11,8 @@ export declare namespace GetPreviewUrl {
     };
     query: {
       documentId?: Data.DocumentID;
-      locale?: string;
+      // A bare `?locale` is parsed as null
+      locale?: string | null;
       status?: 'published' | 'draft';
     };
   }

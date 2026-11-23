@@ -42,6 +42,7 @@ export declare namespace UpdatePermissions {
     error?:
       | errors.ApplicationError
       | errors.NotFoundError // One of the permissions not found
+      | errors.ForbiddenError // The requester does not hold one of the permissions
       | errors.YupValidationError;
   }
 }

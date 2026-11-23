@@ -12,6 +12,10 @@ review_notes:
 
 This provider will retrieve data from an initialized `strapi` instance using its Entity Service and Query Engine.
 
+## Bootstrap
+
+`bootstrap()` loads the JSONL stream packages before it reads the Strapi instance or disables database lifecycles. On a remote pull, the server runs this while the CLI engine is still bootstrapping, which is before the CLI destination `beforeTransfer()` moves or deletes local uploads. A missing package on the server fails the pull there. Later stage reads reuse that load.
+
 ## Provider Options
 
 The accepted options are defined in `ILocalFileSourceProviderOptions`.

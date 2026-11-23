@@ -44,11 +44,27 @@ export interface Entitlement {
   limits: EntitlementLimit[];
 }
 
+// Plain decimals only: `Number()` would also read "1e21" (whose string form "1e+21" reads back
+// as 1 through `parseInt`) and "Infinity" (which serializes to `null`).
+const PLAIN_DECIMAL = /^-?\d+(\.\d+)?$/;
+
+/**
+ * License options are untyped JSON, and the registry has shipped some limits as numeric strings
+ * (`retentionDays: "90"`). Reads a plain finite decimal string as its number; any other value is
+ * returned as is.
+ */
+export const parseNumericString = (value: unknown): unknown => {
+  if (typeof value !== 'string' || PLAIN_DECIMAL.test(value.trim()) === false) {
+    return value;
+  }
+
+  const number = Number(value);
+  return Number.isFinite(number) === true ? number : value;
+};
+
 const normalize = (value: unknown): number | null => {
-  // License options are untyped JSON, and the registry has shipped some limits as numeric
-  // strings (`retentionDays: "90"`). Enforcement coerces those implicitly, so accepting only
-  // real numbers here showed a 90-day audit-logs cap as "Unlimited".
-  const limit = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+  // Accepting only real numbers here showed a 90-day audit-logs cap as "Unlimited".
+  const limit = parseNumericString(value);
 
   if (typeof limit !== 'number' || Number.isNaN(limit)) {
     return null;

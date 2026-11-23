@@ -72,6 +72,13 @@ export type State = {
   formErrors: Record<string, FormModalError>;
   modifiedData: FormModalData;
   initialData: FormModalData;
+  /**
+   * `modifiedData` as the form seeded it, before the user typed anything. Compare against this
+   * (not `initialData`) to tell whether the form has unsaved changes: create flows seed
+   * `modifiedData` with type defaults while `initialData` stays `{}`, and `initialData` must stay
+   * that way because rename handling (`getRenameStorageChange`) reads it.
+   */
+  pristineData: FormModalData;
   componentToCreate: ComponentToCreateData;
   isCreatingComponentWhileAddingAField: boolean;
 };
@@ -80,6 +87,7 @@ const initialState: State = {
   formErrors: {},
   modifiedData: {},
   initialData: {},
+  pristineData: {},
   componentToCreate: {},
   isCreatingComponentWhileAddingAField: false,
 };
@@ -322,14 +330,16 @@ const slice = createSlice({
       action: PayloadAction<ResetPropsAndSetFormForAddingAnExistingCompoPayload>
     ) => {
       const { options = {} } = action.payload;
+      const modifiedData = {
+        type: 'component',
+        repeatable: true,
+        ...options,
+      };
 
       return {
         ...initialState,
-        modifiedData: {
-          type: 'component',
-          repeatable: true,
-          ...options,
-        },
+        modifiedData,
+        pristineData: modifiedData,
       };
     },
     resetPropsAndSaveCurrentData: (
@@ -355,6 +365,8 @@ const slice = createSlice({
         component: createComponentUid(componentToCreate.displayName, componentToCreate.category),
       };
 
+      // `pristineData` stays `{}` on purpose: the component described in step 1 is only created
+      // when step 2 is submitted, so closing here would lose it.
       return {
         ...initialState,
         componentToCreate,
@@ -370,12 +382,13 @@ const slice = createSlice({
         componentToCreate: { type: 'component' as const },
       };
 
-      return { ...initialState, modifiedData: dataToSet };
+      return { ...initialState, modifiedData: dataToSet, pristineData: dataToSet };
     },
     setDataToEdit: (state, action: PayloadAction<SetDataToEditPayload>) => {
       const { data } = action.payload;
       state.modifiedData = data;
       state.initialData = data;
+      state.pristineData = data;
       state.formErrors = {};
     },
     setAttributeDataSchema: (state, action: PayloadAction<SetAttributeDataSchemaPayload>) => {
@@ -390,6 +403,7 @@ const slice = createSlice({
         const { modifiedDataToSetForEditing } = action.payload;
         state.modifiedData = modifiedDataToSetForEditing;
         state.initialData = modifiedDataToSetForEditing;
+        state.pristineData = modifiedDataToSetForEditing;
 
         return;
       }
@@ -444,6 +458,7 @@ const slice = createSlice({
       }
 
       state.modifiedData = dataToSet;
+      state.pristineData = dataToSet;
     },
     setCustomFieldDataSchema: (state, action: PayloadAction<SetCustomFieldDataSchemaPayload>) => {
       const { payload } = action;
@@ -454,6 +469,7 @@ const slice = createSlice({
         const { modifiedDataToSetForEditing } = action.payload;
         state.modifiedData = modifiedDataToSetForEditing;
         state.initialData = modifiedDataToSetForEditing;
+        state.pristineData = modifiedDataToSetForEditing;
 
         return;
       }
@@ -474,11 +490,14 @@ const slice = createSlice({
           set(state.modifiedData, name, defaultValue)
         );
       }
+
+      state.pristineData = state.modifiedData;
     },
     setDynamicZoneDataSchema: (state, action: PayloadAction<SetDynamicZoneDataSchemaPayload>) => {
       const { attributeToEdit } = action.payload;
       state.modifiedData = attributeToEdit;
       state.initialData = attributeToEdit;
+      state.pristineData = attributeToEdit;
       state.formErrors = {};
     },
     setErrors: (state, action: PayloadAction<SetErrorsPayload>) => {

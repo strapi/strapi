@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import type { Schema } from './types/schema';
 
 export const STRAPI_CODE_MIME_TYPE = 'application/vnd.strapi.code';

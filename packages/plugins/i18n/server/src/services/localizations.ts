@@ -1,7 +1,6 @@
 import { isEmpty, cloneDeep } from 'lodash';
 
 import type { Schema } from '@strapi/types';
-import { async } from '@strapi/utils';
 import { getService } from '../utils';
 
 /**
@@ -95,7 +94,9 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
 
   const entryData = await strapi.documents(uid).omitComponentData(normalizedNonLocalizedAttributes);
 
-  await async.map(localeEntriesToUpdate, async (entry: any) => {
+  // One transaction has one connection. Updating every other locale at once
+  // interleaves component writes, and a later publish then sees a null component.
+  for (const entry of localeEntriesToUpdate) {
     const transformedData = await strapi.documents.utils.transformData(
       cloneDeep(normalizedNonLocalizedAttributes),
       {
@@ -122,7 +123,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
       // the updated component data
       data: Object.assign(cloneDeep(entryData), componentData),
     });
-  });
+  }
 };
 
 const localizations = () => ({

@@ -6,6 +6,8 @@ import {
   removeProhibitedFields,
 } from '../data';
 
+import type { Schema } from '@strapi/types';
+
 const defaultFieldsValues = {
   name: 'name',
   password: '',
@@ -260,6 +262,159 @@ describe('data', () => {
           repeat_req_min: [],
         },
         removedAttributes: [],
+      });
+    });
+
+    describe('components taking the place of saved ones', () => {
+      const componentSchema = {
+        uid: 'blog.dish',
+        modelType: 'component',
+        category: 'blog',
+        modelName: 'dish',
+        globalId: 'ComponentBlogDish',
+        info: { displayName: 'Dish' },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+          name: { type: 'string' },
+          category: { type: 'relation', relation: 'oneToOne', target: 'api::category.category' },
+        },
+      } as unknown as Schema.Component;
+      const periodSchema = {
+        ...componentSchema,
+        uid: 'blog.period',
+        modelName: 'period',
+        attributes: {
+          id: { type: 'integer' },
+          dishes: { type: 'component', component: 'blog.dish', repeatable: true },
+        },
+      } as unknown as Schema.Component;
+      const schema = {
+        uid: 'api::restaurant.restaurant',
+        kind: 'collectionType',
+        modelType: 'contentType',
+        modelName: 'restaurant',
+        globalId: 'Restaurant',
+        info: { displayName: 'Restaurant', singularName: 'restaurant', pluralName: 'restaurants' },
+        options: {},
+        pluginOptions: {},
+        attributes: {
+          single: { type: 'component', component: 'blog.dish', repeatable: false },
+          list: { type: 'component', component: 'blog.dish', repeatable: true },
+          period: { type: 'component', component: 'blog.period', repeatable: false },
+        },
+      } as unknown as Schema.ContentType;
+      const components = { 'blog.dish': componentSchema, 'blog.period': periodSchema };
+      const relation = (id: number) => ({ connect: [{ id }], disconnect: [] });
+      const noRelation = { connect: [], disconnect: [] };
+
+      it('should not give a replaced single component the id of the saved one', () => {
+        const { data } = handleInvisibleAttributes(
+          { single: { name: 'Copy', category: relation(3) } },
+          {
+            schema,
+            components,
+            initialValues: { single: { id: 1, name: 'Saved', category: noRelation } },
+          }
+        );
+
+        expect(data.single).toEqual({ name: 'Copy', category: relation(3) });
+      });
+
+      it('should not give a row the id of the deleted row it reuses the key of', () => {
+        const { data } = handleInvisibleAttributes(
+          { list: [{ __temp_key__: 'a0', name: 'Copy', category: relation(3) }] },
+          {
+            schema,
+            components,
+            initialValues: {
+              list: [{ id: 1, __temp_key__: 'a0', name: 'Deleted', category: noRelation }],
+            },
+          }
+        );
+
+        expect(data.list).toEqual([{ __temp_key__: 'a0', name: 'Copy', category: relation(3) }]);
+      });
+
+      it('should not give the rows of a replaced component the ids of the saved rows', () => {
+        const { data } = handleInvisibleAttributes(
+          {
+            period: {
+              dishes: [
+                { __temp_key__: 'a0', name: 'Hot chocolate', category: relation(3) },
+                { __temp_key__: 'a1', name: 'Crepe', category: noRelation },
+              ],
+            },
+          },
+          {
+            schema,
+            components,
+            initialValues: {
+              period: {
+                id: 1,
+                dishes: [
+                  { id: 10, __temp_key__: 'a0', name: 'Ratatouille', category: noRelation },
+                  { id: 11, __temp_key__: 'a1', name: 'Tarte Tatin', category: noRelation },
+                ],
+              },
+            },
+          }
+        );
+
+        expect(data.period).toEqual({
+          dishes: [
+            { __temp_key__: 'a0', name: 'Hot chocolate', category: relation(3) },
+            { __temp_key__: 'a1', name: 'Crepe', category: noRelation },
+          ],
+        });
+      });
+
+      it('should keep the values of a saved component that is edited', () => {
+        const { data } = handleInvisibleAttributes(
+          { list: [{ id: 1, __temp_key__: 'a0', name: 'Edited' }] },
+          {
+            schema,
+            components,
+            initialValues: {
+              list: [{ id: 1, __temp_key__: 'a0', name: 'Saved', category: noRelation }],
+            },
+          }
+        );
+
+        expect(data.list).toEqual([
+          { id: 1, __temp_key__: 'a0', name: 'Edited', category: noRelation },
+        ]);
+      });
+
+      it('should not give the components filled in from another locale the ids of the saved ones', () => {
+        // "Fill in from another locale" sends the source locale's components without ids and with
+        // temp keys regenerated from a0, so they reuse the keys of the saved rows of this locale.
+        const { data } = handleInvisibleAttributes(
+          {
+            single: { name: 'Plat (en)', category: relation(3) },
+            list: [
+              { __temp_key__: 'a0', name: 'Dish 1 (en)', category: relation(4) },
+              { __temp_key__: 'a1', name: 'Dish 2 (en)', category: noRelation },
+            ],
+          },
+          {
+            schema,
+            components,
+            initialValues: {
+              single: { id: 1, name: 'Plat', category: noRelation },
+              list: [
+                { id: 10, __temp_key__: 'a0', name: 'Plat 1', category: noRelation },
+                { id: 11, __temp_key__: 'a1', name: 'Plat 2', category: noRelation },
+              ],
+            },
+          }
+        );
+
+        expect(data.single).toEqual({ name: 'Plat (en)', category: relation(3) });
+        expect(data.list).toEqual([
+          { __temp_key__: 'a0', name: 'Dish 1 (en)', category: relation(4) },
+          { __temp_key__: 'a1', name: 'Dish 2 (en)', category: noRelation },
+        ]);
       });
     });
 

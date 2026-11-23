@@ -19,7 +19,7 @@ export type DocumentationService = ReturnType<typeof createService>;
 
 const createService = ({ strapi }: { strapi: Core.Strapi }) => {
   const config = strapi.config.get('plugin::documentation') as PluginConfig;
-  const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
+  const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(strapi, config);
   const overrideService = getService('override');
 
   return {
@@ -31,7 +31,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       // In production, documentation files live under dist/src/extensions/
       // after the build step. Use dist.extensions for reading.
       const extensionsDir =
-        strapi.config.environment === 'production'
+        strapi.config.get('environment') === 'production'
           ? strapi.dirs.dist.extensions
           : strapi.dirs.app.extensions;
 
@@ -76,7 +76,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     getApiDocumentationPath(api: { name: string; getter: string }) {
-      const isProduction = strapi.config.environment === 'production';
+      const isProduction = strapi.config.get('environment') === 'production';
 
       if (api.getter === 'plugin') {
         const extensionsDir = isProduction

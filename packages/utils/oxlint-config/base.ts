@@ -38,6 +38,57 @@ export const base = {
             group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
             message: 'Use regular lodash methods or a focused helper instead.',
           },
+          {
+            group: ['lodash/isArray', 'lodash/isArray.js'],
+            message: 'Use native Array.isArray instead.',
+          },
+          {
+            group: ['lodash/forEach', 'lodash/forEach.js', 'lodash/each', 'lodash/each.js'],
+            message:
+              'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message:
+              'Use native Object.keys / Object.values / Object.entries instead. They throw on null/undefined, so guard nullish input (e.g. `?? {}`).',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
+          },
+        ],
+        paths: [
+          {
+            name: 'lodash',
+            importNames: [
+              'isArray',
+              'forEach',
+              'each',
+              'keys',
+              'values',
+              'entries',
+              'concat',
+              'filter',
+              'find',
+            ],
+            message:
+              'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
+          },
         ],
       },
     ],

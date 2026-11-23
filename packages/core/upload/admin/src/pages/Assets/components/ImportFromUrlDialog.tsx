@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -43,7 +44,11 @@ export const ImportFromUrlDialog = ({ open, onClose, onUpload }: ImportFromUrlDi
   };
 
   return (
-    <Modal.Root open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <UnsavedChangesModal
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && handleClose()}
+      hasUnsavedChanges={urls.trim() !== ''}
+    >
       <Modal.Content>
         <form onSubmit={handleSubmit}>
           <Modal.Header>
@@ -90,12 +95,14 @@ export const ImportFromUrlDialog = ({ open, onClose, onUpload }: ImportFromUrlDi
           </Modal.Body>
 
           <Modal.Footer>
-            <Button variant="tertiary" onClick={handleClose}>
-              {formatMessage({
-                id: 'app.components.Button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Button>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
+              </Button>
+            </Modal.Close>
             <Button type="submit">
               {formatMessage({
                 id: getTranslationKey('modal.url.upload'),
@@ -105,6 +112,6 @@ export const ImportFromUrlDialog = ({ open, onClose, onUpload }: ImportFromUrlDi
           </Modal.Footer>
         </form>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

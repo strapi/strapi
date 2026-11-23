@@ -59,6 +59,12 @@ export const attributes = {
         target: 'api::complex.complex',
         mappedBy: 'complex',
       },
+      complex: {
+        type: 'relation',
+        relation: 'manyToOne',
+        target: 'api::complex.complex',
+        inversedBy: 'complexbelongstomanycomplexes',
+      },
     },
     manyToOne: {
       complexhasmanycomplexes: {

@@ -114,7 +114,7 @@ describe('bootstrap operation-limit warning', () => {
       }),
       service: vi.fn((name: string) => {
         if (name === 'content-api') {
-          return { buildSchema: vi.fn(() => ({ type: 'schema' })) };
+          return { buildSchema: vi.fn(() => ({ type: 'schema', getTypeMap: () => ({}) })) };
         }
 
         return { playground: { setEnabled: vi.fn() } };

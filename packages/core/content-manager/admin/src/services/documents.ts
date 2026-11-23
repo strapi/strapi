@@ -23,6 +23,7 @@ import type {
   Unpublish,
   Update,
 } from '../../../shared/contracts/collection-types';
+import type { MoveDocument } from '../../../shared/contracts/custom-order';
 
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
@@ -234,6 +235,28 @@ const documentApi = contentManagerApi.injectEndpoints({
           })) ?? []),
         ];
       },
+    }),
+    /**
+     * Places a document right before or after another one in the custom order
+     * of its collection type.
+     */
+    moveDocument: builder.mutation<
+      MoveDocument.Response,
+      MoveDocument.Params & {
+        body: MoveDocument.Request['body'];
+        params?: MoveDocument.Request['query'];
+      }
+    >({
+      query: ({ model, id, body, params }) => ({
+        url: `/content-manager/collection-types/${model}/${id}/actions/move`,
+        method: 'POST',
+        data: body,
+        config: {
+          params,
+        },
+      }),
+      invalidatesTags: (_result, error, { model }) =>
+        error ? [] : [{ type: 'Document', id: `${model}_LIST` }],
     }),
     getDraftRelationCount: builder.query<
       CountDraftRelations.Response,
@@ -542,6 +565,28 @@ const documentApi = contentManagerApi.injectEndpoints({
         'UpcomingReleasesList',
       ],
     }),
+    /**
+     * Used by field-lock on the create view, where document metadata (and
+     * `meta.defaultLocale`) is not fetched. Same payload as the i18n plugin's
+     * locales list — a separate slice so content-manager does not import `@strapi/i18n`.
+     */
+    getI18nLocales: builder.query<
+      Array<{ id: number | string; code: string; isDefault: boolean }>,
+      void
+    >({
+      query: () => '/i18n/locales',
+      // Match the i18n locales query. Settings invalidates each locale id when the
+      // default locale changes, not only the LIST tag, so create-view lock stays in sync.
+      providesTags: (res) => [
+        { type: 'Locale', id: 'LIST' },
+        ...(Array.isArray(res)
+          ? res.map((locale) => ({
+              type: 'Locale' as const,
+              id: locale.id,
+            }))
+          : []),
+      ],
+    }),
   }),
 });
 
@@ -553,12 +598,15 @@ const {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useLazyGetAllDocumentsQuery,
   useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useGetDraftRelationCountQuery,
+  useGetI18nLocalesQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
+  useMoveDocumentMutation,
   usePublishDocumentMutation,
   usePublishManyDocumentsMutation,
   useUpdateDocumentMutation,
@@ -574,12 +622,15 @@ export {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useLazyGetAllDocumentsQuery,
   useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useGetDraftRelationCountQuery,
+  useGetI18nLocalesQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
+  useMoveDocumentMutation,
   usePublishDocumentMutation,
   usePublishManyDocumentsMutation,
   useUpdateDocumentMutation,

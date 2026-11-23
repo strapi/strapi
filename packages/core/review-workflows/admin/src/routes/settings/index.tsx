@@ -1,5 +1,4 @@
 /* eslint-disable check-file/no-index */
-/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
 import { Page, useTracking, ConfirmDialog, useRBAC, Table } from '@strapi/admin/strapi-admin';
@@ -260,7 +259,7 @@ export const ReviewWorkflowsListView = () => {
             {formatMessage({
               id: 'Settings.review-workflows.list.page.delete.confirm.body',
               defaultMessage:
-                'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
+                'If you remove this workflow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
             })}
           </ConfirmDialog>
         </Dialog.Root>
