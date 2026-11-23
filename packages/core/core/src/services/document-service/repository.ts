@@ -474,7 +474,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           string,
           unknown
         >;
-        const { data, deferredCopies, postCloneUpdates } = await prepareCloneData(
+        const { data, deferredCopies, postCloneUpdates, sourceData } = await prepareCloneData(
           originalData,
           queryParams.data,
           contentType,
@@ -508,7 +508,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
             uid,
             sourceEntryId,
             doc.id,
-            originalData,
+            sourceData,
             clonedEntry as Record<string, unknown>,
             deferredCopies
           );
@@ -523,7 +523,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
               documentId: doc.documentId,
               locale: entryToClone.locale ?? queryParams.locale ?? queryParams.data?.locale,
             },
-            originalData,
+            sourceData,
             postCloneUpdates
           );
         }

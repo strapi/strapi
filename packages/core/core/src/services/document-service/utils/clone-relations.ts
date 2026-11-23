@@ -38,7 +38,15 @@ export type PrepareCloneDataResult = {
   data: Record<string, unknown>;
   deferredCopies: DeferredRelationCopy[];
   postCloneUpdates: PostCloneRelationUpdate[];
+  /**
+   * The source entry with its repeatable components and dynamic zones lined up with the
+   * submitted ones (see `alignSourceWithSubmitted`). The paths of `deferredCopies` and
+   * `postCloneUpdates` index into it, so the follow-up writes must read it, not the entry.
+   */
+  sourceData: Record<string, unknown>;
 };
+
+type GetModel = (uid: string) => Schema.Schema;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -449,6 +457,132 @@ const planRootCloneRelation = (
   return { kind: 'keep' };
 };
 
+const ownerComponentUid = (owner: unknown) => {
+  if (!isRecord(owner) || typeof owner.__component !== 'string') {
+    return undefined;
+  }
+
+  return owner.__component;
+};
+
+const isSameComponentEntry = (sourceEntry: unknown, submittedEntry: unknown) => {
+  return (
+    isRecord(sourceEntry) &&
+    isRecord(submittedEntry) &&
+    sourceEntry.id != null &&
+    submittedEntry.id != null &&
+    String(sourceEntry.id) === String(submittedEntry.id) &&
+    // Component ids are allocated per table: in a dynamic zone the id alone is not an identity
+    sourceEntry.__component === submittedEntry.__component
+  );
+};
+
+/**
+ * Rebuilds a source list of components in the order of the submitted one. A submitted entry
+ * that carries the id of a source entry is paired with it, wherever either sits in its list.
+ * A submitted entry with no source entry is a new one and gets a `null` placeholder, and a
+ * source entry that was not submitted is left out, as it was removed.
+ *
+ * Ids are the only identity an entry has. When no submitted entry carries the id of a source
+ * entry (a payload written without ids, or with the ids of another locale), the lists can
+ * only be paired by position, which is what the merge does: the source list is kept as is.
+ */
+const alignComponentList = (
+  sourceList: unknown,
+  submittedList: unknown[],
+  alignEntry: (sourceEntry: unknown, submittedEntry: unknown) => unknown
+) => {
+  if (submittedList.length === 0) {
+    return [];
+  }
+
+  if (!Array.isArray(sourceList)) {
+    return sourceList;
+  }
+
+  const matches = submittedList.map((submittedEntry) =>
+    sourceList.find((sourceEntry) => isSameComponentEntry(sourceEntry, submittedEntry))
+  );
+
+  if (matches.every((match) => match === undefined)) {
+    return sourceList.map((sourceEntry, index) => alignEntry(sourceEntry, submittedList[index]));
+  }
+
+  return matches.map((match, index) =>
+    match === undefined ? null : alignEntry(match, submittedList[index])
+  );
+};
+
+/**
+ * The clone merges the submitted data over the source entry, and lodash pairs arrays by
+ * index. A clone form submits the source values with the id of each component, edited: once
+ * an entry is added, removed or moved, an index no longer names the same entry on both
+ * sides. Each submitted entry then took over what it did not submit (a relation sent as
+ * `{ connect: [], disconnect: [] }`, a media) from whichever source entry sat at its index,
+ * and the source entries past the end of a shorter list came back.
+ *
+ * This returns the source entry with every repeatable component and dynamic zone found in
+ * the submitted data lined up with it, at any depth, so that the same index path names the
+ * same entry in both. An attribute the submitted data omits is returned untouched.
+ */
+const alignSourceWithSubmitted = (
+  source: unknown,
+  submitted: unknown,
+  schema: Schema.Schema | undefined,
+  getModel: GetModel
+): unknown => {
+  if (!isRecord(source) || !isRecord(submitted) || !schema?.attributes) {
+    return source;
+  }
+
+  const aligned = { ...source };
+
+  for (const [attributeName, attribute] of Object.entries(schema.attributes)) {
+    const submittedValue = submitted[attributeName];
+
+    if (attribute.type === 'component') {
+      const componentSchema = getModel(attribute.component);
+      const alignEntry = (sourceEntry: unknown, submittedEntry: unknown) =>
+        alignSourceWithSubmitted(sourceEntry, submittedEntry, componentSchema, getModel);
+
+      if (!attribute.repeatable) {
+        aligned[attributeName] = alignEntry(source[attributeName], submittedValue);
+      } else if (Array.isArray(submittedValue)) {
+        aligned[attributeName] = alignComponentList(
+          source[attributeName],
+          submittedValue,
+          alignEntry
+        );
+      }
+    }
+
+    if (attribute.type === 'dynamiczone' && Array.isArray(submittedValue)) {
+      aligned[attributeName] = alignComponentList(
+        source[attributeName],
+        submittedValue,
+        (sourceEntry, submittedEntry) => {
+          const sourceComponent = ownerComponentUid(sourceEntry);
+          const submittedComponent = ownerComponentUid(submittedEntry);
+
+          // A block replaced by another component at the same position shares nothing with it
+          if (!sourceComponent || (submittedComponent && submittedComponent !== sourceComponent)) {
+            return sourceEntry;
+          }
+
+          return alignSourceWithSubmitted(
+            sourceEntry,
+            submittedEntry,
+            getModel(sourceComponent),
+            getModel
+          );
+        }
+      );
+    }
+  }
+
+  return aligned;
+};
+
 export const prepareCloneData = async (
   originalData: Record<string, unknown>,
   submittedData: Record<string, unknown> | undefined,
@@ -461,12 +595,18 @@ export const prepareCloneData = async (
     contentType,
     getModel
   );
-  let data = merge({}, originalData, submitted) as Record<string, unknown>;
+  const sourceData = alignSourceWithSubmitted(
+    originalData,
+    submitted,
+    contentType,
+    getModel
+  ) as Record<string, unknown>;
+  let data = merge({}, sourceData, submitted) as Record<string, unknown>;
   const deferredCopies: DeferredRelationCopy[] = [];
   const postCloneUpdates: PostCloneRelationUpdate[] = [];
 
   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
-    const plan = planRootCloneRelation(attributeName, attribute, submitted, originalData);
+    const plan = planRootCloneRelation(attributeName, attribute, submitted, sourceData);
 
     if (plan.kind === 'keep') {
       continue;
@@ -495,7 +635,7 @@ export const prepareCloneData = async (
   }
 
   const nested = await collectNestedCloneRelationAdjustments(
-    originalData,
+    sourceData,
     submitted,
     contentType,
     getModel,
@@ -509,11 +649,11 @@ export const prepareCloneData = async (
     set(
       data,
       path,
-      isMedia ? resolveMediaOperations(get(originalData, path), value, isMultiple) : value
+      isMedia ? resolveMediaOperations(get(sourceData, path), value, isMultiple) : value
     );
   }
 
-  return { data, deferredCopies, postCloneUpdates };
+  return { data, deferredCopies, postCloneUpdates, sourceData };
 };
 
 const resolveOwnerEntryId = (
@@ -529,14 +669,6 @@ const resolveOwnerEntryId = (
   const ownerId = owner?.id;
 
   return typeof ownerId === 'number' ? ownerId : undefined;
-};
-
-const ownerComponentUid = (owner: unknown) => {
-  if (!isRecord(owner) || typeof owner.__component !== 'string') {
-    return undefined;
-  }
-
-  return owner.__component;
 };
 
 /**
