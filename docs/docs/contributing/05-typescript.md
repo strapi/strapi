@@ -192,7 +192,8 @@ export = cdnProvider;
 ```
 
 `strapi.plugin('upload').provider.purge('/images')` is then a `Promise<boolean>`: the plugin wraps
-each function member in an async function that forwards its first two arguments. Members that are
+each function member in an async function that forwards its first two arguments. A required first
+argument stays required, and the second defaults to the member's `actionOptions`. Members that are
 not functions are not exposed. A provider package works the same:
 `UploadPluginProviderOf<typeof awsS3>`, with `import type awsS3 from '@strapi/provider-upload-aws-s3'`.
 The import of `@strapi/upload` needs it in the application's dependencies, like `@strapi/email`
@@ -323,7 +324,8 @@ declare global {
   add `satisfies Core.ServiceFactory<uid>` to the factory.
 - A `createCoreService(uid)` without config, as `strapi generate` writes it, has no override: with
   strict types it is the strict core service of `uid` (`Core.CoreAPI.Service.ContentType<uid>`),
-  with every check and the typed results.
+  with every check and the typed results. A config that adds no member (`{}`, `() => ({})`,
+  `undefined`) is the same.
 - Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by
@@ -604,7 +606,15 @@ declare global {
   one member per section, so a `plugins` action without `pluginName` fails to compile. Write the
   actions inline or as an `as const` list: a list without `as const` widens `section` to `string`,
   which matches no section, and fails to compile. They also check the computed ID of each action
-  from its literal fields.
+  from its literal fields. A key the action's section does not have fails to compile, as the
+  strict validation schema rejects it at boot.
+- With strict types, the action provider hooks (`willRegister`, `didRegister`, `willDelete`,
+  `didDelete` and `appliesPropertyToSubject`), the section handlers and matchers receive the
+  action as the provider stores it (`StoredAction`), one member per section, and `get` and `values`
+  return it. Check `section` before reading `category`, `subjects`, `pluginName` or
+  `subCategory`: `category` needs `section === 'settings'`. `getAllowedActionsForRole` of the
+  `admin::action` service returns the same type, and `getPermissionsWithNestedFields` of the
+  `admin::content-type` service accepts the actions `values()` and `get` return.
 - The declaration must be an `interface` to merge into the registry. The repository ESLint config
   flags an empty interface (`@typescript-eslint/no-empty-interface`), hence the disable comment.
 - The application program excludes `src/plugins/**`, so the application declares the IDs of its
@@ -712,7 +722,7 @@ storage key the runtime builds from the params of `strapi.store`: `<type>_<name>
 `<type>_<key>` without a name (`packages/core/core/src/services/core-store.ts`). For example,
 `{ type: 'plugin', name: 'i18n', key: 'default_locale' }` reads `plugin_i18n_default_locale`. Keys
 built at runtime register a template-literal key, e.g.
-``[key: `core_admin_homepage-layout:${string}`]``.
+`` [key: `core_admin_homepage-layout:${string}`] ``.
 
 - The value is the shape the owner writes, as JSON: a `Date` is read back as a string and
   `undefined` properties are dropped. Declare it explicitly rather than reusing a type that holds
