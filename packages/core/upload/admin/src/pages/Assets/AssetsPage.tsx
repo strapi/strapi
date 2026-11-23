@@ -178,13 +178,11 @@ const ToolbarGroup = styled(Flex)`
 
 // Filter + Search (+ search scope). On mobile the group fills the row (search
 // grows into it) and the scope controls wrap onto their own line; on desktop it
-// keeps its intrinsic size and sits at the left edge.
+// keeps its intrinsic size and sits at the left edge, the scope controls
+// wrapping under the search when the row is too narrow for them.
 const FilterSearchGroup = styled(ToolbarGroup)`
   flex-wrap: wrap;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    flex-wrap: nowrap;
-  }
+  min-width: 0;
 `;
 
 const SearchScopeSlot = styled(Box)`
