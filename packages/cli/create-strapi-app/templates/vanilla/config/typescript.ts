@@ -1,7 +1,8 @@
 import type { Core } from '@strapi/strapi';
 
 const config: Core.Config.TypeScript = {
-  strictTypes: true,
+  // Set to true to turn strict types on
+  strictTypes: false,
   // With a license, list its features (e.g. 'sso') to type their license-gated contracts
   // licensedFeatures: [],
 };
