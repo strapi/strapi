@@ -63,6 +63,8 @@ Arrays may hold `undefined` items. String values must be primitive strings: a bo
 
 With strict types, `register` and `registerMany` take the input type of this schema (`ActionRegistration` in `server/src/types/index.ts`), so most shapes the schema rejects also fail to compile. A key the action's section does not have fails to compile too, as the strict schema rejects it at boot. Read [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
 
+With strict types, the action provider hooks (`willRegister`, `didRegister`, `willDelete`, `didDelete` and `appliesPropertyToSubject`), the section handlers and matchers, `get` and `values` receive the action as the provider stores it (`StoredAction` in `server/src/domain/action/index.ts`). That is the registration without its `uid`, with its `actionId`, an `options.applyToProperties` that defaults to `null`, and, in the `settings` and `plugins` sections only, a `subCategory` that defaults to `'general'`. It has one type per section, so code checks `section` before it reads `category`, `subjects`, `pluginName` or `subCategory`. `getAllowedActionsForRole` of the `admin::action` service returns the same type, and `getPermissionsWithNestedFields` of the `admin::content-type` service accepts it.
+
 :::note
 `uid` and `pluginName` are used to create a global unique id.
 
