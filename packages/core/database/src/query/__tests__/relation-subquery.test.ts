@@ -702,9 +702,9 @@ describe('relation subquery path (delete / update writes)', () => {
       // waiting on SQLite's single connection when the transaction was not copied over.
       expect(deepSort.getKnexQuery().client).toBe(trx.client);
 
-      const rows = await deepSort.execute();
+      const rows = await deepSort.execute<{ name: string }[]>();
 
-      expect(rows.map((row: { name: string }) => row.name)).toEqual([
+      expect(rows.map((row) => row.name)).toEqual([
         'IN TRANSACTION',
         'Lucas HERNANDEZ',
         'Samuel UMTITI',
