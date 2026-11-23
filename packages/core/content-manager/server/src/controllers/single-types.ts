@@ -1,4 +1,5 @@
-import type { UID, Modules } from '@strapi/types';
+import type { Context } from 'koa';
+import type { Core, UID, Modules } from '@strapi/types';
 import { setCreatorFields, async, errors } from '@strapi/utils';
 
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
@@ -6,6 +7,7 @@ import { getService } from '../utils';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { getPopulateForLocalizations } from '../services/utils/populate';
 import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
+import type { SingleTypesController } from '../types/controllers';
 
 type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -30,7 +32,7 @@ const findDocument = async (query: any, uid: UID.SingleType, opts: any = {}) => 
   );
 };
 
-const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
+const createOrUpdateDocument = async (ctx: Context, opts?: OptionsWithPopulate) => {
   const { user, userAbility } = ctx.state;
   const { model } = ctx.params;
   const { body, query } = ctx.request;
@@ -94,7 +96,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
 };
 
 export default {
-  async find(ctx: any) {
+  async find(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
@@ -142,7 +144,7 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
-  async createOrUpdate(ctx: any) {
+  async createOrUpdate(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
@@ -159,7 +161,7 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
-  async delete(ctx: any) {
+  async delete(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
@@ -198,7 +200,7 @@ export default {
     ctx.body = await permissionChecker.sanitizeOutput(deletedEntity);
   },
 
-  async publish(ctx: any) {
+  async publish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body, query = {} } = ctx.request;
@@ -253,7 +255,7 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
-  async unpublish(ctx: any) {
+  async unpublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const {
@@ -302,7 +304,7 @@ export default {
     });
   },
 
-  async discard(ctx: any) {
+  async discard(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body, query = {} } = ctx.request;
@@ -335,7 +337,7 @@ export default {
     )(document);
   },
 
-  async countDraftRelations(ctx: any) {
+  async countDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query } = ctx.request;
@@ -379,4 +381,4 @@ export default {
       data: counts,
     };
   },
-};
+} satisfies Core.Implements<SingleTypesController>;
