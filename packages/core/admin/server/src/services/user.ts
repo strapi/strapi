@@ -157,11 +157,12 @@ const createFirstAdmin = async (
  * Update a user in database
  * @param id query params to find the user to update
  * @param attributes A partial user object
+ * @returns the updated user, or null when no user has this id
  */
 const updateById = async (
   id: Data.ID,
   attributes: Partial<AdminUserUpdatePayload>
-): Promise<AdminUser> => {
+): Promise<AdminUser | null> => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
@@ -199,8 +200,11 @@ const updateById = async (
       populate: ['roles'],
     });
 
-    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    // The update resolves null when no user has this id
+    if (updatedUser !== null) {
+      strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+      await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    }
 
     return updatedUser;
   }
@@ -342,6 +346,11 @@ const register = async ({
     isActive: true,
   });
 
+  // null when the account was deleted after the registration token lookup
+  if (registeredUser === null) {
+    throw new ValidationError('Invalid registration info');
+  }
+
   await emitAudit({ strapi }, AUDITED_EVENTS.INVITE_ACCEPT, toAdminUserEvent(registeredUser));
 
   return registeredUser;
@@ -436,10 +445,15 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
 
   const deletedUsers = [] as AdminUser[];
   for (const id of ids) {
-    const deletedUser = await strapi.db.query('admin::user').delete({
+    const deletedUser: AdminUser | null = await strapi.db.query('admin::user').delete({
       where: { id },
       populate: ['roles'],
     });
+
+    // The ID matches no user (e.g. deleted in the meantime): nothing to clean up or report
+    if (deletedUser === null) {
+      continue;
+    }
 
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();

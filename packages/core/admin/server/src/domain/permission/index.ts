@@ -1,5 +1,5 @@
 import { objects, providerFactory } from '@strapi/utils';
-import { pick, reject, merge, omit, get, curry } from 'lodash';
+import { pick, reject, merge, omit, get, curry, type CurriedFunction2 } from 'lodash';
 import type { Utils } from '@strapi/types';
 
 import { Permission } from '../../../../shared/contracts/shared';
@@ -77,8 +77,8 @@ export const removeCondition = curry((condition: string, permission: Permission)
  * @param property - The property to get
  * @param permission - The permission on which we want to access the property
  */
-export const getProperty = curry((property: string, permission: Permission): Permission =>
-  get(permission, `properties.${property}`)
+export const getProperty: CurriedFunction2<string, Permission, unknown> = curry(
+  (property: string, permission: Permission): unknown => get(permission, `properties.${property}`)
 );
 
 /**
