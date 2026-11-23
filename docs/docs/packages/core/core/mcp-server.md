@@ -20,7 +20,7 @@ Source: `packages/core/core/src/services/mcp/`, `packages/core/core/src/provider
 | Authorization | Two layers: coarse session capability gate (CASL ability vs `auth.policies`) + fine-grained handler checks     |
 | Extensibility | Any plugin or app can register tools/prompts/resources via `strapi.ai.mcp.register*` during the register phase |
 | Built-in      | One dev-only `log` tool (core) + one CRUD tool set per displayed content type (content-manager)                |
-| SDK           | `@modelcontextprotocol/server@2.0.0` + `@modelcontextprotocol/node@2.0.0`                                      |
+| SDK           | `@modelcontextprotocol/server@2.3.1` + `@modelcontextprotocol/node@2.1.1`                                      |
 
 ## Architecture
 
@@ -238,7 +238,7 @@ one of these excluded fields fails the TypeScript check instead of receiving `un
 2. **Runtime errors** — if the handler throws while executing, `wrapSafeHandler` catches it and returns a capability-shaped error result (`isError: true` for tools) instead of crashing the request.
 3. **SDK registration errors** — if the MCP SDK itself rejects the registration call, the capability is replaced with a permanently-disabled no-op instead of aborting the whole registration loop.
 
-The SDK does not convert a prompt's `argsSchema` to JSON Schema at registration. It converts every enabled prompt while serving `prompts/list`, unguarded, so one unconvertible schema (`z.date()`, `z.bigint()`, `z.custom()`, a non-object root…) would fail the whole list. The prompt registry therefore probes the schema with `assertSchemaConvertsToJsonSchema` (`services/mcp/utils/assertSchemaConvertsToJsonSchema.ts`), which mirrors the SDK's list-time conversion. The probe runs before `registerPrompt`, on the schema the SDK will list (a raw Zod shape is wrapped with `z.object()` first, as the SDK does). A failure is handled as an SDK registration error (layer 3): the prompt is logged and disabled, sibling prompts stay listed, and the rejected prompt never reaches the SDK, so it does not add a completion handler or the `completions` capability. The verdict is cached per prompt definition, because `argsSchema` is static and a new server is built for every request: a broken prompt is logged once per process, and later requests skip both the conversion and the log. A parity test in `assertSchemaConvertsToJsonSchema.vitest.test.ts` compares the helper with `prompts/list` on a bare `McpServer`, so an SDK upgrade that changes the conversion fails CI. Tool schemas are not probed; an unconvertible tool schema still fails `tools/list`.
+The SDK does not convert a prompt's `argsSchema` to JSON Schema at registration. It converts every enabled prompt while serving `prompts/list`, unguarded, so one unconvertible schema (`z.date()`, `z.bigint()`, `z.custom()`, a non-object root…) would fail the whole list. The prompt registry therefore probes the schema with `assertSchemaConvertsToJsonSchema` (`services/mcp/utils/assertSchemaConvertsToJsonSchema.ts`), which mirrors the SDK's list-time conversion. The probe runs before `registerPrompt`, on the schema the SDK will list (a raw Zod shape is wrapped with `z.object()` first, as the SDK does). A failure is handled as an SDK registration error (layer 3): the prompt is logged, its registry status is `disabled`, and sibling prompts stay listed. The rejected prompt is never registered with the MCP server, so it does not add a completion handler or the `completions` capability, and `prompts/get` on it answers `-32602 Prompt <name> not found` (not the `Prompt <name> disabled` error that a token gets for a prompt it cannot use). The verdict is cached per prompt definition, because `argsSchema` is static and a new server is built for every request: a broken prompt is logged once per process, and later requests skip both the conversion and the log. A parity test in `assertSchemaConvertsToJsonSchema.vitest.test.ts` compares the helper with `prompts/list` on a bare `McpServer`, so an SDK upgrade that changes the conversion fails CI. Tool schemas are not probed; an unconvertible tool schema still fails `tools/list`.
 
 ## Built-in tools (core)
 
@@ -306,17 +306,19 @@ MCP emits its own server-side telemetry events (`didStartMcpServer`, `didUseMcpS
 
 ## Tests
 
-| Path                                                                                           | Covers                                                     |
-| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `packages/core/core/src/services/mcp/__tests__/`                                               | Route registration, disabled skip, service integration     |
-| `packages/core/core/src/services/mcp/__tests__/authentication.test.ts`                         | Bearer parsing, missing/invalid/valid token                |
-| `packages/core/core/src/services/mcp/handlers/__tests__/handlePost.test.ts`                    | Auth failure, timeouts, transport wiring                   |
-| `packages/core/core/src/services/mcp/internal/__tests__/`                                      | Configuration, server factory, capability sync, registries |
-| `packages/core/content-manager/server/src/mcp/__tests__/derive-content-type-mcp-tools.test.ts` | Tool derivation per content type                           |
-| `packages/core/content-manager/server/src/mcp/sanitizers/__tests__/shape-relations.test.ts`    | Relation shaping                                           |
-| `tests/api/core/mcp/mcp-auth.test.api.ts`                                                      | End-to-end admin-token auth + `tools/list`                 |
-| `tests/api/core/mcp/mcp-content-manager-rbac.test.api.ts`                                      | RBAC on derived tools                                      |
-| `tests/api/core/mcp/mcp-content-manager-shaping.test.api.ts`                                   | Relation shaping, end to end                               |
+| Path                                                                                                  | Covers                                                          |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `packages/core/core/src/services/mcp/__tests__/`                                                      | Route registration, disabled skip, service integration          |
+| `packages/core/core/src/services/mcp/__tests__/authentication.vitest.test.ts`                         | Bearer parsing, missing/invalid/valid token                     |
+| `packages/core/core/src/services/mcp/handlers/__tests__/handlePost.vitest.test.ts`                    | Auth failure, timeouts, transport wiring                        |
+| `packages/core/core/src/services/mcp/internal/__tests__/`                                             | Configuration, server factory, capability sync, registries      |
+| `packages/core/core/src/services/mcp/utils/__tests__/`                                                | Safe registration, handler wrapping, timeouts, result shaping   |
+| `packages/core/core/src/services/mcp/utils/__tests__/assertSchemaConvertsToJsonSchema.vitest.test.ts` | Prompt `argsSchema` probe, parity with the SDK's `prompts/list` |
+| `packages/core/content-manager/server/src/mcp/__tests__/derive-content-type-mcp-tools.test.ts`        | Tool derivation per content type                                |
+| `packages/core/content-manager/server/src/mcp/sanitizers/__tests__/shape-relations.test.ts`           | Relation shaping                                                |
+| `tests/api/core/mcp/mcp-auth.test.api.ts`                                                             | End-to-end admin-token auth + `tools/list`                      |
+| `tests/api/core/mcp/mcp-content-manager-rbac.test.api.ts`                                             | RBAC on derived tools                                           |
+| `tests/api/core/mcp/mcp-content-manager-shaping.test.api.ts`                                          | Relation shaping, end to end                                    |
 
 ## Alternatives
 
