@@ -97,6 +97,54 @@ const isObjectGroupOperand = (
   holdsCondition(operand) === true;
 
 /**
+ * True when the operand of a `$and` / `$or` on an attribute holds a condition. A list holds one when
+ * an item does, and `null` holds none. A list or `null` with no condition is left as it was before
+ * this check: GraphQL `or: []` on an attribute returns every row.
+ */
+const holdsAttributeGroupCondition = (operand: unknown): boolean => {
+  if (Array.isArray(operand) === true) {
+    return (operand as unknown[]).some(holdsAttributeGroupCondition);
+  }
+
+  if (operand === null || operand === undefined) {
+    return false;
+  }
+
+  return holdsCondition(operand);
+};
+
+/**
+ * Returns the first `$and` / `$or` in the operator map of an attribute, searched through `$not`, with
+ * the operator path to it, e.g. `['$not', '$or']`, when its operand is a list or a value that holds a
+ * condition. The database layer has no attribute level `$and` / `$or`, so it rejects such an operand
+ * (a 500). An object operand is left to the object operand check (`isObjectGroupOperand`).
+ */
+const findAttributeGroupOperator = (
+  operatorMap: Record<string, unknown>,
+  operatorPath: string[] = []
+): { operator: string; path: string[] } | undefined => {
+  for (const [operator, operand] of Object.entries(operatorMap)) {
+    if (
+      GROUP_OPERATORS.has(operator) === true &&
+      isPlainRecord(operand) === false &&
+      holdsAttributeGroupCondition(operand) === true
+    ) {
+      return { operator, path: [...operatorPath, operator] };
+    }
+
+    if (operator === '$not' && isPlainRecord(operand) === true) {
+      const nested = findAttributeGroupOperator(operand, [...operatorPath, operator]);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+/**
  * True when a raw filter path, e.g. `title.$null.$or`, goes through the operand of an operator that
  * is not logical. Such an operand is a value, not a filter: query conversion casts a `$null` /
  * `$notNull` operand to a boolean, so a `$and` / `$or` key in it does not filter anything.
@@ -230,29 +278,46 @@ export const validateFilters = asyncCurry(
             filter = { [key]: value };
           }
 
+          // id and documentId are not schema attributes, so the attribute path stops at their parent
+          let attributePath = path.attribute ?? key;
+          if (attribute === undefined && path.attribute !== null) {
+            attributePath = `${path.attribute}.${key}`;
+          }
+
           if (filter !== undefined) {
             const objectOperand = findObjectOperand(filter);
 
             if (objectOperand !== undefined) {
               const { operator, operand } = objectOperand;
-              // id and documentId are not schema attributes, so the attribute path stops at their parent
-              let operandPath = path.attribute ?? key;
-              if (attribute === undefined && path.attribute !== null) {
-                operandPath = `${path.attribute}.${key}`;
-              }
 
               // A REST list longer than the `strapi::query` middleware's `arrayLimit` reaches us as an
               // object keyed by index, so name the limit instead of the object
               if (hasOnlyIndexKeys(operand) === true) {
-                throw new ValidationError(arrayLimitMessage(operator, operandPath), {
+                throw new ValidationError(arrayLimitMessage(operator, attributePath), {
                   key: operator,
-                  path: operandPath,
+                  path: attributePath,
                 });
               }
 
               throw new ValidationError(
-                `Invalid operand for ${operator} at ${operandPath}: expected a value, not an object`,
-                { key: operator, path: operandPath }
+                `Invalid operand for ${operator} at ${attributePath}: expected a value, not an object`,
+                { key: operator, path: attributePath }
+              );
+            }
+          }
+
+          // The database layer has no attribute level `$and` / `$or`: a list or a value fails there too.
+          // The object form is left to the check below
+          if (filter !== undefined && (isIdKey === true || isScalarAttribute(attribute) === true)) {
+            const groupOperator = findAttributeGroupOperator(filter as Record<string, unknown>);
+
+            if (groupOperator !== undefined) {
+              const { operator } = groupOperator;
+              const operatorPath = [attributePath, ...groupOperator.path].join('.');
+
+              throw new ValidationError(
+                `Invalid operator ${operator} at ${operatorPath}: use $and and $or at the root of the filters or under a relation, not on an attribute`,
+                { key: operator, path: operatorPath }
               );
             }
           }

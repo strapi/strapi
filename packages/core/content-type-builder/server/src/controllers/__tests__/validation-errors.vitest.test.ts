@@ -114,6 +114,64 @@ describe('CTB controllers - validation errors', () => {
     });
   });
 
+  it.each([
+    ['missing', { type: 'enumeration' }],
+    ['null', { type: 'enumeration', enum: null }],
+  ])('answers a validation error when a content type enumeration enum is %s', async (_, level) => {
+    const { ctx, send } = createContext({
+      body: {
+        contentType: {
+          displayName: 'Ticket',
+          singularName: 'ticket',
+          pluralName: 'tickets',
+          kind: 'collectionType',
+          attributes: { level },
+        },
+      },
+    });
+
+    await contentTypes.createContentType(ctx);
+
+    expect(send).toHaveBeenCalledWith(expect.anything(), 400);
+    expect(getSentBody(send)).toMatchObject({
+      error: {
+        name: 'ValidationError',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({ path: ['contentType', 'attributes', 'level', 'enum'] }),
+          ]),
+        },
+      },
+    });
+  });
+
+  it('answers a validation error when a component enumeration enum is missing', async () => {
+    const { ctx, send } = createContext({
+      body: {
+        component: {
+          category: 'default',
+          displayName: 'Ticket',
+          icon: 'cube',
+          attributes: { level: { type: 'enumeration' } },
+        },
+      },
+    });
+
+    await components.createComponent(ctx);
+
+    expect(send).toHaveBeenCalledWith(expect.anything(), 400);
+    expect(getSentBody(send)).toMatchObject({
+      error: {
+        name: 'ValidationError',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({ path: ['component', 'attributes', 'level', 'enum'] }),
+          ]),
+        },
+      },
+    });
+  });
+
   it('keeps the Yup validation error body unchanged', async () => {
     const { ctx, send } = createContext({ body: { component: {} } });
 

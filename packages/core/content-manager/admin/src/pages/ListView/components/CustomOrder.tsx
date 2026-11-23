@@ -765,7 +765,6 @@ const MoveToPositionForm = ({ documentId, onClose }: MoveToPositionFormProps) =>
             })}
           </Field.Label>
           <NumberInput
-            // eslint-disable-next-line jsx-a11y/no-autofocus -- the dialog is opened to type a position
             autoFocus
             value={value}
             onValueChange={(nextValue) => {

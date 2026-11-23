@@ -9,7 +9,7 @@ import {
 } from '@strapi/utils';
 
 import type { UID, Modules } from '@strapi/types';
-import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
+import { wrapInTransaction, wrapWriteInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
 import { copyNonLocalizedFields } from './internationalization';
@@ -25,6 +25,7 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import * as selfReferentialRelations from './utils/self-referential-relations';
+import * as inverseMorphRelations from './utils/inverse-morph-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
@@ -681,6 +682,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       'published'
     );
 
+    // Links the old published versions own through an inverse morphOne / morphMany of a
+    // morphToOne. Deleting these versions below clears them, so they are re-pointed to the new
+    // published versions once created.
+    const inverseMorphLinks = await inverseMorphRelations.load(
+      uid,
+      oldPublishedVersions.map((entry: any) => entry.id)
+    );
+
     // Delete old published versions. Each delete loads and removes components,
     // so they cannot share this transaction's connection concurrently.
     for (const entry of oldPublishedVersions) {
@@ -728,6 +737,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       publishedEntries.push(await entries.publish(entryToPublish, queryParams));
     }
 
+    await inverseMorphRelations.sync(uid, documentId, oldPublishedVersions, inverseMorphLinks);
+
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
       [...oldPublishedVersions, ...updatedDraft],
@@ -748,9 +759,28 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       selfRelationsToSync
     );
 
-    publishedEntries.forEach(emitEvent('entry.publish'));
+    // The published entries were read back on create (with the caller's fields and populate),
+    // before the re-point above: read them again so the response lists the links they own
+    let entriesToReturn: any[] = publishedEntries;
 
-    return { documentId, entries: publishedEntries };
+    if (inverseMorphLinks.length > 0) {
+      const selectionQuery = transformParamsToQuery(
+        uid,
+        pickSelectionParams({ ...queryParams, status: 'published' }) as any
+      );
+
+      // One at a time: a populate issues its own queries on this transaction's connection
+      entriesToReturn = [];
+      for (const entry of publishedEntries) {
+        entriesToReturn.push(
+          await strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: entry.id } })
+        );
+      }
+    }
+
+    entriesToReturn.forEach(emitEvent('entry.publish'));
+
+    return { documentId, entries: entriesToReturn };
   }
 
   async function unpublish(opts = {} as any) {
@@ -869,14 +899,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     findMany: wrapInTransaction(findMany),
     findFirst: wrapInTransaction(findFirst),
     findOne: wrapInTransaction(findOne),
-    delete: wrapInTransaction(deleteDocument),
-    create: wrapInTransaction(create),
-    clone: wrapInTransaction(clone),
-    update: wrapInTransaction(update),
+    delete: wrapWriteInTransaction(deleteDocument),
+    create: wrapWriteInTransaction(create),
+    clone: wrapWriteInTransaction(clone),
+    update: wrapWriteInTransaction(update),
     count: wrapInTransaction(count),
-    publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
-    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
-    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
+    publish: hasDraftAndPublish ? wrapWriteInTransaction(publish) : (undefined as any),
+    unpublish: hasDraftAndPublish ? wrapWriteInTransaction(unpublish) : (undefined as any),
+    discardDraft: hasDraftAndPublish ? wrapWriteInTransaction(discardDraft) : (undefined as any),
 
     updateComponents,
     omitComponentData,

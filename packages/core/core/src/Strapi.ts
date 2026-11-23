@@ -45,7 +45,6 @@ import { createContentAPISchemaRegistry } from './core-api/routes/validation/sch
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
 const tsUtils = (): typeof import('@strapi/typescript-utils') => {
   if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTsUtils = require('@strapi/typescript-utils');
   }
   return lazyTsUtils as typeof import('@strapi/typescript-utils');
@@ -359,7 +358,7 @@ class Strapi extends Container implements Core.Strapi {
             // TODO: Fix this at the content API loader level to prevent future types issues
             (controller) => controller !== undefined && factories.isCustomController(controller)
           ).length,
-          environment: this.config.environment,
+          environment: this.config.get('environment'),
           // TODO: to add back
           // providers: this.config.installedProviders,
         },

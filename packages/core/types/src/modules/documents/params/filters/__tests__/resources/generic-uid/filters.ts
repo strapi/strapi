@@ -173,3 +173,27 @@ export const knownUIDReadBack = (filters: PostFilters) => {
 
   return { tagFilters, nestedTagName, writerPosts, coverFilters, sectionFilters };
 };
+
+/**
+ * Code generic over a content type UID keeps the identifier keys
+ */
+export const byId = <TSchemaUID extends UID.ContentType>(filters: Filters<TSchemaUID>): boolean =>
+  filters.id !== undefined;
+
+export const byDocumentId = <TSchemaUID extends UID.ContentType>(documentId: string) =>
+  ({ documentId }) as Modules.Documents.Params.Filters.Any<TSchemaUID>;
+
+/**
+ * A filter generic over a UID stays assignable to the filter of the wide UID
+ */
+export const toWideContentType = <TSchemaUID extends UID.ContentType>(
+  filters: Modules.Documents.Params.Filters.Any<TSchemaUID>
+): Modules.Documents.Params.Filters.Any<UID.ContentType> => filters;
+
+export const toWideComponent = <TSchemaUID extends UID.Component>(
+  filters: Modules.Documents.Params.Filters.Any<TSchemaUID>
+): Modules.Documents.Params.Filters.Any<UID.Component> => filters;
+
+export const toWideSchema = <TSchemaUID extends UID.Schema>(
+  filters: Modules.Documents.Params.Filters.Any<TSchemaUID>
+): Modules.Documents.Params.Filters.Any<UID.Schema> => filters;

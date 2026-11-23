@@ -298,6 +298,10 @@ class Database {
    * `commit` and `rollback` helpers: if you call `rollback` and return without
    * throwing, the implementation avoids attempting a second `commit` on an
    * already-finalised transactor.
+   *
+   * A call inside another transaction joins it, without a savepoint: it neither commits nor rolls
+   * back on its own. If `cb` throws and a caller catches the error, the writes `cb` made before
+   * the error are committed with the outer transaction. Use `savepoint` to undo them.
    */
   transaction(): Promise<TransactionObject>;
   transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;

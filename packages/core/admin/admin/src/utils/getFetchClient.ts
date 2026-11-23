@@ -1,5 +1,4 @@
 import flow from 'lodash/flow';
-// eslint-disable-next-line import/default
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
@@ -531,9 +530,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
         return { data: {}, status: response.status } as FetchResponse<TData>;
-      } else {
-        throw error;
       }
+
+      // A non-JSON error body (e.g. an HTML page from a reverse proxy) still has a status worth keeping.
+      if ((error as Error | null)?.name === 'SyntaxError' && !validateStatus?.(response.status)) {
+        const fetchError = new FetchError('Unknown Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
+      }
+
+      throw error;
     }
   };
 
