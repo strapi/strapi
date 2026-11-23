@@ -22,7 +22,7 @@ describe('Plugin route extension backward compatibility', () => {
   let strapi;
 
   beforeAll(async () => {
-    const appRoot = path.resolve(__dirname, '../../../../test-apps/api');
+    const appRoot = path.dirname(process.env.ENV_PATH as string);
 
     const upExtPath = path.join(appRoot, 'src/extensions/users-permissions/strapi-server.js');
     const i18nExtPath = path.join(appRoot, 'src/extensions/i18n/strapi-server.js');
