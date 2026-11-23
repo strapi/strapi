@@ -91,8 +91,8 @@ type UploadMethods =
  * one of `upload` and `uploadStream`; the other members are optional, and members outside this
  * contract are allowed. Each method may answer synchronously or with a promise.
  *
- * Omit the members you do not implement: never set one to `undefined`. The upload plugin wraps every
- * own key of this object, so an `undefined` member becomes a function that throws when called.
+ * Omit the members you do not implement: never set one to `undefined`. The upload plugin wraps only
+ * the members that are functions and ignores the others, so an `undefined` member is treated as missing.
  */
 export type Provider = UploadMethods & {
   /**
