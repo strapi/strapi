@@ -79,9 +79,10 @@ export async function detectInvocation({
 
 export type NonInteractiveReason = 'flag' | 'ci' | 'no-tty';
 
-export type PromptMode =
-  | { interactive: true }
-  | { interactive: false; reason: NonInteractiveReason };
+type InteractiveMode = { interactive: true };
+type NonInteractiveMode = { interactive: false; reason: NonInteractiveReason };
+
+export type PromptMode = InteractiveMode | NonInteractiveMode;
 
 /**
  * Tells whether the CLI can ask questions. Signals, strongest first:
