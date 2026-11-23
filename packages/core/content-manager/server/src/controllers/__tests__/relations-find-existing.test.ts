@@ -131,8 +131,8 @@ describe('findExisting', () => {
         expect.objectContaining({
           select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt', 'name'],
           ordering: 'desc',
-          page: '1',
-          pageSize: '5',
+          page: 1,
+          pageSize: 5,
         })
       );
       expect(dbQuery.load).not.toHaveBeenCalled();
@@ -233,8 +233,8 @@ describe('findExisting', () => {
         'tags',
         expect.objectContaining({
           select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'],
-          page: '1',
-          pageSize: '5',
+          page: 1,
+          pageSize: 5,
         })
       );
       expect(dbQuery.loadPages).toHaveBeenNthCalledWith(
