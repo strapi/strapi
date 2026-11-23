@@ -84,7 +84,7 @@ const mockStrapi = (uploadConfig: Record<string, unknown>, uploadPlugin: Record<
       set: jest.fn(),
     },
     get: jest.fn().mockReturnValue({ add: jest.fn() }),
-  } as any);
+  }) as any;
 
 describe('Upload plugin register', () => {
   describe('routes and provider middlewares', () => {
@@ -419,9 +419,13 @@ describe('Upload plugin register', () => {
       expect(getProviderConfig.mock.contexts[0]).toBe(instance);
       expect(provider.version).toBe(2);
 
-      await provider.uploadIfMatch(file, 'etag');
-      expect(uploadIfMatch).toHaveBeenCalledWith(file, 'etag');
+      // Helpers get exactly the arguments they are called with: no actionOptions, no cut-off.
+      await provider.uploadIfMatch(file);
+      expect(uploadIfMatch).toHaveBeenLastCalledWith(file);
       expect(uploadIfMatch.mock.contexts[0]).toBe(instance);
+
+      await provider.uploadIfMatch(file, oldFile, 'etag');
+      expect(uploadIfMatch).toHaveBeenLastCalledWith(file, oldFile, 'etag');
     });
 
     test('provider methods calling this.upload get the raw method, without actionOptions', async () => {
@@ -492,6 +496,38 @@ describe('Upload plugin register', () => {
           errors.PayloadTooLargeError
         );
         expect(Object.keys(provider)).not.toContain('isPrivate');
+      });
+
+      test('apply when the provider declares the method as null or false', async () => {
+        const provider = await registerWithProvider({
+          upload: jest.fn(),
+          delete: jest.fn(),
+          isPrivate: false,
+          checkFileSize: null,
+          getSignedUrl: null,
+        });
+        const bigFile = { name: 'big.png', size: 2 } as any;
+
+        expect(provider.isPrivate()).toBe(false);
+        expect(provider.getSignedUrl(file)).toBe(file);
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 1000 })).toThrow(
+          errors.PayloadTooLargeError
+        );
+        expect(Object.keys(provider)).not.toContain('isPrivate');
+      });
+
+      test('optional contract methods declared as null stay missing', async () => {
+        const provider = await registerWithProvider({
+          upload: jest.fn(),
+          uploadStream: null,
+          delete: jest.fn(),
+          replace: false,
+          replaceStream: null,
+        });
+
+        expect(provider.uploadStream).toBeUndefined();
+        expect(provider.replace).toBeUndefined();
+        expect(provider.replaceStream).toBeUndefined();
       });
     });
   });
