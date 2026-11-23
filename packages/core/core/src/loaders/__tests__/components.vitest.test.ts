@@ -124,24 +124,110 @@ describe('loadComponents', () => {
     expect((registry.get('shared.card') as any).lifecycles).toEqual({});
   });
 
-  it('throws when the lifecycles module declares an unknown hook', async () => {
+  it('leaves out an export named like a hook with a warning, and helpers without one', async () => {
     await write('default/card.json', schema('card'));
-    await write('default/card.lifecycles.js', `module.exports = { beforeSave() {} };`);
-    const { strapi } = createStrapi();
-
-    await expect(loadComponents(strapi)).rejects.toThrow(
-      'Component lifecycles are invalid for default.card.'
+    await write(
+      'default/card.lifecycles.js',
+      `module.exports = { beforeSave() {}, helper() {}, beforeCreate() {} };`
     );
+    const { strapi, registry, mocks } = createStrapi();
+
+    await loadComponents(strapi);
+
+    const { lifecycles } = registry.get('default.card') as any;
+    expect(Object.keys(lifecycles)).toEqual(['beforeCreate']);
+    expect(mocks.log.warn).toHaveBeenCalledTimes(1);
+    expect(mocks.log.warn.mock.calls[0][0]).toContain('Component default.card lifecycles');
+    expect(mocks.log.warn.mock.calls[0][0]).toContain('"beforeSave" is not a lifecycle hook');
+    expect(mocks.log.warn.mock.calls[0][0]).not.toContain('helper');
   });
 
-  it('throws when a hook is not a function', async () => {
+  it('keeps every known hook, and warns about the *DeleteMany ones', async () => {
+    await write('default/card.json', schema('card'));
+    await write(
+      'default/card.lifecycles.js',
+      `module.exports = { beforeFindOne() {}, afterDeleteMany() {}, afterDelete() {} };`
+    );
+    const { strapi, registry, mocks } = createStrapi();
+
+    await loadComponents(strapi);
+
+    // Find hooks run for direct queries on the component, e.g. the relations of the Content Manager
+    expect(Object.keys((registry.get('default.card') as any).lifecycles)).toEqual([
+      'beforeFindOne',
+      'afterDeleteMany',
+      'afterDelete',
+    ]);
+    expect(mocks.log.warn).toHaveBeenCalledTimes(1);
+    expect(mocks.log.warn.mock.calls[0][0]).toContain('"afterDeleteMany" never runs');
+  });
+
+  it('throws, naming the component, when a hook is not a function', async () => {
     await write('default/card.json', schema('card'));
     await write('default/card.lifecycles.js', `module.exports = { beforeCreate: 'nope' };`);
     const { strapi } = createStrapi();
 
     await expect(loadComponents(strapi)).rejects.toThrow(
-      'Component lifecycles are invalid for default.card.'
+      'Component lifecycles are invalid for default.card: "beforeCreate" must be a function.'
     );
+  });
+
+  it('throws, naming the component, when the file does not export an object', async () => {
+    await write('default/card.json', schema('card'));
+    await write('default/card.lifecycles.js', `module.exports = () => {};`);
+    const { strapi } = createStrapi();
+
+    await expect(loadComponents(strapi)).rejects.toThrow(
+      'Component lifecycles are invalid for default.card: they must be an object of hooks.'
+    );
+  });
+
+  it('names the component when its lifecycles file fails to load', async () => {
+    await write('default/card.json', schema('card'));
+    await write('default/card.lifecycles.js', `throw new Error('boom');`);
+    const { strapi } = createStrapi();
+
+    await expect(loadComponents(strapi)).rejects.toThrow(
+      /Could not load the lifecycles of component default\.card from .*default.card\.lifecycles\.js: boom/
+    );
+  });
+
+  it('keeps the hooks declared inline in a .js schema, as the loader did before', async () => {
+    await write(
+      'default/card.js',
+      `module.exports = ${JSON.stringify(schema('card')).slice(
+        0,
+        -1
+      )}, lifecycles: { beforeCreate() {}, afterCreate() {} } };`
+    );
+    const { strapi, registry } = createStrapi();
+
+    await loadComponents(strapi);
+
+    const { lifecycles } = registry.get('default.card') as any;
+    expect(typeof lifecycles.beforeCreate).toBe('function');
+    expect(typeof lifecycles.afterCreate).toBe('function');
+  });
+
+  it('lets the lifecycles file override the inline hooks, hook by hook', async () => {
+    await write(
+      'default/card.js',
+      `module.exports = ${JSON.stringify(schema('card')).slice(
+        0,
+        -1
+      )}, lifecycles: { beforeCreate() { return 'inline'; }, afterCreate() { return 'inline'; } } };`
+    );
+    await write(
+      'default/card.lifecycles.js',
+      `module.exports = { beforeCreate() { return 'file'; } };`
+    );
+    const { strapi, registry } = createStrapi();
+
+    await loadComponents(strapi);
+
+    const { lifecycles } = registry.get('default.card') as any;
+    expect(lifecycles.beforeCreate()).toBe('file');
+    expect(lifecycles.afterCreate()).toBe('inline');
   });
 
   it('warns and ignores a lifecycles file that has no matching schema', async () => {
@@ -160,6 +246,57 @@ describe('loadComponents', () => {
     expect(mocks.log.warn.mock.calls[0][0]).toContain(
       path.join(dir, 'default', 'ghost.lifecycles.js')
     );
+  });
+
+  it('never imports a lifecycles file without a schema, so one that throws cannot stop the app', async () => {
+    await write('default/card.json', schema('card'));
+    await write('default/ghost.lifecycles.js', `throw new Error('boom');`);
+    const { strapi, registry, mocks } = createStrapi();
+
+    await loadComponents(strapi);
+
+    expect(registry.keys()).toEqual(['default.card']);
+    expect(mocks.log.warn.mock.calls[0][0]).toContain(
+      'no schema found for component "default.ghost"'
+    );
+  });
+
+  it('only attaches a file named exactly <name>.lifecycles.js', async () => {
+    await write('default/card.json', schema('card'));
+    await write('default/card.backup.lifecycles.js', `module.exports = { beforeCreate() {} };`);
+    const { strapi, registry, mocks } = createStrapi();
+
+    await loadComponents(strapi);
+
+    expect((registry.get('default.card') as any).lifecycles).toEqual({});
+    expect(mocks.log.warn).toHaveBeenCalledTimes(1);
+    expect(mocks.log.warn.mock.calls[0][0]).toContain('card.backup.lifecycles.js');
+    expect(mocks.log.warn.mock.calls[0][0]).toContain(
+      'expected <category>/<name>.lifecycles.js (or .ts)'
+    );
+  });
+
+  it('treats inline lifecycles set to null like none', async () => {
+    await write(
+      'default/card.js',
+      `module.exports = ${JSON.stringify(schema('card')).slice(0, -1)}, lifecycles: null };`
+    );
+    const { strapi, registry } = createStrapi();
+
+    await loadComponents(strapi);
+
+    expect((registry.get('default.card') as any).lifecycles).toEqual({});
+  });
+
+  it('matches the lifecycles file name without case, like the schema name', async () => {
+    await write('default/card.json', schema('card'));
+    await write('default/Card.Lifecycles.js', `module.exports = { beforeCreate() {} };`);
+    const { strapi, registry, mocks } = createStrapi();
+
+    await loadComponents(strapi);
+
+    expect(typeof (registry.get('default.card') as any).lifecycles.beforeCreate).toBe('function');
+    expect(mocks.log.warn).not.toHaveBeenCalled();
   });
 
   it('still stops when a schema has no collectionName', async () => {

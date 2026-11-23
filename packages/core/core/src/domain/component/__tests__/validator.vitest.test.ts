@@ -4,33 +4,65 @@ import { LIFECYCLES } from '../../lifecycles';
 
 describe('validateComponentLifecycles', () => {
   it('accepts an empty module', () => {
-    expect(validateComponentLifecycles('default.card', {})).toEqual({});
+    expect(validateComponentLifecycles('default.card', {})).toEqual({
+      lifecycles: {},
+      warnings: [],
+    });
   });
 
-  it('accepts every known hook as a function', () => {
-    const lifecycles = Object.fromEntries(LIFECYCLES.map((hook) => [hook, () => {}]));
+  it('keeps every known hook, as the loader did before', () => {
+    const hooks = Object.fromEntries(LIFECYCLES.map((hook) => [hook, () => {}]));
 
-    expect(validateComponentLifecycles('default.card', lifecycles)).toBe(lifecycles);
+    expect(validateComponentLifecycles('default.card', hooks).lifecycles).toEqual(hooks);
   });
 
-  it('rejects unknown hooks and names the component', () => {
-    expect(() => validateComponentLifecycles('default.card', { beforeSave() {} })).toThrow(
-      /Component lifecycles are invalid for default\.card\./
-    );
+  it('warns that the *DeleteMany hooks never run on deletion by the document service', () => {
+    const { lifecycles, warnings } = validateComponentLifecycles('default.card', {
+      afterDeleteMany() {},
+    });
+
+    expect(Object.keys(lifecycles)).toEqual(['afterDeleteMany']);
+    expect(warnings).toEqual([
+      '"afterDeleteMany" never runs when the document service deletes this component, and it makes that deletion go row by row; use "afterDelete", which runs for each row',
+    ]);
   });
 
-  it('rejects hooks that are not functions', () => {
+  it('leaves out an export named like a hook, with a warning', () => {
+    const { lifecycles, warnings } = validateComponentLifecycles('default.card', {
+      beforeSave() {},
+    });
+
+    expect(lifecycles).toEqual({});
+    expect(warnings).toEqual(['"beforeSave" is not a lifecycle hook and is ignored']);
+  });
+
+  it('leaves out other exports, such as helpers, without a warning', () => {
+    expect(validateComponentLifecycles('default.card', { formatName() {}, LIMIT: 3 })).toEqual({
+      lifecycles: {},
+      warnings: [],
+    });
+  });
+
+  it('ignores a hook set to null or undefined', () => {
+    expect(
+      validateComponentLifecycles('default.card', { beforeCreate: null, afterCreate: undefined })
+    ).toEqual({ lifecycles: {}, warnings: [] });
+  });
+
+  it('rejects a hook that is not a function and names the component', () => {
     expect(() =>
       validateComponentLifecycles('default.card', { beforeCreate: 'not a function' })
-    ).toThrow(/Component lifecycles are invalid for default\.card\./);
-    expect(() => validateComponentLifecycles('default.card', { beforeCreate: null })).toThrow(
-      /Component lifecycles are invalid for default\.card\./
+    ).toThrow(
+      'Component lifecycles are invalid for default.card: "beforeCreate" must be a function.'
     );
   });
 
-  it('rejects a module that is not an object', () => {
-    expect(() => validateComponentLifecycles('default.card', 'nope')).toThrow(
-      /Component lifecycles are invalid for default\.card\./
-    );
-  });
+  it.each(['nope', null, () => {}, []])(
+    'rejects lifecycles that are not an object (%s)',
+    (value) => {
+      expect(() => validateComponentLifecycles('default.card', value)).toThrow(
+        'Component lifecycles are invalid for default.card: they must be an object of hooks.'
+      );
+    }
+  );
 });

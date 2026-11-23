@@ -5,7 +5,6 @@ import { glob } from 'glob';
 import { importDefault } from '@strapi/utils';
 import type { Core, Struct, UID } from '@strapi/types';
 import { loadFiles } from '../utils/load-files';
-import { filePathToPropPath } from '../utils/filepath-to-prop-path';
 import {
   validateComponentLifecycles,
   type ComponentLifecycles,
@@ -42,9 +41,9 @@ type LoadedComponents = {
   };
 };
 
-type LoadedLifecycles = {
+type LifecyclesFiles = {
   [category: string]: {
-    [key: string]: { module: unknown; filename: string };
+    [key: string]: { absolutePath: string; filename: string };
   };
 };
 
@@ -52,41 +51,74 @@ type ComponentMap = {
   [uid in UID.Component]: Struct.ComponentSchema;
 };
 
-const loadLifecycles = async (dir: string): Promise<LoadedLifecycles> => {
-  const files = await glob(LIFECYCLES_FILES_PATTERN, { cwd: dir });
-  const lifecycles: LoadedLifecycles = {};
+// `<category>/<name>.lifecycles.js`, where `<name>` is the name of a schema file (no dot)
+// Case-insensitive like the glob on macOS and Windows; keys are lower-cased like the schema keys
+const LIFECYCLES_FILE = /^([^/\\]+)[/\\]([^/\\.]+)\.lifecycles\.js$/i;
+
+/**
+ * Lists the lifecycles files without importing them: a file is only imported once its component
+ * exists, so that a file left behind by a deleted component can't stop the app.
+ */
+const listLifecyclesFiles = async (strapi: Core.Strapi, dir: string) => {
+  // Case-insensitive on every platform, as it is by default on macOS and Windows
+  const files = await glob(LIFECYCLES_FILES_PATTERN, { cwd: dir, nocase: true });
+  const lifecyclesFiles: LifecyclesFiles = {};
 
   for (const file of files) {
-    const absolutePath = resolve(dir, file);
+    const match = LIFECYCLES_FILE.exec(file);
 
-    delete require.cache[absolutePath];
+    if (!match) {
+      // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
+      strapi.log.warn(
+        `Ignoring lifecycles file ${join(
+          strapi.dirs.app.components,
+          file
+        )}: expected <category>/<name>.lifecycles.js (or .ts), next to <name>.json.`
+      );
+      continue;
+    }
 
-    // `<category>/<name>.lifecycles.js` -> ['<category>', '<name>', 'lifecycles']
-    const [category, key] = filePathToPropPath(file);
+    // Schema keys are lower-cased by the loader, see `filePathToPropPath`
+    const [, category, key] = match.map((part) => part.toLowerCase());
 
-    _.set(lifecycles, [category, key], {
-      module: importDefault(absolutePath),
+    _.set(lifecyclesFiles, [category, key], {
+      absolutePath: resolve(dir, file),
       filename: basename(file),
     });
   }
 
-  return lifecycles;
+  return lifecyclesFiles;
+};
+
+const importLifecycles = (uid: string, filePath: string, displayPath: string) => {
+  delete require.cache[filePath];
+
+  try {
+    return importDefault(filePath);
+  } catch (error) {
+    throw new Error(
+      `Could not load the lifecycles of component ${uid} from ${displayPath}: ${
+        error instanceof Error ? error.message : error
+      }`,
+      { cause: error }
+    );
+  }
 };
 
 const warnAboutOrphanLifecycles = (
   strapi: Core.Strapi,
   schemas: LoadedComponents,
-  lifecycles: LoadedLifecycles
+  lifecyclesFiles: LifecyclesFiles
 ) => {
-  for (const category of Object.keys(lifecycles)) {
-    for (const key of Object.keys(lifecycles[category])) {
+  for (const category of Object.keys(lifecyclesFiles)) {
+    for (const key of Object.keys(lifecyclesFiles[category])) {
       if (schemas[category]?.[key]) {
         continue;
       }
 
       // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
       const categoryDir = join(strapi.dirs.app.components, category);
-      const filePath = join(categoryDir, lifecycles[category][key].filename);
+      const filePath = join(categoryDir, lifecyclesFiles[category][key].filename);
       const expectedSchemaPath = join(categoryDir, `${key}.json`);
 
       strapi.log.warn(
@@ -96,15 +128,68 @@ const warnAboutOrphanLifecycles = (
   }
 };
 
+/**
+ * The lifecycles of a component: those declared inline in a `.js` schema, overridden hook by hook
+ * by its lifecycles file, as the loader merged them before both were validated.
+ */
+const loadComponentLifecycles = (
+  strapi: Core.Strapi,
+  uid: string,
+  schema: LoadedComponent,
+  file: LifecyclesFiles[string][string] | undefined
+) => {
+  // NOTE: We're using the filepaths from the app directory instead of the dist for information purpose
+  const appPath = (filename: string) => join(strapi.dirs.app.components, schema.category, filename);
+
+  // `null` declared nothing, like a missing value
+  const inline = schema.lifecycles ?? undefined;
+
+  if (!file && inline === undefined) {
+    return {};
+  }
+
+  let declared: unknown = inline;
+  const sources = inline === undefined ? [] : [appPath(schema.__filename__)];
+
+  if (file) {
+    const fromFile = importLifecycles(uid, file.absolutePath, appPath(file.filename));
+    sources.push(appPath(file.filename));
+
+    if (inline !== undefined && !_.isObjectLike(inline)) {
+      strapi.log.warn(
+        `Component ${uid}: the inline "lifecycles" of ${appPath(
+          schema.__filename__
+        )} is not an object, it is ignored.`
+      );
+    }
+
+    // The file wins hook by hook over the inline hooks. A file that is not an object is validated
+    // as is, so that the error names it
+    declared = _.isObjectLike(fromFile)
+      ? { ...(_.isObjectLike(inline) ? (inline as object) : {}), ...(fromFile as object) }
+      : fromFile;
+  }
+
+  const { lifecycles, warnings } = validateComponentLifecycles(uid, declared);
+
+  if (warnings.length > 0) {
+    strapi.log.warn(
+      `Component ${uid} lifecycles (${sources.join(', ')}):\n- ${warnings.join('\n- ')}`
+    );
+  }
+
+  return lifecycles;
+};
+
 export default async function loadComponents(strapi: Core.Strapi) {
   if (!(await pathExists(strapi.dirs.dist.components))) {
     return {};
   }
 
   const map = await loadFiles<LoadedComponents>(strapi.dirs.dist.components, '*/*.*(js|json)', {
-    globArgs: { ignore: LIFECYCLES_FILES_PATTERN },
+    globArgs: { ignore: LIFECYCLES_FILES_PATTERN, nocase: true },
   });
-  const lifecyclesMap = await loadLifecycles(strapi.dirs.dist.components);
+  const lifecyclesFiles = await listLifecyclesFiles(strapi, strapi.dirs.dist.components);
 
   const components = Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach((key) => {
@@ -121,10 +206,12 @@ export default async function loadComponents(strapi: Core.Strapi) {
 
       const uid: UID.Component = `${category}.${key}`;
 
-      const loadedLifecycles = lifecyclesMap[category]?.[key];
-      const lifecycles = loadedLifecycles
-        ? validateComponentLifecycles(uid, loadedLifecycles.module)
-        : {};
+      const lifecycles = loadComponentLifecycles(
+        strapi,
+        uid,
+        { ...schema, category },
+        lifecyclesFiles[category]?.[key]
+      );
 
       acc[uid] = Object.assign(schema, {
         __schema__: _.cloneDeep(schema),
@@ -140,7 +227,7 @@ export default async function loadComponents(strapi: Core.Strapi) {
     return acc;
   }, {} as ComponentMap);
 
-  warnAboutOrphanLifecycles(strapi, map, lifecyclesMap);
+  warnAboutOrphanLifecycles(strapi, map, lifecyclesFiles);
 
   strapi.get('components').add(components);
 }

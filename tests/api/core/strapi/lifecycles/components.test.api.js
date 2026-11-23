@@ -8,12 +8,22 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest } = require('api-tests/request');
 
 const COMPONENT_UID = 'default.hooked-compo';
+const WRAPPER_UID = 'default.hooked-wrapper';
 const CONTENT_TYPE_UID = 'api::product-with-hooked-compo.product-with-hooked-compo';
+const DRAFT_CONTENT_TYPE_UID = 'api::article-with-hooked-compo.article-with-hooked-compo';
 
 const component = {
   displayName: 'hooked-compo',
   attributes: {
     name: { type: 'string' },
+  },
+};
+
+// Embeds the hooked component one level down
+const wrapper = {
+  displayName: 'hooked-wrapper',
+  attributes: {
+    inner: { type: 'component', component: COMPONENT_UID },
   },
 };
 
@@ -69,8 +79,28 @@ module.exports = {
   afterDelete(event) {
     log('afterDelete', event);
   },
+  // Runs for queries on the component itself, not when an entry is read
+  beforeFindOne(event) {
+    log('beforeFindOne', event);
+  },
+  // Not a hook: left out of the model
+  helper() {},
+  beforeSave() {},
 };
 `;
+
+// Draft & publish copies components on publish, discard draft and clone
+const draftContentType = {
+  displayName: 'article-with-hooked-compo',
+  singularName: 'article-with-hooked-compo',
+  pluralName: 'article-with-hooked-compos',
+  draftAndPublish: true,
+  attributes: {
+    compo: { type: 'component', component: COMPONENT_UID },
+    wrapper: { type: 'component', component: WRAPPER_UID },
+    zone: { type: 'dynamiczone', components: [COMPONENT_UID] },
+  },
+};
 
 let builder;
 let strapi;
@@ -83,7 +113,12 @@ const callsFor = (action) =>
 describe('Lifecycles - components', () => {
   beforeAll(async () => {
     builder = createTestBuilder();
-    await builder.addComponent(component).addContentType(contentType).build();
+    await builder
+      .addComponent(component)
+      .addComponent(wrapper)
+      .addContentType(contentType)
+      .addContentType(draftContentType)
+      .build();
 
     const appDir = path.dirname(process.env.ENV_PATH);
     lifecyclesPath = path.join(
@@ -112,11 +147,12 @@ describe('Lifecycles - components', () => {
     global.__componentLifecycleCalls = [];
   });
 
-  test('The lifecycles file is attached to the component model', () => {
-    expect(strapi.getModel(COMPONENT_UID).lifecycles).toMatchObject({
+  test('The lifecycles file is attached to the component model, without its other exports', () => {
+    expect(strapi.getModel(COMPONENT_UID).lifecycles).toEqual({
       beforeCreate: expect.any(Function),
       beforeUpdate: expect.any(Function),
       afterDelete: expect.any(Function),
+      beforeFindOne: expect.any(Function),
     });
     expect(strapi.db.metadata.get(COMPONENT_UID).lifecycles.beforeCreate).toBeInstanceOf(Function);
   });
@@ -189,8 +225,10 @@ describe('Lifecycles - components', () => {
   test('A ValidationError thrown from a component hook rejects the request and rolls back the whole entry', async () => {
     const entriesBefore = await strapi.db.query(CONTENT_TYPE_UID).count();
 
+    // The single component is written before the repeatable one, so its row exists when the
+    // hook throws: only a rollback removes it
     const res = await rq.post('/', {
-      body: { data: { compos: [{ name: 'rolled-back' }, { name: 'forbidden' }] } },
+      body: { data: { compo: { name: 'rolled-back' }, compos: [{ name: 'forbidden' }] } },
     });
 
     expect(res.statusCode).toBe(400);
@@ -200,8 +238,69 @@ describe('Lifecycles - components', () => {
       message: 'The name "forbidden" is not allowed',
     });
 
-    // the first component row was inserted before the second one threw: it must be gone
+    expect(callsFor('beforeCreate').map((call) => call.data.name)).toEqual(['ROLLED-BACK']);
     expect(await strapi.db.query(COMPONENT_UID).count({ where: { name: 'ROLLED-BACK' } })).toBe(0);
     expect(await strapi.db.query(CONTENT_TYPE_UID).count()).toBe(entriesBefore);
+  });
+
+  test('Find hooks run for queries on the component, not when its entry is read', async () => {
+    const created = await rq.post('/', {
+      body: { data: { compo: { name: 'read' } } },
+      qs: { populate: ['compo'] },
+    });
+    global.__componentLifecycleCalls = [];
+
+    await rq.get(`/${created.body.data.documentId}`, { qs: { populate: ['compo'] } });
+    expect(callsFor('beforeFindOne')).toEqual([]);
+
+    await strapi.db.query(COMPONENT_UID).findOne({ where: { id: created.body.data.compo.id } });
+    expect(callsFor('beforeFindOne')).toHaveLength(1);
+  });
+
+  describe('Wherever the component is written', () => {
+    const documents = () => strapi.documents(DRAFT_CONTENT_TYPE_UID);
+    const createdNames = () => callsFor('beforeCreate').map((call) => call.data.name);
+
+    test('in a nested component and in a dynamic zone', async () => {
+      await documents().create({
+        data: {
+          wrapper: { inner: { name: 'nested' } },
+          zone: [{ __component: COMPONENT_UID, name: 'zoned' }],
+        },
+      });
+
+      expect(createdNames().sort()).toEqual(['NESTED', 'ZONED']);
+    });
+
+    test('on publish, which writes the published version', async () => {
+      const { documentId } = await documents().create({ data: { compo: { name: 'to-publish' } } });
+      global.__componentLifecycleCalls = [];
+
+      await documents().publish({ documentId });
+
+      expect(createdNames()).toEqual(['TO-PUBLISH']);
+    });
+
+    test('on discard draft, which rewrites the draft from the published version', async () => {
+      const { documentId } = await documents().create({ data: { compo: { name: 'kept' } } });
+      await documents().publish({ documentId });
+      await documents().update({ documentId, data: { compo: { name: 'edited' } } });
+      global.__componentLifecycleCalls = [];
+
+      await documents().discardDraft({ documentId });
+
+      expect(createdNames()).toEqual(['KEPT']);
+      // The edited draft component is deleted
+      expect(callsFor('afterDelete')).toHaveLength(1);
+    });
+
+    test('on clone', async () => {
+      const { documentId } = await documents().create({ data: { compo: { name: 'source' } } });
+      global.__componentLifecycleCalls = [];
+
+      await documents().clone({ documentId });
+
+      expect(createdNames()).toEqual(['SOURCE']);
+    });
   });
 });
