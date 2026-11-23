@@ -1,5 +1,7 @@
 import { pick, merge, curry, flow, omit } from 'lodash';
-import type { Utils } from '@strapi/types';
+import type { Core, Utils } from '@strapi/types';
+import type { z } from '@strapi/utils';
+import type { actionRegistrationSchema } from '../../validation/action-provider';
 
 export interface ActionAlias {
   /**
@@ -73,6 +75,31 @@ export type Action = {
    */
   aliases?: ActionAlias[];
 };
+
+type ActionRegistrationInput = z.input<typeof actionRegistrationSchema>;
+
+type StoredActionOf<TRegistration> = TRegistration extends ActionRegistrationInput
+  ? Omit<TRegistration, 'uid' | 'options' | 'subCategory'> & {
+      actionId: string;
+      options: {
+        applyToProperties: NonNullable<
+          NonNullable<TRegistration['options']>['applyToProperties']
+        > | null;
+      };
+    } & (TRegistration extends { section: 'settings' | 'plugins' }
+        ? { subCategory: string }
+        : unknown)
+  : never;
+
+/**
+ * An action as the action provider stores it ({@link create}) and hands it to its hooks and to the
+ * section handlers: the registration without its `uid`, with its `actionId`, an
+ * `options.applyToProperties` that defaults to `null`, and a `subCategory` that defaults to
+ * `'general'` in the `settings` and `plugins` sections and is removed in the others. One member per
+ * section, as the registration schema (`validation/action-provider.ts`): only `settings` actions have
+ * a `category`, only `contentTypes` actions have `subjects`.
+ */
+export type StoredAction = StoredActionOf<ActionRegistrationInput>;
 
 /**
  * Set of attributes used to create a new {@link Action} object
@@ -164,11 +191,24 @@ const assignOrOmitSubCategory = (action: Action): Action => {
 };
 
 /**
+ * What {@link appliesToProperty} reads from an action. With strict types, it accepts a stored action
+ * ({@link StoredAction}) as well as an {@link Action}.
+ */
+type AppliesToPropertyAction = {
+  options?: { applyToProperties?: readonly (string | undefined)[] | null };
+};
+
+/**
  * Check if a property can be applied to an {@link Action}
  */
-const appliesToProperty = curry((property: string, action: Action | undefined): boolean => {
-  return action?.options?.applyToProperties?.includes(property) ?? false;
-});
+const appliesToProperty = curry(
+  (
+    property: string,
+    action: (Core.IsStrict extends true ? AppliesToPropertyAction : Action) | undefined
+  ): boolean => {
+    return action?.options?.applyToProperties?.includes(property) ?? false;
+  }
+);
 
 /**
  * Check if an action applies to a subject
