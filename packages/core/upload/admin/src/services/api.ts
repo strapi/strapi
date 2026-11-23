@@ -93,6 +93,18 @@ const readRequestHeaders = (): Headers | Error => {
   }
 };
 
+// No file of a failed read was sent, so a retry reads the providers again,
+// once for all the entries it replays
+const rereadFailedRequestHeaders = (entries: UploadEntry[]) => {
+  const failed = entries.filter((entry) => entry.requestHeaders instanceof Error);
+  if (failed.length > 0) {
+    const requestHeaders = readRequestHeaders();
+    failed.forEach((entry) => {
+      entry.requestHeaders = requestHeaders;
+    });
+  }
+};
+
 /**
  * Everything a batch needs to be replayed on retry: the original entries plus the
  * flags it was started with (AI-metadata and upload concurrency). These live here
@@ -909,6 +921,7 @@ const uploadApi = adminApi
 
           // Reset cancelled files back to pending
           dispatch(retryCancelledFiles());
+          rereadFailedRequestHeaders(cancelledIndices.map((index) => batch.entries[index]));
 
           // Fresh AbortController for the retry run
           const abortController = new AbortController();
@@ -956,6 +969,7 @@ const uploadApi = adminApi
 
           skippedFiles.delete(getFileKey(uploadId, index));
           dispatch(retryFile({ uploadId, index }));
+          rereadFailedRequestHeaders([batch.entries[index]]);
 
           return runMergedUploadPool({
             entries: batch.entries,

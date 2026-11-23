@@ -381,4 +381,37 @@ describe('headers a plugin registered', () => {
     await waitFor(() => expect(statuses()).toEqual(['error', 'error']));
     expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
   });
+
+  it('reads the providers again on a retry when the read failed at drop time', async () => {
+    let space: string | undefined;
+    removeHeaders = unstable_addRequestHeaders(() => {
+      if (!space) {
+        throw new Error('no space selected yet');
+      }
+      return { 'x-strapi-space': space };
+    });
+
+    const { request, result, statuses } = setup(['a.png']);
+    await waitFor(() => expect(statuses()).toEqual(['error']));
+
+    // The user selects a space, then retries the failed row
+    space = 'france';
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 0 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+    // A later retry reuses the values the first retry read
+    space = 'spain';
+    await act(async () => {
+      request('a.png').reject(new UploadFileError('Server error'));
+    });
+    await waitFor(() => expect(statuses()).toEqual(['error']));
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 0 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    expect(sentSpaces()).toEqual(['france', 'france']);
+  });
 });
