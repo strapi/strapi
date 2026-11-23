@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 
@@ -7,9 +7,10 @@ import {
   validateCheckUIDAvailabilityInput,
   validateUIDField,
 } from './validation';
+import type { UIDController } from '../types/controllers';
 
 export default {
-  async generateUID(ctx: any) {
+  async generateUID(ctx) {
     const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
 
     const { query = {} } = ctx.request;
@@ -29,7 +30,7 @@ export default {
     };
   },
 
-  async checkUIDAvailability(ctx: any) {
+  async checkUIDAvailability(ctx) {
     const { contentTypeUID, field, value } = await validateCheckUIDAvailabilityInput(
       ctx.request.body
     );
@@ -60,4 +61,4 @@ export default {
         : null,
     };
   },
-};
+} satisfies Core.Implements<UIDController>;
