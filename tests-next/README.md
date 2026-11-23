@@ -119,7 +119,8 @@ never from env vars. A test that needs one the instance doesn't have **fails**, 
 - **ui (Playwright):** tag EE-only tests `@ee`; CE runs leave them out. EE runs replay the
   `@ee` and `@smoke` tests only. Declare requirements with
   `test.use({ requires: { ee: ['cms-content-releases'], future: ['someFlag'] } })`, and read
-  the instance with the `features` fixture.
+  the instance with the `features` fixture. When one is missing, a block with a `beforeAll`
+  fails its first test and Playwright reports the others as "did not run".
 - **api and cli (Vitest):** `describeEE()` and `describeIfFeature()` from
   `@strapi/tests-shared/vitest` run only in EE runs, and `describeIfFeature()` fails when the
   feature is missing. `requireFeatures(features, { future: [...] })` checks future flags.

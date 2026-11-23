@@ -11,7 +11,9 @@ import type { Server } from '../app/server';
  * - EE needs `STRAPI_LICENSE`: without it, or when Strapi rejects it and boots as CE, the run
  *   fails instead of silently testing CE.
  * - Features and future flags are read from the running instance (test plugin), never from env.
- * - A test that needs a feature or flag the instance doesn't have fails instead of skipping.
+ * - A test that needs a feature or flag the instance doesn't have fails instead of skipping. In
+ *   the ui suite, a block with a `beforeAll` fails its first test and Playwright reports the
+ *   others as "did not run".
  */
 
 export type Edition = 'ce' | 'ee';
@@ -117,7 +119,7 @@ export const requireFeatures = (features: InstanceFeatures, requirements: Requir
   ];
   if (missing.length > 0) {
     throw new Error(
-      `This test needs ${missing.join(', ')}, which the ${features.edition.toUpperCase()} instance doesn't have. Tests fail instead of skipping when a requirement is missing.`
+      `This test needs ${missing.join(', ')}, which the ${features.edition.toUpperCase()} instance doesn't have. A missing requirement fails the run instead of skipping.`
     );
   }
 };

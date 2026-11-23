@@ -43,9 +43,10 @@ export interface ResetOptions {
   resetScope: ResetScope;
   /**
    * EE features and future flags the tests need, for example
-   * `test.use({ requires: { ee: ['cms-content-releases'] } })`. A test fails when the instance
-   * lacks one, before its `beforeAll` runs: it never skips. Tag EE-only tests `@ee` so CE runs
-   * leave them out.
+   * `test.use({ requires: { ee: ['cms-content-releases'] } })`. When the instance lacks one, the
+   * check fails before the block's `beforeAll` runs and the run is red, never skipped. Without a
+   * `beforeAll`, each test fails. With one, Playwright fails the first test and reports the
+   * others as "did not run". Tag EE-only tests `@ee` so CE runs leave them out.
    */
   requires: Requirements;
 }
