@@ -18,7 +18,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
-  const permissionService = strapi.admin.services.permission;
+  const permissionService = strapi.service('admin::permission');
 
   const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
     const contentType = strapi.contentTypes[uid];

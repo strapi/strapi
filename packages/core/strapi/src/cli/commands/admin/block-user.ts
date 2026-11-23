@@ -36,7 +36,7 @@ async function setBlock({ email, block }: CmdOptions) {
 
   const blocked = cleanBlock === 'true';
 
-  const user = await app.admin.services.user.findOneByEmail(cleanEmail);
+  const user = await app.service('admin::user').findOneByEmail(cleanEmail);
 
   if (!user) {
     console.error(`User with email "${cleanEmail}" does not exist`);
@@ -44,7 +44,7 @@ async function setBlock({ email, block }: CmdOptions) {
   }
 
   try {
-    await app.admin!.services.user.updateById(user.id, { blocked });
+    await app.service('admin::user').updateById(user.id, { blocked });
   } catch (err: any) {
     console.error(err.message);
     process.exit(1);
