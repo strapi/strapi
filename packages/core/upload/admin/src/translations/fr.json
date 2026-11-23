@@ -429,7 +429,7 @@
   "settings.form.aiMetadata.job-completed": "Métadonnées générées avec succès",
   "settings.form.aiMetadata.job-failed": "Échec de la génération des métadonnées. Veuillez réessayer.",
   "modal.url.title": "Importer depuis une URL",
-  "modal.url.upload": "Téléverser",
+  "modal.url.upload": "Importer",
   "table.header.actions": "actions",
   "header.breadcrumbs.nav.label": "Navigation dans les dossiers",
   "header.actions.folder-level-up": "Retour",
