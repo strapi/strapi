@@ -17,7 +17,12 @@ import {
   type App,
   type Server,
 } from '@strapi/tests-shared';
-import { describeEE, describeIfFeature, requireServerFeature } from '@strapi/tests-shared/vitest';
+import {
+  describeEE,
+  describeIfFeature,
+  isFilteredRun,
+  requireServerFeature,
+} from '@strapi/tests-shared/vitest';
 
 import { port, worker } from '../helpers';
 
@@ -80,7 +85,7 @@ describe('the instance', () => {
   let app: App;
   let server: Server;
   // The EE blocks at the end record that they ran. After them, an EE run fails when one was
-  // skipped, a CE run when one ran.
+  // skipped, a CE run when one ran. A filtered run (-t, .only) may leave them out: no check.
   const ran: string[] = [];
 
   beforeAll(async () => {
@@ -90,8 +95,13 @@ describe('the instance', () => {
     server = await startServer(app, { port });
   });
 
-  afterAll(async () => {
+  // Vitest passes the suite second; the first argument must be a pattern.
+  // eslint-disable-next-line no-empty-pattern
+  afterAll(async ({}, suite) => {
     await stopAllServers();
+    if (isFilteredRun(suite)) {
+      return;
+    }
     expect(ran, 'EE blocks that ran').toEqual(
       editionFromEnv() === 'ee' ? ['describeEE', 'describeIfFeature'] : []
     );
