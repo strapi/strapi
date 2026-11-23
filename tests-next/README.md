@@ -129,5 +129,5 @@ Set future flags with `scaffoldConfig(app, 'features', { future: { someFlag: tru
 
 `STRAPI_TEST_EDITION` is for these suites only: until the cutover, `/tests` still reads
 `STRAPI_E2E_EDITION` and `STRAPI_DISABLE_EE`, and its CI actions `RUN_EE`. CI runs the suites in
-CE only for now; the EE replay, with a license, comes with CMS-2242. Run EE locally with
+CE only for now; EE runs in CI, with a license, come later. Run EE locally with
 `STRAPI_TEST_EDITION=ee STRAPI_LICENSE=…`.
