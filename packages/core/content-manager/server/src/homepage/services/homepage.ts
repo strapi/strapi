@@ -18,7 +18,6 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
-  const permissionService = strapi.service('admin::permission');
 
   const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
     const contentType = strapi.contentTypes[uid];
@@ -61,12 +60,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const getPermittedContentTypes = async () => {
-    const readPermissions: Modules.Permissions.PermissionRule[] = await permissionService.findMany({
-      where: {
-        role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
-        action: 'plugin::content-manager.explorer.read',
-      },
-    });
+    const readPermissions: Modules.Permissions.PermissionRule[] = await strapi
+      .service('admin::permission')
+      .findMany({
+        where: {
+          role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
+          action: 'plugin::content-manager.explorer.read',
+        },
+      });
 
     // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
     // per role the user belongs to, so a multi-role user gets duplicate subjects.

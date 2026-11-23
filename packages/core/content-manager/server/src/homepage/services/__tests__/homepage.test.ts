@@ -51,6 +51,34 @@ describe('homepage service', () => {
     expect(result).toEqual([]);
   });
 
+  it('applies an admin permission extension registered after the homepage service exists', async () => {
+    // A `bootstrap` extension runs after routing created the homepage service
+    const originalFindMany = jest.fn(async () => [{ subject: 'api::article.article' }]);
+    const extendedFindMany = jest.fn(async () => []);
+    const adminServices: Record<string, unknown> = { permission: { findMany: originalFindMany } };
+
+    const strapi = {
+      service: mockAdminServices(adminServices),
+      contentTypes: {},
+      requestContext: {
+        get: jest.fn(() => ({ state: { user: { id: 1 }, userAbility: {} } })),
+      },
+      db: { query: jest.fn(() => ({ findMany: jest.fn(async () => []) })) },
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ create: jest.fn() })) })),
+      documents: jest.fn(),
+    };
+
+    const service = createHomepageService({ strapi } as any);
+
+    adminServices.permission = { findMany: extendedFindMany };
+
+    const result = await service.queryLastDocuments({ sort: 'updatedAt:desc' });
+
+    expect(extendedFindMany).toHaveBeenCalledTimes(1);
+    expect(originalFindMany).not.toHaveBeenCalled();
+    expect(result).toEqual([]);
+  });
+
   describe('queryLastDocuments', () => {
     it('deduplicates permitted content types before querying recent documents', async () => {
       const contentTypes = {
