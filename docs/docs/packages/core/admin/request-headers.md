@@ -35,7 +35,7 @@ Requests that do not get the headers:
 
 The fetch client builds the headers with `Headers.set()`. Header names are case-insensitive, so a later source replaces an earlier one whatever its casing:
 
-1. The defaults: `Accept`, `Content-Type` and `Authorization`.
+1. The defaults: `Authorization`, plus `Accept` and `Content-Type` except for a `get` with a `responseType` other than `json`.
 2. The provider headers, in the order the providers were registered.
 3. The `headers` option of the call.
 
@@ -47,11 +47,11 @@ A value that is `undefined` or `null` only skips the entry of that provider. If 
 
 A call reads the providers once, when it starts. The retry after a 401 sends the same values as the first attempt. Without this, a write sent while the tab worked in one space could be replayed in another space if the tab switched while the token refreshed. `uploadFileViaXHR` also reads the providers once and reuses them for its retry.
 
-A Media Library upload drop reads the providers once, when the user drops the files. All files of the drop and all retries of these files send the same values, also when the tab switches space while the drop uploads. If the read fails, every file of the drop shows an upload error and no file is sent. `uploadFileViaXHR` reads the providers itself only when its caller does not give it the headers.
+A new Media Library drop reads the providers once, when the user drops the files. All files of the drop and all retries of these files send the same values, also when the tab switches space while the drop uploads. If the read fails, every file of the drop shows an upload error and no file is sent. `uploadFileViaXHR` reads the providers itself only when its caller does not give it the headers. The legacy Media Library (`useLegacyMediaLibrary`) does not give them, so it reads the providers once per file.
 
 ## When a provider fails
 
-If a provider throws, returns a value that is not a plain object (for example a promise from an `async` function, an array or `null`), or returns an invalid header name or value, the request fails with a `RequestHeadersError` and is not sent. For an invalid header, the message names the header. For a provider that throws, the thrown error is the `cause`. Header values must be Latin-1 without line breaks, so send identifiers rather than display names. A forbidden name such as `Cookie`, `Origin`, `Sec-*` or `Proxy-*` does not fail: the browser drops it without an error.
+If a provider throws, returns a value that is not a plain object (for example a promise from an `async` function, an array or `null`), or returns an invalid header name or value (for example a value that is not a string), the request fails with a `RequestHeadersError` and is not sent. For an invalid header, the message names the header. For a provider that throws, the thrown error is the `cause`. Header values must be Latin-1 without line breaks, so send identifiers rather than display names. A forbidden name such as `Cookie`, `Origin`, `Sec-*` or `Proxy-*` does not fail: the browser drops it without an error.
 
 When a provider has no context yet, for example before the user selects a space, it returns `undefined` for the header. It throws only on a real failure. A provider that throws too early also blocks requests such as `/admin/users/me`, so the admin cannot see that a stale session ended.
 
@@ -61,7 +61,7 @@ The request fails instead of going out without the header, because the server co
 
 When the admin is hosted on another origin than the server, the browser sends a preflight request before a request with a custom header. The `strapi::cors` middleware only allows `Content-Type`, `Authorization`, `Origin` and `Accept` by default ([`cors.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/middlewares/cors.ts)). Core does not add the provider headers to this list. The project adds the header names to the `headers` option of `strapi::cors`, or the browser blocks the requests.
 
-The middleware merges the options with `{ ...defaults, ...config }`, so a `headers` option replaces the default list. It does not add to it. Keep the default headers in the list. The object entry replaces the `'strapi::cors'` string entry in `config/middlewares.js`: do not keep both, because two cors entries break the preflight.
+The middleware merges the options with `{ ...defaults, ...config }`, so a `headers` option replaces the default list. It does not add to it. Keep the default headers in the list. The object entry replaces the `'strapi::cors'` string entry in `config/middlewares.js`. Keep one entry: Strapi mounts the entries in order, and `@koa/cors` ends an `OPTIONS` preflight, so the first cors entry answers the preflight and a second one never runs for it.
 
 ```js title="config/middlewares.js"
 module.exports = [
