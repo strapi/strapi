@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/app';
+import { expect, test } from '../../fixtures';
 
 // The smallest browser test: each project (playwright.config.ts) opens the admin panel in its own
 // browser, logged in as the default role (admin).
