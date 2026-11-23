@@ -10,7 +10,8 @@ import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
-import { detectInvocation } from './utils/invocation';
+import { detectInvocation, resolvePromptMode } from './utils/invocation';
+import type { NonInteractiveReason } from './utils/invocation';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
@@ -18,6 +19,12 @@ import type { Options, Scope } from './types';
 import { logger } from './utils/logger';
 
 const { version } = fse.readJSONSync(join(__dirname, '..', 'package.json'));
+
+const NON_INTERACTIVE_REASONS: Record<NonInteractiveReason, string> = {
+  flag: `You used ${chalk.bold('--non-interactive')}`,
+  ci: 'A CI environment was detected',
+  'no-tty': 'The input or the output is not a terminal',
+};
 
 const command = new commander.Command('create-strapi-app')
   .version(version)
@@ -54,6 +61,10 @@ const command = new commander.Command('create-strapi-app')
 
   // Automation
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')
+  .option(
+    '--interactive',
+    'Do not switch to --non-interactive mode in CI or without a terminal (use it to pipe answers on stdin)'
+  )
   .option(
     '--agent <name>',
     'Name of the coding agent that runs this command (used for anonymous usage statistics)'
@@ -129,12 +140,39 @@ async function run(args: string[]): Promise<void> {
     );
   }
 
-  if (options.nonInteractive && !directory) {
+  if (options.interactive && options.nonInteractive) {
     logger.fatal(
-      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold(
+      `You cannot use both ${chalk.bold('--interactive')} and ${chalk.bold(
         '--non-interactive'
-      )}`
+      )} flags together`
     );
+  }
+
+  // In CI or without a terminal, nobody can answer the prompts, so the CLI uses --non-interactive.
+  const promptMode = resolvePromptMode(options);
+
+  if (!promptMode.interactive) {
+    const reasonText = NON_INTERACTIVE_REASONS[promptMode.reason];
+
+    if (!directory) {
+      logger.fatal(
+        `Please specify the ${chalk.bold(
+          '<directory>'
+        )} of your project. ${reasonText}, so the CLI cannot ask for it.`
+      );
+    }
+
+    if (promptMode.reason !== 'flag') {
+      logger.info(
+        `${reasonText}. Running in ${chalk.bold(
+          '--non-interactive'
+        )} mode: the CLI uses your flags and the default values for the other options. To show the prompts, use ${chalk.bold(
+          '--interactive'
+        )}.`
+      );
+    }
+
+    options.nonInteractive = true;
   }
 
   const skipPrompts = options.quickstart || options.nonInteractive;
@@ -199,12 +237,13 @@ async function run(args: string[]): Promise<void> {
     scope.useExample = await prompts.example();
   }
 
-  if (options.javascript === true) {
-    scope.useTypescript = false;
-  } else if (options.typescript === true || skipPrompts) {
-    scope.useTypescript = true;
-  } else if (!options.template) {
-    scope.useTypescript = await prompts.typescript();
+  if (!options.template) {
+    scope.useTypescript = await resolveOption(
+      options.javascript === true ? false : options.typescript,
+      skipPrompts,
+      true,
+      prompts.typescript
+    );
   }
 
   scope.installDependencies = await resolveOption(options.install, skipPrompts, true, () =>
