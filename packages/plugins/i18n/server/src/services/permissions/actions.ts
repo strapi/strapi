@@ -256,6 +256,8 @@ const registerI18nActionsHooks = () => {
 
   actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
   hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
+  // The Editor and Author roles created at first boot get the default locale
+  hooks.willCreateDefaultRolePermissions.register(normalizeRolePermissionsLocales);
   hooks.willValidateUpdatePermissions.register(normalizeRolePermissionsLocales);
 };
 

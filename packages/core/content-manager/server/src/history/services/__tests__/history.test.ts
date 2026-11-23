@@ -132,7 +132,7 @@ describe('history-version service', () => {
     jest.useRealTimers();
   });
 
-  it('creates a history version with the author', async () => {
+  it('creates a history version with its author, and still writes createdBy', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
     const historyVersionData = {
@@ -150,19 +150,25 @@ describe('history-version service', () => {
         },
       },
       status: 'draft' as const,
+      source: 'admin-panel' as const,
+      author: { type: 'person' as const, model: 'admin::user', id: '1' },
     };
 
     await historyService.createVersion(historyVersionData);
+    const { author: _author, ...historyVersionColumns } = historyVersionData;
     expect(createMock).toHaveBeenCalledWith({
       data: {
-        ...historyVersionData,
+        ...historyVersionColumns,
+        authorType: 'person',
+        authorModel: 'admin::user',
+        authorId: '1',
         createdBy: userId,
         createdAt: fakeDate,
       },
     });
   });
 
-  it('creates a history version without any author', async () => {
+  it('creates a history version without createdBy outside a request', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
     const historyVersionData = {
@@ -180,14 +186,20 @@ describe('history-version service', () => {
         },
       },
       status: null,
+      source: 'admin-panel' as const,
+      author: { type: 'person' as const, model: 'admin::user', id: '1' },
     };
 
     mockGetRequestContext.mockReturnValueOnce(null as any);
 
     await historyService.createVersion(historyVersionData);
+    const { author: _author, ...historyVersionColumns } = historyVersionData;
     expect(createMock).toHaveBeenCalledWith({
       data: {
-        ...historyVersionData,
+        ...historyVersionColumns,
+        authorType: 'person',
+        authorModel: 'admin::user',
+        authorId: '1',
         createdBy: undefined,
         createdAt: fakeDate,
       },

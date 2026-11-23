@@ -358,7 +358,7 @@ class Strapi extends Container implements Core.Strapi {
             // TODO: Fix this at the content API loader level to prevent future types issues
             (controller) => controller !== undefined && factories.isCustomController(controller)
           ).length,
-          environment: this.config.environment,
+          environment: this.config.get('environment'),
           // TODO: to add back
           // providers: this.config.installedProviders,
         },

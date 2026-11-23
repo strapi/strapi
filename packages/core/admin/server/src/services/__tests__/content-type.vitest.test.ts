@@ -8,6 +8,16 @@ import {
   cleanPermissionFields,
   getNestedFieldsWithIntermediate,
 } from '../content-type';
+import type { Action } from '../../domain/action';
+
+const createContentTypeAction = (
+  attributes: Pick<Action, 'actionId' | 'options'> & Partial<Action>
+): Action => ({
+  section: 'contentTypes',
+  displayName: 'Action',
+  category: 'contentTypes',
+  ...attributes,
+});
 
 describe('Content-Type', () => {
   const contentTypes = {
@@ -238,7 +248,11 @@ describe('Content-Type', () => {
   describe('getPermissionsWithNestedFields', () => {
     test('1 action (no nesting)', async () => {
       const resultLevel1 = getPermissionsWithNestedFields([
-        { actionId: 'action-1', subjects: ['country'], options: { applyToProperties: ['fields'] } },
+        createContentTypeAction({
+          actionId: 'action-1',
+          subjects: ['country'],
+          options: { applyToProperties: ['fields'] },
+        }),
       ]);
 
       expect(resultLevel1).toEqual([
@@ -255,11 +269,11 @@ describe('Content-Type', () => {
     test('2 actions (with nesting level 1)', async () => {
       const resultLevel1 = getPermissionsWithNestedFields(
         [
-          {
+          createContentTypeAction({
             actionId: 'action-1',
             subjects: ['country', 'user'],
             options: { applyToProperties: ['fields'] },
-          },
+          }),
         ],
         { nestingLevel: 1 }
       );
@@ -284,11 +298,11 @@ describe('Content-Type', () => {
     test('2 actions (with nesting level 2)', async () => {
       const resultLevel1 = getPermissionsWithNestedFields(
         [
-          {
+          createContentTypeAction({
             actionId: 'action-1',
             subjects: ['country', 'user'],
             options: { applyToProperties: ['fields'] },
-          },
+          }),
         ],
         { nestingLevel: 2 }
       );
@@ -320,11 +334,11 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 100)', async () => {
       const resultLevel1 = getPermissionsWithNestedFields([
-        {
+        createContentTypeAction({
           actionId: 'action-1',
           subjects: ['country', 'user'],
           options: { applyToProperties: ['fields'] },
-        },
+        }),
       ]);
       expect(resultLevel1).toEqual([
         {
@@ -353,6 +367,80 @@ describe('Content-Type', () => {
           conditions: [],
         },
       ]);
+    });
+
+    test('creates no permission for an action without subjects', () => {
+      const result = getPermissionsWithNestedFields([
+        createContentTypeAction({
+          actionId: 'action-1',
+          options: { applyToProperties: ['fields'] },
+        }),
+      ]);
+
+      expect(result).toEqual([]);
+    });
+
+    test('skips an undefined subject', () => {
+      const result = getPermissionsWithNestedFields([
+        createContentTypeAction({
+          actionId: 'action-1',
+          // @ts-expect-error the registration schema accepts undefined subjects, `Action` does not
+          subjects: [undefined, 'country'],
+          options: { applyToProperties: ['fields'] },
+        }),
+      ]);
+
+      expect(result.map(({ subject }) => subject)).toEqual(['country']);
+    });
+
+    test('skips a subject that is not a loaded content type when the action applies to fields', () => {
+      const result = getPermissionsWithNestedFields([
+        createContentTypeAction({
+          actionId: 'action-1',
+          subjects: ['api::missing.missing', 'constructor', 'country'],
+          options: { applyToProperties: ['fields'] },
+        }),
+      ]);
+
+      expect(result.map(({ subject }) => subject)).toEqual(['country']);
+    });
+
+    test('keeps a subject that is not a loaded content type when the action does not apply to fields', () => {
+      const result = getPermissionsWithNestedFields([
+        createContentTypeAction({
+          actionId: 'plugin::my-plugin.action',
+          subjects: ['plugin::my-plugin.thing', 'country'],
+          options: { applyToProperties: null },
+        }),
+      ]);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          action: 'plugin::my-plugin.action',
+          subject: 'plugin::my-plugin.thing',
+          properties: {},
+        }),
+        expect.objectContaining({
+          action: 'plugin::my-plugin.action',
+          subject: 'country',
+          properties: {},
+        }),
+      ]);
+    });
+
+    test('skips restricted subjects', () => {
+      const result = getPermissionsWithNestedFields(
+        [
+          createContentTypeAction({
+            actionId: 'action-1',
+            subjects: ['country', 'user'],
+            options: { applyToProperties: ['fields'] },
+          }),
+        ],
+        { restrictedSubjects: ['user'] }
+      );
+
+      expect(result.map(({ subject }) => subject)).toEqual(['country']);
     });
   });
 
