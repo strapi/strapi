@@ -53,7 +53,7 @@ app.registerHook(
 
 `Admin/Settings/pages/ListPage/unstable_inject-in-filters` gets `{ list, displayedFilters }` and returns it, as `Admin/CM/pages/ListView/inject-in-filters` does. A filter takes one of two shapes.
 
-A filter on a field of the core model joins the list's Filters popover and is sent in `filters`, as in the Content Manager.
+A filter on a field of the core model joins the list's Filters popover and is sent in `filters`, as in the Content Manager. This works on `users`, `roles` and `audit-logs`. On `roles` the popover only shows once a plugin adds a filter, and its filters apply together with the search. `api-tokens` has no popover: its route lists every token and reads no query, so the page ignores filters of this shape.
 
 A filter the core model does not have, such as a space, uses `unstable_display: 'select'`. It renders as its own dropdown on the right of the toolbar, like the Content Manager locale picker:
 
@@ -83,6 +83,7 @@ app.registerHook(
 - `placeholder` is the option that clears the filter. Picking an option brings a paginated list back to its first page.
 - The plugin applies the value on the server. A middleware on the list route reads `plugins[<pluginId>]` and keeps it for the request, and a scope registered with `strapi.db.unstable_scopes` turns it into a `where` condition. Read [Query scopes](../database/05-query-scopes.md). The four list routes and the audit logs export drop `plugins` before they query the database.
 - The audit logs export sends `plugins` too, but its continuation token and its audit event only cover `filters`. A plugin enforces its own scope on the server and never trusts `plugins`.
+- The lists only send the values of registered dropdowns: a link with a `plugins` value no dropdown reads does not filter anything.
 - The API tokens page keeps `plugins` when it sets its default sort, and shows the empty table instead of the "Add your first API Token" invitation when a plugin filter matches no token.
 
 ## Related

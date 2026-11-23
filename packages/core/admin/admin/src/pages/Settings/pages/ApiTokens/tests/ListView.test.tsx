@@ -64,4 +64,39 @@ describe('API tokens | ListView | plugin columns and filters', () => {
     expect(await screen.findByText('No content found')).toBeInTheDocument();
     expect(screen.queryByText('Add your first API Token')).not.toBeInTheDocument();
   });
+
+  it('ignores the plugin values of a stale link that no dropdown reads', async () => {
+    const requests: URL[] = [];
+
+    server.use(
+      http.get('/admin/api-tokens', ({ request }) => {
+        requests.push(new URL(request.url));
+
+        return HttpResponse.json({ data: [] });
+      })
+    );
+
+    render(<ListView />, {
+      providerOptions,
+      initialEntries: ['/?plugins[old-plugin][team]=blue'],
+    });
+
+    expect(await screen.findByText('Add your first API Token')).toBeInTheDocument();
+    expect(requests[0].searchParams.has('plugins[old-plugin][team]')).toBe(false);
+  });
+
+  it('shows no Filters popover, since the server lists every token', async () => {
+    render(<ListView />, {
+      providerOptions: {
+        runHookWaterfall: settingsListHooks({
+          after: 'description',
+          column: { name: 'scope', label: 'Scope' },
+          filter: { name: 'name', label: 'Name', type: 'string' },
+        }),
+      },
+    });
+
+    expect(await screen.findByText('My super token')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Filters' })).not.toBeInTheDocument();
+  });
 });

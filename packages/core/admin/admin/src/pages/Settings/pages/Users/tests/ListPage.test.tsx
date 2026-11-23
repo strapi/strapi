@@ -94,4 +94,26 @@ describe('Users | ListPage | plugin columns and filters', () => {
     );
     expect(requests.at(-1)!.searchParams.get('page')).toBe('1');
   });
+
+  it('leaves out the plugin values of a stale link that no dropdown reads', async () => {
+    const requests: URL[] = [];
+
+    server.use(
+      http.get('/admin/users', ({ request }) => {
+        requests.push(new URL(request.url));
+
+        return HttpResponse.json({
+          data: { results: [{ id: 1, firstname: 'John', roles: [] }], pagination: { page: 1 } },
+        });
+      })
+    );
+
+    render(<ListPageCE />, {
+      providerOptions,
+      initialEntries: ['/?plugins[old-plugin][team]=blue'],
+    });
+
+    await waitFor(() => expect(requests).toHaveLength(1));
+    expect(requests[0].searchParams.has('plugins[old-plugin][team]')).toBe(false);
+  });
 });

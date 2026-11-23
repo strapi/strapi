@@ -104,7 +104,7 @@ const ListPage = () => {
     'audit-logs',
     displayedFilters
   );
-  const { plugins } = useSettingsListPluginParams();
+  const { plugins } = useSettingsListPluginParams(selects);
   // A date filter stores a day or a minute: the API reads it as the instants it covers
   const apiFilters = toApiFilters(query?.filters, displayedFilters);
   const {

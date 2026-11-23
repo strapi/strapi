@@ -50,11 +50,9 @@ const ListPageCE = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
   const { filters: filterOptions, selects } = useSettingsListFilters('users', FILTERS);
-  const pluginParams = useSettingsListPluginParams();
-  const { data, isError, isLoading } = useAdminUsers({
-    ...qs.parse(search, { ignoreQueryPrefix: true }),
-    ...pluginParams,
-  });
+  const pluginParams = useSettingsListPluginParams(selects);
+  const { plugins: _plugins, ...urlParams } = qs.parse(search, { ignoreQueryPrefix: true });
+  const { data, isError, isLoading } = useAdminUsers({ ...urlParams, ...pluginParams });
   const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
 

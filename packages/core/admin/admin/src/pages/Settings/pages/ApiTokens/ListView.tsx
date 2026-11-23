@@ -7,7 +7,6 @@ import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Filters } from '../../../../components/Filters';
 import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
@@ -98,8 +97,9 @@ export const ListView = () => {
   });
 
   const headers = useSettingsListHeaders('api-tokens', TABLE_HEADERS);
-  const { filters: filterOptions, selects } = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
-  const { plugins } = useSettingsListPluginParams();
+  // The server lists every API token, so only plugin dropdowns apply here, not the Filters popover
+  const { selects } = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
+  const { plugins } = useSettingsListPluginParams(selects);
   const isFiltered = plugins !== undefined;
 
   useOnce(() => {
@@ -192,21 +192,8 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          {(filterOptions.length > 0 || selects.length > 0) && (
-            <Layouts.Action
-              startActions={
-                filterOptions.length > 0 ? (
-                  <Filters.Root options={filterOptions}>
-                    <Filters.Trigger />
-                    <Filters.Popover zIndex={499} />
-                    <Filters.List />
-                  </Filters.Root>
-                ) : undefined
-              }
-              endActions={
-                selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined
-              }
-            />
+          {selects.length > 0 && (
+            <Layouts.Action endActions={<PluginFilterSelects selects={selects} />} />
           )}
           <Layouts.Content>
             {(apiTokens.length > 0 || isFiltered) && (

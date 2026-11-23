@@ -28,7 +28,7 @@ import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useFetchClient } from '../../../../hooks/useFetchClient';
-import { useQueryParams } from '../../../../hooks/useQueryParams';
+import { deepEncodeQueryValues, useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import {
   useSettingsListFilters,
@@ -42,13 +42,15 @@ import { isFetchError } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
+import type { FindRoles } from '../../../../../../shared/contracts/roles';
+
 const ListPage = () => {
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector(selectAdminPermissions);
   const { formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = React.useState(false);
-  const [{ query }] = useQueryParams<{ _q?: string }>();
+  const [{ query }] = useQueryParams<{ _q?: string; filters?: { $and?: unknown } }>();
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
@@ -56,9 +58,19 @@ const ListPage = () => {
 
   const headers = useSettingsListHeaders('roles', TABLE_HEADERS);
   const { filters: filterOptions, selects } = useSettingsListFilters('roles', NO_CORE_FILTERS);
-  const { plugins } = useSettingsListPluginParams();
+  const { plugins } = useSettingsListPluginParams(selects);
+  const searchFilter = query?._q ? { name: { $containsi: query._q } } : undefined;
+  const popoverFilters = Array.isArray(query?.filters?.$and) ? query.filters.$and : [];
   const { roles, refetch: refetchRoles } = useAdminRoles(
-    { filters: query?._q ? { name: { $containsi: query._q } } : undefined, plugins },
+    {
+      // The fetch client does not encode params. The server validates them against the role model
+      filters: deepEncodeQueryValues(
+        popoverFilters.length > 0
+          ? { $and: [...(searchFilter ? [searchFilter] : []), ...popoverFilters] }
+          : searchFilter
+      ) as RoleFilters | undefined,
+      plugins,
+    },
     {
       refetchOnMountOrArgChange: true,
       skip: isLoadingForPermissions || !canRead,
@@ -269,6 +281,8 @@ const ListPage = () => {
     </Page.Main>
   );
 };
+
+type RoleFilters = NonNullable<FindRoles.Request['query']['filters']>;
 
 const NO_CORE_FILTERS: InjectableSettingsListFilter[] = [];
 

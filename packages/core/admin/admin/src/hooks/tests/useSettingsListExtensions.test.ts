@@ -91,8 +91,18 @@ describe('useSettingsListFilters', () => {
 });
 
 describe('useSettingsListPluginParams', () => {
+  const selects = [
+    {
+      pluginId: 'spaces',
+      name: 'space',
+      label: 'Space',
+      placeholder: 'All spaces',
+      useOptions: () => [],
+    },
+  ];
+
   it('sends the plugin values of the URL, encoded', () => {
-    const { result } = renderHook(() => useSettingsListPluginParams(), {
+    const { result } = renderHook(() => useSettingsListPluginParams(selects), {
       initialEntries: ['/?plugins[spaces][space]=fr%20%26%20es&filters[$and][0][a][$eq]=b'],
     });
 
@@ -100,8 +110,18 @@ describe('useSettingsListPluginParams', () => {
   });
 
   it('sends nothing without plugin values', () => {
-    const { result } = renderHook(() => useSettingsListPluginParams());
+    const { result } = renderHook(() => useSettingsListPluginParams(selects));
 
     expect(result.current).toEqual({});
+  });
+
+  it('leaves out the values of dropdowns no plugin registered', () => {
+    const { result } = renderHook(() => useSettingsListPluginParams(selects), {
+      initialEntries: [
+        '/?plugins[spaces][space]=france&plugins[spaces][team]=blue&plugins[old][x]=y',
+      ],
+    });
+
+    expect(result.current).toEqual({ plugins: { spaces: { space: 'france' } } });
   });
 });

@@ -168,16 +168,26 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  * The values of the dropdown filters, to send with the list request. The fetch client does not
  * encode params, so they are encoded here
  */
-const useSettingsListPluginParams = (): { plugins?: Record<string, unknown> } => {
+const useSettingsListPluginParams = (
+  selects: SettingsListSelectFilter[]
+): { plugins?: Record<string, Record<string, string>> } => {
   const [{ query }] = useQueryParams<{ plugins?: unknown }>();
 
-  return React.useMemo(
-    () =>
-      isRecord(query.plugins) && Object.keys(query.plugins).length > 0
-        ? { plugins: deepEncodeQueryValues(query.plugins) }
-        : {},
-    [query.plugins]
-  );
+  return React.useMemo(() => {
+    const plugins: Record<string, Record<string, string>> = {};
+
+    // Only the values of registered dropdowns: a stale link filters nothing
+    for (const { pluginId, name } of selects) {
+      const values = isRecord(query.plugins) ? query.plugins[pluginId] : undefined;
+      const value = isRecord(values) ? values[name] : undefined;
+
+      if (typeof value === 'string' && value !== '') {
+        plugins[pluginId] = { ...plugins[pluginId], [name]: value };
+      }
+    }
+
+    return Object.keys(plugins).length > 0 ? { plugins: deepEncodeQueryValues(plugins) } : {};
+  }, [query.plugins, selects]);
 };
 
 export {

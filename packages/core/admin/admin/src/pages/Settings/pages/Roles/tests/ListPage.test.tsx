@@ -71,4 +71,55 @@ describe('<ListPage /> | plugin columns and filters', () => {
       expect.anything()
     );
   });
+
+  it('sends a Filters popover filter with the search in the roles request', async () => {
+    render(<ListPage />, {
+      providerOptions: {
+        runHookWaterfall: settingsListHooks({
+          after: 'description',
+          column: { name: 'available-in', label: 'Available in' },
+          filter: { name: 'name', label: 'Name', type: 'string' },
+        }),
+      },
+      initialEntries: ['/?_q=edit&filters[$and][0][name][$eq]=Editor'],
+    });
+
+    expect(await screen.findByRole('button', { name: 'Filters' })).toBeInTheDocument();
+    expect(useAdminRoles).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filters: { $and: [{ name: { $containsi: 'edit' } }, { name: { $eq: 'Editor' } }] },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('encodes the popover filter values and skips a malformed $and', async () => {
+    render(<ListPage />, {
+      providerOptions,
+      initialEntries: ['/?filters[$and][0][name][$eq]=R%26D'],
+    });
+
+    await screen.findByText('Super Admin');
+    expect(useAdminRoles).toHaveBeenLastCalledWith(
+      expect.objectContaining({ filters: { $and: [{ name: { $eq: 'R%26D' } }] } }),
+      expect.anything()
+    );
+
+    render(<ListPage />, { providerOptions, initialEntries: ['/?filters[$and]=abc'] });
+
+    expect(useAdminRoles).toHaveBeenLastCalledWith(
+      expect.objectContaining({ filters: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('sends the search alone as before when no popover filter is set', async () => {
+    render(<ListPage />, { providerOptions, initialEntries: ['/?_q=edit'] });
+
+    await screen.findByText('Super Admin');
+    expect(useAdminRoles).toHaveBeenLastCalledWith(
+      expect.objectContaining({ filters: { name: { $containsi: 'edit' } } }),
+      expect.anything()
+    );
+  });
 });
