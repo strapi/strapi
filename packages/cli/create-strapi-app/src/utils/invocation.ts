@@ -45,11 +45,7 @@ const getDetectedAgent = async () => {
   }
 };
 
-/**
- * Reads the two environment facts that both the telemetry value and the prompt mode use, so the two
- * read the same facts. Their results can still differ, for example when an agent has a terminal. A terminal means a TTY on both stdin (to read answers) and stdout (to show the
- * prompts).
- */
+/** Shared CI and terminal facts for telemetry and prompt mode. */
 const readEnvironment = () => ({
   isCI: ciInfo.isCI,
   hasTerminal: process.stdin.isTTY === true && process.stdout.isTTY === true,

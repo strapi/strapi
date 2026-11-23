@@ -323,7 +323,6 @@ describe('create-strapi-app', () => {
     expect(out).toMatch(/non-interactive|directory/i);
   });
 
-  // The spawned process has no terminal, so the CLI switches to --non-interactive by itself.
   it('switches to non-interactive mode without a terminal', async () => {
     const projectDir = mkProjectDir();
     try {
@@ -341,7 +340,6 @@ describe('create-strapi-app', () => {
     }
   });
 
-  // --quickstart alone does not skip the reason line: the CLI still detects the missing terminal
   it('switches to non-interactive mode with --quickstart and no terminal', async () => {
     const projectDir = mkProjectDir();
     try {
@@ -393,7 +391,6 @@ describe('create-strapi-app', () => {
     }
   );
 
-  // --interactive keeps the prompts without a terminal, so the answers come from stdin.
   it('shows the prompts with --interactive when there is no terminal', async () => {
     const tempDir = mkProjectDir();
     const projectDir = path.join(tempDir, 'app');

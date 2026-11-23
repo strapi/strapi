@@ -55,7 +55,10 @@ async function dbPrompt() {
 // An empty or whitespace-only `--dbfile` would be written as an empty `DATABASE_FILENAME`
 const isBlank = (value: string | undefined) => value === undefined || value.trim() === '';
 
-export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
+export async function getDatabaseInfos(
+  options: Options,
+  skipPrompts = options.quickstart || options.nonInteractive
+): Promise<DBConfig> {
   if (options.skipDb) {
     return DEFAULT_CONFIG;
   }
@@ -83,7 +86,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   const hasLoneDBFile = hasDBOptions === false && 'dbfile' in options;
 
   if (hasDBOptions === false && hasLoneDBFile === false) {
-    if (options.quickstart || options.nonInteractive) {
+    if (skipPrompts) {
       return DEFAULT_CONFIG;
     }
 

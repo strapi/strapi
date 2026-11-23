@@ -84,6 +84,13 @@ describe('getDatabaseInfos', () => {
     expect(prompt).toHaveBeenCalledTimes(1);
   });
 
+  it('does not ask for the database when the prompt mode skips the prompts', async () => {
+    await expect(getDatabaseInfos({}, true)).resolves.toEqual(
+      expect.objectContaining({ client: 'sqlite' })
+    );
+    expect(prompt).not.toHaveBeenCalled();
+  });
+
   it('still fails when --dbfile comes with network flags but no --dbclient', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(process, 'exit').mockImplementation((code) => {

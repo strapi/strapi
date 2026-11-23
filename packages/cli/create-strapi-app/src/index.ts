@@ -148,7 +148,6 @@ async function run(args: string[]): Promise<void> {
     );
   }
 
-  // In CI or without a terminal, nobody can answer the prompts, so the CLI uses --non-interactive.
   const promptMode = resolvePromptMode(options);
 
   if (!promptMode.interactive) {
@@ -171,11 +170,9 @@ async function run(args: string[]): Promise<void> {
         )}.`
       );
     }
-
-    options.nonInteractive = true;
   }
 
-  const skipPrompts = options.quickstart || options.nonInteractive;
+  const skipPrompts = options.quickstart || !promptMode.interactive;
 
   checkNodeRequirements();
 
@@ -194,7 +191,7 @@ async function run(args: string[]): Promise<void> {
     rootPath,
     name: basename(rootPath),
     packageManager: getPkgManager(options),
-    database: await getDatabaseInfos(options),
+    database: await getDatabaseInfos(options, skipPrompts),
     template: options.template,
     templateBranch: options.templateBranch,
     templatePath: options.templatePath,
