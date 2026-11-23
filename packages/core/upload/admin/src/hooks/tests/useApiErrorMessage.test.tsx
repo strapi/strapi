@@ -2,28 +2,36 @@
 import { renderHook } from '@tests/utils';
 import { IntlProvider } from 'react-intl';
 
+import { prefixPluginTranslations } from '../../legacy/utils/prefixPluginTranslations';
+import { pluginId } from '../../pluginId';
+import en from '../../translations/en.json';
 import { useApiErrorMessage } from '../useApiErrorMessage';
 
 // The shared `renderHook` mounts `LanguageProvider messages={{}}`, so nothing is
 // translated by default. Its `wrapper` nests inside the providers, so this
 // nearer IntlProvider is the one the hook sees.
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <IntlProvider
-    locale="en"
-    messages={{
-      'upload.apiError.FileTooBig': 'The uploaded file exceeds the maximum allowed asset size.',
-    }}
-  >
+  <IntlProvider locale="en" messages={prefixPluginTranslations(en, pluginId)}>
     {children}
   </IntlProvider>
 );
 
 describe('useApiErrorMessage', () => {
-  it('translates a machine-readable code the server sent', () => {
+  // `strapi::body` answers with the bare `FileTooBig` code when no size details reach the
+  // caller, e.g. the crop dialog's apply and "save as copy" uploads.
+  it('translates the body parser code with the shipped English messages', () => {
     const { result } = renderHook(() => useApiErrorMessage(), { wrapper });
 
     expect(result.current({ message: 'FileTooBig' }, 'Fallback')).toBe(
-      'The uploaded file exceeds the maximum allowed asset size.'
+      'The file is too large to be uploaded. It exceeds the maximum request size allowed by the server.'
+    );
+  });
+
+  it('translates another machine-readable code the server sent', () => {
+    const { result } = renderHook(() => useApiErrorMessage(), { wrapper });
+
+    expect(result.current({ message: 'FolderContainsUnauthorizedAssetsError' }, 'Fallback')).toBe(
+      'The selected folders contain assets that you do not have permission to delete.'
     );
   });
 

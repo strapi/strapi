@@ -8,8 +8,11 @@ import {
   TEST_PLUGIN_ENV_VAR,
   appPort,
   createFakeAiTranslationsProvider,
+  databaseFromEnv,
   generateApp,
   isLoopbackAddress,
+  resetDatabase,
+  restoreSql,
   startServer,
   stopAllServers,
   type App,
@@ -17,7 +20,9 @@ import {
 } from '@strapi/tests-shared';
 
 const worker = Number(process.env.VITEST_POOL_ID ?? 1);
-const port = appPort('api', 10 + worker - 1);
+const port = appPort('api', worker - 1);
+// The boots of this file share one database: nothing here depends on what an earlier boot wrote.
+const database = databaseFromEnv();
 
 /** A non-loopback IPv4 address of this machine, if it has one. */
 const externalAddress = Object.values(os.networkInterfaces())
@@ -35,6 +40,7 @@ let app: App;
 
 beforeAll(async () => {
   app = await generateApp({ name: `api-plugin-${worker}` });
+  await resetDatabase(app, database);
   // A known feature config, to check how /features splits it.
   fs.writeFileSync(
     path.join(app.dir, 'config', 'features.js'),
@@ -51,7 +57,7 @@ describe('test plugin routes', () => {
 
   beforeAll(async () => {
     // Listen on every interface, so the loopback check can be tried from another address.
-    server = await startServer(app, { port, env: { HOST: '0.0.0.0' } });
+    server = await startServer(app, { port, database, env: { HOST: '0.0.0.0' } });
   });
 
   afterAll(async () => {
@@ -101,6 +107,11 @@ describe('test plugin routes', () => {
     expect((await call(server, 'POST', '/rate-limit', { enabled: 'yes' })).status).toBe(400);
   });
 
+  test('writes the probe row once', async () => {
+    expect(await (await call(server, 'POST', '/db/probe')).json()).toEqual({ created: true });
+    expect(await (await call(server, 'POST', '/db/probe')).json()).toEqual({ created: false });
+  });
+
   test('creates the test transfer token once', async () => {
     expect(await (await call(server, 'POST', '/transfer-token')).json()).toEqual({ created: true });
     expect(await (await call(server, 'POST', '/transfer-token')).json()).toEqual({
@@ -127,22 +138,22 @@ describe('test plugin boot options', () => {
     await stopAllServers();
   });
 
-  // With a license, Strapi may accept the fake provider (cms-byok-ai): only CE is checked here.
-  (process.env.STRAPI_LICENSE ? test.skip : test)(
-    'fails the boot when the fake AI provider is requested but rejected',
-    async () => {
-      await expect(startServer(app, { port, fakeAiProvider: true })).rejects.toThrow(
-        // Strapi wraps the error in a box: match the start, which stays on one line.
-        'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
-      );
-    }
-  );
+  // In EE with `cms-byok-ai`, Strapi may accept the fake provider: the check runs on CE, which
+  // drops any license from the server env.
+  test('fails the boot when the fake AI provider is requested but rejected', async () => {
+    await expect(
+      startServer(app, { port, database, fakeAiProvider: true, edition: 'ce' })
+    ).rejects.toThrow(
+      // Strapi wraps the error in a box: match the start, which stays on one line.
+      'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
+    );
+  });
 
   test(`ignores a ${TEST_AI_PROVIDER_ENV_VAR} inherited from the shell`, async () => {
     const inherited = process.env[TEST_AI_PROVIDER_ENV_VAR];
     process.env[TEST_AI_PROVIDER_ENV_VAR] = 'fake';
     try {
-      const server = await startServer(app, { port });
+      const server = await startServer(app, { port, database });
       expect(await (await call(server, 'GET', '/ai/calls')).json()).toEqual({
         registered: false,
         calls: [],
@@ -158,12 +169,12 @@ describe('test plugin boot options', () => {
 
   test('refuses fakeAiProvider without the test plugin', async () => {
     await expect(
-      startServer(app, { port, fakeAiProvider: true, testPlugin: false })
+      startServer(app, { port, database, fakeAiProvider: true, testPlugin: false })
     ).rejects.toThrow('fakeAiProvider needs the test plugin');
   });
 
   test(`is not loaded without ${TEST_PLUGIN_ENV_VAR}=true`, async () => {
-    const server = await startServer(app, { port, testPlugin: false });
+    const server = await startServer(app, { port, database, testPlugin: false });
     expect((await call(server, 'GET', '/features')).status).toBe(404);
   });
 });
@@ -244,4 +255,37 @@ describe('test plugin helpers', () => {
     ]);
     expect(calls).toEqual([{ sourceLocale: 'en', targetLocales: ['fr'], content }]);
   });
+});
+
+describe('SQLite snapshot restore', () => {
+  /** A strapi whose connection records each statement and throws on the one starting with `failOn`. */
+  const fakeStrapi = (failOn: string) => {
+    const statements: string[] = [];
+    const raw = async (sql: string) => {
+      statements.push(sql);
+      if (sql.startsWith(failOn)) {
+        throw new Error(`${failOn} failed`);
+      }
+      return [{ name: 'articles' }];
+    };
+    const connection = { raw, transaction: async (fn: (trx: unknown) => unknown) => fn({ raw }) };
+    const strapi = {
+      config: { get: () => path.join(os.tmpdir(), 'data.db') },
+      db: { connection },
+    };
+    return { strapi, statements };
+  };
+
+  test.each(['ATTACH', 'INSERT', 'DETACH'])(
+    'turns foreign keys back on when %s throws',
+    async (failOn) => {
+      const { strapi, statements } = fakeStrapi(failOn);
+
+      await expect(restoreSql(strapi)).rejects.toThrow(`${failOn} failed`);
+
+      expect(statements).toContain('PRAGMA foreign_keys = ON');
+      // Not attached, nothing to detach.
+      expect(statements.some((sql) => sql.startsWith('DETACH'))).toBe(failOn !== 'ATTACH');
+    }
+  );
 });

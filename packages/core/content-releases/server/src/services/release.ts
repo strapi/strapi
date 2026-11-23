@@ -1,4 +1,4 @@
-import { setCreatorFields, errors, emitAudit } from '@strapi/utils';
+import { setCreatorFields, errors, emitAudit, quoteForLog } from '@strapi/utils';
 
 import type { Core, Struct, Data } from '@strapi/types';
 
@@ -585,7 +585,9 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         // An unexpected error would be a bare 500. Only its name is sent, its message can carry row
         // contents: the log keeps the whole error
-        strapi.log.error(`[Content Releases] Release ${release.name} failed`, { error });
+        strapi.log.error(`[Content Releases] Release ${quoteForLog(release.name)} failed`, {
+          error,
+        });
         throw new errors.ApplicationError(
           `An entry couldn't be released (${getErrorName(error)})`,
           { release }

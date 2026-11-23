@@ -51,6 +51,8 @@ describe('VersionHeader', () => {
       relatedDocumentId: 'pcwmq3rlmp5w0be3cuplhnpr',
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
+      source: 'admin-panel' as const,
+      author: null,
       schema: {},
       locale: null,
       data: {
@@ -135,6 +137,8 @@ describe('VersionHeader', () => {
       relatedDocumentId: 'documentid',
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
+      source: 'admin-panel' as const,
+      author: null,
       schema: {},
       locale: null,
       data: {
