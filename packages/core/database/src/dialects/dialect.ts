@@ -92,7 +92,6 @@ export default class Dialect {
    * Renames the index or constraint `from` on `table` to `to`, if it exists and
    * `to` is free. Runs on the given transaction. Returns whether a rename happened.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async renameSchemaObject(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     trx: Knex,
@@ -110,7 +109,6 @@ export default class Dialect {
    * (schema sync never drops it and would collide when re-creating it). Runs on
    * the given transaction. Returns whether anything was dropped.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async dropSchemaObject(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     trx: Knex,

@@ -8,7 +8,6 @@ export interface Options {
   quickstart?: boolean;
   run?: boolean;
   dbclient?: DBClient;
-  skipCloud?: boolean;
   skipDb?: boolean;
   dbhost?: string;
   dbport?: string;
@@ -67,7 +66,11 @@ export interface Scope {
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
-  shouldCreateGrowthSsoTrial: boolean;
+  /**
+   * @deprecated The Growth SSO trial was removed. This field is ignored and kept only so
+   * existing callers that still pass it keep compiling.
+   */
+  shouldCreateGrowthSsoTrial?: boolean;
   /** How the CLI was started: by an agent, in CI, by a person at a terminal, or unknown. */
   invocation: Invocation;
   agentName: string | null;

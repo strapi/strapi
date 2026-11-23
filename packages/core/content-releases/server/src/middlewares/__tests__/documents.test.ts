@@ -81,6 +81,10 @@ describe('createRevalidateActionsOnDraftChange', () => {
       result
     );
 
+  beforeEach(() => {
+    isLocalizedContentType.mockReturnValue(true);
+  });
+
   it("revalidates the updated entry's release actions", async () => {
     await changeDraft('update');
 
@@ -115,6 +119,19 @@ describe('createRevalidateActionsOnDraftChange', () => {
     expect(revalidatePlannedActions.mock.calls).toStrictEqual([
       [entryWhere(DRAFT)],
       [entryWhere(frDraft)],
+    ]);
+  });
+
+  it.each([
+    ['without a locale', { documentId: 'doc-1' }],
+    ['stored with a locale', DRAFT],
+  ])('revalidates every release action of a non-localized entry %s', async (_, draft) => {
+    isLocalizedContentType.mockReturnValue(false);
+
+    await changeDraft('update', draft);
+
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([
+      [{ contentType: UID, entryDocumentId: 'doc-1' }],
     ]);
   });
 
