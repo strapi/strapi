@@ -1,10 +1,13 @@
 import { has } from 'lodash';
 
 import type { Core } from '@strapi/types';
-import type { Module, RawModule } from '../domain/module';
+import type { RawModule } from '../domain/module';
 
-/** Plugins keyed by name: the module registered under `plugin::<name>` for each. */
-type PluginMap = Record<string, Module>;
+/**
+ * Plugins keyed by name: the module registered under `plugin::<name>` for each, as the modules
+ * registry returns it.
+ */
+type PluginMap = Record<string, Core.RegisteredModule>;
 
 const pluginsRegistry = (strapi: Core.Strapi) => {
   const plugins: PluginMap = {};
