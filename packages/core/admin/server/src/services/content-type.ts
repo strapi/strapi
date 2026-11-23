@@ -167,7 +167,8 @@ const getPermissionsWithNestedFields = (
 };
 
 /**
- * Cleans permissions' fields (add required ones, remove the non-existing ones)
+ * Cleans permissions' fields (remove the ones that left the schema, replace a stored parent path
+ * with its nested fields)
  */
 const cleanPermissionFields = (
   permissions: Modules.Permissions.PermissionRule[]
