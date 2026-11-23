@@ -190,6 +190,11 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
 
   const resultQuery = db.getConnection(aliasedTableName);
 
+  // The outer builder is new, so copy the explicit transaction onto it.
+  if (qb.state.transaction) {
+    resultQuery.transacting(qb.state.transaction);
+  }
+
   // 1. Clone the original query to create the sub-query (referenced as baseQuery) and avoid any mutation on the initial object
   const baseQuery = originalQuery.clone();
   const baseQueryAlias = qb.getAlias();
