@@ -50,7 +50,7 @@ const SPACE_FILTER: InjectableSettingsListFilter = {
   name: 'space',
   label: 'Space',
   placeholder: 'All spaces',
-  options: [{ label: 'France', value: 'france' }],
+  useOptions: () => [{ label: 'France', value: 'france' }],
 };
 
 export { settingsListHooks, SPACE_FILTER };

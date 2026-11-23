@@ -45,7 +45,16 @@ interface InjectableSettingsListSelectFilter {
   label: string | MessageDescriptor;
   /** The option that clears the filter, e.g. "All spaces" */
   placeholder: string | MessageDescriptor;
-  options: Array<{ value: string; label: string | MessageDescriptor }>;
+  /**
+   * A hook that returns the options. It runs inside the dropdown, so it can load them and the
+   * dropdown follows when they change
+   */
+  useOptions: () => SettingsListSelectFilterOption[];
+}
+
+interface SettingsListSelectFilterOption {
+  value: string;
+  label: string | MessageDescriptor;
 }
 
 type InjectableSettingsListFilter =
@@ -56,7 +65,7 @@ interface SettingsListSelectFilter {
   name: string;
   label: string;
   placeholder: string;
-  options: Array<{ value: string; label: string }>;
+  useOptions: InjectableSettingsListSelectFilter['useOptions'];
 }
 
 /**
@@ -132,10 +141,7 @@ const useSettingsListFilters = (
           name: filter.name,
           label: resolveLabel(filter.label, formatMessage),
           placeholder: resolveLabel(filter.placeholder, formatMessage),
-          options: filter.options.map((option) => ({
-            ...option,
-            label: resolveLabel(option.label, formatMessage),
-          })),
+          useOptions: filter.useOptions,
         });
       } else {
         const { unstable_display: _display, ...popoverFilter } = filter;
@@ -174,7 +180,12 @@ const useSettingsListPluginParams = (): { plugins?: Record<string, unknown> } =>
   );
 };
 
-export { useSettingsListFilters, useSettingsListHeaders, useSettingsListPluginParams };
+export {
+  resolveLabel,
+  useSettingsListFilters,
+  useSettingsListHeaders,
+  useSettingsListPluginParams,
+};
 export type {
   InjectSettingsListColumnsArgs,
   InjectSettingsListFiltersArgs,
@@ -184,4 +195,5 @@ export type {
   SettingsList,
   SettingsListRows,
   SettingsListSelectFilter,
+  SettingsListSelectFilterOption,
 };

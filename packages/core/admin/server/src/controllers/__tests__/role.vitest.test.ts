@@ -479,3 +479,33 @@ describe('Role controller', () => {
     });
   });
 });
+
+describe('Role controller | plugin list filters', () => {
+  test('Leaves the plugins param out of the roles query', async () => {
+    const findAllWithUsersCount = vi.fn(() => []);
+    const validateQuery = vi.fn();
+    const ctx = createContext({
+      query: { sort: 'name:ASC', plugins: { spaces: { space: 'france' } } },
+    }) as any;
+    ctx.state = { userAbility: {} };
+
+    global.strapi = {
+      admin: {
+        services: {
+          role: { findAllWithUsersCount },
+          permission: {
+            createPermissionsManager: () => ({
+              validateQuery,
+              sanitizeQuery: (query: any) => query,
+            }),
+          },
+        },
+      },
+    } as any;
+
+    await roleController.findAll(ctx);
+
+    expect(validateQuery).toHaveBeenCalledWith({ sort: 'name:ASC' });
+    expect(findAllWithUsersCount).toHaveBeenCalledWith({ sort: 'name:ASC' });
+  });
+});

@@ -78,13 +78,14 @@ const deepEncodeQueryValues = <T>(value: T): T => {
 
 const withEncodedUserParams = <
   T extends object,
-  TQuery extends { filters?: unknown; _q?: unknown },
+  TQuery extends { filters?: unknown; _q?: unknown; plugins?: unknown },
 >(
   query: TQuery,
   nextParams: T
-): T & { filters?: TQuery['filters']; _q?: TQuery['_q'] } => ({
+): T & { filters?: TQuery['filters']; _q?: TQuery['_q']; plugins?: TQuery['plugins'] } => ({
   ...(query.filters === undefined ? {} : { filters: deepEncodeQueryValues(query.filters) }),
   ...(query._q === undefined ? {} : { _q: deepEncodeQueryValues(query._q) }),
+  ...(query.plugins === undefined ? {} : { plugins: deepEncodeQueryValues(query.plugins) }),
   ...nextParams,
 });
 

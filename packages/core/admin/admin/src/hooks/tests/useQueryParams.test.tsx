@@ -3,7 +3,7 @@
 import { renderHook, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
-import { useQueryParams } from '../useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../useQueryParams';
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -48,5 +48,25 @@ describe('useQueryParams', () => {
     const updatedSearchParams = new URLSearchParams(screen.getByRole('listitem').textContent ?? '');
     expect(updatedSearchParams.get('page')).toEqual('1');
     expect(updatedSearchParams.get('filters[type]')).toEqual('audio');
+  });
+});
+
+describe('withEncodedUserParams', () => {
+  it('encodes the values the user typed or picked, plugin values included', () => {
+    expect(
+      withEncodedUserParams(
+        { _q: 'a&b', filters: { $and: [{ name: { $eq: 'c+d' } }] }, plugins: { x: { y: '50%' } } },
+        { page: 2 }
+      )
+    ).toEqual({
+      _q: 'a%26b',
+      filters: { $and: [{ name: { $eq: 'c%2Bd' } }] },
+      plugins: { x: { y: '50%25' } },
+      page: 2,
+    });
+  });
+
+  it('leaves out the params the query does not have', () => {
+    expect(withEncodedUserParams({}, { page: 1 })).toEqual({ page: 1 });
   });
 });

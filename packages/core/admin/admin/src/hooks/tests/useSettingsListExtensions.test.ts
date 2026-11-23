@@ -45,6 +45,8 @@ describe('useSettingsListHeaders', () => {
 });
 
 describe('useSettingsListFilters', () => {
+  const useOptions = () => [{ value: 'fr', label: 'France' }];
+
   it('keeps popover filters for the filter bar and turns dropdown filters into selects', () => {
     const runHookWaterfall = (_name: string, value: unknown) => {
       const args = value as InjectSettingsListFiltersArgs;
@@ -59,7 +61,7 @@ describe('useSettingsListFilters', () => {
             name: 'space',
             label: { id: 'space', defaultMessage: 'Space' },
             placeholder: { id: 'all', defaultMessage: 'All spaces' },
-            options: [{ value: 'fr', label: { id: 'fr', defaultMessage: 'France' } }],
+            useOptions,
           },
         ],
       };
@@ -81,7 +83,7 @@ describe('useSettingsListFilters', () => {
           name: 'space',
           label: 'Space',
           placeholder: 'All spaces',
-          options: [{ value: 'fr', label: 'France' }],
+          useOptions,
         },
       ],
     });

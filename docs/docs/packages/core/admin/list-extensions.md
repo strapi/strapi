@@ -70,7 +70,7 @@ app.registerHook(
         name: 'team',
         label: { id: 'my-plugin.team', defaultMessage: 'Team' },
         placeholder: { id: 'my-plugin.team.all', defaultMessage: 'All teams' },
-        options: teams.map(({ slug, name }) => ({ label: name, value: slug })),
+        useOptions: () => useTeams().map(({ slug, name }) => ({ label: name, value: slug })),
       },
     ],
   })
@@ -79,8 +79,9 @@ app.registerHook(
 
 - The value goes to the URL and the list request as `plugins[<pluginId>][<name>]`, for example `plugins[my-plugin][team]=blue`, apart from `filters`, which the server validates against the core model.
 - `unstable_display` is experimental: the option can change in a minor release.
+- `useOptions` is a hook that runs inside the dropdown, so it can load the options (for example with a query) and the dropdown follows when they change. While they load, a value from the URL stays visible so the user can clear it. Like any hook, it must call the same hooks on every render, so branch inside one hook rather than switching hooks.
 - `placeholder` is the option that clears the filter. Picking an option brings a paginated list back to its first page.
-- The plugin applies the value on the server, for example with a route middleware. The four list routes and the audit logs export drop `plugins` before they query the database.
+- The plugin applies the value on the server. A middleware on the list route reads `plugins[<pluginId>]` and keeps it for the request, and a scope registered with `strapi.db.unstable_scopes` turns it into a `where` condition. Read [Query scopes](../database/05-query-scopes.md). The four list routes and the audit logs export drop `plugins` before they query the database.
 - The audit logs export sends `plugins` too, but its continuation token and its audit event only cover `filters`. A plugin enforces its own scope on the server and never trusts `plugins`.
 - The API tokens page keeps `plugins` when it sets its default sort, and shows the empty table instead of the "Add your first API Token" invitation when a plugin filter matches no token.
 

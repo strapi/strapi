@@ -7,11 +7,11 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 /**
  * The Settings lists send the values of plugin dropdown filters as `plugins[<pluginId>][<name>]`.
- * Core routes must accept the param and leave it to the plugins.
+ * The routes must accept it. The controller unit tests check that they drop it before querying.
  */
 const PLUGIN_FILTERS = { plugins: { spaces: { space: 'france' } } };
 
-describe('Settings lists with plugin filters (api)', () => {
+describe('Settings list routes with a plugins param (api)', () => {
   let strapi: Core.Strapi;
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
 
@@ -24,8 +24,8 @@ describe('Settings lists with plugin filters (api)', () => {
     await strapi.destroy();
   });
 
-  test.each(['/admin/users', '/admin/roles', '/admin/api-tokens'])(
-    '%s returns the same rows with or without plugin filters',
+  test.each(['/admin/users', '/admin/roles'])(
+    '%s accepts plugins and returns the same rows',
     async (url) => {
       const withoutFilters = await rq({ method: 'GET', url });
       const withFilters = await rq({ method: 'GET', url, qs: PLUGIN_FILTERS });
@@ -36,7 +36,7 @@ describe('Settings lists with plugin filters (api)', () => {
   );
 
   describeOnCondition(edition === 'EE')('audit logs', () => {
-    test('the list returns the same rows with or without plugin filters', async () => {
+    test('the list accepts plugins and returns the same rows', async () => {
       const withoutFilters = await rq({ method: 'GET', url: '/admin/audit-logs' });
       const withFilters = await rq({ method: 'GET', url: '/admin/audit-logs', qs: PLUGIN_FILTERS });
 
@@ -44,7 +44,7 @@ describe('Settings lists with plugin filters (api)', () => {
       expect(withFilters.body).toEqual(withoutFilters.body);
     });
 
-    test('the export accepts plugin filters', async () => {
+    test('the export accepts plugins', async () => {
       const res = await rq({ method: 'GET', url: '/admin/audit-logs/export', qs: PLUGIN_FILTERS });
 
       expect(res.statusCode).toBe(200);

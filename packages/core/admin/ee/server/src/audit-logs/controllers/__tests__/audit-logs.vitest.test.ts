@@ -42,6 +42,36 @@ describe('Audit logs controller', () => {
     } as any;
   });
 
+  describe('plugin list filters', () => {
+    it('should leave the plugins param out of the list query', async () => {
+      const findMany = vi.fn().mockResolvedValue({ results: [], pagination: {} });
+      (strapi.get as any).mockReturnValue({ findMany });
+      const ctx = {
+        request: { query: { page: 1, plugins: { spaces: { space: 'france' } } } },
+      } as any;
+
+      await auditLogsController.findMany(ctx);
+
+      expect(findMany).toHaveBeenCalledWith({ page: 1 });
+    });
+
+    it('should leave the plugins param out of the export query', async () => {
+      const ctx = {
+        request: { query: { plugins: { spaces: { space: 'france' } } } },
+        response: { get: vi.fn(() => '') },
+        set: vi.fn(),
+        vary: vi.fn(),
+        acceptsEncodings: vi.fn(() => 'identity'),
+      } as any;
+
+      await auditLogsController.export(ctx);
+
+      expect(createExportStream).toHaveBeenCalledWith(
+        expect.not.objectContaining({ plugins: expect.anything() })
+      );
+    });
+  });
+
   describe('findManyUsers', () => {
     it('should return the users provided by the audit logs service', async () => {
       const ctx = { request: { query: { page: 1, pageSize: 10, filters: { id: 1 } } } } as any;

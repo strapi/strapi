@@ -1,12 +1,12 @@
 import { Box, Flex, SingleSelect, SingleSelectOption } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 
 import {
   deepEncodeQueryValues,
   useQueryParams,
   withEncodedUserParams,
 } from '../hooks/useQueryParams';
-
-import type { SettingsListSelectFilter } from '../hooks/useSettingsListExtensions';
+import { resolveLabel, type SettingsListSelectFilter } from '../hooks/useSettingsListExtensions';
 
 type PluginsQuery = Record<string, Record<string, unknown>>;
 
@@ -51,28 +51,47 @@ const PluginFilterSelects = ({ selects }: { selects: SettingsListSelectFilter[] 
         const value = plugins[select.pluginId]?.[select.name];
 
         return (
-          <Box
+          <PluginFilterSelect
             key={`${select.pluginId}.${select.name}`}
-            flex={{ initial: '1 1 0', medium: '0 0 auto' }}
-            minWidth={{ initial: 0, medium: '16rem' }}
-          >
-            <SingleSelect
-              size="S"
-              aria-label={select.label}
-              value={typeof value === 'string' ? value : ''}
-              onChange={(next) => handleChange(select)(String(next))}
-            >
-              <SingleSelectOption value="">{select.placeholder}</SingleSelectOption>
-              {select.options.map((option) => (
-                <SingleSelectOption key={option.value} value={option.value}>
-                  {option.label}
-                </SingleSelectOption>
-              ))}
-            </SingleSelect>
-          </Box>
+            select={select}
+            value={typeof value === 'string' ? value : ''}
+            onChange={handleChange(select)}
+          />
         );
       })}
     </Flex>
+  );
+};
+
+interface PluginFilterSelectProps {
+  select: SettingsListSelectFilter;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const PluginFilterSelect = ({ select, value, onChange }: PluginFilterSelectProps) => {
+  const { formatMessage } = useIntl();
+  const options = select.useOptions();
+  // A value from the URL stays visible, and clearable, while its option is loading or gone
+  const isUnknownValue = value !== '' && !options.some((option) => option.value === value);
+
+  return (
+    <Box flex={{ initial: '1 1 0', medium: '0 0 auto' }} minWidth={{ initial: 0, medium: '16rem' }}>
+      <SingleSelect
+        size="S"
+        aria-label={select.label}
+        value={value}
+        onChange={(next) => onChange(String(next))}
+      >
+        <SingleSelectOption value="">{select.placeholder}</SingleSelectOption>
+        {isUnknownValue && <SingleSelectOption value={value}>{value}</SingleSelectOption>}
+        {options.map((option) => (
+          <SingleSelectOption key={option.value} value={option.value}>
+            {resolveLabel(option.label, formatMessage)}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+    </Box>
   );
 };
 
