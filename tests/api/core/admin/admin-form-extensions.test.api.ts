@@ -51,6 +51,8 @@ describe('Admin form extensions (api)', () => {
       },
     });
     formExtensions.unstable_addInputParams('api-token', { spaces: spacesParam });
+
+    keptRoleId = (await createRole({ name: `${prefix}_kept_role` })).body.data.id;
   });
 
   beforeEach(() => {
@@ -117,21 +119,27 @@ describe('Admin form extensions (api)', () => {
       expect(invalid.statusCode).toBe(400);
       expect(invalid.body.error.details.errors[0].path).toEqual(['plugins', 'spaces', 'space']);
       expect(refused.statusCode).toBe(400);
+      // A ValidationError without field errors is reported on the plugin's field
+      expect(refused.body.error.details.errors[0].path).toEqual(['plugins', 'spaces']);
       expect(afterSave).not.toHaveBeenCalled();
     });
 
-    test('saves nothing when afterSave fails', async () => {
+    test('answers the afterSave error, with the entity saved', async () => {
       afterSave.mockRejectedValue(new Error('Plugin save failed'));
 
       const res = await createRole({
-        name: `${prefix}_rolled_back`,
+        name: `${prefix}_after_save_failed`,
         plugins: { spaces: { space: 'france' } },
       });
 
       expect(res.statusCode).toBe(500);
-      expect(
-        await strapi.db.query('admin::role').findOne({ where: { name: `${prefix}_rolled_back` } })
-      ).toBeNull();
+      // Core does not wrap the save in a transaction, so its deadlock retry keeps working
+      const saved = await strapi.db
+        .query('admin::role')
+        .findOne({ where: { name: `${prefix}_after_save_failed` } });
+
+      expect(saved).not.toBeNull();
+      roleIds.push(saved.id);
     });
 
     test('refuses the values of a plugin that added no params', async () => {
@@ -146,8 +154,6 @@ describe('Admin form extensions (api)', () => {
     const roleIdsOf = (user: { roles: Array<{ id: number }> }) => user.roles.map(({ id }) => id);
 
     test('core checks the roles beforeSave returns, so the form can send none', async () => {
-      keptRoleId = (await createRole({ name: `${prefix}_kept_role` })).body.data.id;
-
       const invited = await rq({
         method: 'POST',
         url: '/admin/users',
@@ -207,6 +213,76 @@ describe('Admin form extensions (api)', () => {
       });
 
       expect(res.statusCode).toBe(400);
+    });
+
+    // Same scenario as the concurrent role removals test in admin-user, which deadlocks on
+    // Postgres and MySQL: plugin steps must leave core's deadlock retry working
+    test('concurrent role changes survive a deadlock when a plugin has an afterSave', async () => {
+      const sharedRoleId = (await createRole({ name: `${prefix}_shared_role` })).body.data.id;
+
+      const createUser = async (name: string) => {
+        const res = await rq({
+          method: 'POST',
+          url: '/admin/users',
+          body: { firstname: name, email: `${name}@${prefix}.test`, roles: [sharedRoleId] },
+        });
+
+        expect(res.statusCode).toBe(201);
+        return res.body.data.id;
+      };
+
+      const userIds = [await createUser('concurrent-a'), await createUser('concurrent-b')];
+
+      // The plugin adds the kept role, so each user keeps one role when the shared one goes
+      const setRoles = async (roles: number[]) => {
+        const responses = await Promise.all(
+          userIds.map((id) =>
+            rq({
+              method: 'PUT',
+              url: `/admin/users/${id}`,
+              body: { roles, plugins: { spaces: { space: 'france' } } },
+            })
+          )
+        );
+
+        return responses.map((res) => res.statusCode);
+      };
+
+      const { name, inverseJoinColumn, inverseOrderColumnName } = (
+        strapi.db.metadata.get('admin::user').attributes.roles as unknown as {
+          joinTable: {
+            name: string;
+            inverseJoinColumn: { name: string };
+            inverseOrderColumnName: string;
+          };
+        }
+      ).joinTable;
+
+      const forceGapInSharedRoleOrder = async () => {
+        const rows = await strapi.db
+          .getConnection()
+          .from(name)
+          .select(['id', inverseOrderColumnName])
+          .where(inverseJoinColumn.name, sharedRoleId)
+          .orderBy(inverseOrderColumnName, 'asc');
+
+        expect(rows).toHaveLength(2);
+
+        await strapi.db
+          .getConnection()
+          .from(name)
+          .where('id', rows[1].id)
+          .update({ [inverseOrderColumnName]: Number(rows[0][inverseOrderColumnName]) + 2 });
+      };
+
+      await forceGapInSharedRoleOrder();
+
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        expect(await setRoles([])).toEqual([200, 200]);
+        expect(await setRoles([sharedRoleId])).toEqual([200, 200]);
+
+        await forceGapInSharedRoleOrder();
+      }
     });
   });
 

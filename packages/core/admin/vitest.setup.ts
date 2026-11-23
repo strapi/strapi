@@ -34,11 +34,8 @@ Object.defineProperty(globalThis, 'strapi', {
     decorate(strapiInstance.api);
 
     // Controllers run every save through the form extensions: tests that do not mock them get
-    // the real service with no plugin params, which saves the core values as they are, in a
-    // transaction that only calls back when the test mocks none
+    // the real service with no plugin params, which saves the core values as they are
     const formExtensions = formExtensionsService();
-    strapiInstance.db ??= {};
-    strapiInstance.db.transaction ??= (callback: (trx: object) => unknown) => callback({});
 
     strapiInstance.service = (name = '') => {
       if (name.startsWith('admin::')) {

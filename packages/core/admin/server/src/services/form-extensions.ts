@@ -28,7 +28,7 @@ interface FormInputParam<TSchema extends z.ZodType = z.ZodType> {
   beforeSave?: (
     args: FormContext & { values: z.output<TSchema> | undefined; data: FormData }
   ) => FormData | Promise<FormData>;
-  /** Runs once core has saved the entity, in the same transaction */
+  /** Runs once core has saved the entity */
   afterSave?: (
     args: FormContext & { values: z.output<TSchema> | undefined; entityId: Data.ID }
   ) => void | Promise<void>;
@@ -38,6 +38,24 @@ type ResolvedInputParam = Omit<FormInputParam, 'schema'> & { schema?: z.ZodType 
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * Runs a plugin step. A `ValidationError` without field errors is reported at
+ * `plugins.<pluginId>`, so the admin shows it on the plugin's field instead of dropping it.
+ */
+const runPluginStep = async <T>(pluginId: string, step: () => T | Promise<T>) => {
+  try {
+    return await step();
+  } catch (error) {
+    if (error instanceof errors.ValidationError && !error.details?.errors?.length) {
+      throw new errors.ValidationError(error.message, {
+        errors: [{ path: ['plugins', pluginId], message: error.message, name: 'ValidationError' }],
+      });
+    }
+
+    throw error;
+  }
+};
 
 const formExtensionsService = () => {
   const params = Object.fromEntries(FORMS.map((form) => [form, new Map()])) as Record<
@@ -105,7 +123,9 @@ const formExtensionsService = () => {
         values[pluginId] = result.data;
       }
 
-      await validate?.(values[pluginId], context);
+      if (validate) {
+        await runPluginStep(pluginId, () => validate(values[pluginId], context));
+      }
     }
 
     return values;
@@ -114,7 +134,7 @@ const formExtensionsService = () => {
   /**
    * Runs the plugin steps of a core admin form before core checks it: checks the plugin values,
    * then lets plugins change the core values. Core checks the returned `data` as without plugins,
-   * then saves it with `save`, which tells plugins the saved id in the same transaction.
+   * then saves it with `save`, which tells plugins the saved id.
    */
   const prepare = async <TData extends FormData>(
     form: ExtensibleForm,
@@ -126,24 +146,32 @@ const formExtensionsService = () => {
 
     for (const [pluginId, { beforeSave }] of params[form]) {
       if (beforeSave) {
-        nextData = await beforeSave({ ...context, values: values[pluginId], data: nextData });
+        const current = nextData;
+        nextData = await runPluginStep(pluginId, () =>
+          beforeSave({ ...context, values: values[pluginId], data: current })
+        );
       }
     }
 
+    // Not one transaction with core's save: inside one, the entity manager could no longer retry
+    // a deadlock, for example between two admins changing the roles of users who share one
     const save = async <TEntity extends { id: Data.ID } | null>(
       saveEntity: () => Promise<TEntity>
-    ) =>
-      (await strapi.db.transaction(async () => {
-        const entity = await saveEntity();
+    ): Promise<TEntity> => {
+      const entity = await saveEntity();
 
-        if (entity) {
-          for (const [pluginId, { afterSave }] of params[form]) {
-            await afterSave?.({ ...context, values: values[pluginId], entityId: entity.id });
+      if (entity) {
+        for (const [pluginId, { afterSave }] of params[form]) {
+          if (afterSave) {
+            await runPluginStep(pluginId, () =>
+              afterSave({ ...context, values: values[pluginId], entityId: entity.id })
+            );
           }
         }
+      }
 
-        return entity;
-      })) as TEntity;
+      return entity;
+    };
 
     // Core checks `data` right after, as it checks the body without plugins
     return { data: nextData as TData, save };

@@ -32,6 +32,59 @@ describe('Form extensions service', () => {
     await expect(save(() => saveRole(data))).resolves.toEqual({ id: 7, name: 'Editor' });
   });
 
+  test('does not wrap the save in a transaction, so core keeps its deadlock retry', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', { spaces: { afterSave: vi.fn() } });
+
+    const { save } = await formExtensions.prepare('role', { input: undefined, data: {} });
+    await save(() => saveRole({}));
+
+    expect(steps).toEqual([]);
+  });
+
+  test('reports a plugin ValidationError without field errors at plugins.<pluginId>', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        validate() {
+          throw new errors.ValidationError('This space is not allowed');
+        },
+      },
+    });
+
+    const error = await formExtensions
+      .prepare('role', { input: undefined, data: {} })
+      .catch((e) => e);
+
+    expect(error).toBeInstanceOf(errors.ValidationError);
+    expect(error.message).toBe('This space is not allowed');
+    expect(error.details.errors).toEqual([
+      {
+        path: ['plugins', 'spaces'],
+        message: 'This space is not allowed',
+        name: 'ValidationError',
+      },
+    ]);
+
+    // Field errors a plugin sets itself are kept as they are
+    const teamsOnly = formExtensionsService();
+    teamsOnly.unstable_addInputParams('role', {
+      teams: {
+        validate() {
+          throw new errors.ValidationError('Invalid team', {
+            errors: [{ path: ['plugins', 'teams', 'id'], message: 'Invalid team' }],
+          });
+        },
+      },
+    });
+
+    const teamsError = await teamsOnly
+      .prepare('role', { input: undefined, data: {} })
+      .catch((e) => e);
+
+    expect(teamsError.details.errors[0].path).toEqual(['plugins', 'teams', 'id']);
+  });
+
   test('refuses values of a plugin that added no params to the form', async () => {
     const formExtensions = formExtensionsService();
     formExtensions.unstable_addInputParams('user', { spaces: {} });
@@ -55,7 +108,7 @@ describe('Form extensions service', () => {
     expect(error.details.errors[0].path).toEqual(['plugins', 'spaces', 'availableIn']);
   });
 
-  test('runs the plugin steps before core, then saves and runs afterSave in a transaction', async () => {
+  test('runs the plugin steps before core, then saves and runs afterSave', async () => {
     const formExtensions = formExtensionsService();
     const user = { id: 1 } as never;
 
@@ -95,7 +148,7 @@ describe('Form extensions service', () => {
       return saveRole(data);
     });
 
-    expect(steps).toEqual(['validate', 'beforeSave', 'transaction', 'save', 'afterSave']);
+    expect(steps).toEqual(['validate', 'beforeSave', 'save', 'afterSave']);
   });
 
   test('runs a plugin check also when the body has none of its values', async () => {
