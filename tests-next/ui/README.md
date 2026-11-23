@@ -116,7 +116,7 @@ test.use({ role: 'editor' }); // 'admin' (default, Super Admin), 'editor', 'auth
 
 Once per worker, before the database snapshot, the `server` fixture creates the three users and
 logs each one in through `POST /admin/login`. It saves one storage state per role (refresh
-cookie, and the access token in localStorage) under
+cookie, the access token in localStorage, and the guided tour turned off, `GUIDED_TOUR_OFF`) under
 `test-results/.auth/<project>-<port>/<role>.json`. The users and their sessions are in the
 snapshot, so every reset keeps them. A test that logs out or logs in again only changes the
 database until the next reset.

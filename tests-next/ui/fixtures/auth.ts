@@ -60,10 +60,22 @@ export const storageStatePath = (workerInfo: WorkerInfo, server: Server, role: R
   );
 
 /**
+ * The guided tour, turned off like in the legacy e2e suite: its overview and popovers would cover
+ * the panel in every test. The panel reads `STRAPI_GUIDED_TOUR` from localStorage
+ * (packages/core/admin/admin/src/components/GuidedTour/Context.tsx) and fills in the missing tours
+ * itself (`migrateTours`), so `enabled: false` is enough. A test of the tour itself can set it
+ * back with `page.addInitScript`.
+ */
+export const GUIDED_TOUR_OFF = {
+  name: 'STRAPI_GUIDED_TOUR',
+  value: JSON.stringify({ enabled: false, completedActions: [] }),
+};
+
+/**
  * Log one role in through the admin API and save its storage state: the refresh cookie the login
  * sets, and the access token where the panel keeps it after a "Remember me" login (`jwtToken` in
- * localStorage, see packages/core/admin/admin/src/reducer.ts). A page that loads this state opens
- * the panel logged in.
+ * localStorage, see packages/core/admin/admin/src/reducer.ts), plus the guided tour turned off. A
+ * page that loads this state opens the panel logged in.
  */
 const saveStorageState = async (server: Server, role: Role, file: string) => {
   const { email, password } = CREDENTIALS[role];
@@ -84,6 +96,7 @@ const saveStorageState = async (server: Server, role: Role, file: string) => {
         localStorage: [
           { name: 'jwtToken', value: JSON.stringify(data.token) },
           { name: 'isLoggedIn', value: 'true' },
+          GUIDED_TOUR_OFF,
         ],
       },
     ];
