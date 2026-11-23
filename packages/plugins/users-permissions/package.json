@@ -49,26 +49,11 @@
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:front": "run -T vitest run --config vitest.config.front.ts",
-    "test:front:watch": "run -T vitest --config vitest.config.front.ts",
     "test:ts:back": "run -T tsc -p server/tsconfig.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "test:unit": "run -T vitest run --config vitest.config.ts",
-    "test:unit:watch": "run -T vitest --config vitest.config.ts",
+    "test:unit:vitest": "vitest run && vitest run --config vitest.config.front.ts",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
-  },
-  "nx": {
-    "targets": {
-      "test:unit": {
-        "inputs": [
-          "default",
-          "{workspaceRoot}/packages/utils/vitest-config/src/**/*"
-        ]
-      },
-      "test:front": {
-        "parallelism": false
-      }
-    }
   },
   "dependencies": {
     "@strapi/design-system": "2.3.1",

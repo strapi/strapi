@@ -17,6 +17,8 @@ export default defineConfig({
     // Same budget as the shared Jest front preset these tests ran under before.
     testTimeout: 60_000,
     hookTimeout: 60_000,
+    // Run test files serially, as the Jest front suites did with --runInBand.
+    fileParallelism: false,
     coverage: {
       reporter: [
         ...coverageConfigDefaults.reporter,
