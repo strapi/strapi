@@ -48,10 +48,17 @@ export default config;
 - To turn strict types off again, set `strictTypes: false` or remove the key. The next type
   generation removes the strict files, and the types are those of the previous release. A value
   that is not a boolean fails type generation with a `ValidationError`.
-- Code that must compile with strict types on and off, such as a plugin or a library, annotates its
-  callback parameters. With strict types on, the contracts type them by context. With strict types
-  off, the services are `any`, so the template's `strict: true` reports each unannotated parameter
-  (TS7006, TS7031).
+- Code that must compile with strict types on and off, such as a plugin or a library, cannot rely
+  on what only strict types give it. Compile it in both modes. The differences seen so far:
+  - Callback parameters. With strict types on, the contracts type them by context. With strict
+    types off, the services are `any`, so the template's `strict: true` reports each unannotated
+    parameter (TS7006, TS7031). Annotate them.
+  - Policy references. With strict types on, `{ name }` compiles when the policy's config is
+    optional. With strict types off, the object form requires `config` (TS2322). Write the name
+    alone, or `{ name, config: {} }`.
+  - Results. With strict types on, a populated to-many relation is an array. With strict types off,
+    it is possibly `null` or `undefined` (TS18049). Write `(author.mentees ?? []).length`. Other
+    result types differ the same way: read [Document results](#document-results).
 
 ### Strict errors fail the build
 
@@ -202,6 +209,16 @@ not functions are not exposed. A provider package works the same:
 `UploadPluginProviderOf<typeof awsS3>`, with `import type awsS3 from '@strapi/provider-upload-aws-s3'`.
 The import of `@strapi/upload` needs it in the application's dependencies, like `@strapi/email`
 above.
+
+### GraphQL internal helpers
+
+The GraphQL plugin registers contracts for its internal helper services, such as `builders`,
+`internals` and `utils` (`packages/plugins/graphql/server/src/types/index.ts`). With strict types,
+`strapi.plugin('graphql').service(name)` resolves to them, and the Nexus definitions and GraphQL
+values they pass are `unknown`, e.g. the result of `utils.mappers.graphQLFiltersToStrapiQuery`. A
+plugin that reads them narrows each value. Precise types are planned. `builders.get` and
+`mappers.strapiScalarToGraphQLScalar` keep develop's `any`. Without strict types, the lookups keep
+their develop types.
 
 ### Permission action IDs
 
@@ -611,7 +628,10 @@ declare global {
   actions inline or as an `as const` list: a list without `as const` widens `section` to `string`,
   which matches no section, and fails to compile. They also check the computed ID of each action
   from its literal fields. A key the action's section does not have fails to compile, as the
-  strict validation schema rejects it at boot.
+  strict validation schema rejects it at boot. The check reads the keys of the action's type, and
+  a union type has only the keys all its members share: an action typed with an explicit union,
+  e.g. the result of a function annotated `SettingsAction | PluginsAction`, hides a key that only
+  one member has. It compiles, and the boot fails.
 - With strict types, the action provider hooks (`willRegister`, `didRegister`, `willDelete`,
   `didDelete` and `appliesPropertyToSubject`), the section handlers and matchers receive the
   action as the provider stores it (`StoredAction`), one member per section, and `get` and `values`
@@ -755,8 +775,13 @@ the union of every producer's payload, e.g. `'user.delete': [{ user } | { users 
   with the payload of each of its producers. Applications register the events they emit.
 - With strict types, `strapi.eventHub` resolves to `Modules.EventHub.StrictEventHub`: an emit of a
   registered name must pass one of its payloads, and `on`, `once` and `addListener` listeners
-  receive them. Unregistered names, and wide names such as `string`, keep their types. Subscribers
-  receive every event, so they keep any arguments.
+  receive them. Unregistered names, and wide names such as `string`, keep their types.
+- Subscribers (`subscribe`, `unsubscribe`) receive every event, registered or not, so with strict
+  types their arguments are `unknown`. A subscriber checks the event name and narrows the payload at
+  runtime. Without strict types, they stay `any`.
+- The `entry` of the `entry.*` payloads is `Modules.Documents.AnyDocument`
+  (`packages/core/core/src/types/index.ts`). With strict types, listeners read its values as
+  `unknown`: read [Document results](#document-results).
 - An emit is only checked when its name is a literal. A helper that takes `event: string` passes
   any payload.
 - Events emitted through `emitAudit` (`@strapi/utils`) are not registered: it takes any payload, so
@@ -915,6 +940,71 @@ types what the runtime returns, not what the schema asks for:
 The JSDoc on each type gives the runtime reason. Without strict types, results keep develop's
 `Result` type.
 
+A document of a content type whose schema is not registered is `Modules.Documents.AnyDocument`:
+`id`, `documentId`, and other values that are `unknown` with strict types and `any` without. A
+package or a plugin that reads an application's content type, which it cannot see, gets one, as do
+listeners of the `entry.*` events. Read a value by narrowing it (`typeof value === 'string'`,
+`Array.isArray`). Or annotate the optional fields the code reads, and pin them with a runtime
+test. Review workflows annotates its stage reads this way in `server/src/controllers/stages.ts`:
+`Modules.Documents.AnyDocument & { strapi_stage?: { id: number } | null }`. A required field in the
+annotation does not compile.
+
+A blocks image node is not built from a file document as is. The file's scalars may be `null`,
+which the node's required image fields reject, and its `formats` is a JSON value, where the node
+takes an object. Check the required fields first, then copy them:
+
+```ts
+import type { Modules, Schema } from '@strapi/strapi';
+
+type ImageNode = Extract<Schema.Attribute.BlocksValue[number], { type: 'image' }>;
+type FileDocument = Modules.Documents.StrictResult<'plugin::upload.file', {}, 'published'>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const toImageNode = (file: FileDocument): ImageNode | null => {
+  const { name, url, hash, ext, mime, size, width, height, provider } = file;
+  if (
+    name === null ||
+    url === null ||
+    hash === null ||
+    ext === null ||
+    mime === null ||
+    size === null ||
+    width === null ||
+    height === null ||
+    provider === null
+  ) {
+    return null;
+  }
+
+  return {
+    type: 'image',
+    image: {
+      name,
+      url,
+      hash,
+      ext,
+      mime,
+      size,
+      width,
+      height,
+      provider,
+      alternativeText: file.alternativeText,
+      caption: file.caption,
+      formats: isRecord(file.formats) ? file.formats : null,
+      previewUrl: file.previewUrl,
+      provider_metadata: file.provider_metadata,
+      createdAt: file.createdAt,
+      updatedAt: file.updatedAt,
+    },
+    children: [{ type: 'text', text: '' }],
+  };
+};
+```
+
+`@strapi/types` exports no name for the image yet: `ImageNode['image']` names it.
+
 ### Document write inputs
 
 With strict types, the `data` of Document Service `create`, `update` and `clone`, and of the core
@@ -950,10 +1040,25 @@ type generation already emits, `Schema.Attribute.Required` and `Schema.Attribute
   call on an empty single type creates the entry: the create rules then apply at runtime, and the
   types do not check them.
 
-A schema with unknown attributes, such as an unregistered or generic UID, keeps develop's
-`Data.Input`. Without strict types, the params keep develop's types. With strict types, type
-generation also writes the rule of each attribute as a JSDoc line, which editors show on the input
-keys.
+A schema with unknown attributes, such as an unregistered or generic UID, keeps the shape of
+develop's `Data.Input`. With strict types, each attribute value of an unregistered content type is
+`unknown`: a write accepts any value, and nothing is typed when read back
+([Document results](#document-results)). Component inputs keep their values. Without strict types,
+the params keep develop's types. With strict types, type generation also writes the rule of each
+attribute as a JSDoc line, which editors show on the input keys.
+
+### Document Service middlewares
+
+A middleware added with `strapi.documents.use((ctx, next) => …)` is typed in both modes by
+`packages/core/types/src/modules/documents/middleware.ts`:
+
+- `ctx` is a union over content types and actions. Checking `ctx.action` narrows `ctx.params` to
+  the params of that action.
+- `next()` resolves to the union of the results of every action, whatever the check on
+  `ctx.action`: TypeScript does not narrow a function's result from a property of another value.
+  Code that needs one action's result narrows the value at runtime, as the content releases
+  middleware does with `'entries' in result && Array.isArray(result.entries)`
+  (`server/src/middlewares/documents.ts`).
 
 ## License-gated contracts
 
