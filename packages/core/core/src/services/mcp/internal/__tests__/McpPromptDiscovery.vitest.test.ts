@@ -12,7 +12,7 @@ const createStrapi = () =>
   ({
     log: { error: vi.fn(), info: vi.fn(), debug: vi.fn() },
     telemetry: { send: vi.fn().mockResolvedValue(true) },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 const createHandler = () => async () => ({
   messages: [{ role: 'user' as const, content: { type: 'text' as const, text: 'ok' } }],
