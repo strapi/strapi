@@ -116,7 +116,10 @@ const providerModule = {
       // The public_id differs — upload the new file first, then destroy the old.
       await upload(newFile, customConfig);
 
-      if (oldPublicId) {
+      // Options such as `folder` prefix the public_id (`folder/hash`), so the new upload can land
+      // on the old public_id and overwrite it. Destroying it then would delete the new asset.
+      const newPublicId = newFile.provider_metadata?.public_id;
+      if (oldPublicId && newPublicId !== oldPublicId) {
         try {
           await cloudinary.uploader.destroy(`${oldPublicId}`, {
             resource_type: (oldResourceType || 'image') as string,
