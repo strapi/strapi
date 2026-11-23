@@ -168,6 +168,47 @@ export const expectedMetadataHashedResults = {
               relation: 'oneToMany',
               target: 'api::complex.complex',
               mappedBy: 'complex',
+              joinTable: {
+                __internal__: true,
+                name: 'complexes_complex_lnk',
+                joinColumn: {
+                  name: 'inv_complex_id',
+                  referencedColumn: 'id',
+                  referencedTable: 'complexes',
+                },
+                inverseJoinColumn: {
+                  name: 'complex_id',
+                  referencedColumn: 'id',
+                  referencedTable: 'complexes',
+                },
+                pivotColumns: ['complex_id', 'inv_complex_id'],
+                orderColumnName: 'complex_ord',
+                orderBy: {
+                  complex_ord: 'asc',
+                },
+              },
+            },
+            complex: {
+              type: 'relation',
+              relation: 'manyToOne',
+              target: 'api::complex.complex',
+              inversedBy: 'complexbelongstomanycomplexes',
+              joinTable: {
+                __internal__: true,
+                name: 'complexes_complex_lnk',
+                joinColumn: {
+                  name: 'complex_id',
+                  referencedColumn: 'id',
+                  referencedTable: 'complexes',
+                },
+                inverseJoinColumn: {
+                  name: 'inv_complex_id',
+                  referencedColumn: 'id',
+                  referencedTable: 'complexes',
+                },
+                pivotColumns: ['complex_id', 'inv_complex_id'],
+                inverseOrderColumnName: 'complex_ord',
+              },
             },
           },
           lifecycles: {},
@@ -177,6 +218,85 @@ export const expectedMetadataHashedResults = {
             id: 'id',
             document_id: 'documentId',
             complexbelongstomanycomplexes: 'complexbelongstomanycomplexes',
+            complex: 'complex',
+          },
+        },
+      ],
+      [
+        'complexes_complex_lnk',
+        {
+          singularName: 'complexes_complex_lnk',
+          uid: 'complexes_complex_lnk',
+          tableName: 'complexes_complex_lnk',
+          attributes: {
+            id: {
+              type: 'increments',
+              columnName: 'id',
+            },
+            complex_id: {
+              type: 'integer',
+              column: {
+                unsigned: true,
+              },
+              columnName: 'complex_id',
+            },
+            inv_complex_id: {
+              type: 'integer',
+              column: {
+                unsigned: true,
+              },
+              columnName: 'inv_complex_id',
+            },
+            complex_ord: {
+              type: 'float',
+              column: {
+                unsigned: true,
+                defaultTo: null,
+              },
+              columnName: 'complex_ord',
+            },
+          },
+          indexes: [
+            {
+              name: 'complexes_complex_lnk_fk',
+              columns: ['complex_id'],
+            },
+            {
+              name: 'complexes_complex_lnk_ifk',
+              columns: ['inv_complex_id'],
+            },
+            {
+              name: 'complexes_complex_lnk_uq',
+              columns: ['complex_id', 'inv_complex_id'],
+              type: 'unique',
+            },
+            {
+              name: 'complexes_compl11125_oifk',
+              columns: ['complex_ord'],
+            },
+          ],
+          foreignKeys: [
+            {
+              name: 'complexes_complex_lnk_fk',
+              columns: ['complex_id'],
+              referencedColumns: ['id'],
+              referencedTable: 'complexes',
+              onDelete: 'CASCADE',
+            },
+            {
+              name: 'complexes_complex_lnk_ifk',
+              columns: ['inv_complex_id'],
+              referencedColumns: ['id'],
+              referencedTable: 'complexes',
+              onDelete: 'CASCADE',
+            },
+          ],
+          lifecycles: {},
+          columnToAttribute: {
+            id: 'id',
+            complex_id: 'complex_id',
+            inv_complex_id: 'inv_complex_id',
+            complex_ord: 'complex_ord',
           },
         },
       ],

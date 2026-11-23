@@ -48,7 +48,6 @@ export function buildComponentInputSchema(
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const [key, attr] of Object.entries(component.attributes)) {
     if (key === 'id') {
-      // eslint-disable-next-line no-continue
       continue;
     }
     shape[key] = attributeToInputSchema(strapi, attr, visited);

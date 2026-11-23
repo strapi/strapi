@@ -65,7 +65,20 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    jest.useFakeTimers();
+    // Freeze Date for scheduledAt checks. Leave the timer functions real so the
+    // Postgres pool and release cron can acquire connections and shut down.
+    jest.useFakeTimers({
+      doNotFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'nextTick',
+        'queueMicrotask',
+      ],
+    });
     jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
   });
 
@@ -109,15 +122,32 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     // Assert the response
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveLength(2);
-    // Assert the releases data
-    // Not scheduled release
-    expect(response.body.data[0].name).toBe('Not scheduled release');
-    expect(response.body.data[0].scheduledAt).toBeNull();
-    expect(response.body.data[0].status).toBe('ready');
-    // Next week release
-    expect(response.body.data[1].name).toBe('Next week release');
-    expect(response.body.data[1].scheduledAt).toBeDefined();
-    expect(response.body.data[1].timezone).toBe('Europe/Madrid');
-    expect(response.body.data[1].status).toBe('empty');
+    // Scheduled releases come first (soonest first), undated ones fill the remaining slots
+    expect(response.body.data[0].name).toBe('Next week release');
+    expect(response.body.data[0].scheduledAt).toBeDefined();
+    expect(response.body.data[0].timezone).toBe('Europe/Madrid');
+    expect(response.body.data[0].status).toBe('empty');
+    expect(response.body.data[1].name).toBe('Not scheduled release');
+    expect(response.body.data[1].scheduledAt).toBeNull();
+    expect(response.body.data[1].status).toBe('ready');
+  });
+
+  // A license without `maximumReleases` allows 3 pending releases: this stays within it (the
+  // previous test left 2). Filling all 4 slots is covered by the service's unit tests.
+  test('lists scheduled releases by date, whatever order they were created in, then undated ones', async () => {
+    const created = await createRelease('Soonest release', {
+      scheduledAt: new Date('2024-01-03T00:00:00.000Z'),
+      timezone: 'Europe/Madrid',
+    });
+    expect(created.statusCode).toBe(201);
+
+    const res = await rq({ method: 'GET', url: '/content-releases/homepage/upcoming-releases' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.map((release: { name: string }) => release.name)).toEqual([
+      'Soonest release',
+      'Next week release',
+      'Not scheduled release',
+    ]);
   });
 });

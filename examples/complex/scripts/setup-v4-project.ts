@@ -106,6 +106,14 @@ const packageJson = {
     '@types/react': '^18.0.0',
     '@types/react-dom': '^18.0.0',
   },
+  // This app is installed as a standalone Yarn project, so the monorepo's own allowlist does not
+  // apply. Yarn >= 4.14 disables dependency build scripts by default; allow the two whose install
+  // script fetches the native binary the v4 app loads (sharp for the upload plugin, better-sqlite3
+  // for the sqlite client).
+  dependenciesMeta: {
+    'better-sqlite3': { built: true },
+    sharp: { built: true },
+  },
   engines: {
     node: '>=18.0.0 <=20.x.x',
     npm: '>=6.0.0',

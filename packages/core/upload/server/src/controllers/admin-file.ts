@@ -238,8 +238,15 @@ export default {
   /**
    * `GET /upload/ai-metadata-jobs/latest`
    *
-   * The most recent still-active backfill job, so a client that reloads mid-run
-   * can pick the progress bar back up. 404s when nothing is running.
+   * The most recent backfill job, whatever its status, sent as the bare body
+   * (see `GetLatestAIMetadataJob`). A client that reloads mid-run picks the
+   * progress bar back up, and one that polls sees the run complete or fail.
+   * 404s when no job exists or AI metadata is not enabled.
+   *
+   * A job whose server stopped or crashed is failed first, so the client sees
+   * it fail without waiting for a server to restart. If that sweep fails, the
+   * error is logged and the job is still sent: an error response would stop the
+   * settings page polling a job that may still run.
    */
   async getLatestAIMetadataJob(ctx: Context) {
     if ((await getService('aiMetadata').isEnabled()) === false) {
@@ -247,10 +254,23 @@ export default {
     }
 
     const jobService = getService('aiMetadataJobs');
+
+    try {
+      await jobService.failInterruptedJobs();
+    } catch (error) {
+      strapi.log.error(
+        'Could not fail the interrupted AI metadata jobs before reading the latest one',
+        {
+          message: error instanceof Error ? error.message : String(error),
+          error,
+        }
+      );
+    }
+
     const job = await jobService.getLatestActiveJob();
 
     if (!job) {
-      return ctx.notFound('No active job found');
+      return ctx.notFound('No AI metadata job found');
     }
 
     ctx.body = job;

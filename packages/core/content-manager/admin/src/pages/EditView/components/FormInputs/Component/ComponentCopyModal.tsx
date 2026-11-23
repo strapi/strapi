@@ -223,6 +223,7 @@ const ComponentCopyModal = ({
 
   const [search, setSearch] = React.useState('');
   const debouncedSearch = useDebounce(search, 300);
+  const searchRef = React.useRef<HTMLInputElement>(null);
   const [selectedEntry, setSelectedEntry] = React.useState<SelectedEntry | null>(null);
   const [sourceDocument, setSourceDocument] = React.useState<Document | null>(null);
   const [selectedPaths, setSelectedPaths] = React.useState<string[]>([]);
@@ -838,6 +839,12 @@ const ComponentCopyModal = ({
             returnFocusTarget.focus();
           }
         }}
+        onEscapeKeyDown={(event) => {
+          // Escape in a filled search only clears it, which the searchbar does itself
+          if (search !== '' && event.target === searchRef.current) {
+            event.preventDefault();
+          }
+        }}
       >
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
@@ -848,11 +855,11 @@ const ComponentCopyModal = ({
             isLoading={isLoadingEntries}
             // Picking a second entry while one loads would start a race between the two.
             isSelectionLocked={isFetchingDocument || isCopying}
-            onClose={onClose}
             onSearchChange={setSearch}
             onSelect={handleSelectEntry}
             rows={entryRows}
             search={search}
+            searchRef={searchRef}
             selectedDocumentId={selectedEntry?.documentId ?? null}
           />
           <PreviewPane direction="column" alignItems="stretch">
@@ -924,11 +931,11 @@ interface EntriesPaneProps {
    * Whether picking an entry is temporarily refused, e.g. while one loads.
    */
   isSelectionLocked: boolean;
-  onClose: () => void;
   onSearchChange: (search: string) => void;
   onSelect: (row: EntryRow) => void;
   rows: EntryRow[];
   search: string;
+  searchRef: React.RefObject<HTMLInputElement>;
   selectedDocumentId: string | null;
 }
 
@@ -939,11 +946,11 @@ const EntriesPane = ({
   appliedSearch,
   isLoading,
   isSelectionLocked,
-  onClose,
   onSearchChange,
   onSelect,
   rows,
   search,
+  searchRef,
   selectedDocumentId,
 }: EntriesPaneProps) => {
   const { formatMessage } = useIntl();
@@ -1026,20 +1033,9 @@ const EntriesPane = ({
 
   return (
     <EntriesPaneRoot direction="column" alignItems="stretch">
-      <Box
-        paddingTop={4}
-        paddingBottom={2}
-        paddingLeft={4}
-        paddingRight={4}
-        // The searchbar keeps every key to itself: Escape clears the search, and when there's
-        // nothing to clear it closes the modal like anywhere else in it.
-        onKeyDownCapture={(event: React.KeyboardEvent) => {
-          if (event.key === 'Escape' && search === '') {
-            onClose();
-          }
-        }}
-      >
+      <Box paddingTop={4} paddingBottom={2} paddingLeft={4} paddingRight={4}>
         <Searchbar
+          ref={searchRef}
           name="component-copy-search"
           value={search}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>

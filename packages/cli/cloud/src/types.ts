@@ -79,5 +79,4 @@ export type StrapiCloudCommandInfo = {
 
 export type TrackPayload = Record<string, unknown>;
 
-// eslint-disable-next-line import/no-cycle
 export type * from './services/cli-api';

@@ -12,7 +12,7 @@ import {
 import crypto from 'crypto';
 
 import type { Core, Data } from '@strapi/types';
-import { errors, emitAudit } from '@strapi/utils';
+import { errors, emitAudit, quoteForLog } from '@strapi/utils';
 import type { Ability } from '@casl/ability';
 import type {
   Update,
@@ -668,9 +668,9 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
     const toDelete = [...plain.toDelete, ...parameterized.toDelete];
     const toUpdate = [...plain.toUpdate, ...parameterized.toUpdate];
 
-    const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;
+    const tokenLabel = `Admin token ${token.id} (${quoteForLog(token.name)}) of user ${userId}`;
     const describePermission = (id: Data.ID) =>
-      `${id} ${tokenPermissions.find((p) => p.id === id)?.action}`;
+      `${id} ${quoteForLog(tokenPermissions.find((p) => p.id === id)?.action)}`;
 
     if (toDelete.length > 0) {
       const permissions = toDelete.map((p) => describePermission(p.id)).join(', ');

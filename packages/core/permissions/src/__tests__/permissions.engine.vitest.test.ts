@@ -536,7 +536,6 @@ describe('Permissions Engine', () => {
           engineHooks: [
             {
               name: 'format.permission',
-              // eslint-disable-next-line no-unused-vars
               fn() {
                 return newPermissions[0];
               },
@@ -765,6 +764,31 @@ describe('Permissions Engine', () => {
         permission: { ...permissions[0], conditions: undefined, properties: undefined },
       });
       expect(called).toEqual('beforeRegister');
+    });
+
+    it('hands hooks a copy of the permission so mutations do not leak', async () => {
+      const permissions = [
+        { action: 'read', subject: 'article', properties: { fields: ['title'] } },
+      ] as Permission[];
+      const mutate = ({ permission }: any) => {
+        permission.subject = 'user';
+        permission.properties.fields.push('secret');
+      };
+
+      const { ability } = await buildEngineWithAbility({
+        permissions,
+        engineHooks: [
+          { name: 'before-format::validate.permission', fn: mutate },
+          { name: 'after-format::validate.permission', fn: mutate },
+          { name: 'before-evaluate.permission', fn: mutate },
+          { name: 'before-register.permission', fn: mutate },
+        ],
+      });
+
+      expect(ability.can('read', 'article', 'title')).toBeTruthy();
+      expect(ability.can('read', 'article', 'secret')).toBeFalsy();
+      expect(ability.can('read', 'user')).toBeFalsy();
+      expect(permissions[0].properties).toEqual({ fields: ['title'] });
     });
   });
 });

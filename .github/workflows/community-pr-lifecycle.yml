@@ -54,7 +54,7 @@ jobs:
         run: grep -v '^#' .github/scripts/.env | grep -v '^$' >> "$GITHUB_ENV"
 
       - name: Install and build scripts
-        run: cd .github/scripts && npm install && npx tsup community-pr-lifecycle.ts --format cjs --target node22 --out-dir dist --no-splitting
+        run: cd .github/scripts && npm install && npx --no-install tsup community-pr-lifecycle.ts --format cjs --target node22 --out-dir dist --no-splitting
 
       - name: Sync to Linear and comment
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -63,7 +63,7 @@ jobs:
           LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
         with:
           script: |
-            const { syncWaitingOnAuthor } = require('./.github/scripts/dist/community-pr-lifecycle.js')
+            const { syncWaitingOnAuthor } = require('./.github/scripts/dist/community-pr-lifecycle.cjs')
             await syncWaitingOnAuthor({ github, context, core })
 
   # ──────────────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ jobs:
         run: grep -v '^#' .github/scripts/.env | grep -v '^$' >> "$GITHUB_ENV"
 
       - name: Install and build scripts
-        run: cd .github/scripts && npm install && npx tsup community-pr-lifecycle.ts --format cjs --target node22 --out-dir dist --no-splitting
+        run: cd .github/scripts && npm install && npx --no-install tsup community-pr-lifecycle.ts --format cjs --target node22 --out-dir dist --no-splitting
 
       - name: Process community PR lifecycle
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -96,5 +96,5 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
         with:
           script: |
-            const { processLifecycle } = require('./.github/scripts/dist/community-pr-lifecycle.js')
+            const { processLifecycle } = require('./.github/scripts/dist/community-pr-lifecycle.cjs')
             await processLifecycle({ github, context, core })

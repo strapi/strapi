@@ -183,15 +183,21 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Created At' })).toBeInTheDocument();
   });
 
-  it('should label the empty option of the Select field combobox with its placeholder', async () => {
-    const { user } = render();
+  it.each(['Select field', 'Select filter'])(
+    'should not offer the %s placeholder as an option',
+    async (combobox) => {
+      const { user } = render();
 
-    await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      const select = await screen.findByRole('combobox', { name: combobox });
+      await user.click(select);
 
-    expect(await screen.findByRole('option', { name: 'Select field' })).toBeInTheDocument();
-    expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
-  });
+      expect(await screen.findAllByRole('option')).not.toHaveLength(0);
+      expect(screen.queryByRole('option', { name: combobox })).not.toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
+      expect(select).toBeRequired();
+    }
+  );
 
   it("should display a list of the operators when the combobox named Select filter is pressed & the 'Status' filter is selected", async () => {
     const { user } = render();
@@ -653,6 +659,75 @@ describe('Filters', () => {
     await waitFor(() => {
       expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(1);
     });
+  });
+
+  it.each(['$null', '$notNull'])(
+    'should render a %s chip on a date field without formatting its value',
+    async (operator) => {
+      renderWithSearch(`?filters[$and][0][createdAt][${operator}]=true`);
+
+      expect(await screen.findByText(`Created At ${operator}`)).toBeInTheDocument();
+    }
+  );
+
+  it('should show the value as the filter formats it, except for operators without a value', async () => {
+    const formatValue = jest.fn((value: string) => `formatted ${value}`);
+    renderRTL(
+      <Filters.Root
+        options={[{ name: 'publishAt', label: 'Publish at', type: 'datetime', formatValue }]}
+      >
+        <Filters.List />
+      </Filters.Root>,
+      {
+        initialEntries: [
+          {
+            search:
+              '?filters[$and][0][publishAt][$eq]=2026-10-23&filters[$and][1][publishAt][$null]=true',
+          },
+        ],
+      }
+    );
+
+    expect(await screen.findByText('Publish at $eq formatted 2026-10-23')).toBeInTheDocument();
+    expect(screen.getByText('Publish at $null')).toBeInTheDocument();
+    expect(formatValue).toHaveBeenCalledWith('2026-10-23');
+    expect(formatValue).not.toHaveBeenCalledWith('true');
+  });
+
+  it('should show the label of a matching option over the formatted value', async () => {
+    renderRTL(
+      <Filters.Root
+        options={[
+          {
+            name: 'mode',
+            label: 'Mode',
+            type: 'enumeration',
+            input: () => null,
+            options: [{ label: 'Automatic', value: 'auto' }],
+            formatValue: (value) => `formatted ${value}`,
+          },
+        ]}
+      >
+        <Filters.List />
+      </Filters.Root>,
+      {
+        initialEntries: [
+          { search: '?filters[$and][0][mode][$eq]=auto&filters[$and][1][mode][$eq]=manual' },
+        ],
+      }
+    );
+
+    expect(await screen.findByText('Mode $eq Automatic')).toBeInTheDocument();
+    expect(screen.getByText('Mode $eq formatted manual')).toBeInTheDocument();
+  });
+
+  it('should ignore a hand-edited `$and` that is not a list', async () => {
+    const { user } = renderWithSearch('?filters[$and]=x');
+
+    await addNameFilter(user, 'Jimbob');
+
+    expect(await screen.findByText('Name $eq Jimbob')).toBeInTheDocument();
+    expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][name][$eq]=Jimbob']);
   });
 
   describe('boolean filters', () => {
