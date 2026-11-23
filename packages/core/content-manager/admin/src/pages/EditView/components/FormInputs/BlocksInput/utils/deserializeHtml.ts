@@ -1,4 +1,6 @@
-import { isValidLink } from './links';
+// Subpath import only: the `@strapi/utils` root pulls in Node-only modules.
+import { isValidBlocksLink } from '@strapi/utils/blocks-link';
+
 import { getOfficeListItem, isHiddenOfficeElement } from './officeHtml';
 
 import type { Schema } from '@strapi/types';
@@ -213,8 +215,8 @@ const collectLink = (element: Element, context: InlineContext, output: InlineNod
     .filter((child): child is TextNode => child.type === 'text')
     .map(({ underline: _underline, ...text }) => text);
 
-  // Protocol-relative urls (//example.com) pass isValidLink but point to another site
-  const isSafeUrl = isValidLink(url) && !url.startsWith('//');
+  // Protocol-relative urls (//example.com) pass isValidBlocksLink but point to another site
+  const isSafeUrl = isValidBlocksLink(url) && !url.startsWith('//');
 
   if (url && isSafeUrl && texts.some((text) => text.text.trim())) {
     output.push({ type: 'link', url, rel: '', target: '', children: texts });
@@ -290,6 +292,38 @@ interface Leaf {
   link?: LinkNode;
 }
 
+/*
+ * Plain loops rather than unanchored regexes such as `/ +$/`: a regex engine starts over at every
+ * character of a run, which takes time in n² on a long run (100 000 pasted `&nbsp;` took seconds).
+ */
+
+const trimEndChars = (text: string, chars: string) => {
+  let end = text.length;
+
+  while (end > 0 && chars.includes(text[end - 1])) end -= 1;
+
+  return end === text.length ? text : text.slice(0, end);
+};
+
+/** Removes the spaces before and after each line break. */
+const trimSpacesAroundLineBreaks = (text: string) => {
+  if (!text.includes('\n')) return text;
+
+  const lines = text.split('\n');
+
+  return lines
+    .map((line, index) => {
+      let start = 0;
+      let end = line.length;
+
+      if (index > 0) while (start < end && line[start] === ' ') start += 1;
+      if (index < lines.length - 1) while (end > start && line[end - 1] === ' ') end -= 1;
+
+      return line.slice(start, end);
+    })
+    .join('\n');
+};
+
 /**
  * Collapses whitespace the way a browser renders it: no leading/trailing spaces in a block, no
  * double spaces between inline nodes, no spaces around line breaks. Updates the leaves in place.
@@ -300,7 +334,7 @@ const collapseWhitespace = (leaves: Leaf[]) => {
   let previousLeaf: TextNode | null = null;
 
   leaves.forEach((leaf) => {
-    let text = leaf.text.text.replace(/ *\n */g, '\n');
+    let text = trimSpacesAroundLineBreaks(leaf.text.text);
 
     if (previousEndsWithSpace || text.startsWith('\n')) {
       text = text.replace(/^ +/, '');
@@ -308,7 +342,7 @@ const collapseWhitespace = (leaves: Leaf[]) => {
 
     // No space before a line break, even when they are in different text nodes
     if (text.startsWith('\n') && previousLeaf) {
-      previousLeaf.text = previousLeaf.text.replace(/ +$/, '');
+      previousLeaf.text = trimEndChars(previousLeaf.text, ' ');
     }
 
     if (text.length > 0) {
@@ -321,7 +355,7 @@ const collapseWhitespace = (leaves: Leaf[]) => {
 
   // Trim trailing whitespace and line breaks at the end of the block
   for (let index = leaves.length - 1; index >= 0; index -= 1) {
-    const trimmed = leaves[index].text.text.replace(/[ \n]+$/, '');
+    const trimmed = trimEndChars(leaves[index].text.text, ' \n');
     leaves[index].text.text = trimmed;
 
     if (trimmed.length > 0) break;
@@ -423,12 +457,14 @@ const createTextBlock = (
 
   if (type === 'code') {
     // Code blocks keep plain text only, like when typing in them
-    const text = children
-      .map((child) =>
-        child.type === 'link' ? child.children.map((c) => c.text).join('') : child.text
-      )
-      .join('')
-      .replace(/\n+$/, '');
+    const text = trimEndChars(
+      children
+        .map((child) =>
+          child.type === 'link' ? child.children.map((c) => c.text).join('') : child.text
+        )
+        .join(''),
+      '\n'
+    );
 
     children = text ? [{ type: 'text', text }] : [];
   }

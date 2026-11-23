@@ -100,10 +100,11 @@ const insertBlocks = (editor: Editor, blocks: Descendant[]) => {
   if (Editor.isStart(editor, anchor, blockPath)) {
     insertAt = blockPath;
   } else if (!Editor.isEnd(editor, anchor, blockPath)) {
+    // Not `always`: at the edge of a nested node, such as the end of a list item, Slate splits
+    // between nodes rather than leaving an empty one behind
     Transforms.splitNodes(editor, {
       at: anchor,
       match: (_node, path) => path.length === 1,
-      always: true,
     });
   }
 

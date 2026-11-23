@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'path';
+import { Node } from 'slate';
 
 import { deserializeHtml } from '../deserializeHtml';
 
@@ -158,6 +159,16 @@ describe('deserializeHtml', () => {
       });
     });
 
+    it('keeps fragment links, which the editor and the server accept', () => {
+      expect(deserializeHtml('<p><a href="#install">install</a></p>')[0]).toMatchObject({
+        children: [{ type: 'link', url: '#install' }],
+      });
+    });
+
+    it('keeps the text of a bare "#" link, which points nowhere', () => {
+      expect(deserializeHtml('<p><a href="#">here</a></p>')).toEqual([paragraph(text('here'))]);
+    });
+
     it('drops the underline sources add to link text', () => {
       expect(
         deserializeHtml(
@@ -174,7 +185,7 @@ describe('deserializeHtml', () => {
       ]);
     });
 
-    it.each(['javascript:alert(1)', '#section', '//evil.example.com/page', ''])(
+    it.each(['javascript:alert(1)', '//evil.example.com/page', ''])(
       'keeps the text but drops the link for the url "%s"',
       (url) => {
         expect(deserializeHtml(`<p><a href="${url}">click</a></p>`)).toEqual([
@@ -361,6 +372,39 @@ describe('deserializeHtml', () => {
 
       expect(missingWords).toEqual([]);
       expect(blocks.map((block) => block.type)).toMatchSnapshot();
+    });
+  });
+
+  describe('long runs of non-breaking spaces', () => {
+    // A run of n spaces used to take time in n²: 100 000 took about 8s and froze the tab
+    const SPACES = 100_000;
+    const run = '&nbsp;'.repeat(SPACES);
+    const timed = (html: string) => {
+      const start = performance.now();
+      const [block] = deserializeHtml(html);
+
+      return { text: Node.string(block as Node), duration: performance.now() - start };
+    };
+
+    it('keeps them inside a paragraph and trims them at its end, in linear time', () => {
+      const { text: value, duration } = timed(`<p>a${run}b${run}</p>`);
+
+      expect(value).toBe(`a${' '.repeat(SPACES)}b`);
+      expect(duration).toBeLessThan(1000);
+    });
+
+    it('drops them before a line break, in linear time', () => {
+      const { text: value, duration } = timed(`<p>a${run}<br>b</p>`);
+
+      expect(value).toBe('a\nb');
+      expect(duration).toBeLessThan(1000);
+    });
+
+    it('trims line breaks at the end of a code block, in linear time', () => {
+      const { text: value, duration } = timed(`<pre>a${'\n'.repeat(SPACES)}</pre>`);
+
+      expect(value).toBe('a');
+      expect(duration).toBeLessThan(1000);
     });
   });
 });

@@ -120,6 +120,60 @@ describe('withHtmlPaste', () => {
     expect(Node.string(editor.children[3])).toBe('second');
   });
 
+  describe('splitting a list between its items', () => {
+    const list = (...items: string[]) =>
+      [
+        {
+          type: 'list',
+          format: 'unordered',
+          children: items.map((text) => ({
+            type: 'list-item',
+            children: [{ type: 'text', text }],
+          })),
+        },
+      ] as Editor['children'];
+    const items = (node: Node) =>
+      (node as { children: Node[] }).children.map((item) => Node.string(item));
+    const paste = (editor: Editor) =>
+      editor.insertData(clipboard({ 'text/html': '<h2>X</h2><p>Y</p>' }));
+
+    it('leaves no empty item when the caret is at the end of an item that is not the last', () => {
+      const editor = setup(list('a', 'bb', 'c'));
+      Transforms.select(editor, { path: [0, 0, 0], offset: 1 });
+
+      paste(editor);
+
+      expect(editor.children.map((node) => (node as { type: string }).type)).toEqual([
+        'list',
+        'heading',
+        'paragraph',
+        'list',
+      ]);
+      expect(items(editor.children[0])).toEqual(['a']);
+      expect(items(editor.children[3])).toEqual(['bb', 'c']);
+    });
+
+    it('leaves no empty item when the caret is at the start of an item that is not the first', () => {
+      const editor = setup(list('a', 'bb', 'c'));
+      Transforms.select(editor, { path: [0, 1, 0], offset: 0 });
+
+      paste(editor);
+
+      expect(items(editor.children[0])).toEqual(['a']);
+      expect(items(editor.children[3])).toEqual(['bb', 'c']);
+    });
+
+    it('still splits the item the caret is in the middle of', () => {
+      const editor = setup(list('a', 'bbbb', 'c'));
+      Transforms.select(editor, { path: [0, 1, 0], offset: 2 });
+
+      paste(editor);
+
+      expect(items(editor.children[0])).toEqual(['a', 'bb']);
+      expect(items(editor.children[3])).toEqual(['bb', 'c']);
+    });
+  });
+
   it('reverts the whole paste in one undo step', () => {
     const initial: Editor['children'] = [
       { type: 'paragraph', children: [{ type: 'text', text: 'Before' }] },
