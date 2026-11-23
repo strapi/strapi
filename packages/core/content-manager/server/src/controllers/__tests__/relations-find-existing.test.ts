@@ -160,6 +160,25 @@ describe('findExisting', () => {
       expect(dbQuery.loadPages.mock.calls[0][2].select).not.toContain('name');
     });
 
+    it('passes no page params to loadPages when the query has none', async () => {
+      const dbQuery = {
+        findOne: jest.fn().mockResolvedValue({ id: 10 }),
+        loadPages: jest.fn().mockResolvedValue({ results: [], pagination: {} }),
+        load: jest.fn(),
+      };
+      setupStrapi({ permissionQuery: { fields: PERMITTED_FIELDS }, dbQuery });
+
+      const ctx = createContext(
+        { params: { model: SHOP_UID, targetField: 'tags', id: 'shop-document-id' }, query: {} },
+        { state: { userAbility: {} } }
+      );
+      await relations.findExisting(ctx);
+
+      expect(dbQuery.loadPages).toHaveBeenCalledTimes(1);
+      expect(dbQuery.loadPages.mock.calls[0][2].page).toBeUndefined();
+      expect(dbQuery.loadPages.mock.calls[0][2].pageSize).toBeUndefined();
+    });
+
     it('loads a to-one relation once and wraps it in a page', async () => {
       const dbQuery = {
         findOne: jest.fn().mockResolvedValue({ id: 10 }),
