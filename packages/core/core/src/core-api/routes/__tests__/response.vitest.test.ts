@@ -66,7 +66,7 @@ const contentType = (
     info: { displayName: names.singularName, ...names },
     options: {},
     attributes: articleAttributes,
-  } as Schema.ContentType);
+  }) as Schema.ContentType;
 
 const useStrapi = (model: Schema.ContentType) => {
   const strapi = {
