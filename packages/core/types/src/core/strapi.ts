@@ -8,10 +8,10 @@ import type * as Schema from '../schema';
 
 import type * as UID from '../uid';
 
-import type { Container } from './container';
+import type { Container, ContainerLookup, ContainerLookupName } from './container';
 import type { ControllerLookup, ControllerLookupName, ControllerMap } from './controller';
 import type { MiddlewareLookup, MiddlewareLookupName, MiddlewareMap } from './middleware';
-import type { HookLookup, HookLookupName, HookMap, StrictHooksRegistry } from './hook';
+import type { HookLookup, HookLookupName, HookMap } from './hook';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
 import type { PolicyLookup, PolicyLookupName, PolicyMap } from './policy';
@@ -87,13 +87,26 @@ type StrictLookups = {
 type Lookups = IsStrict extends false ? LegacyLookups : StrictLookups;
 
 /**
- * The container with strict types: `get('hooks')` resolves to the hooks registry, whose `set` and
- * `extend` keep the registered hook contracts. Other names, and calls with an explicit type argument,
- * keep the container's signature.
+ * The container with strict types: registered names (`Strapi.Registries.ContainerEntries`) resolve
+ * to their values, e.g. `get('hooks')` to the hooks registry, whose `set` and `extend` keep the
+ * registered hook contracts.
  */
-type StrictContainer = Omit<Container, 'get'> & {
-  get(name: 'hooks'): StrictHooksRegistry;
-  get<T = any>(name: string, args?: unknown): T;
+type StrictContainer = Omit<Container, 'get' | 'add'> & {
+  /**
+   * Resolves the registered value of `name`. An unregistered name resolves to `unknown`: the runtime
+   * throws when nothing is added under it. An explicit type argument (`get<MyValue>(name)`) wins over
+   * the registry, including for unregistered names. Registered names are listed for completion.
+   */
+  get<T = unknown, TName extends ContainerLookupName = ContainerLookupName>(
+    name: TName,
+    args?: unknown
+  ): ContainerLookup<TName, NoInfer<T>>;
+  /**
+   * Adds `name`, which `get` then resolves: a function resolver is called once, with the container
+   * and the `args` of the first `get`. Throws when the name is already added. Registered names are
+   * listed for completion; the resolver is not checked against the registered value.
+   */
+  add<T, TName extends ContainerLookupName>(name: TName, resolver: T): StrictContainer;
 };
 
 type StrapiContainer = IsStrict extends false ? Container : StrictContainer;

@@ -269,6 +269,24 @@ declare global {
       interface AppMiddlewares {}
 
       /**
+       * Values of the Strapi container keyed by container name (e.g. `'webhookStore'`), read by
+       * `strapi.get(name)`. Each value is what `get` returns: the value given to
+       * `strapi.add(name, resolver)`, or what its factory returns (the container calls a function
+       * resolver once, with the container and the `args` of the first `get`, and caches the result).
+       * With strict types enabled, `get` of a registered name resolves to its value, and of any other
+       * name to `unknown`; `add` lists registered names and does not check the resolver.
+       *
+       * Additive only, with no `Package*` and `App*` pair. A name is added once: a second `add` of
+       * the same name throws, and the container has no `set` or `extend`, so an application cannot
+       * replace a package's value. The package that adds a name registers its value; applications
+       * and plugins register the names they add. Redeclaring a name with another value is a type
+       * error only where the later declaration is type-checked: with `skipLibCheck`, the default in
+       * Strapi applications, the first declaration in program order wins silently.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface ContainerEntries {}
+
+      /**
        * Server hook contracts keyed by hook UID (e.g. `'strapi::content-types.beforeSync'`), read by
        * `strapi.hook(uid)`, `strapi.hooks` and the hooks registry (`strapi.get('hooks')`).
        * The package that sets a hook and calls it registers its contract: the hook kind and the
