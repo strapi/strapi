@@ -382,6 +382,37 @@ describe('headers a plugin registered', () => {
     expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
   });
 
+  it('retries every file of a failed drop with the values the first retry read', async () => {
+    let space: string | undefined;
+    removeHeaders = unstable_addRequestHeaders(() => {
+      if (!space) {
+        throw new Error('no space selected yet');
+      }
+      return { 'x-strapi-space': space };
+    });
+
+    const { request, result, statuses } = setup(['a.png', 'b.png']);
+    await waitFor(() => expect(statuses()).toEqual(['error', 'error']));
+
+    space = 'france';
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 0 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      request('a.png').resolve();
+    });
+
+    // The tab switches space before the user retries the second row
+    space = 'spain';
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 1 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    expect(sentSpaces()).toEqual(['france', 'france']);
+  });
+
   it('reads the providers again on a retry when the read failed at drop time', async () => {
     let space: string | undefined;
     removeHeaders = unstable_addRequestHeaders(() => {
