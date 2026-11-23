@@ -35,6 +35,7 @@ module.exports = {
   setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: '@strapi/admin-test-utils/environment',
+  // Required: Jest 29 cannot format inline snapshots with Prettier 3, the default 'prettier' path.
   prettierPath: null,
   transform: {
     '^.+\\.m?js(x)?$': [

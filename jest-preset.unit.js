@@ -12,6 +12,7 @@ module.exports = {
     // Prevent Jest from running Vitest test files
     '.vitest.test.ts',
   ],
+  // Required: Jest 29 cannot format inline snapshots with Prettier 3, the default 'prettier' path.
   prettierPath: null,
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
   transform: {
