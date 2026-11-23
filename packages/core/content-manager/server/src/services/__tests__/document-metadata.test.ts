@@ -195,8 +195,8 @@ describe('document-metadata service', () => {
       ]);
       expect(params.populate).toEqual({
         cover: { populate: { folder: true } },
-        createdBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
-        updatedBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
+        createdBy: { fields: ['id', 'firstname', 'lastname', 'username', 'email'] },
+        updatedBy: { fields: ['id', 'firstname', 'lastname', 'username', 'email'] },
       });
     });
 
@@ -211,8 +211,8 @@ describe('document-metadata service', () => {
         'publishedAt',
       ]);
       expect(params.populate).toEqual({
-        createdBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
-        updatedBy: { fields: ['id', 'firstname', 'lastname', 'email'] },
+        createdBy: { fields: ['id', 'firstname', 'lastname', 'username', 'email'] },
+        updatedBy: { fields: ['id', 'firstname', 'lastname', 'username', 'email'] },
       });
     };
 
@@ -565,7 +565,8 @@ describe('document-metadata service', () => {
   });
 
   describe('getMetadata creator populate', () => {
-    const CREATOR_FIELDS = ['id', 'firstname', 'lastname', 'email'];
+    // The admin shows the username first when it names a creator, on the draft and published tabs
+    const CREATOR_FIELDS = ['id', 'firstname', 'lastname', 'username', 'email'];
 
     const models: Record<string, unknown> = {
       'api::article.article': {
@@ -629,7 +630,7 @@ describe('document-metadata service', () => {
       );
 
       // The transform adds the document id, as the admin user is a content type
-      const select = ['id', 'documentId', 'firstname', 'lastname', 'email'];
+      const select = ['id', 'documentId', 'firstname', 'lastname', 'username', 'email'];
       const [params] = findMany.mock.calls[0];
       expect(params.populate.createdBy).toEqual({ select });
       expect(params.populate.updatedBy).toEqual({ select });

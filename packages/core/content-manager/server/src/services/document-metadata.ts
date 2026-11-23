@@ -25,8 +25,9 @@ const AVAILABLE_STATUS_SCALAR_FIELDS = [
   'createdAt',
   'publishedAt',
 ];
-// Admin user fields loaded for the creator relations of the other versions
-const AVAILABLE_STATUS_CREATOR_FIELDS = ['id', 'firstname', 'lastname', 'email'];
+// Admin user fields loaded for the creator relations of the other versions.
+// The admin names a creator by its username first, so it is loaded on both paths.
+const AVAILABLE_STATUS_CREATOR_FIELDS = ['id', 'firstname', 'lastname', 'username', 'email'];
 // Creator populate of the fast path, which queries the database directly (`select`)
 const AVAILABLE_STATUS_DB_POPULATE = {
   createdBy: { select: AVAILABLE_STATUS_CREATOR_FIELDS },
