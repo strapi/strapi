@@ -1,5 +1,6 @@
 import { objects } from '@strapi/utils';
 import { has, get, mapValues, omit } from 'lodash';
+import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
 import {
@@ -7,6 +8,7 @@ import {
   isFeatureEnabled as isCustomOrderFeatureEnabled,
 } from '../custom-order/utils';
 import { createModelConfigurationSchema, validateKind } from './validation';
+import type { ContentTypesController } from '../types/controllers';
 
 const assocMainField = (metadata: any) =>
   has(metadata, 'edit.mainField')
@@ -14,7 +16,7 @@ const assocMainField = (metadata: any) =>
     : metadata;
 
 export default {
-  async findContentTypes(ctx: any) {
+  async findContentTypes(ctx) {
     const { kind } = ctx.query;
 
     try {
@@ -29,7 +31,7 @@ export default {
     ctx.body = { data: contentTypes.map(toDto) };
   },
 
-  async findContentTypesSettings(ctx: any) {
+  async findContentTypesSettings(ctx) {
     const { findAllContentTypes, findConfiguration } = getService('content-types');
 
     const contentTypes = await findAllContentTypes();
@@ -45,7 +47,7 @@ export default {
     };
   },
 
-  async findContentTypeConfiguration(ctx: any) {
+  async findContentTypeConfiguration(ctx) {
     const { uid } = ctx.params;
 
     const contentTypeService = getService('content-types');
@@ -83,7 +85,7 @@ export default {
     };
   },
 
-  async updateContentTypeConfiguration(ctx: any) {
+  async updateContentTypeConfiguration(ctx) {
     const { userAbility } = ctx.state;
     const { uid } = ctx.params;
     const { body } = ctx.request;
@@ -150,4 +152,4 @@ export default {
       },
     };
   },
-};
+} satisfies Core.Implements<ContentTypesController>;
