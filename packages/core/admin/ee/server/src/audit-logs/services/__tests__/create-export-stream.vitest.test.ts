@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { AsyncLocalStorage } from 'async_hooks';
 import type { Readable } from 'stream';
 
 import { AUDIT_LOG_EXPORT_EVENT } from '../../../../../../shared/utils/audit-log-export';
@@ -51,6 +52,26 @@ describe('Audit logs export stream', () => {
     configGet.mockImplementation((key: string, defaultValue?: unknown) =>
       key === 'admin.auth.secret' ? SECRET : defaultValue
     );
+  });
+
+  it('reads the rows in the request context, after the request handler returned', async () => {
+    const requestStore = new AsyncLocalStorage<{ scope: string }>();
+    const scopes: Array<string | undefined> = [];
+    findMany.mockImplementation(async () => {
+      scopes.push(requestStore.getStore()?.scope);
+      return scopes.length === 1 ? [] : [makeRow(1)];
+    });
+
+    const service = createAuditLogsService(strapiMock);
+    // Like a plugin middleware: the store only lives while the controller runs
+    const { stream } = await requestStore.run({ scope: 'france' }, () =>
+      service.createExportStream({ cursor: 0, until: 50, token: continuationToken(50) })
+    );
+
+    expect(requestStore.getStore()).toBeUndefined();
+    await streamToString(stream);
+
+    expect(scopes).toEqual(['france', 'france']);
   });
 
   it('echoes the original token on continuations instead of re-signing it', async () => {

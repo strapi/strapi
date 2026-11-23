@@ -49,5 +49,42 @@ describe('Settings list routes with a plugins param (api)', () => {
 
       expect(res.statusCode).toBe(200);
     });
+
+    test('the export applies a plugin scope like the list', async () => {
+      // The hidden row comes first: the export stops at the last row the scope keeps
+      await strapi.db
+        .query('admin::audit-log')
+        .create({ data: { action: 'scope.hidden', date: new Date(), payload: {} } });
+      await strapi.db
+        .query('admin::audit-log')
+        .create({ data: { action: 'scope.kept', date: new Date(), payload: {} } });
+
+      // Like a scoping plugin: the scope reads the plugin value of the current request
+      const unregister = strapi.db.unstable_scopes.register({
+        where: ({ uid }) => {
+          const query = strapi.requestContext.get()?.request.query as
+            { plugins?: { demo?: { action?: unknown } } } | undefined;
+          const action = query?.plugins?.demo?.action;
+
+          return uid === 'admin::audit-log' && typeof action === 'string' ? { action } : null;
+        },
+      });
+
+      try {
+        const qs = { plugins: { demo: { action: 'scope.kept' } } };
+        const list = await rq({ method: 'GET', url: '/admin/audit-logs', qs });
+        // The export streams its rows after the request handler returned
+        const exported = await rq({ method: 'GET', url: '/admin/audit-logs/export', qs });
+
+        expect(list.body.results.map(({ action }: { action: string }) => action)).toEqual([
+          'scope.kept',
+        ]);
+        expect(exported.statusCode).toBe(200);
+        expect(exported.text).toContain('scope.kept');
+        expect(exported.text).not.toContain('scope.hidden');
+      } finally {
+        unregister();
+      }
+    });
   });
 });
