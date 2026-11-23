@@ -39,14 +39,6 @@ export const password = yup
 
 export const roles = yup.array(yup.strapiID()).min(1);
 
-const isAPluginName = yup
-  .string()
-  .test('is-a-plugin-name', 'is not a plugin name', function checkPluginName(value) {
-    return [undefined, 'admin', ...Object.keys(strapi.plugins)].includes(value)
-      ? true
-      : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
-  });
-
 export const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
@@ -231,7 +223,6 @@ export default {
   username,
   password,
   roles,
-  isAPluginName,
   arrayOfConditionNames,
   permission,
   updatePermissions,

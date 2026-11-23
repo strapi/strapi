@@ -190,14 +190,25 @@ export const emailToSchema = (attribute: Schema.Attribute.Email): z.Schema => {
 };
 
 /**
+ * Returns the allowed values of an enumeration attribute.
+ *
+ * An enumeration custom field can be registered without an `enum` option, so its attributes
+ * may have no `enum`. Such an attribute allows no value: the entity validator rejects every
+ * non-null value, so an empty list keeps route validation as strict while letting the schema build.
+ */
+const getEnumValues = (attribute: Schema.Attribute.Enumeration<string[]>): string[] => {
+  return Array.isArray(attribute.enum) === true ? attribute.enum : [];
+};
+
+/**
  * Converts an enumeration attribute to a Zod schema.
  * @param attribute - The Enumeration attribute object from the Strapi schema.
  * @returns A Zod schema representing the enumeration field.
  */
 export const enumToSchema = (attribute: Schema.Attribute.Enumeration<string[]>): z.Schema => {
-  const { writable, required, default: defaultValue, enum: enumValues } = attribute;
+  const { writable, required, default: defaultValue } = attribute;
 
-  const baseSchema = z.enum(enumValues);
+  const baseSchema = z.enum(getEnumValues(attribute));
 
   const schema = augmentSchema(baseSchema, [
     maybeRequired(required),
@@ -553,9 +564,9 @@ export const emailToInputSchema = (attribute: Schema.Attribute.Email) => {
  * @returns A Zod schema for input validation of the enumeration field.
  */
 export const enumerationToInputSchema = (attribute: Schema.Attribute.Enumeration<string[]>) => {
-  const { required, default: defaultValue, enum: enumValues } = attribute;
+  const { required, default: defaultValue } = attribute;
 
-  const baseSchema = z.enum(enumValues);
+  const baseSchema = z.enum(getEnumValues(attribute));
 
   const schema = augmentSchema(baseSchema, [
     maybeRequired(required),
