@@ -1293,10 +1293,19 @@ describe('getFetchClient', () => {
       });
 
       it.each([
-        ['post', '/admin/login'],
-        ['post', '/admin/logout'],
-        ['post', 'admin/logout'],
-      ])('%s %s: still sends the request', async (_method, url) => {
+        '/admin/login',
+        '/admin/logout',
+        '/admin/access-token',
+        '/admin/init',
+        '/admin/registration-info',
+        '/admin/register',
+        '/admin/register-admin',
+        '/admin/forgot-password',
+        '/admin/reset-password',
+        '/admin/providers',
+        '/admin/providers?mode=sso',
+        'admin/logout',
+      ])('still sends %s', async (url) => {
         register(() => {
           throw new Error('provider failed');
         });
@@ -1306,26 +1315,19 @@ describe('getFetchClient', () => {
         expect(window.fetch).toHaveBeenCalledTimes(1);
       });
 
-      it('still sends a pre-login request with a stored token', async () => {
-        register(() => {
-          throw new Error('provider failed');
-        });
+      it.each(['/admin/login-history', '/admin/providers/isSSOLocked'])(
+        'does not send %s',
+        async (url) => {
+          register(() => {
+            throw new Error('provider failed');
+          });
 
-        await getFetchClient().get('/admin/init');
-
-        expect(window.fetch).toHaveBeenCalledTimes(1);
-      });
-
-      it('does not send a request whose path only starts like an auth path', async () => {
-        register(() => {
-          throw new Error('provider failed');
-        });
-
-        await expect(getFetchClient().get('/admin/login-history')).rejects.toMatchObject({
-          name: 'RequestHeadersError',
-        });
-        expect(window.fetch).not.toHaveBeenCalled();
-      });
+          await expect(getFetchClient().get(url)).rejects.toMatchObject({
+            name: 'RequestHeadersError',
+          });
+          expect(window.fetch).not.toHaveBeenCalled();
+        }
+      );
 
       it('does not send the request when a header value is not a string', async () => {
         // Plain JavaScript plugins can return any value, which the type does not allow
