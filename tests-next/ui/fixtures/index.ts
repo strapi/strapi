@@ -1,15 +1,18 @@
 /**
  * `@strapi/tests-e2e/fixtures`: what a ui test imports. See "Writing a test" in the README.
  *
- * - `test`: Playwright's `test` with the worker's Strapi `server`, database resets
- *   (`resetScope`), edition and features (`features`, `requires`) and seeding (`seed`,
- *   `seedPlan` + `seeded`, `unique`).
+ * - `test`: Playwright's `test` with the worker's Strapi `server`, the page logged in as a
+ *   `role`, database resets (`resetScope`), edition and features (`features`, `requires`) and
+ *   seeding (`seed`, `seedPlan` + `seeded`, `unique`).
  * - `expect`: Playwright's `expect`.
+ * - `ROLES`, `CREDENTIALS`: the role users every worker logs in before its snapshot.
  */
 export { test } from './seed';
 export { expect } from '@playwright/test';
+export { CREDENTIALS, GUIDED_TOUR_OFF, ROLES } from './auth';
 
-export type { AppOptions, AppWorkerFixtures, ResetOptions, ResetScope } from './app';
+export type { AppOptions, AppWorkerFixtures, AuthOptions, ResetOptions, ResetScope } from './app';
+export type { Credentials, Role } from './auth';
 export type { SeedFixtures, SeedOptions, SeedWorkerFixtures, Seeded } from './seed';
 export type {
   Edition,

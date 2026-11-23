@@ -1,5 +1,4 @@
-import { expect, test } from '../../fixtures/app';
-import { CREDENTIALS } from '../../fixtures/auth';
+import { CREDENTIALS, expect, test } from '../../fixtures';
 
 // The only tests that go through the login form: every other test starts logged in through its
 // role's storage state.

@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { expect, test } from '../../fixtures/app';
-import { CREDENTIALS, ROLES, type Role } from '../../fixtures/auth';
+import { CREDENTIALS, ROLES, expect, test, type Role } from '../../fixtures';
 
 // Each role starts logged in through its storage state (fixtures/auth.ts), with no login form.
 // Settings > Users tells the roles apart: only the Super Admin can read the admin users.
