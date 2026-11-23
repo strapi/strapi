@@ -1,5 +1,22 @@
-import type { Context } from 'koa';
+import type { Context, Next } from 'koa';
 import type { Core, Data, Schema, Struct } from '@strapi/types';
+
+/**
+ * An action whose query has the shape its validator accepts. Query values are the raw strings the
+ * router parsed: a validator's coercion is not applied.
+ */
+type ValidatedQueryHandler<TQuery> = (
+  context: Context & { query: TQuery; request: { query: TQuery } },
+  next: Next
+) => ReturnType<Core.ControllerHandler>;
+
+/** `findAvailable` query, as `validateFindAvailable` accepts it (`controllers/validation/relations.ts`). */
+type FindAvailableQuery = {
+  id?: string;
+  idsToOmit?: string[];
+  idsToInclude?: string[];
+  _q?: string;
+};
 
 /** Actions exposed by the Content Manager collection type controller. */
 export type CollectionTypesController = {
@@ -7,7 +24,8 @@ export type CollectionTypesController = {
   findOne: Core.ControllerHandler;
   create: Core.ControllerHandler;
   update: Core.ControllerHandler;
-  clone: Core.ControllerHandler;
+  /** `autoClone` calls it without `next`. */
+  clone: (context: Context, next?: Next) => ReturnType<Core.ControllerHandler>;
   autoClone: Core.ControllerHandler;
   delete: Core.ControllerHandler;
   publish: Core.ControllerHandler;
@@ -30,7 +48,9 @@ export type ComponentsController = {
 
 /** Actions exposed by the Content Manager content type controller. */
 export type ContentTypesController = {
-  findContentTypes: Core.ControllerHandler;
+  findContentTypes: Core.IsStrict extends true
+    ? ValidatedQueryHandler<{ kind?: Struct.ContentTypeKind }>
+    : Core.ControllerHandler;
   findContentTypesSettings: Core.ControllerHandler;
   findContentTypeConfiguration: Core.ControllerHandler;
   updateContentTypeConfiguration: Core.ControllerHandler;
@@ -43,7 +63,9 @@ export type InitController = {
 
 /** Actions exposed by the Content Manager relation controller. */
 export type RelationsController = {
-  findAvailable: Core.ControllerHandler;
+  findAvailable: Core.IsStrict extends true
+    ? ValidatedQueryHandler<FindAvailableQuery>
+    : Core.ControllerHandler;
   findExisting: Core.ControllerHandler;
   /**
    * Reads and checks the route params and query shared by `findAvailable` and `findExisting`.
