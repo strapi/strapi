@@ -13,6 +13,10 @@ const stringifyCsvValue = (value: unknown): string => {
     return '';
   }
 
+  if (typeof value === 'function' || typeof value === 'symbol') {
+    return '';
+  }
+
   if (typeof value === 'string') {
     return value;
   }
@@ -32,10 +36,6 @@ const stringifyCsvValue = (value: unknown): string => {
       // empty rather than leaking a partial/misleading payload.
       return '';
     }
-  }
-
-  if (typeof value === 'function' || typeof value === 'symbol') {
-    return '';
   }
 
   return String(value);
