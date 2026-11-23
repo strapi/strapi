@@ -223,6 +223,8 @@ Use `yarn commit` for an interactive prompt. Run `yarn version:check` if you've 
 - Import types from `@strapi/types` — extend or improve them rather than duplicating locally.
 - Never use `any` when a proper type exists or can be reasonably defined. Prefer `unknown` otherwise.
 - Type entity identifiers with `Data.ID` (numeric/db `id`) and `Data.DocumentID` (`documentId`) from `import type { Data } from '@strapi/types'` — never raw `string`, `number` or `string | number`. A value that can be either is `Data.ID | Data.DocumentID`. They may become branded types later, so raw primitives would break.
+- Type schema uids with `UID.ContentType` (content types), `UID.Component` (components) and `UID.Schema` (either) from `import type { UID } from '@strapi/types'`; use `UID.CollectionType` / `UID.SingleType` only when the kind matters — never raw `string` (except in `@strapi/utils`, which can't import `@strapi/types`). Uids that may not be registered yet (e.g. in the Content-Type Builder) are `Internal.UID.*`.
+- Give uids and ids their type where the value comes from — annotate params, fields and test fixtures (`const uid: UID.ContentType = 'api::article.article'`), or type controller params at the boundary (`const { model }: { model: UID.ContentType } = ctx.params`) — instead of casting with `as UID.*` / `as Data.ID`. Cast only values from outside the type system: request params and bodies, DB rows (morph `type` columns, lifecycle `event.model`), stored JSON, and `@strapi/utils` callbacks typed as `string`. Existing casts in the codebase are not a precedent.
 - Run `yarn test:ts` before pushing.
 
 ### Linting & Formatting
