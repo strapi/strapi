@@ -133,7 +133,8 @@ actionProvider.hooks.appliesPropertyToSubject.register(({ property, action, subj
 });
 actionProvider.hooks.willRegister.register(({ key, value }) => {
   key satisfies string;
-  value.options.applyToProperties satisfies string[] | null;
+  // The registration schema accepts `undefined` items, and the provider keeps them.
+  value.options.applyToProperties satisfies (string | undefined)[] | null;
 });
 actionProvider.hooks.didRegister.register(({ value }) => value.actionId satisfies string);
 actionProvider.hooks.willDelete.register(
@@ -151,6 +152,93 @@ actionProvider.hooks.willRegister.register(
   // @ts-expect-error The registered action is `value`, not `action`.
   ({ action }: { action: { actionId: string } }) => action.actionId
 );
+
+// The hooks, `get`, `values` and the section handlers and matchers receive the action as the provider
+// stores it (`domain/action/index.ts` `create`): one member per section, as the registration schema.
+// Only `settings` actions have a `category`, only `contentTypes` actions have `subjects`, and only
+// `settings` and `plugins` actions have a `subCategory` (`'general'` by default).
+actionProvider.hooks.willRegister.register(({ value }) => {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  value.category.toUpperCase();
+  if (value.section === 'settings') {
+    value.category satisfies string;
+    value.subCategory satisfies string;
+  }
+  if (value.section === 'contentTypes') {
+    value.subjects satisfies (string | undefined)[];
+  }
+  if (value.section === 'plugins') {
+    value.pluginName satisfies string;
+    value.subCategory satisfies string;
+  }
+});
+actionProvider.hooks.didRegister.register(({ value }) => {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  value.category.toUpperCase();
+});
+actionProvider.hooks.willDelete.register(({ value }) => {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  value?.category.toUpperCase();
+});
+actionProvider.hooks.didDelete.register(({ value }) => {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  value?.category.toUpperCase();
+  if (value?.section === 'settings') {
+    value.category satisfies string;
+  }
+});
+actionProvider.hooks.appliesPropertyToSubject.register(({ action }) => {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  action.category.toUpperCase();
+  return action.section === 'settings' && action.category !== '';
+});
+const readAction = actionProvider.get(dynamicId);
+// @ts-expect-error A `category` exists only on `settings` actions.
+readAction?.category.toUpperCase();
+if (readAction?.section === 'plugins') {
+  readAction.pluginName satisfies string;
+}
+for (const storedAction of actionProvider.values()) {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  storedAction.category.toUpperCase();
+  if (storedAction.section === 'contentTypes') {
+    storedAction.subjects satisfies (string | undefined)[];
+  }
+}
+const { sectionsBuilder } = app.service('admin::permission');
+sectionsBuilder.addHandler('plugins', ({ action }) => {
+  // @ts-expect-error A `category` exists only on `settings` actions.
+  action.category.toUpperCase();
+});
+sectionsBuilder.addMatcher(
+  'settings',
+  (action) => action.section === 'settings' && action.category
+);
+void sectionsBuilder.build(actionProvider.values());
+
+// `admin::content-type` builds permissions from the actions `values` and `get` return.
+const contentTypeService = app.service('admin::content-type');
+contentTypeService.getPermissionsWithNestedFields(
+  actionProvider.values().filter((action) => action.section === 'contentTypes')
+);
+const explorerRead = actionProvider.get('plugin::content-manager.explorer.read');
+if (explorerRead !== undefined) {
+  contentTypeService.getPermissionsWithNestedFields([explorerRead]);
+}
+
+// `admin::action` returns the actions `values` returns.
+void app
+  .service('admin::action')
+  .getAllowedActionsForRole()
+  .then((allowedActions) => {
+    for (const allowedAction of allowedActions) {
+      // @ts-expect-error A `category` exists only on `settings` actions.
+      allowedAction.category.toUpperCase();
+      if (allowedAction.section === 'settings') {
+        allowedAction.category satisfies string;
+      }
+    }
+  });
 
 // The condition provider hooks hand their handlers the registered condition: `domain.create` keeps
 // the condition fields only, so it has no `name`.
