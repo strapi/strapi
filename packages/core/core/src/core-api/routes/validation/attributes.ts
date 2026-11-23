@@ -190,13 +190,21 @@ export const emailToSchema = (attribute: Schema.Attribute.Email): z.Schema => {
 };
 
 /**
+ * An enumeration attribute whose `enum` may be missing: an enumeration custom field can be
+ * registered without an `enum` option, so its attributes may have no `enum`.
+ */
+export type EnumerationAttribute = Omit<Schema.Attribute.Enumeration<string[]>, 'enum'> & {
+  enum?: string[];
+};
+
+/**
  * Returns the allowed values of an enumeration attribute.
  *
  * An enumeration custom field can be registered without an `enum` option, so its attributes
  * may have no `enum`. Such an attribute allows no value: the entity validator rejects every
  * non-null value, so an empty list keeps route validation as strict while letting the schema build.
  */
-const getEnumValues = (attribute: Schema.Attribute.Enumeration<string[]>): string[] => {
+const getEnumValues = (attribute: EnumerationAttribute): string[] => {
   return Array.isArray(attribute.enum) === true ? attribute.enum : [];
 };
 
@@ -205,7 +213,7 @@ const getEnumValues = (attribute: Schema.Attribute.Enumeration<string[]>): strin
  * @param attribute - The Enumeration attribute object from the Strapi schema.
  * @returns A Zod schema representing the enumeration field.
  */
-export const enumToSchema = (attribute: Schema.Attribute.Enumeration<string[]>): z.Schema => {
+export const enumToSchema = (attribute: EnumerationAttribute): z.Schema => {
   const { writable, required, default: defaultValue } = attribute;
 
   const baseSchema = z.enum(getEnumValues(attribute));
@@ -563,7 +571,7 @@ export const emailToInputSchema = (attribute: Schema.Attribute.Email) => {
  * @param attribute - The Enumeration attribute object from the Strapi schema.
  * @returns A Zod schema for input validation of the enumeration field.
  */
-export const enumerationToInputSchema = (attribute: Schema.Attribute.Enumeration<string[]>) => {
+export const enumerationToInputSchema = (attribute: EnumerationAttribute) => {
   const { required, default: defaultValue } = attribute;
 
   const baseSchema = z.enum(getEnumValues(attribute));
