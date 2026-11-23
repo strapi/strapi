@@ -108,7 +108,9 @@ export const readBack = <TSchemaUID extends UID.ContentType>(filters: Filters<TS
 };
 
 /**
- * Filters with a known UID keep their checks
+ * Filters with a known UID keep the checks below: an unknown attribute (at the root, in a
+ * nested group or in a relation filter) and an unknown operator are type errors.
+ * Unknown attributes in media and component filters are not checked here.
  */
 export const knownUID: PostFilters[] = [
   { slug: { $notNull: true }, views: { $between: [1, 10] } },
@@ -183,7 +185,7 @@ export const byId = <TSchemaUID extends UID.ContentType>(filters: Filters<TSchem
   filters.id !== undefined;
 
 export const byDocumentId = <TSchemaUID extends UID.ContentType>(documentId: string) =>
-  ({ documentId }) as Modules.Documents.Params.Filters.Any<TSchemaUID>;
+  ({ documentId } as Modules.Documents.Params.Filters.Any<TSchemaUID>);
 
 /**
  * A filter generic over a UID stays assignable to the filter of the wide UID
