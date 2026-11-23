@@ -1,5 +1,5 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Action } from '../domain/action';
+import type { StoredAction } from '../domain/action';
 import type {
   ContentPermission,
   PluginPermission,
@@ -35,11 +35,13 @@ export type SectionsBuilderChainAssertions = [
 // A section calls its matchers with the action and its handlers with `{ action, section }`, where
 // `section` is the result of its initial state factory (`sections-builder/section.ts`).
 export type SectionsBuilderOptionsAssertions = [
-  Expect<Equal<[Parameters<NonNullable<SectionOptions['matchers']>[number]>], [[action: Action]]>>,
+  Expect<
+    Equal<[Parameters<NonNullable<SectionOptions['matchers']>[number]>], [[action: StoredAction]]>
+  >,
   Expect<
     Equal<
       [Parameters<NonNullable<SectionOptions['handlers']>[number]>[0]],
-      [{ action: Action; section: unknown }]
+      [{ action: StoredAction; section: unknown }]
     >
   >,
   Expect<Equal<[ReturnType<NonNullable<SectionOptions['initialStateFactory']>>], [unknown]>>,
@@ -50,13 +52,22 @@ export type SectionsBuilderOptionsAssertions = [
 // `GetAll.Response` (`controllers/permission.ts`). A handler registered on one of them receives that
 // section; on any other section, the section is `unknown`.
 export type SectionsBuilderSectionAssertions = [
-  Expect<Equal<[HandlerContext<'singleTypes'>], [{ action: Action; section: ContentPermission }]>>,
   Expect<
-    Equal<[HandlerContext<'collectionTypes'>], [{ action: Action; section: ContentPermission }]>
+    Equal<[HandlerContext<'singleTypes'>], [{ action: StoredAction; section: ContentPermission }]>
   >,
-  Expect<Equal<[HandlerContext<'plugins'>], [{ action: Action; section: PluginPermission[] }]>>,
-  Expect<Equal<[HandlerContext<'settings'>], [{ action: Action; section: SettingPermission[] }]>>,
-  Expect<Equal<[HandlerContext<'my-section'>], [{ action: Action; section: unknown }]>>,
+  Expect<
+    Equal<
+      [HandlerContext<'collectionTypes'>],
+      [{ action: StoredAction; section: ContentPermission }]
+    >
+  >,
+  Expect<
+    Equal<[HandlerContext<'plugins'>], [{ action: StoredAction; section: PluginPermission[] }]>
+  >,
+  Expect<
+    Equal<[HandlerContext<'settings'>], [{ action: StoredAction; section: SettingPermission[] }]>
+  >,
+  Expect<Equal<[HandlerContext<'my-section'>], [{ action: StoredAction; section: unknown }]>>,
   Expect<Equal<[BuiltSections['singleTypes']], [ContentPermission]>>,
   Expect<Equal<[BuiltSections['collectionTypes']], [ContentPermission]>>,
   Expect<Equal<[BuiltSections['plugins']], [PluginPermission[]]>>,
