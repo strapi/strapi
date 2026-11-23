@@ -275,5 +275,48 @@ describe('findExisting', () => {
         })
       );
     });
+
+    it('does not run the second load when the page has no ids', async () => {
+      const pagination = { page: 3, pageSize: 5, pageCount: 2, total: 7 };
+      const dbQuery = {
+        findOne: jest.fn().mockResolvedValue({ id: 10 }),
+        // A page past the last one
+        loadPages: jest.fn().mockResolvedValue({ results: [], pagination }),
+        load: jest.fn(),
+      };
+      const conditions = { $or: [{ createdBy: { id: 42 } }] };
+      setupStrapi({ permissionQuery: { fields: PERMITTED_FIELDS, filters: conditions }, dbQuery });
+
+      const ctx = createContext(
+        {
+          params: { model: SHOP_UID, targetField: 'tags', id: 'shop-document-id' },
+          query: { page: '3', pageSize: '5' },
+        },
+        { state: { userAbility: {} } }
+      );
+      await relations.findExisting(ctx);
+
+      expect(dbQuery.loadPages).toHaveBeenCalledTimes(1);
+      expect(ctx.body).toEqual({ pagination, results: [] });
+    });
+
+    it('does not run the second load when a to-one relation is empty', async () => {
+      const dbQuery = {
+        findOne: jest.fn().mockResolvedValue({ id: 10 }),
+        loadPages: jest.fn(),
+        load: jest.fn().mockResolvedValue(null),
+      };
+      const conditions = { $or: [{ createdBy: { id: 42 } }] };
+      setupStrapi({ permissionQuery: { fields: PERMITTED_FIELDS, filters: conditions }, dbQuery });
+
+      const ctx = createCtx('mainTag');
+      await relations.findExisting(ctx);
+
+      expect(dbQuery.load).toHaveBeenCalledTimes(1);
+      expect(ctx.body).toEqual({
+        pagination: { page: 1, pageCount: 1, pageSize: 10, total: 0 },
+        results: [],
+      });
+    });
   });
 });

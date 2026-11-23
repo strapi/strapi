@@ -5,6 +5,30 @@ import { attributeOptions } from './attributeOptions';
 
 type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
 
+type AdvancedFormOptions = {
+  strictRelations?: boolean;
+};
+
+const relationalRequiredOption = ({ strictRelations }: AdvancedFormOptions = {}) => {
+  if (strictRelations) {
+    return attributeOptions.required;
+  }
+
+  return {
+    ...attributeOptions.required,
+    disabled: true,
+    description: {
+      id: getTrad('form.attribute.item.requiredField.strictRelations.description'),
+      defaultMessage: 'Not enforced until documents.strictRelations is true in config/api',
+    },
+    tooltip: {
+      id: getTrad('form.attribute.item.requiredField.strictRelations'),
+      defaultMessage:
+        'The API only enforces Required on this field when documents.strictRelations is set to true in config/api. Set it, then restart the server. Once enabled, saving or publishing an entry with this field empty is rejected, even if it was accepted before.',
+    },
+  };
+};
+
 const conditionSection = {
   sectionTitle: {
     id: getTrad('form.attribute.condition.title'),
@@ -378,7 +402,7 @@ export const advancedForm = {
       ],
     };
   },
-  relation() {
+  relation(_data: unknown, _step: string, options?: AdvancedFormOptions) {
     return {
       sections: [
         {
@@ -386,7 +410,7 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [attributeOptions.required, attributeOptions.private],
+          items: [relationalRequiredOption(options), attributeOptions.private],
         },
         conditionSection,
       ],

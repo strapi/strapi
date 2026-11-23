@@ -10,6 +10,7 @@ import {
   restoreDatabase,
   snapshotDatabase,
   startServer,
+  writeProbe,
   type InstanceFeatures,
   type Requirements,
   type Server,
@@ -21,8 +22,12 @@ export const UI_APP_NAME = 'ui';
 
 /**
  * When the database goes back to the worker's snapshot (RFC D4):
- * - `file` (default): before the first `beforeAll` or test of each spec file, so a file's
- *   `beforeAll` and tests can build on each other's data but never see another file's;
+ * - `file` (default): before the first `beforeAll` or test of each spec file, so a file's tests
+ *   share what its `beforeAll` wrote but never see another file's data. Don't make a test depend
+ *   on what an earlier test of the file wrote: it breaks when the test runs alone (`--grep`,
+ *   shard), and a failed test restarts the worker, so the next test starts on a fresh snapshot.
+ *   Write shared data in `beforeAll`, or use `test.describe.configure({ mode: 'serial' })` for
+ *   tests that must run in order;
  * - `test`: before every test (and before `beforeAll`), so data a `beforeAll` writes is gone
  *   by the first test. Not before `afterAll`, which sees what the last test wrote.
  * Override it per file with `test.use({ resetScope: 'test' })`.
@@ -98,6 +103,10 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
       // The state every reset goes back to. Seeding and role logins (CMS-1947, CMS-1951) come
       // before this, so their admin sessions survive the resets.
       await snapshotDatabase(server);
+      // The probe row is not in the snapshot: the live database starts one row off it, so even
+      // the first spec file of a worker starts with a real restore, and a reset spec run on its
+      // own (single file, --grep, shard) fails when the restore does nothing.
+      await writeProbe(server);
 
       await use(server);
 
@@ -131,13 +140,8 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
 
   databaseReset: [
     async ({ server, resetScope, databaseOwner }, use, testInfo) => {
-      // The first test of a worker already starts on the snapshot.
-      const dirty = databaseOwner.file !== undefined;
       const newFile = databaseOwner.file !== testInfo.file;
-      if (
-        dirty &&
-        (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll'))
-      ) {
+      if (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll')) {
         await restoreDatabase(server);
       }
       databaseOwner.file = testInfo.file;
