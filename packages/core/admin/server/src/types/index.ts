@@ -22,6 +22,8 @@ import type CEPassportService from '../services/passport';
 import type * as PermissionService from '../services/permission';
 import type { Action, CreateActionPayload, StoredAction } from '../domain/action';
 import type { Condition } from '../domain/condition';
+import type { CreatePermissionPayload } from '../domain/permission';
+import type { CeilingPermission } from '../domain/permission/ceiling';
 import type * as ProjectSettingsService from '../services/project-settings';
 import type { actionRegistrationSchema } from '../validation/action-provider';
 import type CERoleService from '../services/role';
@@ -236,6 +238,7 @@ type RoleServiceOverride =
   | 'getSuperAdmin'
   | 'getSuperAdminWithUsersCount'
   | 'assignPermissions'
+  | 'checkPermissionsCeiling'
   | 'hasSuperAdminRole';
 
 /**
@@ -275,8 +278,18 @@ type StrictRoleService<TService> = Omit<TService, RoleServiceOverride> & {
    * is returned (`differenceBy` in `services/role.ts`).
    */
   assignPermissions(
-    ...args: Parameters<(typeof CERoleService)['assignPermissions']>
+    roleId: Data.ID,
+    permissions?: readonly CreatePermissionPayload[]
   ): Promise<PermissionRow[]>;
+  /**
+   * The permissions to store: a requester cannot grant what they do not hold. Reads the user's `id`
+   * and roles, or the token's permissions and its owner.
+   */
+  checkPermissionsCeiling(
+    requester: { user: UserInput } | { tokenPermissions: CeilingPermission[]; owner: UserInput },
+    roleId: Data.ID,
+    permissions?: CreatePermissionPayload[]
+  ): ReturnType<(typeof CERoleService)['checkPermissionsCeiling']>;
   /** Whether the user has the super admin role. Reads the user's roles. */
   hasSuperAdminRole(user: UserInput): boolean;
 };
@@ -676,11 +689,16 @@ type StrictPermissionQueries = {
   ): Promise<PermissionRow[]>;
   /** The permissions of the user's roles. Reads the user's `id`. */
   findUserPermissions(user: { id: Data.ID }): Promise<PermissionRow[]>;
-  engine: Omit<PermissionEngine, 'generateUserAbility' | 'hooks'> & {
+  engine: Omit<PermissionEngine, 'generateUserAbility' | 'generateTokenAbility' | 'hooks'> & {
     /** The hooks of the engine (`@strapi/permissions`), with typed handlers. */
     readonly hooks: PermissionsEngine.TypedPermissionEngineHooks;
     /** The ability of the user's permissions. The conditions receive the user. */
     generateUserAbility(user: UserInput): ReturnType<PermissionEngine['generateUserAbility']>;
+    /** The ability of the token's permissions. The conditions receive the owner. */
+    generateTokenAbility(
+      tokenPermissions: Parameters<PermissionEngine['generateTokenAbility']>[0],
+      owner: UserInput
+    ): ReturnType<PermissionEngine['generateTokenAbility']>;
   };
 };
 
