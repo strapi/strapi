@@ -48,7 +48,7 @@ const removeDirectoryIfEmpty = async (dir: string) => {
  * union, and a component handler is created with an explicit `Internal.UID.Component`.
  */
 export default function createSchemaHandler<
-  TUID extends SchemaHandlerUID = Internal.UID.ContentType
+  TUID extends SchemaHandlerUID = Internal.UID.ContentType,
 >(infos: Infos<NoInfer<TUID>>) {
   const { category, modelName, plugin, uid, isNew = false, dir, filename, schema } = infos;
 

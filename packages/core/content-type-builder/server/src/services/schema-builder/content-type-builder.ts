@@ -820,8 +820,7 @@ export default function createComponentBuilder() {
               : undefined;
 
           const attributeBeforeSave = contentType.initialSchema?.attributes?.[key] as
-            | InternalAttribute
-            | undefined;
+            InternalAttribute | undefined;
 
           // A pair that the save does not change is not rebuilt: same target, kind and other
           // side as before the save, and the other side as it was before the save. A schema
