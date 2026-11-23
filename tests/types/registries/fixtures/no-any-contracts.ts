@@ -6,7 +6,6 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 // every licensed feature listed sees them: an `any` put back in one of them fails here.
 //
 // Deliberately not guarded, because they still carry `any`:
-// - `admin::content-type.getPermissionsWithNestedFields` `actions`: accepted residual.
 // - `plugin::graphql.builders.get` and `plugin::graphql.utils.mappers.strapiScalarToGraphQLScalar`:
 //   the precise Nexus types are a follow-up.
 // - The rows the round left out: `admin::passport`, the content-manager `relations` controller, the
@@ -264,19 +263,8 @@ declare const adminServiceChecks: [
   Core.Assert<
     Equal<[HasAny<Service<'admin::content-type'>['getNestedFieldsWithIntermediate']>], [false]>
   >,
-  // Every parameter but `actions` (left `any`), and the result.
   Core.Assert<
-    Equal<
-      [
-        HasAny<
-          [
-            Parameters<Service<'admin::content-type'>['getPermissionsWithNestedFields']>[1],
-            ReturnType<Service<'admin::content-type'>['getPermissionsWithNestedFields']>,
-          ]
-        >,
-      ],
-      [false]
-    >
+    Equal<[HasAny<Service<'admin::content-type'>['getPermissionsWithNestedFields']>], [false]>
   >,
 ];
 adminServiceChecks satisfies unknown;
