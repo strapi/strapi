@@ -20,7 +20,7 @@ import type { homepageService } from '../services/homepage';
 import type CEMetricsService from '../services/metrics';
 import type CEPassportService from '../services/passport';
 import type * as PermissionService from '../services/permission';
-import type { Action, CreateActionPayload } from '../domain/action';
+import type { Action, CreateActionPayload, StoredAction } from '../domain/action';
 import type { Condition } from '../domain/condition';
 import type * as ProjectSettingsService from '../services/project-settings';
 import type { actionRegistrationSchema } from '../validation/action-provider';
@@ -414,14 +414,17 @@ type UnknownActionKeys<TAction> = {
   ]: never;
 };
 
-/** What the provider hooks of the action provider receive: the key and the action. */
-type ActionProviderHookContext = { key: string; value: Action };
+/**
+ * What the provider hooks of the action provider receive: the key and the action as the provider
+ * stores it.
+ */
+type ActionProviderHookContext = { key: string; value: StoredAction };
 
 /**
  * What the delete hooks of the action provider receive: the key and its action, read with `get`
  * (`@strapi/utils` `provider-factory.ts` `delete`).
  */
-type ActionProviderDeleteHookContext = { key: string; value: Action | undefined };
+type ActionProviderDeleteHookContext = { key: string; value: StoredAction | undefined };
 
 /** The provider hooks of the action provider (`@strapi/utils` `providerFactory`), with typed handlers. */
 type ActionProviderHooks = {
@@ -429,6 +432,14 @@ type ActionProviderHooks = {
   didRegister: HooksUtils.AsyncParallelHook<(context: ActionProviderHookContext) => unknown>;
   willDelete: HooksUtils.AsyncParallelHook<(context: ActionProviderDeleteHookContext) => unknown>;
   didDelete: HooksUtils.AsyncParallelHook<(context: ActionProviderDeleteHookContext) => unknown>;
+  /** Called by `appliesToProperty` with the action read with `get` (`domain/action/provider.ts`). */
+  appliesPropertyToSubject: HooksUtils.AsyncParallelHook<
+    (context: {
+      property: string;
+      action: StoredAction;
+      subject: NonNullable<Permission['subject']>;
+    }) => unknown
+  >;
 };
 
 /**
@@ -442,7 +453,14 @@ type ActionProviderHooks = {
  */
 type StrictActionProvider = Omit<
   ActionProvider,
-  'hooks' | 'register' | 'registerMany' | 'get' | 'has' | 'appliesToProperty' | 'unstable_aliases'
+  | 'hooks'
+  | 'register'
+  | 'registerMany'
+  | 'get'
+  | 'values'
+  | 'has'
+  | 'appliesToProperty'
+  | 'unstable_aliases'
 > & {
   hooks: Omit<ActionProvider['hooks'], keyof ActionProviderHooks> & ActionProviderHooks;
   register<const TAction extends ActionRegistration>(
@@ -454,7 +472,9 @@ type StrictActionProvider = Omit<
   }): Promise<StrictActionProvider>;
   get<TId extends Core.PermissionActionLookupName>(
     actionId: Core.PermissionActionLookup<TId>
-  ): ReturnType<ActionProvider['get']>;
+  ): StoredAction | undefined;
+  /** Every registered action, as the provider stores it. */
+  values(): StoredAction[];
   has<TId extends Core.PermissionActionLookupName>(
     actionId: Core.PermissionActionLookup<TId>
   ): ReturnType<ActionProvider['has']>;
@@ -467,6 +487,16 @@ type StrictActionProvider = Omit<
     actionId: Core.PermissionActionLookup<TId>,
     subject?: string | null
   ): ReturnType<ActionProvider['unstable_aliases']>;
+};
+
+/**
+ * The `admin::action` service with strict types: the allowed actions of a role are the stored
+ * actions `actionProvider.values()` returns (`services/action.ts`).
+ */
+type StrictActionService = Omit<typeof ActionService, 'getAllowedActionsForRole'> & {
+  getAllowedActionsForRole(
+    ...args: Parameters<(typeof ActionService)['getAllowedActionsForRole']>
+  ): Promise<StoredAction[]>;
 };
 
 type ConditionProvider = (typeof PermissionService)['conditionProvider'];
@@ -603,7 +633,7 @@ type SectionFor<TName extends string> = TName extends keyof BuiltInSections
   : unknown;
 
 /** A section handler: adds what an action contributes to the section, in place. */
-type SectionHandler<TSection> = (context: { action: Action; section: TSection }) => unknown;
+type SectionHandler<TSection> = (context: { action: StoredAction; section: TSection }) => unknown;
 
 /** The sections builder members written for strict types: handlers receive their section. */
 type StrictSectionsBuilderMembers = {
@@ -613,7 +643,7 @@ type StrictSectionsBuilderMembers = {
     options: {
       initialStateFactory?: () => TSection;
       handlers?: SectionHandler<TSection>[];
-      matchers?: ((action: Action) => unknown)[];
+      matchers?: ((action: StoredAction) => unknown)[];
     }
   ): StrictSectionsBuilder;
   deleteSection(sectionName: string): StrictSectionsBuilder;
@@ -621,9 +651,12 @@ type StrictSectionsBuilderMembers = {
     sectionName: TName,
     handler: SectionHandler<SectionFor<TName>>
   ): StrictSectionsBuilder;
-  addMatcher(sectionName: string, matcher: (action: Action) => unknown): StrictSectionsBuilder;
+  addMatcher(
+    sectionName: string,
+    matcher: (action: StoredAction) => unknown
+  ): StrictSectionsBuilder;
   /** Every section built from the actions, by section name. */
-  build(actions?: Action[]): Promise<BuiltInSections & Record<string, unknown>>;
+  build(actions?: readonly StoredAction[]): Promise<BuiltInSections & Record<string, unknown>>;
 };
 
 type StrictSectionsBuilder = Omit<SectionsBuilder, keyof StrictSectionsBuilderMembers> &
@@ -843,7 +876,7 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
       interface PackageServices {
-        'admin::action': typeof ActionService;
+        'admin::action': Core.IsStrict extends true ? StrictActionService : typeof ActionService;
         /** @deprecated Use 'admin::api-token-content-api' instead */
         'admin::api-token': Core.IsStrict extends true
           ? StrictContentApiTokenService
