@@ -4,9 +4,10 @@ import os from 'node:os';
 import path from 'node:path';
 
 /**
- * A new TypeScript project enables `typescript.strictTypes` by default. `strapi build` compiles the
- * server with diagnostics enforced (`noEmitOnError: true` in the templates), so a scaffolded
- * project must type-check with zero diagnostics once its types are generated.
+ * A new TypeScript project ships `typescript.strictTypes: false`, and the application opts in by
+ * setting it to `true`. `strapi build` compiles the server with diagnostics enforced
+ * (`noEmitOnError: true` in the templates), so a scaffolded project must type-check with zero
+ * diagnostics once its types are generated, with strict types off and on.
  *
  * Projects are scaffolded without installing dependencies; their `node_modules` links to the
  * monorepo's, so `@strapi/*` resolve to the built workspace packages.
@@ -76,13 +77,19 @@ function scaffold(projectDir: string, args: string[]) {
   fs.symlinkSync(repoNodeModules, nodeModules, 'dir');
 }
 
-function setStrictTypes(projectDir: string, strictTypes: boolean) {
-  const configPath = path.join(projectDir, 'config', 'typescript.ts');
-  const config = fs.readFileSync(configPath, 'utf8');
+function readTypeScriptConfig(projectDir: string) {
+  return fs.readFileSync(path.join(projectDir, 'config', 'typescript.ts'), 'utf8');
+}
 
-  expect(config).toContain('strictTypes: true');
+function enableStrictTypes(projectDir: string) {
+  const config = readTypeScriptConfig(projectDir);
 
-  fs.writeFileSync(configPath, config.replace('strictTypes: true', `strictTypes: ${strictTypes}`));
+  expect(config).toContain('strictTypes: false');
+
+  fs.writeFileSync(
+    path.join(projectDir, 'config', 'typescript.ts'),
+    config.replace('strictTypes: false', 'strictTypes: true')
+  );
 }
 
 function generateTypes(projectDir: string) {
@@ -116,17 +123,25 @@ describe('create-strapi-app strict types', () => {
   });
 
   it.each(TS_TEMPLATES)(
-    'the $template template compiles with strict types enabled by default',
+    'the $template template keeps strict types off by default and compiles',
     ({ args }) => {
       const projectDir = mkProjectDir();
 
       try {
         scaffold(projectDir, args);
+
+        const config = readTypeScriptConfig(projectDir);
+        expect(config).toContain('strictTypes: false');
+        expect(config).not.toContain('strictTypes: true');
+
         generateTypes(projectDir);
 
-        expect(generatedFiles(projectDir)).toEqual(
-          expect.arrayContaining([...BASE_ARTIFACTS, ...STRICT_ARTIFACTS])
-        );
+        const files = generatedFiles(projectDir);
+
+        expect(files).toEqual(expect.arrayContaining(BASE_ARTIFACTS));
+        for (const artifact of STRICT_ARTIFACTS) {
+          expect(files).not.toContain(artifact);
+        }
 
         typeCheck(projectDir);
       } finally {
@@ -136,21 +151,18 @@ describe('create-strapi-app strict types', () => {
   );
 
   it.each(TS_TEMPLATES)(
-    'the $template template compiles without the strict artifacts when strictTypes is false',
+    'the $template template compiles with strict types after setting strictTypes to true',
     ({ args }) => {
       const projectDir = mkProjectDir();
 
       try {
         scaffold(projectDir, args);
-        setStrictTypes(projectDir, false);
+        enableStrictTypes(projectDir);
         generateTypes(projectDir);
 
-        const files = generatedFiles(projectDir);
-
-        expect(files).toEqual(expect.arrayContaining(BASE_ARTIFACTS));
-        for (const artifact of STRICT_ARTIFACTS) {
-          expect(files).not.toContain(artifact);
-        }
+        expect(generatedFiles(projectDir)).toEqual(
+          expect.arrayContaining([...BASE_ARTIFACTS, ...STRICT_ARTIFACTS])
+        );
 
         typeCheck(projectDir);
       } finally {

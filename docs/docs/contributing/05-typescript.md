@@ -11,14 +11,17 @@ types must stay those of the previous release.
 
 ## Strict types in applications
 
-The TypeScript templates of `create-strapi-app` turn strict types on in `config/typescript.ts`:
+Strict types are opt-in. The TypeScript templates of `create-strapi-app` write
+`config/typescript.ts` with strict types off, and an application turns them on by setting
+`strictTypes: true`:
 
 ```ts
 // config/typescript.ts
 import type { Core } from '@strapi/strapi';
 
 const config: Core.Config.TypeScript = {
-  strictTypes: true,
+  // Set to true to turn strict types on
+  strictTypes: false,
   // With a license, list its features (e.g. 'sso') to type their license-gated contracts
   // licensedFeatures: [],
 };
@@ -26,8 +29,9 @@ const config: Core.Config.TypeScript = {
 export default config;
 ```
 
-- Default on means the template sets the flag. An application without `typescript.strictTypes`,
-  such as one created before this release, keeps strict types off.
+- Strict types stay off unless the application sets the flag to `true`: a new application gets
+  `strictTypes: false`, and one without `typescript.strictTypes`, such as one created before this
+  release, keeps strict types off.
 - With the flag, `strapi develop` and `strapi ts:generate-types` also generate
   `types/generated/strict.d.ts`, `plugins.d.ts`, and the application's service, controller, policy
   and middleware registries. Read
@@ -41,9 +45,9 @@ export default config;
 - A frontend or a types-only package includes `contentTypes.d.ts` and `components.d.ts`, and is
   typed as without strict types unless it also includes `strict.d.ts`. Read
   [Frontends and types-only packages](../packages/core/types/type-system/02-concepts/03-public-registry.mdx#frontends-and-types-only-packages).
-- To opt out, set `strictTypes: false` or remove the key. The next type generation removes the
-  strict files, and the types are those of the previous release. A value that is not a boolean
-  fails type generation with a `ValidationError`.
+- To turn strict types off again, set `strictTypes: false` or remove the key. The next type
+  generation removes the strict files, and the types are those of the previous release. A value
+  that is not a boolean fails type generation with a `ValidationError`.
 - Code that must compile with strict types on and off, such as a plugin or a library, annotates its
   callback parameters. With strict types on, the contracts type them by context. With strict types
   off, the services are `any`, so the template's `strict: true` reports each unannotated parameter
@@ -722,7 +726,7 @@ storage key the runtime builds from the params of `strapi.store`: `<type>_<name>
 `<type>_<key>` without a name (`packages/core/core/src/services/core-store.ts`). For example,
 `{ type: 'plugin', name: 'i18n', key: 'default_locale' }` reads `plugin_i18n_default_locale`. Keys
 built at runtime register a template-literal key, e.g.
-``[key: `core_admin_homepage-layout:${string}`]``.
+`` [key: `core_admin_homepage-layout:${string}`] ``.
 
 - The value is the shape the owner writes, as JSON: a `Date` is read back as a string and
   `undefined` properties are dropped. Declare it explicitly rather than reusing a type that holds

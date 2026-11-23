@@ -450,7 +450,7 @@ The Document Service switches to precise types per UID (`Constants.IsSchemaRegis
 
 Toggling the flag rewrites both files on the next generation: turning it off drops the global block and keeps the `Public` one. A hand-written `Public` schema augmentation has no effect in strict mode: an application runs type generation instead of declaring its schemas by hand.
 
-Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts`, `services.ts`, `controllers.ts`, `policies.ts` and `middlewares.ts` (and an older `.d.ts` of the last four) if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
+Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts`, `services.ts`, `controllers.ts`, `policies.ts` and `middlewares.ts` (and an older `.d.ts` of the last four) if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: false`: an application opts in by setting it to `true`.
 
 ###### Frontends and types-only packages
 
