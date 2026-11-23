@@ -9,10 +9,10 @@ import {
 
 import { parsePublicationFilter, getPublicationFilterCondition } from '../publication-filter';
 
-import { pickAllowedQueryParams } from '../params';
+import { pickAllowedQueryParams, type DocumentQueryParams } from '../params';
 
-const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
-  const rawParams = (params ?? {}) as Record<string, unknown>;
+const transformParamsToQuery = curry((uid: UID.Schema, params: DocumentQueryParams) => {
+  const rawParams: DocumentQueryParams = params ?? {};
   const allowlisted = pickAllowedQueryParams(rawParams);
   const query = strapi.get('query-params').transform(uid, allowlisted);
 
