@@ -65,8 +65,8 @@ const CORE_HEADERS = new Set(['authorization', 'content-type', 'accept']);
 
 /**
  * Registers a function whose headers are added to every request the admin sends
- * to the Strapi server through the fetch client. Unstable: the API can change in
- * a minor release.
+ * to the Strapi server through the fetch client. Auth and pre-login paths do not
+ * read the providers. Unstable: the API can change in a minor release.
  *
  * @returns A function that removes the provider.
  */

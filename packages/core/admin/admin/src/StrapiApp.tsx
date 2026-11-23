@@ -249,7 +249,7 @@ class StrapiApp {
    * a retry after a 401 reuses it. A provider cannot replace `Authorization`,
    * `Content-Type` or `Accept`. If a provider throws or returns an invalid header
    * name or value, the request fails with a `RequestHeadersError` instead of being
-   * sent without the header.
+   * sent without the header. Auth and pre-login paths do not read the providers.
    * Unstable: the API can change in a minor release.
    *
    * @returns A function that removes the provider.
