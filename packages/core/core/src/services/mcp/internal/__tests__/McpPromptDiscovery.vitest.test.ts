@@ -15,7 +15,7 @@ const createStrapi = () =>
   ({
     log: { error: vi.fn(), info: vi.fn(), debug: vi.fn() },
     telemetry: { send: vi.fn().mockResolvedValue(true) },
-  }) as unknown as Core.Strapi;
+  } as unknown as Core.Strapi);
 
 const createHandler = () => async () => ({
   messages: [{ role: 'user' as const, content: { type: 'text' as const, text: 'ok' } }],
@@ -120,7 +120,7 @@ describe('MCP prompt discovery', () => {
         ).resolves.toMatchObject({ messages: [{ role: 'user' }] });
         await expect(
           client.getPrompt({ name: 'unconvertible', arguments: { due: '2026-09-17' } })
-        ).rejects.toThrow();
+        ).rejects.toThrow(/Prompt unconvertible not found/);
       } finally {
         await close();
       }
@@ -135,17 +135,20 @@ describe('MCP prompt discovery', () => {
     definePrompt(prompts, 'not-an-object', z.string());
     definePrompt(prompts, 'healthy', z.object({ topic: z.string() }));
 
-    const { client, close } = await connectClient(strapi, prompts);
+    const { client, registries, close } = await connectClient(strapi, prompts);
 
     try {
       const { prompts: advertisedPrompts } = await client.listPrompts();
 
       expect(advertisedPrompts.map((prompt) => prompt.name)).toEqual(['healthy']);
+      expect(strapi.log.error).toHaveBeenCalledTimes(1);
       expect(strapi.log.error).toHaveBeenCalledWith(
         expect.stringContaining(
           '[MCP] Failed to register prompt "not-an-object" with MCP server: argsSchema cannot be converted to JSON Schema: '
         )
       );
+      expect(registries.prompts.status('not-an-object')).toBe('disabled');
+      expect(registries.prompts.status('healthy')).toBe('enabled');
     } finally {
       await close();
     }
