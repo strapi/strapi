@@ -130,6 +130,7 @@ dist
 build
 .strapi-updater.json
 .strapi-cloud.json
+.strapi-credentials.json
 `;
 
 export const gitIgnore = baseGitIgnore.trim();
