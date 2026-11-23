@@ -12,8 +12,11 @@ const bin = path.join(repoRoot, 'packages/cli/create-strapi-app/bin/index.js');
 const baseScaffoldArgs = ['--non-interactive', '--no-install', '--no-git-init'];
 
 // Every flag that would otherwise open a prompt, so a run without --non-interactive completes
-// only if no other prompt (such as the removed Strapi Cloud login) is asked
+// only if no other prompt (such as the removed Strapi Cloud login) is asked.
+// The child process has no terminal, so `--interactive` keeps the prompts on: without it the CLI
+// switches to non-interactive mode and an unanswered prompt would go unnoticed.
 const promptFreeArgs = [
+  '--interactive',
   '--typescript',
   '--no-example',
   '--skip-db',

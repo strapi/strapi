@@ -57,7 +57,8 @@ const isBlank = (value: string | undefined) => value === undefined || value.trim
 
 export async function getDatabaseInfos(
   options: Options,
-  skipPrompts = options.quickstart || options.nonInteractive
+  // Required: the caller passes the result of `resolvePromptMode()`, which also checks CI and the terminal
+  skipPrompts: boolean
 ): Promise<DBConfig> {
   if (options.skipDb) {
     return DEFAULT_CONFIG;

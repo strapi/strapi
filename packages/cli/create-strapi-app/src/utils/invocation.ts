@@ -86,8 +86,9 @@ export type PromptMode =
 /**
  * Tells whether the CLI can ask questions. Signals, strongest first:
  * 1. `--non-interactive`: never ask.
- * 2. `--interactive`: do not switch off the prompts in CI or without a terminal. This restores the old
- *    behavior, for example to read answers piped on stdin. `--quickstart` still skips the prompts.
+ * 2. `--interactive`: do not switch off the prompts in CI or without a terminal. `--quickstart` still
+ *    skips the prompts. Each prompt opens its own readline, so the first prompt reads all of a piped
+ *    stdin: answers must arrive one at a time, after each prompt shows.
  * 3. CI: nobody answers, even with a terminal.
  * 4. No terminal on stdin or stdout: the prompts cannot read answers or cannot be seen.
  */

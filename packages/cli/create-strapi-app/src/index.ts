@@ -63,7 +63,7 @@ const command = new commander.Command('create-strapi-app')
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')
   .option(
     '--interactive',
-    'Do not switch to --non-interactive mode in CI or without a terminal (use it to pipe answers on stdin)'
+    'Keep the prompts in CI or without a terminal, instead of switching to --non-interactive mode'
   )
   .option(
     '--agent <name>',
