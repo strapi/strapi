@@ -9,6 +9,15 @@ import * as z from 'zod/v4';
 // eslint-disable-next-line import/no-cycle
 import * as attributes from './attributes';
 
+/**
+ * An attribute the mappers convert. An enumeration may have no `enum`
+ * (`attributes.EnumerationAttribute`): a custom field is mapped again with its underlying type, and
+ * an enumeration custom field can be registered without an `enum` option.
+ */
+type MappedAttribute =
+  | Exclude<Schema.Attribute.AnyAttribute, Schema.Attribute.Enumeration<string[]>>
+  | attributes.EnumerationAttribute;
+
 const isCustomFieldAttribute = (
   attribute: unknown
 ): attribute is { type: 'customField'; customField: string } => {
@@ -102,7 +111,7 @@ export const createAttributesInputSchema = (
  */
 export const mapAttributeToSchema = (
   strapi: Core.Strapi,
-  attribute: Schema.Attribute.AnyAttribute
+  attribute: MappedAttribute
 ): z.ZodTypeAny => {
   switch (attribute.type) {
     case 'biginteger':
@@ -207,7 +216,7 @@ export const mapAttributeToSchema = (
  */
 export const mapAttributeToInputSchema = (
   strapi: Core.Strapi,
-  attribute: Schema.Attribute.AnyAttribute
+  attribute: MappedAttribute
 ): z.ZodTypeAny => {
   switch (attribute.type) {
     case 'biginteger':
