@@ -731,19 +731,11 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
 
 //  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
 const pickPopulateParams = (populate: Record<string, unknown>) => {
-  const fieldsToPick = [
-    'select',
-    'count',
-    'where',
-    'populate',
-    'orderBy',
-    'filters',
-    'ordering',
-    'on',
-  ];
+  const fieldsToPick = ['select', 'count', 'where', 'populate', 'filters', 'on'];
 
+  // A count needs no order, and its GROUP BY rejects an ORDER BY on Postgres and MySQL
   if (populate.count !== true) {
-    fieldsToPick.push('limit', 'offset');
+    fieldsToPick.push('limit', 'offset', 'orderBy', 'ordering');
   }
 
   return _.pick(populate, fieldsToPick);
