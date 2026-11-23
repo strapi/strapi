@@ -8,6 +8,7 @@ export { createStrapiFetch, Fetch } from './fetch';
 export { convertCustomFieldType } from './convert-custom-field-type';
 export { createStartupLogger } from './startup-logger';
 export { transformContentTypesToModels } from './transform-content-types-to-models';
+export { validateDynamicZoneComponents } from './validate-dynamic-zone-components';
 export { destroyOnSignal } from './signals';
 export { LIFECYCLES } from './lifecycles';
 export { resolveWorkingDirectories } from './resolve-working-dirs';
