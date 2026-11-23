@@ -1,15 +1,18 @@
+import type { Core } from '@strapi/types';
+
 import { getService } from '../utils';
+import type { ComponentsController } from '../types/controllers';
 import { createModelConfigurationSchema } from './validation';
 
 export default {
-  findComponents(ctx: any) {
+  findComponents(ctx) {
     const components = getService('components').findAllComponents();
     const { toDto } = getService('data-mapper');
 
     ctx.body = { data: components.map(toDto) };
   },
 
-  async findComponentConfiguration(ctx: any) {
+  async findComponentConfiguration(ctx) {
     const { uid } = ctx.params;
 
     const componentService = getService('components');
@@ -31,7 +34,7 @@ export default {
     };
   },
 
-  async updateComponentConfiguration(ctx: any) {
+  async updateComponentConfiguration(ctx) {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
@@ -61,4 +64,4 @@ export default {
 
     ctx.body = { data: newConfiguration };
   },
-};
+} satisfies Core.Implements<ComponentsController>;

@@ -1,7 +1,10 @@
+import type { Core } from '@strapi/types';
+
 import { getService } from '../utils';
+import type { InitController } from '../types/controllers';
 
 export default {
-  async getInitData(ctx: any) {
+  async getInitData(ctx) {
     const { toDto } = getService('data-mapper');
     const { findAllComponents } = getService('components');
     const { getAllFieldSizes } = getService('field-sizes');
@@ -19,4 +22,4 @@ export default {
       },
     };
   },
-};
+} satisfies Core.Implements<InitController>;
