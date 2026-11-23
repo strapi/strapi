@@ -91,7 +91,6 @@ test.describe('Create collection type with all field types', () => {
             type: 'oneWay',
             target: { select: 'Article', name: 'testonewayrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -100,7 +99,6 @@ test.describe('Create collection type with all field types', () => {
             type: 'oneToOne',
             target: { select: 'Article', name: 'testonetoonerelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -109,7 +107,6 @@ test.describe('Create collection type with all field types', () => {
             type: 'oneToMany',
             target: { select: 'Article', name: 'testonetomanyrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -118,7 +115,6 @@ test.describe('Create collection type with all field types', () => {
             type: 'manyToOne',
             target: { select: 'Article', name: 'testmanytoonerelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -127,7 +123,6 @@ test.describe('Create collection type with all field types', () => {
             type: 'manyToMany',
             target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -136,7 +131,6 @@ test.describe('Create collection type with all field types', () => {
             type: 'manyWay',
             target: { select: 'Article', name: 'testmanywayrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'enumeration',

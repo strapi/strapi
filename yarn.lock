@@ -9619,7 +9619,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.63.0"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
     react: ^18.0.0
@@ -9739,7 +9739,7 @@ __metadata:
     slate-react: "npm:0.98.4"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^18.0.0
@@ -9848,7 +9848,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.63.0"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^18.0.0
@@ -9944,7 +9944,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.63.0"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   languageName: unknown
   linkType: soft
 
@@ -10096,7 +10096,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.63.0"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@types/koa": ^2.13.5 || ^3
@@ -10200,7 +10200,7 @@ __metadata:
     react-router-dom: "npm:6.30.6"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
@@ -10249,7 +10249,7 @@ __metadata:
     debug: "npm:4.3.4"
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   languageName: unknown
   linkType: soft
 
@@ -10491,7 +10491,7 @@ __metadata:
     styled-components: "npm:6.4.1"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
@@ -10851,7 +10851,7 @@ __metadata:
     undici: "npm:8.12.4"
     vitest: "catalog:"
     vitest-config: "npm:5.63.0"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@types/koa": ^2.13.5 || ^3
   peerDependenciesMeta:
@@ -11006,7 +11006,7 @@ __metadata:
     sharp: "npm:0.35.5"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^18.0.0
@@ -11040,7 +11040,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.63.0"
     yup: "npm:0.32.9"
-    zod: "npm:4.4.3"
+    zod: "npm:4.6.7"
   languageName: unknown
   linkType: soft
 
@@ -26543,15 +26543,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-2@npm:prettier@^2":
-  version: 2.8.8
-  resolution: "prettier@npm:2.8.8"
-  bin:
-    prettier: bin-prettier.js
-  checksum: 10c0/463ea8f9a0946cd5b828d8cf27bd8b567345cf02f56562d5ecde198b91f47a76b7ac9eae0facd247ace70e927143af6135e8cf411986b8cb8478784a4d6d724a
-  languageName: node
-  linkType: hard
-
 "prettier-linter-helpers@npm:^1.0.0, prettier-linter-helpers@npm:^1.0.1":
   version: 1.0.1
   resolution: "prettier-linter-helpers@npm:1.0.1"
@@ -29170,7 +29161,6 @@ __metadata:
     oxlint: "npm:1.72.0"
     plop: "npm:4.0.5"
     prettier: "npm:3.9.9"
-    prettier-2: "npm:prettier@^2"
     qs: "npm:6.17.0"
     rimraf: "npm:6.1.3"
     rollup: "npm:4.60.4"
@@ -32114,10 +32104,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:4.4.3":
-  version: 4.4.3
-  resolution: "zod@npm:4.4.3"
-  checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
+"zod@npm:4.6.7, zod@npm:^4.2.0":
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
 
@@ -32125,13 +32115,6 @@ __metadata:
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
-  languageName: node
-  linkType: hard
-
-"zod@npm:^4.2.0":
-  version: 4.5.4
-  resolution: "zod@npm:4.5.4"
-  checksum: 10c0/511a2a4d1a6f875dfdd70a1586989a8b14ef126776cd6218a2c760b9f65f14ef389ec20d92ee1aa4fcb4566d4ff3fa012956044f9dc503510d82e4c756a8ba92
   languageName: node
   linkType: hard
 

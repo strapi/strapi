@@ -538,6 +538,19 @@ export default {
     });
 
     /**
+     * A page without relations (no relation, or a page past the last one) has no main field to
+     * load: return it as is.
+     */
+    if (res.results.length === 0) {
+      ctx.body = {
+        pagination: res.pagination || defaultPagination(0),
+        results: [],
+      };
+
+      return;
+    }
+
+    /**
      * Add all ids to load in permissionQuery
      * If any of the relations are not accessible, the permissionQuery will exclude them
      */
@@ -556,7 +569,7 @@ export default {
       ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
       page: 1,
-      pageSize: Math.max(loadedIds.length, 1),
+      pageSize: loadedIds.length,
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority

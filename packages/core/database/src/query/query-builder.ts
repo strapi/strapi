@@ -9,6 +9,7 @@ import { applyQueryTimeout, isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
+import type { QueryScopeContext } from './scopes';
 
 interface State {
   type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
@@ -36,6 +37,8 @@ interface State {
   filters: any;
   search: string;
   processed: boolean;
+  /** False for the subquery of a join scope, so it does not apply the scope conditions twice */
+  scoped: boolean;
 }
 
 export interface QueryBuilder {
@@ -128,6 +131,9 @@ export interface QueryBuilder {
   stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
 
+const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
+  ['select', 'count', 'update', 'delete'].includes(type);
+
 const createQueryBuilder = (
   uid: string,
   db: Database,
@@ -162,7 +168,38 @@ const createQueryBuilder = (
     filters: null,
     search: null,
     processed: false,
+    scoped: true,
   });
+
+  const isScoped = () => state.scoped && !db.unstable_scopes.isEmpty();
+
+  // EXISTS, not IN: with IN, SQLite probes the link index once per row and per visible id
+  const scopeJoin = (alias: string, targetUid: string, idColumn = 'id') => {
+    // A join reads its target, also inside an update or delete
+    const wheres = db.unstable_scopes.where({
+      uid: targetUid,
+      meta: db.metadata.get(targetUid),
+      type: 'select',
+    });
+
+    if (wheres.length === 0) {
+      return undefined;
+    }
+
+    // The subquery takes its aliases from this query's counter, so none can shadow an outer alias
+    const sub = createQueryBuilder(targetUid, db, {
+      scoped: false,
+      aliasCounter: state.aliasCounter,
+    })
+      .select([db.connection.raw('1')])
+      .where({ id: db.connection.ref(`${alias}.${idColumn}`) });
+    wheres.forEach((where) => sub.where(where));
+
+    const query = sub.getKnexQuery();
+    state.aliasCounter = sub.state.aliasCounter;
+
+    return db.connection.raw('exists ?', [query]);
+  };
 
   const getAlias = () => {
     const alias = `t${state.aliasCounter}`;
@@ -441,16 +478,30 @@ const createQueryBuilder = (
       // against it. The clone inherits processed: true and must only read shared arrays.
       const sub = this.clone();
       sub.alias = this.alias;
+      // The clone shares these arrays: on the inner SELECT they would make it an UPDATE
+      sub.state.increments = [];
+      sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const qb = db.getConnection(tableName);
+      const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
 
-      if (originalType === 'update') {
-        return qb.update(state.data).whereIn('id', nestedSubQuery);
+      if (state.transaction) {
+        qb.transacting(state.transaction);
       }
 
-      return qb.delete().whereIn('id', nestedSubQuery);
+      if (originalType === 'delete') {
+        return qb.delete();
+      }
+
+      if (state.data) {
+        qb.update(state.data);
+      }
+
+      state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+
+      return qb;
     },
 
     processState() {
@@ -472,7 +523,21 @@ const createQueryBuilder = (
         }
       }
 
+      const scopeType = isScoped() && isScopedType(state.type) ? state.type : null;
+
+      // Copy instead of push: clones share the state.where array, so a push would scope them twice
+      if (scopeType) {
+        state.where = [...state.where, ...db.unstable_scopes.where({ uid, meta, type: scopeType })];
+      }
+
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
+
+      // After processWhere, so the joins that filters add are scoped too
+      if (scopeType) {
+        state.joins = state.joins.map((join) =>
+          join.uid ? { ...join, scope: scopeJoin(join.alias, join.uid, join.idColumn) } : join
+        );
+      }
 
       // processWhere emits bare root columns while type is still update/delete
       // (mustUseAlias is false). Qualify them now that joins from the relation
