@@ -17,7 +17,6 @@ frontend:
   - 'packages/**/admin/ee/admin/**'
   - 'packages/**/strapi-admin.js'
   - 'packages/**/admin/tests/**'
-  - 'packages/**/vitest*.config.*'
   - 'packages/admin-test-utils/**'
   - 'jest-preset.front.js'
   - 'fileTransformer.js'
