@@ -1,6 +1,7 @@
 import { pick } from 'lodash';
 import type { UID, Modules } from '@strapi/types';
 import { SHARED_QUERY_PARAM_KEYS } from '@strapi/utils';
+import type { queryParams } from '@strapi/utils';
 
 /**
  * Division of allowlists:
@@ -33,14 +34,22 @@ export const ALLOWED_DOCUMENT_ROOT_PARAM_KEYS = [
   'ordering',
 ] as const;
 
+/**
+ * The params the document service passes to `transformParamsToQuery` once its pipeline ran: the
+ * query params the query params transform converts, and the `lookup` conditions the pipeline adds
+ * (status, locale, document ID). The transform passes `locale` and `withCount` through as they are.
+ */
+export type DocumentQueryParams = queryParams.Params & {
+  locale?: unknown;
+  withCount?: unknown;
+  lookup?: Record<string, unknown>;
+};
+
 /** Restrict to allowed query keys so only these reach the query-params transformer (security). */
 export const pickAllowedQueryParams = (
-  params: Record<string, unknown>
-): Record<(typeof ALLOWED_DOCUMENT_PARAM_KEYS)[number], unknown> =>
-  pick(params, ALLOWED_DOCUMENT_PARAM_KEYS as unknown as string[]) as Record<
-    (typeof ALLOWED_DOCUMENT_PARAM_KEYS)[number],
-    unknown
-  >;
+  params: DocumentQueryParams
+): Pick<DocumentQueryParams, (typeof ALLOWED_DOCUMENT_PARAM_KEYS)[number]> =>
+  pick(params, ALLOWED_DOCUMENT_PARAM_KEYS);
 
 const pickSelectionParams = <TUID extends UID.ContentType>(
   data: unknown
