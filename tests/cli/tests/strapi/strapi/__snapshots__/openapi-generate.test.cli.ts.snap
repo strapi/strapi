@@ -23,13 +23,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "lastname": {
@@ -88,13 +84,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -161,13 +153,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "name": {
@@ -217,13 +205,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -276,15 +260,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "array",
           },
           "boolean": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
           "categories_m2m": {
             "description": "A relational field",
@@ -330,7 +310,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           "email": {
             "description": "An email field",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string",
           },
           "enum": {
@@ -344,13 +324,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "json": {
@@ -481,13 +457,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -520,15 +492,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "visible": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
         },
         "required": [
@@ -564,13 +532,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -638,13 +602,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "images": {
@@ -655,16 +615,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "array",
           },
           "isAvailable": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "default": true,
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
           "locale": {
             "description": "A string field",
@@ -754,13 +710,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "manyToMany": {
@@ -829,13 +781,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "name": {
@@ -887,13 +835,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -950,13 +894,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -1013,13 +953,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "integer",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "locale": {
@@ -1074,13 +1010,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "identifiers": {
@@ -1118,7 +1050,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           "uniqueEmail": {
             "description": "An email field",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string",
           },
           "uniqueNumber": {
@@ -1153,15 +1085,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "array",
           },
           "boolean": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
           "date": {
             "description": "A date field",
@@ -1170,7 +1098,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           "email": {
             "description": "An email field",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string",
           },
           "enum": {
@@ -1251,16 +1179,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "array",
           },
           "indexable": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "default": false,
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
           "title": {
             "description": "A string field",
@@ -1315,13 +1239,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "integer",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "mime": {
@@ -1401,13 +1321,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "publishedAt": {
@@ -1451,13 +1367,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "name": {
@@ -1505,28 +1417,20 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         "additionalProperties": false,
         "properties": {
           "blocked": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "default": false,
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
           "confirmed": {
-            "anyOf": [
-              {
-                "type": "boolean",
-              },
-              {
-                "type": "null",
-              },
-            ],
             "default": false,
             "description": "A boolean field",
+            "type": [
+              "boolean",
+              "null",
+            ],
           },
           "createdAt": {
             "description": "A datetime field",
@@ -1541,17 +1445,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           "email": {
             "description": "An email field",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string",
           },
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "number",
-              },
+            "type": [
+              "string",
+              "number",
             ],
           },
           "provider": {
@@ -1631,7 +1531,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           "ComponentEmail": {
             "description": "An email field",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string",
           },
           "ComponentNumberBigInteger": {
@@ -2043,13 +1943,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "locale": {
@@ -2425,13 +2321,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -2722,13 +2614,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -3103,13 +2991,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -3428,13 +3312,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -3600,13 +3480,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "description": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string",
-                                    },
-                                    {
-                                      "type": "null",
-                                    },
+                                  "type": [
+                                    "string",
+                                    "null",
                                   ],
                                 },
                                 "id": {
@@ -3726,7 +3602,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 "properties": {
                   "email": {
                     "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                     "type": "string",
                   },
                 },
@@ -3860,13 +3736,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "description": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string",
-                                    },
-                                    {
-                                      "type": "null",
-                                    },
+                                  "type": [
+                                    "string",
+                                    "null",
                                   ],
                                 },
                                 "id": {
@@ -3960,7 +3832,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 "properties": {
                   "email": {
                     "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                     "type": "string",
                   },
                   "password": {
@@ -4035,13 +3907,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                       "type": "string",
                                     },
                                     "description": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string",
-                                        },
-                                        {
-                                          "type": "null",
-                                        },
+                                      "type": [
+                                        "string",
+                                        "null",
                                       ],
                                     },
                                     "id": {
@@ -4139,13 +4007,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                       "type": "string",
                                     },
                                     "description": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string",
-                                        },
-                                        {
-                                          "type": "null",
-                                        },
+                                      "type": [
+                                        "string",
+                                        "null",
                                       ],
                                     },
                                     "id": {
@@ -4363,13 +4227,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "description": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string",
-                                    },
-                                    {
-                                      "type": "null",
-                                    },
+                                  "type": [
+                                    "string",
+                                    "null",
                                   ],
                                 },
                                 "id": {
@@ -4463,7 +4323,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 "properties": {
                   "email": {
                     "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                     "type": "string",
                   },
                 },
@@ -4640,13 +4500,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "description": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string",
-                                    },
-                                    {
-                                      "type": "null",
-                                    },
+                                  "type": [
+                                    "string",
+                                    "null",
                                   ],
                                 },
                                 "id": {
@@ -5043,13 +4899,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "name": {
@@ -5373,13 +5225,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -5629,13 +5477,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -5957,13 +5801,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -6231,13 +6071,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -6577,13 +6413,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "locale": {
@@ -6870,13 +6702,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -7089,13 +6917,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -7384,13 +7208,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -7621,13 +7441,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -8108,15 +7924,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "array",
                           },
                           "boolean": {
-                            "anyOf": [
-                              {
-                                "type": "boolean",
-                              },
-                              {
-                                "type": "null",
-                              },
-                            ],
                             "description": "A boolean field",
+                            "type": [
+                              "boolean",
+                              "null",
+                            ],
                           },
                           "categories_m2m": {
                             "description": "A relational field",
@@ -8162,7 +7974,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "email": {
                             "description": "An email field",
                             "format": "email",
-                            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                             "type": "string",
                           },
                           "enum": {
@@ -8176,13 +7988,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "json": {
@@ -8581,7 +8389,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "email": {
                         "description": "An email field",
                         "format": "email",
-                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                        "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                         "type": "string",
                       },
                       "enum": {
@@ -8731,15 +8539,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "boolean": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "categories_m2m": {
                           "description": "A relational field",
@@ -8785,7 +8589,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "email": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "enum": {
@@ -8799,13 +8603,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "json": {
@@ -9145,15 +8945,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "boolean": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "categories_m2m": {
                           "description": "A relational field",
@@ -9199,7 +8995,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "email": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "enum": {
@@ -9213,13 +9009,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "json": {
@@ -9715,15 +9507,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "boolean": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "categories_m2m": {
                           "description": "A relational field",
@@ -9769,7 +9557,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "email": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "enum": {
@@ -9783,13 +9571,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "json": {
@@ -10135,7 +9919,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "email": {
                         "description": "An email field",
                         "format": "email",
-                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                        "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                         "type": "string",
                       },
                       "enum": {
@@ -10280,15 +10064,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "boolean": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "categories_m2m": {
                           "description": "A relational field",
@@ -10334,7 +10114,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "email": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "enum": {
@@ -10348,13 +10128,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "json": {
@@ -10818,25 +10594,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "isActive": {
-                            "anyOf": [
-                              {
-                                "type": "boolean",
-                              },
-                              {
-                                "type": "null",
-                              },
-                            ],
                             "description": "A boolean field",
+                            "type": [
+                              "boolean",
+                              "null",
+                            ],
                           },
                           "publishedAt": {
                             "default": "<generated-at-runtime>",
@@ -11174,25 +10942,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "isActive": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "publishedAt": {
                           "default": "<generated-at-runtime>",
@@ -11439,25 +11199,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "isActive": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "publishedAt": {
                           "default": "<generated-at-runtime>",
@@ -11780,25 +11532,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "isActive": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "publishedAt": {
                           "default": "<generated-at-runtime>",
@@ -12080,25 +11824,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "isActive": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "publishedAt": {
                           "default": "<generated-at-runtime>",
@@ -12447,13 +12183,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                           "type": "string",
                                         },
                                         "targetAttribute": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string",
-                                            },
-                                            {
-                                              "type": "null",
-                                            },
+                                          "type": [
+                                            "string",
+                                            "null",
                                           ],
                                         },
                                         "type": {
@@ -12601,26 +12333,18 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                           "type": "array",
                                         },
                                         "max": {
-                                          "anyOf": [
-                                            {
-                                              "type": "number",
-                                            },
-                                            {
-                                              "type": "string",
-                                            },
+                                          "type": [
+                                            "number",
+                                            "string",
                                           ],
                                         },
                                         "maxLength": {
                                           "type": "number",
                                         },
                                         "min": {
-                                          "anyOf": [
-                                            {
-                                              "type": "number",
-                                            },
-                                            {
-                                              "type": "string",
-                                            },
+                                          "type": [
+                                            "number",
+                                            "string",
                                           ],
                                         },
                                         "minLength": {
@@ -12849,13 +12573,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                         "type": "string",
                                       },
                                       "targetAttribute": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string",
-                                          },
-                                          {
-                                            "type": "null",
-                                          },
+                                        "type": [
+                                          "string",
+                                          "null",
                                         ],
                                       },
                                       "type": {
@@ -13003,26 +12723,18 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                         "type": "array",
                                       },
                                       "max": {
-                                        "anyOf": [
-                                          {
-                                            "type": "number",
-                                          },
-                                          {
-                                            "type": "string",
-                                          },
+                                        "type": [
+                                          "number",
+                                          "string",
                                         ],
                                       },
                                       "maxLength": {
                                         "type": "number",
                                       },
                                       "min": {
-                                        "anyOf": [
-                                          {
-                                            "type": "number",
-                                          },
-                                          {
-                                            "type": "string",
-                                          },
+                                        "type": [
+                                          "number",
+                                          "string",
                                         ],
                                       },
                                       "minLength": {
@@ -13254,13 +12966,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                           "type": "string",
                                         },
                                         "targetAttribute": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string",
-                                            },
-                                            {
-                                              "type": "null",
-                                            },
+                                          "type": [
+                                            "string",
+                                            "null",
                                           ],
                                         },
                                         "type": {
@@ -13408,26 +13116,18 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                           "type": "array",
                                         },
                                         "max": {
-                                          "anyOf": [
-                                            {
-                                              "type": "number",
-                                            },
-                                            {
-                                              "type": "string",
-                                            },
+                                          "type": [
+                                            "number",
+                                            "string",
                                           ],
                                         },
                                         "maxLength": {
                                           "type": "number",
                                         },
                                         "min": {
-                                          "anyOf": [
-                                            {
-                                              "type": "number",
-                                            },
-                                            {
-                                              "type": "string",
-                                            },
+                                          "type": [
+                                            "number",
+                                            "string",
                                           ],
                                         },
                                         "minLength": {
@@ -13706,13 +13406,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                         "type": "string",
                                       },
                                       "targetAttribute": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string",
-                                          },
-                                          {
-                                            "type": "null",
-                                          },
+                                        "type": [
+                                          "string",
+                                          "null",
                                         ],
                                       },
                                       "type": {
@@ -13860,26 +13556,18 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                         "type": "array",
                                       },
                                       "max": {
-                                        "anyOf": [
-                                          {
-                                            "type": "number",
-                                          },
-                                          {
-                                            "type": "string",
-                                          },
+                                        "type": [
+                                          "number",
+                                          "string",
                                         ],
                                       },
                                       "maxLength": {
                                         "type": "number",
                                       },
                                       "min": {
-                                        "anyOf": [
-                                          {
-                                            "type": "number",
-                                          },
-                                          {
-                                            "type": "string",
-                                          },
+                                        "type": [
+                                          "number",
+                                          "string",
                                         ],
                                       },
                                       "minLength": {
@@ -14330,13 +14018,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "locale": {
@@ -14369,15 +14053,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "visible": {
-                            "anyOf": [
-                              {
-                                "type": "boolean",
-                              },
-                              {
-                                "type": "null",
-                              },
-                            ],
                             "description": "A boolean field",
+                            "type": [
+                              "boolean",
+                              "null",
+                            ],
                           },
                         },
                         "required": [
@@ -14665,13 +14345,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -14704,15 +14380,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "visible": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                       },
                       "required": [
@@ -14904,13 +14576,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -14943,15 +14611,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "visible": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                       },
                       "required": [
@@ -15227,13 +14891,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -15266,15 +14926,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "visible": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                       },
                       "required": [
@@ -15504,13 +15160,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -15543,15 +15195,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "visible": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                       },
                       "required": [
@@ -15848,13 +15496,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -16122,13 +15766,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -16420,13 +16060,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -16538,13 +16174,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "type": "string",
                       },
                       "publishedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "type": "null",
-                          },
+                        "type": [
+                          "string",
+                          "null",
                         ],
                       },
                       "updatedAt": {
@@ -16966,13 +16598,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "images": {
@@ -16983,16 +16611,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "array",
                           },
                           "isAvailable": {
-                            "anyOf": [
-                              {
-                                "type": "boolean",
-                              },
-                              {
-                                "type": "null",
-                              },
-                            ],
                             "default": true,
                             "description": "A boolean field",
+                            "type": [
+                              "boolean",
+                              "null",
+                            ],
                           },
                           "locale": {
                             "description": "A string field",
@@ -17461,13 +17085,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "images": {
@@ -17478,16 +17098,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "isAvailable": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "default": true,
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "locale": {
                           "description": "A string field",
@@ -17820,13 +17436,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "images": {
@@ -17837,16 +17449,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "isAvailable": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "default": true,
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "locale": {
                           "description": "A string field",
@@ -18275,13 +17883,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "images": {
@@ -18292,16 +17896,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "isAvailable": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "default": true,
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "locale": {
                           "description": "A string field",
@@ -18710,13 +18310,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "images": {
@@ -18727,16 +18323,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "array",
                         },
                         "isAvailable": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
                           "default": true,
                           "description": "A boolean field",
+                          "type": [
+                            "boolean",
+                            "null",
+                          ],
                         },
                         "locale": {
                           "description": "A string field",
@@ -19163,13 +18755,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "manyToMany": {
@@ -19546,13 +19134,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "manyToMany": {
@@ -19827,13 +19411,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "manyToMany": {
@@ -20180,13 +19760,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "manyToMany": {
@@ -20506,13 +20082,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "manyToMany": {
@@ -20910,13 +20482,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "name": {
@@ -21233,13 +20801,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -21484,13 +21048,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -21807,13 +21367,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -22073,13 +21629,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "name": {
@@ -22310,13 +21862,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -22579,13 +22127,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -22867,13 +22411,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -23047,13 +22587,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -23243,13 +22779,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -23450,13 +22982,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -23619,13 +23147,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "publishedAt": {
@@ -23797,13 +23321,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "publishedAt": {
@@ -23992,13 +23512,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "publishedAt": {
@@ -24099,15 +23615,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 {
                   "description": "Populate a single relation, component, file, or dynamic zone",
-                  "enum": [],
+                  "not": {},
                   "readOnly": true,
-                  "type": "string",
                 },
                 {
                   "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
                   "items": {
-                    "enum": [],
-                    "type": "string",
+                    "not": {},
                   },
                   "type": "array",
                 },
@@ -24138,13 +23652,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "publishedAt": {
@@ -24243,15 +23753,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 {
                   "description": "Populate a single relation, component, file, or dynamic zone",
-                  "enum": [],
+                  "not": {},
                   "readOnly": true,
-                  "type": "string",
                 },
                 {
                   "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
                   "items": {
-                    "enum": [],
-                    "type": "string",
+                    "not": {},
                   },
                   "type": "array",
                 },
@@ -24305,13 +23813,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "publishedAt": {
@@ -24410,15 +23914,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 {
                   "description": "Populate a single relation, component, file, or dynamic zone",
-                  "enum": [],
+                  "not": {},
                   "readOnly": true,
-                  "type": "string",
                 },
                 {
                   "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
                   "items": {
-                    "enum": [],
-                    "type": "string",
+                    "not": {},
                   },
                   "type": "array",
                 },
@@ -24480,13 +23982,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "publishedAt": {
@@ -24883,13 +24381,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "integer",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "locale": {
@@ -25229,13 +24723,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "integer",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -25505,13 +24995,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "integer",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -25861,13 +25347,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "integer",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -26151,13 +25633,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "integer",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "locale": {
@@ -26586,13 +26064,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "id": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "number",
-                              },
+                            "type": [
+                              "string",
+                              "number",
                             ],
                           },
                           "identifiers": {
@@ -26630,7 +26104,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "uniqueEmail": {
                             "description": "An email field",
                             "format": "email",
-                            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                             "type": "string",
                           },
                           "uniqueNumber": {
@@ -26932,7 +26406,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "uniqueEmail": {
                         "description": "An email field",
                         "format": "email",
-                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                        "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                         "type": "string",
                       },
                       "uniqueNumber": {
@@ -26986,13 +26460,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "identifiers": {
@@ -27030,7 +26500,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "uniqueEmail": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "uniqueNumber": {
@@ -27297,13 +26767,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "identifiers": {
@@ -27341,7 +26807,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "uniqueEmail": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "uniqueNumber": {
@@ -27700,13 +27166,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "identifiers": {
@@ -27744,7 +27206,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "uniqueEmail": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "uniqueNumber": {
@@ -27993,7 +27455,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "uniqueEmail": {
                         "description": "An email field",
                         "format": "email",
-                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                        "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                         "type": "string",
                       },
                       "uniqueNumber": {
@@ -28044,13 +27506,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "identifiers": {
@@ -28088,7 +27546,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "uniqueEmail": {
                           "description": "An email field",
                           "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                           "type": "string",
                         },
                         "uniqueNumber": {
@@ -28192,15 +27650,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 {
                   "description": "Populate a single relation, component, file, or dynamic zone",
-                  "enum": [],
+                  "not": {},
                   "readOnly": true,
-                  "type": "string",
                 },
                 {
                   "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
                   "items": {
-                    "enum": [],
-                    "type": "string",
+                    "not": {},
                   },
                   "type": "array",
                 },
@@ -28289,13 +27745,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "next_match": {
@@ -28406,15 +27858,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 {
                   "description": "Populate a single relation, component, file, or dynamic zone",
-                  "enum": [],
+                  "not": {},
                   "readOnly": true,
-                  "type": "string",
                 },
                 {
                   "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
                   "items": {
-                    "enum": [],
-                    "type": "string",
+                    "not": {},
                   },
                   "type": "array",
                 },
@@ -28528,13 +27978,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "next_match": {
@@ -28645,15 +28091,13 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 {
                   "description": "Populate a single relation, component, file, or dynamic zone",
-                  "enum": [],
+                  "not": {},
                   "readOnly": true,
-                  "type": "string",
                 },
                 {
                   "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
                   "items": {
-                    "enum": [],
-                    "type": "string",
+                    "not": {},
                   },
                   "type": "array",
                 },
@@ -28783,13 +28227,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
+                          "type": [
+                            "string",
+                            "number",
                           ],
                         },
                         "next_match": {
@@ -28895,23 +28335,15 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "additionalProperties": false,
                       "properties": {
                         "alternativeText": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "null",
-                            },
+                          "type": [
+                            "string",
+                            "null",
                           ],
                         },
                         "caption": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "null",
-                            },
+                          "type": [
+                            "string",
+                            "null",
                           ],
                         },
                         "createdAt": {
@@ -28959,13 +28391,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "previewUrl": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "null",
-                            },
+                          "type": [
+                            "string",
+                            "null",
                           ],
                         },
                         "provider": {
@@ -29023,23 +28451,15 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "additionalProperties": false,
                         "properties": {
                           "alternativeText": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "caption": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "createdAt": {
@@ -29087,13 +28507,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "previewUrl": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "provider": {
@@ -29368,23 +28784,15 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "additionalProperties": false,
                     "properties": {
                       "alternativeText": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "type": "null",
-                          },
+                        "type": [
+                          "string",
+                          "null",
                         ],
                       },
                       "caption": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "type": "null",
-                          },
+                        "type": [
+                          "string",
+                          "null",
                         ],
                       },
                       "createdAt": {
@@ -29432,13 +28840,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "type": "string",
                       },
                       "previewUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "type": "null",
-                          },
+                        "type": [
+                          "string",
+                          "null",
                         ],
                       },
                       "provider": {
@@ -29714,23 +29118,15 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "additionalProperties": false,
                         "properties": {
                           "alternativeText": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "caption": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "createdAt": {
@@ -29778,13 +29174,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "previewUrl": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "provider": {
@@ -29971,23 +29363,15 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "additionalProperties": false,
                   "properties": {
                     "alternativeText": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                        },
-                        {
-                          "type": "null",
-                        },
+                      "type": [
+                        "string",
+                        "null",
                       ],
                     },
                     "caption": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                        },
-                        {
-                          "type": "null",
-                        },
+                      "type": [
+                        "string",
+                        "null",
                       ],
                     },
                     "createdAt": {
@@ -30035,13 +29419,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "type": "string",
                     },
                     "previewUrl": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                        },
-                        {
-                          "type": "null",
-                        },
+                      "type": [
+                        "string",
+                        "null",
                       ],
                     },
                     "provider": {
@@ -30202,23 +29582,15 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "additionalProperties": false,
                   "properties": {
                     "alternativeText": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                        },
-                        {
-                          "type": "null",
-                        },
+                      "type": [
+                        "string",
+                        "null",
                       ],
                     },
                     "caption": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                        },
-                        {
-                          "type": "null",
-                        },
+                      "type": [
+                        "string",
+                        "null",
                       ],
                     },
                     "createdAt": {
@@ -30266,13 +29638,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "type": "string",
                     },
                     "previewUrl": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                        },
-                        {
-                          "type": "null",
-                        },
+                      "type": [
+                        "string",
+                        "null",
                       ],
                     },
                     "provider": {
@@ -31011,13 +30379,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                 "type": "string",
                               },
                               "description": {
-                                "anyOf": [
-                                  {
-                                    "type": "string",
-                                  },
-                                  {
-                                    "type": "null",
-                                  },
+                                "type": [
+                                  "string",
+                                  "null",
                                 ],
                               },
                               "id": {
@@ -31104,7 +30468,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 "properties": {
                   "email": {
                     "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                     "type": "string",
                   },
                   "password": {
@@ -31129,13 +30493,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "id": {
-                                  "anyOf": [
-                                    {
-                                      "type": "number",
-                                    },
-                                    {
-                                      "type": "string",
-                                    },
+                                  "type": [
+                                    "number",
+                                    "string",
                                   ],
                                 },
                               },
@@ -31151,13 +30511,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "id": {
-                                  "anyOf": [
-                                    {
-                                      "type": "number",
-                                    },
-                                    {
-                                      "type": "string",
-                                    },
+                                  "type": [
+                                    "number",
+                                    "string",
                                   ],
                                 },
                               },
@@ -31228,13 +30584,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                               "type": "string",
                             },
                             "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "type": "null",
-                                },
+                              "type": [
+                                "string",
+                                "null",
                               ],
                             },
                             "id": {
@@ -31414,13 +30766,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "description": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                              },
-                              {
-                                "type": "null",
-                              },
+                            "type": [
+                              "string",
+                              "null",
                             ],
                           },
                           "documentId": {
@@ -31643,13 +30991,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "description": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "null",
-                            },
+                          "type": [
+                            "string",
+                            "null",
                           ],
                         },
                         "documentId": {
@@ -32060,13 +31404,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                               "type": "string",
                             },
                             "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "type": "null",
-                                },
+                              "type": [
+                                "string",
+                                "null",
                               ],
                             },
                             "id": {
@@ -32198,13 +31538,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                               "type": "string",
                             },
                             "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "type": "null",
-                                },
+                              "type": [
+                                "string",
+                                "null",
                               ],
                             },
                             "id": {
@@ -32387,13 +31723,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                               "type": "string",
                             },
                             "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "type": "null",
-                                },
+                              "type": [
+                                "string",
+                                "null",
                               ],
                             },
                             "id": {
@@ -32488,7 +31820,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 "properties": {
                   "email": {
                     "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
                     "type": "string",
                   },
                   "password": {
@@ -32513,13 +31845,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "id": {
-                                  "anyOf": [
-                                    {
-                                      "type": "number",
-                                    },
-                                    {
-                                      "type": "string",
-                                    },
+                                  "type": [
+                                    "number",
+                                    "string",
                                   ],
                                 },
                               },
@@ -32535,13 +31863,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                   "type": "string",
                                 },
                                 "id": {
-                                  "anyOf": [
-                                    {
-                                      "type": "number",
-                                    },
-                                    {
-                                      "type": "string",
-                                    },
+                                  "type": [
+                                    "number",
+                                    "string",
                                   ],
                                 },
                               },
@@ -32607,13 +31931,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                               "type": "string",
                             },
                             "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "type": "null",
-                                },
+                              "type": [
+                                "string",
+                                "null",
                               ],
                             },
                             "id": {
