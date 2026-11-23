@@ -39,6 +39,7 @@ import type EERoleService from '../../../ee/server/src/services/role';
 import type EESeatEnforcementService from '../../../ee/server/src/services/seat-enforcement';
 import type EEUserService from '../../../ee/server/src/services/user';
 import type { PersistedTable } from '../../../ee/server/src/services/persist-tables';
+import type { createAuditLogsService } from '../../../ee/server/src/audit-logs/services/audit-logs';
 import type {
   AdminRole,
   AdminUser,
@@ -932,6 +933,15 @@ declare global {
         'admin::user': UserService<
           EditionService<typeof CEUserService, EnterpriseContracts['user']>
         >;
+      }
+
+      interface ContainerEntries {
+        /**
+         * Added by the EE edition when the license that verifies at boot lists `audit-logs` and
+         * `admin.auditLogs.enabled` is not `false` (`isAuditLogsEnabled`). `get` throws when it is not
+         * added: check `strapi.has('audit-logs')` first.
+         */
+        'audit-logs': ReturnType<typeof createAuditLogsService>;
       }
 
       /**
