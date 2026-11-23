@@ -6,6 +6,8 @@ module.exports = {
   // rootDir is the repo root: keep the new suites to their own runners.
   testPathIgnorePatterns: ['/node_modules/', '<rootDir>/tests-next/'],
   testEnvironment: 'node',
+  // Required: Jest 29 cannot format inline snapshots with Prettier 3, the default 'prettier' path.
+  prettierPath: null,
   setupFilesAfterEnv: ['<rootDir>/tests/setup/jest-api.setup.js'],
   // Coverage configuration for SonarQube
   collectCoverage: false, // Will be enabled via CLI flag
