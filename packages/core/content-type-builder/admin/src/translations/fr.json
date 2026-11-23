@@ -326,7 +326,6 @@
   "table.warning.deleted": "Supprimé : {kind}",
   "table.content.create-first-content-type.import-figma": "Importer depuis Figma",
   "ComponentIconPicker.search.placeholder": "Rechercher une icône",
-  "window.confirm.close-modal.file": "Êtes-vous sûr ? Vos modifications seront perdues.",
   "contentType.draftAndPublish.label": "Brouillon et publication",
   "contentType.draftAndPublish.description": "Permet d'écrire une version brouillon d'une entrée avant sa publication",
   "form.attribute.condition.if": "SI",
