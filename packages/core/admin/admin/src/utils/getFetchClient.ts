@@ -115,6 +115,10 @@ const unstable_getRequestHeaders = (): Headers => {
       }
 
       try {
+        // `Headers.set` would send any other value as text, e.g. `[object Promise]`
+        if (typeof value !== 'string') {
+          throw new TypeError('A request header value must be a string.');
+        }
         headers.set(name, value);
       } catch (error) {
         throw new RequestHeadersError(

@@ -1327,6 +1327,20 @@ describe('getFetchClient', () => {
         expect(window.fetch).not.toHaveBeenCalled();
       });
 
+      it('does not send the request when a header value is not a string', async () => {
+        // Plain JavaScript plugins can return any value, which the type does not allow
+        register(
+          () =>
+            ({ 'x-strapi-space': Promise.resolve('france') }) as unknown as Record<string, string>
+        );
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          message: expect.stringContaining('"x-strapi-space"'),
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
       it('does not send the request when a header cannot be sent by the browser', async () => {
         register(() => ({ 'x-strapi-space': '日本' }));
 
