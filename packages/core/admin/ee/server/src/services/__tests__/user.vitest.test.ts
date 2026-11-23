@@ -87,6 +87,18 @@ describe('EE user service audit events', () => {
     expect(JSON.stringify(vi.mocked(emitAudit).mock.calls)).not.toMatch(/Secret1234|hash/);
   });
 
+  test.each([[{ password: 'Secret1234' }], [{ firstname: 'Kai' }]])(
+    'updateById resolves null and records nothing for a missing user (%o)',
+    async (attributes) => {
+      setup({ updated: null as unknown as Record<string, unknown> });
+
+      await expect(updateById(404, attributes)).resolves.toBeNull();
+
+      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
+      expect(emitAudit).not.toHaveBeenCalled();
+    }
+  );
+
   test('deleteById records the deleted account', async () => {
     setup();
 
@@ -119,6 +131,28 @@ describe('EE user service audit events', () => {
       'user.delete',
       expect.objectContaining({ users: expect.any(Array) })
     );
+  });
+
+  test('deleteByIds skips an ID that matches no user', async () => {
+    const { del } = setup();
+    const first = { id: 1, email: 'a@strapi.io', roles: [] };
+    const second = { id: 3, email: 'b@strapi.io', roles: [] };
+    // The database query resolves `null` when no row matches the ID
+    del
+      .mockResolvedValueOnce(first)
+      .mockResolvedValueOnce(null as unknown as Record<string, unknown>)
+      .mockResolvedValueOnce(second);
+
+    const res = await deleteByIds([1, 2, 3]);
+
+    expect(res).toEqual([first, second]);
+    expect(vi.mocked(emitAudit).mock.calls.map((call) => call[2])).toEqual([
+      { userId: 1, email: 'a@strapi.io' },
+      { userId: 3, email: 'b@strapi.io' },
+    ]);
+    expect(global.strapi.eventHub.emit).toHaveBeenCalledWith('user.delete', {
+      users: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 3 })],
+    });
   });
 });
 
@@ -189,5 +223,42 @@ describe('EE user service without a super admin role', () => {
     });
     expect(count).not.toHaveBeenCalled();
     expect(deleteFn).not.toHaveBeenCalled();
+  });
+});
+
+describe('EE user service with a single super admin and an unknown user id', () => {
+  const setup = () => {
+    const findOne = vi.fn(() => Promise.resolve(null));
+    const update = vi.fn(() => Promise.resolve(null));
+
+    global.strapi = {
+      eventHub: { emit: vi.fn() },
+      db: { query: () => ({ findOne, update, count: vi.fn() }) },
+      store: { set: vi.fn() },
+      admin: {
+        services: {
+          role: {
+            getSuperAdminWithUsersCount: vi.fn(() => Promise.resolve({ id: 9, usersCount: 1 })),
+          },
+          'seat-enforcement': { getDisabledUserList: vi.fn(() => Promise.resolve(null)) },
+        },
+      },
+    } as any;
+
+    return { update };
+  };
+
+  test('updateById resolves to null when deactivating a missing user', async () => {
+    const { update } = setup();
+
+    await expect(updateById(404, { isActive: false })).resolves.toBeNull();
+    expect(update).toHaveBeenCalled();
+  });
+
+  test('updateById resolves to null when changing roles of a missing user', async () => {
+    const { update } = setup();
+
+    await expect(updateById(404, { roles: [3] })).resolves.toBeNull();
+    expect(update).toHaveBeenCalled();
   });
 });

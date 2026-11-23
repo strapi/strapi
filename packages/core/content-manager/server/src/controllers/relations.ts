@@ -548,11 +548,15 @@ export default {
      * Load the relations with the main field, the sanitized permission query
      * will exclude the relations the user does not have access to.
      *
-     * Pagination is not necessary as the permissionQuery contains the ids to load.
+     * The permissionQuery already restricts the load to the ids of the page, so it reads them as
+     * one first page. Without explicit page params, loadPages would fall back to its default page
+     * size of 10 and drop the main field of the relations past the 10th.
      */
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
       ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
+      page: 1,
+      pageSize: Math.max(loadedIds.length, 1),
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
