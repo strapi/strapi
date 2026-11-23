@@ -115,7 +115,9 @@ A second built-in subscriber sets `createdAt` and `updatedAt`. Each subscriber g
 - Middlewares run before the repository opens its transaction.
 - The i18n, upload, content-manager (history), content-releases and review-workflows packages add middlewares.
 
-Read [Document write path](./05-document-write-path.md) for where middlewares sit in a write.
+Read [Document write path](./05-document-write-path.md) for where middlewares sit in a write, and
+[Document Service middlewares](../contributing/05-typescript.md#document-service-middlewares) for
+their types.
 
 ## Event hub listeners
 
