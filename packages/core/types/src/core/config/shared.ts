@@ -11,5 +11,4 @@ export type ConfigFunction<TConfigObject = UnknownConfigObject> = (
 export type UnknownConfigObject = Record<string, unknown>;
 
 export type ConfigExport<TConfigObject = UnknownConfigObject> =
-  | ConfigFunction<TConfigObject>
-  | TConfigObject;
+  ConfigFunction<TConfigObject> | TConfigObject;

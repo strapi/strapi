@@ -15,6 +15,12 @@ export const parseFolderTargetId = (dndId: string | number): number | null => {
 
 export const toFolderTreeTargetId = (id: number) => `folder-tree-target:${id}` as const;
 
+/**
+ * The "N parent folders" row in the sidebar. Only there so hovering it during a
+ * drag opens it; no parser recognises it, so a drop on it moves nothing.
+ */
+export const toFolderTreeSummaryId = (rootId: number) => `folder-tree-summary:${rootId}` as const;
+
 export const HOME_TREE_TARGET_ID = 'folder-tree-target:home' as const;
 
 export const parseFolderTreeTargetId = (dndId: string | number): number | 'root' | null => {

@@ -1,5 +1,6 @@
 import {
   parsePathWithIndices,
+  getComponentLevelFromPath,
   getAttributeSchemaFromPath,
   parseFieldMetaData,
   PreviewFieldError,
@@ -57,6 +58,16 @@ describe('fieldUtils', () => {
       const result = parsePathWithIndices('field.0.1.name');
       // The algorithm attaches indices to the previous field, so 0 goes to 'field' and 1 goes to 'field' as well (overwriting)
       expect(result).toEqual([{ name: 'field', index: 1 }, { name: 'name' }]);
+    });
+  });
+
+  describe('getComponentLevelFromPath', () => {
+    it('marks root fields as outside components', () => {
+      expect(getComponentLevelFromPath('title')).toBe(-1);
+    });
+
+    it('marks nested dynamic-zone fields as inside components', () => {
+      expect(getComponentLevelFromPath('blocks.0.title')).toBe(0);
     });
   });
 

@@ -10,9 +10,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async upload(file: UploadableFile) {
-    if (typeof strapi.plugin('upload').provider.uploadStream === 'function') {
+    const provider = strapi.plugin('upload').provider;
+
+    if (typeof provider.uploadStream === 'function') {
       file.stream = file.getStream();
-      await strapi.plugin('upload').provider.uploadStream(file);
+      await provider.uploadStream(file);
 
       delete file.stream;
 
@@ -21,7 +23,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }
     } else {
       file.buffer = await fileUtils.streamToBuffer(file.getStream());
-      await strapi.plugin('upload').provider.upload(file);
+      await provider.upload(file);
 
       delete file.buffer;
 

@@ -10,6 +10,17 @@ import { hasFindMethod } from './utils/routes';
 
 import type { Api, ApiInfo } from '../../types';
 
+/**
+ * Attributes Strapi adds to content types for its own needs, hidden from the Content Manager
+ * and never accepted nor returned by the Content API, such as the position of a document in
+ * the custom order of its collection type.
+ */
+const isInternalAttribute = (attribute: Struct.SchemaAttributes[string]) => {
+  const { visible, private: isPrivate } = attribute as { visible?: boolean; private?: boolean };
+
+  return visible === false && isPrivate === true;
+};
+
 const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
   const requiredAttributes: string[] = [];
 
@@ -34,10 +45,11 @@ const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
  */
 const getAllSchemasForContentType = ({
   routeInfo,
-  attributes,
+  attributes: allAttributes,
   uniqueName,
   relationTargetSchemaNames,
 }: ApiInfo & { relationTargetSchemaNames: Map<string, string> }) => {
+  const attributes = _.omitBy(allAttributes, isInternalAttribute) as Struct.SchemaAttributes;
   // Store response and request schemas in an object
   let strapiComponentSchemas = {};
   const schemas: OpenAPIV3.ComponentsObject = {};
@@ -57,7 +69,7 @@ const getAllSchemasForContentType = ({
   };
 
   // Get all the route methods
-  const routeMethods = routeInfo.routes.map((route: Core.Route) => route.method);
+  const routeMethods = new Set(routeInfo.routes.map((route: Core.Route) => route.method));
 
   const attributesToOmit = [
     'createdAt',
@@ -72,7 +84,7 @@ const getAllSchemasForContentType = ({
   // Get a list of required attribute names
   const requiredRequestAttributes = getRequiredAttributes(attributesForRequest);
   // Build the request schemas when the route has POST or PUT methods
-  if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
+  if (routeMethods.has('POST') || routeMethods.has('PUT')) {
     // Build localization requests schemas
 
     // Build the request schema

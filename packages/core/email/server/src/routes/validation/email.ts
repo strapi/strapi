@@ -8,6 +8,12 @@ export class EmailRouteValidator {
     this._strapi = strapi;
   }
 
+  /**
+   * OpenAPI description of the documented `send` fields. Additional keys are provider options
+   * (attachments, headers, template data…).
+   * The `send` handler does not validate against it: it rejects only a non-object body and
+   * passes every field to the provider unchanged.
+   */
   get sendEmailInput() {
     return z
       .object({
@@ -20,7 +26,7 @@ export class EmailRouteValidator {
         text: z.string(),
         html: z.string().optional(),
       })
-      .catchall(z.string());
+      .catchall(z.unknown());
   }
 
   get emailResponse() {

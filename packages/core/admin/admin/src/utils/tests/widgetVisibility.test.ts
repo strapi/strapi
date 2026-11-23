@@ -1,6 +1,8 @@
 import {
+  hideAuditLogsWidgetWhenDisabled,
   hideCloudDeployMenuLinkInProduction,
   hideDeployNowWidgetInProduction,
+  AUDIT_LOGS_WIDGET_UID,
   CLOUD_DEPLOY_MENU_LINK,
   DEPLOY_NOW_WIDGET_UID,
 } from '../widgetVisibility';
@@ -39,6 +41,21 @@ describe('hideDeployNowWidgetInProduction', () => {
   it('keeps the deploy-now widget when the environment is unknown', () => {
     expect(hideDeployNowWidgetInProduction(widgetsWithDeploy, undefined)).toEqual(
       widgetsWithDeploy
+    );
+  });
+});
+
+describe('hideAuditLogsWidgetWhenDisabled', () => {
+  const auditLogsWidget = createMockWidget(AUDIT_LOGS_WIDGET_UID, 'Last activity');
+  const widgetsWithAuditLogs = [...mockWidgets, auditLogsWidget];
+
+  it('removes the audit logs widget when the config disables audit logs', () => {
+    expect(hideAuditLogsWidgetWhenDisabled(widgetsWithAuditLogs, true)).toEqual(mockWidgets);
+  });
+
+  it('keeps the audit logs widget otherwise', () => {
+    expect(hideAuditLogsWidgetWhenDisabled(widgetsWithAuditLogs, false)).toEqual(
+      widgetsWithAuditLogs
     );
   });
 });

@@ -25,6 +25,8 @@ The plugin has no `register` function. [`bootstrap.ts`](https://github.com/strap
 3. An auth step. It sets `ctx.state.route.info.type` to `content-api` and calls `strapi.auth.authenticate`. It skips authentication for a `GET` that loads the landing page.
 4. `koaMiddleware` from `@as-integrations/koa`.
 
+[`abort-disconnected-request.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/abort-disconnected-request.ts) stops a request whose HTTP client disconnected before the response ended from entering more resolvers: `bootstrap` wraps every field resolver of the final schema in place, including a custom `apolloServer.schema`, and a wrapped resolver that has not started returns a `CLIENT_DISCONNECTED` GraphQL error instead of running, which is not logged as a server error. Resolvers and database queries that are already running continue, and the later root mutation fields of the same operation are skipped, so a mutation with several root fields can be partly applied. This matches the `abortSignal` option of `execute` in graphql 17, which should replace the wrapper once the plugin moves to graphql 17.
+
 The plugin also sets `strapi.plugin('graphql').destroy` to stop Apollo Server on shutdown.
 
 ### Config
@@ -41,7 +43,7 @@ The `content-api` service ([`services/content-api/`](https://github.com/strapi/s
 
 ### Resolver wrapping
 
-`wrapResolvers` in `services/content-api/wrap-resolvers.ts` reads `resolversConfig`. The keys are `Type.field` paths. Each entry can set `auth` (with a `scope`), `middlewares` and `policies`. The auth check reads `context.state.auth`. Policies run last, through `createPoliciesMiddleware`.
+`wrapResolvers` in `services/content-api/wrap-resolvers.ts` reads `resolversConfig`. The keys are `Type.field` paths. Each entry can set `auth` (with a `scope`), `middlewares` and `policies`. The auth check reads `context.state.auth`. An inline function in `middlewares` runs with `(resolve, parent, args, context, info)`. A name or a `{ name, options }` entry refers to a registered Strapi middleware, as in routes. Its factory runs once, at schema build, with `options` (or `{}`). Its koa handler runs with `context.koaContext`, and its `next` resolves the rest of the chain. If the handler does not call `next`, the field resolves to `null`. Policies run last, through `createPoliciesMiddleware`.
 
 ### Landing page and CSP
 

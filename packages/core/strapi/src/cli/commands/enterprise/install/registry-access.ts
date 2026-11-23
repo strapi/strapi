@@ -2,7 +2,7 @@ import path from 'node:path';
 import fse from 'fs-extra';
 
 import type { Logger } from '../../../utils/logger';
-import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
+import { ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
 import type { ResolvedLicense } from './license';
@@ -27,10 +27,7 @@ const shouldReferenceLicense = (
 ): boolean => licenseSource === 'environment' && Boolean(env.CI) && env.CI !== 'false';
 
 type ConfiguredStatus =
-  | 'already-configured'
-  | 'uses-environment-variable'
-  | 'different-license'
-  | 'manual-edit-needed';
+  'already-configured' | 'uses-environment-variable' | 'different-license' | 'manual-edit-needed';
 
 export type RegistryAccessOutcome = {
   filePath: string;
@@ -384,13 +381,19 @@ export const findOverridingConfigFiles = async ({
   return overridingFiles;
 };
 
-export interface RegistryAccess {
-  outcome: RegistryAccessOutcome;
-  /** Adds the setup when it is missing. Called once the registry has accepted the license. */
+export interface RegistrySetup {
+  /** Saves the setup, when there is one to save. Called once the registry has accepted the license. */
   apply: () => Promise<void>;
+  /** Runs the install with the environment it needs to reach the registry. */
+  install: (installPackages: (env?: NodeJS.ProcessEnv) => Promise<void>) => Promise<void>;
+}
+
+export interface RegistryAccess extends RegistrySetup {
+  outcome: RegistryAccessOutcome;
 }
 
 export const prepareRegistryAccess = async ({
+  registryUrl,
   appDir,
   packageManager,
   license,
@@ -399,6 +402,7 @@ export const prepareRegistryAccess = async ({
   env,
   homeDir,
 }: {
+  registryUrl: string;
   appDir: string;
   packageManager: DetectedPackageManager;
   license: string;
@@ -407,7 +411,7 @@ export const prepareRegistryAccess = async ({
   env: NodeJS.ProcessEnv;
   homeDir: string;
 }): Promise<RegistryAccess> => {
-  const registry = describeRegistry(ENTERPRISE_REGISTRY_URL);
+  const registry = describeRegistry(registryUrl);
   const usesYarnrcYml = readsYarnrcYml(packageManager);
   const userConfigPath = usesYarnrcYml
     ? getUserYarnrcPath(homeDir)
@@ -456,6 +460,9 @@ export const prepareRegistryAccess = async ({
           ? `Configured access to ${registry.host} in ${userConfigPath}, reading the license from STRAPI_LICENSE.`
           : `Configured access to ${registry.host} in ${userConfigPath}.`
       );
+    },
+    async install(installPackages) {
+      await installPackages();
     },
   };
 };

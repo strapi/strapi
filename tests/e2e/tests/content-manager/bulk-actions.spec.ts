@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Bulk actions', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to be able to disable the bulk actions on a content type', async ({

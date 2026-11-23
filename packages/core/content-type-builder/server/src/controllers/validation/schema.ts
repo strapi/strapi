@@ -4,8 +4,9 @@ import type { Struct, UID } from '@strapi/types';
 import { isNumber, isObject, snakeCase } from 'lodash';
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
-import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
+import { coreUids, typeKinds } from '../../services/constants';
 import { isConfigurable } from '../../utils/attributes';
+import { isValidUidTarget } from '../../utils/uid-target';
 
 import {
   CATEGORY_NAME_REGEX,
@@ -43,6 +44,7 @@ const verifyUidTargetField: SuperRefinement<
     name: string;
     properties?: {
       type: unknown;
+      customField?: unknown;
       targetField?: string | null;
     };
   }[]
@@ -55,7 +57,9 @@ const verifyUidTargetField: SuperRefinement<
     const { properties, action } = attribute;
 
     if (properties.type === 'uid' && properties.targetField) {
-      const targetAttr = attributes.find((attr) => attr.name === properties.targetField);
+      const targetAttr = attributes.find(
+        (attr) => attr.action !== 'delete' && attr.name === properties.targetField
+      );
 
       if (!targetAttr) {
         // NOTE: on update we are setting it to undefined later in the process instead to handle renames
@@ -65,9 +69,7 @@ const verifyUidTargetField: SuperRefinement<
             message: 'Target does not exist',
           });
         }
-      } else if (
-        !VALID_UID_TARGETS.some((validUIdTarget) => validUIdTarget === targetAttr.properties?.type)
-      ) {
+      } else if (!targetAttr.properties || !isValidUidTarget(targetAttr.properties)) {
         ctx.addIssue({
           code: 'custom',
           message: 'Invalid target type',

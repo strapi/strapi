@@ -15,6 +15,8 @@ import { LocaleStatus } from './CMHeaderActions';
 
 import type { Modules } from '@strapi/types';
 
+const EMPTY_VALIDATION_ERRORS: NonNullable<BulkLocaleActionModalProps['validationErrors']> = {};
+
 type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
 /* -------------------------------------------------------------------------------------------------
@@ -194,7 +196,7 @@ const BulkLocaleActionModal = ({
   headers,
   rows,
   localesMetadata,
-  validationErrors = {},
+  validationErrors = EMPTY_VALIDATION_ERRORS,
   action,
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
@@ -259,14 +261,14 @@ const BulkLocaleActionModal = ({
             ))}
           </Table.Head>
           <Table.Body>
-            {rows.map(({ locale, status }, index) => {
+            {rows.map(({ locale, status }) => {
               const error = validationErrors?.[locale] ?? null;
 
               const statusVariant =
                 status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
 
               return status && locale ? (
-                <Table.Row key={index}>
+                <Table.Row key={locale}>
                   <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
                   <Table.Cell>
                     <Typography variant="sigma" textColor="neutral600">

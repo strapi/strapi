@@ -131,8 +131,6 @@
   "form.attribute.condition.enum-change-warning-end": " を変更または削除すると、これらの条件が壊れます。続行しますか？",
   "form.attribute.condition.enum-change-warning-values": "。列挙値 ",
   "form.attribute.condition.field": "フィールド",
-  "form.attribute.condition.field-change-warning": "次のフィールドがこのフィールドに依存する条件を持っています: {fieldNames}。名前を変更すると、これらの条件が壊れます。続行しますか？",
-  "form.attribute.condition.field-change-warning-end": "。名前を変更すると、これらの条件が壊れます。続行しますか？",
   "form.attribute.condition.label": "条件",
   "form.attribute.condition.no-fields": "条件を設定できるブールまたは列挙型フィールドがありません。",
   "form.attribute.condition.operator": "演算子",

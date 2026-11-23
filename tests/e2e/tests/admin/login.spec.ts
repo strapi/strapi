@@ -49,8 +49,9 @@ test.describe('Login', () => {
       );
       expect(persistentRefreshCookie?.expires).toBeGreaterThan(-1);
 
-      // Clear cookies to test persistence behavior
+      // Clear both the refresh cookie and persisted access token to simulate session expiry.
       await context.clearCookies();
+      await page.evaluate(() => localStorage.removeItem('jwtToken'));
       await page.goto('/admin');
       await expect(page).toHaveTitle(TITLE_LOGIN);
     });

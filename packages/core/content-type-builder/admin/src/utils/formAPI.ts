@@ -122,12 +122,8 @@ export const formsAPI: FormAPI = {
         formType[field] = {
           validators: [],
           form: {
-            advanced: [
-              /* cb */
-            ],
-            base: [
-              /* cb */
-            ],
+            advanced: [/* cb */],
+            base: [/* cb */],
           },
         };
       }

@@ -230,6 +230,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
   });
 
   afterAll(async () => {
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
     await strapi.destroy();
     await builder.cleanup();
   });

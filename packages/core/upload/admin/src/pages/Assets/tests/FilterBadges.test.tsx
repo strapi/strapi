@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { render, screen } from '@tests/utils';
 
 import { FilterBadges } from '../components/FilterBadges';
@@ -106,6 +108,39 @@ describe('FilterBadges', () => {
     await user.click(screen.getByRole('button', { name: 'Remove Type filter' }));
 
     expect(listFilters.removeFilter).toHaveBeenCalledWith(0);
+  });
+
+  it('keeps the remaining badge instance when an earlier badge is removed', async () => {
+    const StatefulBadges = () => {
+      const [filters, setFilters] = useState<ListFilter[]>([
+        { kind: 'type', condition: 'is', values: ['picture'] },
+        {
+          kind: 'date',
+          field: 'createdAt',
+          mode: 'range',
+          condition: 'is',
+          from: '2024-01-01',
+          to: '2024-04-07',
+        },
+      ]);
+
+      return (
+        <FilterBadges
+          listFilters={{
+            ...makeListFilters(filters),
+            removeFilter: (index) => {
+              setFilters((current) => current.filter((_, currentIndex) => currentIndex !== index));
+            },
+          }}
+        />
+      );
+    };
+    const { user } = render(<StatefulBadges />);
+    const remainingBadge = screen.getAllByTestId('filter-badge')[1];
+
+    await user.click(screen.getByRole('button', { name: 'Remove Type filter' }));
+
+    expect(screen.getByTestId('filter-badge')).toBe(remainingBadge);
   });
 
   it('renders a range badge with formatted dates and edits via the calendar', async () => {

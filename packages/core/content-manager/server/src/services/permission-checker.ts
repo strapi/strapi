@@ -14,6 +14,12 @@ export const ACTIONS = {
   discard: 'plugin::content-manager.explorer.update',
 } as const;
 
+type ActionName = keyof typeof ACTIONS;
+
+const ACTION_NAMES = Object.keys(ACTIONS) as ActionName[];
+
+type SanitizedQueryOptions = { action?: string } | string;
+
 type Entity = Modules.EntityService.Result<UID.ContentType>;
 type Query = {
   page?: string;
@@ -35,7 +41,7 @@ const createPermissionChecker =
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    const can = (action: string, entity: Entity | undefined, field: string) => {
+    const can = (action: string, entity?: Entity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -47,7 +53,7 @@ const createPermissionChecker =
       );
     };
 
-    const cannot = (action: string, entity: Entity | undefined, field: string) => {
+    const cannot = (action: string, entity?: Entity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -111,22 +117,34 @@ const createPermissionChecker =
     const sanitizeUpdateInput = (entity: Entity) => (data: any) =>
       sanitizeInput(ACTIONS.update, data, entity);
 
-    const buildPermissionQuery = (query: Query, action: { action?: string } = {}) => {
+    const buildPermissionQuery = (query: Query, action: string) => {
       return permissionsManager.addPermissionsQueryTo(query, action);
     };
 
-    const sanitizedQuery = (query: Query, action: { action?: string } = {}) => {
+    /**
+     * Sanitizes the query with the rules of the action, then adds the action's permission
+     * conditions to it. The action defaults to read.
+     * The action can also be given as a plain string, the v4 signature
+     * `sanitizedQuery(query, actionUID)`, which untyped plugin code may still use.
+     */
+    const sanitizedQueryForAction = (query: Query, options: SanitizedQueryOptions = {}) => {
+      const action = typeof options === 'string' ? options : (options.action ?? ACTIONS.read);
+
       return async.pipe(
-        (q: Query) => sanitizeQuery(q, action),
+        (q: Query) => sanitizeQuery(q, { action }),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);
     };
 
-    // Sanitized queries shortcuts
-    Object.keys(ACTIONS).forEach((action) => {
-      // @ts-expect-error TODO
-      sanitizedQuery[action] = (query: Query) => sanitizedQuery(query, ACTIONS[action]);
-    });
+    // Sanitized queries shortcuts, e.g. `sanitizedQuery.update(query)`
+    const sanitizedQueryShortcuts = Object.fromEntries(
+      ACTION_NAMES.map((name) => [
+        name,
+        (query: Query) => sanitizedQueryForAction(query, { action: ACTIONS[name] }),
+      ])
+    ) as Record<ActionName, (query: Query) => ReturnType<typeof sanitizedQueryForAction>>;
+
+    const sanitizedQuery = Object.assign(sanitizedQueryForAction, sanitizedQueryShortcuts);
 
     // Permission utils shortcuts
     Object.keys(ACTIONS).forEach((action) => {

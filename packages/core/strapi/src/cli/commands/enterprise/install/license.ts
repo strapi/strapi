@@ -40,11 +40,7 @@ const readLicenseFile = async (appDir: string): Promise<string | undefined> => {
   }
 };
 
-interface LicenseInfo {
-  expireAt?: string | number;
-}
-
-const readLicenseInfo = (license: string): LicenseInfo => {
+const assertLicenseFormat = (license: string): void => {
   const [signature, base64Content] = Buffer.from(license, 'base64').toString().split('\n');
 
   if (!signature || !base64Content) {
@@ -56,8 +52,6 @@ const readLicenseInfo = (license: string): LicenseInfo => {
   if (typeof licenseInfo !== 'object' || licenseInfo === null) {
     throw new Error('Invalid license.');
   }
-
-  return licenseInfo as LicenseInfo;
 };
 
 const readEnvFileLicense = async (
@@ -104,22 +98,12 @@ export const findLicense = async ({
   return undefined;
 };
 
-export const validateLicense = (license: string, now: Date): void => {
-  let licenseInfo: LicenseInfo;
-
+export const validateLicense = (license: string): void => {
   try {
-    licenseInfo = readLicenseInfo(license);
+    assertLicenseFormat(license);
   } catch {
     throw new EnterpriseInstallError(
       `This Strapi license is not valid. Check that you copied all of it, or find it at ${BILLING_URL}`
-    );
-  }
-
-  const expiresAt = licenseInfo.expireAt === undefined ? undefined : new Date(licenseInfo.expireAt);
-
-  if (expiresAt && !Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() < now.getTime()) {
-    throw new EnterpriseInstallError(
-      `This Strapi license expired on ${expiresAt.toISOString().slice(0, 10)}. Renew it at ${BILLING_URL}`
     );
   }
 };
@@ -177,20 +161,18 @@ export const resolveLicense = async ({
   isInteractive,
   logger,
   env,
-  now,
   prompt,
 }: {
   appDir: string;
   isInteractive: boolean;
   logger: Logger;
   env: NodeJS.ProcessEnv;
-  now: Date;
   prompt: () => Promise<string>;
 }): Promise<ResolvedLicense> => {
   const foundLicense = await findLicense({ appDir, env });
 
   if (foundLicense) {
-    validateLicense(foundLicense.license, now);
+    validateLicense(foundLicense.license);
     logger.info(`Using the Strapi license from ${LICENSE_SOURCE_LABELS[foundLicense.source]}.`);
 
     return foundLicense;
@@ -205,7 +187,7 @@ export const resolveLicense = async ({
   logger.info(`No Strapi license found. You can find yours at ${BILLING_URL}`);
 
   const pastedLicense = await prompt();
-  validateLicense(pastedLicense, now);
+  validateLicense(pastedLicense);
   await saveLicenseFile(appDir, pastedLicense, logger);
   logger.success(`Saved the license to ${LICENSE_FILE_NAME}.`);
 

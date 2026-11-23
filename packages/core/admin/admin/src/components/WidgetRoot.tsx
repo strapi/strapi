@@ -14,8 +14,10 @@ import { WIDGET_DATA_ATTRIBUTES } from '../utils/widgetLayout';
 import type { FindWidgetFunction, WidgetIdFunction, DragEndFunction } from '../features/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
-export interface BaseWidgetProps
-  extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
+export interface BaseWidgetProps extends Pick<
+  WidgetType,
+  'title' | 'icon' | 'permissions' | 'link' | 'uid'
+> {
   findWidget?: FindWidgetFunction;
   deleteWidget?: WidgetIdFunction;
   onDragStart?: WidgetIdFunction;

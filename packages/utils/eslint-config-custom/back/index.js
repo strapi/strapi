@@ -2,6 +2,7 @@
 
 /** @type {import('eslint').Linter.Config} */
 const config = {
+  reportUnusedDisableDirectives: true,
   extends: '@strapi/eslint-config/back/javascript',
   parserOptions: {
     ecmaVersion: 2021,

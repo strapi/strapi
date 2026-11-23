@@ -1,17 +1,20 @@
 /**
- * Path attribute of the admin auth (access) token cookie, configurable
- * through `admin.auth.cookie.path` so multiple Strapi instances on the same
- * parent domain can keep separate cookies (e.g. `/strapi-de/admin`).
+ * Validates the Path attribute of the admin auth cookies. The path is
+ * configurable through `admin.auth.cookie.path` so multiple Strapi instances
+ * on the same parent domain can keep separate cookies (e.g. `/strapi-de/admin`).
  *
  * Browser-safe single source for both sides of the handoff: the admin panel
- * cannot read server config, so the build transports the config value into
- * the bundle through the internal `STRAPI_ADMIN_AUTH_COOKIE_PATH` variable
- * (see create-build-context.ts in @strapi/strapi); the server resolves the
- * same config at runtime. Changing the path requires an admin rebuild, like
- * any other admin config change.
+ * cannot read server config, so the build transports the access cookie path
+ * into the bundle through the internal `STRAPI_ADMIN_AUTH_COOKIE_PATH`
+ * variable (see create-build-context.ts in @strapi/strapi); the server
+ * resolves the same config at runtime. Changing the path requires an admin
+ * rebuild, like any other admin config change.
  *
- * Defaults to `/admin` to match the refresh-cookie path used by
- * `getRefreshCookieOptions`.
+ * The callers pick the value to validate (see session-auth.ts). When
+ * `admin.auth.cookie.path` is unset, the access cookie follows the path the
+ * panel is served from (`admin.url`) and the refresh cookie follows the admin
+ * API (`/admin`), each behind any `server.url` subpath.
+ * `DEFAULT_AUTH_COOKIE_PATH` is only the fallback for a missing or invalid value.
  */
 export const DEFAULT_AUTH_COOKIE_PATH = '/admin';
 

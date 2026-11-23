@@ -1,5 +1,6 @@
-import { curry, isObject, isEmpty, cloneDeep, omit } from 'lodash';
+import { isObject, isEmpty, cloneDeep, omit } from 'lodash';
 
+import { curry } from '../curry';
 import { isScalarAttribute } from '../content-types';
 import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
