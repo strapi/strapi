@@ -17,6 +17,13 @@ type ComponentsOption<TOptions> = NonNullable<
 
 type SchemaModel = Struct.ContentTypeSchema | Struct.ComponentSchema;
 
+/** What `getPermissionsWithNestedFields` reads from an action, with strict types. */
+type NestedFieldsAction = {
+  actionId: string;
+  subjects?: readonly (string | undefined)[] | undefined;
+  options: { applyToProperties: readonly (string | undefined)[] | null };
+};
+
 // With strict types, the field helpers of the registered contract read the component registry
 // (every caller passes `strapi.components`, and the recursion its own map), and walk component
 // schemas as well as content-type schemas (the recursion passes `components[attr.component]`).
@@ -30,4 +37,7 @@ export type ContentTypeImplementationAssertions = [
   >,
   Expect<Equal<[Parameters<NestedFields>[0]], [SchemaModel]>>,
   Expect<Equal<[Parameters<NestedFieldsWithIntermediate>[0]], [SchemaModel]>>,
+  // `getPermissionsWithNestedFields` takes the stored actions `values` and `get` return as well as
+  // the registered ones: the fields it reads, without `any`.
+  Expect<Equal<[Parameters<PermissionsWithNestedFields>[0]], [readonly NestedFieldsAction[]]>>,
 ];
