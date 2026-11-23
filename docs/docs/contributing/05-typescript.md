@@ -713,8 +713,9 @@ wraps it), but the package that calls the hook builds the context, so nobody els
   same registry; type generation does not, because hooks are set in code, not loaded from files.
 - With strict types, `strapi.hook(uid)` and `strapi.hooks[uid]` resolve a registered UID to its
   contract, and any other UID to `unknown`. `strapi.get('hooks')` resolves to
-  `Core.StrictHooksRegistry`: `set`, `add` and `extend` accept only a hook of the registered
-  contract for a registered UID, and any hook otherwise.
+  `Core.StrictHooksRegistry`, its entry in the container registry
+  ([Container contracts](#container-contracts)): `set`, `add` and `extend` accept only a hook of the
+  registered contract for a registered UID, and any hook otherwise.
 - `@strapi/types` registers the `strapi::content-types.beforeSync` and `afterSync` hooks of the
   Strapi instance in `packages/core/types/src/core/hook.ts`, so packages that depend only on
   `@strapi/types` see them.
@@ -726,7 +727,7 @@ storage key the runtime builds from the params of `strapi.store`: `<type>_<name>
 `<type>_<key>` without a name (`packages/core/core/src/services/core-store.ts`). For example,
 `{ type: 'plugin', name: 'i18n', key: 'default_locale' }` reads `plugin_i18n_default_locale`. Keys
 built at runtime register a template-literal key, e.g.
-`` [key: `core_admin_homepage-layout:${string}`] ``.
+``[key: `core_admin_homepage-layout:${string}`]``.
 
 - The value is the shape the owner writes, as JSON: a `Date` is read back as a string and
   `undefined` properties are dropped. Declare it explicitly rather than reusing a type that holds
@@ -760,6 +761,50 @@ the union of every producer's payload, e.g. `'user.delete': [{ user } | { users 
   any payload.
 - Events emitted through `emitAudit` (`@strapi/utils`) are not registered: it takes any payload, so
   nothing would check their producers.
+
+### Container contracts
+
+`Strapi.Registries.ContainerEntries` maps a container name to the value `strapi.get(name)` returns:
+the value given to `strapi.add(name, resolver)`, or what its factory returns. The container calls a
+function resolver once, with the container and the `args` of the first `get`, and caches the
+result.
+
+```ts
+// server/src/types/index.ts
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface ContainerEntries {
+        'plugin-x.greeter': GreeterService;
+      }
+    }
+  }
+}
+```
+
+- It is additive, with no `Package*` and `App*` pair. A second `add` of a name throws and the
+  container has no `set` or `extend`, so nobody can replace a value another package added. The
+  package that adds a name registers it, in the same `declare global` block as its other contracts.
+  Applications and plugins register the names they add.
+- With strict types, `strapi.get(name)` resolves a registered name to its value, and any other name,
+  or a name known only at runtime, to `unknown`. An explicit type argument wins, as with
+  `strapi.service<T>(uid)`: `strapi.get<MyValue>('plugin-x.thing')`. It is never inferred from the
+  expected type, so `const x: Foo = strapi.get('plugin-x.thing')` fails instead of compiling as an
+  unchecked cast.
+- `strapi.add(name, resolver)` lists registered names for completion and does not check the
+  resolver against the registered value. It returns the strict container, so a chain keeps
+  resolving registered names.
+- `@strapi/types` registers the names `@strapi/core` adds, and `ai.admin` and
+  `audit-logs-lifecycle`, which `@strapi/admin` adds and other packages read
+  (`packages/core/types/src/core/container.ts`). A name a `strapi.*` getter reads has the getter's
+  type, the strict view included: `eventHub`, `coreStore`, `hooks`, `db` and `admin`. The core
+  registries, such as `content-types`, `services` and `modules`, are registered as `@internal`:
+  read them through their getters. `@strapi/admin` registers its EE `audit-logs` service in its own types.
+- A name added only under a license or a config, such as `audit-logs-lifecycle`, is registered with
+  its value, not `| undefined`: `get` throws when the name was not added. Check `strapi.has(name)`
+  first.
+- Without strict types, `get` returns its type argument, `any` by default, and `add` takes any
+  resolver, as before.
 
 ### Content-type schemas
 
