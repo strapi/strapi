@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, vi, type Mock } from 'vitest';
 import type { Context, Next } from 'koa';
 import fse from 'fs-extra';
+import { get } from 'lodash';
 import koaStaticImport from 'koa-static';
 import type { Core } from '@strapi/types';
 
@@ -33,11 +34,16 @@ describe('serveAdminPanel route', () => {
   });
 
   describe('admin shell cache headers', () => {
-    const createStrapi = () => {
+    const createStrapi = (adminPath = '/admin') => {
       let registeredRoutes: AdminPanelRoute[] = [];
+      // Mirrors the config provider: the startup copy as own keys, plus `get` over the live tree
+      const values = { admin: { path: adminPath } };
       const strapi = {
         dirs: { dist: { root: '/tmp/strapi-dist' } },
-        config: { admin: { path: '/admin' } },
+        config: {
+          ...values,
+          get: (path: string, defaultValue?: unknown) => get(values, path, defaultValue),
+        },
         server: {
           routes(routes: AdminPanelRoute[]) {
             registeredRoutes = routes;
@@ -46,6 +52,13 @@ describe('serveAdminPanel route', () => {
       };
       return { strapi, getRoutes: () => registeredRoutes };
     };
+
+    test('registers the route under the configured admin path', () => {
+      const { strapi, getRoutes } = createStrapi('/dashboard');
+      registerAdminPanelRoute({ strapi: strapi as unknown as Core.Strapi });
+
+      expect(getRoutes()[0].path).toBe('/dashboard/:path*');
+    });
 
     test('SPA fallback revalidates the HTML shell', async () => {
       const { strapi, getRoutes } = createStrapi();

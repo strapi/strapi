@@ -69,3 +69,77 @@ describe('content-releases bootstrap: overdue releases', () => {
     );
   });
 });
+
+describe('content-releases bootstrap: afterDeleteMany subscriber', () => {
+  const deletePlannedActions = jest.fn(async () => {});
+
+  const setupSubscriber = async () => {
+    const subscribe = jest.fn();
+    const strapi = {
+      ee: { features: { isEnabled: () => true } },
+      contentTypes: { 'api::article.article': { options: { draftAndPublish: true } } },
+      db: { lifecycles: { subscribe }, inTransaction: () => false },
+      documents: { use: jest.fn() },
+      cron: { add: jest.fn() },
+      getModel: (uid: string) => ({
+        uid,
+        kind: 'collectionType',
+        options: { draftAndPublish: true },
+      }),
+      plugins: {
+        'content-releases': {
+          services: {
+            'release-action': { deletePlannedActions },
+            scheduling: {
+              freezeOverdueReleases: jest.fn(async () => {}),
+              syncFromDatabase: jest.fn(async () => {}),
+            },
+          },
+        },
+      },
+      get: jest.fn(() => ({ addAllowedEvent: jest.fn() })),
+      has: jest.fn(() => false),
+      log: { error: jest.fn() },
+    } as any;
+    global.strapi = strapi;
+
+    await bootstrap({ strapi });
+
+    const [[{ afterDeleteMany }]] = subscribe.mock.calls;
+    return afterDeleteMany;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('filters the planned actions by documentId when the where clause has one', async () => {
+    const afterDeleteMany = await setupSubscriber();
+
+    afterDeleteMany({
+      model: { uid: 'api::article.article' },
+      params: { where: { documentId: 'doc-1', locale: 'fr' } },
+    });
+
+    expect(deletePlannedActions).toHaveBeenCalledWith({
+      contentType: 'api::article.article',
+      locale: 'fr',
+      entryDocumentId: 'doc-1',
+    });
+  });
+
+  it.each([
+    ['absent', {}],
+    ['undefined', { documentId: undefined }],
+    ['an empty string', { documentId: '' }],
+  ])('does not filter by documentId when it is %s', async (_, where) => {
+    const afterDeleteMany = await setupSubscriber();
+
+    afterDeleteMany({ model: { uid: 'api::article.article' }, params: { where } });
+
+    expect(deletePlannedActions).toHaveBeenCalledWith({
+      contentType: 'api::article.article',
+      locale: null,
+    });
+  });
+});

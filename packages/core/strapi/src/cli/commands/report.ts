@@ -19,21 +19,23 @@ const action = async ({ uuid, dependencies, all }: CmdOptions) => {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).register();
 
-  let debugInfo = `Launched In: ${Date.now() - app.config.launchedAt} ms
-Environment: ${app.config.environment}
+  let debugInfo = `Launched In: ${Date.now() - app.config.get<number>('launchedAt')} ms
+Environment: ${app.config.get<string>('environment')}
 OS: ${process.platform}-${process.arch}
-Strapi Version: ${app.config.info.strapi}
+Strapi Version: ${app.config.get<string>('info.strapi')}
 Node/Yarn Version: ${process.env.npm_config_user_agent}
 Edition: ${app.EE ? 'Enterprise' : 'Community'}
-Database: ${app?.config?.database?.connection?.client ?? 'unknown'}`;
+Database: ${app.config.get<string | undefined>('database.connection.client') ?? 'unknown'}`;
 
   if (config.reportUUID) {
-    debugInfo += `${EOL}UUID: ${app.config.uuid}`;
+    debugInfo += `${EOL}UUID: ${app.config.get<string>('uuid')}`;
   }
 
   if (config.reportDependencies) {
-    debugInfo += `${EOL}Dependencies: ${JSON.stringify(app.config.info.dependencies, null, 2)}
-Dev Dependencies: ${JSON.stringify(app.config.info.devDependencies, null, 2)}`;
+    const dependencies = JSON.stringify(app.config.get('info.dependencies'), null, 2);
+    const devDependencies = JSON.stringify(app.config.get('info.devDependencies'), null, 2);
+    debugInfo += `${EOL}Dependencies: ${dependencies}
+Dev Dependencies: ${devDependencies}`;
   }
 
   console.log(debugInfo);
@@ -53,4 +55,4 @@ const command: StrapiCommand = () => {
     .action(runAction('report', action));
 };
 
-export { command };
+export { action, command };

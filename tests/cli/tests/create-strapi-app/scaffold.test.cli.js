@@ -9,7 +9,19 @@ const semver = require('semver');
 const repoRoot = path.resolve(__dirname, '../../../..');
 const bin = path.join(repoRoot, 'packages/cli/create-strapi-app/bin/index.js');
 
-const baseScaffoldArgs = ['--non-interactive', '--skip-cloud', '--no-install', '--no-git-init'];
+const baseScaffoldArgs = ['--non-interactive', '--no-install', '--no-git-init'];
+
+// Every flag that would otherwise open a prompt, so a run without --non-interactive completes
+// only if no other prompt (such as the removed Strapi Cloud login) is asked
+const promptFreeArgs = [
+  '--typescript',
+  '--no-example',
+  '--skip-db',
+  '--no-install',
+  '--no-git-init',
+];
+
+const cloudPromptPattern = /log in|sign up|strapi cloud|strapi servers|trial/i;
 
 function spawnCsa(args, env = {}) {
   return coffee.spawn(process.execPath, [bin, ...args], {
@@ -264,10 +276,48 @@ describe('create-strapi-app', () => {
     }
   });
 
+  it('does not ask for a Strapi Cloud login or write a trial license', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      // No --non-interactive and no --skip-cloud: this combination used to open the cloud login prompt
+      const { stdout, stderr } = await spawnCsa([projectDir, ...promptFreeArgs])
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('Your application was created');
+      expect(`${stdout}${stderr}`).not.toMatch(cloudPromptPattern);
+      expect(fs.existsSync(path.join(projectDir, 'license.txt'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts the legacy --skip-cloud flag as a no-op', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout, stderr } = await spawnCsa([projectDir, ...promptFreeArgs, '--skip-cloud'])
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('Your application was created');
+      expect(`${stdout}${stderr}`).not.toMatch(/unknown option/i);
+      expect(`${stdout}${stderr}`).not.toMatch(cloudPromptPattern);
+      expect(fs.existsSync(path.join(projectDir, 'license.txt'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not list the legacy no-op flags in --help', async () => {
+    const { stdout } = await spawnCsa(['--help']).expect('code', 0).end();
+
+    expect(stdout).toContain('--non-interactive');
+    expect(stdout).not.toContain('--skip-cloud');
+    expect(stdout).not.toContain('--enable-ab-tests');
+  });
+
   it('fails when --non-interactive is used without a directory', async () => {
-    const { stderr, stdout } = await spawnCsa(['--non-interactive', '--skip-cloud'])
-      .expect('code', 1)
-      .end();
+    const { stderr, stdout } = await spawnCsa(['--non-interactive']).expect('code', 1).end();
 
     const out = `${stdout}${stderr}`;
     expect(out).toMatch(/non-interactive|directory/i);

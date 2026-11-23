@@ -75,6 +75,9 @@ export interface File {
         thumbnail: {
           url: string;
         };
+        small?: {
+          url: string;
+        };
       }
     | null;
   hash: string;
@@ -114,6 +117,20 @@ export interface RawFile extends Blob {
   name: string;
   type: string;
 }
+
+/**
+ * `error.details` of a too-large upload, with `limit` in bytes:
+ * - `FileTooBig`: `formidable.maxFileSize` on the `strapi::body` middleware
+ * - `SizeLimitExceeded`: `upload.config.sizeLimit`, or the deprecated `setting` when that is the
+ *   one that applied
+ */
+export type UploadTooLargeDetails =
+  | { code: 'FileTooBig'; limit: number }
+  | {
+      code: 'SizeLimitExceeded';
+      limit: number;
+      setting?: 'upload.config.providerOptions.sizeLimit';
+    };
 
 export interface Pagination {
   page: number;
@@ -314,6 +331,8 @@ export declare namespace CreateFilesStreamEvents {
     name: string;
     index: number;
     message: string;
+    /** `details` of the `ApplicationError` that failed the file, if any. */
+    details?: UploadTooLargeDetails | Record<string, unknown>;
   }
 
   export interface StreamCompleteEvent {
