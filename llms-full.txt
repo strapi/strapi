@@ -1499,7 +1499,7 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 
 A second `destroy()` waits for the shutdown already in progress. After that shutdown succeeds, another `destroy()` returns immediately. If shutdown throws, a later `destroy()` continues from the step that failed, so a closed database is not skipped. `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
 
-`strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
+`strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files, with two exceptions. If that `destroy()` throws, the worker sends `stop` to the primary and exits with code 1. A failure in `start()` never reaches this path, because develop does not await `start()`: `start()` calls `stopWithError()` itself. If `destroy()` throws during a restart, the worker sends neither `killed` nor `stop` and does not exit by itself: what happens next depends on how the process handles the unhandled rejection. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
 
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
 
@@ -2270,6 +2270,7 @@ The `strapi::errors` middleware in [`middlewares/errors.ts`](https://github.com/
 - If no middleware set a status, it responds 404.
 - An `ApplicationError` from `@strapi/utils` gets its status from its class: `UnauthorizedError` 401, `ForbiddenError` and `PolicyError` 403, `NotFoundError` 404, `PayloadTooLargeError` 413, `RateLimitError` 429, `NotImplementedError` 501, and 400 for the others, such as `ValidationError`.
 - An `http-errors` error keeps its status.
+- A database input error from `@strapi/database` (`InvalidBooleanError`, `InvalidDateError`, `InvalidDateTimeError`, `InvalidTimeError` or `InvalidRelationError`) answers 400 as a `ValidationError` and is not logged. These errors reach the middleware from routes that call `strapi.db.query` directly, for example `filters[flag][$eq]=no` on a boolean. The list is in [`utils/database-input-errors.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/database-input-errors.ts).
 - Any other error is logged. If it carries a 4xx status, the status and message are kept. Otherwise the response has a generic message and status 500 (or the 5xx status of the error), so internal details do not leak.
 
 `strapi::errors` and the error helpers on `ctx` write the same body: `{ data: null, error: { status, name, message, details } }`. A controller that sets `ctx.body` directly can use another shape.
@@ -6076,7 +6077,7 @@ Examples: `admin::audit-logs.read`, `plugin::content-manager.explorer.create`
 
 An action can be registered in the backend during the `register` or `bootstrap` phase of the app or of a plugin. Once the admin cleaned the stored permissions, or once Strapi is loaded, `register` throws.
 
-Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions that have an unregistered action, a subject the action does not list, none of the properties its action applies to (role permissions only; a `null` or `undefined` property counts as missing, except `locales: null`, which means every locale and counts as set unless another applicable property is missing), or neither a role nor an admin token. It logs one warning with the count, reasons, actions, subjects and owners of the deleted permissions. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions. The super admin reset, and the default Editor and Author roles created on the first boot, create no permission for a `contentTypes` action without subjects, or, when the action applies to `fields`, for a subject that is not a loaded content type.
+Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions that have an unregistered action, a subject the action does not list, or neither a role nor an admin token. It also deletes a role permission when every property its action lists applies to the subject and is missing. A `null` or `undefined` property counts as missing, except `locales: null`, which means every locale and counts as set unless another applicable property is missing. It keeps the other permissions and cleans their `fields`: fields that left the schema are removed, a stored parent path is replaced by its nested fields, and the permission is updated only when its fields changed. It logs one warning with the count, reasons, actions, subjects and owners of the deleted permissions. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions. The super admin reset, and the default Editor and Author roles created on the first boot, create no permission for a `contentTypes` action without subjects, or, when the action applies to `fields`, for a subject that is not a loaded content type.
 
 Example:
 
@@ -14288,9 +14289,9 @@ The admin dev server runs Vite in middleware mode, so it never opens a browser.
 
 The develop command sets itself up much like the [build](./01-build.md) command. Once we've injected our middlewares, we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
 
-If a step fails after the strapi instance is loaded (for example the TS compile reports type errors), develop logs the errors, destroys the loaded instance so its cron jobs and other bootstrap work stop, closes the admin bundler when `--watch-admin` is on, and keeps watching. The next file change restarts the instance, and the new worker starts a new admin bundler. `destroy()` removes every process listener, so develop adds back an exit on `disconnect`: the worker exits when the primary exits or is killed. A file change also exits the worker when the IPC channel to the primary is closed.
+If a step fails after the strapi instance is loaded (for example the TS compile reports type errors), develop logs the errors, destroys the loaded instance so its cron jobs and other bootstrap work stop, closes the admin bundler when `--watch-admin` is on, and keeps watching. There are two exceptions: a `destroy()` that throws makes the worker exit (see below), and a failure in `start()` never reaches this path because develop does not await `start()`. `start()`, or for a port already in use the HTTP server's `error` listener, calls `stopWithError()`: it logs the error, sends `stop` to the primary and exits with code 1, so a port already in use stops `strapi develop`. The next file change restarts the instance, and the new worker starts a new admin bundler. `destroy()` removes every process listener, so develop adds back an exit on `disconnect`: the worker exits when the primary exits or is killed. A file change also exits the worker when the IPC channel to the primary is closed.
 
-If `destroy()` throws during that stop, the instance is only partly destroyed: cron, the server or the database connection can still run. Develop then logs the error, sends `stop` to the primary and exits the worker, so `strapi develop` exits instead of forking a second worker next to it. On a restart, a `destroy()` that throws does not send `killed`, so the primary does not fork a new worker either.
+If `destroy()` throws during that stop, the instance is only partly destroyed: cron, the server or the database connection can still run. Develop then logs the error, sends `stop` to the primary and exits the worker, so `strapi develop` exits instead of forking a second worker next to it. On a restart, the worker's `kill` handler does not catch a `destroy()` that throws: the error becomes an unhandled rejection, and the worker sends neither `killed` nor `stop`, so the primary does not fork a new worker either. Develop does not exit the worker itself. What happens next depends on how the process handles unhandled rejections.
 
 ### Node Usage
 
@@ -15954,9 +15955,10 @@ async function traverseEntity(
   - `path` _(Path, optional)_: Tracks the current traversal path.
   - `parent` _(Parent, optional)_: Information about the parent attribute.
   - `getModel` _(Function)_: A function to retrieve the schema of a model by its UID.
+  - `allowedExtraRootKeys` _(string[], optional)_: Extra keys that are allowed at the root of the entity, such as the registered input params of a route. Traversal passes it to every visitor.
 
 - **`entity`**:  
-  The data entity to be traversed. Any plain object type is accepted, including a document whose values are `unknown`. A value typed with an `interface` (no implicit index signature) or a class instance is rejected at compile time. At runtime, a value that is not an object is returned unchanged.
+  The data entity to be traversed. Any plain object type is accepted, including a document whose values are `unknown`. A value typed with an `interface` (no implicit index signature) or a class instance is rejected at compile time. When present, `__type` and `__component` must be strings: `{ __type: 1 }` is rejected at compile time. At runtime, a value that is not an object is returned unchanged.
 
 #### Returns
 
@@ -16001,6 +16003,7 @@ interface VisitorOptions {
   path: Path;
   getModel(uid: string): Model;
   parent?: Parent;
+  allowedExtraRootKeys?: string[];
 }
 ```
 
@@ -16012,6 +16015,7 @@ interface VisitorOptions {
 - **`path`**: Tracks the traversal path.
 - **`getModel`**: Function to retrieve a schema definition by UID.
 - **`parent`** _(optional)_: Information about the parent attribute.
+- **`allowedExtraRootKeys`** _(optional)_: Extra keys allowed at the root of the entity, as passed in `TraverseOptions`. Visitors such as `removeUnrecognizedFields` and `throwUnrecognizedFields` read it only when `path.attribute` is `null`.
 
 #### VisitorUtils
 
@@ -16033,7 +16037,7 @@ Utility functions to modify the entity:
 interface Path {
   raw: string | null;
   attribute: string | null;
-  rawWithIndices: string | null;
+  rawWithIndices?: string | null;
 }
 ```
 
@@ -16041,7 +16045,7 @@ Tracks the traversal path:
 
 - **`raw`**: The traversal path on the entity
 - **`attribute`**: The same traversal path on the schema if the attribute exists
-- **`rawWithIndices`**: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
+- **`rawWithIndices`** _(optional)_: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
 
 #### Parent
 
@@ -16064,6 +16068,7 @@ interface TraverseOptions {
   path?: Path;
   parent?: Parent;
   getModel(uid: string): Model;
+  allowedExtraRootKeys?: string[];
 }
 ```
 
@@ -16073,6 +16078,7 @@ Configuration for the traversal:
 - **`path`** _(optional)_: Tracks the current traversal path.
 - **`parent`** _(optional)_: Information about the parent attribute.
 - **`getModel`**: Function to retrieve a schema definition by UID.
+- **`allowedExtraRootKeys`** _(optional)_: Extra keys allowed at the root of the entity, such as the registered input params of a route. Traversal passes it to every visitor and nested traversal.
 
 ---
 
