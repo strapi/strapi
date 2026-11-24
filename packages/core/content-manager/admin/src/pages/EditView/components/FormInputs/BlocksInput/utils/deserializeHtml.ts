@@ -203,7 +203,8 @@ const collectText = (node: Node, context: InlineContext, output: InlineNode[]) =
 };
 
 const collectLink = (element: Element, context: InlineContext, output: InlineNode[]) => {
-  const url = element.getAttribute('href')?.trim() ?? '';
+  // Browsers drop tabs and newlines anywhere in a url, so `/<tab>/evil.com` is `//evil.com`
+  const url = (element.getAttribute('href') ?? '').replace(/[\t\n\r]/g, '').trim();
   const children: InlineNode[] = [];
 
   element.childNodes.forEach((child) =>
@@ -215,8 +216,9 @@ const collectLink = (element: Element, context: InlineContext, output: InlineNod
     .filter((child): child is TextNode => child.type === 'text')
     .map(({ underline: _underline, ...text }) => text);
 
-  // Protocol-relative urls (//example.com) pass isValidBlocksLink but point to another site
-  const isSafeUrl = isValidBlocksLink(url) && !url.startsWith('//');
+  // Protocol-relative urls pass isValidBlocksLink but point to another site. Browsers read `\` as
+  // `/`, so `/\evil.com` and `\\evil.com` are protocol-relative too
+  const isSafeUrl = isValidBlocksLink(url) && !/^[/\\]{2}/.test(url);
 
   if (url && isSafeUrl && texts.some((text) => text.text.trim())) {
     output.push({ type: 'link', url, rel: '', target: '', children: texts });

@@ -1,4 +1,4 @@
-import { type Descendant, Editor, Node, Path, Range, Transforms } from 'slate';
+import { type Descendant, Editor, Element, Node, Path, Range, Transforms } from 'slate';
 
 import { deserializeHtml } from '../utils/deserializeHtml';
 
@@ -33,8 +33,25 @@ const keepRegisteredBlocks = (nodes: RootNode[], blocks: RichTextBlocksStore): R
     block.matchNode({ type: 'link', url: '', rel: '', target: '', children: [] })
   );
 
+  // A nested list whose format is not registered takes the format of the list around it
+  const withRegisteredNestedLists = (list: RootNode & { type: 'list' }): RootNode =>
+    ({
+      ...list,
+      children: list.children.map((child) => {
+        if (child.type !== 'list') return child;
+
+        const nested = (
+          isRegistered(child) ? child : { ...child, format: list.format }
+        ) as RootNode & {
+          type: 'list';
+        };
+
+        return withRegisteredNestedLists(nested);
+      }),
+    } as RootNode);
+
   const toParagraphs = (node: RootNode): RootNode[] => {
-    if (isRegistered(node)) return [node];
+    if (isRegistered(node)) return [node.type === 'list' ? withRegisteredNestedLists(node) : node];
 
     if (node.type === 'list') {
       return node.children.flatMap((child) =>
@@ -84,6 +101,29 @@ const insertBlocks = (editor: Editor, blocks: Descendant[]) => {
   }
 
   const { anchor } = editor.selection;
+
+  const emptyItem = Editor.above(editor, {
+    at: anchor,
+    match: (node) => Element.isElement(node) && node.type === 'list-item',
+  });
+
+  if (emptyItem && Editor.isEmpty(editor, emptyItem[0] as Element)) {
+    // An empty list item is replaced like an empty paragraph: lift it out of its lists first, which
+    // splits them around it, then put the pasted blocks in its place
+    Editor.withoutNormalizing(editor, () => {
+      const itemRef = Editor.pathRef(editor, emptyItem[1]);
+
+      while (itemRef.current && itemRef.current.length > 1) {
+        Transforms.liftNodes(editor, { at: itemRef.current });
+      }
+
+      const itemPath = itemRef.unref()!;
+      Transforms.insertNodes(editor, blocks, { at: Path.next(itemPath), select: true });
+      Transforms.removeNodes(editor, { at: itemPath });
+    });
+    return;
+  }
+
   const blockPath = anchor.path.slice(0, 1);
   const block = Node.get(editor, blockPath);
 

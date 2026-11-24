@@ -10,7 +10,7 @@ const clipboard = (data: Record<string, string>) =>
   ({
     types: Object.keys(data),
     getData: (type: string) => data[type] ?? '',
-  }) as unknown as DataTransfer;
+  } as unknown as DataTransfer);
 
 const setup = (
   children: Editor['children'],
@@ -163,6 +163,34 @@ describe('withHtmlPaste', () => {
       expect(items(editor.children[3])).toEqual(['bb', 'c']);
     });
 
+    it('replaces the only, empty item with the pasted blocks', () => {
+      const editor = setup(list(''));
+      Transforms.select(editor, { path: [0, 0, 0], offset: 0 });
+
+      paste(editor);
+
+      expect(editor.children.map((node) => (node as { type: string }).type)).toEqual([
+        'heading',
+        'paragraph',
+      ]);
+    });
+
+    it('replaces an empty item between two others and splits the list around it', () => {
+      const editor = setup(list('a', '', 'c'));
+      Transforms.select(editor, { path: [0, 1, 0], offset: 0 });
+
+      paste(editor);
+
+      expect(editor.children.map((node) => (node as { type: string }).type)).toEqual([
+        'list',
+        'heading',
+        'paragraph',
+        'list',
+      ]);
+      expect(items(editor.children[0])).toEqual(['a']);
+      expect(items(editor.children[3])).toEqual(['c']);
+    });
+
     it('still splits the item the caret is in the middle of', () => {
       const editor = setup(list('a', 'bbbb', 'c'));
       Transforms.select(editor, { path: [0, 1, 0], offset: 2 });
@@ -218,6 +246,24 @@ describe('withHtmlPaste', () => {
       { type: 'paragraph', children: [{ type: 'text', text: 'two' }] },
       { type: 'paragraph', children: [{ type: 'text', text: 'three' }] },
     ]);
+  });
+
+  it('gives a nested list whose format the project removed the format of its parent list', () => {
+    const { 'list-ordered': _ordered, ...blocks } = defaultBlocksStore;
+    const editor = setup(
+      [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }],
+      blocks as typeof defaultBlocksStore
+    );
+    Transforms.select(editor, { path: [0, 0], offset: 0 });
+
+    editor.insertData(clipboard({ 'text/html': '<ul><li>a<ol><li>b</li></ol></li></ul>' }));
+
+    type ListNode = { type: string; format?: string; children: ListNode[] };
+    const [list] = editor.children as unknown as ListNode[];
+    expect(list).toMatchObject({ type: 'list', format: 'unordered' });
+    expect(list.children.find((child) => child.type === 'list')).toMatchObject({
+      format: 'unordered',
+    });
   });
 
   it('turns blocks the project removed into paragraphs, and links into text', () => {

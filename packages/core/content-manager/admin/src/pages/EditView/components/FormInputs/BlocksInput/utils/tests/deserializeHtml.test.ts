@@ -185,14 +185,20 @@ describe('deserializeHtml', () => {
       ]);
     });
 
-    it.each(['javascript:alert(1)', '//evil.example.com/page', ''])(
-      'keeps the text but drops the link for the url "%s"',
-      (url) => {
-        expect(deserializeHtml(`<p><a href="${url}">click</a></p>`)).toEqual([
-          paragraph(text('click')),
-        ]);
-      }
-    );
+    it.each([
+      'javascript:alert(1)',
+      '//evil.example.com/page',
+      // Browsers read a backslash as a slash and drop tabs and newlines
+      '/\\evil.example.com',
+      '\\\\evil.example.com',
+      '/\t/evil.example.com',
+      '/\n/evil.example.com',
+      '',
+    ])('keeps the text but drops the link for the url "%s"', (url) => {
+      expect(deserializeHtml(`<p><a href="${url}">click</a></p>`)).toEqual([
+        paragraph(text('click')),
+      ]);
+    });
   });
 
   describe('lists', () => {
