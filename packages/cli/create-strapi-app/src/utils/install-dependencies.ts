@@ -1,3 +1,5 @@
+import type { Socket } from 'node:net';
+import type { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 
 import chalk from 'chalk';
@@ -21,6 +23,14 @@ export const MAX_INSTALL_OUTPUT_LENGTH = 64 * 1024;
  * after the package manager exits, so the wait has a limit.
  */
 export const OUTPUT_DRAIN_TIMEOUT_MS = 1000;
+
+/**
+ * Stops the event loop from waiting for the stream, but keeps it open.
+ * The output pipes of a child process are sockets, so they have `unref`.
+ */
+const unref = (stream: Readable | null | undefined) => {
+  (stream as Partial<Socket> | null | undefined)?.unref?.();
+};
 
 /**
  * Resolves when `done` settles or after `ms` milliseconds, whichever comes first.
@@ -145,11 +155,11 @@ export async function runInstall({ rootPath, packageManager }: Scope) {
 
     throw new InstallError(error, tail.read());
   } finally {
-    // Release our end of the pipes, on success and on failure.
-    // A background process that still holds them must not keep the CLI alive.
-    proc.all?.destroy();
-    proc.stdout?.destroy();
-    proc.stderr?.destroy();
+    // A background process started by a lifecycle script can still hold the pipes.
+    // Unref them, on success and on failure, so they cannot keep the CLI alive.
+    // Do not destroy them: the next write of that process would then fail with EPIPE.
+    unref(proc.stdout);
+    unref(proc.stderr);
   }
 }
 
@@ -191,7 +201,9 @@ export async function installProjectDependencies(scope: Scope) {
       error: '',
     });
 
-    logger.fatal([
+    // Wait until stderr accepted all the output, then exit.
+    // When stderr is a pipe, `process.exit` can drop output that is still queued.
+    await logger.fatalAfterFlush([
       chalk.bold(
         'Oh, it seems that you encountered an error while installing dependencies in your project'
       ),

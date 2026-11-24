@@ -22,13 +22,13 @@ vi.mock('ora', () => ({
 vi.mock('../utils/get-package-manager-args', () => ({ getInstallArgs: vi.fn() }));
 vi.mock('../utils/usage', () => ({ trackUsage: vi.fn() }));
 vi.mock('../utils/logger', () => ({
-  logger: { title: vi.fn(), success: vi.fn(), fatal: vi.fn() },
+  logger: { title: vi.fn(), success: vi.fn(), fatalAfterFlush: vi.fn() },
 }));
 
 const execaMock = vi.mocked(execa);
 const getInstallArgsMock = vi.mocked(getInstallArgs);
 const trackUsageMock = vi.mocked(trackUsage);
-const fatalMock = vi.mocked(logger.fatal);
+const fatalMock = vi.mocked(logger.fatalAfterFlush);
 
 const scope = { rootPath: '/tmp/my-app', packageManager: 'npm' } as Scope;
 
@@ -41,8 +41,9 @@ const fakeProcess = (
   error?: unknown,
   { keepOutputOpen = false }: { keepOutputOpen?: boolean } = {}
 ) => {
-  const stdout = new PassThrough();
-  const stderr = new PassThrough();
+  // The output pipes of a real child process are sockets, which have `unref`
+  const stdout = Object.assign(new PassThrough(), { unref: vi.fn() });
+  const stderr = Object.assign(new PassThrough(), { unref: vi.fn() });
   const all = new PassThrough();
 
   const done = new Promise<void>((resolve, reject) => {
@@ -64,6 +65,17 @@ const fakeProcess = (
   });
 
   return Object.assign(done, { stdout, stderr, all }) as unknown as ReturnType<typeof execa>;
+};
+
+/**
+ * The pipes must not keep the CLI alive, but must stay open:
+ * a background process that still writes to them would fail with EPIPE.
+ */
+const expectPipesReleased = (proc: ReturnType<typeof execa>) => {
+  for (const stream of [proc.stdout, proc.stderr]) {
+    expect((stream as unknown as { unref: () => void }).unref).toHaveBeenCalled();
+    expect(stream?.destroyed).toBe(false);
+  }
 };
 
 const execaError = (shortMessage: string) =>
@@ -139,9 +151,7 @@ describe('runInstall', () => {
 
     await runInstall(scope);
 
-    expect(proc.all?.destroyed).toBe(true);
-    expect(proc.stdout?.destroyed).toBe(true);
-    expect(proc.stderr?.destroyed).toBe(true);
+    expectPipesReleased(proc);
   });
 
   it('does not wait for the output to end longer than the time limit', async () => {
@@ -168,9 +178,7 @@ describe('runInstall', () => {
 
       expect(error).toBeInstanceOf(InstallError);
       expect(error.output).toBe('npm error the real error\n');
-      expect(proc.all?.destroyed).toBe(true);
-      expect(proc.stdout?.destroyed).toBe(true);
-      expect(proc.stderr?.destroyed).toBe(true);
+      expectPipesReleased(proc);
     } finally {
       vi.useRealTimers();
     }
