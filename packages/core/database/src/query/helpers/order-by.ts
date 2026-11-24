@@ -190,7 +190,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
 
   const resultQuery = db.getConnection(aliasedTableName);
 
-  // The outer builder is new, so copy the explicit transaction onto it.
+  // A db.getConnection() builder does not inherit originalQuery's transaction.
   if (qb.state.transaction) {
     resultQuery.transacting(qb.state.transaction);
   }

@@ -117,7 +117,7 @@ const setupTables = async (connection: knex.Knex) => {
   ]);
 };
 
-describe('relation subquery path (delete / update writes)', () => {
+describe('relation subquery and deep sort paths', () => {
   it.each([
     [
       'nested relation where',
