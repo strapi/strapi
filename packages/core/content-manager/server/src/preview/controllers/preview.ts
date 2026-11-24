@@ -15,7 +15,7 @@ const createPreviewController = () => {
      * in the Content Manager.
      */
     async getPreviewUrl(ctx) {
-      const uid = ctx.params.contentType as UID.ContentType;
+      const { contentType: uid }: { contentType: UID.ContentType } = ctx.params;
       const query = ctx.request.query as Preview.GetPreviewUrl.Request['query'];
 
       // Validate the request parameters

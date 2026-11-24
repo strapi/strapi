@@ -54,7 +54,7 @@ export const singleCreateOrUpdate = async (
   const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({
     userAbility,
-    model: uid as string,
+    model: uid,
   });
 
   if (permissionChecker.cannot.create() && permissionChecker.cannot.update()) {
@@ -146,7 +146,7 @@ export const createSingleGetHandler =
 
     const permissionChecker = getService('permission-checker').create({
       userAbility,
-      model: uid as string,
+      model: uid,
     });
 
     if (permissionChecker.cannot.read()) {
@@ -240,7 +240,7 @@ export const createSingleDeleteHandler =
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
       userAbility,
-      model: uid as string,
+      model: uid,
     });
 
     if (permissionChecker.cannot.delete()) {
@@ -303,7 +303,7 @@ export const createSinglePublishHandler =
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
       userAbility,
-      model: uid as string,
+      model: uid,
     });
 
     if (permissionChecker.cannot.publish()) {
@@ -360,7 +360,7 @@ export const createSingleUnpublishHandler =
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
       userAbility,
-      model: uid as string,
+      model: uid,
     });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -424,7 +424,7 @@ export const createSingleDiscardDraftHandler =
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
       userAbility,
-      model: uid as string,
+      model: uid,
     });
 
     if (permissionChecker.cannot.discard()) {

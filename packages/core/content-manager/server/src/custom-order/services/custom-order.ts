@@ -7,7 +7,7 @@ import { createDocumentMiddleware } from './document-middleware';
 import { computeMove, type Placement } from './utils';
 
 interface StoredConfiguration {
-  uid?: string;
+  uid?: UID.ContentType;
   settings?: { customOrder?: boolean };
 }
 
@@ -20,7 +20,7 @@ const CONFIGURATION_KEY_PREFIX = 'plugin_content_manager_configuration_content_t
 
 const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
-    enabled: Set<string>;
+    enabled: Set<UID.ContentType>;
     loadedAt: number;
     refreshId: number;
     isRefreshing: boolean;
@@ -36,8 +36,8 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * Only the content types that received the position attribute at register can be ordered.
    */
-  const isOrderable = (uid: string) => {
-    const model = strapi.getModel(uid as UID.ContentType);
+  const isOrderable = (uid: UID.ContentType) => {
+    const model = strapi.getModel(uid);
 
     return model?.attributes?.[POSITION_ATTRIBUTE] !== undefined;
   };
@@ -278,7 +278,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const healMissingPositions = async () => {
     for (const uid of state.enabled) {
-      await assignMissingPositions(uid as UID.ContentType);
+      await assignMissingPositions(uid);
     }
   };
 
@@ -292,7 +292,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Whether the entries of a content type currently follow a custom order.
      */
-    isEnabled(uid: string) {
+    isEnabled(uid: UID.ContentType) {
       refreshInBackgroundIfStale();
 
       return state.enabled.has(uid);

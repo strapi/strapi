@@ -1,4 +1,4 @@
-import type { Core, Modules, Schema } from '@strapi/types';
+import type { Core, Modules, Schema, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
 import type {
@@ -100,7 +100,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
-  const getPermissionChecker = (uid: string) =>
+  const getPermissionChecker = (uid: UID.ContentType) =>
     permissionCheckerService.create({
       userAbility: strapi.requestContext.get()?.state.userAbility,
       model: uid,

@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Data, Schema } from '@strapi/types';
+import type { Data, Schema, UID } from '@strapi/types';
 import { findComponentParent, getParentSchemasForComponent } from '../components';
 
 /**
@@ -68,7 +68,7 @@ export const cleanComponentJoinTable = async (
 const findContentTypeParentForComponentInstance = async (
   componentSchema: Schema.Component,
   componentId: Data.ID
-): Promise<{ uid: string; table: string; parentId: Data.ID } | null> => {
+): Promise<{ uid: UID.Schema; table: string; parentId: Data.ID } | null> => {
   // Get the parent schemas that could contain this component
   const parentSchemas = getParentSchemasForComponent(componentSchema);
   if (parentSchemas.length === 0) {

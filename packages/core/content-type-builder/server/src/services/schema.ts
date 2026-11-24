@@ -1,7 +1,7 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash';
 
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
@@ -208,7 +208,7 @@ const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
 };
 
 interface CollectedRename {
-  uid: string;
+  uid: UID.Schema;
   oldName: string;
   newName: string;
   newAttribute?: RenameAttributeDefinition;
@@ -235,7 +235,7 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
   type AttributeEntry = { action?: string; name?: string; properties?: RenameAttributeDefinition };
   type RenameAwareEntry = {
     action?: string;
-    uid: string;
+    uid: UID.Schema;
     renames?: RenameHop[];
     attributes?: AttributeEntry[];
   };
@@ -292,7 +292,11 @@ const keepSavedAttributes = (
   schema: CTBSchema,
   mapping: AttributeRenamesMapping
 ): AttributeRenamesMapping => {
-  type Entry = { action?: string; uid: string; attributes?: { action?: string; name?: string }[] };
+  type Entry = {
+    action?: string;
+    uid: UID.Schema;
+    attributes?: { action?: string; name?: string }[];
+  };
   const entries = [
     ...(schema.contentTypes as unknown as Entry[]),
     ...(schema.components as unknown as Entry[]),
@@ -394,7 +398,7 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<string | nul
  * refuses before touching the schema when the rename cannot be migrated.
  */
 export const renameAttribute = async (
-  uid: string,
+  uid: UID.Schema,
   oldName: string,
   newName: string
 ): Promise<void> => {
@@ -635,10 +639,10 @@ export const updateSchema = async (schema: CTBSchema) => {
   removeDeletedUIDTargetFieldsOnUpdates(schema);
   renameConditionVarsOnUpdates(schema);
 
-  const upsertedUids = new Map<string, ContentTypeKind>();
-  const deletedUids = new Set<string>();
+  const upsertedUids = new Map<UID.ContentType, ContentTypeKind>();
+  const deletedUids = new Set<UID.ContentType>();
   const generatedApiNames: string[] = [];
-  const backedUpApiUids: string[] = [];
+  const backedUpApiUids: UID.ContentType[] = [];
   let schemaAlreadyRolledBack = false;
   let migrationFilePath: string | null = null;
   const APIsToDelete = contentTypes

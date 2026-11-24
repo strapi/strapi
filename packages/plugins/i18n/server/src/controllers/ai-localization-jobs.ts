@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi }) => {
   const getService = (name: string) => strapi.plugin('i18n').service(name);
@@ -15,7 +15,7 @@ const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi })
         return ctx.notFound();
       }
 
-      const { contentType } = ctx.params;
+      const { contentType }: { contentType: UID.ContentType } = ctx.params;
 
       if (!contentType) {
         return ctx.badRequest('contentType is required');
@@ -42,7 +42,10 @@ const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi })
         return ctx.notFound();
       }
 
-      const { documentId, contentType } = ctx.params;
+      const {
+        documentId,
+        contentType,
+      }: { documentId: Data.DocumentID; contentType: UID.ContentType } = ctx.params;
 
       if (!documentId || !contentType) {
         return ctx.badRequest('Document ID and contentType are required');

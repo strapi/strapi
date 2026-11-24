@@ -13,8 +13,8 @@ interface Params {
 }
 
 interface CustomOrder {
-  isOrderable(uid: string): boolean;
-  isEnabled(uid: string): boolean;
+  isOrderable(uid: UID.ContentType): boolean;
+  isEnabled(uid: UID.ContentType): boolean;
   getTopPosition(uid: UID.ContentType): Promise<number>;
   syncDocumentPosition(uid: UID.ContentType, documentId: Data.DocumentID): Promise<void>;
   withOrderLock<T>(uid: UID.ContentType, fn: () => Promise<T>): Promise<T>;

@@ -22,7 +22,7 @@ export default function createComponentBuilder() {
       }, {});
     },
 
-    createComponentAttributes(this: any, uid: string, attributes: any) {
+    createComponentAttributes(this: any, uid: Internal.UID.Component, attributes: any) {
       if (!this.components.has(uid)) {
         throw new ApplicationError('component.notFound');
       }
@@ -105,7 +105,7 @@ export default function createComponentBuilder() {
       const [, nameUID] = uid.split('.');
 
       const newCategory = strings.nameToSlug(infos.category);
-      const newUID = `${newCategory}.${nameUID}`;
+      const newUID: Internal.UID.Component = `${newCategory}.${nameUID}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
         throw new errors.ApplicationError('component.edit.alreadyExists');

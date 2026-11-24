@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
@@ -38,18 +38,18 @@ export interface ContentTypeBuilderContentStructureService {
    */
   validateContentTypeUidReferences(
     structure: unknown,
-    contentTypeUids: Map<string, ContentTypeKind>
+    contentTypeUids: Map<UID.ContentType, ContentTypeKind>
   ): void;
 
   validateFromUpdate(input: {
     incomingStructure?: unknown;
-    upsertedUids: Map<string, ContentTypeKind>;
-    deletedUids: Set<string>;
+    upsertedUids: Map<UID.ContentType, ContentTypeKind>;
+    deletedUids: Set<UID.ContentType>;
   }): void;
 
   commitFromUpdate(input: {
     incomingStructure?: unknown;
-    deletedUids: Set<string>;
+    deletedUids: Set<UID.ContentType>;
   }): Promise<boolean>;
 }
 
@@ -125,13 +125,16 @@ export function createContentStructureService(
    * Builds an effective set of content type uids and their kind by resolving the pre-transaction content type registry with the list of upserted and deleted uids.
    */
   const buildEffectiveUidKindSet = (
-    upsertedUids: Map<string, ContentTypeKind>,
-    deletedUids: Set<string>
-  ): Map<string, ContentTypeKind> => {
-    const effective = new Map<string, ContentTypeKind>();
+    upsertedUids: Map<UID.ContentType, ContentTypeKind>,
+    deletedUids: Set<UID.ContentType>
+  ): Map<UID.ContentType, ContentTypeKind> => {
+    const effective = new Map<UID.ContentType, ContentTypeKind>();
 
     for (const [uid, contentType] of Object.entries(strapi.contentTypes)) {
-      effective.set(uid, contentType.kind === 'singleType' ? 'singleType' : 'collectionType');
+      effective.set(
+        uid as UID.ContentType,
+        contentType.kind === 'singleType' ? 'singleType' : 'collectionType'
+      );
     }
 
     for (const uid of deletedUids) {
@@ -150,7 +153,7 @@ export function createContentStructureService(
    */
   const pruneStructure = (
     file: ContentStructureFile,
-    deletedUids: Set<string>
+    deletedUids: Set<UID.ContentType>
   ): ContentStructureFile => {
     const cloned = cloneFile(file);
 
@@ -178,7 +181,7 @@ export function createContentStructureService(
 
   const validateContentTypeUidReferences = (
     structure: unknown,
-    contentTypeKinds: Map<string, ContentTypeKind>
+    contentTypeKinds: Map<UID.ContentType, ContentTypeKind>
   ): void => {
     const file = formatContentStructureObjectAsFile(structure);
     const violations: string[] = [];
@@ -231,8 +234,8 @@ export function createContentStructureService(
     deletedUids,
   }: {
     incomingStructure?: unknown;
-    upsertedUids: Map<string, ContentTypeKind>;
-    deletedUids: Set<string>;
+    upsertedUids: Map<UID.ContentType, ContentTypeKind>;
+    deletedUids: Set<UID.ContentType>;
   }): void => {
     if (incomingStructure === undefined || incomingStructure === null) {
       return;
@@ -252,7 +255,7 @@ export function createContentStructureService(
     deletedUids,
   }: {
     incomingStructure?: unknown;
-    deletedUids: Set<string>;
+    deletedUids: Set<UID.ContentType>;
   }): Promise<boolean> => {
     if (incomingStructure !== undefined && incomingStructure !== null) {
       const pruned = pruneStructure(

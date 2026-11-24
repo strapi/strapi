@@ -476,7 +476,7 @@ export const prepareCloneData = async (
 
     if (plan.kind === 'defer') {
       deferredCopies.push({
-        schemaUid: contentType.uid as UID.Schema,
+        schemaUid: contentType.uid,
         attributeName,
         kind: plan.copyKind,
         ownerPath: null,
@@ -488,7 +488,7 @@ export const prepareCloneData = async (
       postCloneUpdates.push({
         dataPath: attributeName,
         value: plan.value,
-        schemaUid: contentType.uid as UID.Schema,
+        schemaUid: contentType.uid,
         ownerPath: null,
       });
     }

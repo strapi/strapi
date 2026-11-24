@@ -65,8 +65,8 @@ const validExample = (): any => ({
   },
 });
 
-const exampleEffectiveSet = (): Map<string, Kind> =>
-  new Map<string, Kind>([
+const exampleEffectiveSet = (): Map<UID.ContentType, Kind> =>
+  new Map<UID.ContentType, Kind>([
     ['api::article.article', 'collectionType'],
     ['api::category.category', 'collectionType'],
     ['api::author.author', 'collectionType'],
@@ -147,7 +147,9 @@ describe('CTB content-structure service', () => {
         },
       };
 
-      const effective = new Map<string, Kind>([['api::article.article', 'collectionType']]);
+      const effective = new Map<UID.ContentType, Kind>([
+        ['api::article.article', 'collectionType'],
+      ]);
 
       expect(() => service().validateContentTypeUidReferences(file, effective)).toThrow(
         /cannot be placed in section "singleTypes"/
@@ -272,7 +274,7 @@ describe('CTB content-structure service', () => {
       expect(() =>
         createContentStructureService(strapi).validateFromUpdate({
           incomingStructure: incoming,
-          upsertedUids: new Map<string, Kind>([['api::article.article', 'singleType']]),
+          upsertedUids: new Map<UID.ContentType, Kind>([['api::article.article', 'singleType']]),
           deletedUids: new Set(),
         })
       ).not.toThrow();
@@ -379,8 +381,8 @@ describe('CTB content-structure service', () => {
     });
 
     it('persists and reloads a mixed folder deletion as a local delete with an ungrouped plugin', async () => {
-      const localUid = 'api::article.article' as UID.ContentType;
-      const pluginUid = 'plugin::example.article' as UID.ContentType;
+      const localUid: UID.ContentType = 'api::article.article';
+      const pluginUid: UID.ContentType = 'plugin::example.article';
       const initialContentStructure = {
         version: 1,
         sections: {
@@ -444,7 +446,8 @@ describe('CTB content-structure service', () => {
       const deletedUids = new Set(
         requestData.contentTypes
           .filter((contentType) => contentType.action === 'delete')
-          .map((contentType) => contentType.uid)
+          // The admin request payload is untyped at the server boundary
+          .map((contentType) => contentType.uid as UID.ContentType)
       );
       const strapi = buildStrapi({
         [localUid]: { kind: 'collectionType' },

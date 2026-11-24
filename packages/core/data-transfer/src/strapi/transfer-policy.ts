@@ -15,8 +15,8 @@ type SchemaAttribute = {
   type?: string;
   target?: string;
   relation?: string;
-  component?: string;
-  components?: string[];
+  component?: UID.Component;
+  components?: UID.Component[];
   repeatable?: boolean;
   morphColumn?: { typeField?: string };
   owner?: boolean;
@@ -74,8 +74,8 @@ const protectedTypeError = (uid: string, path: string) =>
 const invalidPayloadError = (path: string, reason: string) =>
   new ProviderTransferError(`Remote push received invalid relation payload at ${path}: ${reason}`);
 
-const getSchema = (strapi: Core.Strapi, uid: string, path: string): Schema => {
-  const schema = strapi.getModel(uid as UID.Schema) as Schema | undefined;
+const getSchema = (strapi: Core.Strapi, uid: UID.Schema, path: string): Schema => {
+  const schema = strapi.getModel(uid) as Schema | undefined;
 
   if (!schema) {
     throw invalidPayloadError(path, `unknown schema "${uid}"`);
@@ -84,8 +84,8 @@ const getSchema = (strapi: Core.Strapi, uid: string, path: string): Schema => {
   return schema;
 };
 
-const getDatabaseSchema = (strapi: Core.Strapi, uid: string, path: string): Schema => {
-  const schema = strapi.db.metadata.get(uid as UID.Schema) as Schema | undefined;
+const getDatabaseSchema = (strapi: Core.Strapi, uid: UID.Schema, path: string): Schema => {
+  const schema = strapi.db.metadata.get(uid) as Schema | undefined;
 
   if (!schema) {
     throw invalidPayloadError(path, `unknown database schema "${uid}"`);
@@ -111,7 +111,7 @@ const assertPolymorphicValueAllowed = (value: unknown, typeField: string, path: 
 
 const assertComponentValueAllowed = (
   strapi: Core.Strapi,
-  componentUID: string,
+  componentUID: UID.Component,
   value: unknown,
   path: string,
   repeatable: boolean
@@ -136,7 +136,7 @@ const assertComponentValueAllowed = (
 
 const assertDynamicZoneValueAllowed = (
   strapi: Core.Strapi,
-  componentUIDs: string[],
+  componentUIDs: UID.Component[],
   value: unknown,
   path: string
 ) => {
@@ -149,7 +149,8 @@ const assertDynamicZoneValueAllowed = (
       throw invalidPayloadError(path, 'missing dynamic zone component discriminator');
     }
 
-    const componentUID = entry.__component;
+    // Dynamic zone discriminator from the remote payload
+    const componentUID = entry.__component as UID.Component;
     if (!componentUIDs.includes(componentUID)) {
       throw invalidPayloadError(path, `unsupported dynamic zone component "${componentUID}"`);
     }
@@ -160,7 +161,7 @@ const assertDynamicZoneValueAllowed = (
 
 const assertSchemaDataAllowed = (
   strapi: Core.Strapi,
-  uid: string,
+  uid: UID.Schema,
   data: Record<string, unknown>,
   path: string
 ) => {

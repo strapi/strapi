@@ -30,7 +30,7 @@ const encodeKey = (obj: any) => {
 };
 
 interface KeyFields {
-  uid: string;
+  uid: UID.Schema;
   documentId: Data.DocumentID;
   locale?: string | null;
   status?: 'draft' | 'published';

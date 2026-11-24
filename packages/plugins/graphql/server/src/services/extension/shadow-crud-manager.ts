@@ -1,3 +1,5 @@
+import type { UID } from '@strapi/types';
+
 export type ContentTypeConfig = {
   enabled: boolean;
 
@@ -39,9 +41,9 @@ const getDefaultFieldConfig = (): FieldConfig => ({
 const ALL_ACTIONS = '*';
 
 export default () => {
-  const configs = new Map<string, ContentTypeConfig>();
+  const configs = new Map<UID.Schema, ContentTypeConfig>();
 
-  return (uid: string) => {
+  return (uid: UID.Schema) => {
     if (!configs.has(uid)) {
       configs.set(uid, getDefaultContentTypeConfig());
     }

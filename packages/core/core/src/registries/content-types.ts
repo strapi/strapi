@@ -19,7 +19,7 @@ const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
 };
 
 const contentTypesRegistry = () => {
-  const contentTypes: Record<string, Struct.ContentTypeSchema> = {};
+  const contentTypes: Record<UID.ContentType, Struct.ContentTypeSchema> = {};
 
   return {
     /**
@@ -58,7 +58,7 @@ const contentTypesRegistry = () => {
       validateKeySameToSingularName(newContentTypes);
 
       for (const rawCtName of Object.keys(newContentTypes)) {
-        const uid = addNamespace(rawCtName, namespace);
+        const uid = addNamespace(rawCtName, namespace) as UID.ContentType;
 
         if (has(contentTypes, uid)) {
           throw new Error(`Content-type ${uid} has already been registered.`);

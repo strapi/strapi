@@ -87,7 +87,7 @@ const isOtherSide = ({
   targetAttribute,
 }: {
   key: string;
-  uid: string;
+  uid: Internal.UID.ContentType;
   attribute: InternalRelationAttribute;
   targetAttribute: Schema.Attribute.AnyAttribute;
 }) => {
@@ -206,7 +206,7 @@ const getRenameOrigins = (renames: unknown): Map<string, string> => {
 };
 
 /** A relation (`key` of `uid`) and the other side that `setRelation` wrote for it. */
-type BuiltPair = { uid: string; key: string; target: string; name: string };
+type BuiltPair = { uid: Internal.UID.ContentType; key: string; target: string; name: string };
 
 export default function createComponentBuilder() {
   return {
@@ -214,10 +214,10 @@ export default function createComponentBuilder() {
     builtPairs: [] as BuiltPair[],
 
     // The attributes that the save sends for each type it creates or edits
-    savedAttributes: new Map<string, Record<string, unknown>>(),
+    savedAttributes: new Map<Internal.UID.ContentType, Record<string, unknown>>(),
 
     // The types that the save deletes
-    deletedContentTypes: new Set<string>(),
+    deletedContentTypes: new Set<Internal.UID.ContentType>(),
 
     /**
      * Writes the other side of the relation `key` of `uid` on its target. The other side keeps
@@ -234,7 +234,7 @@ export default function createComponentBuilder() {
         renamedCounterpart,
       }: {
         key: string;
-        uid: string;
+        uid: Internal.UID.ContentType;
         attribute: InternalRelationAttribute;
         renamedCounterpart?: Partial<InternalRelationAttribute>;
       }
@@ -301,7 +301,7 @@ export default function createComponentBuilder() {
       );
 
       for (const [uid, savedAttributes] of this.savedAttributes as Map<
-        string,
+        Internal.UID.ContentType,
         Record<string, unknown>
       >) {
         for (const [key, saved] of Object.entries(savedAttributes)) {
@@ -474,7 +474,7 @@ export default function createComponentBuilder() {
         attributes,
       }: {
         key: string;
-        uid: string;
+        uid: Internal.UID.ContentType;
         attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>;
         attributes: Record<string, InternalAttribute>;
       }
@@ -513,7 +513,7 @@ export default function createComponentBuilder() {
 
     createContentTypeAttributes(
       this: any,
-      uid: string,
+      uid: Internal.UID.ContentType,
       attributes: CreateContentTypeInput['attributes']
     ) {
       if (!this.contentTypes.has(uid)) {
@@ -971,7 +971,7 @@ export default function createComponentBuilder() {
       return contentType;
     },
 
-    deleteContentType(this: any, uid: string) {
+    deleteContentType(this: any, uid: Internal.UID.ContentType) {
       if (!this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.notFound');
       }
@@ -1015,7 +1015,7 @@ const generateRelation = ({
 }: {
   key: string;
   attribute: InternalRelationAttribute;
-  uid: string;
+  uid: Internal.UID.ContentType;
   targetAttribute?: Partial<InternalRelationAttribute>;
 }) => {
   const opts: any = {

@@ -141,7 +141,10 @@ export const createLinkQuery = (
       return schemaName ? `${schemaName}.${tableName}` : tableName;
     };
 
-    async function* generateAllForAttribute(uid: string, fieldName: string): AsyncGenerator<ILink> {
+    async function* generateAllForAttribute(
+      uid: UID.Schema,
+      fieldName: string
+    ): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
       if (!metadata) {
@@ -464,7 +467,7 @@ export const createLinkQuery = (
       }
     }
 
-    async function* generateAll(uid: string): AsyncGenerator<ILink> {
+    async function* generateAll(uid: UID.Schema): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
       if (!metadata) {
@@ -607,7 +610,7 @@ export const filterValidRelationalAttributes = (attributes: Record<string, any>)
     .reduce<Record<string, any>>((acc, [key, attribute]) => ({ ...acc, [key]: attribute }), {});
 };
 
-const getLinkKind = (attribute: any, uid: string): ILink['kind'] => {
+const getLinkKind = (attribute: any, uid: UID.Schema): ILink['kind'] => {
   if (attribute.relation.startsWith('morph')) {
     return 'relation.morph';
   }

@@ -33,7 +33,7 @@ export interface StageSnapshot {
 
 export interface WorkflowSnapshot {
   name: string;
-  contentTypes: string[];
+  contentTypes: UID.ContentType[];
   stages: StageSnapshot[];
   stageRequiredToPublish: string | null;
 }
@@ -53,7 +53,7 @@ export type WorkflowChanges = {
 export interface WorkflowRow {
   id: Data.ID;
   name: string;
-  contentTypes?: string[] | null;
+  contentTypes?: UID.ContentType[] | null;
   stages?: Array<{
     name: string;
     color?: string | null;

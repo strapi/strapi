@@ -17,7 +17,7 @@ namespace UpdateAssignee {
   }
 
   export interface Params {
-    model: string;
+    model: UID.ContentType;
     id: Entity['id'];
   }
 
@@ -50,7 +50,7 @@ namespace GetStages {
   }
 
   export interface Params {
-    model: string;
+    model: UID.ContentType;
     id: Entity['id'];
   }
 
@@ -75,7 +75,7 @@ namespace UpdateStage {
   }
 
   export interface Params {
-    model: string;
+    model: UID.ContentType;
     id: Entity['id'];
   }
 

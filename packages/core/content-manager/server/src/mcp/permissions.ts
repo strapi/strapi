@@ -5,8 +5,8 @@ import { getService } from '../utils';
 import type { ContentManagerModelForMcp } from './types';
 
 /** Returns true if the registered localization provider reports the content type identified by `uid` as localized. */
-export const isContentTypeLocalized = (strapi: Core.Strapi, uid: string): boolean => {
-  const ct = strapi.contentTypes?.[uid as UID.ContentType];
+export const isContentTypeLocalized = (strapi: Core.Strapi, uid: UID.ContentType): boolean => {
+  const ct = strapi.contentTypes?.[uid];
   if (ct === undefined) return false;
   return strapi.localization.isLocalizedContentType(ct);
 };
@@ -65,7 +65,7 @@ export const resolvePermittedLocaleSchema = (
   strapi: Core.Strapi,
   context: Modules.MCP.McpHandlerContext,
   action: string,
-  uid: string,
+  uid: UID.ContentType,
   localeCodes: [string, ...string[]] | null,
   defaultLocale: string | null,
   baseLocaleSchema: z.ZodTypeAny
@@ -108,13 +108,15 @@ export const resolvePermittedLocaleSchema = (
  */
 export const getComponentLeafPaths = (
   strapi: Core.Strapi,
-  componentUid: string,
+  componentUid: UID.Component,
   prefix: string,
   visited: Set<string> = new Set()
 ): string[] => {
   if (visited.has(componentUid) === true) return [prefix];
 
-  type ComponentEntry = { attributes: Record<string, { type: string; component?: string }> };
+  type ComponentEntry = {
+    attributes: Record<string, { type: string; component?: UID.Component }>;
+  };
   const component = (strapi.components as unknown as Record<string, ComponentEntry | undefined>)[
     componentUid
   ];
@@ -151,7 +153,7 @@ export const getPermittedFields = (
   strapi: Core.Strapi,
   userAbility: Modules.MCP.McpHandlerContext['userAbility'],
   action: string,
-  uid: string,
+  uid: UID.ContentType,
   attributes: Struct.SchemaAttributes
 ): Set<string> | null => {
   const allKeys = Object.keys(attributes);
@@ -160,7 +162,7 @@ export const getPermittedFields = (
 
     // Component attrs: CASL rules use nested paths (e.g. 'SEO.title').
     // Check if at least one sub-field path is permitted.
-    const attr = attributes[key] as { type: string; component?: string };
+    const attr = attributes[key] as { type: string; component?: UID.Component };
     if (attr.type === 'component' && attr.component !== undefined) {
       const leafPaths = getComponentLeafPaths(strapi, attr.component, key);
       return leafPaths.some((path) => userAbility.can(action, uid, path) === true);

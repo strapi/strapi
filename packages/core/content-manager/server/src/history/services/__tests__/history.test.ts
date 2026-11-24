@@ -1,6 +1,7 @@
 import type { UID } from '@strapi/types';
 import { emitAudit, errors } from '@strapi/utils';
 import { HISTORY_VERSION_UID } from '../../constants';
+import type { CreateHistoryVersion } from '../../../../../shared/contracts/history-versions';
 import { createHistoryService } from '../history';
 
 jest.mock('@strapi/utils', () => ({
@@ -135,8 +136,8 @@ describe('history-version service', () => {
   it('creates a history version with its author, and still writes createdBy', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
+    const historyVersionData: CreateHistoryVersion = {
+      contentType: 'api::article.article',
       data: {
         documentId: '1234',
         id: 1,
@@ -171,8 +172,8 @@ describe('history-version service', () => {
   it('creates a history version without createdBy outside a request', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
+    const historyVersionData: CreateHistoryVersion = {
+      contentType: 'api::article.article',
       data: {
         documentId: '1234',
         id: 1,

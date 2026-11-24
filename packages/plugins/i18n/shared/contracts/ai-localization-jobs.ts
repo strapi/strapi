@@ -1,9 +1,9 @@
-import type { Data } from '@strapi/types';
+import type { Data, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { Entity } from './shared';
 
 export interface AILocalizationJobs extends Entity {
-  contentType: string;
+  contentType: UID.ContentType;
   relatedDocumentId: Data.DocumentID;
   sourceLocale: string;
   targetLocales: string[];

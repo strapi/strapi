@@ -197,7 +197,7 @@ async function copyPublishedEntriesToDraft({
 }: {
   db: Database;
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
 }) {
   const meta = db.metadata.get(uid);
 
@@ -244,7 +244,15 @@ async function copyPublishedEntriesToDraft({
  * every category of relation (self, inbound, outbound, components) using direct SQL so
  * the migration can scale without calling `discardDraft` entry by entry.
  */
-async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex; uid: string }) {
+async function copyRelationsToDrafts({
+  db,
+  trx,
+  uid,
+}: {
+  db: Database;
+  trx: Knex;
+  uid: UID.ContentType;
+}) {
   const meta = db.metadata.get(uid);
   if (!meta) {
     return;
@@ -456,7 +464,7 @@ async function copyMediaMorphToDraftsForContentType({
   publishedToDraftMap,
 }: {
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
   publishedToDraftMap: Map<number, number>;
 }) {
   const morphInfo = getUploadMorphTableInfo();
@@ -481,7 +489,7 @@ async function copySourceSideMorphRelationsForContentType({
   publishedToDraftMap,
 }: {
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
   publishedToDraftMap: Map<number, number>;
 }) {
   const meta = strapi.db.metadata.get(uid);
@@ -2229,7 +2237,7 @@ async function copyRelationsForContentType({
   publishedToDraftMap,
 }: {
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
   publishedToDraftMap: Map<number, number>;
 }) {
   const meta = strapi.db.metadata.get(uid);
@@ -2347,7 +2355,7 @@ async function copyRelationsFromOtherContentTypes({
   publishedToDraftMap,
 }: {
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
   publishedToDraftMap: Map<number, number>;
 }) {
   const targetMeta = strapi.db.metadata.get(uid);
@@ -2486,7 +2494,7 @@ async function copyRelationsToOtherContentTypes({
   publishedToDraftMap,
 }: {
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
   publishedToDraftMap: Map<number, number>;
 }) {
   const meta = strapi.db.metadata.get(uid);
@@ -2664,7 +2672,7 @@ async function updateJoinColumnRelations({
 }: {
   db: Database;
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
 }) {
   const meta = db.metadata.get(uid);
   if (!meta) {
@@ -2771,7 +2779,7 @@ async function updateJoinColumnRelations({
  * Fixes existing v4 draft entries' join table relations by converting published targets to draft targets.
  * This ensures that draft entries point to draft targets, not published ones.
  */
-async function fixExistingDraftRelations({ trx, uid }: { trx: Knex; uid: string }) {
+async function fixExistingDraftRelations({ trx, uid }: { trx: Knex; uid: UID.ContentType }) {
   const meta = strapi.db.metadata.get(uid);
   if (!meta) {
     return;
@@ -2953,13 +2961,19 @@ async function fixExistingDraftRelations({ trx, uid }: { trx: Knex; uid: string 
  * Fixes existing v4 draft entries' component relations by converting published targets to draft targets.
  * This ensures that draft components point to draft targets, not published ones.
  */
-async function fixExistingDraftComponentRelations({ trx, uid }: { trx: Knex; uid: string }) {
+async function fixExistingDraftComponentRelations({
+  trx,
+  uid,
+}: {
+  trx: Knex;
+  uid: UID.ContentType;
+}) {
   const meta = strapi.db.metadata.get(uid);
   if (!meta) {
     return;
   }
 
-  const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
+  const contentType = strapi.contentTypes[uid] as any;
   const collectionName = contentType?.collectionName;
   if (!collectionName) {
     return;
@@ -3151,11 +3165,17 @@ async function fixExistingDraftComponentRelations({ trx, uid }: { trx: Knex; uid
  * After duplicating nested components, the published tree keeps the original components;
  * their relation _lnk rows must point to published targets so the published view resolves them.
  */
-async function fixPublishedComponentRelationTargets({ trx, uid }: { trx: Knex; uid: string }) {
+async function fixPublishedComponentRelationTargets({
+  trx,
+  uid,
+}: {
+  trx: Knex;
+  uid: UID.ContentType;
+}) {
   const meta = strapi.db.metadata.get(uid);
   if (!meta) return;
 
-  const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
+  const contentType = strapi.contentTypes[uid] as any;
   const collectionName = contentType?.collectionName;
   if (!collectionName) return;
 
@@ -3331,7 +3351,7 @@ async function copyComponentRelations({
   publishedToDraftMap,
 }: {
   trx: Knex;
-  uid: string;
+  uid: UID.ContentType;
   publishedToDraftMap: Map<number, number>;
 }) {
   const meta = strapi.db.metadata.get(uid);
@@ -3340,7 +3360,7 @@ async function copyComponentRelations({
   }
 
   // Get collectionName from content type schema (Meta only has tableName which may be shortened)
-  const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
+  const contentType = strapi.contentTypes[uid] as any;
   const collectionName = contentType?.collectionName;
   if (!collectionName) {
     return;
@@ -3656,11 +3676,12 @@ async function copyComponentRelations({
  */
 const migrateUp = async (trx: Knex, db: Database) => {
   strapi.log.info('[discard-drafts] Migration started');
-  const dpModels = [];
+  const dpModels: { uid: UID.ContentType }[] = [];
   for (const meta of db.metadata.values()) {
     const hasDP = await hasDraftAndPublish(trx, meta);
     if (hasDP) {
-      dpModels.push(meta);
+      // Metadata uids are plain strings; hasDraftAndPublish resolved this one as a content type
+      dpModels.push(meta as typeof meta & { uid: UID.ContentType });
     }
   }
 

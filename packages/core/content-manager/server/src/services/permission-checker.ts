@@ -29,7 +29,7 @@ type Query = {
 
 const createPermissionChecker =
   (strapi: Core.Strapi) =>
-  ({ userAbility, model }: { userAbility: Ability; model: string }) => {
+  ({ userAbility, model }: { userAbility: Ability; model: UID.ContentType }) => {
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       model,

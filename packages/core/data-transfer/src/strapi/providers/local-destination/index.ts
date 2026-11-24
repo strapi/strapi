@@ -2,7 +2,7 @@ import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
-import type { Core, Data, Struct } from '@strapi/types';
+import type { Core, Data, Struct, UID } from '@strapi/types';
 import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
@@ -235,7 +235,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.#reportInfo('creating entities stream');
     const { strategy } = this.options;
 
-    const updateMappingTable = (type: string, oldID: Data.ID, newID: Data.ID) => {
+    const updateMappingTable = (type: UID.Schema, oldID: Data.ID, newID: Data.ID) => {
       if (!this.#entitiesMapper[type]) {
         this.#entitiesMapper[type] = {};
       }

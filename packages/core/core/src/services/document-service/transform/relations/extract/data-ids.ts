@@ -12,7 +12,7 @@ import { getInverseMorphTargetUid } from '../utils/inverse-morph-target';
 
 const { isPolymorphic } = relations;
 const { isMorphToRelationalAttribute } = contentTypes;
-const MEDIA_UID = 'plugin::upload.file' as UID.ContentType;
+const MEDIA_UID: UID.ContentType = 'plugin::upload.file';
 
 interface Options {
   uid: UID.Schema;

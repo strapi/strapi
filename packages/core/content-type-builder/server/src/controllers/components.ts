@@ -32,7 +32,7 @@ export default {
    * @param {Object} ctx - koa context
    */
   async getComponent(ctx: Context) {
-    const { uid } = ctx.params;
+    const { uid }: { uid: UID.Component } = ctx.params;
 
     const component = strapi.components[uid];
 
@@ -88,7 +88,7 @@ export default {
    * @param {Object} ctx - koa context - enhanced koa context
    */
   async updateComponent(ctx: Context) {
-    const { uid } = ctx.params;
+    const { uid }: { uid: UID.Component } = ctx.params;
     const body = ctx.request.body as any;
 
     if (!_.has(strapi.components, uid)) {
@@ -130,7 +130,7 @@ export default {
    * @param {Object} ctx - koa context
    */
   async deleteComponent(ctx: Context) {
-    const { uid } = ctx.params;
+    const { uid }: { uid: UID.Component } = ctx.params;
 
     if (!_.has(strapi.components, uid)) {
       return ctx.send({ error: 'component.notFound' }, 404);

@@ -1,4 +1,4 @@
-import type { Data } from '@strapi/types';
+import type { Data, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 /**
@@ -10,7 +10,7 @@ export declare namespace GetNonLocalizedFields {
     body: {
       id?: Data.ID;
       locale?: string;
-      model: string;
+      model: UID.ContentType;
     };
   }
 
@@ -70,7 +70,7 @@ export declare namespace CountManyEntriesDraftRelations {
   }
 
   export interface Params {
-    model: string;
+    model: UID.ContentType;
   }
 
   export interface Response {

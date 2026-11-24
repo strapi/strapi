@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import type { UID } from '@strapi/types';
 import { policy } from '@strapi/utils';
 import { validateHasPermissionsInput } from '../validation/policies/hasPermissions';
 
@@ -17,7 +18,7 @@ export default createPolicy({
       config;
 
     const { userAbility } = ctx.state;
-    const { model }: { model: string } = ctx.params;
+    const { model }: { model: UID.ContentType } = ctx.params;
 
     const isAuthorized = hasAtLeastOne
       ? actions.some((action) => userAbility.can(action, model))

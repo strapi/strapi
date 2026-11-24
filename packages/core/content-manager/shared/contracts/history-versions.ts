@@ -9,7 +9,7 @@ export type HistoryVersionAuthorType = (typeof HISTORY_VERSION_AUTHOR_TYPES)[num
 
 export interface HistoryVersionAuthorReference {
   type: HistoryVersionAuthorType;
-  model: string;
+  model: UID.ContentType;
   id: string;
 }
 
