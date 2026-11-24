@@ -10,11 +10,25 @@ const mockKnownProvider = {
   getRecordId: (credentials: { id?: number } | null) => credentials?.id,
 };
 
+const mockAdminProvider = {
+  type: 'person',
+  model: 'admin::user',
+  getRecordId: (credentials: { id?: number } | null) => credentials?.id,
+};
+
 jest.mock('../../utils', () => ({
   getService: () => ({
     findNames: mockFindNames,
-    findProviderByStrategy: (strategy: string) =>
-      strategy === 'known' ? mockKnownProvider : undefined,
+    findProviderByStrategy(strategy: string) {
+      switch (strategy) {
+        case 'known':
+          return mockKnownProvider;
+        case 'admin':
+          return mockAdminProvider;
+        default:
+          return undefined;
+      }
+    },
   }),
 }));
 
@@ -346,10 +360,10 @@ describe('History utils', () => {
       );
     });
 
-    it('resolves a plugin admin strategy on a Content Manager route to the admin panel source, with no author', () => {
+    it('resolves a plugin admin strategy on a Content Manager route to the admin panel source, with the admin as author', () => {
       expect(resolveHistoryOrigin(createCtx('content-manager', 'plugin-admin'))).toEqual({
         source: 'admin-panel',
-        author: null,
+        author: { type: 'person', model: 'admin::user', entityId: 1 },
       });
     });
 

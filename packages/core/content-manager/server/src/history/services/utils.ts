@@ -536,10 +536,16 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
-  const resolveAuthor = ({ state }: RequestContext): HistoryOrigin['author'] => {
-    const strategyName = state.auth?.strategy?.name;
+  const resolveAuthor = (
+    { state }: RequestContext,
+    source: HistoryVersionSource
+  ): HistoryOrigin['author'] => {
+    // An admin panel write is authored by the logged-in admin, whatever the admin strategy
+    const isAdminPanel = source === 'admin-panel';
+    const strategyName = isAdminPanel ? 'admin' : state.auth?.strategy?.name;
+    const credentials = isAdminPanel ? state.user : state.auth?.credentials;
     const provider = strategyName ? historyAuthors.findProviderByStrategy(strategyName) : undefined;
-    const recordId = provider?.getRecordId(state.auth?.credentials);
+    const recordId = provider?.getRecordId(credentials);
 
     if (!provider || recordId === null || recordId === undefined) {
       return null;
@@ -561,7 +567,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
       return null;
     }
 
-    return { source, author: resolveAuthor(requestContext) };
+    return { source, author: resolveAuthor(requestContext, source) };
   };
 
   return {
