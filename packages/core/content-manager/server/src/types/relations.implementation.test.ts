@@ -1,4 +1,5 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
+import type { Context } from 'koa';
 import type relations from '../controllers/relations';
 import type { Equal, Expect } from './assert.test';
 import type { RelationsController } from './controllers';
@@ -24,4 +25,16 @@ export type RelationsImplementationAssertions = [
   >,
   Expect<Equal<Omit<Result, Untyped>, Omit<ContractResult, Untyped>>>,
   Expect<Equal<Result['attribute'], ContractResult['attribute']>>,
+];
+
+// With strict types, findAvailable takes the context of its contract (a validated query) and
+// findExisting takes the Koa context, not `any`.
+export type RelationsActionsAssertions = [
+  Expect<
+    Equal<
+      Parameters<Implementation['findAvailable']>[0],
+      Parameters<RelationsController['findAvailable']>[0]
+    >
+  >,
+  Expect<Equal<Parameters<Implementation['findExisting']>[0], Context>>,
 ];
