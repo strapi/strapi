@@ -27,17 +27,17 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
   let tokenRequest;
   let token;
 
-  const createTokenRequest = async () => {
+  const createToken = async (name: string) => {
     const { accessKey, id } = await strapi.service('admin::api-token').create({
       kind: 'content-api',
-      name: 'Mobile app',
+      name,
       type: 'full-access',
       lifespan: null,
     });
 
-    token = await strapi.db.query('admin::api-token').findOne({ where: { id } });
+    const record = await strapi.db.query('admin::api-token').findOne({ where: { id } });
 
-    return createRequest({ strapi }).setToken(accessKey);
+    return { token: record, request: createRequest({ strapi }).setToken(accessKey) };
   };
 
   const restCreate = (title: string, qs = {}) =>
@@ -64,6 +64,17 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
     return strapi.db.query(HISTORY_VERSION_UID).findMany({ where: { contentType: noteUid } });
   };
 
+  const findNoteVersions = async (documentId: string) => {
+    await strapi.db.settleTransactionHooks();
+    const adminRequest = await createAuthRequest({ strapi });
+    const { body } = await adminRequest({
+      method: 'GET',
+      url: `/content-manager/history-versions/?contentType=${noteUid}&documentId=${documentId}`,
+    });
+
+    return body.data;
+  };
+
   const deleteVersions = async () => {
     await strapi.db.settleTransactionHooks();
     await strapi.db.query(HISTORY_VERSION_UID).deleteMany({ where: {} });
@@ -81,7 +92,7 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
   beforeAll(async () => {
     await builder.addContentType(noteModel).build();
     strapi = await createStrapiInstance({ bypassAuth: false });
-    tokenRequest = await createTokenRequest();
+    ({ token, request: tokenRequest } = await createToken('Mobile app'));
   });
 
   afterAll(async () => {
@@ -119,6 +130,37 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
     const versions = await findVersions();
     expect(versions).toHaveLength(1);
     expect(versions[0].status).toBe('published');
+  });
+
+  test('Shows the API token as the author of a write', async () => {
+    const created = await restCreate('Hello');
+
+    const versions = await findNoteVersions(created.body.data.documentId);
+    expect(versions[0].author).toEqual({
+      type: 'token',
+      model: 'admin::api-token',
+      id: token.documentId,
+      name: 'Mobile app',
+    });
+  });
+
+  test('Shows a deleted token when the API token is deleted', async () => {
+    const { token: shortLivedToken, request } = await createToken('Short lived');
+    const created = await request({
+      method: 'POST',
+      url: '/api/notes',
+      body: { data: { title: 'Hello' } },
+    });
+
+    await strapi.service('admin::api-token').revoke(shortLivedToken.id);
+
+    const versions = await findNoteVersions(created.body.data.documentId);
+    expect(versions[0].author).toEqual({
+      type: 'token',
+      model: 'admin::api-token',
+      id: null,
+      name: null,
+    });
   });
 
   test('Records a write with no authentication with no author', async () => {
@@ -164,17 +206,6 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
       await roleService.updateRole(role.id, { permissions });
 
       return role;
-    };
-
-    const findNoteVersions = async (documentId: string) => {
-      await strapi.db.settleTransactionHooks();
-      const adminRequest = await createAuthRequest({ strapi });
-      const { body } = await adminRequest({
-        method: 'GET',
-        url: `/content-manager/history-versions/?contentType=${noteUid}&documentId=${documentId}`,
-      });
-
-      return body.data;
     };
 
     beforeAll(async () => {

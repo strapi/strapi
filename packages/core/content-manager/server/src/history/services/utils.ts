@@ -5,6 +5,7 @@ import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
 import { FIELDS_TO_IGNORE } from '../constants';
 import { getService } from '../utils';
+import type { HistoryAuthorProvider } from './authors';
 import type {
   CreateHistoryVersion,
   HistoryVersionAuthor,
@@ -92,6 +93,20 @@ export const toAuthor = (
   const name = author.id ? authorNameDictionary[author.model]?.[author.id] : undefined;
 
   return name === undefined ? { ...author, id: null, name: null } : { ...author, name };
+};
+
+export const resolveAdminTokenOwnerId: HistoryAuthorProvider['getRecordId'] = (credentials) => {
+  const owner = credentials?.adminUserOwner;
+
+  if (owner === null || owner === undefined) {
+    return null;
+  }
+
+  if (typeof owner === 'object') {
+    return owner.id;
+  }
+
+  return owner;
 };
 
 interface AdminUserNames {

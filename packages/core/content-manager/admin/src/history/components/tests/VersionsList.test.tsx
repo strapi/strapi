@@ -62,7 +62,7 @@ describe('VersionsList', () => {
 
     // Displays the source of each version
     expect(within(versions[0]).getByText('Admin panel')).toBeInTheDocument();
-    expect(within(versions[1]).getByText('Admin API')).toBeInTheDocument();
+    expect(within(versions[1]).getByText('Content API')).toBeInTheDocument();
 
     // Redirects to 2nd version on click
     await user.click(versions[1]);
