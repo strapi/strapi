@@ -73,8 +73,14 @@ describe('Settings list routes with a plugins param (api)', () => {
       try {
         const qs = { plugins: { demo: { action: 'scope.kept' } } };
         const list = await rq({ method: 'GET', url: '/admin/audit-logs', qs });
-        // The export streams its rows after the request handler returned
-        const exported = await rq({ method: 'GET', url: '/admin/audit-logs/export', qs });
+        // Uncompressed: with gzip the controller starts piping inside the request, which keeps
+        // the request context even without the fix
+        const exported = await rq({
+          method: 'GET',
+          url: '/admin/audit-logs/export',
+          qs,
+          headers: { 'Accept-Encoding': 'identity' },
+        });
 
         expect(list.body.results.map(({ action }: { action: string }) => action)).toEqual([
           'scope.kept',
