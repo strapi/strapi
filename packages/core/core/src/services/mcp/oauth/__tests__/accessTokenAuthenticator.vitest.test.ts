@@ -18,7 +18,8 @@ describe('createMcpOAuthTokenAuthenticator', () => {
     const strapi = {
       sessionManager: vi.fn(() => ({ validateAccessToken, isSessionActive })),
       db: { query: vi.fn(() => ({ findOne })) },
-      admin: { services: { permission: { engine: { generateUserAbility } } } },
+      service: (uid: string) =>
+        uid === 'admin::permission' ? { engine: { generateUserAbility } } : undefined,
     } as unknown as Core.Strapi;
 
     authenticator = createMcpOAuthTokenAuthenticator(strapi);
@@ -82,5 +83,36 @@ describe('createMcpOAuthTokenAuthenticator', () => {
     // The numeric userId string is coerced for the database lookup
     expect(findOne).toHaveBeenCalledWith({ where: { id: 42 }, populate: ['roles'] });
     expect(generateUserAbility).toHaveBeenCalledWith(user);
+  });
+
+  test('computes the ability with the permission service from the services registry, so extensions apply', async () => {
+    // `extend()` writes only to the registry; `strapi.admin.services` keeps the original service
+    const originalGenerateUserAbility = vi.fn();
+    const extendedAbility = { can: vi.fn() };
+    const extendedGenerateUserAbility = vi.fn().mockResolvedValue(extendedAbility);
+    const user = { id: 42, isActive: true, blocked: false };
+
+    validateAccessToken.mockReturnValue({ isValid: true, payload: validPayload });
+    isSessionActive.mockResolvedValue(true);
+    findOne.mockResolvedValue(user);
+
+    const extendedAuthenticator = createMcpOAuthTokenAuthenticator({
+      sessionManager: vi.fn(() => ({ validateAccessToken, isSessionActive })),
+      db: { query: vi.fn(() => ({ findOne })) },
+      admin: {
+        services: { permission: { engine: { generateUserAbility: originalGenerateUserAbility } } },
+      },
+      service: (uid: string) =>
+        uid === 'admin::permission'
+          ? { engine: { generateUserAbility: extendedGenerateUserAbility } }
+          : undefined,
+    } as unknown as Core.Strapi);
+
+    await expect(extendedAuthenticator.authenticate('token')).resolves.toMatchObject({
+      authenticated: true,
+      ability: extendedAbility,
+    });
+    expect(extendedGenerateUserAbility).toHaveBeenCalledWith(user);
+    expect(originalGenerateUserAbility).not.toHaveBeenCalled();
   });
 });

@@ -44,7 +44,9 @@ export const createMcpOAuthTokenAuthenticator = (strapi: Core.Strapi) => ({
       return invalid;
     }
 
-    const ability = await strapi.admin.services.permission.engine.generateUserAbility(user);
+    // Read through the services registry, so an extended admin permission service applies
+    // (`strapi.admin.services` keeps the original one).
+    const ability = await strapi.service('admin::permission').engine.generateUserAbility(user);
 
     return {
       authenticated: true,
