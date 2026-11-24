@@ -45,13 +45,14 @@ type Save = <TEntity extends { id: Data.ID } | null>(
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
-// Route ids the database matches as a number: '01', ' 1' and '+1' all find row 1
-const DECIMAL_ID = /^\s*\+?\d+(\.0*)?\s*$/;
-
+/**
+ * The id the database matches for a route id. Databases read a leading number from the string
+ * (`'07'`, `' 7'`, `'7e0'`, and on MySQL `'7abc'`, all find row 7), so plugins get that number.
+ * Ids that start with no safe integer are passed as sent: they match no row.
+ */
 const toEntityId = (id?: Data.ID) => {
-  const number = typeof id === 'string' && DECIMAL_ID.test(id) ? Number(id) : NaN;
+  const number = typeof id === 'string' ? Number.parseFloat(id) : NaN;
 
-  // Other ids, and ids too large for a number, are passed as sent
   return Number.isSafeInteger(number) ? number : id;
 };
 

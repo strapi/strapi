@@ -354,7 +354,7 @@ describe('Form extensions service', () => {
     ).toThrow('the schema of "spaces" must be a Zod schema');
   });
 
-  test('passes route ids that are not small decimals as sent', async () => {
+  test('gives plugins the number the database reads from a route id, and other ids as sent', async () => {
     const formExtensions = formExtensionsService();
     const ids: unknown[] = [];
     formExtensions.unstable_addInputParams('role', {
@@ -365,10 +365,10 @@ describe('Form extensions service', () => {
       },
     });
 
-    for (const entityId of ['9007199254740993', '1e0', 'abc']) {
+    for (const entityId of ['07', ' 7', '+7', '7e0', '7abc', '7.5', '9007199254740993', 'abc']) {
       await formExtensions.internal_prepare('role', { body: {}, entityId });
     }
 
-    expect(ids).toEqual(['9007199254740993', '1e0', 'abc']);
+    expect(ids).toEqual([7, 7, 7, 7, 7, '7.5', '9007199254740993', 'abc']);
   });
 });
