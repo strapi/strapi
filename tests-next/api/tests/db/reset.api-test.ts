@@ -11,6 +11,7 @@ import {
   snapshotDatabase,
   startServer,
   stopAllServers,
+  writeProbe,
   type App,
   type Server,
 } from '@strapi/tests-shared';
@@ -18,15 +19,6 @@ import {
 const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 const port = appPort('api', worker - 1);
 const database = databaseFromEnv();
-
-/**
- * Writes the probe row (POST /api/tests/db/probe). `created: true` means the database didn't
- * have it, so a reset happened.
- */
-const writeProbe = async (server: Server) => {
-  const res = await fetch(`${server.url}/api/tests/db/probe`, { method: 'POST' });
-  return ((await res.json()) as { created: boolean }).created;
-};
 
 const timed = async <T>(label: string, fn: () => Promise<T>) => {
   const start = performance.now();
@@ -57,15 +49,19 @@ describe(`per-file instance (${database.client})`, () => {
     });
 
     await resetDatabase(app, database);
-    let server = await startServer(app, { port, database });
-    expect(await writeProbe(server)).toBe(true);
-    expect(await writeProbe(server)).toBe(false);
-    await server.stop();
+    const first = await startServer(app, { port, database });
+    // Also on a failed assertion, so the port is free for the next tests (stop() is idempotent).
+    onTestFinished(() => first.stop());
+    expect(await writeProbe(first)).toBe(true);
+    expect(await writeProbe(first)).toBe(false);
+    await first.stop();
 
     await timed('reset before boot', () => resetDatabase(app, database));
-    server = await timed('boot on the empty database', () => startServer(app, { port, database }));
-    expect(await writeProbe(server)).toBe(true);
-    await server.stop();
+    const second = await timed('boot on the empty database', () =>
+      startServer(app, { port, database })
+    );
+    onTestFinished(() => second.stop());
+    expect(await writeProbe(second)).toBe(true);
   });
 });
 
@@ -158,13 +154,14 @@ describe.skipIf(database.client === 'sqlite')(`snapshots on ${database.client}`,
   test('are refused: the database is reset before boot instead', async () => {
     await resetDatabase(app, database);
     const server = await startServer(app, { port, database });
+    onTestFinished(() => server.stop());
     await expect(snapshotDatabase(server)).rejects.toThrow('Snapshots are SQLite only');
-    await server.stop();
   });
 
   test("another checkout's reset leaves this app's database alone", async () => {
     await resetDatabase(app, database);
     const server = await startServer(app, { port, database });
+    onTestFinished(() => server.stop());
     expect(await writeProbe(server)).toBe(true);
 
     // The same app in another worktree, on the same database server.
@@ -173,6 +170,5 @@ describe.skipIf(database.client === 'sqlite')(`snapshots on ${database.client}`,
     await resetDatabase(otherCheckout, database);
 
     expect(await writeProbe(server)).toBe(false);
-    await server.stop();
   });
 });

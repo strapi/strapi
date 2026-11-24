@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../fixtures';
 import { resetFiles } from '../../../../utils/file-reset';
 import { createSingleType, type AddAttribute } from '../../../../utils/content-types';
 import { sharedSetup } from '../../../../utils/setup';
@@ -91,7 +91,6 @@ test.describe('Create single type with all field types', () => {
             type: 'oneWay',
             target: { select: 'Article', name: 'testonewayrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -100,7 +99,6 @@ test.describe('Create single type with all field types', () => {
             type: 'manyWay',
             target: { select: 'Article', name: 'testmanywayrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'enumeration',

@@ -36,7 +36,7 @@ async function setActive({ email, active }: CmdOptions) {
 
   const isActive = cleanActive === 'true';
 
-  const user = await app.admin.services.user.findOneByEmail(cleanEmail);
+  const user = await app.service('admin::user').findOneByEmail(cleanEmail);
 
   if (!user) {
     console.error(`User with email "${cleanEmail}" does not exist`);
@@ -44,7 +44,7 @@ async function setActive({ email, active }: CmdOptions) {
   }
 
   try {
-    await app.admin!.services.user.updateById(user.id, {
+    await app.service('admin::user').updateById(user.id, {
       isActive,
     });
   } catch (err: any) {
