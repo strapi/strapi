@@ -52,4 +52,11 @@ describe('FormFields', () => {
     );
     expect(formFields.get('role')).toHaveLength(1);
   });
+
+  test('lets only the user forms replace core fields', () => {
+    expect(() =>
+      formFields.unstable_register('role', [field('spaces', { replaces: ['roles'] })])
+    ).toThrow('Only the user forms let a plugin replace core fields');
+    expect(formFields.get('role')).toEqual([]);
+  });
 });

@@ -261,6 +261,9 @@ export const EditView = () => {
           return;
         }
 
+        // Plugin fields remount and load their saved values again
+        formik.setFieldValue('plugins', undefined);
+
         toggleNotification({
           type: 'success',
           message: formatMessage({

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { createTeamsFormFields } from '../../../../../../../tests/formFields';
+import { createTeamsFormFields, teamsFieldMounted } from '../../../../../../../tests/formFields';
 import { EditView } from '../EditViewPage';
 
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
@@ -74,6 +74,7 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
       })
     );
 
+    teamsFieldMounted.mockClear();
     const { user } = render(<EditView />, {
       initialEntries: ['/settings/api-tokens/1'],
       providerOptions: {
@@ -86,5 +87,8 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     await waitFor(() =>
       expect(bodies).toEqual([expect.objectContaining({ plugins: { teams: { teams: ['blue'] } } })])
     );
+    // After the save, the field remounts with no value, to load its saved values again
+    expect(await screen.findByRole('button', { name: 'Teams of 1: null' })).toBeInTheDocument();
+    expect(teamsFieldMounted).toHaveBeenCalledTimes(2);
   });
 });

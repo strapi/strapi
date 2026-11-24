@@ -150,4 +150,73 @@ describe('PluginFormFields', () => {
       ).toBeInTheDocument();
     }
   );
+
+  it('remounts the plugin fields when the form sets plugins back to undefined after a save', async () => {
+    const mounted = jest.fn();
+    const Field = ({ value, onChange }: FormFieldsProps) => {
+      React.useEffect(() => {
+        mounted();
+      }, []);
+
+      return (
+        <button type="button" onClick={() => onChange('changed')}>
+          {`value ${JSON.stringify(value ?? null)}`}
+        </button>
+      );
+    };
+
+    const ResetAfterSave = () => {
+      const onChange = useForm('ResetAfterSave', (state) => state.onChange);
+
+      return (
+        <button type="button" onClick={() => onChange('plugins', undefined)}>
+          Saved
+        </button>
+      );
+    };
+
+    const formFields = new FormFields();
+    formFields.unstable_register('role', [{ pluginId: 'spaces', Component: Field }]);
+
+    const { user } = render(
+      <Form method="PUT" initialValues={{}} onSubmit={jest.fn()}>
+        <PluginFormFields form="role" />
+        <ResetAfterSave />
+      </Form>,
+      { providerOptions: { formFields } }
+    );
+
+    await user.click(screen.getByRole('button', { name: 'value null' }));
+    expect(mounted).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: 'Saved' }));
+
+    expect(await screen.findByRole('button', { name: 'value null' })).toBeInTheDocument();
+    expect(mounted).toHaveBeenCalledTimes(2);
+  });
+
+  it('passes the first message of a roles error that is not a string', () => {
+    const RolesError = ({ replacedFields }: FormFieldsProps) => (
+      <p>{`roles error ${replacedFields.roles?.error ?? 'none'}`}</p>
+    );
+
+    const formFields = new FormFields();
+    formFields.unstable_register('user', [
+      { pluginId: 'spaces', Component: RolesError, replaces: ['roles'] },
+    ]);
+
+    render(
+      <Form
+        method="PUT"
+        initialValues={{ roles: [] }}
+        initialErrors={{ roles: ['Pick a role'] } as never}
+        onSubmit={jest.fn()}
+      >
+        <PluginFormFields form="user" />
+      </Form>,
+      { providerOptions: { formFields } }
+    );
+
+    expect(screen.getByText('roles error Pick a role')).toBeInTheDocument();
+  });
 });

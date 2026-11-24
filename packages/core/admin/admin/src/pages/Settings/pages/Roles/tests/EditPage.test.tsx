@@ -3,7 +3,7 @@ import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { SUPER_ADMIN_CODE } from '../../../../../../../shared/utils/super-admin';
-import { createTeamsFormFields } from '../../../../../../tests/formFields';
+import { createTeamsFormFields, teamsFieldMounted } from '../../../../../../tests/formFields';
 import { initialState } from '../../../../../../tests/store';
 import { EditPage } from '../EditPage';
 
@@ -153,6 +153,7 @@ describe('Roles | EditPage', () => {
         })
       );
 
+      teamsFieldMounted.mockClear();
       const { user } = renderEditPage('strapi-editor', createTeamsFormFields('role'));
 
       await user.click(await screen.findByRole('button', { name: 'Teams of 1: null' }));
@@ -163,6 +164,9 @@ describe('Roles | EditPage', () => {
           expect.objectContaining({ plugins: { teams: { teams: ['blue'] } } }),
         ])
       );
+      // After the save, the field remounts with no value, to load its saved values again
+      expect(await screen.findByRole('button', { name: 'Teams of 1: null' })).toBeInTheDocument();
+      expect(teamsFieldMounted).toHaveBeenCalledTimes(2);
     });
 
     it('saves the permissions first, then the name', async () => {

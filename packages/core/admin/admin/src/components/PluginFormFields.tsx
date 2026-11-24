@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Grid } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
 
@@ -27,6 +29,19 @@ interface FieldsProps extends PluginFormFieldsProps {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
+// Errors on a field's items, such as `roles[0]`, come as an array or an object of messages
+const firstMessage = (error: unknown): string | undefined => {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error !== null && typeof error === 'object') {
+    return Object.values(error).map(firstMessage).find(Boolean);
+  }
+
+  return undefined;
+};
+
 const Fields = ({
   form,
   disabled = false,
@@ -38,10 +53,28 @@ const Fields = ({
 }: FieldsProps) => {
   const formFields = useStrapiApp('PluginFormFields', (state) => state.formFields);
 
+  // After a save, the forms set `plugins` back to undefined: remount the fields so each one loads
+  // its saved values again from `entityId`
+  const [generation, setGeneration] = React.useState(0);
+  const hadValues = React.useRef(values !== undefined);
+
+  React.useEffect(() => {
+    if (hadValues.current && values === undefined) {
+      setGeneration((current) => current + 1);
+    }
+
+    hadValues.current = values !== undefined;
+  }, [values]);
+
   return (
     <>
       {formFields.get(form).map(({ pluginId, Component }) => (
-        <Grid.Item key={pluginId} col={12} direction="column" alignItems="stretch">
+        <Grid.Item
+          key={`${pluginId}-${generation}`}
+          col={12}
+          direction="column"
+          alignItems="stretch"
+        >
           <Component
             value={values?.[pluginId]}
             error={isRecord(errors) ? errors[pluginId] : undefined}
@@ -77,7 +110,7 @@ const PluginFormFields = (props: PluginFormFieldsProps) => {
       replacedFields={{
         roles: {
           value: values.roles,
-          error: typeof errors.roles === 'string' ? errors.roles : undefined,
+          error: firstMessage(errors.roles),
           onChange: (value) => onChange('roles', value),
         },
       }}

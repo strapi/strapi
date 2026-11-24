@@ -168,6 +168,8 @@ const EditPage = () => {
       }
 
       permissionsRef.current?.setFormAfterSubmit();
+      // Plugin fields remount and load their saved values again
+      formik.setFieldValue('plugins', undefined);
 
       await refetchRole();
 

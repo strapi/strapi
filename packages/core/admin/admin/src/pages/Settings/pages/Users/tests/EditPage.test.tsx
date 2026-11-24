@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { createTeamsFormFields } from '../../../../../../tests/formFields';
+import { createTeamsFormFields, teamsFieldMounted } from '../../../../../../tests/formFields';
 import { EditPage } from '../EditPage';
 
 describe('Users | EditPage', () => {
@@ -55,6 +55,7 @@ describe('Users | EditPage', () => {
       })
     );
 
+    teamsFieldMounted.mockClear();
     const { user } = render(<EditPage />, {
       initialEntries: ['/settings/users/1'],
       providerOptions: {
@@ -72,5 +73,8 @@ describe('Users | EditPage', () => {
         expect.objectContaining({ roles: [], plugins: { teams: { teams: ['blue'] } } }),
       ])
     );
+    // After the save, the field remounts with no value, to load its saved values again
+    expect(await screen.findByRole('button', { name: 'Teams of 1: null' })).toBeInTheDocument();
+    expect(teamsFieldMounted).toHaveBeenCalledTimes(2);
   });
 });

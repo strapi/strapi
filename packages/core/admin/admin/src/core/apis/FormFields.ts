@@ -49,9 +49,13 @@ class FormFields {
   };
 
   private checkFormFields = (form: FormFieldsForm, formFields: FormFieldsArgs[]): void => {
-    formFields.forEach(({ pluginId, Component }, index) => {
+    formFields.forEach(({ pluginId, Component, replaces }, index) => {
       invariant(pluginId, 'A pluginId must be provided');
       invariant(Component, 'A Component must be provided');
+      invariant(
+        !replaces?.length || form === 'user',
+        `Only the user forms let a plugin replace core fields, but "${pluginId}" replaces fields of the ${form} form`
+      );
       invariant(
         formFields.findIndex((field) => field.pluginId === pluginId) === index,
         `Fields of the "${pluginId}" plugin have already been added to the ${form} form`

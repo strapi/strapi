@@ -34,12 +34,12 @@ app.formFields.unstable_register('role', [
 
 - Forms: `role`, `user`, `content-api-token` (content API tokens only). Adding the same plugin id twice to a form throws.
 - `Component` renders on a row of its own, at the end of the role details, the user roles and the token details. It gets:
-  - `value` and `onChange`: the plugin's value, sent as `plugins.<pluginId>`. It is `undefined` until the component changes it, also on edit: core answers never contain plugin values, so the component loads them from `entityId`. After a save, the forms can set it back to `undefined`: load the values again then.
+  - `value` and `onChange`: the plugin's value, sent as `plugins.<pluginId>`. It is `undefined` until the component changes it, also on edit: core answers never contain plugin values, so the component loads them from `entityId`. After a successful save on an edit form, the form sets it back to `undefined` and remounts the field, so the component loads its saved values again when it mounts. Role and token create open the edit page with fresh fields; the user invite keeps its fields, disabled, until the modal closes. Load them in the component, not through `onChange`, which would mark the form as changed.
   - `disabled`: true when the form cannot be edited, for example without the update permission.
   - `entityId`: the edited entity, `undefined` when the form creates one. On role duplicate it is `undefined` too: plugin values start empty.
   - `error`: the server error at `plugins.<pluginId>`, a string or an object of errors by path. Render it: on the role and token pages, a refused save shows its validation errors on the fields only, without a notification.
   - `replacedFields`: the core fields the plugin replaces, see below.
-- `replaces` (optional, user forms only): `['roles']` hides the core roles field. The component shows it instead, and sets it with `replacedFields.roles.onChange`. The admin then sends the roles as the component sets them, even none: the server checks the roles that `beforeSave` returns, and its error comes back as `replacedFields.roles.error`.
+- `replaces` (optional, user forms only; registering it on another form throws): `['roles']` hides the core roles field. The component shows it instead, and sets it with `replacedFields.roles.onChange`. The admin then sends the roles as the component sets them, even none: the server checks the roles that `beforeSave` returns, and its error comes back as `replacedFields.roles.error`.
 
 On role edit, the page saves the permissions before the name, the description and the plugin values. When the server refuses the plugin values, the new permissions stay saved, as they do today when it refuses the name.
 
