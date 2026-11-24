@@ -8,7 +8,7 @@ import type { Logger } from '@strapi/logger';
 
 import type { Modules } from '@strapi/types';
 import WorkerQueue from './worker-queue';
-import { createSampleEvent, renderWebhookBody } from './webhook-body';
+import { createSampleEvent, getMaxRenderedBytes, renderWebhookBody } from './webhook-body';
 import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
 
@@ -186,21 +186,30 @@ class WebhookRunner {
    * The default payload, or the rendered body template of the webhook in place of it. A variable
    * without a value would silently be sent empty, so it is logged.
    */
-  private getRequestBody(webhook: Webhook, payload: Record<string, unknown>) {
+  private getRequestBody(webhook: Webhook, payload: Record<string, unknown>): string {
+    const defaultBody = JSON.stringify(payload);
+
     if (!webhook.body || !this.isBodyTemplateEnabled()) {
-      return payload;
+      return defaultBody;
     }
 
     const missing = new Set<string>();
-    const rendered = renderWebhookBody(webhook.body, payload, (variable) => missing.add(variable));
+    const rendered = renderWebhookBody(
+      webhook.body,
+      payload,
+      (variable) => missing.add(variable),
+      getMaxRenderedBytes(defaultBody.length)
+    );
 
     if (missing.size > 0) {
       this.logger.warn(
-        `Webhook "${webhook.name}": no value for ${[...missing].join(', ')} in the body template on event ${payload.event}`
+        `Webhook "${webhook.name}": no value for ${[...missing].join(
+          ', '
+        )} in the body template on event ${payload.event}`
       );
     }
 
-    return rendered;
+    return JSON.stringify(rendered);
   }
 
   /**
@@ -226,9 +235,20 @@ class WebhookRunner {
       ...info,
     };
 
+    let body: string;
+    try {
+      body = this.getRequestBody(webhook, payload);
+    } catch (error) {
+      // Not sent, like a failed request: the other webhooks of the event are still sent
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Webhook "${webhook.name}" was not sent on event ${event}: ${message}`);
+
+      return Promise.resolve({ statusCode: 500, message });
+    }
+
     return this.fetch(url, {
       method: 'post',
-      body: JSON.stringify(this.getRequestBody(webhook, payload)),
+      body,
       headers: {
         ...this.config.defaultHeaders,
         ...headers,

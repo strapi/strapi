@@ -58,7 +58,7 @@ const setup = ({ isBodyTemplateEnabled = true } = {}) => {
       ({
         [ARTICLE_UID]: { attributes: { title: { type: 'string' } } },
         [PAGE_UID]: { attributes: { slug: { type: 'uid' } } },
-      }) as any,
+      } as any),
   });
 
   return { store, query };
@@ -250,7 +250,7 @@ describe('Webhook store', () => {
       expect(query.update).not.toHaveBeenCalled();
     });
 
-    test('Keeps a saved template editable once a field it uses is gone', async () => {
+    test('Rejects an enabled save that keeps a template using a removed field', async () => {
       const { store, query } = setup();
       const saved = createWebhook({
         events: [],
@@ -258,11 +258,76 @@ describe('Webhook store', () => {
         body: { text: '{{ entry.removed }}' },
       });
       query.findOne.mockResolvedValue(toRow(saved));
-      query.update.mockResolvedValue(toRow(saved));
 
-      await store.updateWebhook('1', { ...saved, isEnabled: false, name: 'Renamed' });
+      // A structurally equal copy, as the admin sends it back
+      await expect(
+        store.updateWebhook('1', {
+          ...saved,
+          name: 'Renamed',
+          body: JSON.parse(JSON.stringify(saved.body)),
+        })
+      ).rejects.toThrow(`entry.removed is not a field of ${ARTICLE_UID}`);
+      expect(query.update).not.toHaveBeenCalled();
+    });
 
-      expect(query.update).toHaveBeenCalled();
+    test('Checks a content type added while the webhook was disabled once it is enabled', async () => {
+      // A database that keeps what it saves, so each step sees the row of the previous one
+      const { store, query } = setup();
+      let row: Record<string, unknown> | null = null;
+      query.create.mockImplementation(async ({ data }) => {
+        row = { id: '1', ...data };
+        return row;
+      });
+      query.update.mockImplementation(async ({ data }) => {
+        row = { ...row, ...data };
+        return row;
+      });
+      query.findOne.mockImplementation(async () => row);
+
+      const body = { t: '{{ entry.title }}' };
+      const both = { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] };
+      const webhook = createWebhook({ events: [], body });
+
+      await store.createWebhook({
+        ...webhook,
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+      });
+      await expect(
+        store.updateWebhook('1', { ...webhook, contentTypeEvents: both })
+      ).rejects.toThrow(`entry.title is not a field of ${PAGE_UID}`);
+
+      // Disabled, the save keeps the template unchecked: Page is added
+      await store.updateWebhook('1', { ...webhook, isEnabled: false, contentTypeEvents: both });
+
+      await expect(
+        store.updateWebhook('1', { ...webhook, isEnabled: true, contentTypeEvents: both })
+      ).rejects.toThrow(`entry.title is not a field of ${PAGE_UID}`);
+      expect(row).toMatchObject({ enabled: false });
+    });
+
+    test('Checks a content type added while the flag was off once the flag is on', async () => {
+      let row: Record<string, unknown> | null = null;
+      const persist = (query: ReturnType<typeof setup>['query']) => {
+        query.update.mockImplementation(async ({ data }) => {
+          row = { ...row, ...data };
+          return row;
+        });
+        query.findOne.mockImplementation(async () => row);
+      };
+      const body = { t: '{{ entry.title }}' };
+      const both = { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] };
+      const webhook = createWebhook({ events: [], body });
+      row = toRow({ ...webhook, contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] } });
+
+      const flagOff = setup({ isBodyTemplateEnabled: false });
+      persist(flagOff.query);
+      await flagOff.store.updateWebhook('1', { ...webhook, contentTypeEvents: both });
+
+      const flagOn = setup();
+      persist(flagOn.query);
+      await expect(
+        flagOn.store.updateWebhook('1', { ...webhook, contentTypeEvents: both })
+      ).rejects.toThrow(`entry.title is not a field of ${PAGE_UID}`);
     });
 
     test('Checks a saved template against events changed while the flag was off', async () => {

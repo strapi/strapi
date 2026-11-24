@@ -34,7 +34,7 @@ const BodyInput = () => {
           eventVariables: '{{ event }}, {{ createdAt }}',
           entryVariables: '{{ model }}, {{ uid }}, {{ documentId }}, {{ entry }}',
           commonFields:
-            '{{ entry.id }}, {{ entry.documentId }}, {{ entry.createdAt }}, {{ entry.updatedAt }}',
+            '{{ entry.id }}, {{ entry.documentId }}, {{ entry.createdAt }}, {{ entry.updatedAt }}, {{ entry.publishedAt }}',
           entryField: '{{ entry.<field> }}',
           entryFieldExample: '{{ entry.title }}',
         }

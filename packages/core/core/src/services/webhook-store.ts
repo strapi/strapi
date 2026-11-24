@@ -7,7 +7,7 @@ import { errors } from '@strapi/utils';
 import type { Model, Database } from '@strapi/database';
 import type { Modules } from '@strapi/types';
 
-import { getTargetContentTypes, validateWebhookBody } from './webhook-body';
+import { validateWebhookBody } from './webhook-body';
 
 const { ValidationError } = errors;
 
@@ -187,15 +187,12 @@ const createWebhookStore = ({
         const body = data.body === undefined ? saved?.body : data.body;
         const isSavedBody = saved !== null && _.isEqual(body, saved.body);
 
-        // Checked against the events it will be sent with, which may have changed while the flag
-        // was off. Not when the saved template stays and the webhook ends disabled: a webhook
-        // whose template no longer validates can always be turned off.
+        // Checked in full against the events and content types it will be sent with, which a
+        // disabled save or a save with the flag off may have changed. Not when the saved template
+        // stays and the webhook ends disabled: a webhook whose template no longer validates (a
+        // field it uses was removed, for example) can always be turned off.
         if (body && !(isSavedBody && data.isEnabled === false)) {
-          validateWebhookBody({ ...data, body }, getContentTypes(), {
-            // A field gone from a content type the saved template already targeted stays
-            // accepted, so the webhook stays editable: the runner logs the missing value
-            allowRemovedFieldsOf: isSavedBody ? (getTargetContentTypes(saved) ?? []) : [],
-          });
+          validateWebhookBody({ ...data, body }, getContentTypes());
         }
       }
 

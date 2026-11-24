@@ -47,7 +47,7 @@ const setup = ({ isBodyTemplateEnabled = false } = {}) => {
     logger: logger as any,
     isBodyTemplateEnabled: () => isBodyTemplateEnabled,
     getContentTypes: () =>
-      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } }) as any,
+      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } } as any),
   });
 
   const emit = async (event: string, info: Record<string, unknown>) => {
@@ -139,6 +139,44 @@ describe('WebhookRunner', () => {
         'X-Strapi-Event': 'entry.create',
         'Content-Type': 'application/json',
       });
+    });
+
+    test('Does not send a body over the size limit, and still sends the other webhooks', async () => {
+      const { runner, emit, getRequests, logger } = setup(enabled);
+      // About 10 MB once rendered for a 10 KB entry: over twice the default payload and 1 MiB
+      runner.add(
+        createWebhook({
+          id: '1',
+          url: 'https://example.com/big',
+          body: { t: '{{ entry }}'.repeat(1000) },
+        })
+      );
+      runner.add(createWebhook({ id: '2', url: 'https://example.com/default' }));
+
+      const info = { ...entryEvent(ARTICLE_UID), entry: { id: 1, text: 'x'.repeat(10 * 1024) } };
+      await emit('entry.create', info);
+
+      expect(getRequests()).toEqual([
+        ['https://example.com/default', expect.objectContaining({ event: 'entry.create' })],
+      ]);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Webhook "webhook" was not sent on event entry.create')
+      );
+    });
+
+    test('Resolves a test trigger whose body is over the limit with an error status', async () => {
+      const { runner, fetch } = setup(enabled);
+
+      await expect(
+        runner.run(createWebhook({ body: { t: '{{ entry }}'.repeat(1000) } }), 'entry.create', {
+          ...entryEvent(ARTICLE_UID),
+          entry: { id: 1, text: 'x'.repeat(10 * 1024) },
+        })
+      ).resolves.toEqual({
+        statusCode: 500,
+        message: expect.stringContaining('once rendered'),
+      });
+      expect(fetch).not.toHaveBeenCalled();
     });
 
     test('Uses the new body once the webhook is updated', async () => {

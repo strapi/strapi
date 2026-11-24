@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Modules } from '@strapi/types';
 
-import { createSampleEvent, renderWebhookBody, validateWebhookBody } from '../webhook-body';
+import {
+  MAX_TEMPLATE_BYTES,
+  WebhookBodyTooLargeError,
+  createSampleEvent,
+  getMaxRenderedBytes,
+  renderWebhookBody,
+  validateWebhookBody,
+} from '../webhook-body';
 
 type Webhook = Modules.WebhookStore.Webhook;
 
@@ -127,6 +134,51 @@ describe('renderWebhookBody', () => {
     ).toEqual({
       client_payload: { uid: 'api::article.article', entries: ['abc', { title: 'Hello' }] },
     });
+  });
+
+  test('Treats a placeholder with text around its braces, even whitespace, as text', () => {
+    expect(
+      renderWebhookBody(
+        {
+          a: ' {{ entry.title }} ',
+          b: '{{ entry.views }}\n',
+          c: 'n={{ entry.views }}',
+          d: '{{ entry.views }}',
+        },
+        payload
+      )
+    ).toEqual({ a: ' Hello ', b: '12\n', c: 'n=12', d: 12 });
+  });
+
+  test('Stops before building a body over the limit', () => {
+    const entry = { description: 'x'.repeat(10 * 1024) };
+    const big = { ...payload, entry };
+    const template = { text: '{{ entry }}'.repeat(1000) };
+
+    // About 10 MB once rendered: stopped at the first placeholder over 1 MB, not after
+    expect(() => renderWebhookBody(template, big, undefined, 1024 * 1024)).toThrow(
+      WebhookBodyTooLargeError
+    );
+    // The same limit counts embedded objects, not only text
+    expect(() =>
+      renderWebhookBody({ list: Array(200).fill('{{ entry }}') }, big, undefined, 1024 * 1024)
+    ).toThrow('larger than 1048576 bytes once rendered');
+    expect(renderWebhookBody({ entry: '{{ entry }}' }, big, undefined, 1024 * 1024)).toEqual({
+      entry,
+    });
+  });
+
+  test('Reports a missing variable once, however many times the template uses it', () => {
+    const onMissing = vi.fn();
+
+    renderWebhookBody({ a: '{{ entry.gone }}', b: 'x {{ entry.gone }}' }, payload, onMissing);
+
+    expect(onMissing).toHaveBeenCalledTimes(1);
+  });
+
+  test('Allows twice the default payload, and at least 1 MiB', () => {
+    expect(getMaxRenderedBytes(100)).toBe(1024 * 1024);
+    expect(getMaxRenderedBytes(4 * 1024 * 1024)).toBe(8 * 1024 * 1024);
   });
 
   test('Gives null for a missing single placeholder and an empty string inside a string', () => {
@@ -280,6 +332,8 @@ describe('validateWebhookBody', () => {
           documentId: '{{ entry.documentId }}',
           createdAt: '{{ entry.createdAt }}',
           updatedAt: '{{ entry.updatedAt }}',
+          // Every content type gets publishedAt, draft and publish or not
+          publishedAt: '{{ entry.publishedAt }}',
         },
         webhook
       )
@@ -319,7 +373,7 @@ describe('validateWebhookBody: what the event payload sanitizer removes', () => 
         attributes: { title: { type: 'string' }, secretNote: { type: 'string' } },
         options: { privateAttributes: ['secretNote'] },
       },
-    }) as any;
+    } as any);
 
   test('Rejects a field made private by the content type options', () => {
     expect(() =>
@@ -403,35 +457,16 @@ describe('validateWebhookBody: limits and messages', () => {
     }
   });
 
-  test('Accepts a field gone from its content type only when asked to', () => {
-    const body = { v: '{{ entry.removed }}' };
-
-    expect(() => validate(body)).toThrow('entry.removed is not a field');
-    expect(() =>
-      validateWebhookBody(createWebhook({ body }), contentTypes, {
-        allowRemovedFieldsOf: [ARTICLE_UID],
-      })
-    ).not.toThrow();
+  test('Rejects a field gone from its content type', () => {
+    expect(() => validate({ v: '{{ entry.removed }}' })).toThrow('entry.removed is not a field');
   });
 
-  test('Only accepts a missing field for the content types it is asked to', () => {
-    const body = { v: '{{ entry.title }}' };
-    // Page has a title, Article has one too: drop it from a copy of Article
-    const withoutTitle = {
-      ...contentTypes,
-      [ARTICLE_UID]: { attributes: { views: { type: 'integer' } } },
-    };
-    const webhook = createWebhook({
-      body,
-      contentTypeEvents: { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] },
-    });
+  test(`Rejects a template larger than ${MAX_TEMPLATE_BYTES / 1024} KB`, () => {
+    // Static text, so only the size can make it fail
+    const text = (length: number) => ({ t: 'x'.repeat(length - JSON.stringify({ t: '' }).length) });
 
-    expect(() =>
-      validateWebhookBody(webhook, withoutTitle, { allowRemovedFieldsOf: [PAGE_UID] })
-    ).toThrow(`entry.title is not a field of ${ARTICLE_UID}`);
-    expect(() =>
-      validateWebhookBody(webhook, withoutTitle, { allowRemovedFieldsOf: [ARTICLE_UID] })
-    ).not.toThrow();
+    expect(() => validate(text(MAX_TEMPLATE_BYTES))).not.toThrow();
+    expect(() => validate(text(MAX_TEMPLATE_BYTES + 1))).toThrow("can't be larger than 64 KB");
   });
 
   test('Rejects one level deeper than the limit, not the limit itself', () => {
@@ -461,20 +496,6 @@ describe('validateWebhookBody: limits and messages', () => {
       )
     ).toThrow('entry.createdAt is a private field');
   });
-
-  test('Still checks the events when it accepts removed fields', () => {
-    expect(() =>
-      validateWebhookBody(
-        createWebhook({
-          body: { v: '{{ entry.title }}' },
-          events: ['media.create'],
-          contentTypeEvents: {},
-        }),
-        contentTypes,
-        { allowRemovedFieldsOf: [ARTICLE_UID] }
-      )
-    ).toThrow('not available for the event media.create');
-  });
 });
 
 describe('createSampleEvent', () => {
@@ -487,6 +508,7 @@ describe('createSampleEvent', () => {
       title: '{{ entry.title }}',
       views: '{{ entry.views }}',
       updatedAt: '{{ entry.updatedAt }}',
+      publishedAt: '{{ entry.publishedAt }}',
     };
 
     validateWebhookBody({ ...webhook, body: template }, contentTypes);
@@ -506,6 +528,7 @@ describe('createSampleEvent', () => {
       title: 'Sample title',
       views: 1,
       updatedAt: expect.any(String),
+      publishedAt: expect.any(String),
     });
   });
 
@@ -557,6 +580,7 @@ describe('createSampleEvent', () => {
         documentId: 'sample-document-id',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        publishedAt: expect.any(String),
       },
     });
   });

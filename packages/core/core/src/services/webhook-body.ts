@@ -13,12 +13,17 @@
  * `validateWebhookBody` checks a template against that list when it is saved.
  * `renderWebhookBody` renders it when the webhook is sent:
  *
- * - A string made of a single placeholder is replaced by the value, as is, so `"entry": "{{ entry }}"`
- *   embeds the whole entry object. A missing value gives `null`.
+ * - A string that is exactly one placeholder, with nothing before `{{` or after `}}`, is replaced by
+ *   the value, as is, so `"entry": "{{ entry }}"` embeds the whole entry object. A missing value
+ *   gives `null`.
  * - Placeholders inside a longer string are replaced by their text: strings as is, numbers and
  *   booleans stringified, dates as ISO strings, objects and arrays as JSON. A missing value gives
  *   an empty string.
  * - Object keys are copied as is. Other values (numbers, booleans, null) are copied as is.
+ *
+ * A template is at most `MAX_TEMPLATE_BYTES` when saved, and its rendered body at most
+ * `getMaxRenderedBytes` of the default payload: an entry inlined many times would otherwise make
+ * every delivery as large as the template allows. A body over the limit is not sent.
  */
 
 import _ from 'lodash';
@@ -41,7 +46,8 @@ const bodyError = (message: string) =>
 const BODY_TEMPLATE_FUTURE_FLAG = 'unstableWebhookBodyTemplate';
 
 const PLACEHOLDER = /\{\{\s*([^{}\s]+)\s*\}\}/g;
-const SINGLE_PLACEHOLDER = /^\s*\{\{\s*([^{}\s]+)\s*\}\}\s*$/;
+// Anchored on the braces: `" {{ entry.title }} "` keeps its spaces and stays a string
+const SINGLE_PLACEHOLDER = /^\{\{\s*([^{}\s]+)\s*\}\}$/;
 // Also matches what PLACEHOLDER leaves as text (`{{ entry title }}`), which is a mistake at save
 const ANY_PLACEHOLDER = /\{\{(.*?)\}\}/gs;
 
@@ -50,10 +56,27 @@ const ENTRY_VARIABLES = new Set(['model', 'uid', 'documentId', 'entry']);
 const ENTRY_FIELD_PREFIX = 'entry.';
 const ENTRY_EVENT_PREFIX = 'entry.';
 // The fields of every entry that are not in the attributes of every content type
-const COMMON_ENTRY_FIELDS = new Set(['id', 'documentId', 'createdAt', 'updatedAt']);
+const COMMON_ENTRY_FIELDS = new Set(['id', 'documentId', 'createdAt', 'updatedAt', 'publishedAt']);
 const NON_SCALAR_TYPES = new Set(['relation', 'media', 'component', 'dynamiczone', 'password']);
 // Far deeper than any real payload, and well below what the recursive checks below can handle
 const MAX_DEPTH = 32;
+// A real template is a few hundred bytes; this leaves room for long static text
+export const MAX_TEMPLATE_BYTES = 64 * 1024;
+const MIN_RENDERED_BYTES = 1024 * 1024;
+
+/**
+ * Room for the entry twice (e.g. inlined and as an object) on top of the default payload, and at
+ * least 1 MiB so a small entry never limits a template that fits `MAX_TEMPLATE_BYTES`.
+ */
+export const getMaxRenderedBytes = (defaultPayloadBytes: number) =>
+  Math.max(MIN_RENDERED_BYTES, 2 * defaultPayloadBytes);
+
+export class WebhookBodyTooLargeError extends Error {
+  constructor(limit: number) {
+    super(`Webhook body is larger than ${limit} bytes once rendered`);
+    this.name = 'WebhookBodyTooLargeError';
+  }
+}
 
 const getOwn = (value: unknown, key: string): unknown =>
   _.isPlainObject(value) && Object.hasOwn(value as object, key)
@@ -101,16 +124,37 @@ const toText = (value: unknown): string => {
 export const renderWebhookBody = (
   template: Template,
   payload: Payload,
-  onMissing: (variable: string) => void = () => {}
+  onMissing: (variable: string) => void = () => {},
+  // Approximate JSON size of the result: what each value adds, counted before it is built
+  maxBytes = Infinity
 ): Template => {
-  const resolve = (variable: string) => {
-    const value = getVariable(payload, variable);
+  let bytes = JSON.stringify(template).length;
+  const spend = (size: number) => {
+    bytes += size;
 
-    if (value === undefined) {
-      onMissing(variable);
+    if (bytes > maxBytes) {
+      throw new WebhookBodyTooLargeError(maxBytes);
+    }
+  };
+
+  // Each variable is resolved and measured once, however many times the template uses it
+  const resolved = new Map<string, { value: unknown; text: string; json: number }>();
+  const resolve = (variable: string) => {
+    let entry = resolved.get(variable);
+
+    if (!entry) {
+      const value = getVariable(payload, variable);
+
+      if (value === undefined) {
+        onMissing(variable);
+      }
+
+      const text = toText(value);
+      entry = { value, text, json: JSON.stringify(value ?? null).length };
+      resolved.set(variable, entry);
     }
 
-    return value;
+    return entry;
   };
 
   const renderValue = (value: unknown): unknown => {
@@ -118,10 +162,18 @@ export const renderWebhookBody = (
       const single = SINGLE_PLACEHOLDER.exec(value);
 
       if (single) {
-        return resolve(single[1]) ?? null;
+        const { value: resolvedValue, json } = resolve(single[1]);
+        spend(json);
+
+        return resolvedValue ?? null;
       }
 
-      return value.replace(PLACEHOLDER, (_match, variable: string) => toText(resolve(variable)));
+      return value.replace(PLACEHOLDER, (_match, variable: string) => {
+        const { text } = resolve(variable);
+        spend(text.length);
+
+        return text;
+      });
     }
 
     if (Array.isArray(value)) {
@@ -206,21 +258,7 @@ const isSendableField = (contentType: ContentTypes[string], field: string) => {
 // The fields every entry has, outside the attributes: only the global config can make them private
 const noContentType = (): ContentTypes[string] => ({ attributes: {}, options: {} });
 
-interface ValidateOptions {
-  /**
-   * Content types whose missing fields are accepted: those a saved, unchanged template already
-   * targeted, so it stays editable once a field it uses is removed (the runner logs the missing
-   * value). A content type the webhook did not target before is always checked in full.
-   */
-  allowRemovedFieldsOf?: string[];
-}
-
-const validateEntryField = (
-  webhook: Webhook,
-  field: string,
-  contentTypes: ContentTypes,
-  { allowRemovedFieldsOf = [] }: ValidateOptions
-) => {
+const validateEntryField = (webhook: Webhook, field: string, contentTypes: ContentTypes) => {
   const uids = getTargetContentTypes(webhook);
 
   if (COMMON_ENTRY_FIELDS.has(field)) {
@@ -250,9 +288,7 @@ const validateEntryField = (
     const contentType = contentTypes[uid];
 
     if (!Object.hasOwn(contentType.attributes, field)) {
-      if (!allowRemovedFieldsOf.includes(uid)) {
-        throw bodyError(`Webhook body variable entry.${field} is not a field of ${uid}`);
-      }
+      throw bodyError(`Webhook body variable entry.${field} is not a field of ${uid}`);
     } else if (!isSendableField(contentType, field)) {
       throw bodyError(
         `Webhook body variable entry.${field} is not a scalar, non-private field of ${uid}`
@@ -261,11 +297,7 @@ const validateEntryField = (
   }
 };
 
-export const validateWebhookBody = (
-  webhook: Webhook,
-  contentTypes: ContentTypes,
-  options: ValidateOptions = {}
-) => {
+export const validateWebhookBody = (webhook: Webhook, contentTypes: ContentTypes) => {
   const { body, events, contentTypeEvents = {} } = webhook;
 
   if (body === null || body === undefined) {
@@ -274,6 +306,10 @@ export const validateWebhookBody = (
 
   if (!_.isPlainObject(body)) {
     throw bodyError('Webhook body must be a JSON object');
+  }
+
+  if (JSON.stringify(body).length > MAX_TEMPLATE_BYTES) {
+    throw bodyError(`Webhook body can't be larger than ${MAX_TEMPLATE_BYTES / 1024} KB`);
   }
 
   const nonEntryEvent = [...events, ...Object.values(contentTypeEvents).flat()].find(
@@ -295,12 +331,7 @@ export const validateWebhookBody = (
       }
 
       if (isEntryField) {
-        validateEntryField(
-          webhook,
-          variable.slice(ENTRY_FIELD_PREFIX.length),
-          contentTypes,
-          options
-        );
+        validateEntryField(webhook, variable.slice(ENTRY_FIELD_PREFIX.length), contentTypes);
       }
     }
   }
@@ -367,6 +398,7 @@ export const createSampleEvent = (webhook: Webhook, contentTypes: ContentTypes):
           documentId: 'sample-document-id',
           createdAt: '2026-01-01T12:00:00.000Z',
           updatedAt: '2026-01-01T12:00:00.000Z',
+          publishedAt: '2026-01-01T12:00:00.000Z',
         },
         (_value, field) => isPrivate(contentType, field)
       ),
