@@ -127,7 +127,7 @@ describe('i18n permissions actions', () => {
     });
 
     test('leaves permissions unchanged when locales do not apply to the action', async () => {
-      global.strapi.admin.services.permission.actionProvider.appliesToProperty = jest.fn(() =>
+      global.strapi.service('admin::permission').actionProvider.appliesToProperty = jest.fn(() =>
         Promise.resolve(false)
       );
 
