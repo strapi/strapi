@@ -58,5 +58,10 @@ describe('MainNav', () => {
     expect(() => mainNav.addTint('#c62828' as never)).toThrow(
       'A tint must be a hook that returns a colour or null'
     );
+
+    mainNav.lock();
+    expect(() => mainNav.addTint(useSpaceTint)).toThrow(
+      'Main navigation tints must be added in register'
+    );
   });
 });

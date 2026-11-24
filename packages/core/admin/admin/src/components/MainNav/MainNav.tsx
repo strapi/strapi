@@ -71,17 +71,33 @@ const MainNavWrapper = styled(Flex)`
 `;
 
 /**
+ * `CSS.supports` accepts these as a colour, but `color-mix()` cannot use them
+ */
+const NOT_A_COLOUR = /^(inherit|initial|unset|revert|revert-layer)$|\b(var|env)\(/i;
+
+/**
+ * A value that is not a colour would make every `color-mix()` rule invalid, and the navigation
+ * transparent. Accepted where the browser cannot check it
+ */
+const isColor = (value: string | null): value is string =>
+  value != null &&
+  !NOT_A_COLOUR.test(value.trim()) &&
+  (typeof CSS === 'undefined' ||
+    typeof CSS.supports !== 'function' ||
+    CSS.supports('color', value));
+
+/**
  * The first tint that returns a colour wins
  */
 const useMainNavTint = (): string | null => {
   const tints = useStrapiApp('MainNav', (state) => state.mainNav.tints);
 
-  // The list is fixed once plugins have registered, and every tint runs on every render, so the
+  // The registry is locked once the admin renders, and every tint runs on every render, so the
   // hooks keep their order even when one returns null
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const colors = tints.map((useTint) => useTint());
 
-  return colors.find((color) => color != null) ?? null;
+  return colors.find(isColor) ?? null;
 };
 
 const MainNav = ({ style, ...props }: FlexProps<'nav'>) => {

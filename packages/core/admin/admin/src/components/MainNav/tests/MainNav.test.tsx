@@ -39,6 +39,29 @@ describe('MainNav', () => {
     expect(nav.style.getPropertyValue('--main-nav-tint')).toBe('#2e7d32');
   });
 
+  it('skips a tint that is not a colour, or that color-mix() cannot use', () => {
+    // jsdom has no CSS.supports. Browsers also accept CSS-wide keywords and var() as a colour
+    const supports = jest.fn((property: string, value: string) => value !== 'space-green');
+    Object.defineProperty(CSS, 'supports', { value: supports, configurable: true });
+
+    try {
+      renderTinted(
+        () => 'space-green',
+        () => 'inherit',
+        () => 'var(--space-color)',
+        () => '#2e7d32'
+      );
+
+      expect(screen.getByRole('navigation').style.getPropertyValue('--main-nav-tint')).toBe(
+        '#2e7d32'
+      );
+      expect(supports).toHaveBeenCalledWith('color', 'space-green');
+    } finally {
+      // @ts-expect-error - removes the stub
+      delete CSS.supports;
+    }
+  });
+
   it('darkens the link icon but leaves its badge colour alone', () => {
     const mainNav = new MainNavApi();
     mainNav.addTint(() => '#2e7d32');
