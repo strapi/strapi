@@ -243,6 +243,13 @@ describe('Lifecycles - components', () => {
     expect(await strapi.db.query(CONTENT_TYPE_UID).count()).toBe(entriesBefore);
   });
 
+  test('beforeFindOne runs when the component is written: the entity manager reads the row back', async () => {
+    await rq.post('/', { body: { data: { compo: { name: 'written' } } } });
+
+    // One component row written, so one read back after its create
+    expect(callsFor('beforeFindOne')).toHaveLength(1);
+  });
+
   test('Find hooks run for queries on the component, not when its entry is read', async () => {
     const created = await rq.post('/', {
       body: { data: { compo: { name: 'read' } } },

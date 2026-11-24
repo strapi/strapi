@@ -182,6 +182,40 @@ describe('loadComponents', () => {
     );
   });
 
+  it('throws, naming the component, when the file exports an array', async () => {
+    await write('default/card.json', schema('card'));
+    await write('default/card.lifecycles.js', `module.exports = [];`);
+    const { strapi } = createStrapi();
+
+    await expect(loadComponents(strapi)).rejects.toThrow(
+      'Component lifecycles are invalid for default.card: they must be an object of hooks.'
+    );
+  });
+
+  it('throws when the inline lifecycles of a .js schema are an array', async () => {
+    await write(
+      'default/card.js',
+      `module.exports = ${JSON.stringify(schema('card')).slice(0, -1)}, lifecycles: [] };`
+    );
+    const { strapi } = createStrapi();
+
+    await expect(loadComponents(strapi)).rejects.toThrow('they must be an object of hooks.');
+  });
+
+  it('warns about and ignores inline lifecycles that are not an object when a file has them', async () => {
+    await write(
+      'default/card.js',
+      `module.exports = ${JSON.stringify(schema('card')).slice(0, -1)}, lifecycles: [] };`
+    );
+    await write('default/card.lifecycles.js', `module.exports = { beforeCreate() {} };`);
+    const { strapi, registry, mocks } = createStrapi();
+
+    await loadComponents(strapi);
+
+    expect(Object.keys((registry.get('default.card') as any).lifecycles)).toEqual(['beforeCreate']);
+    expect(mocks.log.warn.mock.calls[0][0]).toContain('is not an object, it is ignored');
+  });
+
   it('names the component when its lifecycles file fails to load', async () => {
     await write('default/card.json', schema('card'));
     await write('default/card.lifecycles.js', `throw new Error('boom');`);

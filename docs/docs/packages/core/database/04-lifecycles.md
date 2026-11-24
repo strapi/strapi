@@ -46,8 +46,10 @@ A `.js` component schema can also declare a `lifecycles` object inline. The file
 Components accept the same hook names as content types, but not all of them run:
 
 - `beforeCreate`, `afterCreate`, `beforeUpdate`, `afterUpdate`, `beforeDelete` and `afterDelete` run when the document service writes the component (see below).
-- The find and count hooks never run when an entry is read: its components come through the populate of the entry. They only run for queries on the component itself (`strapi.db.query('<category>.<name>')`), such as the relations of a component in the Content Manager (`findOne`).
-- The `*Many` hooks only run for such direct queries. A `*DeleteMany` hook also makes the document service delete the rows of that component one by one, so the loader warns about it: use `beforeDelete` or `afterDelete`, which run for each row.
+- `beforeFindOne` and `afterFindOne` also run on every one of those writes: the entity manager reads the row back with `findOne` after a `create` or an `update`, and before a `delete` (`packages/core/database/src/entity-manager/index.ts`). A `*FindOne` hook therefore runs for each component row the document service writes or deletes, not only on reads.
+- The other find and count hooks never run when an entry is read: its components come through the populate of the entry. They only run for queries on the component itself (`strapi.db.query('<category>.<name>')`), such as the relations of a component in the Content Manager.
+- The `*Many` hooks only run for such direct queries. A `*DeleteMany` hook never runs when the document service deletes the component, so the loader warns about it.
+- Any delete hook (`beforeDelete`, `afterDelete`, `beforeDeleteMany` or `afterDeleteMany`, see `DELETE_LIFECYCLES` in `packages/core/core/src/services/document-service/components.ts`) makes the document service delete the rows of that component one by one, with a query per row, instead of in bulk. Declare one only when it is needed: no delete hook is cheaper than another.
 
 How it behaves:
 

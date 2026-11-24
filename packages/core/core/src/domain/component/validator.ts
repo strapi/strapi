@@ -58,11 +58,10 @@ const validateComponentLifecycles = (
     }
 
     if (DELETE_MANY_HOOKS.has(key)) {
+      // Any delete hook makes the document service delete components row by row (see
+      // `DELETE_LIFECYCLES`), so this one never gets a `deleteMany` to run on
       warnings.push(
-        `"${key}" never runs when the document service deletes this component, and it makes that deletion go row by row; use "${key.replace(
-          'Many',
-          ''
-        )}", which runs for each row`
+        `"${key}" never runs when the document service deletes this component, only on a direct deleteMany query on it`
       );
     }
 

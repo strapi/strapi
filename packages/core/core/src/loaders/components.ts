@@ -21,6 +21,7 @@ import {
  * The hooks are attached to the component model exactly like content-type lifecycles.
  */
 const LIFECYCLES_FILES_PATTERN = '*/*.lifecycles.js';
+const LIFECYCLES_SUFFIX = /\.lifecycles\.js$/i;
 
 type LoadedComponent = {
   collectionName: string;
@@ -155,7 +156,7 @@ const loadComponentLifecycles = (
     const fromFile = importLifecycles(uid, file.absolutePath, appPath(file.filename));
     sources.push(appPath(file.filename));
 
-    if (inline !== undefined && !_.isObjectLike(inline)) {
+    if (inline !== undefined && !_.isPlainObject(inline)) {
       strapi.log.warn(
         `Component ${uid}: the inline "lifecycles" of ${appPath(
           schema.__filename__
@@ -163,10 +164,10 @@ const loadComponentLifecycles = (
       );
     }
 
-    // The file wins hook by hook over the inline hooks. A file that is not an object is validated
-    // as is, so that the error names it
-    declared = _.isObjectLike(fromFile)
-      ? { ...(_.isObjectLike(inline) ? (inline as object) : {}), ...(fromFile as object) }
+    // The file wins hook by hook over the inline hooks. A file that is not a plain object (an
+    // array, a class instance…) is validated as is, so that the error names it
+    declared = _.isPlainObject(fromFile)
+      ? { ...(_.isPlainObject(inline) ? (inline as object) : {}), ...(fromFile as object) }
       : fromFile;
   }
 
@@ -186,8 +187,10 @@ export default async function loadComponents(strapi: Core.Strapi) {
     return {};
   }
 
+  // Case-sensitive like before, so `Card.JSON` is not loaded as JavaScript on Linux. Only the
+  // lifecycles files are skipped whatever their case: `listLifecyclesFiles` lists them
   const map = await loadFiles<LoadedComponents>(strapi.dirs.dist.components, '*/*.*(js|json)', {
-    globArgs: { ignore: LIFECYCLES_FILES_PATTERN, nocase: true },
+    globArgs: { ignore: { ignored: ({ name }: { name: string }) => LIFECYCLES_SUFFIX.test(name) } },
   });
   const lifecyclesFiles = await listLifecyclesFiles(strapi, strapi.dirs.dist.components);
 
