@@ -99,6 +99,8 @@ export type {
   InjectableSettingsListHeader as unstable_InjectableSettingsListHeader,
   InjectableSettingsListSelectFilter as unstable_InjectableSettingsListSelectFilter,
   SettingsListSelectFilterOption as unstable_SettingsListSelectFilterOption,
+  SettingsList as unstable_SettingsList,
+  SettingsListRows as unstable_SettingsListRows,
 } from './hooks/useSettingsListExtensions';
 export type {
   SanitizedAdminUser,

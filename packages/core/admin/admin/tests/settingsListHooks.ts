@@ -53,4 +53,13 @@ const SPACE_FILTER: InjectableSettingsListFilter = {
   useOptions: () => [{ label: 'France', value: 'france' }],
 };
 
-export { settingsListHooks, SPACE_FILTER };
+const DATE_FILTER: InjectableSettingsListFilter = {
+  name: 'reviewedAt',
+  label: 'Reviewed at',
+  type: 'datetime',
+};
+
+// The tests run in UTC: the day is midnight to midnight UTC
+const DAY_BOUNDS = { $gte: '2023-10-31T00:00:00.000Z', $lt: '2023-11-01T00:00:00.000Z' };
+
+export { settingsListHooks, DATE_FILTER, DAY_BOUNDS, SPACE_FILTER };

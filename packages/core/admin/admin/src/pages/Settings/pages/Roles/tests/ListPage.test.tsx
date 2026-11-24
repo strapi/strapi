@@ -1,6 +1,11 @@
 import { render, screen } from '@tests/utils';
 
-import { settingsListHooks, SPACE_FILTER } from '../../../../../../tests/settingsListHooks';
+import {
+  DATE_FILTER,
+  DAY_BOUNDS,
+  settingsListHooks,
+  SPACE_FILTER,
+} from '../../../../../../tests/settingsListHooks';
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 import { ListPage } from '../ListPage';
 
@@ -40,6 +45,14 @@ const providerOptions = {
       cellFormatter: (role: AdminRole) => <span>places of {role.name}</span>,
     },
     filter: SPACE_FILTER,
+  }),
+};
+
+const nameFilterOptions = {
+  runHookWaterfall: settingsListHooks({
+    after: 'description',
+    column: { name: 'available-in', label: 'Available in' },
+    filter: { name: 'name', label: 'Name', type: 'string' },
   }),
 };
 
@@ -95,7 +108,7 @@ describe('<ListPage /> | plugin columns and filters', () => {
 
   it('encodes the popover filter values and skips a malformed $and', async () => {
     render(<ListPage />, {
-      providerOptions,
+      providerOptions: nameFilterOptions,
       initialEntries: ['/?filters[$and][0][name][$eq]=R%26D'],
     });
 
@@ -105,8 +118,54 @@ describe('<ListPage /> | plugin columns and filters', () => {
       expect.anything()
     );
 
-    render(<ListPage />, { providerOptions, initialEntries: ['/?filters[$and]=abc'] });
+    render(<ListPage />, {
+      providerOptions: nameFilterOptions,
+      initialEntries: ['/?filters[$and]=abc'],
+    });
 
+    expect(useAdminRoles).toHaveBeenLastCalledWith(
+      expect.objectContaining({ filters: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('sends a plugin date filter as the bounds of its day', async () => {
+    render(<ListPage />, {
+      providerOptions: {
+        runHookWaterfall: settingsListHooks({
+          after: 'description',
+          column: { name: 'available-in', label: 'Available in' },
+          filter: DATE_FILTER,
+        }),
+      },
+      initialEntries: ['/?filters[$and][0][reviewedAt][$eq]=2023-10-31'],
+    });
+
+    await screen.findByText('Super Admin');
+    expect(useAdminRoles).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filters: {
+          $and: [
+            {
+              reviewedAt: {
+                $gte: encodeURIComponent(DAY_BOUNDS.$gte),
+                $lt: encodeURIComponent(DAY_BOUNDS.$lt),
+              },
+            },
+          ],
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('ignores the filters of the URL when no plugin adds a popover filter', async () => {
+    render(<ListPage />, {
+      providerOptions,
+      initialEntries: ['/?filters[$and][0][name][$eq]=Editor'],
+    });
+
+    await screen.findByText('Super Admin');
     expect(useAdminRoles).toHaveBeenLastCalledWith(
       expect.objectContaining({ filters: undefined }),
       expect.anything()

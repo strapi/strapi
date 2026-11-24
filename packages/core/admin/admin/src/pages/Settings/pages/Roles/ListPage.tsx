@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
-import { Filters } from '../../../../components/Filters';
+import { Filters, toApiFilters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
@@ -60,7 +60,10 @@ const ListPage = () => {
   const { filters: filterOptions, selects } = useSettingsListFilters('roles', NO_CORE_FILTERS);
   const { plugins } = useSettingsListPluginParams(selects);
   const searchFilter = query?._q ? { name: { $containsi: query._q } } : undefined;
-  const popoverFilters = Array.isArray(query?.filters?.$and) ? query.filters.$and : [];
+  // Without a popover the page ignores URL filters, as it did before plugins could add one
+  const urlFilters =
+    filterOptions.length > 0 ? toApiFilters(query?.filters, filterOptions)?.$and : undefined;
+  const popoverFilters = Array.isArray(urlFilters) ? urlFilters : [];
   const { roles, refetch: refetchRoles } = useAdminRoles(
     {
       // The fetch client does not encode params. The server validates them against the role model

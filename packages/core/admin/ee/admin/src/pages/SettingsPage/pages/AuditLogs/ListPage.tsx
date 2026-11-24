@@ -106,7 +106,7 @@ const ListPage = () => {
   );
   const { plugins } = useSettingsListPluginParams(selects);
   // A date filter stores a day or a minute: the API reads it as the instants it covers
-  const apiFilters = toApiFilters(query?.filters, displayedFilters);
+  const apiFilters = toApiFilters(query?.filters, filterOptions);
   const {
     auditLogs,
     isLoading: isLoadingAuditLogs,

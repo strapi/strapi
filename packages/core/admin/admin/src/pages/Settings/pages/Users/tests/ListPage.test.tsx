@@ -1,7 +1,12 @@
 import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { settingsListHooks, SPACE_FILTER } from '../../../../../../tests/settingsListHooks';
+import {
+  DATE_FILTER,
+  DAY_BOUNDS,
+  settingsListHooks,
+  SPACE_FILTER,
+} from '../../../../../../tests/settingsListHooks';
 import { ListPageCE } from '../ListPage';
 
 import type { SanitizedAdminUser } from '../../../../../../../shared/contracts/shared';
@@ -93,6 +98,37 @@ describe('Users | ListPage | plugin columns and filters', () => {
       expect(requests.at(-1)!.searchParams.get('plugins[spaces][space]')).toBe('france')
     );
     expect(requests.at(-1)!.searchParams.get('page')).toBe('1');
+  });
+
+  it('sends a plugin date filter as the bounds of its day', async () => {
+    const requests: URL[] = [];
+
+    server.use(
+      http.get('/admin/users', ({ request }) => {
+        requests.push(new URL(request.url));
+
+        return HttpResponse.json({
+          data: { results: [{ id: 1, firstname: 'John', roles: [] }], pagination: { page: 1 } },
+        });
+      })
+    );
+
+    render(<ListPageCE />, {
+      providerOptions: {
+        runHookWaterfall: settingsListHooks({
+          after: 'email',
+          column: { name: 'space', label: 'Spaces' },
+          filter: DATE_FILTER,
+        }),
+      },
+      initialEntries: ['/?filters[$and][0][reviewedAt][$eq]=2023-10-31'],
+    });
+
+    await waitFor(() => expect(requests).toHaveLength(1));
+    expect(requests[0].searchParams.get('filters[$and][0][reviewedAt][$gte]')).toBe(
+      DAY_BOUNDS.$gte
+    );
+    expect(requests[0].searchParams.get('filters[$and][0][reviewedAt][$lt]')).toBe(DAY_BOUNDS.$lt);
   });
 
   it('leaves out the plugin values of a stale link that no dropdown reads', async () => {

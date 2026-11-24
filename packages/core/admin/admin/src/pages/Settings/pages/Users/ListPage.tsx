@@ -8,7 +8,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
-import { Filters } from '../../../../components/Filters';
+import { Filters, toApiFilters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
@@ -32,6 +32,8 @@ import { getDisplayName } from '../../../../utils/users';
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
 
+import type { FindAll } from '../../../../../../shared/contracts/user';
+
 /* -------------------------------------------------------------------------------------------------
  * ListPageCE
  * -----------------------------------------------------------------------------------------------*/
@@ -52,7 +54,14 @@ const ListPageCE = () => {
   const { filters: filterOptions, selects } = useSettingsListFilters('users', FILTERS);
   const pluginParams = useSettingsListPluginParams(selects);
   const { plugins: _plugins, ...urlParams } = qs.parse(search, { ignoreQueryPrefix: true });
-  const { data, isError, isLoading } = useAdminUsers({ ...urlParams, ...pluginParams });
+  const { data, isError, isLoading } = useAdminUsers({
+    ...urlParams,
+    filters: toApiFilters(
+      urlParams.filters as { $and?: unknown } | undefined,
+      filterOptions
+    ) as FindAll.Request['query']['filters'],
+    ...pluginParams,
+  });
   const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
 
