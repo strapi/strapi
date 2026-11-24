@@ -25,6 +25,21 @@ const createRouteInfoMiddleware =
     return next();
   };
 
+/**
+ * Runs the rest of the route (authentication included) detached from the request's database abort
+ * signal, for routes that opted out with `config.abortReadsOnRequestDisconnect: false`.
+ */
+const createDetachFromAbortMiddleware =
+  (strapi: Core.Strapi): Core.MiddlewareHandler =>
+  (ctx, next) => {
+    // The database can be unavailable (e.g. requests served before it is loaded)
+    if (typeof strapi.db?.runWithoutAbortSignal !== 'function') {
+      return next();
+    }
+
+    return strapi.db.runWithoutAbortSignal(() => next());
+  };
+
 const getAuthConfig = property('config.auth');
 
 const createAuthorizeMiddleware =
@@ -84,6 +99,9 @@ export default (strapi: Core.Strapi) => {
 
       const routeHandler = compose([
         createRouteInfoMiddleware(route),
+        ...(route.config?.abortReadsOnRequestDisconnect === false
+          ? [createDetachFromAbortMiddleware(strapi)]
+          : []),
         authenticate,
         authorize,
         createPolicicesMiddleware(route, strapi),

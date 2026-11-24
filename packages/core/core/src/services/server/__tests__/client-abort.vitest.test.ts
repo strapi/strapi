@@ -10,10 +10,13 @@ const createCtx = (writableEnded = false) => {
   return { ctx: { res } as unknown as Context, res };
 };
 
-const createStrapi = () => {
+const createStrapi = (
+  settings: Record<string, unknown> = { abortReadsOnRequestDisconnect: true }
+) => {
   const signals: AbortSignal[] = [];
   const strapi = {
     db: {
+      config: { settings },
       runWithAbortSignal: vi.fn((signal: AbortSignal, cb: () => unknown) => {
         signals.push(signal);
         return cb();
@@ -61,6 +64,20 @@ describe('runWithClientAbortSignal', () => {
     ).rejects.toThrow('boom');
     expect(res.listenerCount('close')).toBe(0);
   });
+
+  it.each([{ abortReadsOnRequestDisconnect: false }, {}])(
+    'adds no listener nor signal when the setting is %j',
+    async (settings) => {
+      const { strapi } = createStrapi(settings);
+      const { ctx, res } = createCtx();
+
+      await runWithClientAbortSignal(strapi, ctx, async () => {
+        expect(res.listenerCount('close')).toBe(0);
+      });
+
+      expect(strapi.db.runWithAbortSignal).not.toHaveBeenCalled();
+    }
+  );
 
   it('just runs the request when the database is unavailable', async () => {
     const { ctx } = createCtx();

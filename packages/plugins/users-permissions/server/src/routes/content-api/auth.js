@@ -125,7 +125,9 @@ module.exports = (strapi) => {
       method: 'POST',
       path: '/auth/logout',
       handler: 'auth.logout',
-      config: { prefix: '' },
+      // Logout often happens as the page closes: authentication and the revocation must run even
+      // when the client is already gone
+      config: { prefix: '', abortReadsOnRequestDisconnect: false },
     },
     {
       method: 'GET',
@@ -137,7 +139,8 @@ module.exports = (strapi) => {
       method: 'DELETE',
       path: '/auth/sessions/:sessionId',
       handler: 'auth.revokeSession',
-      config: { prefix: '' },
+      // Revoking a session must run even when the client is already gone
+      config: { prefix: '', abortReadsOnRequestDisconnect: false },
     },
   ];
 };

@@ -64,16 +64,23 @@ Writes are never aborted:
 - The document service runs its write actions (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) through `db.runWithoutAbortSignal`, middlewares included ([`document-service/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/client-abort.ts)). Document middlewares read outside the write's transaction, before it (review workflows) and after it commits (content history).
 - Commit and rollback hooks run detached from the signal (`abortCtx.exit`).
 
-`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal and marks the calling flow as written. Use it for work that must run to completion although it reads before its first database write. Admin and Users & Permissions logout use it, because the session read that picks what to revoke comes first and logout often happens as the page closes. Upload `remove()` uses it, because it deletes the stored files before it reads and deletes the row.
+`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal and marks the calling flow as written. Use it for work that must run to completion although it reads before its first database write. Upload `remove()` uses it, because it deletes the stored files before it reads and deletes the row.
+
+A route can opt out as a whole with `config.abortReadsOnRequestDisconnect: false` (typed in `@strapi/types`, honored by [`compose-endpoint.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts)). A middleware placed before `authenticate` runs the rest of the route, authentication included, through `db.runWithoutAbortSignal`. This is needed when a read happens before any controller code, such as the session lookup of the admin auth strategy. The logout and session-revoke routes set it (admin `POST /logout`, `DELETE /users/me/sessions` and `DELETE /users/me/sessions/:sessionId`; Users & Permissions `POST /auth/logout` and `DELETE /auth/sessions/:sessionId`), because their purpose is the revocation, and logout often happens as the page closes. The flag only accepts `false`. Like `runWithoutAbortSignal`, it marks the request as written, so nothing in it is aborted.
+
+`db.runDetachedFromAbortSignal(callback)` (internal) runs the callback detached from the signal without marking the flow as written, so the rest of the flow is still aborted. Event hub emits (listeners and subscribers) and cron jobs (creation of the timer and every run) use it, because their reads must not inherit the signal of the request that emitted the event or scheduled the job.
 
 The mechanism is opt-in: it runs only when `settings.abortReadsOnRequestDisconnect` is `true` (default `false`). With the setting unset, `runWithAbortSignal` runs the callback without storing the signal, so nothing changes. It must be a boolean, and the constructor throws otherwise. It is off by default because work that a request starts without awaiting it inherits the signal (see the limits below), which would change behaviour for existing projects.
 
 Limits:
 
 - Queries run directly on `strapi.db.connection` (including `connection.raw`) are not covered, like `queryTimeout`. They are not aborted, and a write made this way does not mark the flow as written.
-- A stream that already started is not cancelled.
+- A stream that already started is not cancelled: only starting one is refused. Its batch and populate queries run detached from the signal.
 - Code that has a side effect outside the database (a file, an external API) and then reads before it writes can stop between the two. Run it in `db.runWithoutAbortSignal`.
-- Work that a request starts without awaiting it inherits the signal, so its reads are refused once the client disconnects, until the request writes. Its writes are not.
+- Other work that a request starts without awaiting it (`setTimeout`, an un-awaited promise) inherits the signal, so its reads are refused once the client disconnects, until the request writes. Its writes are not. Event hub listeners and cron jobs are the exception, they run detached.
+- A request waiting for a pool connection is not woken by the abort. The signal is checked before and after the connection is acquired only.
+- Behind PgBouncer or Supavisor in transaction pooling mode the Postgres cancel (`pg_cancel_backend`) has no effect, as with `queryTimeout`. The read is still refused when issued after the abort.
+- Each cancel opens one extra raw connection outside the pool (the same mechanism as `queryTimeout`), so many simultaneous disconnects can open up to `pool.max` extra connections.
 - A cancel inside a transaction stops whatever statement runs on the transaction's connection. If concurrent branches share one transaction and one of them runs a detached read (`abortCtx.exit` without marking the flow), the cancel of a sibling read can hit that statement instead.
 - Cancelling is best effort: a signal that aborts in the instant between acquiring the connection and the driver sending the query can still let that one query run to completion.
 

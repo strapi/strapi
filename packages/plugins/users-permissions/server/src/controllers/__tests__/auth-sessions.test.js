@@ -40,7 +40,6 @@ describe('Auth controller - sessions', () => {
       },
       sessionManager: sessionManagerCallable,
       log: { error: jest.fn() },
-      db: { runWithoutAbortSignal: jest.fn((cb) => cb()) },
     });
 
     controller = createAuthController();
@@ -247,14 +246,20 @@ describe('Auth controller - sessions', () => {
       expect(unauthorized).toHaveBeenCalledWith('Missing authentication');
     });
 
-    test('Revokes the sessions detached from the request abort signal', async () => {
+    test('The logout route keeps its reads running after the client disconnects', () => {
+      const routes = require('../../routes/content-api/auth')({ config: { get: jest.fn() } });
+      const logoutRoute = routes.find((route) => route.path === '/auth/logout');
+
+      expect(logoutRoute.config.abortReadsOnRequestDisconnect).toBe(false);
+    });
+
+    test('Revokes the sessions of the user', async () => {
       const ctx = createLogoutContext({
         request: { body: { scope: 'all' }, header: {} },
       });
 
       await controller.logout(ctx);
 
-      expect(global.strapi.db.runWithoutAbortSignal).toHaveBeenCalledTimes(1);
       expect(originApi.invalidateRefreshToken).toHaveBeenCalledWith('5');
     });
 

@@ -53,6 +53,7 @@ const routeSchema = yup.object({
           scope: yup.array().of(yup.string()).required(),
         });
       }),
+      abortReadsOnRequestDisconnect: yup.boolean().oneOf([false]).notRequired(),
       policies: yup
         .array()
         // FIXME: fixed in yup v1

@@ -1,26 +1,37 @@
 const authenticatedAdminRoute = (
   method: 'GET' | 'PUT' | 'DELETE' | 'POST',
   path: string,
-  handler: string
+  handler: string,
+  config: { abortReadsOnRequestDisconnect?: false } = {}
 ) => ({
   method,
   path,
   handler,
   config: {
     policies: ['admin::isAuthenticatedAdmin'],
+    ...config,
   },
 });
+
+// Revoking a session is asked for, not read: it must run even when the client is already gone
+const revokeConfig = { abortReadsOnRequestDisconnect: false } as const;
 
 export default [
   authenticatedAdminRoute('GET', '/users/me', 'authenticated-user.getMe'),
   authenticatedAdminRoute('PUT', '/users/me', 'authenticated-user.updateMe'),
   authenticatedAdminRoute('GET', '/users/me/permissions', 'authenticated-user.getOwnPermissions'),
   authenticatedAdminRoute('GET', '/users/me/sessions', 'authenticated-session.list'),
-  authenticatedAdminRoute('DELETE', '/users/me/sessions', 'authenticated-session.revokeAll'),
+  authenticatedAdminRoute(
+    'DELETE',
+    '/users/me/sessions',
+    'authenticated-session.revokeAll',
+    revokeConfig
+  ),
   authenticatedAdminRoute(
     'DELETE',
     '/users/me/sessions/:sessionId',
-    'authenticated-session.revoke'
+    'authenticated-session.revoke',
+    revokeConfig
   ),
   {
     method: 'POST',

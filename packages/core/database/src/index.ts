@@ -339,6 +339,18 @@ class Database {
   }
 
   /**
+   * Runs `cb` detached from the abort signal of the calling flow, WITHOUT marking that flow as
+   * written: the reads `cb` makes are never aborted, but the rest of the calling flow still is.
+   * For work that merely happens to be started from a request and must not inherit its signal
+   * (event hub listeners, cron jobs). Use `runWithoutAbortSignal` for work that writes.
+   *
+   * @internal
+   */
+  runDetachedFromAbortSignal<T>(cb: () => T): T {
+    return abortCtx.exit(cb);
+  }
+
+  /**
    * Run work inside a DB transaction. On a fulfilled callback, the transaction
    * is committed; on rejection, it is rolled back. The callback receives Knex
    * `commit` and `rollback` helpers: if you call `rollback` and return without

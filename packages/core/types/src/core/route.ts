@@ -13,6 +13,13 @@ export type RouteConfig = {
   middlewares?: Array<string | MiddlewareHandler>;
   policies?: Array<string | { name: string; config: unknown }>;
   auth?: false | { scope?: string[]; strategies?: string[] };
+  /**
+   * Set to `false` to never refuse or cancel the database reads of this route when the client
+   * disconnects early, authentication included. Only has an effect when
+   * `database.settings.abortReadsOnRequestDisconnect` is enabled. Use it for routes that must
+   * complete once requested, such as logout (revoking a session as the page closes).
+   */
+  abortReadsOnRequestDisconnect?: false;
 };
 
 export type HandlerReference = string;

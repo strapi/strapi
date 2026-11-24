@@ -309,7 +309,13 @@ class Strapi extends Container implements Core.Strapi {
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
-      .add('eventHub', () => createEventHub())
+      .add('eventHub', () =>
+        createEventHub({
+          // Requests (and so abort signals) only exist once loaded; avoid touching the db before
+          detachFromAbortSignal: (cb) =>
+            this.isLoaded ? this.db.runDetachedFromAbortSignal(cb) : cb(),
+        })
+      )
       .add('startupLogger', () => utils.createStartupLogger(this))
       .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))

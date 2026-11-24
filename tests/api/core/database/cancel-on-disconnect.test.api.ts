@@ -2,8 +2,9 @@ import http from 'node:http';
 import dotenv from 'dotenv';
 import type { Core } from '@strapi/types';
 
-import { createStrapiInstance } from 'api-tests/strapi';
+import { createStrapiInstance, superAdmin } from 'api-tests/strapi';
 import { createTestBuilder } from 'api-tests/builder';
+import { createRequest } from 'api-tests/request';
 
 // Reproduction for strapi/strapi#28646: a client disconnect must stop DB work of that request.
 // Read the test app's .env now: the suite only runs on postgres, decided at definition time
@@ -20,6 +21,8 @@ const POOL_MAX = 2;
 const DISCONNECT_AFTER_MS = 500;
 // Budget for the database to notice the cancellation after the client left
 const CANCEL_BUDGET_MS = 3000;
+// Holds the admin logout request back, so the client disconnects before authentication runs
+const LOGOUT_DELAY_MS = 1000;
 
 const itemModel = {
   kind: 'collectionType',
@@ -51,7 +54,14 @@ const requestAndAbort = (
     method = 'GET',
     path,
     body,
-  }: { port: number; method?: string; path: string; body?: string },
+    headers = {},
+  }: {
+    port: number;
+    method?: string;
+    path: string;
+    body?: string;
+    headers?: Record<string, string>;
+  },
   afterMs = DISCONNECT_AFTER_MS
 ) =>
   new Promise<void>((resolve) => {
@@ -59,7 +69,7 @@ const requestAndAbort = (
       method,
       port,
       path,
-      headers: body ? { 'content-type': 'application/json' } : {},
+      headers: body ? { 'content-type': 'application/json', ...headers } : headers,
     });
     request.on('error', () => {});
     request.on('close', () => resolve());
@@ -107,6 +117,7 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
       .from('pg_stat_activity')
       .where('query', 'like', '%pg_sleep(%')
       .andWhere('state', 'active')
+      .andWhereRaw('datname = current_database()')
       .andWhereRaw('pid <> pg_backend_pid()');
 
     return rows.length;
@@ -143,6 +154,14 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
           query()
             .select(['id', s.db.connection.raw(`pg_sleep(${seconds})`)])
             .execute({ mapResults: false });
+
+        // Delays admin logout so the client is gone before the auth strategy reads the session
+        s.server.use(async (ctx: any, next: () => Promise<any>) => {
+          if (ctx.path === '/admin/logout') {
+            await sleep(LOGOUT_DELAY_MS);
+          }
+          return next();
+        });
 
         s.server.routes({
           type: 'content-api',
@@ -323,18 +342,21 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     started = createDeferred();
     handlerSettled = createDeferred<string>();
     issuedSql.length = 0;
+    createdEvents.length = 0;
   });
 
   afterEach(async () => {
     // Do not let a failing test leave sleeping backends behind for the next one
     await strapi.db.connection.raw(
       `select pg_cancel_backend(pid) from pg_stat_activity
-       where query like '%pg_sleep(%' and state = 'active' and pid <> pg_backend_pid()`
+       where query like '%pg_sleep(%' and state = 'active' and pid <> pg_backend_pid()
+       and datname = current_database()`
     );
     await waitUntil(async () => (await runningSleeps()) === 0, 2000);
     await strapi.db.connection('abort_items').where('name', 'like', 'tx %').del();
     await strapi.db.connection('abort_items').where('name', 'plain after').del();
     await strapi.db.connection('abort_items').where('name', 'event after').del();
+    await strapi.db.query('admin::session').deleteMany({});
   });
 
   test('REST: cancels the running select on the database when the client disconnects', async () => {
@@ -468,6 +490,46 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     await expect(handlerSettled.promise).resolves.toBe('done');
     const fired = await waitUntil(() => createdEvents.length > 0, 3000);
     expect(fired).toBe(true);
+  });
+
+  test('admin logout revokes the session even when the client leaves before authentication', async () => {
+    const cookieName = 'strapi_admin_refresh';
+    const loginRes = await createRequest({ strapi }).post('/admin/login', {
+      body: superAdmin.loginInfo,
+    });
+    expect(loginRes.statusCode).toBe(200);
+    const cookiePair = ((loginRes.headers['set-cookie'] || []) as string[])
+      .find((cookie) => cookie.startsWith(`${cookieName}=`))!
+      .split(';')[0];
+
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePair },
+    });
+    expect(tokenRes.statusCode).toBe(200);
+    const accessToken = tokenRes.body.data.token as string;
+    expect(await strapi.db.query('admin::session').count()).toBeGreaterThan(0);
+
+    await requestAndAbort(
+      {
+        port,
+        method: 'POST',
+        path: '/admin/logout',
+        body: '{}',
+        headers: { authorization: `Bearer ${accessToken}` },
+      },
+      300
+    );
+
+    const revoked = await waitUntil(
+      async () => (await strapi.db.query('admin::session').count()) === 0,
+      LOGOUT_DELAY_MS + 3000
+    );
+    expect(revoked).toBe(true);
+
+    const refreshRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePair },
+    });
+    expect(refreshRes.statusCode).toBe(401);
   });
 
   test('GraphQL: cancels the running select on the database when the client disconnects', async () => {

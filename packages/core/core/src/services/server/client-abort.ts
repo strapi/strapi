@@ -12,6 +12,11 @@ export const runWithClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, r
     return run();
   }
 
+  // Nothing would consume the signal, so skip the controller and listener on every request
+  if (strapi.db.config?.settings?.abortReadsOnRequestDisconnect !== true) {
+    return run();
+  }
+
   const controller = new AbortController();
   const onClose = () => {
     if (!ctx.res.writableEnded) {

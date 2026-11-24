@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { describe, it, expect, vi } from 'vitest';
 import createEventHub from '../event-hub';
 
@@ -238,5 +239,37 @@ describe('Event Hub hasListeners', () => {
     eventHub.destroy();
 
     expect(eventHub.hasListeners('my-event')).toBe(false);
+  });
+
+  describe('abort signal detachment', () => {
+    it('runs listeners and subscribers detached from the emitter flow', async () => {
+      const store = new AsyncLocalStorage<string>();
+      const seen: Array<string | undefined> = [];
+      const { on, subscribe, emit } = createEventHub({
+        detachFromAbortSignal: (cb) => store.exit(cb),
+      });
+
+      on('my-event', async () => {
+        await Promise.resolve();
+        seen.push(store.getStore());
+      });
+      subscribe(async () => {
+        seen.push(store.getStore());
+      });
+
+      await store.run('request', () => emit('my-event'));
+
+      expect(seen).toEqual([undefined, undefined]);
+    });
+
+    it('still emits when no detach function is provided', async () => {
+      const { on, emit } = createEventHub();
+      const fn = vi.fn();
+      on('my-event', fn);
+
+      await emit('my-event', 1);
+
+      expect(fn).toHaveBeenCalledWith(1);
+    });
   });
 });

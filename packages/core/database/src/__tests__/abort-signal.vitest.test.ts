@@ -385,6 +385,20 @@ describe('abort signal on the query builder (#28646)', () => {
       await vi.waitFor(() => expect(hookRows).toEqual([{ id: 1, name: 'first' }]));
     });
 
+    it('runs a select detached from the signal without marking the flow as written', async () => {
+      const controller = new AbortController();
+
+      await runWithAbortSignal(controller.signal, async () => {
+        controller.abort();
+
+        const rows = await (db as any).runDetachedFromAbortSignal(() => selectItems());
+        expect(rows).toEqual([{ id: 1, name: 'first' }]);
+
+        // Unlike runWithoutAbortSignal, the rest of the flow is still aborted
+        await expectQueryAborted(selectItems());
+      });
+    });
+
     it('does not apply the guard to a select that locks rows (forUpdate)', () => {
       runWithAbortSignal(abortedSignal(), () => {
         expect(getActiveAbortSignal(db, { type: 'select', forUpdate: true })).toBeUndefined();
@@ -392,6 +406,63 @@ describe('abort signal on the query builder (#28646)', () => {
         expect(getActiveAbortSignal(db, { type: 'count' })?.aborted).toBe(true);
         expect(getActiveAbortSignal(db, { type: 'select' })?.aborted).toBe(true);
       });
+    });
+  });
+
+  describe('a started stream', () => {
+    beforeEach(async () => {
+      await db.destroy();
+      db = createSqliteDb();
+      await db.init({
+        models: [
+          {
+            uid: ITEM_UID,
+            singularName: 'item',
+            tableName: 'items',
+            attributes: {
+              id: { type: 'increments' },
+              name: { type: 'string' },
+              parent: {
+                type: 'relation',
+                relation: 'manyToOne',
+                target: ITEM_UID,
+                joinColumn: { name: 'parent_id', referencedColumn: 'id' },
+              } as never,
+            },
+          },
+        ],
+      });
+      await db.connection.schema.createTable('items', (table) => {
+        table.increments('id');
+        table.string('name');
+        table.integer('parent_id');
+      });
+      await items().insert({ name: 'root' }).execute();
+      await db.connection('items').insert({ name: 'leaf', parent_id: 1 });
+    });
+
+    it('populates its batches even when the signal aborts after it started', async () => {
+      const controller = new AbortController();
+
+      const rows = await runWithAbortSignal(controller.signal, async () => {
+        const stream = items()
+          .select('*')
+          .where({ name: 'leaf' })
+          .populate({ parent: true })
+          .stream();
+        const read: any[] = [];
+
+        controller.abort();
+
+        for await (const row of stream) {
+          read.push(row);
+        }
+
+        return read;
+      });
+
+      expect(rows).toHaveLength(1);
+      expect(rows[0].parent).toMatchObject({ name: 'root' });
     });
   });
 
