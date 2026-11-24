@@ -15,6 +15,8 @@ describe('Admin form extensions (api)', () => {
 
   const prefix = 'form_extensions_test';
   const afterSave = jest.fn();
+  // The entityId each validate step gets
+  const validatedIds = jest.fn();
   const roleIds: number[] = [];
   // The role a user holds in another place, which the plugin keeps on save
   let keptRoleId: number;
@@ -22,7 +24,15 @@ describe('Admin form extensions (api)', () => {
   const spacesSchema = zod.object({ space: zod.string().min(1) });
   const spacesParam = {
     schema: spacesSchema,
-    validate: (values?: zod.infer<typeof spacesSchema>) => {
+    validate: ({
+      values,
+      entityId,
+    }: {
+      values?: zod.infer<typeof spacesSchema>;
+      entityId?: unknown;
+    }) => {
+      validatedIds(entityId);
+
       if (values?.space === 'forbidden') {
         throw new errors.ValidationError('This space is not allowed');
       }
@@ -56,12 +66,16 @@ describe('Admin form extensions (api)', () => {
         },
       },
     });
-    formExtensions.unstable_addInputParams('api-token', {
+    formExtensions.unstable_addInputParams('content-api-token', {
       spaces: {
         ...spacesParam,
         beforeSave: ({ values, data }) => {
           if (values?.space === 'padded') {
             return { ...data, name: `  ${prefix}_padded_token  ` };
+          }
+
+          if (values?.space === 'padded-create') {
+            return { ...data, name: `  ${prefix}_padded_create  ` };
           }
 
           return values?.space === 'bad-type' ? { ...data, type: 'nope' } : data;
@@ -120,7 +134,7 @@ describe('Admin form extensions (api)', () => {
       expect(updated.body.data.name).toBe(`${prefix}_role_renamed`);
       expect(afterSave).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          entityId: String(created.body.data.id),
+          entityId: created.body.data.id,
           values: { space: 'spain' },
         })
       );
@@ -191,6 +205,56 @@ describe('Admin form extensions (api)', () => {
       expect(afterSave).not.toHaveBeenCalled();
     });
 
+    test('refuses an update body that is not an object, as core does', async () => {
+      const role = await createRole({ name: `${prefix}_array_body` });
+      afterSave.mockReset();
+
+      for (const url of [
+        `/admin/roles/${role.body.data.id}`,
+        '/admin/users/1',
+        `/admin/api-tokens/${role.body.data.id}`,
+      ]) {
+        const res = await rq({ method: 'PUT', url, body: [] });
+
+        expect(res.statusCode).toBe(400);
+      }
+
+      expect(afterSave).not.toHaveBeenCalled();
+    });
+
+    test('gives plugins the id the database matches for a route id such as 07', async () => {
+      const role = await createRole({ name: `${prefix}_padded_id` });
+      validatedIds.mockReset();
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/admin/roles/0${role.body.data.id}`,
+        body: { description: 'x', plugins: { spaces: { space: 'france' } } },
+      });
+
+      expect(res.statusCode).toBe(200);
+      // The route id as the number the database matched, not the string '0<id>'
+      expect(validatedIds).toHaveBeenCalledWith(role.body.data.id);
+    });
+
+    test('answers 500 when afterSave refuses with a ValidationError, the role being saved', async () => {
+      afterSave.mockRejectedValue(new errors.ValidationError('Too late to refuse'));
+
+      const res = await createRole({
+        name: `${prefix}_late_refusal`,
+        plugins: { spaces: { space: 'france' } },
+      });
+
+      expect(res.statusCode).toBe(500);
+
+      const saved = await strapi.db
+        .query('admin::role')
+        .findOne({ where: { name: `${prefix}_late_refusal` } });
+
+      expect(saved).not.toBeNull();
+      roleIds.push(saved.id);
+    });
+
     test('answers 404 for a missing role, without afterSave', async () => {
       const res = await rq({
         method: 'PUT',
@@ -244,7 +308,7 @@ describe('Admin form extensions (api)', () => {
       expect(roleIdsOf(withoutRoles.body.data)).toEqual([keptRoleId]);
       expect(afterSave).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          entityId: String(invited.body.data.id),
+          entityId: invited.body.data.id,
           values: { space: 'spain' },
         })
       );
@@ -379,7 +443,7 @@ describe('Admin form extensions (api)', () => {
       expect(updated.statusCode).toBe(200);
       expect(afterSave).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          entityId: String(created.body.data.id),
+          entityId: created.body.data.id,
           values: { space: 'spain' },
         })
       );
@@ -400,6 +464,19 @@ describe('Admin form extensions (api)', () => {
 
       expect(padded.statusCode).toBe(200);
       expect(padded.body.data.name).toBe(`${prefix}_padded_token`);
+
+      const paddedCreate = await rq({
+        method: 'POST',
+        url: '/admin/api-tokens',
+        body: {
+          name: `${prefix}_will_be_padded`,
+          type: 'read-only',
+          plugins: { spaces: { space: 'padded-create' } },
+        },
+      });
+
+      expect(paddedCreate.statusCode).toBe(201);
+      expect(paddedCreate.body.data.name).toBe(`${prefix}_padded_create`);
 
       const badType = await rq({
         method: 'POST',

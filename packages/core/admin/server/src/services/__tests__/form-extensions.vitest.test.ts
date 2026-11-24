@@ -8,9 +8,8 @@ const saveRole = (data: Record<string, unknown>) => Promise.resolve({ id: 7, ...
 describe('Form extensions service', () => {
   test('returns the core values as they are when no plugin added params', async () => {
     const formExtensions = formExtensionsService();
-    const { data, save } = await formExtensions.prepare('role', {
-      input: undefined,
-      data: { name: 'Editor' },
+    const { data, save } = await formExtensions.internal_prepare('role', {
+      body: { name: 'Editor' },
     });
 
     expect(data).toEqual({ name: 'Editor' });
@@ -27,9 +26,7 @@ describe('Form extensions service', () => {
       },
     });
 
-    const error = await formExtensions
-      .prepare('role', { input: undefined, data: {} })
-      .catch((e) => e);
+    const error = await formExtensions.internal_prepare('role', { body: {} }).catch((e) => e);
 
     expect(error).toBeInstanceOf(errors.ValidationError);
     expect(error.message).toBe('This space is not allowed');
@@ -53,9 +50,7 @@ describe('Form extensions service', () => {
       },
     });
 
-    const teamsError = await teamsOnly
-      .prepare('role', { input: undefined, data: {} })
-      .catch((e) => e);
+    const teamsError = await teamsOnly.internal_prepare('role', { body: {} }).catch((e) => e);
 
     expect(teamsError.details.errors[0].path).toEqual(['plugins', 'teams', 'id']);
   });
@@ -65,7 +60,7 @@ describe('Form extensions service', () => {
     formExtensions.unstable_addInputParams('user', { spaces: {} });
 
     await expect(
-      formExtensions.prepare('role', { input: { spaces: {} }, data: {} })
+      formExtensions.internal_prepare('role', { body: { plugins: { spaces: {} } } })
     ).rejects.toThrow('Invalid key plugins.spaces');
   });
 
@@ -76,7 +71,7 @@ describe('Form extensions service', () => {
     });
 
     const error = await formExtensions
-      .prepare('role', { input: { spaces: { availableIn: [] } }, data: {} })
+      .internal_prepare('role', { body: { plugins: { spaces: { availableIn: [] } } } })
       .catch((e) => e);
 
     expect(error).toBeInstanceOf(errors.ValidationError);
@@ -91,7 +86,7 @@ describe('Form extensions service', () => {
     formExtensions.unstable_addInputParams('user', {
       spaces: {
         schema: z.object({ space: z.string().trim() }),
-        validate(values, context) {
+        validate({ values, ...context }) {
           steps.push('validate');
           // The values have the type the schema returns
           expect(values?.space).toBe('france');
@@ -104,15 +99,14 @@ describe('Form extensions service', () => {
         afterSave({ values, entityId }) {
           steps.push('afterSave');
           expect(values?.space).toBe('france');
-          // On update, the id the earlier steps got
-          expect(entityId).toBe(3);
+          // The saved entity's id
+          expect(entityId).toBe(7);
         },
       },
     });
 
-    const { data, save } = await formExtensions.prepare('user', {
-      input: { spaces: { space: ' france ' } },
-      data: { roles: [] as number[] },
+    const { data, save } = await formExtensions.internal_prepare('user', {
+      body: { roles: [] as number[], plugins: { spaces: { space: ' france ' } } },
       user,
       entityId: 3,
     });
@@ -130,9 +124,9 @@ describe('Form extensions service', () => {
 
   test('runs a plugin check also when the body has none of its values', async () => {
     const formExtensions = formExtensionsService();
-    formExtensions.unstable_addInputParams('api-token', {
+    formExtensions.unstable_addInputParams('content-api-token', {
       spaces: {
-        validate(values) {
+        validate({ values }) {
           if (values === undefined) {
             throw new errors.ValidationError('A space is required');
           }
@@ -141,7 +135,7 @@ describe('Form extensions service', () => {
     });
 
     await expect(
-      formExtensions.prepare('api-token', { input: undefined, data: {} })
+      formExtensions.internal_prepare('content-api-token', { body: {} })
     ).rejects.toThrow('A space is required');
   });
 
@@ -150,12 +144,14 @@ describe('Form extensions service', () => {
     const afterSave = vi.fn().mockRejectedValue(new Error('Plugin save failed'));
     formExtensions.unstable_addInputParams('role', { spaces: { afterSave } });
 
-    const { save } = await formExtensions.prepare('role', { input: undefined, data: {} });
+    const { save } = await formExtensions.internal_prepare('role', { body: {} });
 
     await expect(save(() => Promise.resolve(null))).resolves.toBeNull();
     expect(afterSave).not.toHaveBeenCalled();
 
-    await expect(save(() => saveRole({}))).rejects.toThrow('Plugin save failed');
+    await expect(save(() => saveRole({}))).rejects.toThrow(
+      'the afterSave step of "spaces" failed after core saved entity 7'
+    );
   });
 
   test('refuses an unknown form and a param added twice', () => {
@@ -181,9 +177,7 @@ describe('Form extensions service', () => {
       },
     });
 
-    const error = await formExtensions
-      .prepare('role', { input: undefined, data: {} })
-      .catch((e) => e);
+    const error = await formExtensions.internal_prepare('role', { body: {} }).catch((e) => e);
 
     expect(error.details).toEqual({
       code: 'SPACE_FULL',
@@ -197,10 +191,10 @@ describe('Form extensions service', () => {
     const formExtensions = formExtensionsService();
 
     const notAnObject = await formExtensions
-      .prepare('role', { input: 'spaces', data: {} })
+      .internal_prepare('role', { body: { plugins: 'spaces' } })
       .catch((e) => e);
     const unknownKey = await formExtensions
-      .prepare('role', { input: { other: {} }, data: {} })
+      .internal_prepare('role', { body: { plugins: { other: {} } } })
       .catch((e) => e);
 
     expect(notAnObject.details.errors[0].path).toEqual(['plugins']);
@@ -214,9 +208,8 @@ describe('Form extensions service', () => {
       teams: { beforeSave: ({ data }) => ({ ...data, firstname: `${data.firstname} (team)` }) },
     });
 
-    const { data } = await formExtensions.prepare('user', {
-      input: undefined,
-      data: { firstname: 'Kai' },
+    const { data } = await formExtensions.internal_prepare('user', {
+      body: { firstname: 'Kai' },
     });
 
     expect(data).toEqual({ firstname: 'Kai (team)', roles: [1] });
@@ -225,17 +218,17 @@ describe('Form extensions service', () => {
     // @ts-expect-error - a plugin that forgot to return the core values
     broken.unstable_addInputParams('role', { spaces: { beforeSave: () => undefined } });
 
-    await expect(broken.prepare('role', { input: undefined, data: {} })).rejects.toThrow(
+    await expect(broken.internal_prepare('role', { body: {} })).rejects.toThrow(
       'the beforeSave step of "spaces" must return the core values as an object'
     );
   });
 
-  test('gives afterSave the same entityId as the earlier steps on update, the saved id on create', async () => {
+  test('gives every step the id the database matches: the route id as a number, the saved id on create', async () => {
     const formExtensions = formExtensionsService();
     const ids: unknown[] = [];
     formExtensions.unstable_addInputParams('role', {
       spaces: {
-        validate(values, { entityId }) {
+        validate({ entityId }) {
           ids.push(entityId);
         },
         afterSave({ entityId }) {
@@ -244,19 +237,138 @@ describe('Form extensions service', () => {
       },
     });
 
-    const update = await formExtensions.prepare('role', {
-      input: undefined,
-      data: {},
-      entityId: '7',
+    const update = await formExtensions.internal_prepare('role', {
+      body: {},
+      entityId: '07',
     });
     await update.save(() => saveRole({}));
 
-    expect(ids).toEqual(['7', '7']);
+    expect(ids).toEqual([7, 7]);
 
     ids.length = 0;
-    const create = await formExtensions.prepare('role', { input: undefined, data: {} });
+    const create = await formExtensions.internal_prepare('role', { body: {} });
     await create.save(() => saveRole({}));
 
     expect(ids).toEqual([undefined, 7]);
+  });
+
+  test('answers an afterSave ValidationError as a server error, the entity being saved', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        afterSave() {
+          throw new errors.ValidationError('Too late to refuse');
+        },
+      },
+    });
+
+    const { save } = await formExtensions.internal_prepare('role', { body: {} });
+    const error = await save(() => saveRole({})).catch((e) => e);
+
+    expect(error).not.toBeInstanceOf(errors.ValidationError);
+    expect(error.cause).toBeInstanceOf(errors.ValidationError);
+  });
+
+  test('checks plugin values with an async schema', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        schema: z.object({ space: z.string() }).refine(async ({ space }) => space !== 'full', {
+          message: 'This space is full',
+          path: ['space'],
+        }),
+      },
+    });
+
+    const error = await formExtensions
+      .internal_prepare('role', { body: { plugins: { spaces: { space: 'full' } } } })
+      .catch((e) => e);
+
+    expect(error).toBeInstanceOf(errors.ValidationError);
+    expect(error.details.errors[0].path).toEqual(['plugins', 'spaces', 'space']);
+  });
+
+  test('hands a body that is not an object to core as sent, without plugin steps', async () => {
+    const formExtensions = formExtensionsService();
+    const validate = vi.fn();
+    formExtensions.unstable_addInputParams('role', { spaces: { validate } });
+
+    const { data, save } = await formExtensions.internal_prepare('role', { body: [] });
+
+    expect(data).toEqual([]);
+    expect(validate).not.toHaveBeenCalled();
+    await expect(save(() => saveRole({}))).resolves.toEqual({ id: 7 });
+  });
+
+  test('runs every afterSave when one fails, then answers one server error naming the failures', async () => {
+    const formExtensions = formExtensionsService();
+    const teamsAfterSave = vi.fn();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        afterSave() {
+          throw new Error('spaces failed');
+        },
+      },
+      teams: { afterSave: teamsAfterSave },
+      labels: {
+        afterSave() {
+          throw new Error('labels failed');
+        },
+      },
+    });
+
+    const { save } = await formExtensions.internal_prepare('role', { body: {} });
+    const error = await save(() => saveRole({})).catch((e) => e);
+
+    expect(teamsAfterSave).toHaveBeenCalled();
+    expect(error.message).toBe(
+      'formExtensions: the afterSave step of "spaces", "labels" failed after core saved entity 7'
+    );
+    expect(error.cause).toBeInstanceOf(AggregateError);
+    expect(error.cause.errors.map((e: Error) => e.message)).toEqual([
+      'spaces failed',
+      'labels failed',
+    ]);
+  });
+
+  test('refuses a validate step that returns a value instead of throwing', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      // @ts-expect-error - a plugin that returns false to refuse, as with yup's test()
+      spaces: { validate: () => false },
+    });
+
+    await expect(formExtensions.internal_prepare('role', { body: {} })).rejects.toThrow(
+      'the validate step of "spaces" returned a value'
+    );
+  });
+
+  test('refuses a schema that is not a Zod schema when the param is added', () => {
+    const formExtensions = formExtensionsService();
+
+    expect(() =>
+      formExtensions.unstable_addInputParams('role', {
+        // @ts-expect-error - a yup schema
+        spaces: { schema: { validate: () => true } },
+      })
+    ).toThrow('the schema of "spaces" must be a Zod schema');
+  });
+
+  test('passes route ids that are not small decimals as sent', async () => {
+    const formExtensions = formExtensionsService();
+    const ids: unknown[] = [];
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        validate({ entityId }) {
+          ids.push(entityId);
+        },
+      },
+    });
+
+    for (const entityId of ['9007199254740993', '1e0', 'abc']) {
+      await formExtensions.internal_prepare('role', { body: {}, entityId });
+    }
+
+    expect(ids).toEqual(['9007199254740993', '1e0', 'abc']);
   });
 });

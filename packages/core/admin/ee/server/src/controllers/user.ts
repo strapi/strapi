@@ -36,10 +36,8 @@ export default {
       throw new ForbiddenError('License seat limit reached. You cannot create a new user');
     }
 
-    const { plugins, ...input } = ctx.request.body;
-    const { data: body, save } = await getService('form-extensions').prepare('user', {
-      input: plugins,
-      data: input,
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: ctx.request.body,
       user: ctx.state.user,
     });
     const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
@@ -71,10 +69,8 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const { plugins, ...input } = ctx.request.body;
-    const { data: body, save } = await getService('form-extensions').prepare('user', {
-      input: plugins,
-      data: input,
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: ctx.request.body,
       user: ctx.state.user,
       entityId: id,
     });

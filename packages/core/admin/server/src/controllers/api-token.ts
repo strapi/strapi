@@ -21,18 +21,28 @@ export default {
     const { body } = ctx.request as Create.Request;
     const apiTokenService = getService('api-token-content-api');
 
-    const { data: attributes, save } = await getService('form-extensions').prepare('api-token', {
-      input: body.plugins,
-      data: {
-        kind: 'content-api' as const,
-        name: trim(body.name),
-        description: trim(body.description),
-        type: body.type,
-        permissions: body.permissions,
-        lifespan: body.lifespan,
-      },
-      user: ctx.state.user,
-    });
+    const { data: attributes, save } = await getService('form-extensions').internal_prepare(
+      'content-api-token',
+      {
+        body: {
+          kind: 'content-api' as const,
+          name: trim(body.name),
+          description: trim(body.description),
+          type: body.type,
+          permissions: body.permissions,
+          lifespan: body.lifespan,
+          plugins: body.plugins,
+        },
+        user: ctx.state.user,
+      }
+    );
+
+    // A plugin's beforeSave can change them: trim again, as update does after the plugin steps
+    for (const key of ['name', 'description'] as const) {
+      if (typeof attributes[key] === 'string') {
+        attributes[key] = trim(attributes[key]);
+      }
+    }
 
     await validateApiTokenCreationInput(attributes);
 
@@ -103,14 +113,15 @@ export default {
   // Update
   // -------------------------------------------------------------------------
   async update(ctx: Context) {
-    const { plugins, ...input } = (ctx.request as Update.Request).body;
     const { id } = ctx.params as Update.Params;
-    const { data: body, save } = await getService('form-extensions').prepare('api-token', {
-      input: plugins,
-      data: input,
-      user: ctx.state.user,
-      entityId: id,
-    });
+    const { data: body, save } = await getService('form-extensions').internal_prepare(
+      'content-api-token',
+      {
+        body: (ctx.request as Update.Request).body,
+        user: ctx.state.user,
+        entityId: id,
+      }
+    );
     const apiTokenService = getService('api-token-content-api');
 
     const mutableBody = body as Record<string, unknown>;

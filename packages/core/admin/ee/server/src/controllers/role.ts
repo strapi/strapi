@@ -13,10 +13,8 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx: Context) {
-    const { plugins, ...input } = ctx.request.body;
-    const { data: body, save } = await getService('form-extensions').prepare('role', {
-      input: plugins,
-      data: input,
+    const { data: body, save } = await getService('form-extensions').internal_prepare('role', {
+      body: ctx.request.body,
       user: ctx.state.user,
     });
     await validateRoleCreateInput(body);

@@ -5,7 +5,7 @@ import type { Data } from '@strapi/types';
 import type { AdminUser } from '../../../shared/contracts/shared';
 
 /** The admin forms whose body can carry plugin values, under `plugins.<pluginId>` */
-const FORMS = ['role', 'user', 'api-token'] as const;
+const FORMS = ['role', 'user', 'content-api-token'] as const;
 
 type ExtensibleForm = (typeof FORMS)[number];
 
@@ -14,7 +14,7 @@ type FormData = Record<string, unknown>;
 interface FormContext {
   /** The admin user who sends the form */
   user?: AdminUser;
-  /** The entity the form updates, as the route gets it. Missing when it creates one */
+  /** The entity the form updates, as the database matches it (`'01'` is `1`). Missing on create */
   entityId?: Data.ID;
 }
 
@@ -23,12 +23,14 @@ interface FormInputParam<TSchema extends z.ZodType = z.ZodType> {
   /** Zod schema or factory for the plugin's values, checked when the body has them */
   schema?: TSchema | ((zod: typeof z) => TSchema);
   /** Checks that need more than the shape. Runs before core checks, also when the body has no values */
-  validate?: (values: z.output<TSchema> | undefined, context: FormContext) => void | Promise<void>;
+  validate?: (
+    args: FormContext & { values: z.output<TSchema> | undefined }
+  ) => void | Promise<void>;
   /** Returns the core values to check and save, for example with a field the plugin manages */
   beforeSave?: (
     args: FormContext & { values: z.output<TSchema> | undefined; data: FormData }
   ) => FormData | Promise<FormData>;
-  /** Runs once core has saved the entity */
+  /** Runs once core has saved the entity. A failure answers 500: the entity stays saved */
   afterSave?: (
     args: FormContext & { values: z.output<TSchema> | undefined; entityId: Data.ID }
   ) => void | Promise<void>;
@@ -36,8 +38,22 @@ interface FormInputParam<TSchema extends z.ZodType = z.ZodType> {
 
 type ResolvedInputParam = Omit<FormInputParam, 'schema'> & { schema?: z.ZodType };
 
+type Save = <TEntity extends { id: Data.ID } | null>(
+  saveEntity: () => Promise<TEntity>
+) => Promise<TEntity>;
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
+
+// Route ids the database matches as a number: '01', ' 1' and '+1' all find row 1
+const DECIMAL_ID = /^\s*\+?\d+(\.0*)?\s*$/;
+
+const toEntityId = (id?: Data.ID) => {
+  const number = typeof id === 'string' && DECIMAL_ID.test(id) ? Number(id) : NaN;
+
+  // Other ids, and ids too large for a number, are passed as sent
+  return Number.isSafeInteger(number) ? number : id;
+};
 
 /** A 400 with a field error at `path`, like core's validation errors */
 const fieldError = (message: string, path: string[], details: object = {}) =>
@@ -91,10 +107,15 @@ const formExtensionsService = () => {
         );
       }
 
-      params[form].set(pluginId, {
-        ...param,
-        schema: typeof schema === 'function' ? schema(z) : schema,
-      });
+      const resolvedSchema = typeof schema === 'function' ? schema(z) : schema;
+
+      if (resolvedSchema && typeof resolvedSchema.safeParseAsync !== 'function') {
+        throw new Error(
+          `formExtensions.addInputParams: the schema of "${pluginId}" must be a Zod schema, from \`z\` in @strapi/utils or the factory argument`
+        );
+      }
+
+      params[form].set(pluginId, { ...param, schema: resolvedSchema });
     }
   };
 
@@ -113,7 +134,7 @@ const formExtensionsService = () => {
 
     for (const [pluginId, { schema, validate }] of params[form]) {
       if (schema && values[pluginId] !== undefined) {
-        const result = schema.safeParse(values[pluginId]);
+        const result = await schema.safeParseAsync(values[pluginId]);
 
         if (!result.success) {
           throw new errors.ValidationError(result.error.issues[0]?.message ?? 'Validation error', {
@@ -129,7 +150,16 @@ const formExtensionsService = () => {
       }
 
       if (validate) {
-        await runPluginStep(pluginId, () => validate(values[pluginId], context));
+        const result = await runPluginStep(pluginId, () =>
+          validate({ ...context, values: values[pluginId] })
+        );
+
+        // A plugin bug: returning false refuses nothing, so fail loudly instead of saving
+        if (result !== undefined) {
+          throw new Error(
+            `formExtensions: the validate step of "${pluginId}" returned a value. Throw a ValidationError to refuse a save`
+          );
+        }
       }
     }
 
@@ -137,14 +167,26 @@ const formExtensionsService = () => {
   };
 
   /**
-   * Runs the plugin steps of a core admin form before core checks it: checks the plugin values,
-   * then lets plugins change the core values. Core checks the returned `data` as without plugins,
-   * then saves it with `save`, which tells plugins the saved id.
+   * For core's controllers, not plugins. Runs the plugin steps of a core admin form before core
+   * checks it: takes `plugins` out of the body, checks the plugin values, then lets plugins change
+   * the core values. Core checks the returned `data` as without plugins, then saves it with `save`,
+   * which tells plugins the saved id.
    */
-  const prepare = async <TData extends FormData>(
+  const prepare = async <TBody>(
     form: ExtensibleForm,
-    { input, data, ...context }: FormContext & { input: unknown; data: TData }
+    { body, ...requestContext }: FormContext & { body: TBody }
   ) => {
+    type TData = Omit<TBody, 'plugins'>;
+
+    // A body that is not an object goes to core's own validation as sent, which refuses it
+    if (!isRecord(body)) {
+      const saveAsIs: Save = (saveEntity) => saveEntity();
+
+      return { data: body as unknown as TData, save: saveAsIs };
+    }
+
+    const { plugins: input, ...data } = body;
+    const context = { ...requestContext, entityId: toEntityId(requestContext.entityId) };
     const values = await parseInput(form, input, context);
 
     let nextData: FormData = data;
@@ -169,23 +211,34 @@ const formExtensionsService = () => {
 
     // Not one transaction with core's save: inside one, the entity manager could no longer retry
     // a deadlock, for example between two admins changing the roles of users who share one
-    const save = async <TEntity extends { id: Data.ID } | null>(
-      saveEntity: () => Promise<TEntity>
-    ): Promise<TEntity> => {
+    const save: Save = async (saveEntity) => {
       const entity = await saveEntity();
 
       if (entity) {
+        const failures: Array<{ pluginId: string; error: unknown }> = [];
+
+        // Every plugin gets its afterSave, even when another one failed
         for (const [pluginId, { afterSave }] of params[form]) {
-          if (afterSave) {
-            await runPluginStep(pluginId, () =>
-              // On update, the same id as the earlier steps get; on create, the saved id
-              afterSave({
-                ...context,
-                values: values[pluginId],
-                entityId: context.entityId ?? entity.id,
-              })
-            );
+          try {
+            await afterSave?.({ ...context, values: values[pluginId], entityId: entity.id });
+          } catch (error) {
+            failures.push({ pluginId, error });
           }
+        }
+
+        if (failures.length > 0) {
+          // Never a 4xx: the entity is saved, and a client retrying a 400 would save it twice
+          throw new Error(
+            `formExtensions: the afterSave step of ${failures
+              .map(({ pluginId }) => `"${pluginId}"`)
+              .join(', ')} failed after core saved entity ${entity.id}`,
+            {
+              cause:
+                failures.length === 1
+                  ? failures[0].error
+                  : new AggregateError(failures.map(({ error }) => error)),
+            }
+          );
         }
       }
 
@@ -196,8 +249,10 @@ const formExtensionsService = () => {
     return { data: nextData as TData, save };
   };
 
-  return { unstable_addInputParams: addInputParams, prepare };
+  return { unstable_addInputParams: addInputParams, internal_prepare: prepare };
 };
 
+type FormExtensionsService = ReturnType<typeof formExtensionsService>;
+
 export default formExtensionsService;
-export type { ExtensibleForm, FormContext, FormInputParam };
+export type { ExtensibleForm, FormContext, FormExtensionsService, FormInputParam };

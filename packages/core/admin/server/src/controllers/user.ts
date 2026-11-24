@@ -23,10 +23,8 @@ const { ApplicationError } = errors;
 
 export default {
   async create(ctx: Context) {
-    const { plugins, ...input } = (ctx.request as Create.Request).body;
-    const { data: body, save } = await getService('form-extensions').prepare('user', {
-      input: plugins,
-      data: input,
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: (ctx.request as Create.Request).body,
       user: ctx.state.user,
     });
     const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
@@ -99,10 +97,8 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params as Update.Params;
-    const { plugins, ...input } = (ctx.request as Update.Request).body;
-    const { data: body, save } = await getService('form-extensions').prepare('user', {
-      input: plugins,
-      data: input,
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: (ctx.request as Update.Request).body,
       user: ctx.state.user,
       entityId: id,
     });
