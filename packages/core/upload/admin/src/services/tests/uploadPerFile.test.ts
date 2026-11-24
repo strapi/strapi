@@ -52,7 +52,10 @@ const storeConfig = {
   },
 };
 
-const setup = (names: string[], { owner }: { owner?: string } = {}) => {
+const setup = (
+  names: string[],
+  { owner, beforeDrop }: { owner?: string; beforeDrop?: (uploadId: number) => void } = {}
+) => {
   const requests: PendingRequest[] = [];
 
   mockUploadFileViaXHR.mockImplementation(
@@ -79,6 +82,9 @@ const setup = (names: string[], { owner }: { owner?: string } = {}) => {
     }),
     { providerOptions: { storeConfig } }
   );
+
+  // The drop opens the next batch, so its id is one above the current one
+  beforeDrop?.(result.current.progress.uploadId + 1);
 
   act(() => {
     result.current.upload({
@@ -380,6 +386,66 @@ describe('headers a plugin registered', () => {
 
     await waitFor(() => expect(statuses()).toEqual(['error', 'error']));
     expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
+  });
+
+  it('reads the providers once for a failed drop, whichever row is retried', async () => {
+    let reads = 0;
+    removeHeaders = unstable_addRequestHeaders(() => {
+      reads += 1;
+      if (reads === 1) {
+        throw new Error('no space selected yet');
+      }
+      return { 'x-strapi-space': `read-${reads}` };
+    });
+
+    const { request, result, statuses } = setup(['a.png', 'b.png']);
+    await waitFor(() => expect(statuses()).toEqual(['error', 'error']));
+
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 0 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      request('a.png').resolve();
+    });
+    act(() => {
+      result.current.retry({ uploadId: result.current.progress.uploadId, index: 1 });
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    expect(reads).toBe(2);
+    expect(sentSpaces()).toEqual(['read-2', 'read-2']);
+  });
+
+  it('reads the providers again when retrying cancelled rows after a failed read', async () => {
+    let space = '';
+    removeHeaders = unstable_addRequestHeaders(() => {
+      if (!space) {
+        throw new Error('no space selected yet');
+      }
+      return { 'x-strapi-space': space };
+    });
+
+    // Skip the second row so it stays pending and can be cancelled
+    const { result, statuses } = setup(['a.png', 'b.png'], {
+      beforeDrop: (uploadId) => {
+        // The first call aborts any row an earlier test left in flight under the same key
+        abortUploadFile(uploadId, 1);
+        abortUploadFile(uploadId, 1);
+      },
+    });
+    await waitFor(() => expect(statuses()).toEqual(['error', 'pending']));
+    act(() => {
+      result.current.dispatch(cancelFile({ uploadId: result.current.progress.uploadId, index: 1 }));
+    });
+
+    space = 'france';
+    act(() => {
+      result.current.retryAll();
+    });
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+    expect(sentSpaces()).toEqual(['france']);
   });
 
   it('retries every file of a failed drop with the values the first retry read', async () => {
