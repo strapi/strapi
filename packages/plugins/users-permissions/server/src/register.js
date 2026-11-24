@@ -12,7 +12,7 @@ module.exports = ({ strapi }) => {
 
   const historyAuthors = strapi.plugin('content-manager')?.service('history-authors');
 
-  historyAuthors?.registerProvider({
+  historyAuthors?.unstable_registerProvider({
     strategy: 'users-permissions',
     type: 'person',
     model: 'plugin::users-permissions.user',

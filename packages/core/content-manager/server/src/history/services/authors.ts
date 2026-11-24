@@ -15,7 +15,13 @@ const createHistoryAuthorsService = () => {
   const findNamesByModel = new Map<string, HistoryAuthorProvider['findNames']>();
 
   return {
-    registerProvider(provider: HistoryAuthorProvider) {
+    /**
+     * Registers a provider that finds the author names for one authentication strategy.
+     * This method is internal and can change without notice.
+     *
+     * @internal
+     */
+    unstable_registerProvider(provider: HistoryAuthorProvider) {
       if (providersByStrategy.has(provider.strategy)) {
         throw new Error(
           `History author provider for strategy ${provider.strategy} has already been registered.`
