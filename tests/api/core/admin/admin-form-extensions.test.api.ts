@@ -36,7 +36,13 @@ describe('Admin form extensions (api)', () => {
     utils = createUtils(strapi);
 
     const formExtensions = strapi.service('admin::form-extensions');
-    formExtensions.unstable_addInputParams('role', { spaces: spacesParam });
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        ...spacesParam,
+        beforeSave: ({ values, data }) =>
+          values?.space === 'bad-name' ? { ...data, name: '' } : data,
+      },
+    });
     formExtensions.unstable_addInputParams('user', {
       spaces: {
         ...spacesParam,
@@ -50,7 +56,18 @@ describe('Admin form extensions (api)', () => {
         },
       },
     });
-    formExtensions.unstable_addInputParams('api-token', { spaces: spacesParam });
+    formExtensions.unstable_addInputParams('api-token', {
+      spaces: {
+        ...spacesParam,
+        beforeSave: ({ values, data }) => {
+          if (values?.space === 'padded') {
+            return { ...data, name: `  ${prefix}_padded_token  ` };
+          }
+
+          return values?.space === 'bad-type' ? { ...data, type: 'nope' } : data;
+        },
+      },
+    });
 
     keptRoleId = (await createRole({ name: `${prefix}_kept_role` })).body.data.id;
   });
@@ -102,7 +119,10 @@ describe('Admin form extensions (api)', () => {
       expect(updated.statusCode).toBe(200);
       expect(updated.body.data.name).toBe(`${prefix}_role_renamed`);
       expect(afterSave).toHaveBeenLastCalledWith(
-        expect.objectContaining({ entityId: created.body.data.id, values: { space: 'spain' } })
+        expect.objectContaining({
+          entityId: String(created.body.data.id),
+          values: { space: 'spain' },
+        })
       );
     });
 
@@ -147,6 +167,39 @@ describe('Admin form extensions (api)', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toBe('Invalid key plugins.other');
+      expect(res.body.error.details.errors[0].path).toEqual(['plugins', 'other']);
+    });
+
+    test('takes plugins {} and null as no values, and refuses a value that is not an object', async () => {
+      const empty = await createRole({ name: `${prefix}_empty`, plugins: {} });
+      const nullValue = await createRole({ name: `${prefix}_null`, plugins: null });
+      const notAnObject = await createRole({ name: `${prefix}_string`, plugins: 'spaces' });
+
+      expect(empty.statusCode).toBe(201);
+      expect(nullValue.statusCode).toBe(201);
+      expect(notAnObject.statusCode).toBe(400);
+      expect(notAnObject.body.error.details.errors[0].path).toEqual(['plugins']);
+    });
+
+    test('core checks the role values beforeSave returns', async () => {
+      const res = await createRole({
+        name: `${prefix}_renamed_by_plugin`,
+        plugins: { spaces: { space: 'bad-name' } },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(afterSave).not.toHaveBeenCalled();
+    });
+
+    test('answers 404 for a missing role, without afterSave', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/admin/roles/999999',
+        body: { name: `${prefix}_missing`, plugins: { spaces: { space: 'france' } } },
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(afterSave).not.toHaveBeenCalled();
     });
   });
 
@@ -190,8 +243,22 @@ describe('Admin form extensions (api)', () => {
       expect(withoutRoles.statusCode).toBe(200);
       expect(roleIdsOf(withoutRoles.body.data)).toEqual([keptRoleId]);
       expect(afterSave).toHaveBeenLastCalledWith(
-        expect.objectContaining({ entityId: invited.body.data.id, values: { space: 'spain' } })
+        expect.objectContaining({
+          entityId: String(invited.body.data.id),
+          values: { space: 'spain' },
+        })
       );
+    });
+
+    test('answers 404 for a missing user, without afterSave', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/admin/users/999999',
+        body: { firstname: 'Nobody', plugins: { spaces: { space: 'france' } } },
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(afterSave).not.toHaveBeenCalled();
     });
 
     test('refuses core values from beforeSave that core would refuse', async () => {
@@ -311,8 +378,51 @@ describe('Admin form extensions (api)', () => {
 
       expect(updated.statusCode).toBe(200);
       expect(afterSave).toHaveBeenLastCalledWith(
-        expect.objectContaining({ entityId: created.body.data.id, values: { space: 'spain' } })
+        expect.objectContaining({
+          entityId: String(created.body.data.id),
+          values: { space: 'spain' },
+        })
       );
+    });
+
+    test('core checks and trims the token values beforeSave returns', async () => {
+      const created = await rq({
+        method: 'POST',
+        url: '/admin/api-tokens',
+        body: { name: `${prefix}_to_pad`, type: 'read-only' },
+      });
+
+      const padded = await rq({
+        method: 'PUT',
+        url: `/admin/api-tokens/${created.body.data.id}`,
+        body: { description: 'x', plugins: { spaces: { space: 'padded' } } },
+      });
+
+      expect(padded.statusCode).toBe(200);
+      expect(padded.body.data.name).toBe(`${prefix}_padded_token`);
+
+      const badType = await rq({
+        method: 'POST',
+        url: '/admin/api-tokens',
+        body: {
+          name: `${prefix}_bad_type`,
+          type: 'read-only',
+          plugins: { spaces: { space: 'bad-type' } },
+        },
+      });
+
+      expect(badType.statusCode).toBe(400);
+    });
+
+    test('answers 404 for a missing token, without afterSave', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/admin/api-tokens/999999',
+        body: { description: 'x', plugins: { spaces: { space: 'france' } } },
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(afterSave).not.toHaveBeenCalled();
     });
 
     test('refuses an unknown plugin key', async () => {

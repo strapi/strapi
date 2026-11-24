@@ -14,7 +14,7 @@ type FormData = Record<string, unknown>;
 interface FormContext {
   /** The admin user who sends the form */
   user?: AdminUser;
-  /** The entity the form updates. Missing when it creates one */
+  /** The entity the form updates, as the route gets it. Missing when it creates one */
   entityId?: Data.ID;
 }
 
@@ -39,6 +39,13 @@ type ResolvedInputParam = Omit<FormInputParam, 'schema'> & { schema?: z.ZodType 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
+/** A 400 with a field error at `path`, like core's validation errors */
+const fieldError = (message: string, path: string[], details: object = {}) =>
+  new errors.ValidationError(message, {
+    ...details,
+    errors: [{ path, message, name: 'ValidationError' }],
+  });
+
 /**
  * Runs a plugin step. A `ValidationError` without field errors is reported at
  * `plugins.<pluginId>`, so the admin shows it on the plugin's field instead of dropping it.
@@ -48,9 +55,7 @@ const runPluginStep = async <T>(pluginId: string, step: () => T | Promise<T>) =>
     return await step();
   } catch (error) {
     if (error instanceof errors.ValidationError && !error.details?.errors?.length) {
-      throw new errors.ValidationError(error.message, {
-        errors: [{ path: ['plugins', pluginId], message: error.message, name: 'ValidationError' }],
-      });
+      throw fieldError(error.message, ['plugins', pluginId], error.details);
     }
 
     throw error;
@@ -95,14 +100,14 @@ const formExtensionsService = () => {
 
   const parseInput = async (form: ExtensibleForm, input: unknown, context: FormContext) => {
     if (input !== undefined && input !== null && !isRecord(input)) {
-      throw new errors.ValidationError('plugins must be an object');
+      throw fieldError('plugins must be an object', ['plugins']);
     }
 
     const values: Record<string, unknown> = isRecord(input) ? { ...input } : {};
 
     for (const key of Object.keys(values)) {
       if (!params[form].has(key)) {
-        throw new errors.ValidationError(`Invalid key plugins.${key}`);
+        throw fieldError(`Invalid key plugins.${key}`, ['plugins', key]);
       }
     }
 
@@ -147,9 +152,18 @@ const formExtensionsService = () => {
     for (const [pluginId, { beforeSave }] of params[form]) {
       if (beforeSave) {
         const current = nextData;
-        nextData = await runPluginStep(pluginId, () =>
+        const result = await runPluginStep(pluginId, () =>
           beforeSave({ ...context, values: values[pluginId], data: current })
         );
+
+        // A plugin bug, not a bad request: answer 500 with a clear message
+        if (!isRecord(result)) {
+          throw new Error(
+            `formExtensions: the beforeSave step of "${pluginId}" must return the core values as an object`
+          );
+        }
+
+        nextData = result;
       }
     }
 
@@ -164,7 +178,12 @@ const formExtensionsService = () => {
         for (const [pluginId, { afterSave }] of params[form]) {
           if (afterSave) {
             await runPluginStep(pluginId, () =>
-              afterSave({ ...context, values: values[pluginId], entityId: entity.id })
+              // On update, the same id as the earlier steps get; on create, the saved id
+              afterSave({
+                ...context,
+                values: values[pluginId],
+                entityId: context.entityId ?? entity.id,
+              })
             );
           }
         }

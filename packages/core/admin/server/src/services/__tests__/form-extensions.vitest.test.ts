@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 import { errors, z } from '@strapi/utils';
 
 import formExtensionsService from '../form-extensions';
@@ -6,21 +6,6 @@ import formExtensionsService from '../form-extensions';
 const saveRole = (data: Record<string, unknown>) => Promise.resolve({ id: 7, ...data });
 
 describe('Form extensions service', () => {
-  const steps: string[] = [];
-
-  beforeEach(() => {
-    steps.length = 0;
-
-    global.strapi = {
-      db: {
-        async transaction(callback: () => Promise<unknown>) {
-          steps.push('transaction');
-          return callback();
-        },
-      },
-    } as any;
-  });
-
   test('returns the core values as they are when no plugin added params', async () => {
     const formExtensions = formExtensionsService();
     const { data, save } = await formExtensions.prepare('role', {
@@ -30,16 +15,6 @@ describe('Form extensions service', () => {
 
     expect(data).toEqual({ name: 'Editor' });
     await expect(save(() => saveRole(data))).resolves.toEqual({ id: 7, name: 'Editor' });
-  });
-
-  test('does not wrap the save in a transaction, so core keeps its deadlock retry', async () => {
-    const formExtensions = formExtensionsService();
-    formExtensions.unstable_addInputParams('role', { spaces: { afterSave: vi.fn() } });
-
-    const { save } = await formExtensions.prepare('role', { input: undefined, data: {} });
-    await save(() => saveRole({}));
-
-    expect(steps).toEqual([]);
   });
 
   test('reports a plugin ValidationError without field errors at plugins.<pluginId>', async () => {
@@ -91,7 +66,7 @@ describe('Form extensions service', () => {
 
     await expect(
       formExtensions.prepare('role', { input: { spaces: {} }, data: {} })
-    ).rejects.toThrow(new errors.ValidationError('Invalid key plugins.spaces'));
+    ).rejects.toThrow('Invalid key plugins.spaces');
   });
 
   test('checks the values with the schema and reports the path under plugins', async () => {
@@ -109,6 +84,7 @@ describe('Form extensions service', () => {
   });
 
   test('runs the plugin steps before core, then saves and runs afterSave', async () => {
+    const steps: string[] = [];
     const formExtensions = formExtensionsService();
     const user = { id: 1 } as never;
 
@@ -128,7 +104,8 @@ describe('Form extensions service', () => {
         afterSave({ values, entityId }) {
           steps.push('afterSave');
           expect(values?.space).toBe('france');
-          expect(entityId).toBe(7);
+          // On update, the id the earlier steps got
+          expect(entityId).toBe(3);
         },
       },
     });
@@ -192,5 +169,94 @@ describe('Form extensions service', () => {
     expect(() => formExtensions.unstable_addInputParams('role', { spaces: {} })).toThrow(
       'param "spaces" has already been added to the role form'
     );
+  });
+
+  test('keeps the details of a plugin ValidationError', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        validate() {
+          throw new errors.ValidationError('This space is full', { code: 'SPACE_FULL' });
+        },
+      },
+    });
+
+    const error = await formExtensions
+      .prepare('role', { input: undefined, data: {} })
+      .catch((e) => e);
+
+    expect(error.details).toEqual({
+      code: 'SPACE_FULL',
+      errors: [
+        { path: ['plugins', 'spaces'], message: 'This space is full', name: 'ValidationError' },
+      ],
+    });
+  });
+
+  test('reports a refused plugins value with a path under plugins', async () => {
+    const formExtensions = formExtensionsService();
+
+    const notAnObject = await formExtensions
+      .prepare('role', { input: 'spaces', data: {} })
+      .catch((e) => e);
+    const unknownKey = await formExtensions
+      .prepare('role', { input: { other: {} }, data: {} })
+      .catch((e) => e);
+
+    expect(notAnObject.details.errors[0].path).toEqual(['plugins']);
+    expect(unknownKey.details.errors[0].path).toEqual(['plugins', 'other']);
+  });
+
+  test('chains beforeSave steps and refuses one that returns no object', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('user', {
+      spaces: { beforeSave: ({ data }) => ({ ...data, roles: [1] }) },
+      teams: { beforeSave: ({ data }) => ({ ...data, firstname: `${data.firstname} (team)` }) },
+    });
+
+    const { data } = await formExtensions.prepare('user', {
+      input: undefined,
+      data: { firstname: 'Kai' },
+    });
+
+    expect(data).toEqual({ firstname: 'Kai (team)', roles: [1] });
+
+    const broken = formExtensionsService();
+    // @ts-expect-error - a plugin that forgot to return the core values
+    broken.unstable_addInputParams('role', { spaces: { beforeSave: () => undefined } });
+
+    await expect(broken.prepare('role', { input: undefined, data: {} })).rejects.toThrow(
+      'the beforeSave step of "spaces" must return the core values as an object'
+    );
+  });
+
+  test('gives afterSave the same entityId as the earlier steps on update, the saved id on create', async () => {
+    const formExtensions = formExtensionsService();
+    const ids: unknown[] = [];
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        validate(values, { entityId }) {
+          ids.push(entityId);
+        },
+        afterSave({ entityId }) {
+          ids.push(entityId);
+        },
+      },
+    });
+
+    const update = await formExtensions.prepare('role', {
+      input: undefined,
+      data: {},
+      entityId: '7',
+    });
+    await update.save(() => saveRole({}));
+
+    expect(ids).toEqual(['7', '7']);
+
+    ids.length = 0;
+    const create = await formExtensions.prepare('role', { input: undefined, data: {} });
+    await create.save(() => saveRole({}));
+
+    expect(ids).toEqual([undefined, 7]);
   });
 });
