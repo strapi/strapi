@@ -50,7 +50,7 @@ describe('createMcpAdminTokenAuthenticator', () => {
       request: {
         header: authorization === undefined ? {} : { authorization },
       },
-    }) as any;
+    } as any);
 
   test('returns missing_token when authorization header is absent', async () => {
     const result = await authenticator.authenticate(makeCtx());
@@ -86,7 +86,7 @@ describe('createMcpAdminTokenAuthenticator', () => {
     const ability = { can: vi.fn() };
     authenticateAdminToken.mockResolvedValue({
       authenticated: true,
-      credentials: { id: 42 },
+      credentials: { id: 7, adminUserOwner: { id: 42 } },
       user: { id: 42 },
       ability,
     });
@@ -95,7 +95,7 @@ describe('createMcpAdminTokenAuthenticator', () => {
 
     expect(result).toEqual({
       authenticated: true,
-      credentials: { id: 42 },
+      credentials: { id: 7, adminUserOwner: { id: 42 } },
       user: { id: 42 },
       ability,
     });

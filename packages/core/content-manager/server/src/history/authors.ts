@@ -15,12 +15,14 @@ export const registerHistoryAuthors = (strapi: Core.Strapi) => {
     findNames: findAdminUserNames,
   });
 
-  authors.unstable_registerProvider({
-    strategy: 'admin-token',
-    type: 'person',
-    model: 'admin::user',
-    getRecordId: resolveAdminTokenOwnerId,
-    findNames: findAdminUserNames,
+  (['admin-token', 'mcp'] as const).forEach((strategy) => {
+    authors.unstable_registerProvider({
+      strategy,
+      type: 'person',
+      model: 'admin::user',
+      getRecordId: resolveAdminTokenOwnerId,
+      findNames: findAdminUserNames,
+    });
   });
 
   authors.unstable_registerProvider({

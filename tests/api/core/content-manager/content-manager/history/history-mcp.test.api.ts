@@ -36,6 +36,7 @@ describeOnCondition(edition === 'EE')('History of MCP writes', () => {
   let mcp;
   let accessKey: string;
   let tokenOwnerId: number;
+  let tokenOwnerDocumentId: string;
 
   const tokenOwner = {
     email: 'history-mcp-owner@test.com',
@@ -81,9 +82,9 @@ describeOnCondition(edition === 'EE')('History of MCP writes', () => {
     expect(version).toMatchObject({
       source: 'mcp',
       status,
-      authorType: null,
-      authorModel: null,
-      authorId: null,
+      authorType: 'person',
+      authorModel: 'admin::user',
+      authorId: tokenOwnerDocumentId,
     });
   };
 
@@ -101,6 +102,7 @@ describeOnCondition(edition === 'EE')('History of MCP writes', () => {
     const superAdminRole = await utils.getSuperAdminRole();
     const owner = await utils.createUser({ ...tokenOwner, roles: [superAdminRole.id] });
     tokenOwnerId = owner.id;
+    tokenOwnerDocumentId = owner.documentId;
 
     const rq = await createAuthRequest({ strapi, userInfo: tokenOwner });
     const { body } = await rq({
@@ -173,5 +175,23 @@ describeOnCondition(edition === 'EE')('History of MCP writes', () => {
     const versions = await findVersions();
     expect(versions).toHaveLength(1);
     expectMcpVersion(versions[0], 'draft');
+  });
+
+  test('Shows the token owner as the author in the versions list', async () => {
+    const documentId = await createNote('Hello');
+    await strapi.db.settleTransactionHooks();
+
+    const adminRequest = await createAuthRequest({ strapi });
+    const { body } = await adminRequest({
+      method: 'GET',
+      url: `/content-manager/history-versions/?contentType=${noteUid}&documentId=${documentId}`,
+    });
+
+    expect(body.data[0].author).toEqual({
+      type: 'person',
+      model: 'admin::user',
+      id: tokenOwnerDocumentId,
+      name: 'History Owner',
+    });
   });
 });
