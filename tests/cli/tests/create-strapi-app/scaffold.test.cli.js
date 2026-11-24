@@ -15,6 +15,7 @@ const baseScaffoldArgs = ['--non-interactive', '--no-install', '--no-git-init'];
 // only if no other prompt (such as the removed Strapi Cloud login) is asked.
 // The child process has no terminal, so `--interactive` keeps the prompts on: without it the CLI
 // switches to non-interactive mode and an unanswered prompt would go unnoticed.
+// Run these args with spawnCsaWithoutAnswers so that an unanswered prompt fails the test.
 const promptFreeArgs = [
   '--interactive',
   '--typescript',
@@ -30,6 +31,16 @@ function spawnCsa(args, env = {}, cwd = repoRoot) {
   return coffee.spawn(process.execPath, [bin, ...args], {
     cwd,
     env: { ...process.env, ...env },
+  });
+}
+
+// coffee closes stdin only after input queued with .write(), so without input a prompt waits forever.
+// An empty stdin makes a prompt read end-of-file at once: the CLI then exits with an error.
+function spawnCsaWithoutAnswers(args) {
+  return coffee.spawn(process.execPath, [bin, ...args], {
+    cwd: repoRoot,
+    env: process.env,
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
 }
 
@@ -283,7 +294,7 @@ describe('create-strapi-app', () => {
     const projectDir = mkProjectDir();
     try {
       // No --non-interactive and no --skip-cloud: this combination used to open the cloud login prompt
-      const { stdout, stderr } = await spawnCsa([projectDir, ...promptFreeArgs])
+      const { stdout, stderr } = await spawnCsaWithoutAnswers([projectDir, ...promptFreeArgs])
         .expect('code', 0)
         .end();
 
@@ -298,7 +309,11 @@ describe('create-strapi-app', () => {
   it('accepts the legacy --skip-cloud flag as a no-op', async () => {
     const projectDir = mkProjectDir();
     try {
-      const { stdout, stderr } = await spawnCsa([projectDir, ...promptFreeArgs, '--skip-cloud'])
+      const { stdout, stderr } = await spawnCsaWithoutAnswers([
+        projectDir,
+        ...promptFreeArgs,
+        '--skip-cloud',
+      ])
         .expect('code', 0)
         .end();
 
