@@ -848,6 +848,36 @@ describe('getStageReason', () => {
   });
 });
 
+describe('getActionValidity and a request abort', () => {
+  const draftRef = {
+    type: 'publish' as const,
+    contentType: contentTypeUid,
+    entryDocumentId: 'article-1',
+    locale: 'en',
+  };
+
+  const abortedError = () =>
+    Object.assign(new Error('The request was aborted before the query completed'), {
+      name: 'QueryAbortedError',
+    });
+
+  test('rethrows a QueryAbortedError instead of storing the entry as not valid', async () => {
+    const aborted = abortedError();
+    const strapi = buildStrapi({ findOne: jest.fn().mockRejectedValue(aborted) });
+
+    await expect(getActionValidity(draftRef, { strapi })).rejects.toBe(aborted);
+  });
+
+  test('still stores any other failed read as not valid', async () => {
+    const strapi = buildStrapi({ findOne: jest.fn().mockRejectedValue(new TypeError('lost')) });
+
+    await expect(getActionValidity(draftRef, { strapi })).resolves.toStrictEqual({
+      isEntryValid: false,
+      reason: { error: { name: 'TypeError' } },
+    });
+  });
+});
+
 describe('getActionValidity', () => {
   test('stores a failing draft read as not valid, with only the error name', async () => {
     const strapi = {

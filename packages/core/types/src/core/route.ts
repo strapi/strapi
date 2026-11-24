@@ -16,8 +16,9 @@ export type RouteConfig = {
   /**
    * Set to `false` to never refuse or cancel the database reads of this route when the client
    * disconnects early, authentication included. Only has an effect when
-   * `database.settings.abortReadsOnRequestDisconnect` is enabled. Use it for routes that must
-   * complete once requested, such as logout (revoking a session as the page closes).
+   * `database.settings.abortReadsOnRequestDisconnect` is enabled, and only `GET` and `HEAD`
+   * requests are ever affected. Use it for a `GET` route that writes or has side effects, such as
+   * confirming an email or a provider's login callback.
    */
   abortReadsOnRequestDisconnect?: false;
 };

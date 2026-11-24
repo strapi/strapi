@@ -47,35 +47,53 @@ const createdEvents: string[] = [];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Sends a request. `disconnect()` destroys the socket, like a client that hangs up, and resolves
+ * once the connection closed.
+ */
+const startRequest = ({
+  port,
+  method = 'GET',
+  path,
+  body,
+  headers = {},
+}: {
+  port: number;
+  method?: string;
+  path: string;
+  body?: string;
+  headers?: Record<string, string>;
+}) => {
+  const request = http.request({
+    method,
+    port,
+    path,
+    headers: body ? { 'content-type': 'application/json', ...headers } : headers,
+  });
+  const closed = new Promise<void>((resolve) => {
+    request.on('close', () => resolve());
+  });
+  request.on('error', () => {});
+  request.end(body);
+
+  return {
+    closed,
+    disconnect: () => {
+      request.destroy();
+      return closed;
+    },
+  };
+};
+
 /** Sends a request and destroys the socket `afterMs` later, before any response could end. */
 const requestAndAbort = (
-  {
-    port,
-    method = 'GET',
-    path,
-    body,
-    headers = {},
-  }: {
-    port: number;
-    method?: string;
-    path: string;
-    body?: string;
-    headers?: Record<string, string>;
-  },
+  options: Parameters<typeof startRequest>[0],
   afterMs = DISCONNECT_AFTER_MS
-) =>
-  new Promise<void>((resolve) => {
-    const request = http.request({
-      method,
-      port,
-      path,
-      headers: body ? { 'content-type': 'application/json', ...headers } : headers,
-    });
-    request.on('error', () => {});
-    request.on('close', () => resolve());
-    request.end(body);
-    setTimeout(() => request.destroy(), afterMs);
-  });
+) => {
+  const request = startRequest(options);
+  setTimeout(() => request.disconnect(), afterMs);
+  return request.closed;
+};
 
 const getJson = ({ port, path }: { port: number; path: string }) =>
   new Promise<{ statusCode: number | undefined; body: any }>((resolve, reject) => {
@@ -219,6 +237,38 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
               config: { auth: false },
             },
             {
+              // A slow read sent with POST: POST requests are never armed, so it must complete
+              method: 'POST',
+              path: '/abort-post-read',
+              handler: async (ctx: any) => {
+                started.resolve();
+                try {
+                  ctx.body = await slow(1.5);
+                  handlerSettled.resolve('done');
+                } catch (error: any) {
+                  handlerSettled.resolve(`failed: ${error?.name}`);
+                  throw error;
+                }
+              },
+              config: { auth: false },
+            },
+            {
+              // A GET route that opted out (it writes, e.g. a provider callback): must complete
+              method: 'GET',
+              path: '/abort-get-opt-out',
+              handler: async (ctx: any) => {
+                started.resolve();
+                try {
+                  ctx.body = await slow(1.5);
+                  handlerSettled.resolve('done');
+                } catch (error: any) {
+                  handlerSettled.resolve(`failed: ${error?.name}`);
+                  throw error;
+                }
+              },
+              config: { auth: false, abortReadsOnRequestDisconnect: false },
+            },
+            {
               // A document service read: it runs inside a transaction (wrapInTransaction)
               method: 'GET',
               path: '/abort-document-read',
@@ -316,12 +366,29 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
               type Query {
                 abortSlow: String
               }
+              type Mutation {
+                abortSlowMutation: String
+              }
             `,
             resolvers: {
               Query: {
                 async abortSlow() {
                   started.resolve();
                   await slow(SLEEP_SECONDS);
+                  return 'done';
+                },
+              },
+              Mutation: {
+                // A slow read in a mutation: mutations are never armed, so it must complete
+                async abortSlowMutation() {
+                  started.resolve();
+                  try {
+                    await slow(1.5);
+                    handlerSettled.resolve('done');
+                  } catch (error: any) {
+                    handlerSettled.resolve(`failed: ${error?.name}`);
+                    throw error;
+                  }
                   return 'done';
                 },
               },
@@ -360,10 +427,11 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
   });
 
   test('REST: cancels the running select on the database when the client disconnects', async () => {
-    const aborted = requestAndAbort({ port, path: '/api/abort-slow' });
+    const request = startRequest({ port, path: '/api/abort-slow' });
     await started.promise;
-    await aborted;
-    expect(await runningSleeps()).toBe(1); // still running right when the client left
+    // The select is really running on the database before the client leaves
+    expect(await waitUntil(async () => (await runningSleeps()) === 1, 3000)).toBe(true);
+    await request.disconnect();
 
     const cancelled = await waitUntil(async () => (await runningSleeps()) === 0, CANCEL_BUDGET_MS);
 
@@ -397,10 +465,10 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
   });
 
   test('REST: cancels a read inside a transaction that has not written', async () => {
-    const aborted = requestAndAbort({ port, path: '/api/abort-read-tx' });
+    const request = startRequest({ port, path: '/api/abort-read-tx' });
     await started.promise;
-    await aborted;
-    expect(await runningSleeps()).toBe(1);
+    expect(await waitUntil(async () => (await runningSleeps()) === 1, 3000)).toBe(true);
+    await request.disconnect();
 
     const cancelled = await waitUntil(async () => (await runningSleeps()) === 0, CANCEL_BUDGET_MS);
 
@@ -492,7 +560,33 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     expect(fired).toBe(true);
   });
 
-  test('admin logout revokes the session even when the client leaves before authentication', async () => {
+  test('scope: a read sent with POST is not cancelled by a disconnect', async () => {
+    await requestAndAbort({ port, method: 'POST', path: '/api/abort-post-read', body: '{}' }, 300);
+
+    await expect(handlerSettled.promise).resolves.toBe('done');
+  });
+
+  test('scope: a GET route that opted out is not cancelled by a disconnect', async () => {
+    await requestAndAbort({ port, path: '/api/abort-get-opt-out' }, 300);
+
+    await expect(handlerSettled.promise).resolves.toBe('done');
+  });
+
+  test('GraphQL: a mutation is not cancelled by a disconnect', async () => {
+    await requestAndAbort(
+      {
+        port,
+        method: 'POST',
+        path: '/graphql',
+        body: JSON.stringify({ query: 'mutation { abortSlowMutation }' }),
+      },
+      300
+    );
+
+    await expect(handlerSettled.promise).resolves.toBe('done');
+  });
+
+  test('admin logout (POST, never armed) revokes the session even when the client leaves before authentication', async () => {
     const cookieName = 'strapi_admin_refresh';
     const loginRes = await createRequest({ strapi }).post('/admin/login', {
       body: superAdmin.loginInfo,
@@ -532,16 +626,16 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     expect(refreshRes.statusCode).toBe(401);
   });
 
-  test('GraphQL: cancels the running select on the database when the client disconnects', async () => {
-    const aborted = requestAndAbort({
+  test('GraphQL: cancels the running select of a query (POST) when the client disconnects', async () => {
+    const request = startRequest({
       port,
       method: 'POST',
       path: '/graphql',
       body: JSON.stringify({ query: '{ abortSlow }' }),
     });
     await started.promise;
-    await aborted;
-    expect(await runningSleeps()).toBe(1);
+    expect(await waitUntil(async () => (await runningSleeps()) === 1, 3000)).toBe(true);
+    await request.disconnect();
 
     const cancelled = await waitUntil(async () => (await runningSleeps()) === 0, CANCEL_BUDGET_MS);
 

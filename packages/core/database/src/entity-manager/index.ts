@@ -42,6 +42,7 @@ import {
 import { idsForInsertedRows, readAutoIncrementStep, splitByIdSource } from './inserted-ids';
 import { isDeadlockError, transactionCtx, waitForDeadlockRetry } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
+import { abortCtx } from '../abort-context';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID, RelationalAttribute, Relation } from '../types';
@@ -345,13 +346,12 @@ const WRITE_METHODS = [
  * and runs lifecycles around it, so the whole method runs detached from the abort signal. The
  * calling flow is marked as written, so the reads it makes after the write are not aborted either.
  */
-const detachWritesFromAbort = (db: Database, entityManager: EntityManager): EntityManager => {
+const detachWritesFromAbort = (entityManager: EntityManager): EntityManager => {
   for (const name of WRITE_METHODS) {
     const method = entityManager[name] as (...args: unknown[]) => unknown;
 
     Object.assign(entityManager, {
-      [name]: (...args: unknown[]) =>
-        db.runWithoutAbortSignal(() => method.apply(entityManager, args)),
+      [name]: (...args: unknown[]) => abortCtx.detachWrite(() => method.apply(entityManager, args)),
     });
   }
 
@@ -2185,5 +2185,5 @@ export const createEntityManager = (db: Database): EntityManager => {
     },
   };
 
-  return detachWritesFromAbort(db, entityManager);
+  return detachWritesFromAbort(entityManager);
 };

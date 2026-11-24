@@ -13,6 +13,8 @@ module.exports = (strapi) => {
       config: {
         middlewares: ['plugin::users-permissions.rateLimit'],
         prefix: '',
+        // Writes on a GET (it also serves the provider's callback): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
     },
     {
@@ -47,6 +49,8 @@ module.exports = (strapi) => {
       handler: 'auth.callback',
       config: {
         prefix: '',
+        // Writes on a GET (creates or signs in the user): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
       request: {
         params: {
@@ -87,6 +91,8 @@ module.exports = (strapi) => {
       handler: 'auth.emailConfirmation',
       config: {
         prefix: '',
+        // Writes on a GET (confirms the user): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
     },
     {
@@ -125,9 +131,7 @@ module.exports = (strapi) => {
       method: 'POST',
       path: '/auth/logout',
       handler: 'auth.logout',
-      // Logout often happens as the page closes: authentication and the revocation must run even
-      // when the client is already gone
-      config: { prefix: '', abortReadsOnRequestDisconnect: false },
+      config: { prefix: '' },
     },
     {
       method: 'GET',
@@ -139,8 +143,7 @@ module.exports = (strapi) => {
       method: 'DELETE',
       path: '/auth/sessions/:sessionId',
       handler: 'auth.revokeSession',
-      // Revoking a session must run even when the client is already gone
-      config: { prefix: '', abortReadsOnRequestDisconnect: false },
+      config: { prefix: '' },
     },
   ];
 };

@@ -123,6 +123,10 @@ export const isRunConflict = (error: unknown) =>
   (error instanceof Error && error.name === 'SavepointError') ||
   CONFLICT_CODES.has(getErrorCode(error) ?? '');
 
+// A read the database refused or cancelled because the client of the request left
+const isQueryAborted = (error: unknown) =>
+  error instanceof Error && error.name === 'QueryAbortedError';
+
 // The reason shapes an entry that wasn't released stores
 export const toValidationReason = (error: Error) => ({
   validation: { errors: getValidationErrors(error) },
@@ -172,6 +176,11 @@ const readCheck = async <TResult>(
     // In a transaction, the transaction fails with a conflict: no other check, nor what the caller
     // records, can be kept. Outside one, it only undid this read, so it's a failed check.
     if (inTransaction && isRunConflict(error)) {
+      throw error;
+    }
+    // The request was abandoned: the entry's validity is unknown, not false, so nothing may be
+    // stored for it (matched by name, like the conflict above)
+    if (isQueryAborted(error)) {
       throw error;
     }
     return toError(error);
@@ -551,7 +560,7 @@ export const getPublishabilityForActions = <TAction extends PublishActionRef>(
 /**
  * The validity to store on each publish action, by action id. A draft that can't be read is
  * stored as not publishable and doesn't stop the others, except in a transaction a run conflict
- * (see `isRunConflict`), which is rethrown.
+ * (see `isRunConflict`) and a read aborted because the client left, which are rethrown.
  */
 export const getValidityForActions = <TAction extends PublishActionRef>(
   actions: readonly TAction[],

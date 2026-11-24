@@ -21,7 +21,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     try {
       await next();
     } catch (error) {
-      if (error instanceof Error) {
+      // A query aborted because the client left is not an error of the server (matched by name:
+      // this package does not depend on @strapi/database)
+      if (error instanceof Error && error.name !== 'QueryAbortedError') {
         sentryService.sendError(error, (scope: Sentry.Scope) => {
           scope.addEventProcessor((event) => {
             // Parse Koa context to add error metadata

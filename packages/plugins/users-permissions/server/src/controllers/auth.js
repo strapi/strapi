@@ -369,8 +369,6 @@ module.exports = ({ strapi }) => ({
     const deviceId = extractDeviceId(body);
 
     try {
-      // The route opts out of the request abort signal (`abortReadsOnRequestDisconnect: false`),
-      // so this runs to completion even when the client is already gone
       await revokeLogoutSessions(strapi, ctx, userId, { scope, deviceId, body });
     } catch (err) {
       strapi.log.error('UP logout failed', err);

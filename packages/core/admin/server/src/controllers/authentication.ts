@@ -400,8 +400,6 @@ export default {
         const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
         const sessionId = (ctx.state.session as { id?: string } | undefined)?.id;
 
-        // The route opts out of the request abort signal (`abortReadsOnRequestDisconnect: false`),
-        // so this runs to completion even when the client is already gone
         if (typeof bodyDeviceId === 'string' && bodyDeviceId.length > 0) {
           const deviceId = await resolveLogoutDeviceId(userId, sessionId, bodyDeviceId);
           await sessionManager('admin').invalidateRefreshToken(userId, deviceId);

@@ -61,7 +61,10 @@ const dispatch = async (strapi: any, storage: any, config: Record<string, unknow
   const router = new Router();
   const handler = vi.fn(async () => 'ok');
 
-  composeEndpoint(strapi)({ method: 'POST', path: '/logout', handler, config } as any, { router });
+  composeEndpoint(strapi)(
+    { method: 'GET', path: '/auth/email-confirmation', handler, config } as any,
+    { router }
+  );
 
   const layer = router.stack[0];
   const controller = new AbortController();
@@ -103,8 +106,8 @@ describe('route config abortReadsOnRequestDisconnect', () => {
     const handler = vi.fn(async () => 'ok');
     composeEndpoint(strapi)(
       {
-        method: 'POST',
-        path: '/logout',
+        method: 'GET',
+        path: '/auth/email-confirmation',
         handler,
         config: { abortReadsOnRequestDisconnect: false },
       } as any,

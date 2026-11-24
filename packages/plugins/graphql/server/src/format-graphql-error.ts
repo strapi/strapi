@@ -28,6 +28,22 @@ function createFormattedError(
   return new GraphQLError(message, options);
 }
 
+// Whether the error is the database refusing or cancelling a query for a request whose client left
+const isAbortedByClient = (error: unknown): error is Error => {
+  if (!(error instanceof Error) || error.name !== 'QueryAbortedError') {
+    return false;
+  }
+
+  if (strapi.db?.config?.settings?.abortReadsOnRequestDisconnect !== true) {
+    return false;
+  }
+
+  // formatError gets no context, but it runs inside the request, which the request context holds
+  const res = strapi.requestContext?.get()?.res;
+
+  return Boolean(res?.destroyed && !res.writableEnded);
+};
+
 /**
  * The handler for Apollo Server v4's formatError config option
  *
@@ -65,8 +81,9 @@ export function formatGraphqlError(formattedError: GraphQLFormattedError, error:
   // else if originalError doesn't appear to be from Strapi or GraphQL..
 
   // Log the error. When the client disconnected nobody reads the response, so it is not an
-  // unexpected error (matched by name: this package does not depend on @strapi/database)
-  if (originalError instanceof Error && originalError.name === 'QueryAbortedError') {
+  // unexpected error. Only so when the setting is on and the client is really gone: otherwise a
+  // QueryAbortedError is one. Matched by name: this package does not depend on @strapi/database.
+  if (isAbortedByClient(originalError)) {
     strapi.log.debug(`Request aborted before the query completed: ${originalError.message}`);
   } else {
     strapi.log.error(originalError);

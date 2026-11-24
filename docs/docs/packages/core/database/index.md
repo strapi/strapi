@@ -46,7 +46,26 @@ The entity manager writes relations into join tables and keeps their order. Poly
 
 ### Abort context
 
-`db.runWithAbortSignal(signal, callback)` runs the callback with an `AbortSignal` stored in an async context (`abortCtx`, [`src/abort-context.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/abort-context.ts)), the same way `transactionCtx` holds a transaction. `@strapi/core` calls it for every HTTP request ([`services/server/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/client-abort.ts)): the signal aborts when the response closes before it ended, which means the client disconnected. It exists so a request nobody waits for stops holding pooled connections (issue #28646).
+`db.runWithAbortSignal(signal, callback)` runs the callback with an `AbortSignal` stored in an async context (`abortCtx`, [`src/abort-context.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/abort-context.ts)), the same way `transactionCtx` holds a transaction. The signal aborts when the client disconnects before the response ended. It exists so a request nobody waits for stops holding pooled connections (issue #28646).
+
+#### Which requests get a signal
+
+Only requests that read are armed ([`services/server/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/client-abort.ts)):
+
+- `GET` and `HEAD` requests. The server middleware arms them. Every other method (`POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`) runs without a signal, so nothing in a mutation is ever aborted and the routes of a mutation need no opt-out.
+- GraphQL queries sent with `POST`. The GraphQL plugin ([`abort-queries.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/abort-queries.ts)) parses the body after the body parser, picks the operation by `operationName` (or the only operation), and arms the request through `strapi.server.runWithClientAbortSignal` only when it is a `query`. A batch is armed only if every operation is a query. A body with no query text (persisted queries), a document that does not parse, or an operation that cannot be selected is not armed. A GraphQL `GET` is armed by the server like any other `GET`.
+
+#### Routes that write on a GET
+
+Some `GET` routes write. They opt out with `config.abortReadsOnRequestDisconnect: false` (typed in `@strapi/types`, validated in `routing.ts`, honored by [`compose-endpoint.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts)). A middleware placed before `authenticate` runs the rest of the route, authentication included, through `db.runWithoutAbortSignal`, so it also covers reads made before any controller code. The flag only accepts `false`. Like `runWithoutAbortSignal`, it marks the request as written, so nothing in it is aborted. These routes set it:
+
+- Users & Permissions: `GET /auth/email-confirmation`, `GET /auth/:provider/callback` and `GET /connect/(.*)` (they confirm, create or sign in a user).
+- Admin SSO (EE): `GET /admin/connect/:provider` (it serves the login redirect and the provider callback, which creates or updates the user and its session).
+- Admin data transfer: `GET /admin/transfer/runner/push` and `GET /admin/transfer/runner/pull` (long lived websocket sessions, a push writes).
+
+A new `GET` route that writes or has side effects must set the flag.
+
+#### How the read abort works
 
 When a signal is in context, `execute()` of the query builder changes only for reads: `select`, `count`, `max` and `min`. A read that locks rows (`forUpdate`) is not aborted.
 
@@ -56,27 +75,29 @@ When a signal is in context, `execute()` of the query builder changes only for r
 
 A read inside a transaction is aborted like any other. `db.transaction` rolls the transaction back when its callback rejects, so the document service reads (`findMany`, `findFirst`, `findOne`, `count`, which run inside `wrapInTransaction`) are aborted without leaving anything behind.
 
+#### Safety nets: writes are never aborted
+
+A `GET` can still write or schedule work, so these stay even though mutations are not armed.
+
 Once the flow writes, nothing is aborted anymore. The store in `abortCtx` is shared by everything the request runs, and the first write marks it as written: an `insert`, `update`, `delete` or `truncate` from the query builder, a `forUpdate` read, or a call to `db.runWithoutAbortSignal`. Every later query of the request runs to completion, including the reads that follow up on the write and the reads of other branches running at the same time. So the only reads that are aborted are those issued before the request wrote anything.
 
-Writes are never aborted:
-
-- The entity manager write methods (`create`, `createMany`, `update`, `updateMany`, `delete`, `deleteMany`, `attachRelations`, `updateRelations`, `deleteRelations`, `deleteManyRelations`, `insertJoinTableRows`) run through `db.runWithoutAbortSignal`, lifecycles included ([`entity-manager/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/entity-manager/index.ts)). `update` and `delete` read the row before they write, and `create` reads it back after the insert.
+- The entity manager write methods (`create`, `createMany`, `update`, `updateMany`, `delete`, `deleteMany`, `attachRelations`, `updateRelations`, `deleteRelations`, `deleteManyRelations`, `insertJoinTableRows`) detach from the signal and mark the flow as written, as `db.runWithoutAbortSignal` does, lifecycles included ([`entity-manager/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/entity-manager/index.ts)). `update` and `delete` read the row before they write, and `create` reads it back after the insert.
 - The document service runs its write actions (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) through `db.runWithoutAbortSignal`, middlewares included ([`document-service/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/client-abort.ts)). Document middlewares read outside the write's transaction, before it (review workflows) and after it commits (content history).
 - Commit and rollback hooks run detached from the signal (`abortCtx.exit`).
+- `db.runDetachedFromAbortSignal(callback)` (internal) runs the callback detached from the signal without marking the flow as written, so the rest of the flow is still aborted. Event hub emits (listeners and subscribers) and cron jobs (creation of the timer and every run) use it, because their reads must not inherit the signal of the request that emitted the event or scheduled the job.
+- The populate queries of a stream that already started run detached too.
 
-`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal and marks the calling flow as written. Use it for work that must run to completion although it reads before its first database write. Upload `remove()` uses it, because it deletes the stored files before it reads and deletes the row.
+`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal and marks the calling flow as written. Use it for work that must run to completion although it reads before its first database write, when it can run under a `GET`.
 
-A route can opt out as a whole with `config.abortReadsOnRequestDisconnect: false` (typed in `@strapi/types`, honored by [`compose-endpoint.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts)). A middleware placed before `authenticate` runs the rest of the route, authentication included, through `db.runWithoutAbortSignal`. This is needed when a read happens before any controller code, such as the session lookup of the admin auth strategy. The logout and session-revoke routes set it (admin `POST /logout`, `DELETE /users/me/sessions` and `DELETE /users/me/sessions/:sessionId`; Users & Permissions `POST /auth/logout` and `DELETE /auth/sessions/:sessionId`), because their purpose is the revocation, and logout often happens as the page closes. The flag only accepts `false`. Like `runWithoutAbortSignal`, it marks the request as written, so nothing in it is aborted.
+#### Setting
 
-`db.runDetachedFromAbortSignal(callback)` (internal) runs the callback detached from the signal without marking the flow as written, so the rest of the flow is still aborted. Event hub emits (listeners and subscribers) and cron jobs (creation of the timer and every run) use it, because their reads must not inherit the signal of the request that emitted the event or scheduled the job.
-
-The mechanism is opt-in: it runs only when `settings.abortReadsOnRequestDisconnect` is `true` (default `false`). With the setting unset, `runWithAbortSignal` runs the callback without storing the signal, so nothing changes. It must be a boolean, and the constructor throws otherwise. It is off by default because work that a request starts without awaiting it inherits the signal (see the limits below), which would change behaviour for existing projects.
+The mechanism is opt-in: it runs only when `settings.abortReadsOnRequestDisconnect` is `true` (default `false`). With the setting unset, `runWithAbortSignal` runs the callback without storing the signal, and the server does not install a listener, so nothing changes. It must be a boolean, and the constructor throws otherwise. It is off by default because work that a request starts without awaiting it inherits the signal (see the limits below), which would change behaviour for existing projects.
 
 Limits:
 
 - Queries run directly on `strapi.db.connection` (including `connection.raw`) are not covered, like `queryTimeout`. They are not aborted, and a write made this way does not mark the flow as written.
 - A stream that already started is not cancelled: only starting one is refused. Its batch and populate queries run detached from the signal.
-- Code that has a side effect outside the database (a file, an external API) and then reads before it writes can stop between the two. Run it in `db.runWithoutAbortSignal`.
+- Code reached from a `GET` that has a side effect outside the database (a file, an external API) and then reads before it writes can stop between the two. Set the route flag or run it in `db.runWithoutAbortSignal`.
 - Other work that a request starts without awaiting it (`setTimeout`, an un-awaited promise) inherits the signal, so its reads are refused once the client disconnects, until the request writes. Its writes are not. Event hub listeners and cron jobs are the exception, they run detached.
 - A request waiting for a pool connection is not woken by the abort. The signal is checked before and after the connection is acquired only.
 - Behind PgBouncer or Supavisor in transaction pooling mode the Postgres cancel (`pg_cancel_backend`) has no effect, as with `queryTimeout`. The read is still refused when issued after the abort.
@@ -84,7 +105,7 @@ Limits:
 - A cancel inside a transaction stops whatever statement runs on the transaction's connection. If concurrent branches share one transaction and one of them runs a detached read (`abortCtx.exit` without marking the flow), the cancel of a sibling read can hit that statement instead.
 - Cancelling is best effort: a signal that aborts in the instant between acquiring the connection and the driver sending the query can still let that one query run to completion.
 
-`QueryAbortedError` is not an internal error. The REST error middleware and the GraphQL error formatter log it at debug level instead of error.
+`QueryAbortedError` is not an internal error when the client really left. The REST error middleware and the GraphQL error formatter log it at debug level only when the setting is on and the client disconnected (the response was destroyed before it ended). Otherwise it is logged as an error. The Sentry plugin does not report it, and Content Releases rethrows it instead of storing an entry as not valid.
 
 ### Migrations
 

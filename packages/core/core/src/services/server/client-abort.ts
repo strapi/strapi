@@ -1,12 +1,31 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
+// Methods that, by contract, only read. Everything else may write, so it is never armed.
+const READ_ONLY_METHODS = new Set(['GET', 'HEAD']);
+
 /**
- * Aborts a per-request signal when the client disconnects before the response ended, and runs the
- * rest of the request with it as the database abort signal, so `select` queries stop being issued
- * (and a running one is cancelled) for a request nobody waits on. See the database docs.
+ * Whether the HTTP client left before the response ended.
+ *
+ * @internal
  */
-export const runWithClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, run: () => T): T => {
+export const isClientDisconnected = (ctx: Context): boolean => {
+  const res = ctx.res as Partial<Context['res']> | undefined;
+
+  return Boolean(res?.destroyed && !res.writableEnded);
+};
+
+/**
+ * Runs `run` with a per-request abort signal that aborts when the client disconnects before the
+ * response ended, as the database abort signal: `select` queries stop being issued (and a running
+ * one is cancelled) for a request nobody waits on. See the database docs.
+ *
+ * Unlike {@link runWithClientAbortSignal}, it does not look at the method: the caller must know
+ * that the request only reads (e.g. a GraphQL query). Exposed as `strapi.server.runWithClientAbortSignal`.
+ *
+ * @internal
+ */
+export const armClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, run: () => T): T => {
   // The database can be unavailable (e.g. requests served before it is loaded)
   if (typeof strapi.db?.runWithAbortSignal !== 'function') {
     return run();
@@ -43,4 +62,17 @@ export const runWithClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, r
     cleanup();
     throw error;
   }
+};
+
+/**
+ * The app middleware's arming: only `GET` and `HEAD` requests get the signal, the rest can write
+ * and run without one. A route that does write on a GET opts out with
+ * `config.abortReadsOnRequestDisconnect: false`.
+ */
+export const runWithClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, run: () => T): T => {
+  if (!READ_ONLY_METHODS.has(ctx.method)) {
+    return run();
+  }
+
+  return armClientAbortSignal(strapi, ctx, run);
 };

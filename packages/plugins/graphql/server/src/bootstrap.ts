@@ -13,6 +13,7 @@ import type { Core } from '@strapi/types';
 import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
+import { createArmQueriesMiddleware } from './abort-queries';
 import { abortFieldsOnClientDisconnect } from './abort-disconnected-request';
 import { formatGraphqlError } from './format-graphql-error';
 
@@ -273,6 +274,9 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   } else {
     strapi.log.debug('Body parser has been disabled for Apollo server');
   }
+
+  // a query only reads, so a client that disconnects can stop its database reads
+  handler.push(createArmQueriesMiddleware(strapi));
 
   // add the Strapi auth middleware
   handler.push((ctx, next) => {

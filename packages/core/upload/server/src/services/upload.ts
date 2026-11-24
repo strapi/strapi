@@ -766,12 +766,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function remove(file: File) {
-    // The stored files are deleted before the row: once they are gone, the row must be deleted too,
-    // even when the client that asked for it disconnected
-    return strapi.db.runWithoutAbortSignal(() => removeFileAndRow(file));
-  }
-
-  async function removeFileAndRow(file: File) {
     const config = strapi.config.get<Config>('plugin::upload');
 
     // execute delete function of the provider

@@ -58,9 +58,6 @@ export default [
     handler: 'authentication.logout',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
-      // Logout often happens as the page closes: the session lookup of the auth strategy and the
-      // revocation must run even when the client is already gone
-      abortReadsOnRequestDisconnect: false,
     },
   },
 ];

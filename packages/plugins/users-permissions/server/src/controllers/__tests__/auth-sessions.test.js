@@ -246,23 +246,6 @@ describe('Auth controller - sessions', () => {
       expect(unauthorized).toHaveBeenCalledWith('Missing authentication');
     });
 
-    test('The logout route keeps its reads running after the client disconnects', () => {
-      const routes = require('../../routes/content-api/auth')({ config: { get: jest.fn() } });
-      const logoutRoute = routes.find((route) => route.path === '/auth/logout');
-
-      expect(logoutRoute.config.abortReadsOnRequestDisconnect).toBe(false);
-    });
-
-    test('Revokes the sessions of the user', async () => {
-      const ctx = createLogoutContext({
-        request: { body: { scope: 'all' }, header: {} },
-      });
-
-      await controller.logout(ctx);
-
-      expect(originApi.invalidateRefreshToken).toHaveBeenCalledWith('5');
-    });
-
     test('Revokes every session when scope is all', async () => {
       const ctx = createLogoutContext({
         request: { body: { scope: 'all' }, header: {} },

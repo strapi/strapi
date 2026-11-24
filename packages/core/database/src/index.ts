@@ -89,8 +89,9 @@ interface Settings {
    */
   queryTimeout?: number;
   /**
-   * Refuse reads (and cancel the running one on postgres and mysql) for a request whose client
-   * disconnected before the response ended, until the request has written. Writes are never
+   * Refuse reads (and cancel the running one on postgres and mysql) for a `GET`, `HEAD` or GraphQL
+   * query request whose client disconnected before the response ended, until the request has
+   * written. Writes are never
    * aborted. Off by default; set to true to enable it. Must be a boolean.
    */
   abortReadsOnRequestDisconnect?: boolean;

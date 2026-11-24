@@ -9,6 +9,8 @@ export default [
     config: {
       middlewares: ['admin::data-transfer'],
       auth: { strategies: [dataTransferAuthStrategy], scope: ['push'] },
+      // A long lived websocket transfer session (a push writes) with its own disconnect handling
+      abortReadsOnRequestDisconnect: false,
     },
   },
   // Transfer Pull
@@ -19,6 +21,8 @@ export default [
     config: {
       middlewares: ['admin::data-transfer'],
       auth: { strategies: [dataTransferAuthStrategy], scope: ['pull'] },
+      // A long lived websocket transfer session with its own disconnect handling
+      abortReadsOnRequestDisconnect: false,
     },
   },
   // Transfer Tokens
