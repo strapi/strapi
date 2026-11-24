@@ -56,7 +56,7 @@ If a provider throws, returns a value that is not a plain object (for example a 
 
 When a provider has no context yet, for example before the user selects a space, it returns `undefined` for the header. It throws only on a real failure. A provider that throws too early also blocks requests such as `/admin/users/me`, so the admin cannot see that a stale session ended.
 
-The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. For endpoints that use the admin base query, RTK Query returns the error as a `SerializedError` named `RequestHeadersError`, so check `error.name` there. The upload mutations have their own `queryFn`: `uploadFiles` and `uploadFromUrls` mark the rows as failed, and `uploadFromUrls` and `uploadFileSilently` return an `UnknownError`. `instanceof RequestHeadersError` works only for errors from `getFetchClient` or `unstable_getRequestHeaders`.
+The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. For endpoints that use the admin base query, RTK Query returns the error as a `SerializedError` named `RequestHeadersError`, so check `error.name` there. The upload mutations have their own `queryFn`: `uploadFiles` and `uploadFromUrls` mark the rows as failed, and `uploadFromUrls` and `uploadFileSilently` return an `UnknownError`. After a failed read, `uploadFiles` returns no error and no files: only the rows show the failure. `instanceof RequestHeadersError` works only for errors from `getFetchClient` or `unstable_getRequestHeaders`.
 
 ## CORS
 
