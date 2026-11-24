@@ -28,7 +28,7 @@ export const EmptyAssetGrid = ({ count, size }: EmptyAssetGridProps) => {
         .fill(null)
         .map((_, idx) => (
           <EmptyAssetCard
-            // eslint-disable-next-line react/no-array-index-key
+            // oxlint-disable-next-line react/no-array-index-key
             key={`empty-asset-card-${idx}`}
             height={`${PlaceholderSize[size]}px`}
             hasRadius

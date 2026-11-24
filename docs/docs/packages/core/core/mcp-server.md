@@ -90,7 +90,7 @@ An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) 
 `packages/core/core/src/services/mcp/authentication.ts`:
 
 1. Extract `Authorization: Bearer <token>` — missing/malformed header → `missing_token`.
-2. Validate through `strapi.admin.services['api-token-admin'].authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
+2. Validate through `strapi.service('admin::api-token-admin').authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
 3. On success, the handler receives the token's CASL `ability` and owning `user`.
 
 There is no separate "MCP token" type and no admin-panel screen dedicated to MCP — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`.

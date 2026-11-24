@@ -12,6 +12,7 @@ import { createAuthRequest } from 'api-tests/request';
  */
 const PLAIN_UID = 'api::locale-norm-plain.locale-norm-plain';
 const LOCALIZED_UID = 'api::locale-norm-localized.locale-norm-localized';
+const UNIQUE_UID = 'api::locale-norm-unique.locale-norm-unique';
 
 const plainModel = {
   kind: 'collectionType',
@@ -32,6 +33,16 @@ const localizedModel = {
   attributes: {
     title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
   },
+};
+
+// Without draft and publish, every entry is published, so the unique check always runs
+const uniqueModel = {
+  kind: 'collectionType',
+  displayName: 'Locale norm unique',
+  singularName: 'locale-norm-unique',
+  pluralName: 'locale-norm-uniques',
+  draftAndPublish: false,
+  attributes: { code: { type: 'string', unique: true } },
 };
 
 // The request locale: `undefined` means the request has no `locale`
@@ -55,7 +66,7 @@ describe('CM API - request locale passed to the document service', () => {
   let calls: Call[] = [];
 
   beforeAll(async () => {
-    await builder.addContentTypes([plainModel, localizedModel]).build();
+    await builder.addContentTypes([plainModel, localizedModel, uniqueModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -138,13 +149,9 @@ describe('CM API - request locale passed to the document service', () => {
       empty: undefined,
       fr: 'fr',
     };
-    // The body `locale` is kept in the data of create and update, so an empty one is stored
-    const storedLocale: Record<string, string | null> = {
-      absent: null,
-      null: null,
-      empty: '',
-      fr: 'fr',
-    };
+    // A non-localized entry has no locale: the body `locale` is never stored, and the writes
+    // (create, update, clone) get no `locale` param, so `calls` does not list them
+    const storedLocale = null;
 
     test.each(variants)('create, body locale %s', async (name, locale) => {
       const { res, calls } = await send({
@@ -154,10 +161,8 @@ describe('CM API - request locale passed to the document service', () => {
       });
 
       expect(res.statusCode).toBe(201);
-      expect(calls).toEqual([['create', expectedLocale[name]]]);
-      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([
-        [storedLocale[name], 'draft'],
-      ]);
+      expect(calls).toEqual([]);
+      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([[storedLocale, 'draft']]);
     });
 
     test.each(variants)('update, body locale %s', async (name, locale) => {
@@ -169,11 +174,8 @@ describe('CM API - request locale passed to the document service', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(calls).toEqual([
-        ['findOne', expectedLocale[name]],
-        ['update', expectedLocale[name]],
-      ]);
-      expect(await rows(PLAIN_UID, sourceId)).toEqual([[storedLocale[name], 'draft']]);
+      expect(calls).toEqual([['findOne', expectedLocale[name]]]);
+      expect(await rows(PLAIN_UID, sourceId)).toEqual([[storedLocale, 'draft']]);
     });
 
     test.each(variants)('clone, body locale %s', async (name, locale) => {
@@ -185,14 +187,8 @@ describe('CM API - request locale passed to the document service', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(calls).toEqual([
-        ['findOne', expectedLocale[name]],
-        ['clone', expectedLocale[name]],
-      ]);
-      // Without a locale, the clone keeps the locale of the source row
-      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([
-        [name === 'fr' ? 'fr' : null, 'draft'],
-      ]);
+      expect(calls).toEqual([['findOne', expectedLocale[name]]]);
+      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([[storedLocale, 'draft']]);
     });
 
     // A query string cannot hold a null locale
@@ -221,13 +217,79 @@ describe('CM API - request locale passed to the document service', () => {
       expect(res.statusCode).toBe(200);
       expect(calls).toEqual([
         ['findOne', expectedLocale[name]],
-        ['update', expectedLocale[name]],
         ['publish', expectedLocale[name]],
       ]);
       expect(await rows(PLAIN_UID, sourceId)).toEqual([
-        [storedLocale[name], 'published'],
-        [storedLocale[name], 'draft'],
+        [storedLocale, 'published'],
+        [storedLocale, 'draft'],
       ]);
+    });
+  });
+
+  // The unique check of the entity validator filters on the locale param. A non-localized entry
+  // stores no locale, so a body locale must not reach the document service as a param either:
+  // a request with `"locale": "fr"` must still see the values stored with no locale.
+  describe('non-localized content type, unique field', () => {
+    const base = `/content-manager/collection-types/${UNIQUE_UID}`;
+
+    // Stores an entry with no locale, without going through the content manager
+    const seed = async (code: string): Promise<string> => {
+      const entry = await strapi.documents(UNIQUE_UID).create({ data: { code } });
+      expect(await rows(UNIQUE_UID, entry.documentId)).toEqual([[null, 'published']]);
+      return entry.documentId;
+    };
+
+    const count = (code: string): Promise<number> =>
+      strapi.db.query(UNIQUE_UID).count({ where: { code } });
+
+    const expectUniqueError = (res: any) => {
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'This attribute must be unique',
+        details: { errors: [{ path: ['code'], message: 'This attribute must be unique' }] },
+      });
+    };
+
+    test('create, body locale fr, rejects a value stored with no locale', async () => {
+      await seed('create-taken');
+
+      const res = await rq({
+        method: 'POST',
+        url: base,
+        body: { code: 'create-taken', locale: 'fr' },
+      });
+
+      expectUniqueError(res);
+      expect(await count('create-taken')).toBe(1);
+    });
+
+    test('update, body locale fr, rejects a value stored with no locale', async () => {
+      await seed('update-taken');
+      const otherId = await seed('update-other');
+
+      const res = await rq({
+        method: 'PUT',
+        url: `${base}/${otherId}`,
+        body: { code: 'update-taken', locale: 'fr' },
+      });
+
+      expectUniqueError(res);
+      expect(await count('update-taken')).toBe(1);
+    });
+
+    test('clone, body locale fr, rejects a value stored with no locale', async () => {
+      await seed('clone-taken');
+      const sourceId = await seed('clone-source');
+
+      const res = await rq({
+        method: 'POST',
+        url: `${base}/clone/${sourceId}`,
+        body: { code: 'clone-taken', locale: 'fr' },
+      });
+
+      expectUniqueError(res);
+      expect(await count('clone-taken')).toBe(1);
     });
   });
 

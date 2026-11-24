@@ -5,7 +5,7 @@ tags:
   - rbac
   - hooks
 review_notes:
-  - 'The usage example calls `engine.generate(...)`. The engine method is `generateAbility`.'
+  - 'The usage example now calls `await engine.generateAbility(...)`. The rest of the page is not checked against the code.'
 status: needs-review
 ---
 
@@ -38,7 +38,7 @@ const permission = {
   conditions: ['isPublished'],
 };
 
-const ability = engine.generate([permission]);
+const ability = await engine.generateAbility([permission]);
 
 console.log('Can read article?:', ability.can('read', 'article'));
 ```
@@ -88,6 +88,12 @@ sequenceDiagram
 | before-evaluate.permission         | Pre-evaluation   | Transform the permission after formatting and validation     |
 | before-register.permission         | Pre-registration | Final modifications after evaluation but before registration |
 
+### Typed Hooks
+
+`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones, and the engine `engine.new` returns is assignable to `TypedEngine` without a cast. In `TypedPermissionEngineHooks`, the `format.permission` handlers are typed, but `call` resolves to `unknown`: the same hook also runs the handlers that untyped code registers. `TypedPermission` reads the permission properties as `unknown`, except `fields`, which is a list of field names (`string[]`).
+
+A validate hook stops at the first handler that returns a value other than `undefined`, and the engine rejects the permission when that value is `false`. A validator that lets the permission through returns nothing, so the next validators still run.
+
 ### Hook Implementation Example
 
 ```typescript
@@ -95,14 +101,14 @@ const engine = permissions.engine.new({ providers });
 
 // Validation hook
 engine.on('before-format::validate.permission', ({ permission }) => {
-  if (permission.action === 'delete' && !permission.conditions.includes('isAdmin')) {
+  if (permission.action === 'delete' && !permission.conditions?.includes('isAdmin')) {
     return false; // Prevent non-admin delete
   }
-  return true;
+  // Return nothing, so the next validators still run
 });
 
 // Format hook
-engine.on('format.permission', ({ permission }) => {
+engine.on('format.permission', (permission) => {
   // Add timestamp to tracking actions
   if (permission.action.startsWith('track')) {
     return {
@@ -184,11 +190,12 @@ const permission = domain.permission.create({
   conditions: ['isOwner'],
 });
 
-engine.on('before-evaluate.permission', ({ permission }) => {
+engine.on('before-evaluate.permission', (context) => {
   // Add dynamic conditions based on context
-  if (permission.action === 'update') {
-    permission.conditions.push('isNotLocked');
-    permission.conditions.push('isWithinBusinessHours');
+  if (context.permission.action === 'update') {
+    context.addCondition('isNotLocked').addCondition('isWithinBusinessHours');
   }
 });
 ```
+
+`context.permission` is a copy of the permission, so changing it has no effect. `addCondition` adds the condition to the permission the engine evaluates.

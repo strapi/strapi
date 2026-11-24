@@ -48,7 +48,7 @@ async function deleteAdmin({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const user = await app.admin.services.user.findOneByEmail(email);
+  const user = await app.service('admin::user').findOneByEmail(email);
 
   if (!user) {
     console.error(`User with email "${email}" does not exist`);
@@ -56,7 +56,7 @@ async function deleteAdmin({ email }: CmdOptions) {
   }
 
   try {
-    await app.admin!.services.user.deleteById(user.id);
+    await app.service('admin::user').deleteById(user.id);
   } catch (err: any) {
     console.error(err.message);
     process.exit(1);

@@ -407,7 +407,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
-          // eslint-disable-next-line no-continue
           if (!format) continue;
           queueConcurrentOperation(uploadPromises, uploadResponsiveFormat(format));
         }
@@ -461,7 +460,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
-          // eslint-disable-next-line no-continue
           if (!format) continue;
           newFormatKeys.add(format.key);
           queueConcurrentOperation(promises, replaceFormat(format.key, format.file));

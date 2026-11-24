@@ -1,6 +1,8 @@
 import { type HttpHandler, http, HttpResponse } from 'msw';
 import * as qs from 'qs';
 
+import type { GetAIMetadataPendingCount } from '../../shared/contracts/files';
+
 // Define the expected structure of your query parameters
 interface CustomQuery extends qs.ParsedQs {
   filters?: {
@@ -175,13 +177,26 @@ const handlers: HttpHandler[] = [
   }),
 
   http.get('/upload/ai-metadata-jobs/pending-count', () => {
-    return HttpResponse.json({
-      count: 0,
+    return HttpResponse.json<GetAIMetadataPendingCount.Response>({
+      imagesWithoutMetadataCount: 0,
+      totalImages: 0,
     });
   }),
 
+  // The route answers 404 when no job exists, never 200 with an empty body
   http.get('/upload/ai-metadata-jobs/latest', () => {
-    return HttpResponse.json(null);
+    return HttpResponse.json(
+      {
+        data: null,
+        error: {
+          status: 404,
+          name: 'NotFoundError',
+          message: 'No AI metadata job found',
+          details: {},
+        },
+      },
+      { status: 404 }
+    );
   }),
 
   // Per-file AI metadata generation, reported per file so a single failure never

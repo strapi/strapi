@@ -18,15 +18,25 @@ const templates = fs
   .filter((template) => fs.existsSync(path.join(templatesDir, template, 'scripts', 'seed.js')));
 
 type UploadCall = { files: unknown; data: unknown };
+type StoreCall = { environment?: unknown; type: string; name: string };
 
 const runSeed = async (template: string) => {
   const scriptPath = path.join(templatesDir, template, 'scripts', 'seed.js');
   const uploadCalls: UploadCall[] = [];
+  const storeCalls: StoreCall[] = [];
+  const configValues: Record<string, unknown> = { environment: 'test' };
 
   const strapi = {
-    config: { environment: 'test' },
+    // Mirrors the config provider: the startup copy as own keys, plus `get` over the live tree
+    config: {
+      ...configValues,
+      get: (key: string, defaultValue?: unknown) => configValues[key] ?? defaultValue,
+    },
     log: {},
-    store: () => ({ get: async () => undefined, set: async () => undefined }),
+    store(args: StoreCall) {
+      storeCalls.push(args);
+      return { get: async () => undefined, set: async () => undefined };
+    },
     db: {
       query: (uid: string) => ({
         findOne: async () => (uid === 'plugin::users-permissions.role' ? { id: 1 } : null),
@@ -69,7 +79,10 @@ const runSeed = async (template: string) => {
 
   const module = { exports: {} };
   const wrapper = vm.runInThisContext(
-    `(function (exports, require, module, __filename, __dirname, strapi, process, console) {${fs.readFileSync(scriptPath, 'utf8')}\n})`
+    `(function (exports, require, module, __filename, __dirname, strapi, process, console) {${fs.readFileSync(
+      scriptPath,
+      'utf8'
+    )}\n})`
   );
 
   wrapper(
@@ -85,10 +98,20 @@ const runSeed = async (template: string) => {
 
   const exitCode = await exited;
 
-  return { exitCode, uploadCalls };
+  return { exitCode, uploadCalls, storeCalls };
 };
 
 describe('create-strapi-app example templates seed script', () => {
+  it.each(templates)(
+    '%s: opens the setup store for the configured environment',
+    async (template) => {
+      const { exitCode, storeCalls } = await runSeed(template);
+
+      expect(exitCode).toBe(0);
+      expect(storeCalls).toContainEqual({ environment: 'test', type: 'type', name: 'setup' });
+    }
+  );
+
   it.each(templates)('%s: uploads each file with its original name', async (template) => {
     const { exitCode, uploadCalls } = await runSeed(template);
 

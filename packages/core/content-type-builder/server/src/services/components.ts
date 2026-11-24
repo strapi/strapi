@@ -51,7 +51,12 @@ export const createComponent = async ({
     return builder.editComponent(replaceTmpUIDs(component));
   });
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('component.create', { component: newComponent });
 
@@ -124,7 +129,12 @@ export const deleteComponent = async (uid: Internal.UID.Component) => {
 
   const deletedComponent = builder.deleteComponent(uid);
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('component.delete', { component: deletedComponent });
 

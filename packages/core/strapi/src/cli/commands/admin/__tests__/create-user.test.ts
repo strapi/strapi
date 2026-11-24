@@ -10,16 +10,14 @@ const getSuperAdmin = jest.fn(() => Promise.resolve({ id: roleId }));
 const exists = jest.fn();
 const assertPasswordIsValid = jest.fn();
 
-const admin = {
-  services: {
-    user: {
-      assertPasswordIsValid,
-      create,
-      exists,
-    },
-    role: {
-      getSuperAdmin,
-    },
+const adminServices: Record<string, unknown> = {
+  user: {
+    assertPasswordIsValid,
+    create,
+    exists,
+  },
+  role: {
+    getSuperAdmin,
   },
 };
 
@@ -28,7 +26,7 @@ const destroy = jest.fn(() => Promise.resolve());
 
 const mock = {
   load,
-  admin,
+  service: jest.fn((uid: string) => adminServices[uid.slice('admin::'.length)]),
   cron: { stop: stopCron },
   destroy,
 };

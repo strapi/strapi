@@ -17,6 +17,7 @@ import {
 } from '../store/uploadProgress';
 import { createRafBatcher } from '../utils/createRafBatcher';
 import { getFilenameFromUrl } from '../utils/files';
+import { getUploadTooLargeError } from '../utils/getUploadTooLargeError';
 
 import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from './uploadFileViaXHR';
 
@@ -130,18 +131,6 @@ const unregisterAbortController = (uploadId: number) => {
 };
 
 /**
- * Aborts an upload by its uploadId.
- * Called from the UploadProgressDialog when the user clicks cancel or close.
- */
-export const abortUpload = (uploadId: number) => {
-  const controller = abortControllers.get(uploadId);
-  if (controller) {
-    controller.abort();
-    unregisterAbortController(uploadId);
-  }
-};
-
-/**
  * One controller per file in flight, keyed by `uploadId:index`, so a single row
  * can be cancelled without stopping the rest of its batch. Files still queued
  * have no request to abort yet; they are remembered in `skippedFiles` instead
@@ -151,6 +140,26 @@ const fileAbortControllers = new Map<string, AbortController>();
 const skippedFiles = new Set<string>();
 
 const getFileKey = (uploadId: number, index: number) => `${uploadId}:${index}`;
+
+/**
+ * Aborts an upload by its uploadId.
+ * Called from the UploadProgressDialog when the user clicks cancel or close.
+ */
+export const abortUpload = (uploadId: number) => {
+  const controller = abortControllers.get(uploadId);
+  if (controller) {
+    controller.abort();
+    unregisterAbortController(uploadId);
+  }
+
+  // A cancelled batch stops its workers before they reach the queued files, so
+  // their skip markers would otherwise outlive it and make a retry skip them.
+  for (const key of skippedFiles) {
+    if (key.startsWith(`${uploadId}:`)) {
+      skippedFiles.delete(key);
+    }
+  }
+};
 
 /**
  * Aborts one file of a batch. Pair it with `cancelFile` to mark the row, the
@@ -402,7 +411,15 @@ const runUploadPool = async ({
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
-      dispatch(setFileError({ index, name: fileName, message, uploadId }));
+      dispatch(
+        setFileError({
+          index,
+          name: fileName,
+          message,
+          uploadId,
+          tooLarge: getUploadTooLargeError(err),
+        })
+      );
     } finally {
       abortController.signal.removeEventListener('abort', abortFile);
       fileAbortControllers.delete(fileKey);
@@ -426,7 +443,6 @@ const runUploadPool = async ({
         break;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       await uploadOne(index);
     }
   };
@@ -605,7 +621,6 @@ const processSSEStream = async ({
     const lastDoubleNewline = buffer.lastIndexOf('\n\n');
     if (lastDoubleNewline === -1) {
       // No complete events yet, keep buffering
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -672,7 +687,15 @@ const processSSEStream = async ({
         }
         case 'file:error': {
           const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-          dispatch(setFileError({ index, name: payload.name, message: payload.message, uploadId }));
+          dispatch(
+            setFileError({
+              index,
+              name: payload.name,
+              message: payload.message,
+              uploadId,
+              tooLarge: getUploadTooLargeError({ details: payload.details }),
+            })
+          );
           break;
         }
         case 'stream:complete': {

@@ -24,6 +24,7 @@ import {
   SimpleMenu,
   SingleSelect,
   SingleSelectOption,
+  Tooltip,
   Typography,
   Link,
 } from '@strapi/design-system';
@@ -140,6 +141,50 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
     </Flex>
   );
 };
+
+const ReleaseName = ({ release, isPast }: { release: ReleaseRow; isPast: boolean }) => {
+  const textRef = React.useRef<HTMLSpanElement | null>(null);
+  const [isTruncated, setIsTruncated] = React.useState(false);
+
+  const checkTruncation = () => {
+    const el = textRef.current;
+
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    }
+  };
+
+  const attachRef = (el: HTMLSpanElement | null) => {
+    textRef.current = el;
+
+    if (el) {
+      checkTruncation();
+    }
+  };
+
+  return (
+    <Tooltip label={isTruncated ? release.name : undefined}>
+      <NameLink
+        tag={NavLink}
+        to={`${release.id}`}
+        isExternal={false}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        onPointerEnter={checkTruncation}
+        onFocus={checkTruncation}
+      >
+        <Typography ref={attachRef} textColor={isPast ? 'neutral600' : 'neutral800'} ellipsis>
+          {release.name}
+        </Typography>
+      </NameLink>
+    </Tooltip>
+  );
+};
+
+// The link is inline-flex, so it grows with the name and the ellipsis never applies
+const NameLink = styled(Link)`
+  display: block;
+  max-width: 100%;
+`;
 
 // "in 2 days" reads "In 2 days": `capitalize` would also write "Days"
 const SentenceCase = styled(Typography)`
@@ -334,7 +379,7 @@ const useReleasesFilterOptions = (): Filters.Filter[] => {
  * ReleasesSort
  * -----------------------------------------------------------------------------------------------*/
 
-const DEFAULT_SORT = 'scheduledAt:asc';
+const DEFAULT_SORT = 'scheduledAt:desc';
 // The first of the admin's page sizes
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -344,7 +389,7 @@ const SORT_OPTIONS = [
     value: 'scheduledAt:asc',
     message: {
       id: 'content-releases.pages.Releases.sort.scheduled-at-asc',
-      defaultMessage: 'Scheduled date (soonest first)',
+      defaultMessage: 'Scheduled date (earliest first)',
     },
   },
   {
@@ -530,16 +575,7 @@ const ReleasesTable = ({
                 onClick={() => navigate(`${release.id}`)}
               >
                 <Table.Cell width="30%" maxWidth="30rem">
-                  <Link
-                    tag={NavLink}
-                    to={`${release.id}`}
-                    isExternal={false}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  >
-                    <Typography textColor={isPast ? 'neutral600' : 'neutral800'} ellipsis>
-                      {release.name}
-                    </Typography>
-                  </Link>
+                  <ReleaseName release={release} isPast={isPast} />
                 </Table.Cell>
                 <Table.Cell>
                   <ReleaseStatusBadge status={release.status} />

@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -10,7 +9,6 @@ import type {
 
 import {
   buildHomepageQueryFields,
-  compactSanitizedFields,
   formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
@@ -20,7 +18,6 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
-  const permissionService = strapi.admin.services.permission;
 
   const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
     const contentType = strapi.contentTypes[uid];
@@ -63,12 +60,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const getPermittedContentTypes = async () => {
-    const readPermissions: Modules.Permissions.PermissionRule[] = await permissionService.findMany({
-      where: {
-        role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
-        action: 'plugin::content-manager.explorer.read',
-      },
-    });
+    const readPermissions: Modules.Permissions.PermissionRule[] = await strapi
+      .service('admin::permission')
+      .findMany({
+        where: {
+          role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
+          action: 'plugin::content-manager.explorer.read',
+        },
+      });
 
     // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
     // per role the user belongs to, so a multi-role user gets duplicate subjects.
@@ -195,14 +194,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       locale: '*',
     });
 
-    const sanitizedFields = compactSanitizedFields(permissionQuery.fields);
-    if (sanitizedFields !== undefined) {
-      permissionQuery.fields = sanitizedFields;
-    }
-
     return {
       permissionQuery,
-      titleField: resolveTitleField(meta.mainField, sanitizedFields),
+      titleField: resolveTitleField(meta.mainField, permissionQuery.fields),
     };
   };
 

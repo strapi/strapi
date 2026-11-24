@@ -12,6 +12,9 @@ module.exports = ({ env }) => {
     );
   }
 
+  // An empty DATABASE_FILENAME would resolve to the app root, so it falls back to the default file
+  const sqliteFilename = env('DATABASE_FILENAME', '');
+
   /** @type {Record<Core.Config.Database.ClientKind, Core.Config.Database['connection']>} */
   const connections = {
     mysql: {
@@ -57,7 +60,11 @@ module.exports = ({ env }) => {
     sqlite: {
       client: 'sqlite',
       connection: {
-        filename: path.join(__dirname, '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+        filename: path.join(
+          __dirname,
+          '..',
+          sqliteFilename === '' ? '.tmp/data.db' : sqliteFilename
+        ),
       },
       useNullAsDefault: true,
     },

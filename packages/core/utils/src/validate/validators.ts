@@ -4,8 +4,11 @@ import { pipe as pipeAsync } from '../async';
 import {
   isScalarAttribute,
   constants,
+  isComponentAttribute,
   isDynamicZoneAttribute,
+  isMediaAttribute,
   isMorphToRelationalAttribute,
+  isRelationalAttribute,
 } from '../content-types';
 import {
   traverseQueryFilters,
@@ -73,11 +76,17 @@ const arrayLimitMessage = (operator: string, path: string) =>
 const GROUP_OPERATORS = new Set(['$and', '$or']);
 
 /**
- * True when a `$and` / `$or` operand is a non-empty plain object with a key that is not an operator,
- * such as an index or an attribute name. Query conversion drops such an operand along with its
- * condition (or the database layer rejects it), so letting one through can make the query match
- * every row. An operator map, e.g. `{ title: { $and: { $eq: 'x' } } }`, is left to the scalar
- * attribute checks, and empty objects hold no condition and are sanitized out.
+ * True when the value holds a condition: anything but a plain object that holds only empty objects,
+ * at any depth. Such an object holds no condition: sanitization and query conversion remove it.
+ */
+const holdsCondition = (value: unknown): boolean =>
+  isPlainRecord(value) === false || Object.values(value).some(holdsCondition);
+
+/**
+ * True when a `$and` / `$or` operand is a plain object that holds a condition, whatever its keys:
+ * indexes, attribute names or operators. The database layer reads a group only from a list and has
+ * no attribute level `$and` / `$or`, so it rejects such an operand, and query conversion drops one
+ * with no valid key left, so letting one through can make the query match every row.
  */
 const isObjectGroupOperand = (
   operator: string,
@@ -85,7 +94,55 @@ const isObjectGroupOperand = (
 ): operand is Record<string, unknown> =>
   GROUP_OPERATORS.has(operator) === true &&
   isPlainRecord(operand) === true &&
-  Object.keys(operand).some((key) => isOperator(key) === false);
+  holdsCondition(operand) === true;
+
+/**
+ * True when the operand of a `$and` / `$or` on an attribute holds a condition. A list holds one when
+ * an item does, and `null` holds none. A list or `null` with no condition is left as it was before
+ * this check: GraphQL `or: []` on an attribute returns every row.
+ */
+const holdsAttributeGroupCondition = (operand: unknown): boolean => {
+  if (Array.isArray(operand) === true) {
+    return (operand as unknown[]).some(holdsAttributeGroupCondition);
+  }
+
+  if (operand === null || operand === undefined) {
+    return false;
+  }
+
+  return holdsCondition(operand);
+};
+
+/**
+ * Returns the first `$and` / `$or` in the operator map of an attribute, searched through `$not`, with
+ * the operator path to it, e.g. `['$not', '$or']`, when its operand is a list or a value that holds a
+ * condition. The database layer has no attribute level `$and` / `$or`, so it rejects such an operand
+ * (a 500). An object operand is left to the object operand check (`isObjectGroupOperand`).
+ */
+const findAttributeGroupOperator = (
+  operatorMap: Record<string, unknown>,
+  operatorPath: string[] = []
+): { operator: string; path: string[] } | undefined => {
+  for (const [operator, operand] of Object.entries(operatorMap)) {
+    if (
+      GROUP_OPERATORS.has(operator) === true &&
+      isPlainRecord(operand) === false &&
+      holdsAttributeGroupCondition(operand) === true
+    ) {
+      return { operator, path: [...operatorPath, operator] };
+    }
+
+    if (operator === '$not' && isPlainRecord(operand) === true) {
+      const nested = findAttributeGroupOperator(operand, [...operatorPath, operator]);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+    }
+  }
+
+  return undefined;
+};
 
 /**
  * True when a raw filter path, e.g. `title.$null.$or`, goes through the operand of an operator that
@@ -107,37 +164,93 @@ const isInOperatorOperand = (rawPath: string | null) => {
 };
 
 /**
- * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
+ * Returns the first non-empty plain object in the operand of a non-logical operator: the operand
+ * itself, or an item of its value list at any depth. An operator map is such an object too.
+ */
+const findObjectValue = (operand: unknown): Record<string, unknown> | undefined => {
+  if (Array.isArray(operand) === true) {
+    for (const item of operand as unknown[]) {
+      const found = findObjectValue(item);
+
+      if (found !== undefined) {
+        return found;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(operand) === true && Object.keys(operand).length > 0) {
+    return operand;
+  }
+
+  return undefined;
+};
+
+/**
+ * Returns the first non-logical operator, and its operand, in an operator map (or a list of them, at
+ * any depth) whose operand is a non-empty plain object, operator maps included, or holds one in its
+ * value list, e.g. `{ $eq: { a: 1 } }` or `{ $notIn: [{ $eq: 'x' }] }`.
+ * The operand of a logical operator is an operator map, or a list of them, and is searched in turn.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
- * condition, so letting one through makes the query match every row.
+ * condition, or empties the list holding them. The query then matches every row, except for a `$and` /
+ * `$or` list on a scalar attribute, which the database layer rejects with a 500.
  * Empty objects are not reported: they hold no condition, and sanitization removes them.
  */
 const findObjectOperand = (
-  filter: Record<string, unknown>
+  filter: unknown
 ): { operator: string; operand: Record<string, unknown> } | undefined => {
+  if (Array.isArray(filter) === true) {
+    for (const item of filter as unknown[]) {
+      const nested = findObjectOperand(item);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(filter) === false) {
+    return undefined;
+  }
+
   for (const [operator, operand] of Object.entries(filter)) {
-    if (
-      isOperator(operator) === false ||
-      BOOLEAN_CAST_OPERATORS.has(operator) === true ||
-      isPlainRecord(operand) === false ||
-      Object.keys(operand).length === 0
-    ) {
+    if (isOperator(operator) === false || BOOLEAN_CAST_OPERATORS.has(operator) === true) {
       continue;
     }
 
-    if (LOGICAL_OPERATORS.has(operator) === false) {
-      return { operator, operand };
+    if (LOGICAL_OPERATORS.has(operator) === true) {
+      const nested = findObjectOperand(operand);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+
+      continue;
     }
 
-    const nested = findObjectOperand(operand);
+    const objectValue = findObjectValue(operand);
 
-    if (nested !== undefined) {
-      return nested;
+    if (objectValue !== undefined) {
+      return { operator, operand: objectValue };
     }
   }
 
   return undefined;
 };
+
+/**
+ * True for the attributes whose filter can hold operators: scalar, relation, media and component
+ * attributes. Dynamic zones and morphTo relations are left to their own checks, which reject them.
+ */
+const isOperatorFilterableAttribute = (attribute: Attribute | undefined) =>
+  isScalarAttribute(attribute) === true ||
+  isMediaAttribute(attribute) === true ||
+  (isRelationalAttribute(attribute) === true &&
+    isMorphToRelationalAttribute(attribute) === false) ||
+  (isComponentAttribute(attribute) === true && isDynamicZoneAttribute(attribute) === false);
 
 export const validateFilters = asyncCurry(
   async (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
@@ -152,32 +265,59 @@ export const validateFilters = asyncCurry(
     // keys that are not attributes or valid operators
     if (include.includes('nonAttributesOperators')) {
       functionsToApply.push(
-        traverseQueryFilters(({ key, attribute, path, value }) => {
+        traverseQueryFilters(({ key, attribute, path, value, parent }) => {
           const isIdKey = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key);
+          // An operator at the root of the filters, e.g. `{ $not: { $eq: ... } }`, applies to no
+          // attribute, so the attribute checks below never see its operand
+          const isRootOperator = parent === undefined && isOperator(key) === true;
 
-          if ((isIdKey || isScalarAttribute(attribute) === true) && isPlainRecord(value)) {
-            const objectOperand = findObjectOperand(value);
+          let filter: unknown;
+          if (isIdKey || isOperatorFilterableAttribute(attribute) === true) {
+            filter = isPlainRecord(value) === true ? value : undefined;
+          } else if (isRootOperator === true) {
+            filter = { [key]: value };
+          }
+
+          // id and documentId are not schema attributes, so the attribute path stops at their parent
+          let attributePath = path.attribute ?? key;
+          if (attribute === undefined && path.attribute !== null) {
+            attributePath = `${path.attribute}.${key}`;
+          }
+
+          if (filter !== undefined) {
+            const objectOperand = findObjectOperand(filter);
 
             if (objectOperand !== undefined) {
               const { operator, operand } = objectOperand;
-              // id and documentId are not schema attributes, so the attribute path stops at their parent
-              let operandPath = path.attribute ?? key;
-              if (attribute === undefined && path.attribute !== null) {
-                operandPath = `${path.attribute}.${key}`;
-              }
 
               // A REST list longer than the `strapi::query` middleware's `arrayLimit` reaches us as an
               // object keyed by index, so name the limit instead of the object
               if (hasOnlyIndexKeys(operand) === true) {
-                throw new ValidationError(arrayLimitMessage(operator, operandPath), {
+                throw new ValidationError(arrayLimitMessage(operator, attributePath), {
                   key: operator,
-                  path: operandPath,
+                  path: attributePath,
                 });
               }
 
               throw new ValidationError(
-                `Invalid operand for ${operator} at ${operandPath}: expected a value, not an object`,
-                { key: operator, path: operandPath }
+                `Invalid operand for ${operator} at ${attributePath}: expected a value, not an object`,
+                { key: operator, path: attributePath }
+              );
+            }
+          }
+
+          // The database layer has no attribute level `$and` / `$or`: a list or a value fails there too.
+          // The object form is left to the check below
+          if (filter !== undefined && (isIdKey === true || isScalarAttribute(attribute) === true)) {
+            const groupOperator = findAttributeGroupOperator(filter as Record<string, unknown>);
+
+            if (groupOperator !== undefined) {
+              const { operator } = groupOperator;
+              const operatorPath = [attributePath, ...groupOperator.path].join('.');
+
+              throw new ValidationError(
+                `Invalid operator ${operator} at ${operatorPath}: use $and and $or at the root of the filters or under a relation, not on an attribute`,
+                { key: operator, path: operatorPath }
               );
             }
           }
@@ -198,8 +338,10 @@ export const validateFilters = asyncCurry(
               });
             }
 
+            // Only name the places where the database layer reads a list of filters: under a scalar
+            // attribute, the list form is not supported either
             throw new ValidationError(
-              `Invalid operand for ${key} at ${operandPath}: expected an array of filters, not an object`,
+              `Invalid operand for ${key} at ${operandPath}: expected a list of filters, at the root of the filters or under a relation, not an object`,
               { key, path: operandPath }
             );
           }

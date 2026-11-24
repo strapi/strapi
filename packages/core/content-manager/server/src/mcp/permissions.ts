@@ -126,7 +126,6 @@ export const getComponentLeafPaths = (
   for (const [key, attr] of Object.entries(component.attributes)) {
     if (key === 'id') {
       // skip system id field — it is not a user-facing permission path
-      // eslint-disable-next-line no-continue
       continue;
     }
     const fieldPath = `${prefix}.${key}`;
