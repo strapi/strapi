@@ -778,6 +778,50 @@ describe('useInfiniteAssets', () => {
       expect(getResult().isLoading).toBe(true);
       expect(getResult().assets).toHaveLength(0);
     });
+
+    it('keeps the folder rows rendered on the first keystroke of a folder search', () => {
+      const folderPage1 = createMockPage(1, 1, 2, 2);
+
+      mockUseGetAssetsQuery.mockImplementation(({ search }: { search?: string }) =>
+        search
+          ? {
+              data: folderPage1.data,
+              currentData: undefined,
+              isLoading: false,
+              isFetching: true,
+              error: undefined,
+            }
+          : folderPage1
+      );
+
+      let hookResult: ReturnType<typeof useInfiniteAssets>;
+      let startSearch: () => void;
+
+      const FolderSearchWrapper = () => {
+        const [search, setSearch] = useState<string | undefined>(undefined);
+        hookResult = useInfiniteAssets({
+          folder: 1,
+          search,
+          searchFolderPath: search ? '/1' : undefined,
+        });
+        startSearch = () => setSearch('cat');
+
+        return null;
+      };
+
+      render(createElement(FolderSearchWrapper));
+
+      expect(hookResult!.assets).toHaveLength(2);
+
+      act(() => startSearch());
+
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ folder: 1, search: 'cat', searchFolderPath: '/1' }),
+        expect.anything()
+      );
+      expect(hookResult!.isLoading).toBe(false);
+      expect(hookResult!.assets).toHaveLength(2);
+    });
   });
 
   it('renders an asset that appears in two pages once, in its first position', () => {

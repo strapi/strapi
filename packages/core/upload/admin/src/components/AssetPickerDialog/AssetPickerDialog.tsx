@@ -189,7 +189,7 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
                   isSearchingAll={isSearchingAll}
                   onSearchingAllChange={setSearchingAll}
                   resultCount={
-                    isLoadingAssets || isLoadingFolders
+                    isLoadingAssets || isLoadingFolders || assetsError
                       ? undefined
                       : folders.length + (pagination?.total ?? 0)
                   }

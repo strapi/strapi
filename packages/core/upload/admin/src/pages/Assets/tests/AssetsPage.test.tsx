@@ -725,13 +725,18 @@ describe('AssetsPage search', () => {
 
       await screen.findByRole('switch', { name: 'Search all media' });
       expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
+      const statusesWhileLoading = screen.getAllByRole('status');
 
       releaseFolder();
 
       await waitFor(async () => expect(await findResultCount()).toHaveTextContent('1 result'));
+      const resultCount = screen.getByText(RESULT_COUNT_PATTERN);
+      expect(resultCount).toHaveAttribute('role', 'status');
+      expect(statusesWhileLoading).toContain(resultCount);
     });
 
     it('shows an error rather than loading forever when the folder request fails', async () => {
+      const requests = captureListRequests();
       server.use(
         http.get('*/upload/folders/:id', () =>
           HttpResponse.json({ error: { status: 500, name: 'ApplicationError' } }, { status: 500 })
@@ -743,6 +748,9 @@ describe('AssetsPage search', () => {
       expect(
         await screen.findByText('An error occurred while fetching assets.')
       ).toBeInTheDocument();
+      expect(searchesFor(requests.files)).toHaveLength(0);
+      expect(searchesFor(requests.folders)).toHaveLength(0);
+      expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
     });
 
     it('widens the search and records it in the URL when the switch is turned on', async () => {
