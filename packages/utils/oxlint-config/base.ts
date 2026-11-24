@@ -1,5 +1,8 @@
 import type { OxlintConfig } from 'oxlint';
 
+const LODASH_STRING_ARRAY_MESSAGE =
+  'Use native String.prototype.toLowerCase / toUpperCase / trim / trimStart / trimEnd / padEnd / padStart and Array.prototype.includes / every. Lodash coerces input to a string (null/undefined become "") and returns false / true for nullish collections, so coerce or guard untrusted input (e.g. `String(x ?? "")`). For trim with custom chars use a regex replace; lodash includes also searches object values; lodash every accepts shorthand predicates and visits sparse-array holes, which native every skips (use `Array.from(arr).every(...)` for untrusted arrays such as auth scopes).';
+
 /**
  * Shared baseline applied to every file in the monorepo.
  *
@@ -17,9 +20,6 @@ import type { OxlintConfig } from 'oxlint';
  * enabling it only produced ~500 test-only diagnostics with no ESLint parity
  * signal. Revisit after an intentional Jest/Vitest ESLint policy exists.
  */
-const LODASH_STRING_ARRAY_MESSAGE =
-  'Use native String.prototype.toLowerCase / toUpperCase / trim / trimStart / trimEnd / padEnd / padStart and Array.prototype.includes / every. Lodash coerces input to a string (null/undefined become "") and returns false / true for nullish collections, so coerce or guard untrusted input (e.g. `String(x ?? "")`). For trim with custom chars use a regex replace; lodash includes also searches object values; lodash every accepts shorthand predicates and visits sparse-array holes, which native every skips (use `Array.from(arr).every(...)` for untrusted arrays such as auth scopes).';
-
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
   jsPlugins: ['./no-lodash-fp.js'],
