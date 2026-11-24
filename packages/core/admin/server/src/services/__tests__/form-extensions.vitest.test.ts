@@ -371,4 +371,107 @@ describe('Form extensions service', () => {
 
     expect(ids).toEqual([7, 7, 7, 7, 7, '7.5', '9007199254740993', 'abc']);
   });
+
+  describe('read-only reasons', () => {
+    const user = { id: 1 } as never;
+
+    test('marks the entities a plugin gives a reason for, and leaves the others as they are', async () => {
+      const formExtensions = formExtensionsService();
+      const seen: unknown[] = [];
+      formExtensions.unstable_addReadOnlyReasons('role', {
+        spaces(args) {
+          seen.push(args);
+          return args.entityId === 2 ? 'Shared roles are edited in the Control center.' : null;
+        },
+      });
+
+      const roles = [
+        { id: 1, name: 'Editor' },
+        { id: 2, name: 'Shared' },
+      ];
+      const marked = await formExtensions.internal_markReadOnly('role', roles, { user });
+
+      expect(marked[0]).toBe(roles[0]);
+      expect(marked[1]).toEqual({
+        id: 2,
+        name: 'Shared',
+        readOnly: true,
+        readOnlyReason: 'Shared roles are edited in the Control center.',
+      });
+      expect(seen).toEqual([
+        { user, entityId: 1 },
+        { user, entityId: 2 },
+      ]);
+    });
+
+    test('takes the first reason in the order plugins added them', async () => {
+      const formExtensions = formExtensionsService();
+      formExtensions.unstable_addReadOnlyReasons('role', {
+        spaces: () => undefined,
+        teams: () => 'Team roles are edited by the team owner.',
+        labels: () => 'Labelled roles are locked.',
+      });
+
+      const [role] = await formExtensions.internal_markReadOnly('role', [{ id: 1 }], { user });
+
+      expect(role).toEqual({
+        id: 1,
+        readOnly: true,
+        readOnlyReason: 'Team roles are edited by the team owner.',
+      });
+    });
+
+    test('refuses a change to a read-only entity with the reason', async () => {
+      const formExtensions = formExtensionsService();
+      formExtensions.unstable_addReadOnlyReasons('role', {
+        spaces: ({ entityId }) => (entityId === 2 ? 'Shared roles are edited elsewhere.' : null),
+      });
+
+      await expect(
+        formExtensions.internal_assertNotReadOnly('role', [{ id: 1 }], { user })
+      ).resolves.toBeUndefined();
+
+      const error = await formExtensions
+        .internal_assertNotReadOnly('role', [{ id: 1 }, { id: 2 }], { user })
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(errors.ApplicationError);
+      expect(error.message).toBe('Shared roles are edited elsewhere.');
+      expect(error.details).toEqual({ readOnly: true });
+    });
+
+    test('changes nothing when no plugin added a reason', async () => {
+      const formExtensions = formExtensionsService();
+      const roles = [{ id: 1 }];
+
+      await expect(formExtensions.internal_markReadOnly('role', roles, { user })).resolves.toEqual([
+        roles[0],
+      ]);
+      await expect(
+        formExtensions.internal_assertNotReadOnly('role', roles, { user })
+      ).resolves.toBeUndefined();
+    });
+
+    test('refuses other forms, a reason added twice, and a reason that is not a string', async () => {
+      const formExtensions = formExtensionsService();
+
+      expect(() =>
+        formExtensions.unstable_addReadOnlyReasons('user', { spaces: () => null })
+      ).toThrow('"user" entities cannot be read-only');
+      expect(() =>
+        // @ts-expect-error - not a function
+        formExtensions.unstable_addReadOnlyReasons('role', { spaces: 'Shared' })
+      ).toThrow('the reason of "spaces" must be a function');
+
+      // @ts-expect-error - a plugin that returns true instead of a reason
+      formExtensions.unstable_addReadOnlyReasons('role', { spaces: () => true });
+
+      expect(() =>
+        formExtensions.unstable_addReadOnlyReasons('role', { spaces: () => null })
+      ).toThrow('a reason of "spaces" has already been added to the role form');
+      await expect(
+        formExtensions.internal_markReadOnly('role', [{ id: 1 }], { user })
+      ).rejects.toThrow('the read-only reason of "spaces" must be a string');
+    });
+  });
 });

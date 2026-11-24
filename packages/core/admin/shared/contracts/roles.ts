@@ -7,7 +7,12 @@ export type SanitizedPermission = Pick<
   'id' | 'action' | 'actionParameters' | 'subject' | 'properties' | 'conditions'
 >;
 
-type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: number };
+type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & {
+  usersCount?: number;
+  /** Set when a plugin makes the role read-only, with `unstable_addReadOnlyReasons` */
+  readOnly?: boolean;
+  readOnlyReason?: string;
+};
 
 /**
  * GET /roles/:id/permissions - Get the permissions of a role

@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main } from '@strapi/design-system';
+import { Alert, Box, Button, Flex, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { Navigate, useMatch } from 'react-router-dom';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
@@ -183,7 +184,9 @@ const EditPage = () => {
     }
   };
 
-  const isFormDisabled = !isRoleLoading && role.code === SUPER_ADMIN_CODE;
+  // A plugin made the role read-only: it opens like the Super Admin role, with the plugin's reason
+  const isReadOnly = !isRoleLoading && role.readOnly === true;
+  const isFormDisabled = (!isRoleLoading && role.code === SUPER_ADMIN_CODE) || isReadOnly;
 
   if (isLoadingPermissionsLayout || isRoleLoading || isLoadingPermissions || !permissionsLayout) {
     return <Page.Loading />;
@@ -218,7 +221,7 @@ const EditPage = () => {
                 <Button
                   type="submit"
                   startIcon={<Check />}
-                  disabled={role.code === SUPER_ADMIN_CODE || hasLocaleValidationErrors}
+                  disabled={isFormDisabled || hasLocaleValidationErrors}
                   loading={isSubmitting}
                   fullWidth
                 >
@@ -228,10 +231,17 @@ const EditPage = () => {
                   })}
                 </Button>
               }
-              title={formatMessage({
-                id: 'Settings.roles.edit.title',
-                defaultMessage: 'Edit a role',
-              })}
+              title={
+                isReadOnly
+                  ? formatMessage({
+                      id: 'Settings.roles.view.title',
+                      defaultMessage: 'View a role',
+                    })
+                  : formatMessage({
+                      id: 'Settings.roles.edit.title',
+                      defaultMessage: 'Edit a role',
+                    })
+              }
               subtitle={formatMessage({
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
@@ -245,6 +255,17 @@ const EditPage = () => {
             />
             <Layouts.Content>
               <Flex direction="column" alignItems="stretch" gap={6}>
+                {isReadOnly && role.readOnlyReason ? (
+                  <ReadOnlyAlert
+                    variant="default"
+                    closeLabel={formatMessage({
+                      id: 'app.utils.close-label',
+                      defaultMessage: 'Close',
+                    })}
+                  >
+                    {role.readOnlyReason}
+                  </ReadOnlyAlert>
+                ) : null}
                 <RoleForm
                   disabled={isFormDisabled}
                   errors={errors}
@@ -272,6 +293,13 @@ const EditPage = () => {
     </Main>
   );
 };
+
+// The reason stays while the role is read-only: hide the close button, as the Releases limit alert does
+const ReadOnlyAlert = styled(Alert)`
+  button {
+    display: none;
+  }
+`;
 
 const ProtectedEditPage = () => {
   const permissions = useTypedSelector(

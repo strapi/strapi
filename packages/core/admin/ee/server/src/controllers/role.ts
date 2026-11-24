@@ -38,6 +38,12 @@ export default {
 
     const roleService = getService('role');
 
+    await getService('form-extensions').internal_assertNotReadOnly(
+      'role',
+      await roleService.find({ id }, []),
+      { user: ctx.state.user }
+    );
+
     const roles = await roleService.deleteByIds([id]);
 
     const sanitizedRole = roles.map((role: unknown) => roleService.sanitizeRole(role))[0] || null;
@@ -57,6 +63,12 @@ export default {
     await validateRolesDeleteInput(body);
 
     const roleService = getService('role');
+
+    await getService('form-extensions').internal_assertNotReadOnly(
+      'role',
+      await roleService.find({ id: { $in: body.ids } }, []),
+      { user: ctx.state.user }
+    );
 
     const roles = await roleService.deleteByIds(body.ids);
     const sanitizedRoles = roles.map(roleService.sanitizeRole);

@@ -38,6 +38,17 @@ interface FormInputParam<TSchema extends z.ZodType = z.ZodType> {
 
 type ResolvedInputParam = Omit<FormInputParam, 'schema'> & { schema?: z.ZodType };
 
+/**
+ * Why a plugin keeps an entity from being changed, or nothing to let core change it. The reason
+ * is shown to the admin user, so write it for them.
+ */
+type ReadOnlyReason = (
+  args: Omit<FormContext, 'entityId'> & { entityId: Data.ID }
+) => string | null | undefined | Promise<string | null | undefined>;
+
+/** The forms whose entities a plugin can make read-only */
+const READ_ONLY_FORMS: ExtensibleForm[] = ['role'];
+
 type Save = <TEntity extends { id: Data.ID } | null>(
   saveEntity: () => Promise<TEntity>
 ) => Promise<TEntity>;
@@ -250,10 +261,107 @@ const formExtensionsService = () => {
     return { data: nextData as TData, save };
   };
 
-  return { unstable_addInputParams: addInputParams, internal_prepare: prepare };
+  const readOnlyReasons = Object.fromEntries(FORMS.map((form) => [form, new Map()])) as Record<
+    ExtensibleForm,
+    Map<string, ReadOnlyReason>
+  >;
+
+  /**
+   * Lets plugins make some entities of a core admin form read-only, with a reason. Keys are plugin
+   * ids. Core shows the reason and refuses changes to those entities.
+   */
+  const addReadOnlyReasons = (form: ExtensibleForm, options: Record<string, ReadOnlyReason>) => {
+    if (!READ_ONLY_FORMS.includes(form)) {
+      throw new Error(
+        `formExtensions.addReadOnlyReasons: "${form}" entities cannot be read-only. Use one of: ${READ_ONLY_FORMS.join(', ')}`
+      );
+    }
+
+    for (const [pluginId, getReason] of Object.entries(options)) {
+      if (typeof getReason !== 'function') {
+        throw new Error(
+          `formExtensions.addReadOnlyReasons: the reason of "${pluginId}" must be a function`
+        );
+      }
+
+      if (readOnlyReasons[form].has(pluginId)) {
+        throw new Error(
+          `formExtensions.addReadOnlyReasons: a reason of "${pluginId}" has already been added to the ${form} form`
+        );
+      }
+
+      readOnlyReasons[form].set(pluginId, getReason);
+    }
+  };
+
+  /** The first reason a plugin gives, in the order they were added, or null */
+  const getReadOnlyReason = async (
+    form: ExtensibleForm,
+    entity: { id: Data.ID },
+    { user }: Pick<FormContext, 'user'>
+  ) => {
+    for (const [pluginId, getReason] of readOnlyReasons[form]) {
+      const reason = await getReason({ user, entityId: entity.id });
+
+      if (reason !== null && reason !== undefined && typeof reason !== 'string') {
+        throw new Error(
+          `formExtensions: the read-only reason of "${pluginId}" must be a string, null or undefined`
+        );
+      }
+
+      if (reason) {
+        return reason;
+      }
+    }
+
+    return null;
+  };
+
+  /**
+   * For core's controllers, not plugins. Adds `readOnly` and `readOnlyReason` to the entities a
+   * plugin makes read-only, and leaves the others as they are.
+   */
+  const markReadOnly = async <TEntity extends { id: Data.ID }>(
+    form: ExtensibleForm,
+    entities: TEntity[],
+    context: Pick<FormContext, 'user'>
+  ) =>
+    Promise.all(
+      entities.map(async (entity) => {
+        const readOnlyReason = await getReadOnlyReason(form, entity, context);
+
+        return readOnlyReason ? { ...entity, readOnly: true, readOnlyReason } : entity;
+      })
+    );
+
+  /**
+   * For core's controllers, not plugins. Refuses a change to entities a plugin makes read-only,
+   * like core refuses to change the Super Admin role.
+   */
+  const assertNotReadOnly = async (
+    form: ExtensibleForm,
+    entities: Array<{ id: Data.ID }>,
+    context: Pick<FormContext, 'user'>
+  ) => {
+    for (const entity of entities) {
+      const readOnlyReason = await getReadOnlyReason(form, entity, context);
+
+      if (readOnlyReason) {
+        throw new errors.ApplicationError(readOnlyReason, { readOnly: true });
+      }
+    }
+  };
+
+  return {
+    unstable_addInputParams: addInputParams,
+    unstable_addReadOnlyReasons: addReadOnlyReasons,
+    internal_prepare: prepare,
+    internal_markReadOnly: markReadOnly,
+    internal_assertNotReadOnly: assertNotReadOnly,
+  };
 };
 
 type FormExtensionsService = ReturnType<typeof formExtensionsService>;
 
 export default formExtensionsService;
-export type { ExtensibleForm, FormContext, FormExtensionsService, FormInputParam };
+export type { ExtensibleForm, FormContext, FormExtensionsService, FormInputParam, ReadOnlyReason };

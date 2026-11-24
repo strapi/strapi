@@ -61,6 +61,39 @@ describe('Roles | EditPage', () => {
     await waitFor(() => expect(getEmailSettingsCheckbox()).toBeDisabled());
   });
 
+  it('opens a role a plugin made read-only for viewing, with the reason', async () => {
+    const reason = 'Shared roles are edited in the Control center.';
+
+    server.use(
+      http.get('/admin/roles/1', () =>
+        HttpResponse.json({
+          data: {
+            id: 1,
+            code: 'shared-reviewer',
+            name: 'Shared reviewer',
+            description: '',
+            readOnly: true,
+            readOnlyReason: reason,
+          },
+        })
+      )
+    );
+
+    renderEditPage('strapi-editor');
+
+    expect(await screen.findByRole('heading', { name: 'View a role' })).toBeInTheDocument();
+    expect(screen.getByText(reason)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Name' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('opens a role with no reason for editing, as before', async () => {
+    renderEditPage('strapi-editor');
+
+    expect(await screen.findByRole('heading', { name: 'Edit a role' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Name' })).toBeEnabled();
+  });
+
   it('lets a super admin grant any permission', async () => {
     const { user } = renderEditPage(SUPER_ADMIN_CODE);
 

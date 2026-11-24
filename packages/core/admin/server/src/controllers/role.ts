@@ -57,8 +57,12 @@ export default {
       return ctx.notFound('role.notFound');
     }
 
+    const [data] = await getService('form-extensions').internal_markReadOnly('role', [role], {
+      user: ctx.state.user,
+    });
+
     ctx.body = {
-      data: role,
+      data,
     } satisfies FindRole.Response;
   },
 
@@ -80,7 +84,9 @@ export default {
     const roles = await getService('role').findAllWithUsersCount(sanitizedQuery);
 
     ctx.body = {
-      data: roles,
+      data: await getService('form-extensions').internal_markReadOnly('role', roles, {
+        user: ctx.state.user,
+      }),
     } satisfies FindRoles.Response;
   },
 
@@ -109,6 +115,10 @@ export default {
     if (role.code === SUPER_ADMIN_CODE) {
       throw new ApplicationError("Super admin can't be edited.");
     }
+
+    await getService('form-extensions').internal_assertNotReadOnly('role', [role], {
+      user: ctx.state.user,
+    });
 
     const updatedRole = await save(() => roleService.update({ id }, body));
     const sanitizedRole = roleService.sanitizeRole(updatedRole) as Omit<
@@ -168,6 +178,10 @@ export default {
       throw new ApplicationError("Super admin permissions can't be edited.");
     }
 
+    await getService('form-extensions').internal_assertNotReadOnly('role', [role], {
+      user: ctx.state.user,
+    });
+
     await validatedUpdatePermissionsInput(input);
 
     const normalizedPermissions = (await roleService.hooks.willValidateUpdatePermissions.call(
@@ -212,6 +226,12 @@ export default {
 
     const roleService = getService('role');
 
+    await getService('form-extensions').internal_assertNotReadOnly(
+      'role',
+      await roleService.find({ id }, []),
+      { user: ctx.state.user }
+    );
+
     const roles = await roleService.deleteByIds([id]);
 
     const sanitizedRole = roles.map((role) => roleService.sanitizeRole(role))[0] || null;
@@ -231,6 +251,12 @@ export default {
     await validateRolesDeleteInput(body);
 
     const roleService = getService('role');
+
+    await getService('form-extensions').internal_assertNotReadOnly(
+      'role',
+      await roleService.find({ id: { $in: body.ids } }, []),
+      { user: ctx.state.user }
+    );
 
     const roles = await roleService.deleteByIds(body.ids);
     const sanitizedRoles = roles.map(roleService.sanitizeRole);

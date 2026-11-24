@@ -39,4 +39,5 @@ export type {
   ExtensibleForm as unstable_ExtensibleForm,
   FormExtensionsService as unstable_FormExtensionsService,
   FormInputParam as unstable_FormInputParam,
+  ReadOnlyReason as unstable_ReadOnlyReason,
 } from './services/form-extensions';

@@ -1,6 +1,6 @@
 ---
 title: Admin form extensions
-description: 'How a plugin sends, checks and saves its own values with the role, user and API token forms.'
+description: 'How a plugin sends, checks and saves its own values with the role, user and API token forms, and makes some roles read-only.'
 status: draft
 review_notes:
   - New experimental API, written with the code; needs a maintainer review.
@@ -75,6 +75,24 @@ Form extensions are not an access-control hook: only the role, user and content 
 - deletes of roles, users and tokens.
 
 A plugin that needs values for every user handles the users created elsewhere itself, for example with a default.
+
+## Read-only roles
+
+A plugin can make some roles read-only, with a reason the admin shows:
+
+```ts
+formExtensions.unstable_addReadOnlyReasons('role', {
+  'my-plugin': async ({ entityId, user }) =>
+    (await isShared(entityId)) ? 'Shared roles are edited in the Control center.' : null,
+});
+```
+
+- Only the `role` form takes reasons for now; other forms throw. Adding the same plugin id twice throws.
+- The function gets the role's `entityId` (its id, a number) and the admin `user` of the request. It returns the reason, a string written for the admin user, or `null` or `undefined` to leave the role editable. Anything else, or an error, is a plugin bug and answers 500, and since it runs for every role of `GET /admin/roles`, every screen that lists roles fails with it. With several plugins, the first reason, in the order they were added, wins. Core calls it once per role on each request: a plugin with many roles caches or batches its lookups.
+- `GET /admin/roles` and `GET /admin/roles/:id` add `readOnly: true` and `readOnlyReason` to the roles that have a reason. Other roles, and every role when no plugin adds a reason, are answered as before.
+- Core refuses `PUT /admin/roles/:id`, `PUT /admin/roles/:id/permissions`, `DELETE /admin/roles/:id` and `POST /admin/roles/batch-delete` for a read-only role with a 400 whose message is the reason, after its own checks and the plugin input checks, so a missing role, the Super Admin role and a role still assigned to users answer as before. A batch with one read-only role deletes nothing.
+- The admin shows a read-only role with "View" instead of "Edit" in the list, without "Delete", and opens it as "View a role": the form is disabled, as for the Super Admin role, and the reason shows above it. Duplicating it is still possible.
+- Like the rest of this page, it is not an access-control hook: it covers these routes only. Code that changes roles through the role service, the database, or another route does not ask for reasons.
 
 ## Related
 

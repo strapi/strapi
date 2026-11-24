@@ -12,7 +12,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
+import { Duplicate, Eye, Pencil, Plus, Trash } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -241,10 +241,25 @@ const ListPage = () => {
                       canUpdate &&
                         ({
                           onClick: () => navigate(role.id.toString()),
-                          label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-                          children: <Pencil />,
+                          // A plugin made the role read-only: it opens, but cannot change
+                          ...(role.readOnly
+                            ? {
+                                label: formatMessage({
+                                  id: 'app.utils.view',
+                                  defaultMessage: 'View',
+                                }),
+                                children: <Eye />,
+                              }
+                            : {
+                                label: formatMessage({
+                                  id: 'app.utils.edit',
+                                  defaultMessage: 'Edit',
+                                }),
+                                children: <Pencil />,
+                              }),
                         } satisfies RoleRowProps['icons'][number]),
                       canDelete &&
+                        !role.readOnly &&
                         ({
                           onClick: handleClickDelete(role),
                           label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
