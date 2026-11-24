@@ -64,7 +64,7 @@ test('lists the published articles', async () => {
 
 The cli suite has no `helpers.ts`. Replace the `../helpers` import with the lines below, name the
 app `cli-<domain>-${worker}`, and call the server with
-`` fetch(`${server.url}/…`) ``:
+`fetch(server.url + '/…')`:
 
 ```ts
 import { appPort } from '@strapi/tests-shared';
