@@ -143,12 +143,13 @@ export async function runInstall({ rootPath, packageManager }: Scope) {
     // Do not wait longer: a background process can keep the pipe open for a long time.
     await waitAtMost(outputDone, OUTPUT_DRAIN_TIMEOUT_MS);
 
-    // Release our end of the pipes, so a process that still holds them cannot keep the CLI alive
+    throw new InstallError(error, tail.read());
+  } finally {
+    // Release our end of the pipes, on success and on failure.
+    // A background process that still holds them must not keep the CLI alive.
     proc.all?.destroy();
     proc.stdout?.destroy();
     proc.stderr?.destroy();
-
-    throw new InstallError(error, tail.read());
   }
 }
 

@@ -133,6 +133,17 @@ describe('runInstall', () => {
     expect(error.output.startsWith('line ')).toBe(true);
   });
 
+  it('releases the pipes when the install succeeds while the output stays open', async () => {
+    const proc = fakeProcess(['added 1 package\n'], undefined, { keepOutputOpen: true });
+    execaMock.mockReturnValue(proc);
+
+    await runInstall(scope);
+
+    expect(proc.all?.destroyed).toBe(true);
+    expect(proc.stdout?.destroyed).toBe(true);
+    expect(proc.stderr?.destroyed).toBe(true);
+  });
+
   it('does not wait for the output to end longer than the time limit', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
@@ -158,6 +169,8 @@ describe('runInstall', () => {
       expect(error).toBeInstanceOf(InstallError);
       expect(error.output).toBe('npm error the real error\n');
       expect(proc.all?.destroyed).toBe(true);
+      expect(proc.stdout?.destroyed).toBe(true);
+      expect(proc.stderr?.destroyed).toBe(true);
     } finally {
       vi.useRealTimers();
     }
