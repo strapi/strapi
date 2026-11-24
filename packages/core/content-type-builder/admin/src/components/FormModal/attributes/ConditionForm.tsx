@@ -412,10 +412,18 @@ export const ConditionForm = ({
                 })}
               >
                 <SingleSelectOption value="show">
-                  Show <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
+                  {formatMessage({
+                    id: getTrad('form.attribute.condition.action.show'),
+                    defaultMessage: 'Show',
+                  })}{' '}
+                  <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
                 </SingleSelectOption>
                 <SingleSelectOption value="hide">
-                  Hide <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
+                  {formatMessage({
+                    id: getTrad('form.attribute.condition.action.hide'),
+                    defaultMessage: 'Hide',
+                  })}{' '}
+                  <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
                 </SingleSelectOption>
               </SingleSelect>
             </Field.Root>

@@ -1,6 +1,8 @@
 import { Button, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { getTrad } from '../utils/getTrad';
+
 interface ApplyConditionButtonProps {
   disabled?: boolean;
   tooltipMessage?: string;
@@ -26,7 +28,7 @@ export const ApplyConditionButton = ({
       startIcon={<span aria-hidden>＋</span>}
     >
       {formatMessage({
-        id: 'form.attribute.condition.apply',
+        id: getTrad('form.attribute.condition.apply'),
         defaultMessage: 'Apply condition',
       })}
     </Button>
