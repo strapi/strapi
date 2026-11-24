@@ -10,7 +10,10 @@ import { editionFromEnv, getInstanceFeatures, requireFeatures } from './index';
 
 declare module 'vitest' {
   interface TaskMeta {
-    /** Set by `describeEE` on its block, and so on its tests, when the run is CE. */
+    /**
+     * Set by `describeEE` on its block, and so on its tests, in every run: `true` only when the
+     * block is skipped because the run is CE, `false` in EE runs.
+     */
     skippedForEdition?: boolean;
   }
 }
