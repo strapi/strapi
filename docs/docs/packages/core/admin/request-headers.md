@@ -29,6 +29,7 @@ Requests that do not get the headers:
 - The token refresh call to `/admin/access-token` in `postAccessToken`, which does not use the fetch client.
 - The call to `/content-manager/preview/script` in [`Preview.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/preview/pages/Preview.tsx). It uses a plain `fetch`.
 - The call to `/admin/project-type` in [`browserStrapi.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/utils/browserStrapi.ts). It runs before the plugins register.
+- Asset downloads and media URLs in the upload package. [`downloadFile.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/downloadFile.ts) and its legacy copy use a plain `fetch`.
 - A plugin's own `fetch` or `XMLHttpRequest`. Code that does not use the fetch client must call `unstable_getRequestHeaders()` and add the result to its request.
 
 ## How the headers are merged
@@ -47,7 +48,7 @@ A value that is `undefined` or `null` only skips the entry of that provider. If 
 
 A call reads the providers once, when it starts. The retry after a 401 sends the same values as the first attempt. Without this, a write sent while the tab worked in one space could be replayed in another space if the tab switched while the token refreshed. `uploadFileViaXHR` also reads the providers once and reuses them for its retry.
 
-A new Media Library drop reads the providers once, when the user drops the files. All files of the drop and all retries of these files send the same values, also when the tab switches space while the drop uploads. If the read fails, every file of the drop shows an upload error and no file is sent. A retry then reads the providers again, once for the whole drop, and all later retries of the drop send these values. `uploadFileViaXHR` reads the providers itself only when its caller does not give it the headers. The legacy Media Library (`useLegacyMediaLibrary`) does not give them, so it reads the providers once per file.
+A new Media Library drop reads the providers once, when the user drops the files. All files of the drop and all retries of these files send the same values, also when the tab switches space while the drop uploads. If the read fails, every file of the drop shows an upload error and no file is sent. A retry then reads the providers again, once for the whole drop, and all later retries of the drop send these values. In a media field, when the failed row is no longer in the upload store, Retry starts a new drop with the same file, so it reads the providers again. `uploadFileViaXHR` reads the providers itself only when its caller does not give it the headers. The legacy Media Library (`useLegacyMediaLibrary`) does not give them, so it reads the providers once per file.
 
 ## When a provider fails
 
@@ -55,7 +56,7 @@ If a provider throws, returns a value that is not a plain object (for example a 
 
 When a provider has no context yet, for example before the user selects a space, it returns `undefined` for the header. It throws only on a real failure. A provider that throws too early also blocks requests such as `/admin/users/me`, so the admin cannot see that a stale session ended.
 
-The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. The RTK Query base query returns the error as a `SerializedError` named `RequestHeadersError`, so check `error.name` there. `instanceof RequestHeadersError` works only for errors from `getFetchClient` or `unstable_getRequestHeaders`.
+The request fails instead of going out without the header, because the server could then run it in the wrong context, for example the default space. For endpoints that use the admin base query, RTK Query returns the error as a `SerializedError` named `RequestHeadersError`, so check `error.name` there. The upload mutations have their own `queryFn`: `uploadFiles` and `uploadFromUrls` mark the rows as failed, and `uploadFromUrls` and `uploadFileSilently` return an `UnknownError`. `instanceof RequestHeadersError` works only for errors from `getFetchClient` or `unstable_getRequestHeaders`.
 
 ## CORS
 
