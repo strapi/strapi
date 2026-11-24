@@ -299,7 +299,7 @@ export default {
    *
    * Component and document relations are dealt a bit differently (they don't have a document_id).
    */
-  async findAvailable(ctx: any) {
+  async findAvailable(ctx) {
     const { id } = ctx.request.query;
 
     await validateFindAvailable(ctx.request.query);
@@ -449,7 +449,7 @@ export default {
     };
   },
 
-  async findExisting(ctx: any) {
+  async findExisting(ctx) {
     const { userAbility } = ctx.state;
     const { id } = ctx.params;
 
