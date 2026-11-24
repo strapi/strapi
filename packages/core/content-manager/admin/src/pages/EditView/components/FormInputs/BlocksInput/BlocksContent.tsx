@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useIsMobile } from '@strapi/admin/strapi-admin';
+import { useIsMobile, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
   Box,
   BoxComponent,
@@ -21,10 +21,13 @@ import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop'
 import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
+import { createDroppedImagesInserter } from './Blocks/Image';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
+
+import type { Schema } from '@strapi/types';
 
 const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
@@ -374,6 +377,14 @@ const baseRenderElement = ({
 
 const dragNoop = () => true;
 
+interface FileDropZoneProps {
+  children: React.ReactNode;
+  allowedTypes: Schema.Attribute.MediaKind[];
+  onDropFiles: (
+    event: React.DragEvent<HTMLElement>
+  ) => (asset: Schema.Attribute.MediaValue<true>[number]) => void;
+}
+
 interface BlocksContentProps {
   placeholder?: string;
   ariaLabelId: string;
@@ -396,6 +407,12 @@ const BlocksContent = ({
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
+  // Registered by the Media Library: uploads files dropped onto the content
+  // and hands them back to be inserted as image blocks.
+  const FileDropZone = useStrapiApp(
+    'BlocksContent',
+    (state) => state.components?.['media-library-file-drop-zone']
+  ) as React.ComponentType<FileDropZoneProps> | undefined;
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -619,7 +636,7 @@ const BlocksContent = ({
     }
   }, [editor]);
 
-  return (
+  const content = (
     <Box
       ref={blocksRef}
       grow={1}
@@ -656,6 +673,19 @@ const BlocksContent = ({
       />
       {modalElement}
     </Box>
+  );
+
+  if (!FileDropZone || disabled) {
+    return content;
+  }
+
+  return (
+    <FileDropZone
+      allowedTypes={['images']}
+      onDropFiles={(event) => createDroppedImagesInserter(editor, event)}
+    >
+      {content}
+    </FileDropZone>
   );
 };
 

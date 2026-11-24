@@ -51,6 +51,7 @@ type Base<TAttributesFormType extends 'base' | 'advanced'> = {
   attributes: Attribute[];
   extensions: FormAPI;
   forTarget: string;
+  strictRelations?: boolean;
 };
 
 type CustomFieldFormParams = {
@@ -196,10 +197,11 @@ export const forms = {
       }
     },
     form: {
-      advanced({ data, type, step, extensions, ...rest }: Base<'advanced'>) {
+      advanced({ data, type, step, extensions, strictRelations, ...rest }: Base<'advanced'>) {
         try {
-          const baseForm = attributesForm.advanced[type](data as never, step ?? '')
-            .sections as FormTypeOptions;
+          const baseForm = attributesForm.advanced[type](data as never, step ?? '', {
+            strictRelations: Boolean(strictRelations),
+          }).sections as FormTypeOptions;
           const itemsToAdd = extensions.getAdvancedForm(['attribute', type], {
             data,
             type,

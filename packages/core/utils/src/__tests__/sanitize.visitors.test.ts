@@ -772,7 +772,6 @@ describe('Sanitize visitors util', () => {
       const results = [];
       for (const entity of makePage(4)) {
         results.push(
-          // eslint-disable-next-line no-await-in-loop
           await traverseEntity(
             visitor,
             { schema: restrictedSchema, getModel: getModelWithSecret },

@@ -1,8 +1,9 @@
-import { test, expect, type APIRequestContext } from '@playwright/test';
+import { type APIRequestContext } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import path from 'path';
 
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { describeOnCondition } from '../../../utils/shared';
 
@@ -41,8 +42,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('shows the empty state and uploads through the Add assets button', async ({ page }) => {

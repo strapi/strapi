@@ -202,8 +202,6 @@
   "list.table.header.sort": "Zoradiť podľa {label}",
   "list.table.content.empty-label": "Toto pole je prázdne",
   "tabs.title": "Ako si prajete nahrať Vaše súbory?",
-  "window.confirm.close-modal.file": "Ste si istý? Vaše zmeny budú zahodené.",
-  "window.confirm.close-modal.files": "Ste si istý? Existujú súbory, ktoré zatiaľ ešte neboli nahraté.",
   "config.back": "Späť",
   "config.subtitle": "Definujte nastavenia zobrazenia knižnice súborov.",
   "config.entries.title": "Počet záznamov na stránku",

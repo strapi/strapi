@@ -1,5 +1,5 @@
 import type { EnterprisePluginEntry } from './discovery';
-import { promptChecklist, type ChecklistChoice } from './checklist-prompt';
+import { promptChecklist, type ChecklistChoice, type ChecklistFooter } from './checklist-prompt';
 import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
 import { isPrerelease } from './versions';
@@ -18,34 +18,43 @@ type PluginRowState =
   /** Installed and up to date for this Strapi version. */
   | { state: 'installed'; installedVersion: string; newerVersionNote?: string }
   /** Installed, but the license does not include it anymore. */
-  | { state: 'not-licensed'; installedVersion: string }
+  | { state: 'not-licensed'; installedVersion: string; listedOutsideLicense: boolean }
   /** Not installed, and no stable version fits this Strapi version. */
   | { state: 'no-compatible-version'; requiredStrapiRange: string }
   /** Not installed, and only prerelease versions exist. */
   | { state: 'no-stable-release' }
-  /** Not installed, and not available to this license: not shown. */
+  /** Not installed, and the catalog lists it outside the license. Shown, but not selectable. */
+  | { state: 'locked' }
+  /** Not installed, not available to this license, and not in the catalog: not shown. */
   | { state: 'hidden' };
 
 export type PluginRow = { entry: EnterprisePluginEntry } & PluginRowState;
 
 export type SelectableRow = Extract<PluginRow, { state: 'upgrade' | 'install' }>;
 
+type ChecklistRow = Exclude<PluginRow, { state: 'locked' | 'hidden' }>;
+
+const isChecklistRow = (row: PluginRow): row is ChecklistRow =>
+  row.state !== 'locked' && row.state !== 'hidden';
+
 export const buildPluginRow = ({
   entry,
   lookup,
   installedVersion,
   strapiVersion,
+  listedOutsideLicense = false,
 }: {
   entry: EnterprisePluginEntry;
   lookup: PackumentLookup;
   installedVersion?: string;
   strapiVersion?: string;
+  listedOutsideLicense?: boolean;
 }): PluginRow => {
   const status = resolvePluginStatus({ lookup, installedVersion, strapiVersion });
 
   if (status.state === 'not-licensed' || status.state === 'not-found') {
     return status.state === 'not-licensed' && installedVersion
-      ? { entry, state: 'not-licensed', installedVersion }
+      ? { entry, state: 'not-licensed', installedVersion, listedOutsideLicense }
       : { entry, state: 'hidden' };
   }
 
@@ -85,6 +94,7 @@ const ROW_ORDER: PluginRow['state'][] = [
   'not-licensed',
   'no-compatible-version',
   'no-stable-release',
+  'locked',
 ];
 
 export const isSelectable = (row: PluginRow): row is SelectableRow =>
@@ -101,10 +111,15 @@ const describeUpgrade = (row: Extract<PluginRow, { state: 'upgrade' }>): string 
   return row.isMajorUpgrade ? '[major upgrade]' : '[upgrade]';
 };
 
-export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
-  const { displayName, packageName, kind } = row.entry;
+const describeLabel = ({ displayName, packageName, kind }: EnterprisePluginEntry): string => {
   const kindTag = kind && kind !== 'plugin' ? ` [${kind}]` : '';
-  const label = `${displayName} (${packageName})${kindTag}`;
+
+  return `${displayName} (${packageName})${kindTag}`;
+};
+
+export const toCheckboxChoice = (row: ChecklistRow): ChecklistChoice => {
+  const { displayName } = row.entry;
+  const label = describeLabel(row.entry);
   // The note is a sentence of its own, such as "1.3.0 is available but requires Strapi ^5.56.0."
   const noteSuffix = (note?: string) => (note ? `  ${note}` : '');
 
@@ -137,8 +152,11 @@ export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
       return { name: label, disabled: `requires Strapi ${row.requiredStrapiRange}` };
     case 'no-stable-release':
       return { name: label, disabled: 'no stable release yet' };
-    default:
-      return { name: label, disabled: 'unavailable' };
+    default: {
+      const unexpectedRow: never = row;
+
+      return unexpectedRow;
+    }
   }
 };
 
@@ -148,8 +166,38 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
     .filter((row) => row.state !== 'hidden')
     .sort((left, right) => ROW_ORDER.indexOf(left.state) - ROW_ORDER.indexOf(right.state));
 
-export const promptForPlugins = (rows: PluginRow[]): Promise<string[]> =>
-  promptChecklist({
+export const describeLockedGroup = (notLicensedMessage?: string): string =>
+  notLicensedMessage || 'Not in your license.';
+
+const toLockedFooter = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): ChecklistFooter | undefined => {
+  const lines = rows
+    .filter((row) => row.state === 'locked')
+    .map(({ entry }) => `  ✕ ${describeLabel(entry)}${entry.summary ? `  ${entry.summary}` : ''}`);
+
+  return lines.length > 0 ? { heading: describeLockedGroup(notLicensedMessage), lines } : undefined;
+};
+
+export const describeLockedRows = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): string | undefined => {
+  const footer = toLockedFooter(rows, notLicensedMessage);
+
+  return footer && [footer.heading, ...footer.lines].join('\n');
+};
+
+export const promptForPlugins = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): Promise<string[]> => {
+  const visibleRows = orderVisibleRows(rows);
+
+  return promptChecklist({
     message: 'Which Enterprise plugins do you want to install or upgrade?',
-    choices: orderVisibleRows(rows).map(toCheckboxChoice),
+    choices: visibleRows.filter(isChecklistRow).map(toCheckboxChoice),
+    footer: toLockedFooter(visibleRows, notLicensedMessage),
   });
+};

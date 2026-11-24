@@ -77,12 +77,13 @@ Hook objects come from the `hooks` module of `@strapi/utils`. Each object has `r
 | `createAsyncParallelHook`        | Runs all handlers at the same time. Each handler receives a deep clone of the context.         |
 | `createAsyncBailHook`            | Runs handlers one after the other and returns the first result that is not `undefined`.        |
 
-Core defines two hooks. Both are parallel hooks. The `registries` provider creates them in its `register` step.
+Core defines three hooks. The `registries` provider creates them in its `register` step.
 
-- `strapi::content-types.beforeSync` runs before the database schema sync.
-- `strapi::content-types.afterSync` runs after it.
+- `strapi::content-types.beforeSync` runs before the database schema sync. It is a parallel hook.
+- `strapi::content-types.afterSync` runs after it. It is a parallel hook.
+- `strapi::app.afterBootstrap` runs after the app `bootstrap`, before `strapi.isLoaded` is `true`. It is a series hook and receives no context. The admin adds a handler in its `bootstrap` that cleans the stored permissions. Handlers run in the order they are added, so a handler that the app adds in its `bootstrap` runs after the admin one. The admin handler locks the action provider first, so registering an admin action in a later handler throws.
 
-Both receive `{ oldContentTypes, contentTypes }`. Core uses them to migrate data when draft and publish or i18n is turned on or off for a content type. The i18n, content-releases and review-workflows plugins also add handlers. Add handlers in `register`, because the hooks run before module `bootstrap`.
+The two sync hooks receive `{ oldContentTypes, contentTypes }`. Core uses them to migrate data when draft and publish or i18n is turned on or off for a content type. The i18n, content-releases and review-workflows plugins also add handlers. Add handlers in `register`, because the hooks run before module `bootstrap`.
 
 :::caution
 The local `Hook` type in `registries/hooks.ts` declares a `handlers` property. The objects from `@strapi/utils` expose `getHandlers()` instead.
@@ -120,11 +121,9 @@ Read [Document write path](./05-document-write-path.md) for where middlewares si
 
 To offer an event to webhooks, a plugin calls `strapi.get('webhookStore').addAllowedEvent(key, value)`, usually in `bootstrap`.
 
-:::caution
-Several unsubscribe helpers use `list.splice(list.indexOf(item), 1)`. If `item` is not in the list, `indexOf` returns `-1` and `splice(-1, 1)` removes the last entry. This applies to `eventHub.off()`, to the function that `strapi.documents.use()` returns and to the function that `strapi.db.lifecycles.subscribe()` returns.
+`eventHub.off(name, listener)` does nothing if `listener` is not registered for `name`. `eventHub.once(name, listener)` registers a wrapper. The wrapper calls `listener` only on its first call and removes itself, so `listener` runs one time, also when two emits of the same event overlap. `emit` iterates over a copy of the listener list, so if a listener is removed during an emit, the next listener still runs.
 
-`eventHub.once(name, listener)` registers a wrapper, but the wrapper calls `off(name, listener)` with the original listener. The original is not in the list, so the call removes the last listener for that event. If the wrapper is the last listener, it removes itself and the call looks correct. If another listener was added after it, that listener is removed and the wrapper stays. A local run of the code confirmed this: with `once` then `on`, two emits called the `once` listener twice and the other listener zero times.
-:::
+The functions that `strapi.documents.use()` and `strapi.db.lifecycles.subscribe()` return remove their own entry only. They do nothing if the entry is not in the list, for example on a second call or after `strapi.db.lifecycles.clear()`.
 
 ## Three hook-like mechanisms compared
 

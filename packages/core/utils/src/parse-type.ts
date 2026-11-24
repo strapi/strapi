@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { padEnd, toNumber } from 'lodash';
 import * as dates from 'date-fns';
 
 const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]{1,3})?$/;
@@ -22,7 +22,7 @@ const parseTime = (value: unknown): string => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = _.padEnd(fraction.slice(1), 3, '0');
+  const fractionPart = padEnd(fraction.slice(1), 3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
@@ -156,7 +156,7 @@ const parseType = <Type extends keyof TypeMap>(options: ParseTypeOptions<Type>):
     case 'biginteger':
     case 'float':
     case 'decimal': {
-      return _.toNumber(value) as TypeMap[Type];
+      return toNumber(value) as TypeMap[Type];
     }
     case 'time': {
       return parseTime(value) as TypeMap[Type];

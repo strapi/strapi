@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
 

@@ -191,4 +191,92 @@ describe('createMigrationRunner', () => {
       });
     });
   });
+
+  describe('phases', () => {
+    it('runs each migration inside withPhase with its name', async () => {
+      const phases: string[] = [];
+      const runner = createMigrationRunner({
+        storage: {
+          executed: jest.fn().mockResolvedValue([]),
+          logMigration: jest.fn().mockResolvedValue(undefined),
+          unlogMigration: jest.fn().mockResolvedValue(undefined),
+        },
+        logger: { info: jest.fn() },
+        getMigrations: jest.fn().mockResolvedValue(migrations),
+        async withPhase(phase, fn) {
+          phases.push(phase);
+          return fn();
+        },
+      });
+
+      await runner.up();
+
+      expect(phases).toEqual([
+        'migration 001-first.js',
+        'migration 002-second.js',
+        'migration 003-third.js',
+      ]);
+    });
+
+    const createOrderedRunner = (executed: string[]) => {
+      const calls: string[] = [];
+
+      const orderedMigrations: RunnableMigration[] = ['001-first.js', '002-second.js'].map(
+        (name) => ({
+          name,
+          async up() {
+            calls.push(`up:${name}`);
+          },
+          async down() {
+            calls.push(`down:${name}`);
+          },
+        })
+      );
+
+      const runner = createMigrationRunner({
+        storage: {
+          executed: jest.fn().mockResolvedValue(executed),
+          logMigration: jest.fn().mockResolvedValue(undefined),
+          unlogMigration: jest.fn().mockResolvedValue(undefined),
+        },
+        logger: { info: jest.fn() },
+        getMigrations: jest.fn().mockResolvedValue(orderedMigrations),
+        async withPhase(phase, fn) {
+          calls.push(`enter:${phase}`);
+          const result = await fn();
+          calls.push(`exit:${phase}`);
+          return result;
+        },
+      });
+
+      return { runner, calls };
+    };
+
+    it('runs each up body inside its own labelled call', async () => {
+      const { runner, calls } = createOrderedRunner([]);
+
+      await runner.up();
+
+      expect(calls).toEqual([
+        'enter:migration 001-first.js',
+        'up:001-first.js',
+        'exit:migration 001-first.js',
+        'enter:migration 002-second.js',
+        'up:002-second.js',
+        'exit:migration 002-second.js',
+      ]);
+    });
+
+    it('runs the down body inside a labelled call with the migration name', async () => {
+      const { runner, calls } = createOrderedRunner(['001-first.js', '002-second.js']);
+
+      await runner.down();
+
+      expect(calls).toEqual([
+        'enter:migration 002-second.js',
+        'down:002-second.js',
+        'exit:migration 002-second.js',
+      ]);
+    });
+  });
 });

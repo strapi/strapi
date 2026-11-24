@@ -3,6 +3,8 @@
 module.exports = {
   displayName: 'API integration tests',
   testMatch: ['**/?(*.)+(spec|test).api.(js|ts)'],
+  // rootDir is the repo root: keep the new suites to their own runners.
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/tests-next/'],
   testEnvironment: 'node',
   setupFilesAfterEnv: ['<rootDir>/tests/setup/jest-api.setup.js'],
   // Coverage configuration for SonarQube

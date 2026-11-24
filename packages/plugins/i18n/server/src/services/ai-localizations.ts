@@ -178,9 +178,18 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return;
       }
 
+      // The document can lack a string locale: `null` when updating a missing document,
+      // no `locale` key when `fields` leaves it out. This guard stops null documents and
+      // results with no `locale`. It is also the only check that stops an explicit
+      // `locale: null` from matching a `null` default locale (none stored) and starting jobs
+      // with a `null` source locale.
+      if (typeof document?.locale !== 'string') {
+        return;
+      }
+
       // Don't trigger localizations if the update is on a derived locale, only do it on the default
       const defaultLocale = await localeService.getDefaultLocale();
-      if (document?.locale !== defaultLocale) {
+      if (document.locale !== defaultLocale) {
         return;
       }
 

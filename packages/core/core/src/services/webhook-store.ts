@@ -28,6 +28,9 @@ const webhookModel: Model = {
     events: {
       type: 'json',
     },
+    contentTypeEvents: {
+      type: 'json',
+    },
     enabled: {
       type: 'boolean',
     },
@@ -35,8 +38,28 @@ const webhookModel: Model = {
 };
 
 type Webhook = Modules.WebhookStore.Webhook;
-type DBOutput = Omit<Webhook, 'id' | 'isEnabled'> & { id: string | number; enabled: boolean };
+type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'contentTypeEvents'> & {
+  id: string | number;
+  enabled: boolean;
+  // null for webhooks saved before events could be selected per content type
+  contentTypeEvents?: Webhook['contentTypeEvents'] | null;
+};
 type DBInput = Omit<DBOutput, 'id'>;
+
+/**
+ * Events triggered for every content type don't need to be saved per content type as well.
+ */
+const toContentTypeEvents = ({ events, contentTypeEvents = {} }: Webhook) => {
+  return Object.fromEntries(
+    Object.entries(contentTypeEvents)
+      .map(([uid, uidEvents]) => [uid, uidEvents.filter((event) => !events.includes(event))])
+      .filter(([, uidEvents]) => uidEvents.length > 0)
+  );
+};
+
+const getEvents = ({ events, contentTypeEvents = {} }: Webhook) => {
+  return [...events, ...Object.values(contentTypeEvents).flat()];
+};
 
 const toDBObject = (data: Webhook): DBInput => {
   return {
@@ -44,6 +67,7 @@ const toDBObject = (data: Webhook): DBInput => {
     url: data.url,
     headers: data.headers,
     events: data.events,
+    contentTypeEvents: toContentTypeEvents(data),
     enabled: data.isEnabled,
   };
 };
@@ -55,6 +79,7 @@ const fromDBObject = (row: DBOutput): Webhook => {
     url: row.url,
     headers: row.headers,
     events: row.events,
+    contentTypeEvents: row.contentTypeEvents ?? {},
     isEnabled: row.enabled,
   };
 };
@@ -116,7 +141,7 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
       return result ? fromDBObject(result) : null;
     },
     async createWebhook(data) {
-      await webhookEventValidator(this.allowedEvents, data.events);
+      await webhookEventValidator(this.allowedEvents, getEvents(data));
 
       return db
         .query('strapi::webhook')
@@ -126,7 +151,7 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
         .then(fromDBObject);
     },
     async updateWebhook(id, data) {
-      await webhookEventValidator(this.allowedEvents, data.events);
+      await webhookEventValidator(this.allowedEvents, getEvents(data));
 
       const webhook = await db.query('strapi::webhook').update({
         where: { id },

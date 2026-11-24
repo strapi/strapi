@@ -27,7 +27,7 @@ let admin = {
 };
 
 const mergeRoutes = (a: any, b: any, key: string) => {
-  return _.isArray(a) && _.isArray(b) && key === 'routes' ? a.concat(b) : undefined;
+  return Array.isArray(a) && Array.isArray(b) && key === 'routes' ? a.concat(b) : undefined;
 };
 
 if (strapi.EE) {

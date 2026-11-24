@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
+  Badge,
   Box,
   Flex,
   Grid,
@@ -56,6 +57,10 @@ interface DynamicComponentProps
    * so the parent can clear the forced state.
    */
   onForceOpenHandled?: () => void;
+  /**
+   * Whether the component was copied from another entry and not saved yet.
+   */
+  isCopied?: boolean;
 }
 
 const DynamicComponent = ({
@@ -74,6 +79,7 @@ const DynamicComponent = ({
   children,
   forceOpen,
   onForceOpenHandled,
+  isCopied,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
@@ -348,7 +354,17 @@ const DynamicComponent = ({
                 >
                   {accordionTitle}
                 </Accordion.Trigger>
-                <Accordion.Actions>{accordionActions}</Accordion.Actions>
+                <Accordion.Actions>
+                  {isCopied && (
+                    <Badge variant="success" size="S">
+                      {formatMessage({
+                        id: getTranslation('components.Component.copied'),
+                        defaultMessage: 'Copied',
+                      })}
+                    </Badge>
+                  )}
+                  {accordionActions}
+                </Accordion.Actions>
               </Accordion.Header>
               <Accordion.Content>
                 <AccordionContentRadius background="neutral0">
@@ -357,6 +373,7 @@ const DynamicComponent = ({
                     index={index}
                     layout={componentUid ? components[componentUid]?.layout : undefined}
                     name={name}
+                    disabled={disabled}
                   >
                     {children}
                   </DynamicComponentFields>
@@ -401,7 +418,7 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   margin: 0;
 `;
 
-interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {
+interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children' | 'disabled'> {
   componentUid?: string;
   index: number;
   layout?: EditFieldLayout[][];
@@ -409,7 +426,7 @@ interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'child
 }
 
 const DynamicComponentFields = React.memo(
-  ({ children, componentUid, index, layout, name }: DynamicComponentFieldsProps) => {
+  ({ children, componentUid, index, layout, name, disabled }: DynamicComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
@@ -430,6 +447,8 @@ const DynamicComponentFields = React.memo(
 
                     const fieldWithTranslatedLabel = {
                       ...field,
+                      // Inherit parent disable (e.g. locked non-localized DZ on a secondary locale)
+                      disabled: field.disabled || disabled,
                       label: formatMessage({
                         id: `content-manager.components.${componentUid}.${field.name}`,
                         defaultMessage: field.label,
@@ -448,10 +467,15 @@ const DynamicComponentFields = React.memo(
                         {children ? (
                           children({
                             ...fieldWithTranslatedLabel,
+                            size,
                             name: fieldName,
                           })
                         ) : (
-                          <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                          <InputRenderer
+                            {...fieldWithTranslatedLabel}
+                            size={size}
+                            name={fieldName}
+                          />
                         )}
                       </ResponsiveGridItem>
                     );

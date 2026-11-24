@@ -67,6 +67,11 @@ export const areEnumValuesUnique: CommonTestConfig = {
   name: 'areEnumValuesUnique',
   message: '${path} cannot contain duplicate values',
   test(values) {
+    // A missing value is reported by `required`
+    if (Array.isArray(values) === false) {
+      return true;
+    }
+
     const filtered = [...new Set(values as string[])];
 
     return filtered.length === (values as string[]).length;
@@ -87,7 +92,7 @@ export const isValidDefaultJSON: CommonTestConfig = {
       return true;
     }
 
-    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || _.isArray(val)) {
+    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || Array.isArray(val)) {
       return true;
     }
 

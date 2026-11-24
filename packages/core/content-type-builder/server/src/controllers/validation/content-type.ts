@@ -5,6 +5,7 @@ import { yup, validateYupSchema } from '@strapi/utils';
 
 import type { Struct, Internal, UID } from '@strapi/types';
 
+import type { NestedComponentInput } from '../../services/components';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -15,10 +16,7 @@ import { nestedComponentSchema } from './component';
 export type CreateContentTypeInput = {
   uid?: UID.ContentType;
   contentType?: Partial<Struct.ContentTypeSchema> & Partial<Struct.ContentTypeSchemaInfo>;
-  components?: Array<
-    Partial<Struct.ComponentSchema> &
-      Partial<Struct.SchemaInfo> & { tmpUID?: Internal.UID.Component }
-  >;
+  components?: NestedComponentInput[];
   singularName: Struct.ContentTypeSchemaInfo['singularName'];
   attributes: Struct.SchemaAttributes & Record<string, any>;
   kind: Struct.ContentTypeKind;
@@ -132,7 +130,7 @@ export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => 
   if (has(data, 'components') && Array.isArray(data.components)) {
     data.components.forEach((comp) => {
       if (has(comp, 'uid')) {
-        removeEmptyDefaults(comp as Struct.ComponentSchema);
+        removeEmptyDefaults(comp);
       }
     });
   }

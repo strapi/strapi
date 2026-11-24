@@ -5,18 +5,16 @@ const load = jest.fn(() => mock) as any;
 const findOneByEmail = jest.fn();
 const updateById = jest.fn();
 
-const admin = {
-  services: {
-    user: {
-      findOneByEmail,
-      updateById,
-    },
+const adminServices: Record<string, unknown> = {
+  user: {
+    findOneByEmail,
+    updateById,
   },
 };
 
 const mock = {
   load,
-  admin,
+  service: jest.fn((uid: string) => adminServices[uid.slice('admin::'.length)]),
 };
 
 jest.mock('@strapi/core', () => {

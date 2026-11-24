@@ -65,6 +65,7 @@ const renderModal = ({
       onChangeParentCheckbox={jest.fn()}
       onChangeCollectionTypeLeftActionRowCheckbox={jest.fn()}
       onChangeCollectionTypeGlobalActionCheckbox={jest.fn()}
+      inheritConditions={false}
     >
       <Modal.Root open>
         <ConditionsModal

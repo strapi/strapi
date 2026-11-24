@@ -39,8 +39,13 @@ interface LayoutSettings extends Settings {
   icon?: never;
 }
 
+interface ListCellMeta {
+  collectionType: string;
+  model: string;
+}
+
 interface ListFieldLayout
-  extends Table.Header<Document, ListFieldLayout>, Pick<Filters.Filter, 'mainField'> {
+  extends Table.Header<Document, ListFieldLayout, ListCellMeta>, Pick<Filters.Filter, 'mainField'> {
   attribute: SchemaUtils.Attribute.AnyAttribute | { type: 'custom' };
 }
 
@@ -595,4 +600,11 @@ export {
   convertEditLayoutToFieldLayouts,
   DEFAULT_SETTINGS,
 };
-export type { EditLayout, EditFieldLayout, ListLayout, ListFieldLayout, UseDocumentLayout };
+export type {
+  EditLayout,
+  EditFieldLayout,
+  ListCellMeta,
+  ListLayout,
+  ListFieldLayout,
+  UseDocumentLayout,
+};

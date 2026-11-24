@@ -55,11 +55,12 @@ Register tools, prompts, and resources from a plugin's `register()` phase (prefe
 
 ## Configuration
 
-| Key                           | Default | Notes                                                  |
-| ----------------------------- | ------- | ------------------------------------------------------ |
-| `server.mcp.enabled`          | `false` | Must be `true` to start the server                     |
-| `server.mcp.connectTimeoutMs` | `5000`  | Timeout for `mcpServer.connect(transport)` per request |
-| `server.mcp.requestTimeoutMs` | `60000` | Timeout for `transport.handleRequest(...)` per request |
+| Key                               | Default | Notes                                                                                                                                               |
+| --------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server.mcp.enabled`              | `false` | Must be `true` to start the server                                                                                                                  |
+| `server.mcp.connectTimeoutMs`     | `5000`  | Timeout for `mcpServer.connect(transport)` per request                                                                                              |
+| `server.mcp.requestTimeoutMs`     | `60000` | Timeout for `transport.handleRequest(...)` per request                                                                                              |
+| `server.mcp.maxToolInputElements` | `10000` | Max array elements and object keys combined in one tool call's arguments. Must be an integer >= 1. Set to `Infinity` to disable (JS/TS config only) |
 
 Implementation: `packages/core/core/src/services/mcp/internal/McpConfiguration.ts`. Type: `McpConfig` in `packages/core/types/src/core/config/server.ts`.
 
@@ -78,6 +79,10 @@ All five routes set `config: { auth: false }` — Strapi's own admin/content-API
 
 The transport is the MCP SDK's `NodeStreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
 
+Each tool call permits at most `server.mcp.maxToolInputElements` (default 10,000) array elements and object keys combined in its arguments. The SDK rejects larger arguments before schema validation or handler execution.
+
+Every tool is registered on each per-request server, but only some tools resolve their Zod schemas, because `resolveInputSchema`/`resolveOutputSchema` is the main per-request cost. `resolveToolSchemaScope` (`internal/resolveToolSchemaScope.ts`) reads the JSON-RPC body before the server is built: `tools/list` needs every tool, `tools/call` needs only the called tool, and other messages (`initialize`, notifications) need none. A tool resolves its schemas only when it is in that scope **and** the token may use it (`canUseMcpCapability`). The other tools are registered without schemas and with a handler that only returns an error, so a call to a tool the token cannot use still gets the SDK's `Tool <name> disabled` error.
+
 An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) intercepts `/.well-known/oauth-*` and `/register` with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page.
 
 ## Authentication
@@ -85,7 +90,7 @@ An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) 
 `packages/core/core/src/services/mcp/authentication.ts`:
 
 1. Extract `Authorization: Bearer <token>` — missing/malformed header → `missing_token`.
-2. Validate through `strapi.admin.services['api-token-admin'].authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
+2. Validate through `strapi.service('admin::api-token-admin').authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
 3. On success, the handler receives the token's CASL `ability` and owning `user`.
 
 There is no separate "MCP token" type and no admin-panel screen dedicated to MCP — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`.
