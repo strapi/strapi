@@ -44,13 +44,14 @@ The edit view response holds only a count for each relation field, and the relat
 
 `server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost.
 
-History records the writes made through the Content Manager routes and through the Content API (REST and GraphQL). Each version stores the source of the write, and the versions list shows it as a tag:
+History records the writes made through the Content Manager routes, through the Content API (REST and GraphQL), and through the MCP server. Each version stores the source of the write, and the versions list shows it as a tag:
 
 | Source        | Write made with                                                                                                                           |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `admin-panel` | Any admin strategy that sets a user on the Content Manager routes, except an admin token. This includes SSO and the strategies of plugins |
 | `admin-api`   | An admin token on the Content Manager routes                                                                                              |
 | `content-api` | Any request on a Content API route                                                                                                        |
+| `mcp`         | An admin token on the MCP server                                                                                                          |
 
 History records nothing for the other writes: a write on another admin route, a write made outside a request, and a Content API write when `admin.history.contentApi.enabled` is `false`.
 
@@ -58,7 +59,7 @@ Each version also stores a reference to its author: a type, and the model and do
 
 Set `admin.history.contentApi.enabled` to `false` to stop recording Content API writes. It is `true` by default. The flag does not change Content Manager writes.
 
-The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead. It is empty for Content API writes.
+The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead. It is empty for Content API writes and MCP writes.
 
 Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`. An admin token write of that time also shows as `admin-panel`, and its author is the owner of the token.
 

@@ -217,6 +217,10 @@ const SOURCE_LABELS: Record<HistoryVersions.HistoryVersionSource, MessageDescrip
     id: 'content-manager.history.sidebar.version-card.source.content-api',
     defaultMessage: 'Content API',
   },
+  mcp: {
+    id: 'content-manager.history.sidebar.version-card.source.mcp',
+    defaultMessage: 'MCP',
+  },
 };
 
 const VersionSource = ({ source }: { source: HistoryVersions.HistoryVersionSource }) => {

@@ -54,6 +54,7 @@ describe('handlePost', () => {
     };
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockAuthenticationStrategy = {
+      name: 'mcp',
       authenticate: vi.fn().mockResolvedValue({
         // Distinct ids so assertions can tell the token owner (user) apart
         // from the token itself (credentials).
@@ -66,7 +67,7 @@ describe('handlePost', () => {
   });
 
   const makeCtx = (req: IncomingMessage, res: ServerResponse, body?: unknown) =>
-    ({ req, res, request: { body }, respond: true, state: {} }) as any;
+    ({ req, res, request: { body }, respond: true, state: {} } as any);
 
   const makeRes = () => {
     const writeHeadSpy = vi.fn();
@@ -79,7 +80,7 @@ describe('handlePost', () => {
     return { res, writeHeadSpy, endSpy };
   };
 
-  const makeReq = () => ({ headers: {} }) as unknown as IncomingMessage;
+  const makeReq = () => ({ headers: {} } as unknown as IncomingMessage);
 
   test('should set ctx.respond = false before touching the response', async () => {
     const deps: McpHandlerDependencies = {
@@ -326,6 +327,11 @@ describe('handlePost', () => {
     // user (id 42), not credentials (id 7) — the actor is the token owner.
     expect(ctx.state.user).toEqual({ id: 42 });
     expect(ctx.state.auditSource).toBe('mcp');
+    expect(ctx.state.auth).toEqual({
+      strategy: mockAuthenticationStrategy,
+      credentials: { id: 7 },
+      ability: expect.objectContaining({ can: expect.any(Function) }),
+    });
   });
 
   test('should call withTimeout with connectTimeoutMs for connect and requestTimeoutMs for handleRequest', async () => {

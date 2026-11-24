@@ -32,6 +32,7 @@ const extractBearerToken = (ctx: Context): string | null => {
 };
 
 export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
+  name: 'mcp',
   async authenticate(ctx: Context): Promise<McpAdminTokenAuthResult> {
     const token = extractBearerToken(ctx);
 

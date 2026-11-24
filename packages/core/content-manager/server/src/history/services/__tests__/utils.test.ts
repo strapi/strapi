@@ -54,7 +54,7 @@ const createCtx = (
       route: { info: { pluginName, type } },
       auth: { strategy: { name: strategyName }, credentials },
     },
-  }) as unknown as RequestContext;
+  } as unknown as RequestContext);
 
 type LocalizationFixture = {
   defaultLocale: string;
@@ -358,6 +358,13 @@ describe('History utils', () => {
       expect(resolveHistoryOrigin(createCtx('content-manager', 'admin-token'))?.source).toBe(
         'admin-api'
       );
+    });
+
+    it('resolves the MCP strategy to the MCP source, with no author', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'mcp', 'api'))).toEqual({
+        source: 'mcp',
+        author: null,
+      });
     });
 
     it('resolves a plugin admin strategy on a Content Manager route to the admin panel source, with the admin as author', () => {

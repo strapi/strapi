@@ -142,7 +142,13 @@ const isContentManagerRoute = ({ state }: RequestContext) =>
 
 const isContentApiRoute = ({ state }: RequestContext) => state.route?.info?.type === 'content-api';
 
+const isMcpRequest = ({ state }: RequestContext) => state.auth?.strategy?.name === 'mcp';
+
 const resolveSource = (requestContext: RequestContext): HistoryVersionSource | null => {
+  if (isMcpRequest(requestContext)) {
+    return 'mcp';
+  }
+
   if (isContentManagerRoute(requestContext)) {
     switch (requestContext.state.auth?.strategy?.name) {
       case 'admin-token':
