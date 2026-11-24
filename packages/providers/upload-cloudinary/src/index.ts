@@ -102,27 +102,34 @@ const providerModule = {
         oldFile.provider_metadata ?? {};
 
       // If the public_id is preserved, we can overwrite in place and invalidate
-      // the CDN cache in a single call.
+      // the CDN cache in a single call. `public_id` and `overwrite` come after the options so
+      // they cannot be overridden.
       if (oldPublicId && newFile.hash === oldPublicId) {
-        return upload(newFile, {
-          public_id: oldPublicId as string,
-          overwrite: true,
+        await upload(newFile, {
           invalidate: true,
           ...(oldResourceType ? { resource_type: oldResourceType } : {}),
           ...customConfig,
+          public_id: oldPublicId as string,
+          overwrite: true,
         });
+      } else {
+        await upload(newFile, customConfig);
       }
 
-      // The public_id differs — upload the new file first, then destroy the old.
-      await upload(newFile, customConfig);
-
-      // Options such as `folder` prefix the public_id (`folder/hash`), so the new upload can land
-      // on the old public_id and overwrite it. Destroying it then would delete the new asset.
-      const newPublicId = newFile.provider_metadata?.public_id;
-      if (oldPublicId && newPublicId !== oldPublicId) {
+      // Cloudinary identifies an asset by its public_id and resource_type together. Options such
+      // as `folder` prefix the public_id (`folder/hash`), and a new mime can change the
+      // resource_type, so the new asset can land on the old one or next to it. Destroy the old
+      // asset only when it is a different one, or the new asset would be deleted.
+      const { public_id: newPublicId, resource_type: newResourceType } =
+        newFile.provider_metadata ?? {};
+      const oldAssetResourceType = oldResourceType || 'image';
+      if (
+        oldPublicId &&
+        (newPublicId !== oldPublicId || newResourceType !== oldAssetResourceType)
+      ) {
         try {
           await cloudinary.uploader.destroy(`${oldPublicId}`, {
-            resource_type: (oldResourceType || 'image') as string,
+            resource_type: oldAssetResourceType as string,
             invalidate: true,
           });
         } catch (error) {

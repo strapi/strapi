@@ -6,17 +6,25 @@ import cloudinaryProvider from '../index';
 
 type UploadCallback = (err: unknown, image: unknown) => void;
 
-// Mocks the SDK upload, applying the documented `folder` prefix to the public_id.
-const mockUploadStream = () =>
+// Mocks the SDK upload, applying the documented `folder` prefix to the public_id. With
+// `resource_type: 'auto'`, Cloudinary detects the type from the file: `detectedResourceType`.
+const mockUploadStream = (detectedResourceType = 'image') =>
   vi.spyOn(cloudinary.uploader, 'upload_stream').mockImplementation(
-    ((options: { folder?: string; public_id: string }, callback: UploadCallback) =>
+    ((
+      options: { folder?: string; public_id: string; resource_type?: string },
+      callback: UploadCallback
+    ) =>
       new Writable({
         write: (_chunk, _encoding, done) => done(),
         final(done) {
           const publicId = options.folder
             ? `${options.folder}/${options.public_id}`
             : options.public_id;
-          callback(null, { public_id: publicId, resource_type: 'image', secure_url: 'url' });
+          const resourceType =
+            options.resource_type && options.resource_type !== 'auto'
+              ? options.resource_type
+              : detectedResourceType;
+          callback(null, { public_id: publicId, resource_type: resourceType, secure_url: 'url' });
           done();
         },
       })) as unknown as typeof cloudinary.uploader.upload_stream
@@ -94,6 +102,54 @@ describe('Cloudinary provider', () => {
 
       expect(newFile).toMatchObject({ provider_metadata: { public_id: 'new/photo_123' } });
       expect(destroy).toHaveBeenCalledWith('old/photo_123', {
+        resource_type: 'image',
+        invalidate: true,
+      });
+    });
+
+    test('destroys the old asset when the new one has another resource_type', async () => {
+      mockUploadStream('video');
+      const destroy = vi.spyOn(cloudinary.uploader, 'destroy').mockResolvedValue({ result: 'ok' });
+      const provider = cloudinaryProvider.init({ cloud_name: 'demo' });
+      const { newFile, oldFile } = createFiles('assets/photo_123');
+
+      await provider.replaceStream(newFile, oldFile, { folder: 'assets' });
+
+      expect(newFile).toMatchObject({
+        provider_metadata: { public_id: 'assets/photo_123', resource_type: 'video' },
+      });
+      expect(destroy).toHaveBeenCalledWith('assets/photo_123', {
+        resource_type: 'image',
+        invalidate: true,
+      });
+    });
+
+    test('overwrites in place when the public_id is the hash', async () => {
+      const uploadStream = mockUploadStream();
+      const destroy = vi.spyOn(cloudinary.uploader, 'destroy').mockResolvedValue({ result: 'ok' });
+      const provider = cloudinaryProvider.init({ cloud_name: 'demo' });
+      const { newFile, oldFile } = createFiles('photo_123');
+
+      await provider.replace(newFile, oldFile, { public_id: 'other', overwrite: false });
+
+      expect(uploadStream).toHaveBeenCalledWith(
+        expect.objectContaining({ public_id: 'photo_123', overwrite: true, invalidate: true }),
+        expect.any(Function)
+      );
+      expect(newFile).toMatchObject({ provider_metadata: { public_id: 'photo_123' } });
+      expect(destroy).not.toHaveBeenCalled();
+    });
+
+    test('destroys the old asset when a folder moves an in-place replace', async () => {
+      mockUploadStream();
+      const destroy = vi.spyOn(cloudinary.uploader, 'destroy').mockResolvedValue({ result: 'ok' });
+      const provider = cloudinaryProvider.init({ cloud_name: 'demo' });
+      const { newFile, oldFile } = createFiles('photo_123');
+
+      await provider.replaceStream(newFile, oldFile, { folder: 'assets' });
+
+      expect(newFile).toMatchObject({ provider_metadata: { public_id: 'assets/photo_123' } });
+      expect(destroy).toHaveBeenCalledWith('photo_123', {
         resource_type: 'image',
         invalidate: true,
       });
