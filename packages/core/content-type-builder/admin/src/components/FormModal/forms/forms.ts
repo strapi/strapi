@@ -112,7 +112,10 @@ export const forms = {
         const sections: FormTypeOptions = [
           { sectionTitle: null, items: [] },
           {
-            sectionTitle: { id: 'form.attribute.condition.section', defaultMessage: 'Conditions' },
+            sectionTitle: {
+              id: getTrad('form.attribute.condition.label'),
+              defaultMessage: 'Conditions',
+            },
             items: [
               {
                 name: 'conditions',

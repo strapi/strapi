@@ -254,7 +254,14 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                 />
                 {'conditions' in item &&
                   item.conditions &&
-                  Object.keys(item.conditions).length > 0 && <Badge margin={4}>conditional</Badge>}
+                  Object.keys(item.conditions).length > 0 && (
+                    <Badge margin={4}>
+                      {formatMessage({
+                        id: getTrad('modelPage.attribute.conditional'),
+                        defaultMessage: 'conditional',
+                      })}
+                    </Badge>
+                  )}
                 {item.type === 'relation' && (
                   <>
                     &nbsp;({getRelationType(item.relation, item.targetAttribute)})&nbsp;
