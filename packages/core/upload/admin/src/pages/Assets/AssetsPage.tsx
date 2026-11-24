@@ -130,10 +130,7 @@ const StickyHeader = styled(Box)<{ $compact: boolean }>`
   /* Horizontal padding matches the list's default spacing (Layouts.Content /
      RESPONSIVE_DEFAULT_SPACING: 4 / 6 / 10) so the header lines up with the rows. */
   padding: ${({ theme }) => `${theme.spaces[6]} ${theme.spaces[4]}`};
-  transition:
-    padding 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: padding 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 
   ${({ theme }) => theme.breakpoints.medium} {
     padding-left: ${({ theme }) => theme.spaces[6]};
@@ -171,6 +168,10 @@ const TitleRow = styled(Flex)`
   justify-content: space-between;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[4]};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    align-items: flex-start;
+  }
 
   h1 {
     font-size: 1.8rem;

@@ -3,8 +3,7 @@ import { House, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useGetFolderStructureQuery } from '../../../services/folders';
-import { findFolderPath } from '../../../utils/findFolderPath';
+import { useFolderTrail } from '../../../hooks/useFolderTrail';
 import { getTranslationKey } from '../../../utils/translations';
 
 const TAP_TARGET_SIZE = '4.4rem';
@@ -39,22 +38,9 @@ export const FolderHeaderTitle = ({
   onSelectFolder,
 }: FolderHeaderTitleProps) => {
   const { formatMessage } = useIntl();
-  const { data: folderStructure = [] } = useGetFolderStructureQuery();
-
-  const path = findFolderPath(folderStructure, currentFolderId);
-  const ancestors = path?.slice(0, -1) ?? [];
+  const { ancestors } = useFolderTrail(currentFolderId);
 
   const homeLabel = formatMessage({ id: getTranslationKey('plugin.home'), defaultMessage: 'Home' });
-
-  const heading = (
-    <Heading variant="alpha" tag="h1" ellipsis>
-      {title}
-    </Heading>
-  );
-
-  if (!path) {
-    return heading;
-  }
 
   return (
     <Flex alignItems="center" gap={1} minWidth={0}>
@@ -100,7 +86,9 @@ export const FolderHeaderTitle = ({
       </Nav>
       <Separator aria-hidden>/</Separator>
       <Flex minWidth={0} paddingLeft={2}>
-        {heading}
+        <Heading variant="alpha" tag="h1" ellipsis>
+          {title}
+        </Heading>
       </Flex>
     </Flex>
   );

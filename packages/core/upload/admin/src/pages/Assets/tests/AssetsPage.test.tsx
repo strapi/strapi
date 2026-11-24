@@ -725,6 +725,29 @@ describe('AssetsPage mobile folder breadcrumb', () => {
     });
   });
 
+  it.each([
+    [
+      'cannot be loaded',
+      () => HttpResponse.json({ error: { status: 500, message: 'boom' } }, { status: 500 }),
+    ],
+    ['does not hold the folder', () => HttpResponse.json({ data: [] })],
+  ])('still offers Home when the folder tree %s', async (_, resolver) => {
+    server.use(http.get('*/upload/folder-structure', resolver));
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading()).toHaveAccessibleName('Paris');
+    expect(
+      within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
+    ).not.toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
   it('keeps the search title while searching inside a folder', async () => {
     renderPage('?folder=3&_q=x');
 
