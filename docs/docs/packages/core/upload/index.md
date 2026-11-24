@@ -6,7 +6,7 @@ package: '@strapi/upload'
 status: draft
 review_notes:
   - Written from the package source on develop; needs a maintainer review.
-  - The Media Library, AI metadata, MCP tools and GraphQL extension are not documented in this page beyond a mention. Add pages for them.
+  - AI metadata, MCP tools and the GraphQL extension are not documented beyond a mention. Add pages for them.
 ---
 
 ## Purpose
@@ -58,6 +58,8 @@ A provider can return `true` from `isPrivate()` and implement `getSignedUrl(file
 ### Admin part
 
 The admin entry adds the Media Library menu link and its settings page, registers the `media` field input, and registers the `media-library` dialog component. `bootstrap` on the server registers the permission actions, for example `plugin::upload.assets.create`, and the webhook events. The redesigned Media Library is the default. The `useLegacyMediaLibrary` key in `config/features` selects the legacy one from `admin/src/legacy`.
+
+The [Admin](./02-admin/00-overview.md) pages document the admin code: its layout, the [asset details drawer](./02-admin/01-asset-details-drawer.md), [forms](./02-admin/02-forms.md), [data fetching](./02-admin/03-data-fetching.md) and [testing](./02-admin/04-testing.md).
 
 ## Related
 
