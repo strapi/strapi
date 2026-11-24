@@ -20,6 +20,13 @@ import {
   useAssetDetailsParam,
 } from './components/AssetDetails/AssetDetailsDrawer';
 import { AssetsSearchInput } from './components/AssetsSearchInput';
+import {
+  AssetsToolbar,
+  SearchGroup,
+  SearchScopeSlot,
+  SearchSlot,
+  ViewGroup,
+} from './components/AssetsToolbar';
 import { AssetsView } from './components/AssetsView';
 import { AssetsDndProvider } from './components/Dnd/AssetsDndProvider';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
@@ -143,14 +150,8 @@ const TitleRow = styled(Flex)`
   }
 `;
 
-// Two groups in source order (Filter, Search / Sort, Toggle). Mobile: stacked —
-// Filter+Search on row 1, Sort+Toggle on row 2. Desktop (large+): one row,
-// Filter+Search on the left, Sort+Toggle pushed right.
-const Toolbar = styled(Flex)<{ $compact: boolean }>`
+const Toolbar = styled(AssetsToolbar)<{ $compact: boolean }>`
   margin-top: ${({ theme }) => theme.spaces[5]};
-  flex-direction: column;
-  align-items: stretch;
-  gap: ${({ theme }) => theme.spaces[3]};
   transition: margin-top 0.2s ease;
 
   /* Tightening the gap to the title belongs to the compact header, so it is
@@ -163,55 +164,6 @@ const Toolbar = styled(Flex)<{ $compact: boolean }>`
         margin-top: ${theme.spaces[2]};
       }
     `}
-
-  ${({ theme }) => theme.breakpoints.large} {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-`;
-
-const ToolbarGroup = styled(Flex)`
-  align-items: center;
-  gap: ${({ theme }) => theme.spaces[3]};
-`;
-
-// Filter + Search (+ search scope). On mobile the group fills the row (search
-// grows into it) and the scope controls wrap onto their own line; on desktop it
-// keeps its intrinsic size and sits at the left edge, the scope controls
-// wrapping under the search when the row is too narrow for them.
-const FilterSearchGroup = styled(ToolbarGroup)`
-  flex-wrap: wrap;
-  min-width: 0;
-`;
-
-const SearchScopeSlot = styled(Box)`
-  flex-basis: 100%;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    flex: 0 0 auto;
-  }
-`;
-
-// Sort + Toggle. Mobile: spread across the row (Sort left, Toggle right).
-// Desktop: sit together at the right edge (space-between on the toolbar leaves
-// the empty space between the search and here).
-const SortToggleGroup = styled(ToolbarGroup)`
-  justify-content: space-between;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    justify-content: flex-end;
-    flex: 0 0 auto;
-  }
-`;
-
-// Fills the row on mobile; intrinsic width on desktop.
-const SearchSlot = styled(Box)`
-  flex: 1;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    flex: 0 1 auto;
-  }
 `;
 
 export const AssetsPage = () => {
@@ -477,7 +429,7 @@ export const AssetsPage = () => {
                       </TitleRow>
 
                       <Toolbar $compact={isHeaderCompact}>
-                        <FilterSearchGroup>
+                        <SearchGroup $isSearching={isSearching}>
                           <Box>
                             <FilterMenu listFilters={listFilters} />
                           </Box>
@@ -498,13 +450,13 @@ export const AssetsPage = () => {
                               />
                             </SearchScopeSlot>
                           )}
-                        </FilterSearchGroup>
-                        <SortToggleGroup>
+                        </SearchGroup>
+                        <ViewGroup>
                           <Box>
                             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
                           </Box>
                           <ViewToggle view={view} onChange={setView} />
-                        </SortToggleGroup>
+                        </ViewGroup>
                       </Toolbar>
 
                       <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />

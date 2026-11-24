@@ -16,6 +16,12 @@ import { styled } from 'styled-components';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { AssetsGrid } from '../../pages/Assets/components/AssetsGrid';
 import { AssetsSearchInput } from '../../pages/Assets/components/AssetsSearchInput';
+import {
+  AssetsToolbar,
+  SearchGroup,
+  SearchScopeSlot,
+  ViewGroup,
+} from '../../pages/Assets/components/AssetsToolbar';
 import { AssetsView } from '../../pages/Assets/components/AssetsView';
 import { FilterBadges } from '../../pages/Assets/components/FilterBadges';
 import { FilterMenu } from '../../pages/Assets/components/FilterMenu';
@@ -110,16 +116,6 @@ const Footer = styled(Modal.Footer)`
   flex: 0 0 auto;
 `;
 
-// Own line on small screens, so the search field keeps its width; inline from
-// medium up, wrapping only if the toolbar runs out of room.
-const SearchScopeSlot = styled(Box)`
-  flex-basis: 100%;
-
-  ${({ theme }) => theme.breakpoints.medium} {
-    flex: 0 0 auto;
-  }
-`;
-
 /* -------------------------------------------------------------------------------------------------
  * Shared
  * -----------------------------------------------------------------------------------------------*/
@@ -182,8 +178,8 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
   return (
     <>
       <Box paddingLeft={7} paddingRight={7} paddingTop={6} paddingBottom={6}>
-        <Flex justifyContent="space-between" gap={2} wrap="wrap">
-          <Flex gap={2} wrap="wrap">
+        <AssetsToolbar>
+          <SearchGroup $isSearching={isSearching}>
             <FilterMenu listFilters={listFilters} />
             <AssetsSearchInput collapsible />
             {isSearching && (
@@ -200,12 +196,12 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
                 />
               </SearchScopeSlot>
             )}
-          </Flex>
-          <Flex gap={2}>
+          </SearchGroup>
+          <ViewGroup>
             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
             <ViewToggle view={view} onChange={setView} iconsOnly />
-          </Flex>
-        </Flex>
+          </ViewGroup>
+        </AssetsToolbar>
         <FilterBadges listFilters={listFilters} />
         {/* In the fixed header with the toolbar, so the way back up stays in
             reach however far the list is scrolled. A search across all media
