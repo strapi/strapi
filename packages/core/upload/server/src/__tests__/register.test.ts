@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { Readable } from 'stream';
 
 jest.mock('sharp', () => {
   return {
@@ -13,6 +14,7 @@ jest.mock('sharp', () => {
 /* eslint-disable import/first -- mock runs before `sharp` import */
 import sharp from 'sharp';
 import { register } from '../register';
+import createProviderService from '../services/provider';
 /* eslint-enable import/first */
 
 const exampleMiddlewaresConfig = [
@@ -44,6 +46,40 @@ jest.mock('@strapi/provider-upload-local', () => ({
   },
 }));
 
+// The upload service removes `file.buffer` once `upload` returns, so record it at call time.
+const uploadedContents: string[] = [];
+const uploadOnlyUpload = jest.fn(async (file: { buffer: Buffer }) => {
+  uploadedContents.push(file.buffer.toString());
+});
+
+// Not resolvable as `@strapi/provider-upload-*`, so register loads it by its own name.
+jest.mock(
+  'upload-only-with-undefined-stream',
+  () => ({
+    init() {
+      return {
+        upload: uploadOnlyUpload,
+        uploadStream: undefined,
+        delete: jest.fn(),
+      };
+    },
+  }),
+  { virtual: true }
+);
+
+const createStrapiMock = (uploadConfig: unknown): any => ({
+  dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+  plugins: { upload: {} },
+  db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+  server: { app: { on: jest.fn() }, routes: jest.fn() },
+  admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+  config: {
+    get: jest.fn().mockReturnValue(uploadConfig),
+    set: jest.fn(),
+  },
+  get: jest.fn().mockReturnValue({ add: jest.fn() }),
+});
+
 describe('Upload plugin register', () => {
   describe('routes and provider middlewares', () => {
     test('The upload plugin registers the /upload route', async () => {
@@ -52,6 +88,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: registerRoute },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -72,6 +109,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: jest.fn() },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -98,6 +136,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: registerRoute },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -119,6 +158,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: registerRoute },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -137,6 +177,71 @@ describe('Upload plugin register', () => {
     });
   });
 
+  describe('base provider checkFileSize', () => {
+    test('puts the code and the limit in the error details', async () => {
+      const plugin: { provider?: any } = {};
+
+      global.strapi = {
+        dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+        plugins: { upload: plugin },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+        server: { app: { on: jest.fn() }, routes: jest.fn() },
+        admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+        config: {
+          get: jest.fn().mockReturnValue({ provider: 'local' }),
+          set: jest.fn(),
+        },
+        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+      } as any;
+
+      await register({ strapi });
+
+      expect(() =>
+        plugin.provider.checkFileSize(
+          { originalFilename: 'big.png', size: 2000 },
+          { sizeLimit: 1000000 }
+        )
+      ).toThrow(
+        expect.objectContaining({
+          name: 'PayloadTooLargeError',
+          message: 'big.png exceeds size limit of 1 MB.',
+          details: { code: 'SizeLimitExceeded', limit: 1000000 },
+        })
+      );
+    });
+  });
+
+  describe('size limit mismatch warning', () => {
+    test('warns at register when sizeLimit is higher than the body parser limit', async () => {
+      const warn = jest.fn();
+      const configByPath: Record<string, unknown> = {
+        'plugin::upload': { provider: 'local', sizeLimit: 500 * 1000 * 1000 },
+        middlewares: [
+          { name: 'strapi::body', config: { formidable: { maxFileSize: 250 * 1000 * 1000 } } },
+        ],
+      };
+
+      global.strapi = {
+        dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+        plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+        server: { app: { on: jest.fn() }, routes: jest.fn() },
+        admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+        config: {
+          get: jest.fn((path: string) => configByPath[path]),
+          set: jest.fn(),
+        },
+        log: { warn },
+        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+      } as any;
+
+      await register({ strapi });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain('upload.config.sizeLimit is 500 MB');
+    });
+  });
+
   describe('plugin::upload config', () => {
     test('null/undefined plugin::upload: register runs, sharp cache and concurrency use defaults', async () => {
       for (const uploadFromConfig of [null, undefined]) {
@@ -147,6 +252,7 @@ describe('Upload plugin register', () => {
         global.strapi = {
           dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
           plugins: { upload: {} },
+          db: { migrations: { providers: { internal: { register: jest.fn() } } } },
           server: { app: { on: jest.fn() }, routes: registerRoute },
           admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
           config: {
@@ -161,6 +267,33 @@ describe('Upload plugin register', () => {
         expect(sharp.cache).toHaveBeenCalledWith(false);
         expect(sharp.concurrency).toHaveBeenCalledWith(1);
       }
+    });
+  });
+
+  describe('provider methods', () => {
+    test('a method the provider declares as undefined is not exposed as a function', async () => {
+      const emitWarning = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
+      global.strapi = createStrapiMock({ provider: 'upload-only-with-undefined-stream' });
+
+      await register({ strapi });
+
+      // The upload service falls back on `upload` with a buffer instead of crashing.
+      const file = {
+        hash: 'file_hash',
+        ext: '.png',
+        mime: 'image/png',
+        getStream: () => Readable.from([Buffer.from('content')]),
+      } as any;
+      await createProviderService({ strapi }).upload(file);
+
+      expect(uploadOnlyUpload).toHaveBeenCalledTimes(1);
+      expect(uploadedContents).toEqual(['content']);
+
+      const provider = strapi.plugin('upload').provider;
+      expect(provider.uploadStream).toBeUndefined();
+      expect(provider.upload).toEqual(expect.any(Function));
+
+      emitWarning.mockRestore();
     });
   });
 });

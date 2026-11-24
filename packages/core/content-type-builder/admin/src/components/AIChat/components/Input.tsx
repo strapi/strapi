@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { styled } from 'styled-components';
@@ -25,12 +25,10 @@ export interface InputRootProps extends React.ComponentPropsWithoutRef<typeof Fl
 }
 
 export const Root = ({ children, isLoading = false, ...props }: InputRootProps) => {
+  const contextValue = useMemo(() => ({ isLoading }), [isLoading]);
+
   return (
-    <InputContext.Provider
-      value={{
-        isLoading,
-      }}
-    >
+    <InputContext.Provider value={contextValue}>
       <Flex
         direction="column"
         alignItems={'flex-start'}

@@ -1,6 +1,6 @@
 import type { Context, Next } from 'koa';
 import { errors } from '@strapi/utils';
-import { isString, get } from 'lodash/fp';
+import { get, isString } from 'lodash';
 import type { Core } from '@strapi/types';
 
 const { RateLimitError } = errors;
@@ -18,7 +18,7 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
-      const requestEmail = get('request.body.email')(ctx);
+      const requestEmail = get(ctx, 'request.body.email');
       const userEmail = isString(requestEmail) ? requestEmail.toLowerCase() : 'unknownEmail';
 
       const loadConfig = {

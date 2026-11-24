@@ -71,7 +71,6 @@ describe('Wysiwyg render and actions buttons', () => {
       const hasText = (node: Element | null) =>
         node ? node.textContent === '<u>Underline</u>' : false;
       const nodeHasText = hasText(node);
-      // eslint-disable-next-line testing-library/no-node-access
       const childrenDontHaveText = Array.from(node?.children ?? []).every(
         (child) => !hasText(child)
       );

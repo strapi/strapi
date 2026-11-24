@@ -14,6 +14,7 @@ const statusSchema = z.enum(['draft', 'published'], { error: 'Invalid status' })
 
 /**
  * From a request or query object, validates and returns the locale and status of the document.
+ * A null or empty locale means no locale, so it is returned as undefined, like an absent one.
  * If the status is not provided and Draft & Publish is disabled, it defaults to 'published'.
  */
 export const getDocumentLocaleAndStatus = async (
@@ -36,5 +37,5 @@ export const getDocumentLocaleAndStatus = async (
 
   await validateZodAsync(schema)(request);
 
-  return { locale, status, ...rest };
+  return { locale: locale === null || locale === '' ? undefined : locale, status, ...rest };
 };

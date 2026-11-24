@@ -1,0 +1,134 @@
+model {
+  mcp_client = external_system 'MCP client' {
+    summary 'Uses enabled tools, prompts and resources.'
+    description '''
+        An external MCP-compatible application calls this Strapi application. It needs an Admin API token; Content API tokens do not substitute for it.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/authentication.ts 'Authentication'
+  }
+  transfer_cli = container 'Data transfer CLI' {
+    summary 'Runs import, export or remote transfer.'
+    description '''
+        A short-lived Node.js process. It loads a local application and selects source/destination providers. Import/export use files; transfer uses a remote Strapi endpoint. The engine runs in this process, not as a separate service.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/strapi/src/cli/commands/transfer/action.ts 'Remote transfer command'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/strapi/src/cli/commands/import/action.ts 'Import command'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/strapi/src/cli/commands/export/action.ts 'Export command'
+
+    engine = component 'Transfer engine' {
+      summary 'Checks compatibility and streams selected stages.'
+      description '''
+        Runs in the CLI process. Source/destination providers exchange entities, relations, assets and supported configuration. Schema metadata supports integrity checks; it does not deploy application schemas or code. Source and destination versions/schemas must satisfy the engine checks.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/data-transfer/src/engine/index.ts 'Transfer stages and integrity checks'
+    }
+    local = component 'Local transfer providers' {
+      summary 'Read or restore the locally loaded application.'
+      description '''
+        Runs in the CLI process. Reads/writes database records and uses upload storage for assets. The destination restore strategy clears selected destination records/assets. Database rollback does not make external file operations atomic.
+      '''
+      link https://github.com/strapi/strapi/tree/develop/packages/core/data-transfer/src/strapi/providers/local-source 'Local source'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/data-transfer/src/strapi/providers/local-destination/index.ts 'Local destination'
+    }
+  }
+  transfer_archive = source_document 'Export archive or directory' {
+    summary 'Carries selected data, assets and schema metadata.'
+    description '''
+        File source/destination providers serialize supported transfer stages. Encryption/compression and directory format depend on command options. This is not an application source package or a complete database backup.
+      '''
+    link https://github.com/strapi/strapi/tree/develop/packages/core/data-transfer/src/file/providers 'File providers'
+  }
+
+
+  extend strapi.server_runtime {
+    graphql_endpoint = component 'GraphQL endpoint' {
+      summary 'Optional Apollo server on the Strapi HTTP server.'
+      description '''
+        Plugin bootstrap builds the schema from enabled Shadow CRUD content types and registered extensions, then mounts the configured endpoint. Requests are authenticated as Content API requests before GraphQL execution. This is in-process, not another deployed service.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/bootstrap.ts 'Schema assembly and endpoint'
+      link https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/services/content-api/index.ts 'Generated schema and extensions'
+    }
+    graphql_wrappers = component 'Resolver access checks' {
+      summary 'Authorize configured scopes, then run policies and middleware.'
+      description '''
+        wrapResolvers checks authorization for root operations or explicitly configured fields unless auth is disabled for that resolver. Resolver middleware and policies wrap the handler. Custom resolver authors are responsible for appropriate access configuration.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/services/content-api/wrap-resolvers.ts 'Resolver wrappers'
+    }
+    graphql_resolvers = component 'Generated resolvers' {
+      summary 'Translate GraphQL operations into document calls.'
+      description '''
+        Shadow CRUD creates query/mutation resolvers from enabled content types. Generated query resolvers validate and sanitize through Content API helpers before Document Service calls. Custom resolvers can use different services; this map shows the generated content path.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/services/builders/resolvers/query.ts 'Query resolvers'
+      link https://github.com/strapi/strapi/tree/develop/packages/plugins/graphql/server/src/services/builders/mutations 'Mutation builders'
+      link https://github.com/strapi/strapi/tree/develop/packages/plugins/graphql/server/src/services/extension 'Schema customization'
+    }
+    mcp_http = component 'MCP HTTP handler' {
+      summary 'Authenticates each POST and creates a request-scoped server.'
+      description '''
+        Disabled unless server.mcp.enabled is true. The /mcp POST handler uses stateless Streamable HTTP: it creates a server/transport for the request and closes the server afterward. It does not reuse the REST Content API route pipeline.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/handlers/handlePost.ts 'Request lifecycle'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/internal/McpConfiguration.ts 'Enablement'
+    }
+    mcp_auth = component 'MCP Admin-token authentication' {
+      summary 'Resolves the token owner and Admin ability.'
+      description '''
+        Delegates bearer-token checks to the Admin API token service. Token identity and ability become the request context; authentication alone does not authorize every tool operation.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/authentication.ts 'Admin token authentication'
+    }
+    mcp_definitions = component 'MCP capability definitions' {
+      summary 'Registers tools, prompts and resources before start.'
+      description '''
+        The service retains definitions before it starts. Content Manager derives content-type tools when MCP is enabled; application/plugins can register further definitions. Registration is separate from per-request availability.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/index.ts 'Definition registration'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/mcp/register-content-manager-mcp-tools.ts 'Content Manager tools'
+    }
+    mcp_dispatch = component 'MCP capability dispatch' {
+      summary 'Exposes capabilities allowed for this request.'
+      description '''
+        The factory binds definitions to a request-scoped SDK server and enables capabilities using Admin ability policies or the explicit dev-mode rule. This is a coarse availability check: handler-specific field/entity permissions still matter.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/internal/McpServerFactory.ts 'Request server factory'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/mcp/internal/syncMcpSessionCapabilities.ts 'Capability availability'
+    }
+    mcp_content_handlers = component 'Content Manager MCP handlers' {
+      summary 'Apply content permissions and run document operations.'
+      description '''
+        Representative built-in tools use permission-checker sanitization and document-manager with the token owner/ability. Other tools, prompts and resources have their own handlers and need not call Document Service.
+      '''
+      link https://github.com/strapi/strapi/tree/develop/packages/core/content-manager/server/src/mcp/handlers 'Content handlers'
+    }
+    transfer_endpoint = component 'Remote transfer endpoint' {
+      summary 'Authenticates push/pull and upgrades to WebSocket.'
+      description '''
+        Remote transfer must be enabled. Dedicated transfer-token scopes authorize push or pull. Handlers connect the remote local providers to the protocol; this path does not call the ordinary Content REST API. Source assets are streamed from local files or remote URLs (signed when needed); destination asset writes/deletes use the upload provider.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/routes/transfer.ts 'Transfer routes'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/data-transfer/src/strapi/remote/handlers 'Remote handlers'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/data-transfer/src/strapi/providers/local-source/assets.ts 'Asset source streams'
+    }
+  }
+  public_client -> strapi.server_runtime.graphql_endpoint 'sends GraphQL operations'
+  strapi.server_runtime.graphql_endpoint -> strapi.server_runtime.auth 'authenticates Content API request'
+  strapi.server_runtime.graphql_endpoint -> strapi.server_runtime.graphql_wrappers 'executes wrapped fields'
+  strapi.server_runtime.graphql_wrappers -> strapi.server_runtime.graphql_resolvers 'invokes permitted resolver'
+  strapi.server_runtime.graphql_resolvers -> strapi.server_runtime.content_api 'validates and sanitizes inputs'
+  strapi.server_runtime.graphql_resolvers -> strapi.server_runtime.document_service 'runs generated document operations'
+  mcp_client -> strapi.server_runtime.mcp_http 'POST /mcp with Admin token'
+  strapi.server_runtime.mcp_http -> strapi.server_runtime.mcp_auth 'authenticates bearer token'
+  strapi.server_runtime.mcp_http -> strapi.server_runtime.mcp_dispatch 'creates server with ability and identity'
+  strapi.server_runtime.mcp_dispatch -> strapi.server_runtime.mcp_definitions 'binds registered definitions'
+  strapi.server_runtime.mcp_dispatch -> strapi.server_runtime.mcp_content_handlers 'dispatches enabled content tool'
+  strapi.server_runtime.mcp_content_handlers -> strapi.server_runtime.cm_document_manager 'uses after permission checks'
+  developer -> transfer_cli.engine 'runs a transfer command'
+  transfer_cli.engine -> transfer_archive 'reads or writes file data'
+  transfer_cli.engine -> transfer_cli.local 'reads or restores local data'
+  transfer_cli.engine -> strapi.server_runtime.transfer_endpoint 'streams remote push or pull'
+  strapi.server_runtime.transfer_endpoint -> strapi.database 'reads or restores remote records'
+  strapi.server_runtime.transfer_endpoint -> strapi.server_runtime.upload_provider 'restores assets through provider'
+}

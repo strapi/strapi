@@ -9,6 +9,7 @@ import apiUploadFolder from './api-upload-folder';
 import extensions from './extensions';
 import { createAIMetadataService } from './ai-metadata';
 import { createAIMetadataJobsService } from './ai-metadata-jobs';
+import { createAIMetadataProviderService } from './ai-metadata-provider';
 
 export const services = {
   provider,
@@ -22,4 +23,5 @@ export const services = {
   extensions,
   aiMetadata: createAIMetadataService,
   aiMetadataJobs: createAIMetadataJobsService,
+  aiMetadataProvider: createAIMetadataProviderService,
 };

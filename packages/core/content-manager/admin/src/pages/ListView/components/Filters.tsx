@@ -29,7 +29,7 @@ const { INJECT_LIST_VIEW_FILTERS } = HOOKS;
 /**
  * If new attributes are added, this list needs to be updated.
  */
-const NOT_ALLOWED_FILTERS = [
+const NOT_ALLOWED_FILTERS = new Set([
   'json',
   'component',
   'media',
@@ -37,9 +37,9 @@ const NOT_ALLOWED_FILTERS = [
   'dynamiczone',
   'password',
   'blocks',
-];
+]);
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
-const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
+const USER_FILTER_ATTRIBUTES = new Set([...CREATOR_FIELDS, 'strapi_assignee']);
 
 /* -------------------------------------------------------------------------------------------------
  * Filters
@@ -47,14 +47,25 @@ const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 interface FiltersProps {
   disabled?: boolean;
   schema: Schema;
-  layout: ListLayout;
+  /**
+   * From `useListViewFilterOptions`. The list page computes them once: its API query reads them
+   * too (`toApiFilters`).
+   */
+  options: Filters.Filter[];
   children: React.ReactNode;
 }
 
-const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
-  const { attributes, uid: model, options } = schema;
+const NO_ATTRIBUTES: Schema['attributes'] = {};
+
+/**
+ * The filters of the list view. The API query reads them too (`toApiFilters`): a filter can take
+ * a value the API doesn't read as it is.
+ */
+const useListViewFilterOptions = (schema: Schema | undefined, layout: ListLayout) => {
+  const attributes = schema?.attributes ?? NO_ATTRIBUTES;
+  const model = schema?.uid;
+  const options = schema?.options;
   const { formatMessage, locale } = useIntl();
-  const { trackUsage } = useTracking();
   const allPermissions = useAuth('FiltersImpl', (state) => state.permissions);
   const [{ query }] = useQueryParams<Filters.Query>();
   const { schemas } = useContentTypeSchema();
@@ -81,7 +92,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     const isAdminUserRelation =
       attribute?.type === 'relation' && 'target' in attribute && attribute.target === 'admin::user';
 
-    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.includes(key)) && !acc.includes(id)) {
+    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.has(key)) && !acc.includes(id)) {
       acc.push(id);
     }
 
@@ -104,16 +115,19 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   });
 
   const displayedFilters = React.useMemo(() => {
-    const [{ properties: { fields = [] } = { fields: [] } }] = allPermissions.filter(
-      (permission) =>
-        permission.action === 'plugin::content-manager.explorer.read' &&
-        permission.subject === model
-    );
+    // An absent read permission for this model yields no filterable fields.
+    // The empty object lets the defaults below apply instead of throwing.
+    const { properties: { fields = [] } = { fields: [] } } =
+      allPermissions.find(
+        (permission) =>
+          permission.action === 'plugin::content-manager.explorer.read' &&
+          permission.subject === model
+      ) ?? {};
 
     const allowedFields = fields.filter((field) => {
       const attribute = attributes[field] ?? {};
 
-      return attribute.type && !NOT_ALLOWED_FILTERS.includes(attribute.type);
+      return attribute.type && !NOT_ALLOWED_FILTERS.has(attribute.type);
     });
 
     const baseFilters = [
@@ -177,7 +191,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
 
         const attribute = attributes[name];
 
-        if (!attribute || NOT_ALLOWED_FILTERS.includes(attribute.type)) {
+        if (!attribute || NOT_ALLOWED_FILTERS.has(attribute.type)) {
           return null;
         }
 
@@ -268,7 +282,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
       };
 
       // User-typed filters need user options so the chip can render the display name instead of the id.
-      if (USER_FILTER_ATTRIBUTES.includes(filter.name) && !next.options?.length) {
+      if (USER_FILTER_ATTRIBUTES.has(filter.name) && !next.options?.length) {
         next.options = userOptions;
       }
 
@@ -290,6 +304,12 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     runHookWaterfall,
   ]);
 
+  return displayedFilters;
+};
+
+const Root = ({ disabled, schema, options, children }: FiltersProps) => {
+  const { trackUsage } = useTracking();
+
   const onOpenChange = (isOpen: boolean) => {
     if (isOpen) {
       trackUsage('willFilterEntries');
@@ -297,7 +317,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   };
 
   const handleFilterChange: Filters.Props['onChange'] = (data) => {
-    const attribute = attributes[data.name];
+    const attribute = schema.attributes[data.name];
 
     if (attribute) {
       trackUsage('didFilterEntries', {
@@ -309,7 +329,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   return (
     <Filters.Root
       disabled={disabled}
-      options={displayedFilters}
+      options={options}
       onOpenChange={onOpenChange}
       onChange={handleFilterChange}
     >
@@ -378,5 +398,5 @@ const listViewFilters = {
   List: Filters.List,
 };
 
-export { listViewFilters };
+export { listViewFilters, useListViewFilterOptions };
 export type { FiltersProps };

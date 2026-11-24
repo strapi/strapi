@@ -1,6 +1,5 @@
+import { pick, includes, merge, get, curry, flow, omit } from 'lodash';
 import type { Utils } from '@strapi/types';
-
-import { curry, pipe, merge, set, pick, omit, includes, isArray, prop } from 'lodash/fp';
 
 export interface ActionAlias {
   /**
@@ -119,9 +118,8 @@ const actionFields = [
 /**
  * Remove unwanted attributes from an {@link Action}
  */
-const sanitizeActionAttributes = pick(actionFields) as (
-  action: Action | CreateActionPayload
-) => Action;
+const sanitizeActionAttributes = (action: Action | CreateActionPayload): Action =>
+  pick(action, actionFields) as Action;
 
 /**
  * Create and return an identifier for an {@link CreateActionPayload}.
@@ -147,8 +145,10 @@ const computeActionId = (attributes: CreateActionPayload): string => {
 /**
  * Assign an actionId attribute to an {@link CreateActionPayload} object
  */
-const assignActionId = (attrs: CreateActionPayload) =>
-  set('actionId', computeActionId(attrs), attrs);
+const assignActionId = (attrs: CreateActionPayload) => ({
+  ...attrs,
+  actionId: computeActionId(attrs),
+});
 
 /**
  * Transform an action by adding or removing the {@link Action.subCategory} attribute
@@ -159,37 +159,33 @@ const assignOrOmitSubCategory = (action: Action): Action => {
   const shouldHaveSubCategory = ['settings', 'plugins'].includes(action.section);
 
   return shouldHaveSubCategory
-    ? set('subCategory', action.subCategory || 'general', action)
-    : omit('subCategory', action);
+    ? { ...action, subCategory: action.subCategory || 'general' }
+    : omit(action, 'subCategory');
 };
 
 /**
  * Check if a property can be applied to an {@link Action}
  */
 const appliesToProperty = curry((property: string, action: Action): boolean => {
-  return pipe(prop('options.applyToProperties'), includes(property))(action);
+  return includes(get(action, 'options.applyToProperties'), property);
 });
 
 /**
  * Check if an action applies to a subject
  */
 const appliesToSubject = curry((subject: string, action: Action): boolean => {
-  return isArray(action.subjects) && includes(subject, action.subjects);
+  return Array.isArray(action.subjects) && action.subjects.includes(subject);
 });
 
 /**
  * Transform the given attributes into a domain representation of an Action
  */
-const create: (payload: CreateActionPayload) => Action = pipe(
-  // Create and assign an action identifier to the action
-  // (need to be done before the sanitizeActionAttributes since we need the uid here)
+const create: (payload: CreateActionPayload) => Action = flow(
+  // Assign the action identifier before sanitization removes the uid.
   assignActionId,
-  // Add or remove the sub category field based on the pluginName attribute
   assignOrOmitSubCategory,
-  // Remove unwanted attributes from the payload
   sanitizeActionAttributes,
-  // Complete the action creation by adding default values for some attributes
-  merge(getDefaultActionAttributes())
+  (action) => merge({}, getDefaultActionAttributes(), action)
 );
 
 export default {

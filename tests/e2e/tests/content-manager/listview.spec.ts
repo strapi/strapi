@@ -1,12 +1,45 @@
-import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { test, expect } from '../../../fixtures';
+import { login, loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
 test.describe('List View', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
+  });
+
+  test('Saved sorting survives logging in and opening the Content Manager base route', async ({
+    page,
+  }) => {
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Article', exact: true }).click();
+
+    const titleHeader = page.getByRole('gridcell', { name: 'title', exact: true });
+    const firstEntry = page.getByRole('row').nth(1);
+
+    await expect(firstEntry).toContainText('West Ham post match analysis');
+
+    if ((await titleHeader.getAttribute('aria-sort')) !== 'ascending') {
+      await titleHeader.click();
+    }
+    await expect(titleHeader).toHaveAttribute('aria-sort', 'ascending');
+
+    await titleHeader.click();
+    await expect(titleHeader).toHaveAttribute('aria-sort', 'descending');
+    await expect(firstEntry).toContainText('Why I prefer football over soccer');
+
+    await page.getByRole('button', { name: 'test testing' }).click();
+    await page.getByRole('menuitem', { name: 'Log out' }).click();
+    await expect(page.getByText('Log in to your Strapi account')).toBeVisible();
     await login({ page });
+    await expect(page.getByRole('button', { name: 'test testing' })).toBeVisible();
+
+    await page.goto('/admin/content-manager');
+
+    await expect(page.getByRole('heading', { name: 'Article', exact: true })).toBeVisible();
+    await expect(titleHeader).toHaveAttribute('aria-sort', 'descending');
+    await expect(firstEntry).toContainText('Why I prefer football over soccer');
   });
 
   test('A user can filter entries', async ({ page }) => {

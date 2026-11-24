@@ -74,4 +74,31 @@ describe('sortConnectArray', () => {
       'The relation with id 1 is already connected. You cannot connect the same relation twice.'
     );
   });
+
+  test('sorts a long chain of relations each connected before the next one', () => {
+    const size = 20_000;
+    // id 1 before id 2 before id 3 ... before id `size`, which is connected at the end
+    const connect = Array.from({ length: size }, (_, idx) => ({
+      id: idx + 1,
+      position: idx + 1 === size ? { end: true as const } : { before: idx + 2 },
+    }));
+
+    const sortConnect = sortConnectArray(connect);
+
+    expect(sortConnect.map(({ id }) => id)).toEqual(
+      Array.from({ length: size }, (_, idx) => size - idx)
+    );
+  });
+
+  test('detects a circular reference in a long chain', () => {
+    const size = 20_000;
+    const connect = Array.from({ length: size }, (_, idx) => ({
+      id: idx + 1,
+      position: { before: idx + 1 === size ? 1 : idx + 2 },
+    }));
+
+    expect(() => sortConnectArray(connect)).toThrowError(
+      'A circular reference was found in the connect array.'
+    );
+  });
 });

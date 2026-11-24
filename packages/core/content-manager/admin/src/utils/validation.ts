@@ -1,5 +1,5 @@
 import { translatedErrors } from '@strapi/admin/strapi-admin';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import * as yup from 'yup';
 
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
@@ -102,7 +102,7 @@ const createYupSchema = (
             addRegexValidation,
           ].map((fn) => fn(attribute, options));
 
-          const transformSchema = pipe(...validations);
+          const transformSchema = flow(...validations);
 
           switch (attribute.type) {
             case 'component': {
@@ -148,6 +148,27 @@ const createYupSchema = (
                     ) as unknown as yup.ObjectSchema<ObjectShape>
                   )
                 ).test(arrayValidator(attribute, options)),
+              };
+            case 'media':
+              return {
+                ...acc,
+                // mixed().required() rejects null and undefined. An untouched multiple
+                // field is loaded as [], which would still publish.
+                [name]: transformSchema(
+                  attribute.multiple
+                    ? yup.mixed().test({
+                        name: 'media-required',
+                        message: translatedErrors.required,
+                        test(value: unknown) {
+                          if (options.status === 'draft' || !attribute.required) {
+                            return true;
+                          }
+
+                          return !Array.isArray(value) || value.length > 0;
+                        },
+                      })
+                    : yup.mixed()
+                ),
               };
             case 'relation':
               return {

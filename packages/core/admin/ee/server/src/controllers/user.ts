@@ -1,7 +1,6 @@
+import _, { pick } from 'lodash';
 import type { Context } from 'koa';
 
-import _ from 'lodash';
-import { pick, isNil } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
@@ -11,7 +10,8 @@ import { isSsoLocked } from '../utils/sso-lock';
 
 const { ApplicationError, ForbiddenError } = errors;
 
-const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
+const pickUserCreationAttributes = <T extends object>(user: T) =>
+  pick(user, ['firstname', 'lastname', 'email', 'roles']);
 
 const hasAdminSeatsAvaialble = async () => {
   if (!strapi.EE) {
@@ -19,7 +19,7 @@ const hasAdminSeatsAvaialble = async () => {
   }
 
   const permittedSeats = strapi.ee.seats as any;
-  if (isNil(permittedSeats)) {
+  if (permittedSeats == null) {
     return true;
   }
 
@@ -82,6 +82,10 @@ export default {
     }
 
     const user = await getService('user').findOne(id, null);
+
+    if (user === null) {
+      return ctx.notFound('User does not exist');
+    }
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');

@@ -1,10 +1,11 @@
+import { get } from 'lodash';
 import type { Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { isNil } from 'lodash/fp';
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
 import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';
+import { hasStageAttribute } from '../utils/review-workflows';
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 
@@ -32,10 +33,42 @@ const getEntityStage = async (uid: any, id: any, params: any) => {
 };
 
 /**
+ * An update creates a new locale of a document when the requested locale has no entry yet
+ */
+const isLocaleCreation = async (uid: any, params: any) => {
+  const entry = await strapi.documents(uid).findOne({
+    documentId: params.documentId,
+    locale: params.locale,
+    status: 'draft',
+    fields: ['id'],
+  });
+
+  return entry === null;
+};
+
+/**
  * Ensures the entity is assigned to the default workflow stage
  */
 const assignStageOnCreate: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'create' && ctx.action !== 'clone') {
+  if (ctx.action === 'update') {
+    const data = ctx.params.data as Record<string, any> | undefined;
+
+    if (data?.[ENTITY_STAGE_ATTRIBUTE] != null) {
+      return next();
+    }
+
+    // Only a localized type with a stage attribute can get a new locale with a stage through an update
+    if (
+      hasStageAttribute(ctx.contentType) === false ||
+      get(ctx.contentType, 'pluginOptions.i18n.localized') !== true
+    ) {
+      return next();
+    }
+
+    if ((await isLocaleCreation(ctx.contentType.uid, ctx.params)) === false) {
+      return next();
+    }
+  } else if (ctx.action !== 'create' && ctx.action !== 'clone') {
     return next();
   }
 
@@ -54,7 +87,7 @@ const assignStageOnCreate: Middleware = async (ctx, next) => {
   const data = ctx.params.data as Record<string, any>;
 
   // Assign the default stage if the entity doesn't have one
-  if (ctx.params?.data && isNil(data[ENTITY_STAGE_ATTRIBUTE])) {
+  if (ctx.params?.data && data[ENTITY_STAGE_ATTRIBUTE] == null) {
     data[ENTITY_STAGE_ATTRIBUTE] = { id: workflow.stages[0].id };
   }
 
@@ -69,7 +102,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
   const { documentId } = ctx.params;
   const data = ctx.params.data as any;
 
-  if (isNil(data?.[ENTITY_STAGE_ATTRIBUTE])) {
+  if (data?.[ENTITY_STAGE_ATTRIBUTE] == null) {
     delete data?.[ENTITY_STAGE_ATTRIBUTE];
     return next();
   }
@@ -120,7 +153,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
     });
   }
 
-  return next();
+  return result;
 };
 
 /**

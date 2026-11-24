@@ -141,8 +141,6 @@
   "form.attribute.condition.enum-change-warning": "Nasledujúce polia majú podmienky, ktoré závisia od tohto poľa: {fieldNames}. Zmena alebo odstránenie enum hodnôt {values} tieto podmienky poruší. Chcete pokračovať?",
   "form.attribute.condition.enum-change-warning-values": ". Zmena alebo odstránenie enum hodnôt ",
   "form.attribute.condition.enum-change-warning-end": " poruší tieto podmienky. Chcete pokračovať?",
-  "form.attribute.condition.field-change-warning": "Nasledujúce polia majú podmienky, ktoré závisia od tohto poľa: {fieldNames}. Jeho premenovanie tieto podmienky poruší. Chcete pokračovať?",
-  "form.attribute.condition.field-change-warning-end": ". Jeho premenovanie poruší tieto podmienky. Chcete pokračovať?",
   "form.button.add-components-to-dynamiczone": "Pridať komponenty do zóny",
   "form.button.add-field": "Pridať ďalšie políčko",
   "form.button.add-first-field-to-created-component": "Pridať prvé políčko do komponentu",

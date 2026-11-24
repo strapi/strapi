@@ -1,8 +1,8 @@
-import pipe from 'lodash/fp/pipe';
-// eslint-disable-next-line import/default
+import flow from 'lodash/flow';
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
+import { decodeAccessTokenExpiry } from './jwt';
 
 import type { errors } from '@strapi/utils';
 
@@ -40,7 +40,16 @@ let onTokenUpdate: ((token: string) => void) | null = null;
  * session expired). The React layer registers a handler that clears local
  * auth state and navigates to /auth/login.
  */
-let onSessionExpired: (() => void) | null = null;
+let onSessionExpired: ((expiredToken?: string | null) => void) | null = null;
+
+/**
+ * A 401 after a failed refresh is delivered twice in the common RTK path
+ * (baseQuery, then the store middleware). Concurrent in-flight queries can
+ * add more. Fire the React handler once per dead session; re-arm when a new
+ * token is stored (refresh or login).
+ */
+let sessionExpiredNotified = false;
+let sessionExpiredToken: string | null | undefined;
 
 /**
  * Set the callback that will be called when the token is refreshed.
@@ -60,22 +69,50 @@ const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
 
 /**
  * Set the callback that will be called when the active session is no longer
- * valid (refresh token rejected by the server, or detected idle on the
- * client). This lets the active tab redirect to /auth/login without waiting
- * for the next user-initiated request to fail.
+ * valid — i.e. the server rejected the refresh token, not merely that the
+ * short-lived access token expired. This lets the tab redirect to /auth/login
+ * (after any unsaved-changes guard) rather than sitting on a dead session.
  *
  * @param callback - Function to call when the session ends, or null to clear
  */
-const setOnSessionExpired = (callback: (() => void) | null): void => {
+const setOnSessionExpired = (callback: ((expiredToken?: string | null) => void) | null): void => {
   onSessionExpired = callback;
+  if (callback === null) {
+    resetSessionExpiredNotification();
+  }
+};
+
+/**
+ * Re-arm session-expired notifications after a new access token is stored
+ * (silent refresh) or after a successful login.
+ */
+const resetSessionExpiredNotification = (): void => {
+  sessionExpiredNotified = false;
+  sessionExpiredToken = undefined;
 };
 
 /**
  * Trigger the registered session-expired callback, if any. Safe to call from
- * non-React code (e.g., the RTK Query baseQuery 401 handler).
+ * non-React code (e.g., the RTK Query baseQuery 401 handler). Returns `false`
+ * when nothing is listening, so callers can fall back to a hard redirect
+ * instead of leaving the user on a dead page. Subsequent calls during the same
+ * dead session return `true` without invoking the handler again.
  */
-const triggerSessionExpired = (): void => {
-  onSessionExpired?.();
+const triggerSessionExpired = (expiredToken?: string | null): boolean => {
+  if (!onSessionExpired) {
+    return false;
+  }
+
+  if (sessionExpiredNotified) {
+    if (expiredToken === undefined || expiredToken === sessionExpiredToken) {
+      return true;
+    }
+  }
+
+  sessionExpiredNotified = true;
+  sessionExpiredToken = expiredToken;
+  onSessionExpired(expiredToken);
+  return true;
 };
 
 /**
@@ -96,6 +133,8 @@ const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.tes
  * @internal Exported for testing purposes
  */
 const storeToken = (token: string): void => {
+  resetSessionExpiredNotification();
+
   // Check if the original token was stored in localStorage (persist mode)
   const wasPersistedToLocalStorage = Boolean(localStorage.getItem(STORAGE_KEYS.TOKEN));
 
@@ -111,39 +150,139 @@ const storeToken = (token: string): void => {
   }
 };
 
+const getToken = (): string | null => {
+  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  if (fromLocalStorage) {
+    return JSON.parse(fromLocalStorage);
+  }
+
+  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
+  return fromCookie ?? null;
+};
+
+const ADMIN_REFRESH_LOCK = 'strapi-admin-access-token';
+const FALLBACK_ADOPT_TIMEOUT_MS = 250;
+const FALLBACK_ADOPT_POLL_MS = 25;
+
+const postAccessToken = (backendURL: string) =>
+  fetch(`${backendURL}/admin/access-token`, {
+    method: 'POST',
+    credentials: 'include', // Include cookies for the refresh token
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+
+const adoptSharedAccessToken = (token: string): string => {
+  resetSessionExpiredNotification();
+
+  if (onTokenUpdate) {
+    onTokenUpdate(token);
+  }
+  return token;
+};
+
+/**
+ * Another tab may have refreshed already and written a newer access token to the
+ * shared localStorage/cookie. Per-tab Redux is not visible here — only shared
+ * storage counts.
+ */
+const readValidAccessTokenFromSharedStorage = (staleToken: string | null): string | null => {
+  const stored = getToken();
+  if (!stored || stored === staleToken) {
+    return null;
+  }
+
+  const expiry = decodeAccessTokenExpiry(stored);
+  if (expiry === null || expiry <= Date.now()) {
+    return null;
+  }
+
+  return stored;
+};
+
+const waitForSharedAccessToken = async (staleToken: string | null): Promise<string | null> => {
+  const timeoutAt = Date.now() + FALLBACK_ADOPT_TIMEOUT_MS;
+
+  while (Date.now() < timeoutAt) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, FALLBACK_ADOPT_POLL_MS);
+    });
+
+    const adopted = readValidAccessTokenFromSharedStorage(staleToken);
+    if (adopted) {
+      return adoptSharedAccessToken(adopted);
+    }
+  }
+
+  return null;
+};
+
+const executeRefreshAccessToken = async (
+  backendURL: string,
+  tokenBeforeRefresh: string | null,
+  { allowHttpRetry }: { allowHttpRetry: boolean }
+): Promise<string | null> => {
+  const adopted = readValidAccessTokenFromSharedStorage(tokenBeforeRefresh);
+  if (adopted) {
+    return adoptSharedAccessToken(adopted);
+  }
+
+  let response = await postAccessToken(backendURL);
+
+  if (response.status === 401 && allowHttpRetry) {
+    const adoptedAfterFail = readValidAccessTokenFromSharedStorage(tokenBeforeRefresh);
+    if (adoptedAfterFail) {
+      return adoptSharedAccessToken(adoptedAfterFail);
+    }
+
+    const adoptedAfterWait = await waitForSharedAccessToken(tokenBeforeRefresh);
+    if (adoptedAfterWait) {
+      return adoptedAfterWait;
+    }
+
+    response = await postAccessToken(backendURL);
+  }
+
+  if (!response.ok) {
+    console.warn('[Auth] Token refresh failed with status:', response.status);
+    return null;
+  }
+
+  const result = await response.json();
+  const token = result?.data?.token as string | undefined;
+
+  if (!token) {
+    console.warn('[Auth] Token refresh response missing token');
+    return null;
+  }
+
+  storeToken(token);
+  return token;
+};
+
 /**
  * Refresh the access token by calling the /admin/access-token endpoint.
  * This uses a low-level fetch to avoid recursion through the interceptor.
  * Returns the new token on success, or null on failure.
  */
-const refreshAccessToken = async (): Promise<string | null> => {
+const refreshAccessToken = async (
+  tokenUsedByFailedRequest?: string | null
+): Promise<string | null> => {
   const backendURL = window.strapi.backendURL;
+  const tokenBeforeRefresh = tokenUsedByFailedRequest ?? getToken();
 
   try {
-    const response = await fetch(`${backendURL}/admin/access-token`, {
-      method: 'POST',
-      credentials: 'include', // Include cookies for the refresh token
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
+    if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+      return await navigator.locks.request(ADMIN_REFRESH_LOCK, () =>
+        executeRefreshAccessToken(backendURL, tokenBeforeRefresh, { allowHttpRetry: false })
+      );
+    }
+
+    return await executeRefreshAccessToken(backendURL, tokenBeforeRefresh, {
+      allowHttpRetry: true,
     });
-
-    if (!response.ok) {
-      console.warn('[Auth] Token refresh failed with status:', response.status);
-      return null;
-    }
-
-    const result = await response.json();
-    const token = result?.data?.token as string | undefined;
-
-    if (!token) {
-      console.warn('[Auth] Token refresh response missing token');
-      return null;
-    }
-
-    storeToken(token);
-    return token;
   } catch (error) {
     console.error('[Auth] Token refresh error:', error);
     return null;
@@ -158,9 +297,9 @@ const refreshAccessToken = async (): Promise<string | null> => {
  * @throws {Error} If the token refresh fails (e.g., refresh token expired)
  * @internal Exported for testing purposes
  */
-const attemptTokenRefresh = async (): Promise<string> => {
+const attemptTokenRefresh = async (tokenUsedByFailedRequest?: string | null): Promise<string> => {
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken().finally(() => {
+    refreshPromise = refreshAccessToken(tokenUsedByFailedRequest).finally(() => {
       refreshPromise = null;
     });
   }
@@ -226,15 +365,50 @@ const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
 };
 
-const getToken = (): string | null => {
-  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  if (fromLocalStorage) {
-    return JSON.parse(fromLocalStorage);
-  }
+/**
+ * Access token the failed request actually sent. Kept off `FetchError` so
+ * logs and error reporters cannot pick the bearer token up from the object.
+ */
+const failedRequestSessionTokens = new WeakMap<FetchError, string | null>();
 
-  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
-  return fromCookie ?? null;
+const setFailedRequestSessionToken = (error: FetchError, token: string | null): void => {
+  failedRequestSessionTokens.set(error, token);
 };
+
+const getFailedRequestSessionToken = (error: FetchError): string | null | undefined => {
+  return failedRequestSessionTokens.get(error);
+};
+
+export type AbortError = DOMException & {
+  name: 'AbortError' | 'TimeoutError';
+};
+
+/**
+ * Type guard that checks whether an error comes from an aborted operation,
+ * such as a `fetch` cancelled via `AbortController` or timed out via
+ * `AbortSignal.timeout()`.
+ *
+ * Note: if the controller was aborted with a custom reason
+ * (`controller.abort(reason)`), the operation rejects with that reason
+ * instead of an `AbortError`, and this guard returns `false`. In that case,
+ * also check the signal itself:
+ *
+ * @example
+ * try {
+ *   await fetch(url, { signal: controller.signal });
+ * } catch (err) {
+ *   if (isAbortError(err) || controller.signal.aborted) return;
+ *   throw err;
+ * }
+ *
+ * @param error - The caught value to check.
+ * @returns `true` if `error` is a `DOMException` named `AbortError` or `TimeoutError`.
+ */
+export function isAbortError(error: unknown): error is AbortError {
+  return (
+    error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')
+  );
+}
 
 type FetchClient = {
   get: {
@@ -286,10 +460,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * Create default headers with the current token.
    * This is a function so we can get a fresh token after refresh.
    */
-  const getDefaultHeaders = () => ({
+  const getDefaultHeaders = (token = getToken()) => ({
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${getToken()}`,
+    Authorization: `Bearer ${token}`,
   });
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
@@ -356,9 +530,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
         return { data: {}, status: response.status } as FetchResponse<TData>;
-      } else {
-        throw error;
       }
+
+      // A non-JSON error body (e.g. an HTML page from a reverse proxy) still has a status worth keeping.
+      if ((error as Error | null)?.name === 'SyntaxError' && !validateStatus?.(response.status)) {
+        const fetchError = new FetchError('Unknown Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
+      }
+
+      throw error;
     }
   };
 
@@ -369,20 +550,33 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    */
   const withTokenRefresh = async <TData>(
     url: string,
-    executeRequest: () => Promise<FetchResponse<TData>>
+    executeRequest: () => Promise<FetchResponse<TData>>,
+    getRequestToken: () => string | null
   ): Promise<FetchResponse<TData>> => {
     try {
       return await executeRequest();
     } catch (error) {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
+        const tokenUsedByFailedRequest = getRequestToken();
+
         try {
-          await attemptTokenRefresh();
-          // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
-          return await executeRequest();
+          await attemptTokenRefresh(tokenUsedByFailedRequest);
         } catch {
           // If refresh fails, throw the original error
+          setFailedRequestSessionToken(error, tokenUsedByFailedRequest);
           throw error;
+        }
+
+        // Retry outside the refresh catch so a second 401 is attributed to the
+        // refreshed token instead of the token used by the original request.
+        try {
+          return await executeRequest();
+        } catch (retryError) {
+          if (isFetchError(retryError) && retryError.status === 401) {
+            setFailedRequestSessionToken(retryError, getRequestToken());
+          }
+          throw retryError;
         }
       }
       throw error;
@@ -420,18 +614,21 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * are unique to the individual request
    */
   const makeCreateRequestUrl = (options?: FetchOptions) =>
-    pipe(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
+    flow(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
 
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
-        const { Authorization } = getDefaultHeaders();
+        requestToken = getToken();
+        const { Authorization } = getDefaultHeaders(requestToken);
 
         // For non-JSON response types, omit content negotiation headers that imply JSON
-        const defaultHeaders = responseType === 'json' ? getDefaultHeaders() : { Authorization };
+        const defaultHeaders =
+          responseType === 'json' ? getDefaultHeaders(requestToken) : { Authorization };
 
         const headers = new Headers({
           ...defaultHeaders,
@@ -448,7 +645,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus, responseType);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     post: async <TData, TSend = unknown>(
       url: string,
@@ -456,10 +653,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
+        requestToken = getToken();
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...getDefaultHeaders(requestToken),
           ...options?.headers,
         });
 
@@ -481,7 +680,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     put: async <TData, TSend = unknown>(
       url: string,
@@ -489,10 +688,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
+        requestToken = getToken();
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...getDefaultHeaders(requestToken),
           ...options?.headers,
         });
 
@@ -515,14 +716,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
+        requestToken = getToken();
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...getDefaultHeaders(requestToken),
           ...options?.headers,
         });
 
@@ -535,7 +738,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
   };
 
@@ -546,10 +749,15 @@ export {
   getFetchClient,
   isFetchError,
   FetchError,
+  getFailedRequestSessionToken,
+  setFailedRequestSessionToken,
   attemptTokenRefresh,
+  refreshAccessToken,
   storeToken,
   setOnTokenUpdate,
   setOnSessionExpired,
   triggerSessionExpired,
+  resetSessionExpiredNotification,
+  ADMIN_REFRESH_LOCK,
 };
 export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };

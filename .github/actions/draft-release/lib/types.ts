@@ -148,7 +148,7 @@ export type PullPayload = {
     repo?: { full_name?: string | null } | null;
   } | null;
   user?: { login?: string | null } | null;
-  milestone?: { title?: string | null } | null;
+  milestone?: { number?: number | null; title?: string | null } | null;
 };
 
 /** A pull request the API reports as merged, produced only by the `isMerged` guard. */
@@ -163,6 +163,7 @@ export type PullSummary = {
   baseRef: string;
   headRef: string;
   milestone: string | null;
+  milestoneNumber: number | null;
   /**
    * When the pull request landed, ISO 8601, from `merged_at`.
    *
@@ -275,7 +276,8 @@ export type MilestonePlan = {
  */
 export type RealignItem = {
   number: number;
-  from: string | null;
+  fromNumber: number | null;
+  fromTitle: string | null;
   toTitle: string;
 };
 
@@ -327,10 +329,16 @@ export type JournalSnapshot = {
   entries: JournalEntry[];
 };
 
+export type JournalResult = Partial<Pick<JournalEntry, 'target' | 'before' | 'after' | 'detail'>>;
+
 export type Journal = {
   mode: 'applied' | 'planned';
   /** Records the intent, then performs it only when the run is applying. */
-  write: <T>(intent: JournalIntent, perform: () => Promise<T>) => Promise<T | null>;
+  write: <T>(
+    intent: JournalIntent,
+    perform: () => Promise<T>,
+    recordResult?: (result: T) => JournalResult
+  ) => Promise<T | null>;
   entries: () => JournalEntry[];
   toJSON: () => JournalSnapshot;
 };
@@ -495,7 +503,11 @@ export type GitAdapter = {
   refExists: (ref: string) => boolean;
   isAncestor: (ancestor: string, descendant: string) => boolean;
   listIntegrations: (fromSha: string, toSha: string) => Integration[];
-  pushBranch: (sha: string, branch: string) => void;
+  /**
+   * Pushes the branch, then reconciles a failed command against the head seen during preflight.
+   * `expectedSha` is `null` when the branch was absent.
+   */
+  pushBranch: (sha: string, branch: string, expectedSha: string | null) => void;
   /** Deletes under a lease: the push fails unless the remote head is still `expectedSha`. */
   deleteBranch: (branch: string, expectedSha: string) => void;
   remoteBranchExists: (branch: string) => boolean;

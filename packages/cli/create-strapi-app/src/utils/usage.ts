@@ -17,6 +17,8 @@ const boolToString = (value: boolean | undefined) => (value === true).toString()
 const getProperties = (scope: Scope, error?: TrackError) => {
   const eventProperties = {
     error: typeof error === 'string' ? error : error && error.message,
+    invocation: scope.invocation,
+    agentName: scope.agentName,
   };
 
   const userProperties = {
@@ -52,8 +54,12 @@ const getProperties = (scope: Scope, error?: TrackError) => {
   };
 };
 
+// Same values as `STRAPI_TELEMETRY_DISABLED` in @strapi/core
+export const isTelemetryDisabled = () =>
+  ['1', 'true'].includes((process.env.STRAPI_TELEMETRY_DISABLED ?? '').toLowerCase());
+
 function trackEvent(event: string, payload: Record<string, unknown>) {
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || isTelemetryDisabled()) {
     return;
   }
 

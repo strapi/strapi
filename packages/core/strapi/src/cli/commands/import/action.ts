@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { isObject } from 'lodash/fp';
+import { isObject } from 'lodash';
 import chalk from 'chalk';
 
 import fs from 'fs-extra';

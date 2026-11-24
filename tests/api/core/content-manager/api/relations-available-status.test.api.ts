@@ -10,6 +10,7 @@ import { createAuthRequest } from 'api-tests/request';
  */
 const UID_PRODUCT = 'api::product.product';
 const UID_SHOP = 'api::shop.shop';
+const UID_TAG = 'api::tag.tag';
 
 const productModel = {
   attributes: {
@@ -35,11 +36,31 @@ const shopModel = {
       relation: 'oneToMany',
       target: UID_PRODUCT,
     },
+    tags_mm: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: UID_TAG,
+      targetAttribute: 'shops',
+    },
   },
   draftAndPublish: true,
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
+  description: '',
+  collectionName: '',
+};
+
+const tagModel = {
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+  draftAndPublish: false,
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
   description: '',
   collectionName: '',
 };
@@ -88,11 +109,26 @@ describe('CM API - Relations findAvailable status labels', () => {
     return res.body.data;
   };
 
-  const findAvailable = async (id: string, query: Record<string, any> = {}) => {
+  const findAvailable = async (
+    id: string,
+    query: Record<string, any> = {},
+    field = 'products_mw'
+  ) => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/relations/${UID_SHOP}/products_mw`,
+      url: `/content-manager/relations/${UID_SHOP}/${field}`,
       qs: { id, pageSize: 50, ...query },
+    });
+
+    expect(res.statusCode).toBe(200);
+    return res.body;
+  };
+
+  const findExisting = async (id: string, query: Record<string, any> = {}, field = 'tags_mm') => {
+    const res = await rq({
+      method: 'GET',
+      url: `/content-manager/relations/${UID_SHOP}/${id}/${field}`,
+      qs: { pageSize: 50, ...query },
     });
 
     expect(res.statusCode).toBe(200);
@@ -113,7 +149,7 @@ describe('CM API - Relations findAvailable status labels', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([productModel, shopModel]).build();
+    await builder.addContentTypes([productModel, tagModel, shopModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -159,5 +195,62 @@ describe('CM API - Relations findAvailable status labels', () => {
   test('status=draft — no duplicates, correct status badges', async () => {
     const body = await findAvailable(shopDocId, { status: 'draft' });
     expectNoDuplicatesAndCorrectBadges(body);
+  });
+
+  test('draft can re-add a many-to-many relation still present on the published version', async () => {
+    const tagRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_TAG}`,
+      body: { name: 'PageTag' },
+    });
+    expect(tagRes.statusCode).toBe(201);
+    const tagDocumentId = tagRes.body.data.documentId;
+
+    const shopRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_SHOP}`,
+      body: { name: 'TaggedShop', tags_mm: [tagDocumentId] },
+    });
+    expect(shopRes.statusCode).toBe(201);
+    const taggedShopDocId = shopRes.body.data.documentId;
+
+    const publishRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_SHOP}/${taggedShopDocId}/actions/publish`,
+    });
+    expect(publishRes.statusCode).toBe(200);
+
+    const availableWhileConnected = await findAvailable(
+      taggedShopDocId,
+      { status: 'draft' },
+      'tags_mm'
+    );
+    expect(availableWhileConnected.results.map((r: any) => r.documentId)).not.toContain(
+      tagDocumentId
+    );
+
+    const disconnectRes = await rq({
+      method: 'PUT',
+      url: `/content-manager/collection-types/${UID_SHOP}/${taggedShopDocId}`,
+      qs: { status: 'draft' },
+      body: { tags_mm: { disconnect: [tagDocumentId] } },
+    });
+    expect(disconnectRes.statusCode).toBe(200);
+
+    const existingDraft = await findExisting(taggedShopDocId, { status: 'draft' });
+    expect(existingDraft.results.map((r: any) => r.documentId)).not.toContain(tagDocumentId);
+
+    const existingPublished = await findExisting(taggedShopDocId, { status: 'published' });
+    expect(existingPublished.results.map((r: any) => r.documentId)).toContain(tagDocumentId);
+
+    const availableDraft = await findAvailable(taggedShopDocId, { status: 'draft' }, 'tags_mm');
+    expect(availableDraft.results.map((r: any) => r.documentId)).toContain(tagDocumentId);
+
+    const availablePublished = await findAvailable(
+      taggedShopDocId,
+      { status: 'published' },
+      'tags_mm'
+    );
+    expect(availablePublished.results.map((r: any) => r.documentId)).not.toContain(tagDocumentId);
   });
 });

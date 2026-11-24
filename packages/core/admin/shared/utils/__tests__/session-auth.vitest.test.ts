@@ -1,0 +1,357 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
+import {
+  getAccessCookieName,
+  getAccessCookiePath,
+  getAccessCookieDomain,
+  getRefreshCookieOptions,
+  getRefreshCookiePath,
+  resolveLogoutDeviceId,
+} from '../session-auth';
+import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
+import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
+import { DEFAULT_AUTH_COOKIE_DOMAIN } from '../auth-cookie-domain';
+
+// URL config as packages/core/core/src/configuration resolves it.
+const DEFAULT_URLS = {
+  'server.absoluteUrl': 'http://localhost:1337',
+  'admin.absoluteUrl': 'http://localhost:1337/admin',
+  'admin.path': '/admin',
+};
+
+// admin.url: '/dashboard'
+const CUSTOM_ADMIN_URL = {
+  'server.absoluteUrl': 'http://localhost:1337',
+  'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+  'admin.path': '/dashboard',
+};
+
+// server.url: 'https://example.com/strapi' (a reverse proxy strips the prefix)
+const SUBPATH_SERVER_URL = {
+  'server.absoluteUrl': 'https://example.com/strapi',
+  'admin.absoluteUrl': 'https://example.com/strapi/admin',
+  'admin.path': '/admin',
+};
+
+const mockConfig = (values: Record<string, unknown>) => {
+  global.strapi.config.get = vi.fn((key: string) => values[key]) as any;
+};
+
+describe('getAccessCookieName', () => {
+  beforeEach(() => {
+    global.strapi = {
+      config: {
+        get: vi.fn(() => undefined),
+      },
+    } as any;
+  });
+
+  test('defaults to jwtToken', () => {
+    expect(getAccessCookieName()).toBe(DEFAULT_AUTH_COOKIE_NAME);
+  });
+
+  test('uses the admin.auth.cookie.name config', () => {
+    global.strapi.config.get = vi.fn((key: string) =>
+      key === 'admin.auth.cookie.name' ? 'config_cookie_name' : undefined
+    ) as any;
+
+    expect(getAccessCookieName()).toBe('config_cookie_name');
+  });
+
+  test('does not read the STRAPI_ADMIN_AUTH_COOKIE_NAME environment variable', () => {
+    const ORIGINAL_ENV = process.env;
+    process.env = { ...ORIGINAL_ENV, STRAPI_ADMIN_AUTH_COOKIE_NAME: 'env_cookie_name' };
+
+    try {
+      expect(getAccessCookieName()).toBe(DEFAULT_AUTH_COOKIE_NAME);
+    } finally {
+      process.env = ORIGINAL_ENV;
+    }
+  });
+});
+
+describe('getAccessCookiePath', () => {
+  beforeEach(() => {
+    global.strapi = {
+      config: {
+        get: vi.fn(() => undefined),
+      },
+    } as any;
+  });
+
+  test('defaults to /admin', () => {
+    expect(getAccessCookiePath()).toBe(DEFAULT_AUTH_COOKIE_PATH);
+  });
+
+  test('uses the admin.auth.cookie.path config', () => {
+    global.strapi.config.get = vi.fn((key: string) =>
+      key === 'admin.auth.cookie.path' ? '/strapi-de/admin' : undefined
+    ) as any;
+
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('follows a custom admin.url so the panel can read its own cookie', () => {
+    mockConfig(CUSTOM_ADMIN_URL);
+
+    expect(getAccessCookiePath()).toBe('/dashboard');
+  });
+
+  test('includes a server.url subpath, which admin.path leaves out', () => {
+    mockConfig(SUBPATH_SERVER_URL);
+
+    expect(getAccessCookiePath()).toBe('/strapi/admin');
+  });
+
+  test('includes a server.url subpath in front of a custom admin.url', () => {
+    mockConfig({
+      'server.absoluteUrl': 'https://example.com/strapi',
+      'admin.absoluteUrl': 'https://example.com/strapi/dashboard',
+      'admin.path': '/dashboard',
+    });
+
+    expect(getAccessCookiePath()).toBe('/strapi/dashboard');
+    expect(getRefreshCookiePath()).toBe('/strapi/admin');
+  });
+
+  test('uses the root path for an admin panel served from the root of its origin', () => {
+    mockConfig({
+      'server.absoluteUrl': 'https://api.example.com',
+      'admin.absoluteUrl': 'https://admin.example.com',
+      'admin.path': '/',
+    });
+
+    expect(getAccessCookiePath()).toBe('/');
+  });
+
+  test('prefers admin.auth.cookie.path over admin.url', () => {
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '/strapi-de/admin' });
+
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('treats a blank admin.auth.cookie.path as unset', () => {
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '  ' });
+
+    expect(getAccessCookiePath()).toBe('/dashboard');
+  });
+});
+
+describe('getRefreshCookiePath', () => {
+  const logWarn = vi.fn();
+
+  beforeEach(() => {
+    logWarn.mockReset();
+    global.strapi = {
+      config: {
+        get: vi.fn(() => undefined),
+      },
+      log: {
+        warn: logWarn,
+      },
+    } as any;
+  });
+
+  test('defaults to /admin', () => {
+    mockConfig(DEFAULT_URLS);
+
+    expect(getRefreshCookiePath()).toBe('/admin');
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+  });
+
+  test('stays on the admin API when admin.url is custom, so /admin/access-token receives it', () => {
+    mockConfig(CUSTOM_ADMIN_URL);
+
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getAccessCookiePath()).toBe('/dashboard');
+    expect(logWarn).not.toHaveBeenCalled();
+  });
+
+  test('follows a server.url subpath, which is where the browser sends admin API requests', () => {
+    mockConfig(SUBPATH_SERVER_URL);
+
+    expect(getRefreshCookieOptions().path).toBe('/strapi/admin');
+  });
+
+  test('keeps an admin.auth.cookie.path that covers the admin API', () => {
+    mockConfig({
+      'server.absoluteUrl': 'https://example.com/strapi-de',
+      'admin.absoluteUrl': 'https://example.com/strapi-de/admin',
+      'admin.path': '/admin',
+      'admin.auth.cookie.path': '/strapi-de/admin',
+    });
+
+    expect(getRefreshCookieOptions().path).toBe('/strapi-de/admin');
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('keeps a root admin.auth.cookie.path', () => {
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '/' });
+
+    expect(getRefreshCookieOptions().path).toBe('/');
+  });
+
+  test('ignores an admin.auth.cookie.path that does not cover the admin API, and warns once', () => {
+    // The workaround documented for a custom admin.url before the access cookie followed it.
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '/dashboard' });
+
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getAccessCookiePath()).toBe('/dashboard');
+    expect(logWarn).toHaveBeenCalledTimes(1);
+    expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('"/dashboard"'));
+  });
+
+  test('matches whole path segments only', () => {
+    mockConfig({ ...DEFAULT_URLS, 'admin.auth.cookie.path': '/adm' });
+
+    expect(getRefreshCookiePath()).toBe('/admin');
+  });
+});
+
+describe('getAccessCookieDomain', () => {
+  beforeEach(() => {
+    global.strapi = {
+      config: {
+        get: vi.fn(() => undefined),
+      },
+    } as any;
+  });
+
+  test('defaults to a host-only cookie', () => {
+    expect(getAccessCookieDomain()).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
+  });
+
+  test('uses the admin.auth.cookie.domain config', () => {
+    global.strapi.config.get = vi.fn((key: string) =>
+      key === 'admin.auth.cookie.domain' ? 'strapi.test' : undefined
+    ) as any;
+
+    expect(getAccessCookieDomain()).toBe('strapi.test');
+  });
+
+  test('falls back to admin.auth.domain', () => {
+    global.strapi.config.get = vi.fn((key: string) =>
+      key === 'admin.auth.domain' ? 'legacy.strapi.test' : undefined
+    ) as any;
+
+    expect(getAccessCookieDomain()).toBe('legacy.strapi.test');
+  });
+
+  test('prefers admin.auth.cookie.domain over admin.auth.domain', () => {
+    global.strapi.config.get = vi.fn((key: string) => {
+      if (key === 'admin.auth.cookie.domain') return 'cookie.strapi.test';
+      if (key === 'admin.auth.domain') return 'legacy.strapi.test';
+      return undefined;
+    }) as any;
+
+    expect(getAccessCookieDomain()).toBe('cookie.strapi.test');
+  });
+});
+
+describe('getRefreshCookieOptions', () => {
+  const logWarn = vi.fn();
+
+  beforeEach(() => {
+    logWarn.mockReset();
+    global.strapi = {
+      config: {
+        get: vi.fn(() => undefined),
+      },
+      log: {
+        warn: logWarn,
+      },
+    } as any;
+  });
+
+  test('resolves the domain through the shared helper so it agrees with the access cookie', () => {
+    global.strapi.config.get = vi.fn((key: string) =>
+      key === 'admin.auth.cookie.domain' ? 'strapi.test' : undefined
+    ) as any;
+
+    expect(getRefreshCookieOptions().domain).toBe('strapi.test');
+  });
+
+  test('falls back to a host-only cookie and warns via strapi.log when the configured domain is invalid', () => {
+    global.strapi.config.get = vi.fn((key: string) =>
+      key === 'admin.auth.cookie.domain' ? 'strapi.test:1337' : undefined
+    ) as any;
+
+    expect(getRefreshCookieOptions().domain).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
+    expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('strapi.test:1337'));
+  });
+});
+
+describe('resolveLogoutDeviceId', () => {
+  const findOne = vi.fn();
+  const logDebug = vi.fn();
+
+  beforeEach(() => {
+    findOne.mockReset();
+    logDebug.mockReset();
+    global.strapi = {
+      db: {
+        query: vi.fn(() => ({ findOne })),
+      },
+      log: { debug: logDebug },
+    } as any;
+  });
+
+  test('falls back to clientDeviceId when sessionId is missing', async () => {
+    await expect(resolveLogoutDeviceId('42', undefined, 'client-device')).resolves.toBe(
+      'client-device'
+    );
+    expect(findOne).not.toHaveBeenCalled();
+    expect(logDebug).toHaveBeenCalled();
+  });
+
+  test('returns the session deviceId when the row is owned by the admin user', async () => {
+    findOne.mockResolvedValue({
+      userId: '42',
+      origin: 'admin',
+      deviceId: 'sso-device',
+    });
+
+    await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
+      'sso-device'
+    );
+    expect(findOne).toHaveBeenCalledWith({ where: { sessionId: 'session-1' } });
+  });
+
+  test('falls back when the session is missing or not owned', async () => {
+    findOne.mockResolvedValue({
+      userId: '99',
+      origin: 'admin',
+      deviceId: 'other-device',
+    });
+
+    await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
+      'client-device'
+    );
+    expect(logDebug).toHaveBeenCalled();
+  });
+
+  test('falls back when the session origin is not admin', async () => {
+    findOne.mockResolvedValue({
+      userId: '42',
+      origin: 'users-permissions',
+      deviceId: 'up-device',
+    });
+
+    await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
+      'client-device'
+    );
+    expect(logDebug).toHaveBeenCalled();
+  });
+
+  test('falls back when the owned session has no deviceId string', async () => {
+    findOne.mockResolvedValue({
+      userId: '42',
+      origin: 'admin',
+      deviceId: null,
+    });
+
+    await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
+      'client-device'
+    );
+  });
+});

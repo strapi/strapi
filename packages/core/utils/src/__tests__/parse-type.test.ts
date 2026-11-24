@@ -85,6 +85,11 @@ describe('parseType', () => {
       expect(() => parseType({ type: 'time', value: 122 })).toThrow();
       expect(() => parseType({ type: 'time', value: {} })).toThrow();
       expect(() => parseType({ type: 'time', value: [] })).toThrow();
+
+      // The millisecond separator must be a literal ".", not any character
+      expect(() => parseType({ type: 'time', value: '12:31:11x2' })).toThrow();
+      expect(() => parseType({ type: 'time', value: '12:31:11,2' })).toThrow();
+      expect(() => parseType({ type: 'time', value: '12:31:11 2' })).toThrow();
     });
   });
 

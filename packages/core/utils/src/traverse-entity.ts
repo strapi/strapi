@@ -1,6 +1,7 @@
-import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
+import { clone, isObject } from 'lodash';
 
-import type { Attribute, AnyAttribute, Model, Data } from './types';
+import { curry } from './curry';
+import type { Attribute, AnyAttribute, Model, Entry } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
 /**
@@ -26,7 +27,7 @@ export interface VisitorOptions {
   data: Record<string, unknown>;
   schema: Model;
   key: string;
-  value: Data[keyof Data];
+  value: unknown;
   attribute?: AnyAttribute;
   path: Path;
   getModel(uid: string): Model;
@@ -62,8 +63,8 @@ export interface Parent {
 const traverseEntity = async (
   visitor: Visitor,
   options: TraverseOptions,
-  entity: Data
-): Promise<Data> => {
+  entity: Entry
+): Promise<Entry> => {
   const {
     path = { raw: null, attribute: null, rawWithIndices: null },
     schema,
@@ -73,7 +74,7 @@ const traverseEntity = async (
 
   let parent = options.parent;
 
-  const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
+  const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Entry) => {
     const targetSchema = getModel(entry.__type!);
 
     const traverseOptions: TraverseOptions = {
@@ -88,7 +89,7 @@ const traverseEntity = async (
   };
 
   const traverseRelationTarget =
-    (schema: Model) => async (visitor: Visitor, path: Path, entry: Data) => {
+    (schema: Model) => async (visitor: Visitor, path: Path, entry: Entry) => {
       const traverseOptions: TraverseOptions = {
         schema,
         path,
@@ -100,7 +101,7 @@ const traverseEntity = async (
       return traverseEntity(visitor, traverseOptions, entry);
     };
 
-  const traverseMediaTarget = async (visitor: Visitor, path: Path, entry: Data) => {
+  const traverseMediaTarget = async (visitor: Visitor, path: Path, entry: Entry) => {
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
@@ -115,7 +116,7 @@ const traverseEntity = async (
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
-  const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Data) => {
+  const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Entry) => {
     const traverseOptions: TraverseOptions = {
       schema,
       path,
@@ -127,12 +128,12 @@ const traverseEntity = async (
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
-  const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
+  const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Entry) => {
     // A dynamic zone array can contain a `null` entry (for example a relation
     // created inline inside a dynamic zone component can leave a null item).
     // Reading `__component` on it crashed traversal; pass nil entries through
     // untouched, consistent with how `traverseEntity` ends recursion on nil. (#24303)
-    if (isNil(entry)) {
+    if (entry == null) {
       return entry;
     }
 
@@ -149,7 +150,7 @@ const traverseEntity = async (
   };
 
   // End recursion
-  if (!isObject(entity) || isNil(schema)) {
+  if (!isObject(entity) || schema == null) {
     return entity;
   }
 
@@ -166,11 +167,11 @@ const traverseEntity = async (
 
     const newPath = { ...path };
 
-    newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
-    newPath.rawWithIndices = isNil(path.rawWithIndices) ? key : `${path.rawWithIndices}.${key}`;
+    newPath.raw = path.raw == null ? key : `${path.raw}.${key}`;
+    newPath.rawWithIndices = path.rawWithIndices == null ? key : `${path.rawWithIndices}.${key}`;
 
-    if (!isNil(attribute)) {
-      newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+    if (attribute != null) {
+      newPath.attribute = path.attribute == null ? key : `${path.attribute}.${key}`;
     }
 
     // Visit the current attribute
@@ -201,7 +202,7 @@ const traverseEntity = async (
     const value = copy[key];
 
     // Ignore Nil values or attributes
-    if (isNil(value) || isNil(attribute)) {
+    if (value == null || attribute == null) {
       continue;
     }
 
@@ -213,21 +214,20 @@ const traverseEntity = async (
         ? traverseMorphRelationTarget
         : traverseRelationTarget(getModel(attribute.target!));
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return method(visitor, arrayPath, item);
           })
         );
       } else {
-        copy[key] = await method(visitor, newPath, value as Data);
+        copy[key] = await method(visitor, newPath, value as Entry);
       }
 
       continue;
@@ -236,21 +236,20 @@ const traverseEntity = async (
     if (isMediaAttribute(attribute)) {
       parent = { schema, key, attribute, path: newPath };
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process media array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return traverseMediaTarget(visitor, arrayPath, item);
           })
         );
       } else {
-        copy[key] = await traverseMediaTarget(visitor, newPath, value as Data);
+        copy[key] = await traverseMediaTarget(visitor, newPath, value as Entry);
       }
 
       continue;
@@ -260,27 +259,26 @@ const traverseEntity = async (
       parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process component array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return traverseComponent(visitor, arrayPath, targetSchema, item);
           })
         );
       } else {
-        copy[key] = await traverseComponent(visitor, newPath, targetSchema, value as Data);
+        copy[key] = await traverseComponent(visitor, newPath, targetSchema, value as Entry);
       }
 
       continue;
     }
 
-    if (attribute.type === 'dynamiczone' && isArray(value)) {
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
       parent = { schema, key, attribute, path: newPath };
 
       // Process dynamic zone items in parallel with ordered error handling
@@ -288,9 +286,8 @@ const traverseEntity = async (
         value.map((item, i) => {
           const arrayPath = {
             ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
+            rawWithIndices:
+              newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
           };
           return visitDynamicZoneEntry(visitor, arrayPath, item);
         })
@@ -303,12 +300,12 @@ const traverseEntity = async (
   return copy;
 };
 
-const createVisitorUtils = ({ data }: { data: Data }) => ({
+const createVisitorUtils = ({ data }: { data: Record<string, unknown> }) => ({
   remove(key: string) {
     delete data[key];
   },
 
-  set(key: string, value: Data) {
+  set(key: string, value: unknown) {
     data[key] = value;
   },
 });

@@ -276,6 +276,8 @@ type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
    * @default false
    */
   shouldIgnoreRBAC?: boolean;
+  /** Passed down by component and dynamic zone layouts; not used here. */
+  size?: number;
 };
 
 /**
@@ -287,8 +289,12 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
     return labelAction;
   }
 
-  // TODO: find a better way to do this rather than access internals
-  const labelActionTitleId = labelAction.props.title.id;
+  // TODO: find a better way to do this rather than access internals.
+  // Shared-field lock actions can be stamped without a title; don't throw.
+  const labelActionTitleId = labelAction.props?.title?.id;
+  if (typeof labelActionTitleId !== 'string') {
+    return labelAction;
+  }
 
   if (labelActionTitleId === 'i18n.Field.localized') {
     return React.cloneElement(labelAction, {
@@ -356,6 +362,8 @@ const VersionInputRenderer = ({
   hint: providedHint,
   shouldIgnoreRBAC = false,
   labelAction,
+  // Not spread with the rest: design-system inputs have a `size` prop of their own.
+  size: _size,
   ...props
 }: VersionInputRendererProps) => {
   const customLabelAction = getLabelAction(labelAction);
@@ -619,4 +627,9 @@ const attributeHasCustomFieldProperty = (
   'customField' in attribute && typeof attribute.customField === 'string';
 
 export type { VersionInputRendererProps };
-export { VersionInputRenderer, CustomRelationInput, resolveComponentRenderResources };
+export {
+  VersionInputRenderer,
+  CustomRelationInput,
+  getLabelAction,
+  resolveComponentRenderResources,
+};

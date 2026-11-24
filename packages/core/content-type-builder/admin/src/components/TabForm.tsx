@@ -51,7 +51,7 @@ type TabFormProps = {
   onChange: TabFormChangeHandler;
 };
 
-/* eslint-disable react/no-array-index-key */
+/* oxlint-disable react/no-array-index-key */
 export const TabForm = ({
   form,
   formErrors,
@@ -143,9 +143,7 @@ export const TabForm = ({
                 // Special handling for 'condition-form'
                 if (input.type === 'condition-form') {
                   const currentCondition = get(modifiedData, input.name) as
-                    | AttributeConditions
-                    | null
-                    | undefined;
+                    AttributeConditions | null | undefined;
 
                   // Get all attributes from the content type schema
                   const contentTypeAttributes =

@@ -1,4 +1,4 @@
-import { toString } from 'lodash/fp';
+import { toString } from 'lodash';
 import type { Database, Model } from '@strapi/database';
 
 const coreStoreModel: Model = {

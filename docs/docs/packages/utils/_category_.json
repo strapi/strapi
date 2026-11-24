@@ -1,0 +1,9 @@
+{
+  "label": "Utilities",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "slug": "/packages/utils",
+    "description": "Workspace packages under packages/utils/ in the monorepo."
+  }
+}

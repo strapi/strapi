@@ -89,4 +89,32 @@ describe('validateQuery', () => {
       await expect(validators.query(query, schema, { strictParams: false })).resolves.not.toThrow();
     });
   });
+
+  it.each([
+    ['boolean populate', true],
+    ['count populate', { count: true }],
+  ])('accepts morph %s authorization for sanitizer handling', async (_label, populateValue) => {
+    const morphSchema = {
+      ...schema,
+      attributes: {
+        ...schema.attributes,
+        related: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    await expect(
+      validators.query(
+        {
+          populate: {
+            related: populateValue,
+          },
+        },
+        morphSchema,
+        { auth: {} }
+      )
+    ).resolves.not.toThrow();
+  });
 });

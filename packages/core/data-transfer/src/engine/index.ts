@@ -1,10 +1,8 @@
-import { PassThrough, Transform, Readable, Writable } from 'stream';
+import { PassThrough, Transform, Readable, Writable, Duplex } from 'stream';
 import { pipeline } from 'stream/promises';
 import { extname } from 'path';
 import { EOL } from 'os';
-import type Chain from 'stream-chain';
-import { chain } from 'stream-chain';
-import { isEmpty, uniq, last, isNumber, set, pick } from 'lodash/fp';
+import { isEmpty, isNumber, pick } from 'lodash';
 import { diff as semverDiff } from 'semver';
 
 import type { Struct, Utils } from '@strapi/types';
@@ -46,6 +44,7 @@ import {
 } from '../utils/diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
+import { loadStreamDeps } from '../utils/esm-deps';
 import { ProviderTransferError } from '../errors/providers';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
@@ -91,8 +90,7 @@ type SchemaMap = Utils.String.Dict<Struct.Schema>;
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider,
-> implements ITransferEngine
-{
+> implements ITransferEngine {
   sourceProvider: ISourceProvider;
 
   destinationProvider: IDestinationProvider;
@@ -124,6 +122,8 @@ class TransferEngine<
   #currentStreamController?: AbortController;
 
   #aborted: boolean = false;
+
+  #closed: boolean = false;
 
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
@@ -212,38 +212,39 @@ class TransferEngine<
    *
    * Allowed transformations includes 'filter' and 'map'.
    */
-  #createStageTransformStream<T extends TransferStage>(
+  async #createStageTransformStream<T extends TransferStage>(
     key: T,
     options: { includeGlobal?: boolean } = {}
-  ): PassThrough | Transform {
+  ): Promise<PassThrough | Duplex> {
+    const { chain } = await loadStreamDeps();
     const { includeGlobal = true } = options;
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    let stream: PassThrough | Chain = new PassThrough({ objectMode: true });
+    // Every group must be in the returned chain: callers write into that stream only.
+    const steps: StreamItem[] = [];
 
-    const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
-      const chainTransforms: StreamItem[] = [];
+    const pushTransforms = (transforms: TransferTransform<unknown>[] = []) => {
       for (const transform of transforms) {
         if ('filter' in transform) {
-          chainTransforms.push(utils.stream.filter(transform.filter));
+          steps.push(utils.stream.filter(transform.filter));
         }
 
         if ('map' in transform) {
-          chainTransforms.push(utils.stream.map(transform.map));
+          steps.push(utils.stream.map(transform.map));
         }
-      }
-      if (chainTransforms.length) {
-        stream = stream.pipe(chain(chainTransforms));
       }
     };
 
     if (includeGlobal) {
-      applyTransforms(globalTransforms);
+      pushTransforms(globalTransforms as TransferTransform<unknown>[]);
     }
 
+    pushTransforms(stageTransforms as TransferTransform<unknown>[]);
+
+    // Throttle last so that items dropped by a filter are not delayed.
     if (isNumber(throttle) && throttle > 0) {
-      stream = stream.pipe(
+      steps.push(
         new PassThrough({
           objectMode: true,
           async transform(data, _encoding, callback) {
@@ -256,9 +257,11 @@ class TransferEngine<
       );
     }
 
-    applyTransforms(stageTransforms as TransferTransform<unknown>[]);
+    if (!steps.length) {
+      return new PassThrough({ objectMode: true });
+    }
 
-    return stream;
+    return chain(steps);
   }
 
   /**
@@ -499,7 +502,7 @@ class TransferEngine<
       return;
     }
 
-    const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
+    const keys = [...new Set(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)))];
     const diffs: { [key: string]: Diff[] } = {};
 
     keys.forEach((key) => {
@@ -591,7 +594,7 @@ class TransferEngine<
     stage: TransferStage;
     source?: Readable;
     destination?: Writable;
-    transform?: PassThrough | Chain;
+    transform?: PassThrough | Duplex;
     tracker?: PassThrough;
   }) {
     if (this.#aborted) {
@@ -719,6 +722,8 @@ class TransferEngine<
    * Run the close method in both source and destination providers
    */
   async close(): Promise<void> {
+    this.#closed = true;
+
     const results = await Promise.allSettled([
       this.sourceProvider.close?.(),
       this.destinationProvider.close?.(),
@@ -727,6 +732,32 @@ class TransferEngine<
     results.forEach((result) => {
       if (result.status === 'rejected') {
         this.panic(result.reason);
+      }
+    });
+  }
+
+  /**
+   * Close both providers on a failure path, reporting rather than throwing cleanup errors so the
+   * error that caused the failure is the one the caller sees.
+   */
+  async #closeAfterError(): Promise<void> {
+    if (this.#closed) {
+      return;
+    }
+
+    this.#closed = true;
+
+    const providers = [this.sourceProvider, this.destinationProvider];
+    const results = await Promise.allSettled(providers.map((provider) => provider.close?.()));
+
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        const { message } = result.reason instanceof Error ? result.reason : { message: '' };
+
+        this.reportWarning(
+          `Failed to close the ${providers[index].name} provider${message ? `: ${message}` : ''}`,
+          'transfer(cleanup)'
+        );
       }
     });
   }
@@ -819,13 +850,25 @@ class TransferEngine<
   async transfer(): Promise<ITransferResults<S, D>> {
     // reset data between transfers
     this.progress.data = {};
+    this.#closed = false;
+
+    // A failed stream package load happens before any provider runs, so it must skip rollback
+    // and close: providers never bootstrapped, and file/directory rollback deletes an existing
+    // --file target.
+    let streamDepsLoaded = false;
 
     try {
+      // Load before any provider runs: destination beforeTransfer deletes uploads, and a fast
+      // failure during bootstrap races the DB transaction and hangs rollback.
+      await loadStreamDeps();
+      streamDepsLoaded = true;
+
       this.#emitTransferUpdate('init');
       await this.bootstrap();
       await this.init();
 
       await this.integrityCheck();
+      await this.validateStages();
 
       this.#emitTransferUpdate('start');
 
@@ -844,7 +887,7 @@ class TransferEngine<
     } catch (e: unknown) {
       this.#emitTransferUpdate('error', { error: e });
 
-      const lastDiagnostic = last(this.diagnostics.stack.items);
+      const lastDiagnostic = this.diagnostics.stack.items.at(-1);
       // Do not report an error diagnostic if the last one reported the same error
       if (
         e instanceof Error &&
@@ -853,9 +896,29 @@ class TransferEngine<
         this.reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
-      // Rollback the destination provider if an exception is thrown during the transfer
-      // Note: This will be configurable in the future
-      await this.destinationProvider.rollback?.(e as Error);
+      // Once close has started, a provider's transaction may already have ended and cannot be
+      // rolled back safely. Note: This will be configurable in the future.
+      if (streamDepsLoaded && !this.#closed) {
+        try {
+          await this.destinationProvider.rollback?.(e as Error);
+        } catch (rollbackError) {
+          const { message } = rollbackError instanceof Error ? rollbackError : { message: '' };
+
+          this.reportWarning(
+            `Failed to rollback the ${this.destinationProvider.name} provider${
+              message ? `: ${message}` : ''
+            }`,
+            'transfer(rollback)'
+          );
+        }
+      }
+
+      // Providers bootstrapped before the failure may still hold resources: the local providers
+      // disable database lifecycles on bootstrap and only re-enable them on close, so skipping this
+      // would leave a programmatic caller's Strapi instance with lifecycles permanently off.
+      if (streamDepsLoaded) {
+        await this.#closeAfterError();
+      }
 
       throw e;
     }
@@ -865,6 +928,18 @@ class TransferEngine<
       destination: this.destinationProvider.results,
       engine: this.progress.data,
     };
+  }
+
+  async validateStages(): Promise<void> {
+    if (!this.sourceProvider.validateStage) {
+      return;
+    }
+
+    for (const stage of TRANSFER_STAGES) {
+      if (!this.shouldSkipStage(stage)) {
+        await this.sourceProvider.validateStage(stage);
+      }
+    }
   }
 
   async beforeTransfer(): Promise<void> {
@@ -902,7 +977,7 @@ class TransferEngine<
     const source = await this.sourceProvider.createSchemasReadStream?.();
     const destination = await this.destinationProvider.createSchemasWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = await this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
       key: (value: Struct.Schema) => value.modelType,
     });
@@ -919,8 +994,9 @@ class TransferEngine<
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
+    const { chain } = await loadStreamDeps();
     const transform = chain([
-      this.#createStageTransformStream(stage),
+      await this.#createStageTransformStream(stage),
       new Transform({
         objectMode: true,
         transform: async (entity: IEntity, _encoding, callback) => {
@@ -943,7 +1019,7 @@ class TransferEngine<
           const { type, data } = entity;
           const attributes = schemas[type].attributes;
           const attributesToKeep = Object.keys(attributes).concat('documentId');
-          const updatedEntity = set('data', pick(attributesToKeep, data), entity);
+          const updatedEntity = { ...entity, data: pick(data, attributesToKeep) };
 
           callback(null, updatedEntity);
         },
@@ -964,8 +1040,9 @@ class TransferEngine<
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
 
+    const { chain } = await loadStreamDeps();
     const transform = chain([
-      this.#createStageTransformStream(stage),
+      await this.#createStageTransformStream(stage),
       new Transform({
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
@@ -1002,7 +1079,7 @@ class TransferEngine<
     const source = await this.sourceProvider.createAssetsReadStream?.();
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = await this.#createStageTransformStream(stage);
     const tracker = this.#progressTrackerChunks(stage, {
       key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
@@ -1047,7 +1124,7 @@ class TransferEngine<
     const source = await this.sourceProvider.createConfigurationReadStream?.();
     const destination = await this.destinationProvider.createConfigurationWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = await this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage);
 
     await this.#transferStage({ stage, source, destination, transform, tracker });

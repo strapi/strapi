@@ -1,10 +1,12 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
-import { errors } from '@strapi/utils';
+import { omit, difference, isEmpty, isNumber } from 'lodash';
+
+import { errors, emitAudit } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
+import { AUDITED_EVENTS, getTokenChanges, toActionRefs } from '../../audit-logs/tokens';
 import {
   DatabaseTransferToken,
   SanitizedTransferToken,
@@ -86,14 +88,14 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
       data: {
-        ...omit('permissions', attributes),
+        ...omit(attributes, 'permissions'),
         accessKey: hash(accessKey),
         ...getExpirationFields(attributes.lifespan),
       },
     });
 
     await Promise.all(
-      uniq(attributes.permissions).map((action) =>
+      [...new Set(attributes.permissions)].map((action) =>
         strapi.db
           .query(TRANSFER_TOKEN_PERMISSION_UID)
           .create({ data: { action, token: transferToken } })
@@ -105,11 +107,23 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
       .load(transferToken, 'permissions');
 
     if (currentPermissions) {
-      Object.assign(transferToken, { permissions: map('action', currentPermissions) });
+      Object.assign(transferToken, {
+        permissions: Array.from(currentPermissions ?? [], (permission) => permission?.action),
+      });
     }
 
     return transferToken;
   })) as TransferToken;
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_CREATE, {
+    tokenId: result.id,
+    name: result.name,
+    kind: 'transfer',
+    description: result.description ?? null,
+    lifespan: result.lifespan,
+    expiresAt: result.expiresAt,
+    permissions: result.permissions ?? [],
+  });
 
   return { ...result, accessKey };
 };
@@ -121,8 +135,11 @@ const update = async (
   id: string | number,
   attributes: TokenUpdatePayload
 ): Promise<SanitizedTransferToken> => {
-  // retrieve token without permissions
-  const originalToken = await strapi.db.query(TRANSFER_TOKEN_UID).findOne({ where: { id } });
+  // Populated with its permissions: the audit row for this update lists what changed,
+  // so the state before the write is needed.
+  const originalToken: DatabaseTransferToken | null = await strapi.db
+    .query(TRANSFER_TOKEN_UID)
+    .findOne({ where: { id }, populate: POPULATE_FIELDS });
 
   if (!originalToken) {
     throw new NotFoundError('Token not found');
@@ -131,12 +148,12 @@ const update = async (
   assertTokenPermissionsValidity(attributes);
   assertValidLifespan(attributes.lifespan);
 
-  return strapi.db.transaction(async () => {
+  const updated = (await strapi.db.transaction(async () => {
     const updatedToken = await strapi.db.query(TRANSFER_TOKEN_UID).update({
       select: SELECT_FIELDS,
       where: { id },
       data: {
-        ...omit('permissions', attributes),
+        ...omit(attributes, 'permissions'),
       },
     });
 
@@ -145,8 +162,11 @@ const update = async (
         .query(TRANSFER_TOKEN_UID)
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
-      const newPermissions = uniq(attributes.permissions);
+      const currentPermissions = Array.from(
+        currentPermissionsResult || [],
+        (permission: TransferTokenPermission) => permission?.action
+      );
+      const newPermissions = [...new Set(attributes.permissions)];
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
       const actionsToAdd = difference(newPermissions, currentPermissions);
@@ -181,18 +201,48 @@ const update = async (
       ...updatedToken,
       permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
     };
-  }) as unknown as Promise<SanitizedTransferToken>;
+  })) as SanitizedTransferToken;
+
+  const changes = getTokenChanges(
+    {
+      name: originalToken.name,
+      description: originalToken.description,
+      permissions: toActionRefs(originalToken.permissions),
+    },
+    { name: updated.name, description: updated.description, permissions: updated.permissions ?? [] }
+  );
+
+  if (Object.keys(changes).length > 0) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_UPDATE, {
+      tokenId: originalToken.id,
+      name: updated.name,
+      kind: 'transfer',
+      changes,
+    });
+  }
+
+  return updated;
 };
 
 /**
  * Revoke (delete) a token
  */
 const revoke = async (id: string | number): Promise<SanitizedTransferToken> => {
-  return strapi.db.transaction(async () =>
+  const deleted = (await strapi.db.transaction(async () =>
     strapi.db
       .query(TRANSFER_TOKEN_UID)
       .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } })
-  ) as unknown as Promise<SanitizedTransferToken>;
+  )) as SanitizedTransferToken | null;
+
+  if (deleted) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_DELETE, {
+      tokenId: deleted.id,
+      name: deleted.name,
+      kind: 'transfer',
+    });
+  }
+
+  return deleted as SanitizedTransferToken;
 };
 
 /**
@@ -257,17 +307,23 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
   const transferToken = (await strapi.db.transaction(async () =>
     strapi.db.query(TRANSFER_TOKEN_UID).update({
-      select: ['id', 'accessKey'],
+      select: ['id', 'name', 'accessKey'],
       where: { id },
       data: {
         accessKey: hash(accessKey),
       },
     })
-  )) as Promise<TransferToken>;
+  )) as TransferToken;
 
   if (!transferToken) {
     throw new NotFoundError('The provided token id does not exist');
   }
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_REGENERATE, {
+    tokenId: transferToken.id,
+    name: transferToken.name,
+    kind: 'transfer',
+  });
 
   return {
     ...transferToken,
@@ -278,7 +334,7 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
 const getExpirationFields = (lifespan: TransferToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
-  if (!isValidNumber && !isNil(lifespan)) {
+  if (!isValidNumber && lifespan != null) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
@@ -331,8 +387,11 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
 
   return {
     ...token,
-    permissions: isArray(token.permissions)
-      ? map('action', token.permissions as TransferTokenPermission[])
+    permissions: Array.isArray(token.permissions)
+      ? Array.from(
+          token.permissions as TransferTokenPermission[],
+          (permission) => permission?.action
+        )
       : token.permissions,
   };
 };
@@ -354,7 +413,7 @@ const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
  * Check if a token's lifespan is valid
  */
 const isValidLifespan = (lifespan: unknown) => {
-  if (isNil(lifespan)) {
+  if (lifespan == null) {
     return true;
   }
 

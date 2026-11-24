@@ -1,4 +1,5 @@
-import { isNil, merge } from 'lodash/fp';
+import { merge } from 'lodash';
+
 import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
@@ -39,10 +40,10 @@ const populateBuilder = (uid: UID.Schema) => {
      * @param [options.toOne] - Populate XtoOne relations as count if true.
      */
     countRelations({ toMany, toOne } = { toMany: true, toOne: true }) {
-      if (!isNil(toMany)) {
+      if (toMany != null) {
         deepPopulateOptions.countMany = toMany;
       }
-      if (!isNil(toOne)) {
+      if (toOne != null) {
         deepPopulateOptions.countOne = toOne;
       }
       return builder;
@@ -66,7 +67,7 @@ const populateBuilder = (uid: UID.Schema) => {
     withPopulateOverride(overrides: Record<string, any>) {
       const prev = getInitialPopulate;
       // merge(base, overrides): overrides win for overlapping keys, so e.g. localizations
-      getInitialPopulate = async () => merge((await prev()) || {}, overrides);
+      getInitialPopulate = async () => merge({}, (await prev()) || {}, overrides);
       return builder;
     },
 

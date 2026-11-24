@@ -1,13 +1,11 @@
-import { castArray } from 'lodash/fp';
+import { castArray } from 'lodash';
+
 import * as strapiUtils from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
 import { type DraftRelationCounts, isBidirectionalManyToMany } from './draft-relations';
 
 const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
-
-const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
-  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
 
 type DraftRelationLinkRef = {
   targetUid: UID.Schema;
@@ -81,7 +79,7 @@ const collectDraftRelationLinks = (
             return collected;
           }
 
-          const targetIsLocalized = isLocalizedContentType(targetModel);
+          const targetIsLocalized = strapi.localization.isLocalizedContentType(targetModel);
           const relatedEntries = castArray(value);
           const links = relatedEntries
             .map((entry) => toDraftRelationLink(entry, attribute.target, targetIsLocalized, locale))
@@ -147,11 +145,11 @@ const countLinksToUnpublishedDocuments = async (
   const counts = await Promise.all(
     Array.from(linksByTarget.entries()).map(async ([targetUid, targetLinks]) => {
       const targetModel = strapi.getModel(targetUid);
-      const targetIsLocalized = isLocalizedContentType(targetModel);
+      const targetIsLocalized = strapi.localization.isLocalizedContentType(targetModel);
       const documentIds = [...new Set(targetLinks.map((link) => link.documentId))];
 
       const publishedRows = await strapi.db.query(targetUid).findMany({
-        select: ['documentId', 'locale'],
+        select: targetIsLocalized === true ? ['documentId', 'locale'] : ['documentId'],
         where: {
           documentId: { $in: documentIds },
           publishedAt: { $notNull: true },

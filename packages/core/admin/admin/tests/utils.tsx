@@ -40,6 +40,8 @@ import { adminApi } from '../src/services/api';
 import { server } from './server';
 import { initialState } from './store';
 
+const EMPTY_PERMISSIONS: NonNullable<ProvidersProps['permissions']> = [];
+
 setLogger({
   log: () => {},
   warn: () => {},
@@ -97,7 +99,12 @@ const DEFAULT_PERMISSIONS = [
   },
 ];
 
-const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
+const Providers = ({
+  children,
+  initialEntries,
+  storeConfig,
+  permissions = EMPTY_PERMISSIONS,
+}: ProvidersProps) => {
   /**
    * Keep these instances stable for the lifetime of the render.
    * Recreating the data router on rerenders can crash React Router.
@@ -184,17 +191,17 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
               settings={{}}
             >
               <Provider store={storeRef.current!}>
-                <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                  <QueryClientProvider client={queryClientRef.current!}>
-                    <DndProvider backend={HTML5Backend}>
-                      <LanguageProvider messages={{}}>
-                        <Theme
-                          themes={{
-                            dark: darkTheme,
-                            light: lightTheme,
-                          }}
-                        >
-                          <NotificationsProvider>
+                <LanguageProvider messages={{}}>
+                  <Theme
+                    themes={{
+                      dark: darkTheme,
+                      light: lightTheme,
+                    }}
+                  >
+                    <NotificationsProvider>
+                      <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                        <QueryClientProvider client={queryClientRef.current!}>
+                          <DndProvider backend={HTML5Backend}>
                             <GuidedTourContext enabled={false}>
                               <ConfigurationContextProvider
                                 showReleaseNotification={false}
@@ -219,12 +226,12 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
-                          </NotificationsProvider>
-                        </Theme>
-                      </LanguageProvider>
-                    </DndProvider>
-                  </QueryClientProvider>
-                </AuthProvider>
+                          </DndProvider>
+                        </QueryClientProvider>
+                      </AuthProvider>
+                    </NotificationsProvider>
+                  </Theme>
+                </LanguageProvider>
               </Provider>
             </StrapiAppProvider>
           ),
@@ -244,7 +251,6 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
   );
 };
 
-// eslint-disable-next-line react/jsx-no-useless-fragment
 const fallbackWrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 export interface RenderOptions {

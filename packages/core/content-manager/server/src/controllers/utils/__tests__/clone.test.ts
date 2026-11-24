@@ -1,4 +1,4 @@
-import { getProhibitedCloningFields } from '../clone';
+import { excludeNotCreatableFields, getProhibitedCloningFields } from '../clone';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -176,6 +176,20 @@ describe('Populate', () => {
     test('model with media', () => {
       const prohibitedFields = getProhibitedCloningFields('media');
       expect(prohibitedFields).toHaveLength(0);
+    });
+
+    test('Removes inaccessible component fields without changing the request body', () => {
+      const component = Object.freeze({ text: 'secret' });
+      const unrelated = { title: 'preserved' };
+      const body = Object.freeze({ componentAttrName: component, unrelated });
+      const permissionChecker = { can: { create: jest.fn(() => false) } };
+
+      const result = excludeNotCreatableFields('component', permissionChecker)(body);
+
+      expect(result.componentAttrName).toEqual({ text: null });
+      expect(body.componentAttrName).toEqual({ text: 'secret' });
+      expect(result.unrelated).toBe(unrelated);
+      expect(permissionChecker.can.create).toHaveBeenCalledWith(null, 'componentAttrName.text');
     });
   });
 });

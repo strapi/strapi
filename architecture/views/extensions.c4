@@ -1,0 +1,146 @@
+views {
+  view strapi_construction {
+    title '03 Engineering / Assembly / Application code and tooling'
+    description '''
+      **Type:** construction view, not a C4 container view. Files and tooling are shown as artifacts and development processes.
+      **Audience:** engineers. **Question:** where do application definitions come from, and how are they loaded?
+      Application code and schemas are loaded at startup. The CLI scaffolds files; it is not a required long-running production service.
+      Plugin package schemas and application plugin overrides are separate from application content-type files.
+      Scaffolding writes files; loader arrows read definitions. These are distinct activities, not one ordered pipeline. Compiling TypeScript application code is outside this view.
+      Open schema files for the development editing journey, loaders for startup, or plugin entrypoints for the extension map.
+    '''
+    include
+      strapi.cli_tooling.generators,
+      strapi.application_source.content_type_schema_files with { navigateTo content_type_builder_schema_change_flow },
+      strapi.application_source.api_module_files,
+      strapi.server_runtime.schema_loader with { navigateTo strapi_startup },
+      strapi.server_runtime.api_module_loader with { navigateTo strapi_startup },
+      strapi.server_runtime.plugin_system with { navigateTo strapi_extensions },
+      plugin_package.server_entry with { navigateTo plugin_entrypoints },
+      strapi.application_source.plugin_overrides
+    exclude * -> *
+    include
+      strapi.cli_tooling.generators -> strapi.application_source.content_type_schema_files,
+      strapi.cli_tooling.generators -> strapi.application_source.api_module_files,
+      strapi.server_runtime.schema_loader -> strapi.application_source.content_type_schema_files,
+      strapi.server_runtime.api_module_loader -> strapi.application_source.api_module_files,
+      strapi.server_runtime.plugin_system -> plugin_package.server_entry,
+      strapi.server_runtime.plugin_system -> strapi.application_source.plugin_overrides
+    autoLayout TopBottom 70 40
+  }
+
+  view strapi_extensions {
+    title '03 Engineering / Extensions / Extension mechanisms'
+    link ../scheduled_work/ 'Related: scheduled application work'
+    link ../interface_overview/ 'Related: application interfaces'
+    description '''
+      **Audience:** developers and technical product readers. **Type:** reading guide, not a runtime architecture diagram.
+      **Question:** which extension mechanism fits the change you want to make?
+      Choose plugin packaging, request/document behavior, custom fields, external integrations or startup hooks. Scheduled application work is available as a related topic.
+      These mechanisms can be combined. A plugin can supply custom fields or routes, but no single example represents all plugin behavior.
+      Cards name the topic opened by their navigation control. Arrows mean “explore this mechanism”, not function calls or required execution stages.
+    '''
+    include
+      extension_guide,
+      plugin_guide with { navigateTo plugin_entrypoints },
+      request_guide with { navigateTo request_customization },
+      fields_guide with { navigateTo custom_fields },
+      providers_guide with { navigateTo strapi_providers },
+      startup_guide with { navigateTo strapi_startup }
+    exclude * -> *
+    include
+      extension_guide -> plugin_guide,
+      extension_guide -> request_guide,
+      extension_guide -> fields_guide,
+      extension_guide -> providers_guide,
+      extension_guide -> startup_guide
+    autoLayout LeftRight 55 30
+  }
+
+  view plugin_entrypoints {
+    title '03 Engineering / Extensions / Plugin entrypoints'
+    link ../strapi_extensions/ 'Guide: choose an extension mechanism'
+    description '''
+      **Audience:** developers and technical product readers. **Type:** plugin construction and extension view.
+      **Question:** how can one plugin contribute to both the Admin and the server?
+      One plugin package can contribute separately to server runtime and browser Admin. The Admin entrypoint is bundled at build time;
+      the server entrypoint is loaded at startup. At runtime, plugin UI may call its server endpoints over HTTP.
+      Other in-process extensions, such as authentication strategies, document middleware and plugin schemas, are outside this entrypoint map.
+      A plugin can supply either entrypoint or both; an Admin extension does not require a matching server API.
+      Arrows explicitly distinguish importing/building, loading at startup and runtime HTTP calls. Open the build for application state or server plugin loading for startup.
+    '''
+    include
+      plugin_package.server_entry,
+      plugin_package.admin_entry,
+      strapi.cli_tooling.admin_build with { navigateTo application_state },
+      strapi.server_runtime.plugin_system with { navigateTo strapi_startup },
+      strapi.server_runtime.plugin_modules,
+      strapi.admin_web_app.plugin_admin_extensions
+    exclude * -> *
+    include
+      strapi.server_runtime.plugin_system -> plugin_package.server_entry,
+      strapi.server_runtime.plugin_system -> strapi.server_runtime.plugin_modules,
+      strapi.cli_tooling.admin_build -> plugin_package.admin_entry,
+      strapi.cli_tooling.admin_build -> strapi.admin_web_app.plugin_admin_extensions,
+      strapi.admin_web_app.plugin_admin_extensions -> strapi.server_runtime.plugin_modules with { title 'Calls plugin endpoints' technology 'HTTP(S)' }
+    autoLayout LeftRight 70 40
+  }
+
+  view strapi_providers {
+    title '03 Engineering / Extensions / Providers and webhooks'
+    description '''
+      **Audience:** engineers. **Question:** how does Strapi delegate file storage, email and event delivery?
+      **Scope:** optional external integrations. Upload providers choose local or remote storage; the remote path is shown here.
+      Email providers send messages. Webhooks deliver subscribed events. Each arrow points from caller to destination.
+      These adapters execute inside the Strapi server; they are not independently deployed services.
+      Upload providers manage stored files and their URLs. Browser/application downloads can use those URLs directly; this diagram does not imply that Strapi proxies every media read.
+      The three paths are independent integrations, not one workflow. Webhook event production and delivery failure handling are outside this view.
+      Open the upload service for its journey or remote media storage for a production deployment example.
+    '''
+    include
+      strapi.server_runtime.upload_service with { navigateTo media_upload_flow },
+      strapi.server_runtime.upload_provider,
+      media_storage with { navigateTo self_hosted_deployment },
+      strapi.server_runtime.email_provider,
+      email_service,
+      strapi.server_runtime.webhook_delivery with { navigateTo events_and_jobs },
+      external_system
+    exclude * -> *
+    include
+      strapi.server_runtime.upload_service -> strapi.server_runtime.upload_provider,
+      strapi.server_runtime.upload_provider -> media_storage,
+      strapi.server_runtime.email_provider -> email_service,
+      strapi.server_runtime.webhook_delivery -> external_system
+    autoLayout LeftRight 70 40
+  }
+
+  view strapi_startup of strapi.server_runtime {
+    title '03 Engineering / Server / Startup and registration'
+    link ../scheduled_work/ 'Related: scheduled work after startup'
+    description '''
+      **Scope:** startup responsibilities, not per-request execution. load() runs register() then bootstrap().
+      **Audience:** engineers. **Question:** what must be prepared before the server accepts requests?
+      Application and plugin definitions are loaded before database schema synchronization and route initialization;
+      start() listens after loading completes. Edges summarize orchestration, not an exact call trace.
+      Application/plugin register and bootstrap hooks participate in these phases. This map groups those responsibilities; it is not a full lifecycle or shutdown diagram.
+      Open plugin loading for extensions, application loaders for assembly, schema synchronization for database evolution, or HTTP server for request handling.
+    '''
+    include
+      application_lifecycle,
+      plugin_system with { navigateTo strapi_extensions },
+      api_module_loader with { navigateTo strapi_construction },
+      schema_loader with { navigateTo strapi_construction },
+      schema_sync with { navigateTo database_schema_evolution },
+      route_registration with { navigateTo content_api_runtime_components },
+      http_server with { navigateTo strapi_container_internals }
+    exclude * -> *
+    include
+      application_lifecycle -> plugin_system,
+      application_lifecycle -> api_module_loader,
+      application_lifecycle -> schema_loader,
+      application_lifecycle -> schema_sync,
+      application_lifecycle -> route_registration,
+      application_lifecycle -> http_server
+    autoLayout LeftRight 70 40
+  }
+}

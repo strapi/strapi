@@ -41,11 +41,11 @@ its branch is named, because anyone can open one. Nothing else works as a key: a
 outlives its candidate, because the ruleset over `releases/*` forbids deleting one, and a milestone
 is renamed by this very action.
 
-| Mode      | When                                                     | What it does                                                                                                                                         |
-| --------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `draft`   | No candidate is open.                                    | Cuts the branch, opens the pull request, closes the shipping milestone.                                                                              |
-| `refresh` | A candidate is open and the version still agrees.        | Fast-forwards the branch, refills the shipping milestone, rewrites the body, comments. The pull request keeps its number, its reviews and its label. |
-| `redraft` | A candidate is open and the commits changed the version. | Opens a replacement pull request, renames both milestones, then comments on, closes and deletes the one it replaced.                                 |
+| Mode      | When                                                  | What it does                                                                                                                                         |
+| --------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draft`   | No candidate is open.                                 | Cuts the branch, opens the pull request, closes the shipping milestone.                                                                              |
+| `refresh` | A candidate is open and the version still agrees.     | Fast-forwards the branch, refills the shipping milestone, rewrites the body, comments. The pull request keeps its number, its reviews and its label. |
+| `redraft` | A candidate is open and the selected version changed. | Opens a replacement pull request, renames both milestones, then comments on, closes and deletes the one it replaced.                                 |
 
 A `refresh` that finds the branch already at `develop`'s head pushes nothing. Pushing would fire
 `synchronize` on the pull request and publish another identical experimental artifact for nothing.
@@ -53,6 +53,10 @@ A `refresh` that finds the branch already at `develop`'s head pushes nothing. Pu
 `redraft` is the expensive path. A `feat` landing after a patch was drafted changes the version, and
 the version is in the branch name, so the candidate has to be re-keyed. The replacement is opened
 before the old candidate is retired, so the release is never without one.
+
+An explicit version can select the current next milestone while a candidate is open. The action
+first renames that open milestone to the following patch, then renames the old shipping milestone
+onto the selected version. This order avoids a transient duplicate milestone title.
 
 ## Version rule
 
@@ -130,8 +134,9 @@ would never run.
 
 ## The release candidate block
 
-The pull request body carries a JSON block between `STRAPI_RELEASE_CANDIDATE_START` and
-`STRAPI_RELEASE_CANDIDATE_END`, so later automation reads the release rather than the prose.
+The pull request body carries a collapsed JSON block between `STRAPI_RELEASE_CANDIDATE_START` and
+`STRAPI_RELEASE_CANDIDATE_END`, so later automation reads the release rather than the prose without
+making the human report hard to scan.
 
 `candidate` is the part that identifies the release without re-deriving any of it:
 
@@ -154,6 +159,9 @@ record of which run pulled which work in, and they are never rewritten.
 | `login` | The GitHub username, from the pull request payload. Empty only if it has none. |
 | `name`  | The display name, or `null` when no commit in the range can vouch for one.     |
 
+Each pull projection also keeps `milestoneNumber` beside the milestone title. The journal uses the
+number as the rollback value when realignment changes the assignment.
+
 A GitHub pull request payload has no display name in it: its `user` is the short user object, and
 asking for the long one costs a request per distinct contributor. Git already has the name, because
 a squash commit is authored by the contributor, so `%an` on the integration commit is the same
@@ -175,7 +183,8 @@ changing `experimentalVersion` in [`lib/report.ts`](lib/report.ts).
 
 This action does not roll back. A run that dies halfway leaves the repository half-changed and a
 human finishes or reverts it, so every mutation is recorded before the next one starts. The journal
-is written to the step summary and uploaded as an artifact whether the run succeeds or fails.
+file exists before the pipeline starts. It is replaced atomically after each intent and state
+transition, then uploaded as an artifact whether the run succeeds or fails.
 
 Each entry carries how far it got, so it never claims more certainty than the run has:
 
@@ -187,9 +196,10 @@ Each entry carries how far it got, so it never claims more certainty than the ru
 | `failed`        | The server or git answered with a refusal, so nothing changed. The answer is in `error`. |
 | `indeterminate` | The call failed in a way that proves nothing, a socket closed after the request left.    |
 
-A GitHub response status and a git exit code both mean the operation reached a verdict, and git
-updates a ref atomically, so a push that exits non-zero left the ref alone. An error carrying
-neither is `indeterminate` rather than assumed harmless.
+A GitHub 4xx response proves refusal. A 5xx response does not, because the server can apply the
+write before returning an error. After a failed Git push, the action reads the exact remote ref. It
+accepts the write when the intended state is present and records a refusal when the preflight state
+is unchanged. Any other remote state is `indeterminate`.
 
 A dry run fills the same structure without calling the API. That is the rehearsal: a reviewable,
 line-by-line list of every milestone rename, pull request reassignment and ref push the real run
@@ -204,13 +214,13 @@ vouch for whether it landed.
 | `op`                    | Undo                                                                          |
 | ----------------------- | ----------------------------------------------------------------------------- |
 | `milestone.rename`      | `gh api -X PATCH repos/strapi/strapi/milestones/<n> -f title=<before>`        |
-| `milestone.create`      | `gh api -X DELETE repos/strapi/strapi/milestones/<n>`                         |
+| `milestone.create`      | `gh api -X DELETE repos/strapi/strapi/milestones/<target n>`                  |
 | `milestone.close`       | `gh api -X PATCH repos/strapi/strapi/milestones/<n> -f state=open`            |
 | `issue.milestone.set`   | `gh api -X PATCH repos/strapi/strapi/issues/<n> -F milestone=<before number>` |
 | `issue.milestone.clear` | same, with the milestone number recorded in `before`                          |
 | `branch.push`           | `git push origin --delete releases/<version>`                                 |
 | `branch.delete`         | `git push origin <before sha>:refs/heads/<branch>`                            |
-| `pr.create`             | `gh pr close <n> --delete-branch`                                             |
+| `pr.create`             | `gh pr close <target n> --delete-branch`                                      |
 | `pr.close`              | `gh pr reopen <n>`                                                            |
 | `pr.label`              | `gh pr edit <n> --remove-label publish-experimental`                          |
 | `pr.body`, `pr.comment` | Edit or delete by hand.                                                       |
@@ -248,8 +258,10 @@ The run refuses to continue on any of these, all of them before the first write:
 13. The candidate's branch head is not contained in `origin/develop`, so someone pushed to it.
 14. The range now computes a version below the candidate's, so history was rewritten.
 15. No milestone is titled after the candidate's version, or the open one is not the candidate's next.
-16. A milestone already holds the title this run would rename another one onto.
+16. A milestone already holds the title this run would rename another one onto, except the current
+    next milestone during the ordered adjacent-version swap.
 17. A candidate's pull request is open but its branch is gone from the remote.
+18. A no-op refresh candidate moves away from the pinned SHA after preflight.
 
 `ambiguous` and `unresolved` records do not stop the run. They are listed in the pull request body
 under "Needs a human".

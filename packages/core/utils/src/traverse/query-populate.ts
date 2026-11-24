@@ -1,19 +1,6 @@
-import {
-  curry,
-  isString,
-  isArray,
-  isEmpty,
-  split,
-  isObject,
-  trim,
-  constant,
-  isNil,
-  identity,
-  cloneDeep,
-  join,
-  first,
-} from 'lodash/fp';
+import { isString, isEmpty, isObject, constant, identity, cloneDeep } from 'lodash';
 
+import { curry } from '../curry';
 import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';
@@ -26,7 +13,7 @@ const DEFAULT_QS_ARRAY_LIMIT = 100;
  * produces when indexed array notation exceeds `arrayLimit` (see #25632).
  */
 const isQsArrayLimitPopulateObject = (value: unknown): value is Record<string, string> => {
-  if (!isObject(value) || isArray(value)) {
+  if (!isObject(value) || Array.isArray(value)) {
     return false;
   }
 
@@ -58,6 +45,23 @@ const isKeyword = (keyword: string) => {
   };
 };
 
+type KeyContext = { key: string; attribute?: Attribute; parent?: Parent };
+
+/**
+ * Below a relation, media, component or `on` fragment (`parent.attribute` is set), the keys of a
+ * populate value are query keywords, even when the schema also has an attribute of the same
+ * name. Elsewhere, a key that names an attribute is that attribute.
+ */
+const isKeywordPosition = ({ attribute, parent }: Omit<KeyContext, 'key'>) =>
+  !attribute || !!parent?.attribute;
+
+/**
+ * A nested `populate`. Unlike `isKeyword`, this also matches in a keyword position when the
+ * schema has an attribute named `populate`: the value is still walked as a nested populate of
+ * the schema, not as that attribute, so every visitor checks it against the right schema.
+ */
+const isPopulateKeyword = (ctx: KeyContext) => ctx.key === 'populate' && isKeywordPosition(ctx);
+
 const isWildcard = (value: unknown): value is '*' => value === '*';
 
 const isPopulateString = (value: unknown): value is string => {
@@ -65,7 +69,7 @@ const isPopulateString = (value: unknown): value is string => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
@@ -77,17 +81,21 @@ const populate = traverseFactory()
      */
     const populateObject = pathsToObjectPopulate([populate]);
     const traversedPopulate = (await recurse(visitor, options, populateObject)) as PopulateObject;
-    const [result] = objectPopulateToPaths(traversedPopulate);
+    const paths = objectPopulateToPaths(traversedPopulate);
 
-    return result;
+    // Dot notation cannot represent polymorphic `on` fragments. Keep the object form
+    // when a visitor adds one, rather than trying to serialize it as nested `populate`.
+    return paths ? paths[0] : traversedPopulate;
   })
-  // Array of strings ['foo', 'bar.baz'] => map(recurse), then filter out empty items
+  // Array of strings ['foo', 'bar.baz'] => traverse as one object, then serialize when possible
   .intercept(isStringArray, async (visitor, options, populate, { recurse }) => {
-    const paths = await Promise.all(
-      populate.map((subClause) => recurse(visitor, options, subClause))
-    );
+    const populateObject = pathsToObjectPopulate(populate);
+    const traversedPopulate = (await recurse(visitor, options, populateObject)) as PopulateObject;
+    const paths = objectPopulateToPaths(traversedPopulate);
 
-    return paths.filter((item) => !isNil(item));
+    // A string array cannot hold polymorphic `on` fragments. Return the sanitized object
+    // as a whole when one is present, so consumers receive a valid populate representation.
+    return paths ?? traversedPopulate;
   })
   .intercept(isQsArrayLimitPopulateObject, async (_visitor, _options, populate) => {
     throwQsArrayLimitPopulateError(Object.keys(populate).length);
@@ -125,11 +133,11 @@ const populate = traverseFactory()
 
   // Parse string values
   .parse(isString, () => {
-    const tokenize = split('.');
-    const recompose = join('.');
+    const tokenize = (value: string) => value.split('.');
+    const recompose = (parts: string[]) => parts.join('.');
 
     return {
-      transform: trim,
+      transform: (value) => value.trim(),
 
       remove(key, data) {
         const [root] = tokenize(data);
@@ -144,11 +152,11 @@ const populate = traverseFactory()
           return data;
         }
 
-        return isNil(value) || isEmpty(value) ? root : `${root}.${value}`;
+        return value == null || isEmpty(value) ? root : `${root}.${value}`;
       },
 
       keys(data) {
-        const v = first(tokenize(data));
+        const v = tokenize(data)[0];
         return v ? [v] : [];
       },
 
@@ -161,10 +169,13 @@ const populate = traverseFactory()
   })
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    // Copied once, where the traversal is handed the caller's populate, rather than at every
+    // nested level: a deep copy at every level cost the size of the populate times its depth.
+    clone: cloneDeep,
+    transform: identity,
 
     remove(key, data) {
-      // eslint-disable-next-line no-unused-vars
+      // oxlint-disable-next-line no-unused-vars
       const { [key]: ignored, ...rest } = data;
 
       return rest;
@@ -193,13 +204,15 @@ const populate = traverseFactory()
     // which would cause "Invalid key" validation errors (issue #21338).
     //
     // The attribute can still be populated explicitly via `populate: { filters: true }`.
-    return ['sort', 'filters', 'fields'].includes(key) && (!attribute || !!parent?.attribute);
+    return ['sort', 'filters', 'fields'].includes(key) && isKeywordPosition({ attribute, parent });
   })
   .on(
     // Handle recursion on populate."populate"
-    isKeyword('populate'),
-    async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
-      const parent: Parent = { key, path, schema, attribute };
+    isPopulateKeyword,
+    async ({ key, visitor, path, value, schema, getModel }, { set, recurse }) => {
+      // No `attribute`: the keys of the nested populate are attributes of `schema` again, even
+      // when `schema` has an attribute named `populate`.
+      const parent: Parent = { key, path, schema };
 
       const newValue = await recurse(visitor, { schema, path, getModel, parent }, value);
 
@@ -231,8 +244,12 @@ const populate = traverseFactory()
   )
   // Handle populate on relation
   .onRelation(
-    async ({ key, value, attribute, visitor, path, schema, getModel }, { set, recurse }) => {
-      if (isNil(value)) {
+    async (
+      { key, value, attribute, visitor, path, schema, getModel, parent: keyParent },
+      { set, recurse }
+    ) => {
+      // A `populate` attribute in a keyword position is walked by `isPopulateKeyword` instead.
+      if (value == null || isPopulateKeyword({ key, attribute, parent: keyParent })) {
         return;
       }
 
@@ -251,7 +268,7 @@ const populate = traverseFactory()
           { on: value?.on }
         );
 
-        set(key, newValue);
+        set(key, { ...value, ...(newValue as Record<string, unknown>) });
 
         return;
       }
@@ -269,28 +286,36 @@ const populate = traverseFactory()
     }
   )
   // Handle populate on media
-  .onMedia(async ({ key, path, schema, attribute, visitor, value, getModel }, { recurse, set }) => {
-    if (isNil(value)) {
-      return;
+  .onMedia(
+    async (
+      { key, path, schema, attribute, visitor, value, getModel, parent: keyParent },
+      { recurse, set }
+    ) => {
+      if (value == null || isPopulateKeyword({ key, attribute, parent: keyParent })) {
+        return;
+      }
+
+      const parent: Parent = { key, path, schema, attribute };
+
+      const targetSchemaUID = 'plugin::upload.file';
+      const targetSchema = getModel(targetSchemaUID);
+
+      const newValue = await recurse(
+        visitor,
+        { schema: targetSchema, path, getModel, parent },
+        value
+      );
+
+      set(key, newValue);
     }
-
-    const parent: Parent = { key, path, schema, attribute };
-
-    const targetSchemaUID = 'plugin::upload.file';
-    const targetSchema = getModel(targetSchemaUID);
-
-    const newValue = await recurse(
-      visitor,
-      { schema: targetSchema, path, getModel, parent },
-      value
-    );
-
-    set(key, newValue);
-  })
+  )
   // Handle populate on components
   .onComponent(
-    async ({ key, value, schema, visitor, path, attribute, getModel }, { recurse, set }) => {
-      if (isNil(value)) {
+    async (
+      { key, value, schema, visitor, path, attribute, getModel, parent: keyParent },
+      { recurse, set }
+    ) => {
+      if (value == null || isPopulateKeyword({ key, attribute, parent: keyParent })) {
         return;
       }
 
@@ -309,8 +334,15 @@ const populate = traverseFactory()
   )
   // Handle populate on dynamic zones
   .onDynamicZone(
-    async ({ key, value, schema, visitor, path, attribute, getModel }, { set, recurse }) => {
-      if (isNil(value) || !isObject(value)) {
+    async (
+      { key, value, schema, visitor, path, attribute, getModel, parent: keyParent },
+      { set, recurse }
+    ) => {
+      if (
+        value == null ||
+        !isObject(value) ||
+        isPopulateKeyword({ key, attribute, parent: keyParent })
+      ) {
         return;
       }
 
@@ -331,21 +363,29 @@ type PopulateObject = {
   [key: string]: true | { populate: PopulateObject };
 };
 
-const objectPopulateToPaths = (input: PopulateObject): string[] => {
+const objectPopulateToPaths = (input: PopulateObject): string[] | undefined => {
   const paths: string[] = [];
 
-  function traverse(currentObj: PopulateObject, parentPath: string) {
+  function traverse(currentObj: PopulateObject, parentPath: string): boolean {
     for (const [key, value] of Object.entries(currentObj)) {
       const currentPath = parentPath ? `${parentPath}.${key}` : key;
       if (value === true) {
         paths.push(currentPath);
       } else {
-        traverse((value as { populate: PopulateObject }).populate, currentPath);
+        const nestedPopulate = (value as { populate?: PopulateObject }).populate;
+
+        if (!nestedPopulate || !traverse(nestedPopulate, currentPath)) {
+          return false;
+        }
       }
     }
+
+    return true;
   }
 
-  traverse(input, '');
+  if (!traverse(input, '')) {
+    return undefined;
+  }
 
   return paths;
 };

@@ -1,18 +1,15 @@
 import * as ts from 'typescript';
 import {
-  pipe,
-  replace,
   camelCase,
-  upperFirst,
-  isUndefined,
-  isNull,
-  isString,
-  isNumber,
-  isDate,
-  isArray,
   isBoolean,
-  propEq,
-} from 'lodash/fp';
+  isDate,
+  isNumber,
+  isString,
+  matchesProperty,
+  upperFirst,
+} from 'lodash';
+
+import { compareEnglish } from '../compare';
 
 const { factory } = ts;
 
@@ -45,9 +42,8 @@ export interface Schema {
 /**
  * Extract a valid interface name from a schema uid
  */
-export const getSchemaInterfaceName = pipe(replace(/(:.)/, ' '), camelCase, upperFirst) as (
-  uid: string
-) => string;
+export const getSchemaInterfaceName = (uid: string): string =>
+  upperFirst(camelCase(uid.replace(/(:.)/, ' ')));
 
 export const getSchemaModelType = (schema: Schema): string | null | undefined => {
   const { modelType, kind } = schema;
@@ -89,11 +85,11 @@ export const getTypeNode = (typeName: string, params: ts.TypeNode[] = []): ts.Ty
  * Transform a regular JavaScript object or scalar value into a literal expression
  */
 export const toTypeLiteral = (data: any): any => {
-  if (isUndefined(data)) {
+  if (data === undefined) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword as any);
   }
 
-  if (isNull(data)) {
+  if (data === null) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.NullKeyword as any);
   }
 
@@ -114,7 +110,7 @@ export const toTypeLiteral = (data: any): any => {
     return data ? factory.createTrue() : factory.createFalse();
   }
 
-  if (isArray(data)) {
+  if (Array.isArray(data)) {
     return factory.createTupleTypeNode(data.map((item) => toTypeLiteral(item)));
   }
 
@@ -126,7 +122,7 @@ export const toTypeLiteral = (data: any): any => {
     throw new Error(`Cannot convert to object literal. Unknown type "${typeof data}"`);
   }
 
-  const entries = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
+  const entries = Object.entries(data).sort((a, b) => compareEnglish(a[0], b[0]));
 
   const props = entries.reduce<any[]>((acc, [key, value]) => {
     // Handle keys such as content-type-builder & co.
@@ -156,7 +152,7 @@ export const getDefinitionAttributesCount = (
   definition: ts.InterfaceDeclaration
 ): number | null => {
   const attributesNode = definition.members.find(
-    (propEq as any)('name.escapedText', 'attributes')
+    matchesProperty('name.escapedText', 'attributes')
   ) as any;
 
   if (!attributesNode) {

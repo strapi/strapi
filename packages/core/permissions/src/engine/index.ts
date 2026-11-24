@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
@@ -9,13 +9,33 @@ import {
   createBeforeEvaluateContext,
   createValidateContext,
 } from './hooks';
-import type { PermissionEngineHooks, HookName } from './hooks';
+import type {
+  PermissionEngineHooks,
+  HookName,
+  TypedPermissionEngineHooks,
+  TypedPermission,
+  BeforeEvaluateContext,
+  ValidateContext,
+  WillRegisterCondition,
+  WillRegisterContext,
+} from './hooks';
 
 import * as abilities from './abilities';
 import { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };
+// `PermissionEngineHooks` stays unexported here: a re-export changes how downstream declarations
+// print the engine's `hooks` (`engine.PermissionEngineHooks` instead of the path to `engine/hooks`)
+export type {
+  HookName,
+  TypedPermissionEngineHooks,
+  TypedPermission,
+  BeforeEvaluateContext,
+  ValidateContext,
+  WillRegisterCondition,
+  WillRegisterContext,
+};
 
 type Provider = Omit<ReturnType<typeof providerFactory>, 'register'> & {
   register(...args: unknown[]): Promise<Provider> | Provider;
@@ -33,6 +53,19 @@ export interface Engine {
     options: Record<string, unknown>
   ): (permission: PermissionRule) => Promise<unknown>;
 }
+
+/**
+ * The engine with typed hooks and handlers. {@link Engine}, what `new` returns, keeps untyped
+ * handlers; a typed contract can declare this type instead.
+ */
+export type TypedEngine = Omit<Engine, 'hooks' | 'on' | 'generateAbility'> & {
+  hooks: TypedPermissionEngineHooks;
+  generateAbility(permissions: TypedPermission[], options?: object): Promise<Ability>;
+  on<THook extends HookName>(
+    hook: THook,
+    handler: Parameters<TypedPermissionEngineHooks[THook]['register']>[0]
+  ): TypedEngine;
+};
 
 export interface EngineParams {
   providers: { action: ActionProvider; condition: ConditionProvider };
@@ -119,25 +152,25 @@ const newEngine = (params: EngineParams): Engine => {
     const resolveConditions = (ids: string[]): (Condition | undefined)[] =>
       ids.map((id) => providers.condition.get(id) as Condition | undefined);
 
-    const removeInvalidConditions = _.filter(
-      (condition: Condition | undefined): condition is Condition =>
-        condition != null && _.isFunction(condition.handler)
-    );
+    const removeInvalidConditions = (conditions: (Condition | undefined)[]) =>
+      conditions.filter(
+        (condition): condition is Condition =>
+          condition != null && typeof condition.handler === 'function'
+      );
 
     const evaluateConditions = (conditions: Condition[]) => {
       return Promise.all(
         conditions.map(async (condition) => ({
           condition,
           result: await condition.handler(
-            _.merge(options, { permission: _.cloneDeep(permission) })
+            _.merge({}, options, { permission: _.cloneDeep(permission) })
           ),
         }))
       );
     };
 
-    const removeInvalidResults = _.filter(
-      ({ result }) => _.isBoolean(result) || _.isObject(result)
-    );
+    const removeInvalidResults = (results: Awaited<ReturnType<typeof evaluateConditions>>) =>
+      results.filter(({ result }) => _.isBoolean(result) || _.isObject(result));
 
     const evaluatedConditions = await Promise.resolve(conditions)
       .then(resolveConditions)
@@ -145,18 +178,20 @@ const newEngine = (params: EngineParams): Engine => {
       .then(evaluateConditions)
       .then(removeInvalidResults);
 
-    const resultPropEq = _.propEq('result');
-    const pickResults = _.map(_.prop('result'));
-
-    if (evaluatedConditions.every(resultPropEq(false))) {
+    if (evaluatedConditions.every(({ result }) => result === false)) {
       return;
     }
 
-    if (_.isEmpty(evaluatedConditions) || evaluatedConditions.some(resultPropEq(true))) {
+    if (
+      _.isEmpty(evaluatedConditions) ||
+      evaluatedConditions.some(({ result }) => result === true)
+    ) {
       return register({ action, subject, properties });
     }
 
-    const results = pickResults(evaluatedConditions).filter(_.isObject);
+    const results = evaluatedConditions
+      .map(({ result }) => result)
+      .filter((result) => _.isObject(result));
 
     if (_.isEmpty(results)) {
       return register({ action, subject, properties });

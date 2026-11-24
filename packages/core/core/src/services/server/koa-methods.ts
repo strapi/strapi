@@ -1,4 +1,4 @@
-import { camelCase } from 'lodash/fp';
+import { camelCase } from 'lodash';
 import { STATUS_CODES } from 'node:http';
 
 export interface ErrorMethodEntry {
@@ -121,15 +121,4 @@ export interface ContextDelegatedResponseSuccessMethods {
   created(response?: unknown): void;
   /** 204 | 200 */
   deleted(response?: unknown): void;
-}
-
-// Keep Koa's context and response types in sync with the helpers registered at runtime in `koa.ts`.
-declare module 'koa' {
-  interface DefaultContextDelegatedResponse
-    extends ContextDelegatedResponseErrorMethods,
-      ContextDelegatedResponseSuccessMethods {}
-
-  interface BaseResponse
-    extends ContextDelegatedResponseErrorMethods,
-      ContextDelegatedResponseSuccessMethods {}
 }

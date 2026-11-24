@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, map, every, pipe } = require('lodash/fp');
+const { map, every } = require('lodash');
 const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
@@ -43,7 +43,11 @@ const authenticate = async (ctx) => {
       // Fetch user's permissions
       const permissions = await Promise.resolve(user.role.id)
         .then(getService('permission').findRolePermissions)
-        .then(map(getService('permission').toContentAPIPermission));
+        .then((permissions) =>
+          map(permissions, (permission) =>
+            getService('permission').toContentAPIPermission(permission)
+          )
+        );
 
       // Generate an ability (content API engine) based on the given permissions
       const ability = await strapi.contentAPI.permissions.engine.generateAbility(permissions);
@@ -64,7 +68,11 @@ const authenticate = async (ctx) => {
 
     const publicPermissions = await getService('permission')
       .findPublicPermissions()
-      .then(map(getService('permission').toContentAPIPermission));
+      .then((permissions) =>
+        map(permissions, (permission) =>
+          getService('permission').toContentAPIPermission(permission)
+        )
+      );
 
     if (publicPermissions.length === 0) {
       return { authenticated: false };
@@ -100,12 +108,8 @@ const verify = async (auth, config) => {
     throw new UnauthorizedError();
   }
 
-  const isAllowed = pipe(
-    // Make sure we're dealing with an array
-    castArray,
-    // Transform the scope array into an action array
-    every((scope) => ability.can(scope))
-  )(config.scope);
+  const scopes = Array.isArray(config.scope) ? config.scope : [config.scope];
+  const isAllowed = every(scopes, (scope) => ability.can(scope));
 
   if (!isAllowed) {
     throw new ForbiddenError();

@@ -2,6 +2,7 @@ import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { createGithubAdapter, createRestClient, parseNextLink } from '../lib/github.ts';
+import { classifyFailure } from '../lib/journal.ts';
 
 import type { HttpRequest, HttpResponse } from '../lib/github.ts';
 
@@ -89,14 +90,25 @@ describe('createRestClient', () => {
     );
   });
 
-  it('carries the response status on the error, so the journal can tell a refusal apart', async () => {
+  it('marks a 4xx response as a definitive refusal', async () => {
     const { request } = stubRequest([
       response({ ok: false, status: 422, payload: { message: 'already_exists' } }),
     ]);
 
     await assert.rejects(
       () => createRestClient('t', request).send('PATCH', '/repos/a/b/milestones/430', {}),
-      (error: unknown) => (error as { status?: unknown }).status === 422
+      (error: unknown) => classifyFailure(error) === 'failed'
+    );
+  });
+
+  it('marks a 5xx response as an indeterminate mutation outcome', async () => {
+    const { request } = stubRequest([
+      response({ ok: false, status: 502, payload: { message: 'bad gateway' } }),
+    ]);
+
+    await assert.rejects(
+      () => createRestClient('t', request).send('PATCH', '/repos/a/b/milestones/430', {}),
+      (error: unknown) => classifyFailure(error) === 'indeterminate'
     );
   });
 

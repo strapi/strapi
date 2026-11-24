@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { mapValues } from 'lodash/fp';
+import { mapValues } from 'lodash';
 import andOperator from './and';
 import orOperator from './or';
 import notOperator from './not';
@@ -51,4 +51,4 @@ const operators = {
 
 // Instantiate every operator with the Strapi instance
 export default ({ strapi }: { strapi: Core.Strapi }) =>
-  mapValues((opCtor) => opCtor({ strapi }), operators);
+  mapValues(operators, (opCtor) => opCtor({ strapi }));

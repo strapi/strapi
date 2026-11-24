@@ -1,5 +1,5 @@
 import type { ReadStream } from 'node:fs';
-import { getOr } from 'lodash/fp';
+import { get } from 'lodash';
 import {
   S3Client,
   GetObjectCommand,
@@ -16,6 +16,7 @@ import {
   ServerSideEncryption,
 } from '@aws-sdk/client-s3';
 import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
+import type { Providers } from '@strapi/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
@@ -84,8 +85,7 @@ export interface File {
 }
 
 export type UploadCommandOutput = (
-  | CompleteMultipartUploadCommandOutput
-  | AbortMultipartUploadCommandOutput
+  CompleteMultipartUploadCommandOutput | AbortMultipartUploadCommandOutput
 ) & {
   Location?: string;
   ETag?: string;
@@ -331,7 +331,7 @@ const getConfig = ({
   };
 };
 
-export default {
+const providerModule = {
   init({ baseUrl, rootPath, s3Options, providerConfig, ...legacyS3Options }: InitOptions) {
     // Validate configuration and emit warnings for potential issues
     validateProviderConfig(providerConfig, s3Options as DefaultOptions);
@@ -403,7 +403,7 @@ export default {
 
       // Merge customParams but preserve critical security parameters
       // Bucket, Key, and Body must not be overridden by customParams
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // oxlint-disable-next-line no-unused-vars
       const { Bucket, Key, Body, ...safeCustomParams } = customParams as any;
       return { ...params, ...safeCustomParams };
     };
@@ -592,7 +592,7 @@ export default {
             Key: fileKey,
           }),
           {
-            expiresIn: getOr(15 * 60, ['params', 'signedUrlExpires'], config),
+            expiresIn: get(config, ['params', 'signedUrlExpires'], 15 * 60),
           }
         );
 
@@ -626,7 +626,7 @@ export default {
         await upload(newFile, customParams);
 
         if (newKey !== oldKey) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // oxlint-disable-next-line no-unused-vars
           const { Bucket, Key, ...safeParams } = customParams as any;
           const command = new DeleteObjectCommand({
             ...safeParams,
@@ -644,7 +644,7 @@ export default {
         await upload(newFile, customParams);
 
         if (newKey !== oldKey) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // oxlint-disable-next-line no-unused-vars
           const { Bucket, Key, ...safeParams } = customParams as any;
           const command = new DeleteObjectCommand({
             ...safeParams,
@@ -682,7 +682,7 @@ export default {
        */
       delete(file: File, customParams = {}): Promise<DeleteObjectCommandOutput> {
         // Spread customParams first, then override with secure values
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // oxlint-disable-next-line no-unused-vars
         const { Bucket, Key, ...safeParams } = customParams as any;
         const command = new DeleteObjectCommand({
           ...safeParams,
@@ -694,3 +694,9 @@ export default {
     };
   },
 };
+
+// Checked apart from its declaration, so the contract does not re-type the parameters the
+// provider leaves to inference.
+providerModule satisfies Providers.Upload.Factory<InitOptions>;
+
+export default providerModule;

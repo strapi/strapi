@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Stuurt foutmeldingen van Strapi naar Sentry.",
+  "plugin.description.short": "Stuurt foutmeldingen van Strapi naar Sentry.",
+  "plugin.name": "Sentry"
+}
