@@ -33,7 +33,8 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist/"
+    "dist/",
+    "blocks-link/"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
@@ -58,7 +59,7 @@
     "p-map": "4.0.0",
     "preferred-pm": "5.0.0",
     "yup": "0.32.9",
-    "zod": "4.4.3"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/http-errors": "2.0.4",

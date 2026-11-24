@@ -52,14 +52,21 @@ interface RootProps {
   pageCount?: PaginationApi['pageCount'];
   /**
    * @default 1
-   * @description the initial page number.
+   * @description the initial page number when the URL has no `page` param.
+   * A spread API `page` is ignored; the active page always comes from the URL.
    */
   defaultPage?: PaginationApi['page'];
   /**
    * @default 10
-   * @description the initial number of items to display
+   * @description the initial number of items to display when the URL has no
+   * `pageSize` param. Wins over a spread `pageSize`.
    */
   defaultPageSize?: PaginationApi['pageSize'];
+  /**
+   * @description page size from a spread API pagination object. Used only when
+   * `defaultPageSize` is omitted and the URL has no `pageSize` param.
+   */
+  pageSize?: PaginationApi['pageSize'];
   /**
    * @description a callback that is called when the page size changes.
    */
@@ -89,13 +96,23 @@ interface RootProps {
  */
 const Root = React.forwardRef<HTMLDivElement, RootProps>(
   (
-    { children, defaultPageSize = 10, pageCount = 0, defaultPage = 1, onPageSizeChange, total = 0 },
+    {
+      children,
+      defaultPageSize,
+      pageSize: spreadPageSize,
+      pageCount = 0,
+      defaultPage = 1,
+      onPageSizeChange,
+      total = 0,
+    },
     forwardedRef
   ) => {
+    const resolvedPageSize = defaultPageSize ?? spreadPageSize ?? 10;
+
     const [{ query }, setQuery] = useQueryParams<
       Pick<PaginationContextValue, 'page' | 'pageSize'> & { filters?: unknown; _q?: unknown }
     >({
-      pageSize: defaultPageSize.toString(),
+      pageSize: resolvedPageSize.toString(),
       page: defaultPage.toString(),
     });
 

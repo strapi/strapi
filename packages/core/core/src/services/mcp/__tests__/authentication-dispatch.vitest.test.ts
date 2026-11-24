@@ -25,7 +25,8 @@ describe('createMcpAuthenticationStrategy', () => {
 
     strategy = createMcpAuthenticationStrategy(
       {
-        admin: { services: { 'api-token-admin': { authenticateAdminToken } } },
+        service: (uid: string) =>
+          uid === 'admin::api-token-admin' ? { authenticateAdminToken } : undefined,
       } as unknown as Core.Strapi,
       {
         isOAuthEnabled,

@@ -91,7 +91,7 @@ An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) 
 
 1. Extract `Authorization: Bearer <token>` — missing/malformed header → `missing_token`.
 2. If the token is JWT-shaped (contains two `.`) **and** `server.mcp.oauth.enabled` is on, it is treated as an MCP OAuth access token (`oauth/accessTokenAuthenticator.ts`): validated against the `mcp` session-manager origin, requiring an active session row, an active non-blocked admin user, and a freshly computed `generateUserAbility`. Admin API tokens are long random hex strings that can never contain a dot, so the dispatch is unambiguous.
-3. Otherwise it validates through `strapi.admin.services['api-token-admin'].authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
+3. Otherwise it validates through `strapi.service('admin::api-token-admin').authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
 4. On success, the handler receives the caller's CASL `ability` and owning `user`.
 
 There is no separate "MCP token" type — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`, or an MCP client obtains an OAuth token through the flow below.

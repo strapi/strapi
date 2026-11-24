@@ -83,9 +83,9 @@ export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
       return { authenticated: false, reason: 'missing_token' };
     }
 
-    const authResult = (await strapi.admin.services['api-token-admin'].authenticateAdminToken(
-      token
-    )) as McpAdminTokenAuthResult;
+    const authResult = (await strapi
+      .service('admin::api-token-admin')
+      .authenticateAdminToken(token)) as McpAdminTokenAuthResult;
 
     if (authResult.authenticated === false) {
       return {
