@@ -13,9 +13,10 @@ import { writePnpmWorkspaceConfig } from './utils/pnpm-config';
 import { generateDotEnv } from './utils/dot-env';
 import { isStderrError } from './types';
 
-import type { Scope } from './types';
+import type { AdminUser, Scope } from './types';
 import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
+import { getCreateAdminArgs, getCreateAdminCommandTemplate } from './utils/admin-command';
 import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
 
 const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
@@ -94,6 +95,7 @@ async function createApp(scope: Scope) {
     packageManager,
     gitInit,
     runApp,
+    admin,
   } = scope;
 
   const shouldRunSeed = useExample && installDependencies;
@@ -236,6 +238,8 @@ async function createApp(scope: Scope) {
     }
   }
 
+  const adminCreated = admin ? await createAdminUser(scope, admin) : false;
+
   const cmd = chalk.cyan(`${packageManager} run`);
 
   logger.title('Strapi', `Your application was created!`);
@@ -264,6 +268,15 @@ async function createApp(scope: Scope) {
     ]);
   }
 
+  if (admin && adminCreated) {
+    logger.log([
+      '',
+      `Admin user: ${chalk.green(admin.email)}. Log in with this email and password.`,
+    ]);
+  } else {
+    logNoAdmin(scope);
+  }
+
   logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
 
   if (runApp && installDependencies) {
@@ -290,6 +303,53 @@ async function createApp(scope: Scope) {
 
       logger.fatal('Failed to start your Strapi application');
     }
+  }
+}
+
+async function createAdminUser(scope: Scope, admin: AdminUser) {
+  const { file, args } = getCreateAdminArgs(scope.packageManager, admin);
+
+  logger.title('Admin', `Creating the admin user ${chalk.green(admin.email)}`);
+
+  try {
+    // stdin is closed, so nothing can wait for an answer. The output is not shown because the
+    // arguments hold the password.
+    await execa(file, args, { cwd: scope.rootPath, stdin: 'ignore', all: true });
+    logger.success('Admin user created');
+
+    return true;
+  } catch (error) {
+    const output = (error as execa.ExecaError).all ?? '';
+    const reason = output.trim().split('\n').pop() || 'unknown error';
+
+    logger.error([`The admin user was not created: ${reason}`]);
+
+    return false;
+  }
+}
+
+/**
+ * Says clearly that the project has no admin, with the exact command to create one.
+ * The message also speaks to agents, so they ask the developer instead of inventing credentials.
+ */
+function logNoAdmin({ packageManager, invocation }: Scope) {
+  logger.title('Admin', chalk.yellow('No admin user yet.'));
+  logger.log([
+    'To create the first admin user, run this command in the project folder:',
+    '',
+    chalk.cyan(getCreateAdminCommandTemplate(packageManager)),
+    '',
+    'The password needs 8 characters or more, with a lowercase letter, an uppercase letter and a number.',
+    'You can also create the admin user in the browser, the first time you open the admin panel.',
+  ]);
+
+  if (invocation !== 'human') {
+    logger.log([
+      '',
+      chalk.bold(
+        'AI agents: ask the developer for the admin email, password and first name. Do not invent them.'
+      ),
+    ]);
   }
 }
 

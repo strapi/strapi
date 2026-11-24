@@ -43,6 +43,16 @@ When you pass `--template`, the CLI does not add `typescript` or `@types/*` depe
 
 `detectInvocation()` and `resolvePromptMode()` read the same CI and terminal facts from `readEnvironment()`. The two results can still differ. For example, an agent that has a terminal gets `agent` and the prompts, and `--interactive` in CI gives `ci` and the prompts.
 
+## Admin user
+
+The CLI never asks for the admin user. By default, it creates the project with no admin user.
+
+To create a super admin, pass `--admin-email` and `--admin-password`. `--admin-firstname` is optional, and its default value is `Admin`. `utils/admin-command.ts` checks the values before the CLI creates the project, with the same rules as `strapi admin:create-user`. If a value is not correct, or if you pass only one of the two flags, the CLI stops with an error. The admin flags need the dependencies. If you use them with `--no-install`, the CLI also stops.
+
+After the install and the seed, the CLI runs `strapi admin:create-user` in the project with all the values as flags and stdin closed. If the command gets a value as a flag, it does not prompt. The CLI does not show the output of the command, because the arguments contain the password. If the command fails, the CLI logs the last line of its output and does not stop: the project exists.
+
+Without an admin user, the CLI logs "No admin user yet." and the exact `admin:create-user` command, with quoted placeholders. When the invocation is not `human`, it also tells AI agents to ask the developer for the values and not to invent them.
+
 ## Telemetry
 
 The CLI sends project-creation events through `src/utils/usage.ts`. Each event carries `invocation` and `agentName` in `eventProperties`.
