@@ -967,12 +967,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
 
-      const { documentId } = await strapi.db
-        .query('admin::api-token')
-        .findOne({ select: ['documentId'], where: { id: body.data.id } });
-
       return {
-        token: { ...body.data, documentId },
         tokenRq: await createAgent(strapi, { token: body.data.accessKey }),
       };
     };

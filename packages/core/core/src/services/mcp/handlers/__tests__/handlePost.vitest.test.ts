@@ -67,7 +67,7 @@ describe('handlePost', () => {
   });
 
   const makeCtx = (req: IncomingMessage, res: ServerResponse, body?: unknown) =>
-    ({ req, res, request: { body }, respond: true, state: {} } as any);
+    ({ req, res, request: { body }, respond: true, state: {} }) as any;
 
   const makeRes = () => {
     const writeHeadSpy = vi.fn();
@@ -80,7 +80,7 @@ describe('handlePost', () => {
     return { res, writeHeadSpy, endSpy };
   };
 
-  const makeReq = () => ({ headers: {} } as unknown as IncomingMessage);
+  const makeReq = () => ({ headers: {} }) as unknown as IncomingMessage;
 
   test('should set ctx.respond = false before touching the response', async () => {
     const deps: McpHandlerDependencies = {

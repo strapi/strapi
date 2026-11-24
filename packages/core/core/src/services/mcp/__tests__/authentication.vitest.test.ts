@@ -50,7 +50,7 @@ describe('createMcpAdminTokenAuthenticator', () => {
       request: {
         header: authorization === undefined ? {} : { authorization },
       },
-    } as any);
+    }) as any;
 
   test('returns missing_token when authorization header is absent', async () => {
     const result = await authenticator.authenticate(makeCtx());
