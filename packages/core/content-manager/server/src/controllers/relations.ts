@@ -412,11 +412,14 @@ export default {
      * searching should be allowed only on mainField for permission reasons
      */
     if (search) {
-      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      const filter =
+        typeof query._filter === 'string' && isOperatorOfType('where', query._filter)
+          ? query._filter
+          : '$containsi';
       addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
-    if (idsToOmit?.length > 0) {
+    if ((idsToOmit?.length ?? 0) > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
         id: { $notIn: [...new Set(idsToOmit)] },
@@ -437,7 +440,7 @@ export default {
     const { userAbility } = ctx.state;
     const { id } = ctx.params;
 
-    await validateFindExisting(ctx.request.query);
+    const { page, pageSize } = await validateFindExisting(ctx.request.query);
 
     const {
       entryId,
@@ -489,10 +492,7 @@ export default {
       filters.publishedAt = { $null: true };
     }
 
-    const pageParams = {
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
-    };
+    const pageParams = { page, pageSize };
 
     const defaultPagination = (total: number) => ({ page: 1, pageCount: 1, pageSize: 10, total });
 
