@@ -12,6 +12,16 @@ export type * as Utils from './utils';
 export type * as Struct from './struct';
 export type * as UID from './uid';
 
+// The email provider contract also at the root, so the declarations a provider emits import it
+// from `@strapi/types` itself
+export type {
+  Capabilities as EmailProviderCapabilities,
+  Factory as EmailProviderFactory,
+  Provider as EmailProvider,
+  SendOptions as EmailProviderSendOptions,
+  Settings as EmailProviderSettings,
+} from './providers/email';
+
 // The upload provider contract also at the root, so the declarations a provider emits import it
 // from `@strapi/types` itself
 export type {

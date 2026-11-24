@@ -24,7 +24,8 @@ import { PERMISSIONS } from '../constants';
 import { getYupInnerErrors } from '../utils/getYupInnerErrors';
 import { schema } from '../utils/schema';
 
-import type { EmailSettings, ProviderCapabilities } from '../../../shared/types';
+import type { EmailSettings } from '../../../shared/types';
+import type { Providers } from '@strapi/types';
 
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
@@ -62,7 +63,7 @@ const CapabilitiesSection = ({
   isIdle,
   formatMessage,
 }: {
-  capabilities: ProviderCapabilities;
+  capabilities: Providers.Email.Capabilities;
   isIdle?: boolean;
   formatMessage: (msg: { id: string; defaultMessage: string }) => string;
 }) => {
