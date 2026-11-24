@@ -33,13 +33,15 @@ const MenuContent = styled(Menu.Content)`
 
 const useNoCurrent = () => null;
 
+const NO_PERMISSIONS: NonNullable<MainNavMenuArgs['permissions']> = [];
+
 interface NavMenuProps {
   menu: MainNavMenuArgs;
   showLabel: boolean;
 }
 
 const NavMenu = ({
-  menu: { icon: Icon, intlLabel, permissions = [], useCurrent = useNoCurrent, Content },
+  menu: { icon: Icon, intlLabel, permissions = NO_PERMISSIONS, useCurrent = useNoCurrent, Content },
   showLabel,
 }: NavMenuProps) => {
   const { formatMessage } = useIntl();
