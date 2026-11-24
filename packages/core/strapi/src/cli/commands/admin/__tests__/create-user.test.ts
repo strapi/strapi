@@ -8,21 +8,19 @@ const create = jest.fn();
 const getSuperAdmin = jest.fn(() => Promise.resolve({ id: roleId }));
 const exists = jest.fn();
 
-const admin = {
-  services: {
-    user: {
-      create,
-      exists,
-    },
-    role: {
-      getSuperAdmin,
-    },
+const adminServices: Record<string, unknown> = {
+  user: {
+    create,
+    exists,
+  },
+  role: {
+    getSuperAdmin,
   },
 };
 
 const mock = {
   load,
-  admin,
+  service: jest.fn((uid: string) => adminServices[uid.slice('admin::'.length)]),
 };
 
 jest.mock('@strapi/core', () => {
