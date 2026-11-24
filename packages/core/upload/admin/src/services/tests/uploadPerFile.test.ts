@@ -52,10 +52,18 @@ const storeConfig = {
   },
 };
 
-const setup = (
-  names: string[],
-  { owner, beforeDrop }: { owner?: string; beforeDrop?: (uploadId: number) => void } = {}
-) => {
+// Abort controllers, skip markers and pool queues are module state, so every test
+// settles the requests it leaves open
+const leaked: PendingRequest[] = [];
+
+afterEach(async () => {
+  leaked.splice(0).forEach((pending) => pending.reject(new UploadAbortedError()));
+  await new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+});
+
+const setup = (names: string[], { owner }: { owner?: string } = {}) => {
   const requests: PendingRequest[] = [];
 
   mockUploadFileViaXHR.mockImplementation(
@@ -69,6 +77,7 @@ const setup = (
           resolve: () => resolve({ id: requests.length, name } as never),
           reject,
         });
+        leaked.push({ name, signal, resolve: () => {}, reject });
       })
   );
 
@@ -82,9 +91,6 @@ const setup = (
     }),
     { providerOptions: { storeConfig } }
   );
-
-  // The drop opens the next batch, so its id is one above the current one
-  beforeDrop?.(result.current.progress.uploadId + 1);
 
   act(() => {
     result.current.upload({
@@ -426,14 +432,9 @@ describe('headers a plugin registered', () => {
       return { 'x-strapi-space': space };
     });
 
-    // Skip the second row so it stays pending and can be cancelled
-    const { result, statuses } = setup(['a.png', 'b.png'], {
-      beforeDrop: (uploadId) => {
-        // The first call aborts any row an earlier test left in flight under the same key
-        abortUploadFile(uploadId, 1);
-        abortUploadFile(uploadId, 1);
-      },
-    });
+    // A fresh store opens uploadId 1: skip its second row so it stays pending and can be cancelled
+    abortUploadFile(1, 1);
+    const { result, statuses } = setup(['a.png', 'b.png']);
     await waitFor(() => expect(statuses()).toEqual(['error', 'pending']));
     act(() => {
       result.current.dispatch(cancelFile({ uploadId: result.current.progress.uploadId, index: 1 }));
