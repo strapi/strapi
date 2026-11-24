@@ -40,18 +40,25 @@ interface NavMenuProps {
   showLabel: boolean;
 }
 
-const NavMenu = ({
-  menu: { icon: Icon, intlLabel, permissions = NO_PERMISSIONS, useCurrent = useNoCurrent, Content },
-  showLabel,
-}: NavMenuProps) => {
-  const { formatMessage } = useIntl();
-  const isDesktop = useIsDesktop();
-  const current = useCurrent();
+const NavMenu = ({ menu, showLabel }: NavMenuProps) => {
+  const permissions = menu.permissions ?? NO_PERMISSIONS;
   const { allowedActions, isLoading } = useRBAC(permissions);
 
   if (permissions.length > 0 && (isLoading || !Object.values(allowedActions).some(Boolean))) {
     return null;
   }
+
+  // Rendered apart so `useCurrent` only runs for users who see the menu, as it may fetch data
+  return <NavMenuImpl menu={menu} showLabel={showLabel} />;
+};
+
+const NavMenuImpl = ({
+  menu: { icon: Icon, intlLabel, useCurrent = useNoCurrent, Content },
+  showLabel,
+}: NavMenuProps) => {
+  const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
+  const current = useCurrent();
 
   const label = formatMessage(intlLabel);
   const name = current

@@ -595,6 +595,8 @@ class StrapiApp {
   runHookParallel = (name: string) => this.hooksDict[name].runParallel();
 
   render() {
+    this.mainNav.lock();
+
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
     const storedLocale = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
     const locale = normalizeAdminLocale(storedLocale) as keyof typeof localeNames;

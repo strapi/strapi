@@ -37,11 +37,11 @@ app.unstable_addMainNavMenu({
 
 - `id`: unique. Adding the same id twice throws.
 - `icon` and `intlLabel`: the trigger shows the icon, and its tooltip and accessible name read the label, while `useCurrent` returns no value.
-- `useCurrent` (optional): a hook that returns the current value, `{ label, icon? }`, or `null`. The trigger then shows its icon, and its tooltip and accessible name read "Space: Control center".
+- `useCurrent` (optional): a hook that returns the current value, `{ label, icon? }`, or `null`. The trigger then shows its icon, and its tooltip and accessible name read "Space: Control center". It only runs for users who see the menu.
 - `permissions` (optional): the menu shows to users who have one of them at least. Without, all users see it.
 - `Content`: rendered inside the design system `Menu.Content`, so it renders `Menu.Item`, `Menu.Label` and `Menu.Separator`. Core owns the trigger, the placement, the keyboard and focus, and closing: on Escape, a click outside, or the selection of an item.
 
-Menus show in the order plugins add them. On desktop they sit above the profile menu, and their menu opens to the right of the navigation. On mobile they show in the burger menu, above the profile menu, with their name.
+Add menus in the admin `register`: once the admin renders, adding one throws. Menus show in the order plugins add them. On desktop they sit above the profile menu, and their menu opens to the right of the navigation. On mobile they show in the burger menu, above the profile menu, with their name.
 
 ## Related
 

@@ -30,8 +30,21 @@ interface MainNavMenuArgs {
 
 class MainNav {
   menus: MainNavMenuArgs[] = [];
+  private isLocked = false;
+
+  /**
+   * Called once the admin renders: the navigation reads the registry on every render, so menus
+   * added later would not show until something re-renders it
+   */
+  lock = () => {
+    this.isLocked = true;
+  };
 
   addMenu = (menu: MainNavMenuArgs) => {
+    invariant(
+      !this.isLocked,
+      'Main navigation menus must be added in register, before the admin renders'
+    );
     invariant(menu.id, 'An id must be provided');
     invariant(menu.icon, 'An icon must be provided');
     invariant(menu.intlLabel, 'An intlLabel must be provided');

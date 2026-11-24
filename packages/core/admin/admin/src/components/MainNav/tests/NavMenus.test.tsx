@@ -109,7 +109,8 @@ describe('NavMenus', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
-  it('hides a menu from users without its permissions', async () => {
+  it('hides a menu from users without its permissions, without running its useCurrent', async () => {
+    const useNotHeldCurrent = jest.fn(() => null);
     const mainNav = new MainNav();
     const spaces = {
       icon: Earth,
@@ -126,11 +127,14 @@ describe('NavMenus', () => {
       id: 'not-held',
       intlLabel: { id: 'other.label', defaultMessage: 'Other' },
       permissions: [{ action: 'plugin::spaces.read', subject: null } as never],
+      useCurrent: useNotHeldCurrent,
     });
 
     render(<NavMenus />, { providerOptions: { mainNav } });
 
     expect(await screen.findByRole('button', { name: 'Space' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Other' })).not.toBeInTheDocument();
+    // Nor while the permissions were loading
+    expect(useNotHeldCurrent).not.toHaveBeenCalled();
   });
 });

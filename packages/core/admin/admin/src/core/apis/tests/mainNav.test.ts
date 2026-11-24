@@ -32,4 +32,18 @@ describe('MainNav', () => {
     );
     expect(mainNav.menus).toHaveLength(1);
   });
+
+  it('refuses menus added once the admin has rendered', () => {
+    const mainNav = new MainNav();
+    mainNav.lock();
+
+    expect(() =>
+      mainNav.addMenu({
+        id: 'spaces',
+        icon: Earth,
+        intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
+        Content: () => null,
+      })
+    ).toThrow('Main navigation menus must be added in register');
+  });
 });
