@@ -10,7 +10,10 @@ const prompt = vi.hoisted(() => vi.fn());
 vi.mock('inquirer', () => ({ default: { prompt } }));
 
 const getDotEnvFilename = async (options: Options) => {
-  const database = await getDatabaseInfos(options);
+  const database = await getDatabaseInfos(
+    options,
+    Boolean(options.quickstart || options.nonInteractive)
+  );
   const dotEnv = generateDotEnv({ database } as Scope);
 
   return dotEnv.match(/^DATABASE_FILENAME=(.*)$/m)?.[1];
@@ -54,7 +57,10 @@ describe('getDatabaseInfos', () => {
   ])(
     'keeps a lone --dbfile as a sqlite file without --dbclient (%s)',
     async (_mode, modeOptions) => {
-      const database = await getDatabaseInfos({ ...modeOptions, dbfile: 'db/custom.db' });
+      const database = await getDatabaseInfos(
+        { ...modeOptions, dbfile: 'db/custom.db' },
+        _mode !== 'interactive'
+      );
 
       expect(database).toEqual(
         expect.objectContaining({
@@ -78,10 +84,17 @@ describe('getDatabaseInfos', () => {
   it('still asks for the database interactively without any database option', async () => {
     prompt.mockResolvedValueOnce({ useDefault: true });
 
-    await expect(getDatabaseInfos({})).resolves.toEqual(
+    await expect(getDatabaseInfos({}, false)).resolves.toEqual(
       expect.objectContaining({ client: 'sqlite' })
     );
     expect(prompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not ask for the database when the prompt mode skips the prompts', async () => {
+    await expect(getDatabaseInfos({}, true)).resolves.toEqual(
+      expect.objectContaining({ client: 'sqlite' })
+    );
+    expect(prompt).not.toHaveBeenCalled();
   });
 
   it('still fails when --dbfile comes with network flags but no --dbclient', async () => {
@@ -91,7 +104,7 @@ describe('getDatabaseInfos', () => {
     });
 
     await expect(
-      getDatabaseInfos({ nonInteractive: true, dbhost: 'localhost', dbfile: 'db/custom.db' })
+      getDatabaseInfos({ nonInteractive: true, dbhost: 'localhost', dbfile: 'db/custom.db' }, true)
     ).rejects.toThrow('process.exit(1)');
     expect(console.error).toHaveBeenCalledWith(
       expect.stringContaining('Required database arguments are missing')
