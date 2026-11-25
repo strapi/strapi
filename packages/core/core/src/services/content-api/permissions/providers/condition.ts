@@ -13,7 +13,9 @@ export default (options = {}) => {
 
     async register(condition: Condition) {
       if (strapi.isLoaded) {
-        throw new Error(`You can't register new conditions outside the bootstrap function.`);
+        throw new Error(
+          `You can't register new conditions after Strapi has loaded. Register conditions in a register or bootstrap function.`
+        );
       }
 
       return provider.register(condition.name, condition);

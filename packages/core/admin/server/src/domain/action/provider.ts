@@ -24,7 +24,9 @@ const createActionProvider = (options?: Options) => {
 
   const assertCanRegister = () => {
     if (strapi.isLoaded === true) {
-      throw new Error(`You can't register new actions outside of the bootstrap function.`);
+      throw new Error(
+        `You can't register new actions after Strapi has loaded. Register actions in a register or bootstrap function.`
+      );
     }
 
     if (isLocked === true) {

@@ -138,6 +138,31 @@ const afterCreate =
     });
   };
 
+/**
+ * Once the pool is closed, knex rejects every query with "Unable to acquire a connection". Add
+ * why to that message. Only the rejection changes: a query that gets a connection, for example
+ * after `connection.initialize()` re-created the pool, runs as before.
+ */
+const explainQueriesAfterDestroy = (client: Knex.Client) => {
+  const acquireConnection: () => Promise<unknown> = client.acquireConnection;
+
+  client.acquireConnection = async function acquireConnectionAfterDestroy(this: Knex.Client) {
+    try {
+      return await acquireConnection.call(this);
+    } catch (error) {
+      if (this.pool === undefined) {
+        throw new Error(
+          'Unable to acquire a connection: the database connection was closed by destroy(). ' +
+            'Queries cannot run once the database, or the Strapi instance that owns it, is destroyed.',
+          { cause: error }
+        );
+      }
+
+      throw error;
+    }
+  };
+};
+
 class Database {
   connection: Knex;
 
@@ -165,6 +190,9 @@ class Database {
   private poolDiagnostics?: PoolDiagnostics;
 
   private phase?: string;
+
+  /** Set by `init()`, so `query()` can tell an unknown model from a call made before init. */
+  private isInitialized = false;
 
   constructor(config: DatabaseConfig) {
     this.config = {
@@ -260,12 +288,20 @@ class Database {
     }
 
     this.metadata.loadModels(models);
+    this.isInitialized = true;
     await validateDatabase(this);
     return this;
   }
 
   query(uid: string) {
     if (!this.metadata.has(uid)) {
+      if (this.isInitialized === false) {
+        throw new Error(
+          `Model ${uid} not found: the database is not initialized yet. ` +
+            'Strapi initializes it when the bootstrap phase starts: query models from a bootstrap function or later, not from a register function.'
+        );
+      }
+
       throw new Error(`Model ${uid} not found`);
     }
 
@@ -478,6 +514,7 @@ class Database {
         this.logger.warn('Closing the database connection with transaction hooks still running');
       }
       await this.connection.destroy();
+      explainQueriesAfterDestroy(this.connection.client);
     } catch (error) {
       failedToClose = true;
       closeError = error;

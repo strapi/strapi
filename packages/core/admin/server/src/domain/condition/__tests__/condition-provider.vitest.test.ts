@@ -71,7 +71,7 @@ describe('Condition Provider', () => {
         const register = () => conditionProvider.register(attributes);
 
         await expect(register()).rejects.toThrowError(
-          `You can't register new conditions outside of the bootstrap function.`
+          `You can't register new conditions after Strapi has loaded. Register conditions in a register or bootstrap function.`
         );
       });
 

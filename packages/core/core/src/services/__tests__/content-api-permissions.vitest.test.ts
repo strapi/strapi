@@ -229,24 +229,32 @@ describe('Content API - Permissions', () => {
   });
 
   describe('Providers', () => {
-    test('You should not be able to register action once strapi is loaded', () => {
+    test('You should not be able to register action once strapi is loaded', async () => {
       global.strapi.isLoaded = true;
 
       const contentAPI = createContentAPI(global.strapi);
 
       // Actions
-      expect(() =>
-        contentAPI.permissions.providers.action.register('foo', {})
-      ).rejects.toThrowError(`You can't register new actions outside the bootstrap function.`);
+      await expect(contentAPI.permissions.providers.action.register('foo', {})).rejects.toThrow(
+        new Error(
+          "You can't register new actions after Strapi has loaded. Register actions in a register or bootstrap function."
+        )
+      );
 
       // Conditions
-      expect(() =>
+      await expect(
         contentAPI.permissions.providers.condition.register({ name: 'myCondition' })
-      ).rejects.toThrowError(`You can't register new conditions outside the bootstrap function.`);
+      ).rejects.toThrow(
+        new Error(
+          "You can't register new conditions after Strapi has loaded. Register conditions in a register or bootstrap function."
+        )
+      );
 
       // Register Actions
-      expect(() => contentAPI.permissions.registerActions()).rejects.toThrowError(
-        `You can't register new actions outside the bootstrap function.`
+      await expect(contentAPI.permissions.registerActions()).rejects.toThrow(
+        new Error(
+          "You can't register new actions after Strapi has loaded. Register actions in a register or bootstrap function."
+        )
       );
     });
   });

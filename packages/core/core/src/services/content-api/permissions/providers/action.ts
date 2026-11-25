@@ -8,7 +8,9 @@ export default (options = {}) => {
 
     async register(action: string, payload: Record<string, unknown>) {
       if (strapi.isLoaded) {
-        throw new Error(`You can't register new actions outside the bootstrap function.`);
+        throw new Error(
+          `You can't register new actions after Strapi has loaded. Register actions in a register or bootstrap function.`
+        );
       }
 
       return provider.register(action, payload);

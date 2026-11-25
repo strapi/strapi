@@ -202,8 +202,7 @@ describe('Database pool timeout diagnostics', () => {
 
     await database.destroy();
 
-    expect(
-      Object.prototype.hasOwnProperty.call(database.connection.client, 'acquireConnection')
-    ).toBe(false);
+    // Only the wrapper that explains queries made after destroy() remains
+    expect(database.connection.client.acquireConnection.name).toBe('acquireConnectionAfterDestroy');
   });
 });
