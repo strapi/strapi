@@ -75,7 +75,9 @@ export type PolicyConfigFor<TName extends RegisteredPolicyName> =
  */
 export type PolicyMap = IsStrict extends false
   ? Record<string, Policy>
-  : RegisteredRecord<{ [TName in RegisteredPolicyName]: Policy<PolicyConfigFor<TName>> }, Policy>;
+  : Readonly<
+      RegisteredRecord<{ [TName in RegisteredPolicyName]: Policy<PolicyConfigFor<TName>> }, Policy>
+    >;
 
 /**
  * A name accepted by `strapi.policy(name)`. Runtime resolves it as an exact name, so relative

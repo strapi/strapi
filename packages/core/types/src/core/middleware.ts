@@ -50,9 +50,11 @@ export type MiddlewareConfigFor<TName extends RegisteredMiddlewareName> =
  */
 export type MiddlewareMap = IsStrict extends false
   ? Record<string, MiddlewareFactory>
-  : RegisteredRecord<
-      { [TName in RegisteredMiddlewareName]: MiddlewareFactory<MiddlewareConfigFor<TName>> },
-      MiddlewareFactory<unknown>
+  : Readonly<
+      RegisteredRecord<
+        { [TName in RegisteredMiddlewareName]: MiddlewareFactory<MiddlewareConfigFor<TName>> },
+        MiddlewareFactory<unknown>
+      >
     >;
 
 /**

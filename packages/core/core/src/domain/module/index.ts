@@ -25,7 +25,7 @@ export interface RawModule {
   // Registered as is: the registries call a factory once, with `{ strapi }`.
   controllers?: Record<string, ControllerFactory>;
   services?: Record<string, ServiceFactory>;
-  contentTypes?: Core.Module['contentTypes'];
+  contentTypes?: Core.RawModuleInput['contentTypes'];
   policies?: Core.Module['policies'];
   middlewares?: Core.Module['middlewares'];
   // `createModule` awaits the result: a lifecycle may be synchronous.

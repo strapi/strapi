@@ -3,7 +3,7 @@ import type { Core } from '@strapi/types';
 import type { RawModule } from '../domain/module';
 
 const apisRegistry = (strapi: Core.Strapi) => {
-  const apis: Record<string, unknown> = {};
+  const apis: Record<string, Core.RegisteredModule> = {};
 
   return {
     get(name: string) {
