@@ -10,6 +10,11 @@ export interface Join {
   rootTable?: string;
   on?: Record<string, any>;
   orderBy?: Record<string, 'asc' | 'desc'>;
+  /** Model whose scopes apply. On a join table, the target, so a hidden target drops the link */
+  uid?: string;
+  /** Column that holds the `uid` ids. Defaults to id */
+  idColumn?: string;
+  scope?: Knex.Raw;
 }
 
 interface JoinOptions {
@@ -39,6 +44,8 @@ const createPivotJoin = (
     rootColumn: joinTable.joinColumn.referencedColumn,
     rootTable: alias,
     on: joinTable.on,
+    uid: targetMeta.uid,
+    idColumn: joinTable.inverseJoinColumn.name,
   });
 
   const subAlias = refAlias || qb.getAlias();
@@ -81,6 +88,7 @@ const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: Joi
           [morphColumn.typeColumn.name]: uid,
           ...morphColumn.on,
         },
+        uid: targetMeta.uid,
       });
 
       return subAlias;
@@ -99,6 +107,8 @@ const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: Joi
           [joinTable.morphColumn.typeColumn.name]: uid,
           field: attributeName,
         },
+        uid: targetMeta.uid,
+        idColumn: joinTable.joinColumn.name,
       });
 
       const subAlias = refAlias || qb.getAlias();
@@ -127,6 +137,7 @@ const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: Joi
       referencedColumn: joinColumn.referencedColumn,
       rootColumn: joinColumn.name,
       rootTable: alias,
+      uid: targetMeta.uid,
     });
     return subAlias;
   }
@@ -151,6 +162,7 @@ const applyJoin = (qb: Knex.QueryBuilder, join: Join) => {
     rootTable, // = qb.alias
     on,
     orderBy,
+    scope,
   } = join;
 
   qb[method](`${referencedTable} as ${alias}`, (inner) => {
@@ -160,6 +172,10 @@ const applyJoin = (qb: Knex.QueryBuilder, join: Join) => {
       for (const key of Object.keys(on)) {
         inner.onVal(`${alias}.${key}`, on[key]);
       }
+    }
+
+    if (scope) {
+      inner.andOn(scope);
     }
   });
 

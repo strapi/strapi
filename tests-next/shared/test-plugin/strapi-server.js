@@ -12,7 +12,14 @@
  * - POST /rate-limit { enabled }  turn the admin login rate limit on or off
  * - POST /transfer-token          make sure the test transfer token exists (CLI transfer tests)
  * - GET  /features                feature flags and license features, to gate tests on them
+ * - GET  /config?path=a.b         a config value, to check what the config scaffolders wrote
  * - GET  /ai/calls, DELETE /ai/calls   what the fake AI translations provider received
+ * - GET  /boot                    an id of the running worker, to tell whether Strapi restarted
+ * - POST /db/probe                write the probe row if missing: `created: true` means the
+ *                                  database didn't have it, so a reset happened
+ * - POST /db/snapshot             SQLite snapshot of the live DB (lib/sqlite-snapshot.js)
+ * - POST /db/restore              restore it, without a restart
+ * - POST /seed <SeedPlan>         run the seeders in the running server (lib/seed.js)
  *
  * With `STRAPI_TEST_AI_PROVIDER=fake`, registers a fake AI translations provider. Strapi only
  * accepts a custom provider in EE with the `cms-byok-ai` license feature, and otherwise
@@ -22,6 +29,11 @@
 const constants = require('./constants.json');
 const { isLoopbackAddress } = require('./lib/loopback');
 const { createFakeAiTranslationsProvider } = require('./lib/fake-ai-provider');
+const sqliteSnapshot = require('./lib/sqlite-snapshot');
+const { runSeed } = require('./lib/seed');
+
+/** Changes on every worker start, so a restart can be told apart from the previous worker. */
+const BOOT_ID = `${process.pid}-${Date.now()}`;
 
 const isEnabled = () => process.env[constants.envVar] === 'true';
 
@@ -76,8 +88,14 @@ module.exports = {
         route('POST', '/rate-limit', 'setRateLimit'),
         route('POST', '/transfer-token', 'ensureTransferToken'),
         route('GET', '/features', 'features'),
+        route('GET', '/config', 'config'),
         route('GET', '/ai/calls', 'aiCalls'),
         route('DELETE', '/ai/calls', 'clearAiCalls'),
+        route('GET', '/boot', 'boot'),
+        route('POST', '/db/probe', 'probeDb'),
+        route('POST', '/db/snapshot', 'snapshotDb'),
+        route('POST', '/db/restore', 'restoreDb'),
+        route('POST', '/seed', 'seed'),
       ],
     },
   },
@@ -123,11 +141,66 @@ module.exports = {
         };
       },
 
+      config(ctx) {
+        const { path } = ctx.query;
+        if (typeof path !== 'string' || path === '') {
+          return ctx.badRequest('Expected ?path=<config path>');
+        }
+        ctx.body = { value: strapi.config.get(path) ?? null };
+      },
+
       aiCalls(ctx) {
         ctx.body = {
           registered: fakeAiRegistered,
           calls: fakeAi.calls,
         };
+      },
+
+      boot(ctx) {
+        ctx.body = { bootId: BOOT_ID };
+      },
+
+      async probeDb(ctx) {
+        // One row in Strapi's core store, a table every app has.
+        const probe = { type: 'plugin', name: 'tests', key: 'probe' };
+        const exists = (await strapi.store.get(probe)) !== null;
+        if (!exists) {
+          await strapi.store.set({ ...probe, value: true });
+        }
+        ctx.body = { created: !exists };
+      },
+
+      async snapshotDb(ctx) {
+        if (!sqliteSnapshot.isSqlite(strapi)) {
+          return ctx.badRequest('Snapshots are SQLite only: reset other databases before boot.');
+        }
+        const start = process.hrtime.bigint();
+        await sqliteSnapshot.snapshot(strapi);
+        ctx.body = { ms: Number(process.hrtime.bigint() - start) / 1e6 };
+      },
+
+      async restoreDb(ctx) {
+        if (!sqliteSnapshot.isSqlite(strapi)) {
+          return ctx.badRequest('Snapshots are SQLite only: reset other databases before boot.');
+        }
+        if (!sqliteSnapshot.hasSnapshot(strapi)) {
+          return ctx.badRequest('No snapshot: call POST /api/tests/db/snapshot first.');
+        }
+        const start = process.hrtime.bigint();
+        await sqliteSnapshot.restoreSql(strapi);
+        ctx.body = { ms: Number(process.hrtime.bigint() - start) / 1e6 };
+      },
+
+      async seed(ctx) {
+        try {
+          ctx.body = await runSeed(strapi, ctx.request.body ?? {});
+        } catch (error) {
+          // A seed error is a test setup mistake: return it whole instead of a bare 500.
+          ctx.status = 400;
+          ctx.body = {
+            error: { name: error.name, message: error.message, details: error.details },
+          };
+        }
       },
 
       clearAiCalls(ctx) {

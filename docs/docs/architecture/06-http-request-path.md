@@ -62,6 +62,8 @@ In the bootstrap phase, `server.initMiddlewares()` reads the `middlewares` confi
 | `strapi::favicon`   | Serves the favicon.                                                                                                                                    |
 | `strapi::public`    | Registers two routes: `GET /` redirects to the admin URL, and a `GET` route serves the `public` folder (except `/uploads`).                            |
 
+`strapi::body` answers a multipart request whose files add up to more than `formidable.maxFileSize` (formidable's default is 200 MiB) with a 413 `PayloadTooLargeError`. formidable 2.x counts the file bytes of the whole request, not of each file. Its message is `FileTooBig` and its details are `{ code: 'FileTooBig', limit }`, with the limit in bytes. This happens before any route runs, so it also caps uploads that the upload plugin `sizeLimit` would accept.
+
 Without a `middlewares` config, Strapi uses the same list with `strapi::session` before `strapi::query`. The boot fails if `strapi::errors`, `strapi::security`, `strapi::cors`, `strapi::query`, `strapi::body`, `strapi::public` or `strapi::favicon` is missing. `strapi::compression`, `strapi::ip`, `strapi::responseTime` and `strapi::responses` exist but are not in the default list.
 
 :::note
@@ -228,6 +230,7 @@ The `strapi::errors` middleware in [`middlewares/errors.ts`](https://github.com/
 - If no middleware set a status, it responds 404.
 - An `ApplicationError` from `@strapi/utils` gets its status from its class: `UnauthorizedError` 401, `ForbiddenError` and `PolicyError` 403, `NotFoundError` 404, `PayloadTooLargeError` 413, `RateLimitError` 429, `NotImplementedError` 501, and 400 for the others, such as `ValidationError`.
 - An `http-errors` error keeps its status.
+- A database input error from `@strapi/database` (`InvalidBooleanError`, `InvalidDateError`, `InvalidDateTimeError`, `InvalidTimeError` or `InvalidRelationError`) answers 400 as a `ValidationError` and is not logged. These errors reach the middleware from routes that call `strapi.db.query` directly, for example `filters[flag][$eq]=no` on a boolean. The list is in [`utils/database-input-errors.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/database-input-errors.ts).
 - Any other error is logged. If it carries a 4xx status, the status and message are kept. Otherwise the response has a generic message and status 500 (or the 5xx status of the error), so internal details do not leak.
 
 `strapi::errors` and the error helpers on `ctx` write the same body: `{ data: null, error: { status, name, message, details } }`. A controller that sets `ctx.body` directly can use another shape.

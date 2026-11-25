@@ -1,55 +1,71 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { Core } from '@strapi/strapi';
 
 import sentryMiddleware from '../sentry';
 
-const sendError = vi.fn();
+const STRAPI_VERSION = '5.0.0';
+
+type Middleware = (ctx: unknown, next: () => Promise<void>) => Promise<void>;
 
 const setup = () => {
-  let middleware: (ctx: unknown, next: () => Promise<unknown>) => Promise<unknown>;
-
-  const strapi = {
-    plugin: () => ({
-      service: () => ({
-        init: vi.fn(),
-        getInstance: () => ({ Handlers: { parseRequest: vi.fn() } }),
-        sendError,
-      }),
+  const scope = { addEventProcessor: vi.fn(), setTag: vi.fn() };
+  const sentryService = {
+    init: vi.fn(),
+    getInstance: vi.fn(() => ({ Handlers: { parseRequest: vi.fn() } })),
+    sendError: vi.fn((_error: Error, configureScope: (s: typeof scope) => void) => {
+      configureScope(scope);
     }),
-    server: {
-      use(fn: typeof middleware) {
-        middleware = fn;
-      },
+  };
+  let middleware: Middleware | undefined;
+  const info = { strapi: STRAPI_VERSION };
+  const strapi = {
+    // Mirrors the config provider: the startup copy as own keys, plus `get` over the live tree
+    config: {
+      info,
+      get: vi.fn((key: string) => (key === 'info.strapi' ? info.strapi : undefined)),
     },
-    config: { info: { strapi: '5.0.0' } },
-  } as any;
+    plugin: vi.fn(() => ({ service: vi.fn(() => sentryService) })),
+    server: {
+      use: vi.fn((fn: Middleware) => {
+        middleware = fn;
+      }),
+    },
+  };
 
-  sentryMiddleware({ strapi });
+  sentryMiddleware({ strapi: strapi as unknown as Core.Strapi });
 
-  const ctx = { method: 'GET', _matchedRoute: '/x', request: {} };
-
-  return (error: unknown) =>
-    middleware(ctx, async () => {
-      throw error;
-    });
+  return { scope, sentryService, getMiddleware: () => middleware! };
 };
 
 describe('Sentry middleware', () => {
-  beforeEach(() => {
-    sendError.mockClear();
-  });
-
-  it('sends the errors of a request to Sentry and rethrows them', async () => {
+  it('tags errors sent to Sentry with the Strapi version', async () => {
+    const { scope, sentryService, getMiddleware } = setup();
     const error = new Error('boom');
+    const ctx = { method: 'GET', _matchedRoute: '/api/articles', request: {} };
 
-    await expect(setup()(error)).rejects.toBe(error);
-    expect(sendError).toHaveBeenCalledTimes(1);
+    await expect(
+      getMiddleware()(ctx, async () => {
+        throw error;
+      })
+    ).rejects.toBe(error);
+
+    expect(sentryService.sendError).toHaveBeenCalledWith(error, expect.any(Function));
+    expect(scope.setTag).toHaveBeenCalledWith('strapi_version', STRAPI_VERSION);
+    expect(scope.setTag).toHaveBeenCalledWith('transaction', 'GET /api/articles');
   });
 
   it('does not send a QueryAbortedError (the client left), and still rethrows it', async () => {
+    const { sentryService, getMiddleware } = setup();
     const error = new Error('The request was aborted before the query completed');
     error.name = 'QueryAbortedError';
+    const ctx = { method: 'GET', _matchedRoute: '/api/articles', request: {} };
 
-    await expect(setup()(error)).rejects.toBe(error);
-    expect(sendError).not.toHaveBeenCalled();
+    await expect(
+      getMiddleware()(ctx, async () => {
+        throw error;
+      })
+    ).rejects.toBe(error);
+
+    expect(sentryService.sendError).not.toHaveBeenCalled();
   });
 });

@@ -160,8 +160,13 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
       }
 
       // There was a previous file and an new file was uploaded
-      // Remove the previous file
-      strapi.plugin('upload').provider.delete(previousSettings[inputName]);
+      // Remove the previous file. A failed delete only leaves an orphan file in the storage:
+      // log it rather than failing the settings update or leaving an unhandled rejection.
+      try {
+        await strapi.plugin('upload').provider.delete(previousSettings[inputName]);
+      } catch (error) {
+        strapi.log.warn(`Could not delete the previous ${inputName} file`, { error });
+      }
     })
   );
 };
@@ -203,13 +208,13 @@ const updateProjectSettings = async (
     ]);
   });
 
-  // No await to proceed asynchronously
-  deleteOldFiles({ previousSettings, newSettings });
-
   await store.set({
     key: 'project-settings',
     value: { ...previousSettings, ...newSettings },
   });
+
+  // Delete the replaced files once the new settings are saved
+  await deleteOldFiles({ previousSettings, newSettings });
 
   const changes = getProjectSettingsChanges(previousSettings, newSettings);
 

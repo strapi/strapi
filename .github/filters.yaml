@@ -35,6 +35,7 @@ e2e:
   - 'tests/scripts/run-tests.js'
   - 'tests/e2e/**'
   - 'playwright.base.config.js'
+  - 'tests/fixtures.ts'
   - 'tests/utils/**'
   - 'tests/helpers/**'
   - 'tests/app-template/**'

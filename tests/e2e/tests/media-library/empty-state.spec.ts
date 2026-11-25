@@ -1,4 +1,5 @@
-import { test, expect, type APIRequestContext } from '@playwright/test';
+import { type APIRequestContext } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import path from 'path';
 
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';

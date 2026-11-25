@@ -6,6 +6,15 @@ const ctService = ctServiceFactory();
 
 const { ApplicationError } = errors;
 
+const constants = { default: { READ_ACTION: 'read', CREATE_ACTION: 'create' } };
+
+// `global.strapi = …` (tests/setup/unit.setup.js) resolves `strapi.service('admin::x')` from
+// `strapi.admin.services.x`. Assign `strapi.service` afterwards to mock the services registry.
+const mockAdminServices = (services: Record<string, unknown>) =>
+  jest.fn((uid: string) =>
+    uid.startsWith('admin::') ? services[uid.slice('admin::'.length)] : undefined
+  ) as any;
+
 describe('i18n - Controller - content-types', () => {
   describe('getNonLocalizedAttributes', () => {
     beforeEach(() => {
@@ -132,7 +141,7 @@ describe('i18n - Controller - content-types', () => {
 
       global.strapi.db.query = () => ({ findOne }) as any;
       global.strapi.contentType = contentType as any;
-      global.strapi.admin.services.permission = { findMany };
+      global.strapi.service = mockAdminServices({ constants, permission: { findMany } });
       const ctx: any = {
         state: { user: { roles: [{ id: 1 }, { id: 2 }] } },
         request: {
@@ -160,6 +169,41 @@ describe('i18n - Controller - content-types', () => {
           { id: 1, locale: 'en', publishedAt: '2021-03-30T09:34:54.042Z' },
         ],
       });
+    });
+
+    test('reads permissions from the services registry, so admin service extensions apply', async () => {
+      const model = {
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          name: { type: 'string' },
+          description: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+        },
+      };
+      const entity = { id: 1, name: 'Pizza', description: 'Pizza', locale: 'en' };
+      // The services registry returns the extended service; `strapi.admin.services` keeps the
+      // original one, because `extend()` writes only to the registry
+      const originalFindMany = jest.fn(() =>
+        Promise.resolve([{ properties: { fields: ['name'], locales: ['fr'] } }])
+      );
+      const extendedFindMany = jest.fn(() => Promise.resolve([]));
+
+      global.strapi.db.query = () => ({ findOne: jest.fn(() => Promise.resolve(entity)) }) as any;
+      global.strapi.contentType = jest.fn(() => model) as any;
+      global.strapi.admin.services.permission = { findMany: originalFindMany };
+      global.strapi.service = mockAdminServices({
+        constants,
+        permission: { findMany: extendedFindMany },
+      });
+      const ctx: any = {
+        state: { user: { roles: [{ id: 1 }] } },
+        request: { body: { model: 'api::country.country', id: 1, locale: 'fr' } },
+      };
+
+      await controller.getNonLocalizedAttributes(ctx);
+
+      expect(extendedFindMany).toHaveBeenCalledTimes(1);
+      expect(originalFindMany).not.toHaveBeenCalled();
+      expect(ctx.body.nonLocalizedFields).toEqual({});
     });
   });
 });
