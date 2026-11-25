@@ -111,6 +111,11 @@ export interface ServicesRegistry {
   get(uid: string): Service | undefined;
   getAll(namespace?: string): Record<string, Service>;
   set(uid: string, service: ServiceFactoryInput): ServicesRegistry;
+  /**
+   * Registers the raw admin services map, `strapi.admin.services`, whose values are `unknown` with
+   * strict types. Throws when a service of the namespace is already registered.
+   */
+  add(namespace: 'admin::', services: Record<string, unknown> | undefined): ServicesRegistry;
   /** Throws when a service of the namespace is already registered. */
   add(
     namespace: string,

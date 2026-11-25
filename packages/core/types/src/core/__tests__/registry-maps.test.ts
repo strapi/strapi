@@ -110,8 +110,9 @@ if (typeof policy === 'function') {
 
 // Unregistered service keys, literal or dynamic, resolve to `unknown`, like `strapi.service(uid)`:
 // they have no contract. Other unregistered keys keep the legacy types: an index signature cannot
-// close literal keys while keeping dynamic keys open, unlike the singular lookups. The raw admin
-// services keep the legacy service: `strapi.admin` is not built from the registries.
+// close literal keys while keeping dynamic keys open, unlike the singular lookups. `strapi.admin` is
+// the declaration of `@strapi/admin`: its raw services, such as factories, resolve to `unknown`;
+// `strapi.service('admin::<name>')` resolves their contracts.
 const unregisteredService = strapi.services['plugin::map-lab.unregistered'];
 const dynamicService = strapi.services[dynamicKey];
 const dynamicController = strapi.controllers[dynamicKey];
@@ -134,8 +135,8 @@ declare const open: [
   Expect<Equal<typeof unregisteredPluginService, unknown>>,
   Expect<Equal<typeof dynamicPluginService, unknown>>,
   Expect<Equal<typeof unregisteredApiService, unknown>>,
-  Expect<Equal<typeof adminService, Service>>,
-  Expect<Equal<typeof adminServices, Record<string, Service>>>,
+  Expect<Equal<typeof adminService, unknown>>,
+  Expect<Equal<typeof adminServices, Record<string, unknown>>>,
   Expect<Equal<(typeof strapi.admin)['controllers'], Record<string, Controller>>>,
   Expect<Equal<(typeof strapi.admin)['config'], Record<string, unknown>>>,
   Expect<Equal<typeof unregisteredPlugin, Plugin>>,

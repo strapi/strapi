@@ -398,9 +398,7 @@ export interface Module extends ModuleOf<string> {}
  * The admin module, `strapi.admin`, with strict types enabled. `strapi.admin` is the declaration
  * that `@strapi/admin/strapi-server` exports, not a module built by `@strapi/core`: `@strapi/core`
  * registers its entries under `admin::` and calls its lifecycles with `{ strapi }`. It has no
- * lookups and its `config` is the declared config object. Its `services` map holds the raw entries,
- * such as the `homepage` and `debug-dump` factories, not the instances registered under `admin::`:
- * use `strapi.service('admin::<name>')` to resolve a registered contract.
+ * lookups and its `config` is the declared config object.
  */
 export interface AdminModule {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
@@ -408,7 +406,12 @@ export interface AdminModule {
   register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   config: Record<string, unknown>;
   routes: Record<string, Router>;
-  services: Record<string, Service>;
+  /**
+   * The raw admin service entries, such as the `homepage` and `debug-dump` factories, not the
+   * instances registered under `admin::`, so their values are `unknown`. Use
+   * `strapi.service('admin::<name>')` for typed access.
+   */
+  services: Record<string, unknown>;
   controllers: Record<string, Controller>;
   policies: Record<string, Policy>;
   middlewares: Record<string, MiddlewareHandler | MiddlewareFactory<unknown>>;
