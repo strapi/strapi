@@ -99,8 +99,7 @@ export interface Strapi extends Container {
           // snapshot); returns the limit the feature enforces.
           get: (
             feature?:
-              | string
-              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+              string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
           ) => unknown;
         }>;
       }) => void;
@@ -193,8 +192,8 @@ export interface Strapi extends Container {
   ): TSchemaUID extends UID.ContentType
     ? Schema.ContentType<TSchemaUID>
     : TSchemaUID extends UID.Component
-    ? Schema.Component<TSchemaUID>
-    : never;
+      ? Schema.Component<TSchemaUID>
+      : never;
   /**
    * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
    */

@@ -9,7 +9,7 @@ const hoursAgo = (hours: number) => new Date(Date.parse(NOW) - hours * HOUR).toI
 // Two hours before NOW
 const COUNT = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
 
-const createStrapi = (get: () => Promise<unknown>) => ({ store: { get: vi.fn(get) } } as any);
+const createStrapi = (get: () => Promise<unknown>) => ({ store: { get: vi.fn(get) } }) as any;
 
 describe('getAdminUsersAcrossInstances', () => {
   beforeEach(() => {

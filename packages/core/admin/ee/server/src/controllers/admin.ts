@@ -147,7 +147,7 @@ export default {
             feature,
             available,
             limits: available
-              ? activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? []
+              ? (activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? [])
               : [],
           };
         }
@@ -158,7 +158,7 @@ export default {
           feature,
           available: Boolean(retainedFeature),
           limits: retainedFeature
-            ? retainedEntitlements.find((entry) => entry.feature === feature)?.limits ?? []
+            ? (retainedEntitlements.find((entry) => entry.feature === feature)?.limits ?? [])
             : [],
         };
       }),
