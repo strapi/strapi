@@ -85,8 +85,9 @@ interface AddAssetMenuProps {
  * trigger itself goes when nothing is left to offer, rather than opening an
  * empty menu.
  *
- * The drop zone below keeps working whatever this shows — it is a second way
- * in, not the only one.
+ * The drop zone does not depend on what this shows: it is a second way in for
+ * files. It is disabled without the create permission, and a single field that
+ * already holds an asset renders none.
  */
 export const AddAssetMenu = ({
   disabled = false,
