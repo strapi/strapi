@@ -75,17 +75,6 @@ export interface MediaLibraryInputProps {
 
 const EMPTY_ATTRIBUTE: NonNullable<MediaLibraryInputProps['attribute']> = {};
 
-/**
- * The Content Manager's `media` field, on the current Media Library stack.
- *
- * Files dropped here (or picked from the device) upload straight through
- * `uploadFiles`, which is what drives the global upload progress dialog — so the
- * entry form stays usable while they go, instead of being covered by the legacy
- * wizard.
- *
- * The legacy input is still registered when `useLegacyMediaLibrary` is on, and
- * is untouched by this.
- */
 export const MediaLibraryInput = ({
   name,
   label,
@@ -112,22 +101,17 @@ export const MediaLibraryInput = ({
 
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
-  // Echoes the app config; a missing payload (still loading) falls back to
-  // sequential rather than outpacing what the server asked for.
+
   const { isLoading, canRead, canCreate } = useMediaLibraryPermissions();
-  // Not while permissions load: `useRBAC` starts with every flag false, and an
-  // upload sent before it settles can end in a 403.
+
   const canUpload = !isLoading && canCreate;
+
   const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
 
   const assets: File[] = Array.isArray(value) ? value : value ? [value] : [];
 
-  // An upload resumes long after the render that started it, and the dialog is
-  // non-blocking precisely so a second batch can be dropped meanwhile. Reading
-  // the closed-over `assets` on resume would then append to whatever the field
-  // held when that drop began, dropping every asset that landed since.
   const assetsRef = useRef(assets);
   assetsRef.current = assets;
 
@@ -136,6 +120,7 @@ export const MediaLibraryInput = ({
       onChange(name, nextAssets.length > 0 ? nextAssets : null);
       return;
     }
+
     onChange(name, nextAssets[0] ?? null);
   };
 
@@ -143,18 +128,23 @@ export const MediaLibraryInput = ({
     setAssets(assets.filter((current) => current.id !== asset.id));
   };
 
-  // Bound to the form, not to this input: a component collapsed mid-upload
-  // unmounts the field, and the file must still land on the entry.
+  /**
+   * Attach an uploaded file to the form while preserving writes that have not
+   * yet been rendered by React.
+   */
   const attachUploadedFile = (file: File) => {
     const writes = unrenderedWrites.get(getValues) ?? new Map();
     unrenderedWrites.set(getValues, writes);
 
     const value = get(getValues(), name);
     const pending = writes.get(name);
+
     const current = pending && pending.seen === value ? pending.written : toAssets(value);
+
     const next = multiple ? [...current, file] : [file];
 
     writes.set(name, { seen: value, written: next });
+
     setAssets(next);
   };
 
@@ -185,34 +175,20 @@ export const MediaLibraryInput = ({
     });
   };
 
-  /**
-   * Opens only when no drawer is open, in this field or another. Pressing a row's
-   * button is a press outside the open drawer, which closes it — or, with unsaved
-   * edits, asks first. Opening on the click that follows would put a second
-   * drawer, or a new asset, under that question and drop the edits it is asking
-   * about.
-   */
   const handleEdit = (asset: File) => {
     if (!isAnyAssetDetailsOpen()) {
       setEditedAssetId(asset.id);
     }
   };
 
-  // The drawer saves to the library itself; the field holds its own copy of the
-  // asset, so it takes the server's after every change. Read from the ref: the
-  // drawer reports after a request, by which time this render's `assets` may
-  // be stale.
   const handleAssetChange = (changedAsset: AssetWithPopulatedCreatedBy) => {
     setAssets(
       assetsRef.current.map((current) =>
-        // The populated `createdBy` is the one shape difference, and the entry
-        // only keeps the asset's id on save.
         current.id === changedAsset.id ? (changedAsset as unknown as File) : current
       )
     );
   };
 
-  // Deleting from the library leaves nothing for the field to point at.
   const handleAssetDelete = (id: number) => {
     setAssets(assetsRef.current.filter((current) => current.id !== id));
   };
@@ -228,8 +204,6 @@ export const MediaLibraryInput = ({
       timeout: 4000,
       message: formatMessage(
         {
-          // Legacy key: translated everywhere, and it names the accepted types,
-          // which the field already passes as `fileTypes`.
           id: getTranslationKey('input.notification.not-supported'),
           defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,
         },
@@ -238,11 +212,6 @@ export const MediaLibraryInput = ({
     });
   };
 
-  /**
-   * True when the batch is more than a single-value field can take. Counted on
-   * what was handed in rather than on what survives filtering: uploading one of
-   * several would leave the user guessing which one the field kept.
-   */
   const rejectsBatch = (count: number) => {
     if (multiple || count <= 1) {
       return false;
@@ -265,8 +234,6 @@ export const MediaLibraryInput = ({
       return;
     }
 
-    // The device picker can't reach this — it carries `multiple` — so a drop is
-    // the only way in.
     if (rejectsBatch(files.length)) {
       return;
     }
@@ -278,8 +245,6 @@ export const MediaLibraryInput = ({
       return;
     }
 
-    // A mixed drop uploads what it can and says so, rather than silently
-    // dropping the rest.
     if (allowedFiles.length < files.length) {
       notifyUnsupported();
     }
@@ -289,7 +254,9 @@ export const MediaLibraryInput = ({
       acc[type] = (acc[type] ?? 0) + 1;
       return acc;
     }, {});
+
     trackUsage('didSelectFile', { source: 'computer', location: CONTENT_MANAGER_LOCATION });
+
     trackUsage('willAddMediaLibraryAssets', {
       location: CONTENT_MANAGER_LOCATION,
       ...assetsCountByType,
@@ -298,13 +265,11 @@ export const MediaLibraryInput = ({
     startUpload(allowedFiles);
   };
 
-  /**
-   * Hands the files to the shared upload pool. The field picks the results up
-   * from `onFileUploaded`, which also runs for retries of the same rows.
-   */
   const startUpload = (allowedFiles: globalThis.File[]) => {
     const formData = new FormData();
+
     allowedFiles.forEach((file) => formData.append('files', file));
+
     formData.append(
       'fileInfo',
       JSON.stringify(
@@ -330,18 +295,19 @@ export const MediaLibraryInput = ({
   const handleRetry = (upload: FieldUpload) => retry(upload, (file) => startUpload([file]));
 
   /**
-   * The server fetches each URL and uploads what it finds, so the file's type
-   * is not known here — `allowedTypes` can only be enforced on what comes back.
-   * A URL whose file the field does not accept is uploaded to the library and
-   * left off the field, which is also what the Media Library page does with it.
+   * Upload files from URLs and attach them using the same form-state mechanism
+   * as device uploads.
    */
   const handleUrlUpload = async (urls: string[]) => {
-    if (disabled || urls.length === 0 || rejectsBatch(urls.length)) {
+    if (disabled || !canUpload || urls.length === 0 || rejectsBatch(urls.length)) {
       return;
     }
 
     trackUsage('didSelectFile', { source: 'url', location: CONTENT_MANAGER_LOCATION });
-    trackUsage('willAddMediaLibraryAssets', { location: CONTENT_MANAGER_LOCATION });
+
+    trackUsage('willAddMediaLibraryAssets', {
+      location: CONTENT_MANAGER_LOCATION,
+    });
 
     try {
       const { data: uploadedFiles } = await uploadFromUrls({
@@ -353,6 +319,8 @@ export const MediaLibraryInput = ({
       const allowedFiles = uploadedFiles.filter((file) =>
         isMediaTypeAllowed(allowedTypes, file.mime)
       );
+
+      // FIX: Correctly identify files that were uploaded but cannot be attached.
       const notAttachedFiles = uploadedFiles.filter((file) => !allowedFiles.includes(file));
 
       if (notAttachedFiles.length > 0) {
@@ -374,8 +342,9 @@ export const MediaLibraryInput = ({
         });
       }
 
-      if (allowedFiles.length > 0) {
-        setAssets(multiple ? [...assetsRef.current, ...allowedFiles] : [allowedFiles[0]]);
+      // Attach through the shared mechanism to avoid stale form-state updates.
+      for (const file of allowedFiles) {
+        attachUploadedFile(file);
       }
     } catch {
       // Errors reach the user through the progress dialog, which the mutation
@@ -384,11 +353,8 @@ export const MediaLibraryInput = ({
   };
 
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // Copied before the reset, not after: `event.target.files` is the input's
-    // live FileList, and clearing `value` empties it in place. Reading it
-    // afterwards yields nothing and the upload never starts.
     const files = Array.from(event.target.files ?? []);
-    // Reset so picking the same file twice in a row still fires `change`.
+
     event.target.value = '';
 
     if (files.length > 0) {
@@ -417,8 +383,6 @@ export const MediaLibraryInput = ({
     };
 
     if (!multiple) {
-      // A replacement in flight, or one that failed, stands in for the current
-      // asset until it lands or is removed.
       if (uploads.length > 0) {
         return (
           <Flex direction="column" alignItems="stretch" gap={2}>
@@ -434,7 +398,6 @@ export const MediaLibraryInput = ({
           asset={assets[0]}
           disabled={disabled}
           onCopyLink={handleCopyLink}
-          // The details drawer fetches the asset from the library, which needs read access.
           onEdit={canRead ? handleEdit : undefined}
           onRemove={handleRemove}
         />
@@ -464,6 +427,7 @@ export const MediaLibraryInput = ({
     <Field.Root name={name} error={error} hint={hint} required={required}>
       <Flex justifyContent="space-between" alignItems="center" gap={2}>
         <Field.Label action={labelAction}>{label}</Field.Label>
+
         <AddAssetMenu
           disabled={disabled}
           preventOpen={isAnyDrawerOpen}
