@@ -1,6 +1,7 @@
 import {
   sanitize,
   validate,
+  routesOf,
   sanitizeRoutesMapForSerialization,
   ALLOWED_QUERY_PARAM_KEYS,
   RESERVED_INPUT_PARAM_KEYS,
@@ -206,9 +207,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
     const routesMap: Record<string, Core.Route[]> = {};
 
     for (const [apiName, api] of Object.entries(strapi.apis)) {
-      const routes = Object.values(api.routes)
-        .flatMap((route) => ('routes' in route ? route.routes : route))
-        .filter(filterContentAPI);
+      const routes = Object.values(api.routes).flatMap(routesOf).filter(filterContentAPI);
 
       if (routes.length === 0) {
         continue;
@@ -226,7 +225,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
 
       const pluginRoutes = Array.isArray(plugin.routes)
         ? plugin.routes
-        : Object.values(plugin.routes).flatMap((route) => route.routes);
+        : Object.values(plugin.routes).flatMap(routesOf);
 
       const routes = pluginRoutes.map(transformPrefix).filter(filterContentAPI);
 
