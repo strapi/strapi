@@ -147,10 +147,7 @@ describe('updateDocument', () => {
      */
     const state = result.current.store.getState() as {
       adminApi: {
-        queries: Record<
-          string,
-          { endpointName?: string; data?: typeof documentResponse }
-        >;
+        queries: Record<string, { endpointName?: string; data?: typeof documentResponse }>;
       };
     };
     const cachedDocument = Object.values(state.adminApi.queries).find(
