@@ -1,6 +1,6 @@
 import type * as Core from '..';
 import type { ControllerHandler } from '../controller';
-import type { Middleware, MiddlewareFactory, MiddlewareHandler } from '../middleware';
+import type { MiddlewareFactory, MiddlewareHandler } from '../middleware';
 import type { ModuleOf } from '../module';
 import type { Plugin } from '../plugin';
 import type { RouteConfigFor, RouteInput } from '../route';
@@ -153,14 +153,11 @@ contextual satisfies unknown;
 const apiAudit = strapi.api('middleware-lab').middleware('audit');
 const apiUnregistered = strapi.api('middleware-lab').middleware('unregistered');
 const apiExplicit = strapi.api('middleware-lab').middleware<LabFactory>('unregistered');
-// Modules other than APIs, such as `strapi.admin`, keep the legacy middleware.
-const adminModuleMiddleware = strapi.admin.middleware('middlewareLab');
 declare const apiLookupChecks: [
   Expect<Equal<typeof apiAudit, MiddlewareFactory<{ channel: string }>>>,
   Expect<Equal<typeof apiAudit, ModuleOf<'api::middleware-lab'>['middlewares']['audit']>>,
   Expect<Equal<typeof apiUnregistered, unknown>>,
   Expect<Equal<typeof apiExplicit, LabFactory>>,
-  Expect<Equal<typeof adminModuleMiddleware, Middleware>>,
 ];
 apiLookupChecks satisfies unknown;
 

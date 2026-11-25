@@ -223,10 +223,7 @@ strapi.api('type-lab').service<{ count(): number }>('greeting').count() satisfie
 // @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
 const contextualApi: GreetingService = strapi.api('type-lab').service('unregistered');
 contextualApi satisfies unknown;
-// Modules other than APIs, such as `strapi.admin`, keep the legacy lookups.
-strapi.admin.service('type-lab').anything();
-const contextualAdmin: GreetingService = strapi.admin.service('type-lab');
-contextualAdmin satisfies GreetingService;
+// `strapi.admin` has no lookups (`loaded-module.test.ts`): use `strapi.service('admin::<name>')`.
 
 // `ServiceFactory` checks a factory against the registered contract, application overrides first.
 (({ strapi: instance }) => ({

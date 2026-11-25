@@ -235,8 +235,6 @@ const dynamicApi = strapi.api(dynamicName).policy('hasRole');
 const unregisteredApi = strapi.api('unregistered').policy('hasRole');
 const apiExplicit = strapi.api('policy-lab').policy<LabPolicy>('unregistered');
 const apiExplicitRegistered = strapi.api('policy-lab').policy<LabPolicy>('hasRole');
-// Modules other than APIs, such as `strapi.admin`, keep the legacy policy.
-const adminModulePolicy = strapi.admin.policy('policyLab');
 declare const apiLookupChecks: [
   Expect<Equal<typeof apiHasRole, Policy<{ apiRole: string }>>>,
   Expect<Equal<typeof apiHasRole, ModuleOf<'api::policy-lab'>['policies']['hasRole']>>,
@@ -247,7 +245,6 @@ declare const apiLookupChecks: [
   Expect<Equal<typeof unregisteredApi, unknown>>,
   Expect<Equal<typeof apiExplicit, LabPolicy>>,
   Expect<Equal<typeof apiExplicitRegistered, LabPolicy>>,
-  Expect<Equal<typeof adminModulePolicy, Policy>>,
 ];
 apiLookupChecks satisfies unknown;
 // @ts-expect-error `T` is not inferred from the annotation, for API lookups either.

@@ -48,7 +48,9 @@ export type ControllerLookupName = SuggestedString<RegisteredControllerUID, UID.
  */
 export type ControllerMap = IsStrict extends false
   ? Record<string, Controller>
-  : RegisteredRecord<{ [TUID in RegisteredControllerUID]: ControllerFor<TUID> }, Controller>;
+  : Readonly<
+      RegisteredRecord<{ [TUID in RegisteredControllerUID]: ControllerFor<TUID> }, Controller>
+    >;
 
 /**
  * A UID accepted by {@link ControllerFactory}. With strict types enabled, only registered UIDs: a
