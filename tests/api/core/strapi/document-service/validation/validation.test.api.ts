@@ -242,6 +242,20 @@ describe('Document Service Validations', () => {
         expectValidResult(result, methodName);
       });
 
+      it('should not throw on private attribute in nested populate fields', async () => {
+        const result = await callMethod(methodName, {
+          populate: { createdBy: { fields: ['email', 'password'] } },
+        });
+        expectValidResult(result, methodName);
+      });
+
+      it('should not throw on nested populate fields', async () => {
+        const result = await callMethod(methodName, {
+          populate: { categories: { fields: ['name'] } },
+        });
+        expectValidResult(result, methodName);
+      });
+
       it('should not throw on wildcard *', async () => {
         const result = await callMethod(methodName, {
           populate: '*',
