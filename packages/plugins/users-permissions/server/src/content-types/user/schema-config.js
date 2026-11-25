@@ -8,8 +8,21 @@ module.exports = {
     confirmationToken: {
       hidden: true,
     },
+  },
+  metadatas: {
     provider: {
-      hidden: true,
+      edit: {
+        label: 'provider',
+        description: '',
+        placeholder: '',
+        visible: false,
+        editable: false,
+      },
+      list: {
+        label: 'provider',
+        searchable: true,
+        sortable: true,
+      },
     },
   },
 };
