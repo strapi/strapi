@@ -18,13 +18,14 @@ import {
   statSync,
 } from 'node:fs';
 import { createServer } from 'node:http';
-import { join } from 'node:path';
+import { resolve, sep } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 const [dir = '.nx/remote-cache', port = '4555'] = process.argv.slice(2);
 const token = process.env.NX_SELF_HOSTED_REMOTE_CACHE_ACCESS_TOKEN;
 
-mkdirSync(dir, { recursive: true });
+const root = resolve(dir);
+mkdirSync(root, { recursive: true });
 
 const server = createServer(async (req, res) => {
   const match = /^\/v1\/cache\/([A-Za-z0-9]+)$/.exec(req.url ?? '');
@@ -39,7 +40,11 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const file = join(dir, match[1]);
+  const file = resolve(root, match[1]);
+  if (file.startsWith(root + sep) === false) {
+    res.writeHead(400).end();
+    return;
+  }
 
   try {
     if (req.method === 'GET') {
