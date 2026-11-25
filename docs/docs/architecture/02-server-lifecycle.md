@@ -129,22 +129,6 @@ The sync hooks run in steps 5 and 9, before module `bootstrap`. Add sync hook ha
 
 Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootstrap` runs, the webhook runner has not read the stored webhooks, the cron service has not started, and the admin `bootstrap` has not run.
 
-## Module routes by phase
-
-The `routes` member of a plugin, an API or the admin changes shape in `server.initRouting()` (bootstrap step 11):
-
-| Module                     | Until `initRouting()`                                                                                      | After `initRouting()`                                                                                                                       |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Plugin with a router map   | As declared: each entry is a router object or a factory. Core plugins use factories that expose `.routes`. | A new map of built routers. Strapi calls each factory once with `{ strapi }`. Router objects are kept and get `type` and `prefix` defaults. |
-| Plugin with a routes array | The array.                                                                                                 | The same array.                                                                                                                             |
-| Plugin without routes      | `[]`. All plugins without routes share one array instance.                                                 | The same shared array.                                                                                                                      |
-| API                        | A map keyed by file name in `routes/`, or `[]` without a `routes/` folder.                                 | A new map of built routers, all with `type: 'content-api'`. `[]` becomes `{}`.                                                              |
-| Admin                      | As declared by `@strapi/admin`.                                                                            | A new map of built routers.                                                                                                                 |
-
-`initRouting()` also sets `route.info` (`{ pluginName }` or `{ apiName }`) on each route, and the route manager adds `info.type`. A route added to a module after `initRouting()` has no `info` and is never served.
-
-A router from `createCoreRouter()` builds its route list on the first read of `.routes`, from the content type at that moment. A read in a `register` function freezes the routes before other plugins extend the content type.
-
 ## Start and listen
 
 `strapi.start()` calls `load()` if `strapi.isLoaded` is `false`. Then it calls `listen()`. `listen()` uses `server.socket` if it is set. Otherwise it uses `server.host` and `server.port`.
@@ -176,6 +160,22 @@ A second `destroy()` waits for the shutdown already in progress. After that shut
 `strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files, with two exceptions. If that `destroy()` throws, the worker sends `stop` to the primary and exits with code 1. A failure in `start()` never reaches this path, because develop does not await `start()`: `start()` calls `stopWithError()` itself. If `destroy()` throws during a restart, the worker sends neither `killed` nor `stop` and does not exit by itself: what happens next depends on how the process handles the unhandled rejection. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
 
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
+
+## Module routes by phase
+
+The `routes` member of a plugin, an API or the admin changes shape in `server.initRouting()` (bootstrap step 11):
+
+| Module                     | Until `initRouting()`                                                                                      | After `initRouting()`                                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Plugin with a router map   | As declared: each entry is a router object or a factory. Core plugins use factories that expose `.routes`. | A new map of built routers. Strapi calls each factory once with `{ strapi }`. Router objects are kept and get `type` and `prefix` defaults. |
+| Plugin with a routes array | The array.                                                                                                 | The same array.                                                                                                                             |
+| Plugin without routes      | `[]`. All plugins without routes share one array instance.                                                 | The same shared array.                                                                                                                      |
+| API                        | A map keyed by file name in `routes/`, or `[]` without a `routes/` folder.                                 | A new map of built routers, all with `type: 'content-api'`. `[]` becomes `{}`.                                                              |
+| Admin                      | As declared by `@strapi/admin`.                                                                            | A new map of built routers.                                                                                                                 |
+
+`initRouting()` also sets `route.info` (`{ pluginName }` or `{ apiName }`) on each route, and the route manager adds `info.type`. A route added to a module after `initRouting()` has no `info` and is never served.
+
+A router from `createCoreRouter()` builds its route list on the first read of `.routes`, from the content type at that moment. A read in a `register` function freezes the routes before other plugins extend the content type.
 
 ## Registry maps
 
