@@ -53,6 +53,4 @@ Inside a `map`, write the tag type with `as const`, for example `{ type: 'Asset'
 ## Uploads
 
 - `updateAsset` and `replaceAsset` in `services/assets.ts` build a `FormData` in `query` and use the default base query. They send one request and need no progress.
-- `uploadFiles` in `services/api.ts` sends new files. Its `queryFn` sends one XHR request per file (`services/uploadFileViaXHR.ts`) through a worker pool. The `concurrency` argument sets the number of parallel requests, 1 by default. Files added while a batch is in flight join that batch and keep its concurrency. XHR exposes `upload.onprogress`, which gives the progress of each file. The progress goes to the `uploadProgress` slice in `store/uploadProgress.ts`, which the upload progress dialog reads.
-- `uploadFromUrls` imports files from URLs. It sends the URLs as a JSON body with `fetch` and reads the response as a stream of server-sent events, not through XHR.
-- `uploadFileSilently` uploads one file without the upload progress dialog. `AssetDetails` uses it in `handleCropSaveAsCopy` to save a cropped copy.
+- `uploadFiles`, `uploadFromUrls`, `uploadFileSilently`, `retryCancelledFiles` and `retryUploadFile` in `services/api.ts` use a `queryFn` instead. They send one XHR request per file, or read a stream of server-sent events for URL imports. All but `uploadFileSilently` report progress to the `uploadProgress` slice. [Uploads](./04-uploads.md) describes them.

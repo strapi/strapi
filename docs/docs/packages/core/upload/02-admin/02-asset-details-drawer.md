@@ -60,7 +60,7 @@ Closing removes the parameter, so closing is a navigation. The next section reli
 
 When the user confirms, the blocker lets the navigation through by itself. Its `onProceed` also resets the form. The form stays mounted during the slide-out, and while it is modified it would block the next navigation and keep the unload and session expiry warnings active.
 
-The second guard keeps the dirty state in a ref because only the close handlers read it, so a change of the dirty state does not re-render the drawer. The ref and `requestClose` live in `AssetDetailsDrawer`, above `<Form>`, so a small component rendered inside the function child of `<Form>` reports the state up (see [Forms](./02-forms.md)). The confirmation dialog renders inside the panel, so Radix counts presses on it as inside.
+The second guard keeps the dirty state in a ref because only the close handlers read it, so a change of the dirty state does not re-render the drawer. The ref and `requestClose` live in `AssetDetailsDrawer`, above `<Form>`, so a small component rendered inside the function child of `<Form>` reports the state up (see [Forms](./03-forms.md)). The confirmation dialog renders inside the panel, so Radix counts presses on it as inside.
 
 Only `<Blocker>` warns when the user reloads or closes the tab, and when the session expires. The field uses the second guard, so it has neither warning.
 
@@ -88,5 +88,5 @@ The Delete and Replace buttons read their functions and pending flags from `Asse
 
 ## Related
 
-- [Forms](./02-forms.md): the form inside the drawer.
-- [Testing](./04-testing.md): page objects and locators for the drawer.
+- [Forms](./03-forms.md): the form inside the drawer.
+- [Testing](./08-testing.md): page objects and locators for the drawer.

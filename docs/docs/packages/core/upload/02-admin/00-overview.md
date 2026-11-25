@@ -63,8 +63,8 @@ Put new work in the current tree, not in `legacy/`. Before you remove a file fro
 - **A component for one feature of the page**: `pages/Assets/components/<Feature>/`.
 - **A component that several surfaces share**: `components/`, like the `Drawer` shell. Some shared components still live with the page: the media field imports `AssetDetailsDrawer` and `ImportFromUrlDialog` from `pages/Assets/components/`.
 - **A hook**: `hooks/` when the page and the field share it, `pages/Assets/hooks/` when only the page uses it.
-- **An endpoint**: a file in `services/`. See [Data fetching](./03-data-fetching.md).
-- **Tests**: a `tests/` folder next to the code. See [Testing](./04-testing.md).
+- **An endpoint**: a file in `services/`. See [Data fetching](./07-data-fetching.md).
+- **Tests**: a `tests/` folder next to the code. See [Testing](./08-testing.md).
 - **Translations**: `translations/en.json`. Keys are flat and scoped by feature, for example `asset-details.replace.success`. Read them with `getTranslationKey` from `utils/translations.ts`, which adds the `upload.` prefix.
 
 ## Layout pitfall: the global image reset
@@ -73,7 +73,11 @@ The design system's global style sets `max-width: 100%` on `img`. This reset cla
 
 ## Pages in this section
 
-- [Asset details drawer](./01-asset-details-drawer.md): the drawer shell, stacking, URL state, unsaved edits and in-drawer feedback.
-- [Forms](./02-forms.md): reading form state, the save baseline and save gating.
-- [Data fetching](./03-data-fetching.md): the API slice, cache tags, endpoint names and uploads.
-- [Testing](./04-testing.md): unit tests, the two end-to-end suites, and what jsdom cannot catch.
+- [Asset list](./01-asset-list.md): list state, search, filters, sort, infinite loading, selection and folders.
+- [Asset details drawer](./02-asset-details-drawer.md): the drawer shell, stacking, URL state, unsaved edits and in-drawer feedback.
+- [Forms](./03-forms.md): reading form state, the save baseline and save gating.
+- [Uploads](./04-uploads.md): entry points, the upload requests, the progress store and dialog, and AI metadata.
+- [Media field and picker](./05-media-field-and-picker.md): the Content Manager `media` field and the picker of the rich text editors.
+- [Drag and drop](./06-drag-and-drop.md): moving assets and folders, drop rules, and the keyboard alternative.
+- [Data fetching](./07-data-fetching.md): the API slice, cache tags, endpoint names and upload endpoints.
+- [Testing](./08-testing.md): unit tests, the two end-to-end suites, and what jsdom cannot catch.

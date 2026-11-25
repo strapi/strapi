@@ -71,7 +71,7 @@ CI runs the suites in two jobs of [`.github/workflows/tests.yml`](https://github
 
 `useLegacyMediaLibrary` becomes the `USE_LEGACY_MEDIA_LIBRARY` variable, which `tests/app-template/config/features.js` reads. The admin UI gets the flag when it is built, not when the server starts. `yarn test:e2e` rebuilds the admin on every run, so the variable takes effect. If you run Playwright again against an existing test app, it keeps the UI of the last build.
 
-Both jobs run on Chromium only. The comment on the jobs in `tests.yml` gives the reason: the drag and drop helper builds a `DataTransfer`, which the suite cannot use on WebKit.
+Both jobs run on Chromium only. The comment on the jobs in `tests.yml` gives the reason: the upload helper `uploadFilesWithDragAndDrop` in `AssetsPage.ts` builds a `DataTransfer` to drop files, which the suite cannot use on WebKit. The helpers that move items by drag and drop use `page.mouse` and do not need it.
 
 ### Run the suites locally
 

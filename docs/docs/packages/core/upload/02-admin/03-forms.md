@@ -7,7 +7,7 @@ tags:
 
 # Forms
 
-The Media Library uses `Form`, `useForm` and `useField` from `@strapi/admin/strapi-admin`. The form of the [asset details drawer](./01-asset-details-drawer.md), `AssetDetails` in [`AssetDetailsDrawer.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/components/AssetDetails/AssetDetailsDrawer.tsx), is the reference for the patterns below.
+The Media Library uses `Form`, `useForm` and `useField` from `@strapi/admin/strapi-admin`. The form of the [asset details drawer](./02-asset-details-drawer.md), `AssetDetails` in [`AssetDetailsDrawer.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/components/AssetDetails/AssetDetailsDrawer.tsx), is the reference for the patterns below.
 
 ## Read form state inside the form
 

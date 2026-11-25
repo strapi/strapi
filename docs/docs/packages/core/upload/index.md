@@ -59,7 +59,7 @@ A provider can return `true` from `isPrivate()` and implement `getSignedUrl(file
 
 The admin entry adds the Media Library menu link and its settings page, registers the `media` field input, and registers the `media-library` dialog component. `bootstrap` on the server registers the permission actions, for example `plugin::upload.assets.create`, and the webhook events. The redesigned Media Library is the default. The `useLegacyMediaLibrary` key in `config/features` selects the legacy one from `admin/src/legacy`.
 
-The [Admin](./02-admin/00-overview.md) pages document the admin code: its layout, the [asset details drawer](./02-admin/01-asset-details-drawer.md), [forms](./02-admin/02-forms.md), [data fetching](./02-admin/03-data-fetching.md) and [testing](./02-admin/04-testing.md).
+The [Admin](./02-admin/00-overview.md) pages document the admin code: its layout, the [asset list](./02-admin/01-asset-list.md), the [asset details drawer](./02-admin/02-asset-details-drawer.md), [forms](./02-admin/03-forms.md), [uploads](./02-admin/04-uploads.md), the [media field and picker](./02-admin/05-media-field-and-picker.md), [drag and drop](./02-admin/06-drag-and-drop.md), [data fetching](./02-admin/07-data-fetching.md) and [testing](./02-admin/08-testing.md).
 
 ## Related
 
