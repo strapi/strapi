@@ -117,6 +117,19 @@ const createMockAsset = (id: number, name: string, mime = 'image/png', ext = '.p
   updatedAt: '2024-01-01T00:00:00.000Z',
 });
 
+const createMockFormat = (url: string) => ({
+  name: url,
+  hash: url,
+  ext: '.jpg',
+  mime: 'image/jpeg',
+  path: null,
+  width: 500,
+  height: 500,
+  size: 10,
+  sizeInBytes: 10240,
+  url,
+});
+
 const mockAssets: File[] = [
   createMockAsset(1, 'image1.png'),
   createMockAsset(2, 'image2.png'),
@@ -280,6 +293,60 @@ describe('AssetsGrid', () => {
         asset.formats = null;
         setup({ assets: [asset] });
         expect(screen.getByRole('img')).toBeInTheDocument();
+      });
+
+      it('offers the small format as the 2x candidate so HiDPI screens are not upscaled', () => {
+        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
+        asset.formats = {
+          thumbnail: createMockFormat('/uploads/thumb_test.jpg'),
+          small: createMockFormat('/uploads/small_test.jpg'),
+        };
+        setup({ assets: [asset] });
+
+        const img = screen.getByRole('img');
+        expect(img).toHaveAttribute('src', expect.stringContaining('/uploads/thumb_test.jpg'));
+        expect(img).toHaveAttribute(
+          'srcset',
+          expect.stringMatching(/\/uploads\/small_test\.jpg\S* 2x$/)
+        );
+      });
+
+      it('does not set srcset when the small format was not generated', () => {
+        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
+        asset.formats = { thumbnail: { url: '/uploads/thumb_test.jpg' } };
+        setup({ assets: [asset] });
+
+        expect(screen.getByRole('img')).not.toHaveAttribute('srcset');
+      });
+
+      it('does not set srcset when there is no thumbnail, as the original is already the largest', () => {
+        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
+        asset.formats = { small: createMockFormat('/uploads/small_test.jpg') };
+        setup({ assets: [asset] });
+
+        expect(screen.getByRole('img')).not.toHaveAttribute('srcset');
+      });
+
+      it('cache-busts the small 2x candidate too, but not when the URL is signed', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          formats: {
+            thumbnail: createMockFormat('/uploads/thumb_test.jpg'),
+            small: createMockFormat('/uploads/small_test.jpg'),
+          },
+          updatedAt: '2024-05-06T00:00:00.000Z',
+        };
+        const version = `v=${new Date(asset.updatedAt).getTime()}`;
+
+        const { unmount } = setup({ assets: [asset] });
+        expect(screen.getByRole('img')).toHaveAttribute('srcset', expect.stringContaining(version));
+        unmount();
+
+        setup({ assets: [{ ...asset, isUrlSigned: true }] });
+        expect(screen.getByRole('img')).toHaveAttribute(
+          'srcset',
+          expect.not.stringContaining('v=')
+        );
       });
 
       it('cache-busts the thumbnail with updatedAt so a replaced image refetches (CMS-1237)', () => {

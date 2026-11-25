@@ -720,6 +720,124 @@ describe('Admin Token Role Sync (api)', () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // T5 — User or role deleted with a `where` that has no `id`
+  // ---------------------------------------------------------------------------
+
+  describe('T5 — Deleted by a field other than id', () => {
+    test('T5-1 Delete user by email → user and its admin tokens are gone', async () => {
+      const utils = createUtils(strapi);
+      const email = 'sync-delete-by-email@test.com';
+
+      const user = await utils.createUser({
+        email,
+        firstname: 'DeleteByEmail',
+        lastname: 'User',
+        isActive: true,
+        roles: [roleA.id],
+      });
+
+      try {
+        const rq = await createAuthRequest({ strapi, userInfo: { email } as any });
+        const createRes = await rq({
+          url: '/admin/admin-tokens',
+          method: 'POST',
+          body: {
+            name: 'sync-delete-by-email-token',
+            adminPermissions: [
+              { action: SYNC_ACTION, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+            ],
+          },
+        });
+        expect(createRes.status).toBe(201);
+        const token = createRes.body.data;
+
+        await strapi.db.query('admin::user').delete({ where: { email } });
+
+        expect(await strapi.db.query('admin::user').findOne({ where: { id: user.id } })).toBeNull();
+        expect(
+          await strapi.db.query('admin::api-token').findOne({ where: { id: token.id } })
+        ).toBeNull();
+      } finally {
+        const remaining = await strapi.db.query('admin::user').findOne({ where: { id: user.id } });
+        if (remaining !== null) {
+          await strapi.db
+            .query('admin::api-token')
+            .deleteMany({ where: { adminUserOwner: { id: user.id } } });
+          await strapi.db.query('admin::user').delete({ where: { id: user.id } });
+        }
+      }
+    });
+
+    test('T5-2 Delete role by code → its users’ token permissions are re-synced', async () => {
+      const utils = createUtils(strapi);
+      const email = 'sync-delete-role-by-code@test.com';
+
+      const tempRoleDeleted = await utils.createRole({
+        name: 'sync-temp-role-deleted-by-code',
+        description: 'Temp role that will be deleted by code',
+      });
+
+      try {
+        // roleA keeps SYNC_ACTION and the admin-tokens actions; only the deleted role grants SYNC_ACTION_2
+        await utils.assignPermissionsToRole(roleA.id, [
+          { action: SYNC_ACTION, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+        await utils.assignPermissionsToRole(tempRoleDeleted.id, [
+          { action: SYNC_ACTION_2, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+        ]);
+
+        const tempUser = await utils.createUser({
+          email,
+          firstname: 'Temp',
+          lastname: 'SyncUser',
+          isActive: true,
+          roles: [roleA.id, tempRoleDeleted.id],
+        });
+
+        try {
+          const tempRq = await createAuthRequest({ strapi, userInfo: { email } as any });
+          const createRes = await tempRq({
+            url: '/admin/admin-tokens',
+            method: 'POST',
+            body: {
+              name: 'sync-temp-token-role-by-code',
+              adminPermissions: [
+                { action: SYNC_ACTION, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+                { action: SYNC_ACTION_2, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+              ],
+            },
+          });
+          expect(createRes.status).toBe(201);
+          const tempToken = createRes.body.data;
+
+          // Same bypass as T3-1, so the lifecycles fire while tempUser still holds the role
+          await strapi.db
+            .query('admin::permission')
+            .deleteMany({ where: { role: { id: tempRoleDeleted.id } } });
+          await strapi.db.query('admin::role').delete({ where: { code: tempRoleDeleted.code } });
+
+          expect(
+            await strapi.db.query('admin::role').findOne({ where: { id: tempRoleDeleted.id } })
+          ).toBeNull();
+          const actions = (await getAdminPermissionsFromDB(tempToken.id)).map((p) => p.action);
+          expect(actions).toContain(SYNC_ACTION);
+          expect(actions).not.toContain(SYNC_ACTION_2);
+        } finally {
+          await utils.deleteUserById(tempUser.id);
+        }
+      } finally {
+        const remaining = await strapi.db
+          .query('admin::role')
+          .findOne({ where: { id: tempRoleDeleted.id } });
+        if (remaining !== null) {
+          await strapi.db.query('admin::role').delete({ where: { id: tempRoleDeleted.id } });
+        }
+      }
+    });
+  });
+
   /**
    * Token permissions stored under an earlier rule, or edited while the server was down, are
    * re-clamped to the owner's ceiling when the server starts, without a role or user change.

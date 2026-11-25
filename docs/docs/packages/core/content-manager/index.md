@@ -42,7 +42,22 @@ The edit view response holds only a count for each relation field, and the relat
 
 ### History and preview
 
-`server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost. The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). Both folders carry their own `LICENSE` file.
+`server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost.
+
+History records the writes made through the Content Manager routes. Each version stores the source of the write, and the versions list shows it as a tag:
+
+| Source        | Write made with                              |
+| ------------- | -------------------------------------------- |
+| `admin-panel` | An admin panel session                       |
+| `admin-api`   | An admin token on the Content Manager routes |
+
+Each version also stores a reference to its author: a type, and the model and document id of the author record. An admin panel write is attributed to the admin. An admin token write is attributed to the token, not to its owner. The versions list shows the current name of the author. A version of a deleted admin shows "Deleted user", and a version of a deleted token shows "Deleted token". The reference stays on the version after a delete. A document id is never given to another record, so the reference never points to a newer author.
+
+The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead.
+
+Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`.
+
+The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). The `history` and `preview` folders carry their own `LICENSE` file.
 
 ## Related
 

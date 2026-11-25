@@ -103,7 +103,7 @@ const assertLocalRefsResolve = (document: unknown) => {
 };
 
 describe('zodToOpenAPI', () => {
-  it('strips the $id emitted by Zod 4.4.3 registry conversion with uri', () => {
+  it('strips the $id emitted by Zod registry conversion with uri', () => {
     const schemaStore = createTestContentAPISchemaRegistry();
     const zodSchema = z.object({ name: z.string() });
     const probeRegistry = z.registry<z.core.GlobalMeta>();

@@ -7,7 +7,8 @@ const HEAP_LIMIT_MB = 1024;
 export const COMPILE_TIMEOUT_MS = 60_000;
 
 /**
- * Type-checks the fixture in `resources/<fixtureName>` on its own, with a capped heap
+ * Type-checks the fixture in `resources/<fixtureName>` on its own, with a capped heap.
+ * An absolute fixture path is used as is.
  */
 export const compileFixture = (fixtureName: string, compilerArgs: string[] = []) => {
   const result = spawnSync(
@@ -16,7 +17,7 @@ export const compileFixture = (fixtureName: string, compilerArgs: string[] = [])
       `--max-old-space-size=${HEAP_LIMIT_MB}`,
       TSC_PATH,
       '--project',
-      path.join(__dirname, 'resources', fixtureName, 'tsconfig.json'),
+      path.resolve(__dirname, 'resources', fixtureName, 'tsconfig.json'),
       '--extendedDiagnostics',
       ...compilerArgs,
     ],

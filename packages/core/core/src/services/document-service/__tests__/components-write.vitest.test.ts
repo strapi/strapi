@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, type Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { updateComponents, deleteComponents, isComponentUnchanged } from '../components';
 
 const PAGE_UID = 'api::page.page';
@@ -426,6 +426,173 @@ describe('updateComponents', () => {
 
       expect(queries[LEGACY_UID].delete).toHaveBeenCalledWith({ where: { id: '30' } });
       expect(result.zone.map((block: any) => block.id)).toEqual([1, 20]);
+    });
+  });
+
+  describe('repeated component id', () => {
+    const stored = {
+      [PAGE_UID]: {
+        10: {
+          links: [link(1, 'a'), link(2, 'b')],
+          hero: link(3, 'hero'),
+          sections: [{ id: 20, title: 's' }],
+          zone: [
+            { id: 1, __component: LINK_UID, title: 'a', image: null },
+            { id: 1, __component: SECTION_UID, title: 's' },
+          ],
+        },
+      },
+      [SECTION_UID]: { 20: { links: [link(4, 'c'), link(5, 'd')] } },
+    };
+
+    const expectRejected = async (data: Record<string, unknown>, path: string[]) => {
+      const queries = setup(stored);
+
+      await expect(updateComponents(PAGE_UID, page, data as any)).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: `The component id 1 appears more than once in ${path.slice(0, -2).join('.')}`,
+        details: { errors: [{ path, name: 'ValidationError', value: 1 }] },
+      });
+
+      // rejected before anything is read or written
+      for (const query of Object.values(queries)) {
+        if (typeof query === 'object' && 'load' in query) {
+          expect(query.load).not.toHaveBeenCalled();
+          expect(query.update).not.toHaveBeenCalled();
+          expect(query.create).not.toHaveBeenCalled();
+          expect(query.delete).not.toHaveBeenCalled();
+        }
+      }
+    };
+
+    it('rejects an id sent twice in a repeatable component', async () => {
+      await expectRejected({ links: [linkInput(1, 'a'), linkInput(1, 'b')] }, ['links', '1', 'id']);
+    });
+
+    it('rejects the same id sent as a number and as a string', async () => {
+      await expectRejected({ links: [linkInput(2, 'b'), { id: '1' }, { id: 1 }] }, [
+        'links',
+        '2',
+        'id',
+      ]);
+    });
+
+    it('rejects an id sent twice for the same type in a dynamic zone', async () => {
+      await expectRejected(
+        {
+          zone: [
+            { __component: LINK_UID, ...linkInput(1, 'a') },
+            { __component: LINK_UID, ...linkInput(1, 'b') },
+          ],
+        },
+        ['zone', '1', 'id']
+      );
+    });
+
+    it('rejects an id sent twice in a nested list, naming its full path', async () => {
+      await expectRejected(
+        { sections: [{ id: 20, links: [linkInput(4, 'c'), linkInput(1, 'x'), { id: 1 }] }] },
+        ['sections', '0', 'links', '2', 'id']
+      );
+    });
+
+    describe('in a single component', () => {
+      beforeEach(() => {
+        models[PAGE_UID].attributes.single = { type: 'component', component: SECTION_UID };
+      });
+
+      afterEach(() => {
+        delete models[PAGE_UID].attributes.single;
+      });
+
+      it('rejects an id sent twice in a list nested in an updated single component', async () => {
+        // a list nested in a single component is named without an index for the single component
+        await expectRejected({ single: { id: 20, links: [{ id: 1 }, { id: 1 }] } }, [
+          'single',
+          'links',
+          '1',
+          'id',
+        ]);
+      });
+
+      it('accepts ids sent twice in a list nested in a created single component', async () => {
+        const queries = setup(stored);
+
+        await updateComponents(PAGE_UID, page, {
+          single: { title: 'new', links: [linkInput(1, 'x'), linkInput(1, 'y')] },
+        } as any);
+
+        // creating a component drops the ids nested in it
+        expect(queries[SECTION_UID].create).toHaveBeenCalledTimes(1);
+        expect(queries[LINK_UID].create).toHaveBeenCalledTimes(2);
+        expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+      });
+    });
+
+    it('rejects an id sent twice in a list nested in a dynamic zone', async () => {
+      await expectRejected(
+        { zone: [{ __component: SECTION_UID, id: 1, links: [{ id: 1 }, { id: 1 }] }] },
+        ['zone', '0', 'links', '1', 'id']
+      );
+    });
+
+    it('accepts ids sent twice in a list nested in a created repeatable item', async () => {
+      const queries = setup(stored);
+
+      await updateComponents(PAGE_UID, page, {
+        sections: [{ title: 'new', links: [linkInput(1, 'x'), linkInput(1, 'y')] }],
+      } as any);
+
+      expect(queries[SECTION_UID].create).toHaveBeenCalledTimes(1);
+      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(2);
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+    });
+
+    it('accepts ids sent twice in a list nested in a created dynamic zone item', async () => {
+      const queries = setup(stored);
+
+      await updateComponents(PAGE_UID, page, {
+        zone: [{ __component: SECTION_UID, title: 'new', links: [{ id: 1 }, { id: 1 }] }],
+      } as any);
+
+      expect(queries[SECTION_UID].create).toHaveBeenCalledTimes(1);
+      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(2);
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+    });
+
+    it('accepts the same id for two types of a dynamic zone', async () => {
+      const queries = setup(stored);
+
+      await updateComponents(PAGE_UID, page, {
+        zone: [
+          { __component: LINK_UID, ...linkInput(1, 'a') },
+          { __component: SECTION_UID, id: 1, title: 's' },
+        ],
+      } as any);
+
+      expect(queries[PAGE_UID].load).toHaveBeenCalledTimes(1);
+    });
+
+    it('accepts the same id in different lists', async () => {
+      const queries = setup(stored);
+
+      // each id is checked against the list it belongs to, after this check
+      await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a'), linkInput(2, 'b')],
+        sections: [{ id: 20, title: 's', links: [linkInput(4, 'c'), linkInput(5, 'd')] }],
+      } as any);
+
+      expect(queries[PAGE_UID].load).toHaveBeenCalledTimes(2);
+    });
+
+    it('accepts items without an id that hold the same data', async () => {
+      const queries = setup(stored);
+
+      await updateComponents(PAGE_UID, page, {
+        links: [linkInput(undefined, 'same'), linkInput(undefined, 'same')],
+      } as any);
+
+      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(2);
     });
   });
 });
