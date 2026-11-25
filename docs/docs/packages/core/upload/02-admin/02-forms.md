@@ -11,12 +11,12 @@ The Media Library uses `Form`, `useForm` and `useField` from `@strapi/admin/stra
 
 ## Read form state inside the form
 
-`useForm` reads the form context. The context has default values, so a call outside `<Form>` does not throw. It returns the defaults instead, and `modified` stays `false` forever. A save button gated on that value never enables.
+`useForm` reads the form context, and the context has default values. Outside `<Form>`, reading the state does not throw: it returns the defaults, and `modified` stays `false` forever. A save button gated on that value never enables. Calling an action of the default context, such as `onChange` or `resetForm`, throws.
 
 The component that renders `<Form>` is outside the context. It reads the state through the function child of `Form`:
 
 ```tsx
-<Form initialValues={initialValues} onSubmit={handleSubmit}>
+<Form method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
   {({ modified, isSubmitting, values, resetForm }) => (
     <>
       <FormBody />
@@ -28,7 +28,13 @@ The component that renders `<Form>` is outside the context. It reads the state t
 </Form>
 ```
 
-`Form` passes `modified`, `disabled`, `onChange`, the form state (`values`, `errors`, `isSubmitting`), `setErrors` and `resetForm`. Components rendered inside `<Form>` can call `useForm` directly. For example, `DetailField` reads `isSubmitting` with `useForm`.
+`method` is required. `Form` passes `modified`, `disabled`, `onChange`, the form state (`values`, `errors`, `isSubmitting`), `setErrors` and `resetForm`. Components rendered inside `<Form>` can call `useForm` directly. For example, `DetailField` reads `isSubmitting` with `useForm`.
+
+The same rule applies to `<Blocker>`. It reads `modified` with `useForm`, so render it inside `<Form>`. Outside the form, it sees `false` and never blocks.
+
+## Update fields with the path form of `onChange`
+
+Call `onChange(name, value)` with the field path and the value. Do not pass the change event. The event form turns `''` into `null`, so a field that starts as `''` stays modified after the user types a character and deletes it. `DetailField` calls `field.onChange(name, value)` for this reason.
 
 ## Keep `initialValues` stable
 
@@ -48,7 +54,7 @@ The save button is disabled when any of these is true:
 
 - `!modified`: there are no edits.
 - `isSubmitting`: the mutation is in flight.
-- The file name is empty. The check trims the value, so a name made of spaces counts as empty. The API rejects a blank name.
+- The file name is empty. The check trims the value, so a name made of spaces counts as empty.
 
 ```tsx
 const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
@@ -56,4 +62,6 @@ const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
 <Button type="submit" disabled={!modified || isSubmitting || nameIsEmpty} />;
 ```
 
-`DetailField` shows a warning icon next to an empty field, with a tooltip from the `asset-details.field.empty` translation.
+This gate is the only check on the name. The admin route `PUT /upload/files/:id` validates `name` as a nullable string, and the upload service saves any value that is not `null` or `undefined`, an empty string included.
+
+`DetailField` shows a warning icon next to an empty field, with a tooltip from the `asset-details.field.empty` translation. The icon checks the value without trimming it, so a name made of spaces disables the save button but shows no icon.
