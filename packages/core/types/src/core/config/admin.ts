@@ -19,6 +19,17 @@ export interface AuthCookie {
   secure?: boolean;
   domain?: string;
   path?: string;
+  /**
+   * Optional path override for the httpOnly admin refresh-token cookie (`strapi_admin_refresh`).
+   * Independent of `path` (which scopes the access-token cookie and EE SSO).
+   * Resolved at runtime (not inlined into the admin bundle) and must be a prefix of the
+   * browser path to `POST /admin/access-token`.
+   *
+   * When unset, defaults to the admin API path derived from `server.absoluteUrl`
+   * (`<server.url path>/admin`, or `/admin` when `server.url` has no subpath),
+   * keeping `path` when it covers that API path.
+   */
+  refreshPath?: string;
   sameSite?: 'strict' | 'lax' | 'none' | boolean | null;
 }
 

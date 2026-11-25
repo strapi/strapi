@@ -11,6 +11,7 @@ import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
   buildSessionMetadataFromContext,
+  getAccessCookiePath,
   getSessionManager,
   extractDeviceParams,
   generateDeviceId,
@@ -388,10 +389,22 @@ export default {
     strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
 
     // Clear cookie regardless of token validity
+    const refreshCookieOptions = getRefreshCookieOptions(ctx.request.secure);
     ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
-      ...getRefreshCookieOptions(ctx.request.secure),
+      ...refreshCookieOptions,
       expires: new Date(0),
     });
+
+    // If a previous configuration/version wrote strapi_admin_refresh at the
+    // access cookie path, expire it there too so an orphaned cookie is not left behind.
+    const accessCookiePath = getAccessCookiePath();
+    if (accessCookiePath !== refreshCookieOptions.path) {
+      ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
+        ...refreshCookieOptions,
+        path: accessCookiePath,
+        expires: new Date(0),
+      });
+    }
 
     try {
       const sessionManager = getSessionManager();

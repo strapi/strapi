@@ -32,6 +32,11 @@ const getConfiguredCookiePath = (): string | undefined => {
   return typeof configured === 'string' && configured.trim() !== '' ? configured : undefined;
 };
 
+const getConfiguredRefreshCookiePath = (): string | undefined => {
+  const configured: unknown = strapi.config.get('admin.auth.cookie.refreshPath');
+  return typeof configured === 'string' && configured.trim() !== '' ? configured : undefined;
+};
+
 /**
  * Path the browser sees for one of the resolved absolute URLs, so it includes
  * a `server.url` subpath (`admin.path` does not). No trailing slash, except
@@ -92,13 +97,23 @@ const warnedRefreshCookiePaths = new Set<string>();
 
 /**
  * Path of the httpOnly refresh cookie (and every other cookie built from
- * `getRefreshCookieOptions`). Only the admin API reads it, and the API does not
- * move with `admin.url`, so it follows the API path instead of the panel.
- * `admin.auth.cookie.path` is kept when it covers the API path. Otherwise the
- * browser would never send the cookie to `/admin/access-token` and every
- * session would end when its access token expires, so the API path is used.
+ * `getRefreshCookieOptions`). When `admin.auth.cookie.refreshPath` is set, it
+ * overrides the derived default. Otherwise, only the admin API reads this
+ * cookie, and the API does not move with `admin.url`, so it follows the API
+ * path derived from `server.absoluteUrl` (`<server.url path>/admin`, or
+ * `/admin` with no subpath). `admin.auth.cookie.path` is kept when it covers
+ * the API path; otherwise it is ignored for the refresh cookie with a warning.
  */
 export const getRefreshCookiePath = (): string => {
+  const configuredRefreshPath = getConfiguredRefreshCookiePath();
+  if (configuredRefreshPath) {
+    return resolveAuthCookiePath(configuredRefreshPath, (message) => {
+      warnViaStrapiLog(
+        message.replace('admin auth cookie path', 'admin.auth.cookie.refreshPath')
+      );
+    });
+  }
+
   const apiPath = getAdminApiPath();
   const configured = getConfiguredCookiePath();
 

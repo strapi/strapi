@@ -206,6 +206,39 @@ describe('getRefreshCookiePath', () => {
 
     expect(getRefreshCookiePath()).toBe('/admin');
   });
+
+  test('uses admin.auth.cookie.refreshPath when configured, independent of cookie.path and server.url', () => {
+    mockConfig({
+      ...SUBPATH_SERVER_URL,
+      'admin.auth.cookie.path': '/dashboard',
+      'admin.auth.cookie.refreshPath': '/cms/admin',
+    });
+
+    expect(getRefreshCookiePath()).toBe('/cms/admin');
+    expect(getRefreshCookieOptions().path).toBe('/cms/admin');
+    expect(getAccessCookiePath()).toBe('/dashboard');
+    expect(logWarn).not.toHaveBeenCalled();
+  });
+
+  test('treats a blank admin.auth.cookie.refreshPath as unset and falls back to the derived API path', () => {
+    mockConfig({
+      ...SUBPATH_SERVER_URL,
+      'admin.auth.cookie.refreshPath': '   ',
+    });
+
+    expect(getRefreshCookiePath()).toBe('/strapi/admin');
+  });
+
+  test('warns with admin.auth.cookie.refreshPath and defaults to /admin when refreshPath is invalid', () => {
+    mockConfig({
+      ...DEFAULT_URLS,
+      'admin.auth.cookie.refreshPath': 'relative-path',
+    });
+
+    expect(getRefreshCookiePath()).toBe('/admin');
+    expect(logWarn).toHaveBeenCalledTimes(1);
+    expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('admin.auth.cookie.refreshPath'));
+  });
 });
 
 describe('getAccessCookieDomain', () => {

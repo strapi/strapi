@@ -13,7 +13,8 @@
  * The callers pick the value to validate (see session-auth.ts). When
  * `admin.auth.cookie.path` is unset, the access cookie follows the path the
  * panel is served from (`admin.url`) and the refresh cookie follows the admin
- * API (`/admin`), each behind any `server.url` subpath.
+ * API (`/admin`), each behind any `server.url` subpath, unless overridden via
+ * `admin.auth.cookie.refreshPath`.
  * `DEFAULT_AUTH_COOKIE_PATH` is only the fallback for a missing or invalid value.
  */
 export const DEFAULT_AUTH_COOKIE_PATH = '/admin';

@@ -164,3 +164,81 @@ describe('Authentication controller, forgot password', () => {
     });
   });
 });
+
+describe('Authentication controller, logout', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getService.mockReturnValue({
+      sanitizeUser: vi.fn((u: unknown) => u),
+    });
+  });
+
+  test('expires strapi_admin_refresh at both the refresh path and differing access cookie path', async () => {
+    const configValues: Record<string, unknown> = {
+      'server.absoluteUrl': 'http://localhost:1337',
+      'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+      'admin.auth.cookie.path': '/dashboard',
+      'admin.auth.cookie.refreshPath': '/cms/admin',
+    };
+
+    global.strapi = {
+      config: { get: vi.fn((key: string) => configValues[key]) },
+      eventHub: { emit: vi.fn() },
+      log: { warn: vi.fn(), error: vi.fn() },
+    } as any;
+
+    const setCookie = vi.fn();
+    const ctx = {
+      state: { user: { id: 1 } },
+      request: { secure: false, body: {} },
+      cookies: { set: setCookie },
+      body: undefined,
+    };
+
+    await authentication.logout(ctx as any);
+
+    expect(setCookie).toHaveBeenCalledTimes(2);
+    expect(setCookie).toHaveBeenNthCalledWith(
+      1,
+      'strapi_admin_refresh',
+      '',
+      expect.objectContaining({ path: '/cms/admin', expires: new Date(0) })
+    );
+    expect(setCookie).toHaveBeenNthCalledWith(
+      2,
+      'strapi_admin_refresh',
+      '',
+      expect.objectContaining({ path: '/dashboard', expires: new Date(0) })
+    );
+  });
+
+  test('clears strapi_admin_refresh once when access and refresh cookie paths match', async () => {
+    const configValues: Record<string, unknown> = {
+      'server.absoluteUrl': 'http://localhost:1337',
+      'admin.absoluteUrl': 'http://localhost:1337/admin',
+    };
+
+    global.strapi = {
+      config: { get: vi.fn((key: string) => configValues[key]) },
+      eventHub: { emit: vi.fn() },
+      log: { warn: vi.fn(), error: vi.fn() },
+    } as any;
+
+    const setCookie = vi.fn();
+    const ctx = {
+      state: { user: { id: 1 } },
+      request: { secure: false, body: {} },
+      cookies: { set: setCookie },
+      body: undefined,
+    };
+
+    await authentication.logout(ctx as any);
+
+    expect(setCookie).toHaveBeenCalledTimes(1);
+    expect(setCookie).toHaveBeenCalledWith(
+      'strapi_admin_refresh',
+      '',
+      expect.objectContaining({ path: '/admin', expires: new Date(0) })
+    );
+  });
+});
