@@ -8,7 +8,7 @@ import { setLifecycleHooks } from '../utils/lifecycle-hooks';
 export default defineProvider({
   init(strapi) {
     strapi
-      .add('content-types', () => registries.contentTypes())
+      .add('content-types', () => registries.contentTypes(strapi))
       .add('components', () => registries.components())
       .add('services', () => registries.services(strapi))
       .add('policies', () => registries.policies())
@@ -19,7 +19,7 @@ export default defineProvider({
       .add('plugins', () => registries.plugins(strapi))
       .add('custom-fields', () => registries.customFields(strapi))
       .add('apis', () => registries.apis(strapi))
-      .add('models', () => registries.models())
+      .add('models', () => registries.models(strapi))
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators());
   },
