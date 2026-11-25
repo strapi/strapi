@@ -120,6 +120,11 @@ A plugin's `provider` (`strapi.plugin(name).provider`) is the exception: it has 
 Without a registered provider type it is `unknown`, as every member the plugin object does not
 declare. Read [Plugin providers](#plugin-providers).
 
+The `services` map of the admin module, `strapi.admin.services`, holds the raw entries of
+`@strapi/admin/strapi-server`, such as the `homepage` and `debug-dump` factories, not the services
+registered under `admin::`. With strict types, its values are `unknown`: read an admin service
+through `strapi.service('admin::<name>')`, which resolves its contract.
+
 ### Plugin providers
 
 A package that sets a provider on its plugin registers its type in `PackagePluginProviders`, keyed

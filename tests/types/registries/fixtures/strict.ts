@@ -152,8 +152,11 @@ for (const service of Object.values(app.plugin(dynamicName).services)) {
   // @ts-expect-error Iterated services are `unknown`: narrow before use.
   service.anything();
 }
-// The raw admin services keep the legacy service: `strapi.admin` is not built from the registries.
+// The raw admin services have no contract: `strapi.admin` is the plain module, and its `services`
+// map holds raw entries, such as factories. The services registry resolves their contracts.
+// @ts-expect-error Raw admin services are `unknown`.
 app.admin.services.permission?.anything();
+app.service('admin::permission').engine satisfies object;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
