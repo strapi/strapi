@@ -70,6 +70,14 @@ describe('no-restricted-imports for lodash string and array helpers', () => {
     expect(lintLines(source)).toEqual([1, 2, 3]);
   });
 
+  test('keeps reporting the older lodash named-import bans', () => {
+    const source = ["import { isArray } from 'lodash';", "import { forEach } from 'lodash';"].join(
+      '\n'
+    );
+
+    expect(lintLines(source)).toEqual([1, 2]);
+  });
+
   test('ignores unrestricted lodash imports', () => {
     const source = ["import { reduce } from 'lodash';", "import uniq from 'lodash/uniq';"].join(
       '\n'
