@@ -284,26 +284,31 @@ export interface Strapi extends StrapiContainer, Lookups {
   config: ConfigProvider;
   /**
    * Services keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
-   * other keys keep the legacy service.
+   * other keys keep the legacy service. Built on each read, so read-only with strict types.
    */
   services: ServiceMap;
   /**
    * Controllers keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
-   * other keys keep the legacy controller.
+   * other keys keep the legacy controller. Built on each read, so read-only with strict types.
    */
   controllers: ControllerMap;
-  contentTypes: Schema.ContentTypes;
+  /**
+   * Content-type schemas keyed by UID. Built on each read, so read-only with strict types: register
+   * content types through the registry.
+   */
+  contentTypes: IsStrict extends false ? Schema.ContentTypes : Readonly<Schema.ContentTypes>;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID
   ): Schema.ContentType<TContentTypeUID>;
   /**
    * Policies keyed by UID. With strict types enabled, registered UIDs receive their config contract;
-   * other keys keep the legacy policy.
+   * other keys keep the legacy policy. Built on each read, so read-only with strict types.
    */
   policies: PolicyMap;
   /**
    * Middlewares keyed by UID. With strict types enabled, registered UIDs receive their config
-   * contract; other keys keep the legacy factory.
+   * contract; other keys keep the legacy factory. Built on each read, so read-only with strict
+   * types.
    */
   middlewares: MiddlewareMap;
   /**
@@ -313,7 +318,7 @@ export interface Strapi extends StrapiContainer, Lookups {
   plugins: PluginMap;
   /**
    * Hooks keyed by UID. With strict types enabled, registered UIDs resolve to their contracts; other
-   * keys resolve to `unknown`.
+   * keys resolve to `unknown`. Built on each read, so read-only with strict types.
    */
   hooks: HookMap;
   /**

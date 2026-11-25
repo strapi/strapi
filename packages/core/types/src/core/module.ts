@@ -1,6 +1,7 @@
 import type { PropertyPath } from 'lodash';
 import type { Router, Controller, Service, Policy, Middleware, Strapi } from '.';
 import type { ContentType } from '../schema';
+import type { ContentTypeSchema } from '../struct';
 import type { ControllerFor, RegisteredControllerUID } from './controller';
 import type {
   MiddlewareConfigFor,
@@ -33,32 +34,39 @@ type ModuleEntryNames<TUID, TNamespace extends string> =
 
 /**
  * The module's services keyed by name. With strict types enabled, registered names resolve to their
- * contracts; other names, literal or dynamic, resolve to `unknown`, like `strapi.services`.
+ * contracts; other names, literal or dynamic, resolve to `unknown`, like `strapi.services`. The map
+ * is built on each read, so it is read-only with strict types: register services through the
+ * registry.
  */
 export type ModuleServiceMap<TNamespace extends string> = IsStrict extends false
   ? Record<string, Service>
-  : RegisteredRecord<
-      {
-        [
-          TName in ModuleEntryNames<RegisteredServiceUID, TNamespace>
-        ]: ServiceFor<`${TNamespace}.${TName}`>;
-      },
-      unknown
+  : Readonly<
+      RegisteredRecord<
+        {
+          [
+            TName in ModuleEntryNames<RegisteredServiceUID, TNamespace>
+          ]: ServiceFor<`${TNamespace}.${TName}`>;
+        },
+        unknown
+      >
     >;
 
 /**
  * The module's controllers keyed by name. With strict types enabled, registered names resolve to their
  * contracts; other names, literal or dynamic, resolve to the legacy controller, like `strapi.controllers`.
+ * The map is built on each read, so it is read-only with strict types.
  */
 export type ModuleControllerMap<TNamespace extends string> = IsStrict extends false
   ? Record<string, Controller>
-  : RegisteredRecord<
-      {
-        [
-          TName in ModuleEntryNames<RegisteredControllerUID, TNamespace>
-        ]: ControllerFor<`${TNamespace}.${TName}`>;
-      },
-      Controller
+  : Readonly<
+      RegisteredRecord<
+        {
+          [
+            TName in ModuleEntryNames<RegisteredControllerUID, TNamespace>
+          ]: ControllerFor<`${TNamespace}.${TName}`>;
+        },
+        Controller
+      >
     >;
 
 /**
@@ -335,6 +343,36 @@ type ModuleConfigGetter<TNamespace extends string> = IsStrict extends false
   ? LegacyModuleConfigGetter
   : StrictModuleConfigGetter<TNamespace>;
 
+/** Develop's lifecycles and content types of a module, without strict mode. */
+type LegacyLoadedModuleMembers = {
+  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  routes: Record<string, Router>;
+  contentTypes: Record<string, { schema: ContentType }>;
+};
+
+/**
+ * The members of a module `@strapi/core` built from its declaration (`strapi.plugin(name)`,
+ * `strapi.api(name)`), with strict mode. Its lifecycles are not part of it: Strapi calls them,
+ * once.
+ */
+type StrictLoadedModuleMembers = {
+  routes: Record<string, Router>;
+  /**
+   * The schemas of the module's content types, keyed by name, e.g. `locale` for
+   * `plugin::i18n.locale`. Built on each read, so read-only: register content types through the
+   * registry.
+   */
+  contentTypes: Readonly<Record<string, ContentTypeSchema>>;
+  /** The schema of the module's content type `name`, i.e. `<namespace>.<name>`. */
+  contentType(name: string): ContentTypeSchema;
+};
+
+type LoadedModuleMembers = IsStrict extends false
+  ? LegacyLoadedModuleMembers
+  : StrictLoadedModuleMembers;
+
 /**
  * A loaded module of the namespace `TNamespace`, its runtime namespace, e.g. `plugin::i18n` or
  * `api::article`: with strict types enabled, a literal namespace types the `services`,
@@ -342,16 +380,11 @@ type ModuleConfigGetter<TNamespace extends string> = IsStrict extends false
  * `policy` and `middleware` lookups of API modules, and `config` from the config registries.
  */
 export interface ModuleOf<TNamespace extends string>
-  extends ModuleLookups<TNamespace>, ModuleConfigGetter<TNamespace> {
-  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  routes: Record<string, Router>;
+  extends ModuleLookups<TNamespace>, ModuleConfigGetter<TNamespace>, LoadedModuleMembers {
   controllers: ModuleControllerMap<TNamespace>;
   services: ModuleServiceMap<TNamespace>;
   policies: ModulePolicyMap<TNamespace>;
   middlewares: ModuleMiddlewareMap<TNamespace>;
-  contentTypes: Record<string, { schema: ContentType }>;
 }
 
 /**
@@ -362,14 +395,25 @@ export interface ModuleOf<TNamespace extends string>
 export interface Module extends ModuleOf<string> {}
 
 /**
- * The admin module, `strapi.admin`, with strict types enabled. `strapi.admin` is the raw module of
- * `@strapi/admin/strapi-server`, not a module built by `@strapi/core`: its `services` map holds the
- * raw entries, such as the `homepage` and `debug-dump` factories, not the instances registered under
- * `admin::`. So its services keep the legacy service; use `strapi.service('admin::<name>')` to
- * resolve a registered contract.
+ * The admin module, `strapi.admin`, with strict types enabled. `strapi.admin` is the declaration
+ * that `@strapi/admin/strapi-server` exports, not a module built by `@strapi/core`: `@strapi/core`
+ * registers its entries under `admin::` and calls its lifecycles with `{ strapi }`. It has no
+ * lookups and its `config` is the declared config object. Its `services` map holds the raw entries,
+ * such as the `homepage` and `debug-dump` factories, not the instances registered under `admin::`:
+ * use `strapi.service('admin::<name>')` to resolve a registered contract.
  */
-export interface AdminModule extends Omit<Module, 'services'> {
+export interface AdminModule {
+  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  config: Record<string, unknown>;
+  routes: Record<string, Router>;
   services: Record<string, Service>;
+  controllers: Record<string, Controller>;
+  policies: Record<string, Policy>;
+  middlewares: Record<string, MiddlewareHandler | MiddlewareFactory<unknown>>;
+  /** The declared content types: `@strapi/core` registers their schemas under `admin::`. */
+  contentTypes: Record<string, { schema: ContentType }>;
 }
 
 /** The API name of an `api::<api>.<name>` UID. */

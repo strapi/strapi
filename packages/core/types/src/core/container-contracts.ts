@@ -3,6 +3,7 @@ import type { queryParams } from '@strapi/utils';
 import type { PropertyPath } from 'lodash';
 
 import type * as Modules from '../modules';
+import type { ContentType } from '../schema';
 import type * as Struct from '../struct';
 import type * as UID from '../uid';
 import type { Controller } from './controller';
@@ -234,7 +235,7 @@ export interface RawModuleInput {
   routes?: Record<string, RouterConfig>;
   controllers?: Record<string, ControllerFactoryInput>;
   services?: Record<string, ServiceFactoryInput>;
-  contentTypes?: Module['contentTypes'];
+  contentTypes?: Record<string, { schema: ContentType }>;
   policies?: Module['policies'];
   middlewares?: Module['middlewares'];
   bootstrap?: (params: { strapi: Strapi }) => void | Promise<void>;
@@ -299,10 +300,14 @@ export interface CustomFieldsRegistry {
  * @internal Read through `strapi.api(name)` and `strapi.apis`. Not a plugin API.
  */
 export interface ApisRegistry {
-  get(name: string): unknown;
-  getAll(): Record<string, unknown>;
-  /** Adds the API's module under `api::<name>`. Throws when the API is already registered. */
-  add(apiName: string, apiConfig: unknown): unknown;
+  /** The module registered under `api::<name>`. */
+  get(name: string): RegisteredModule;
+  getAll(): Record<string, RegisteredModule>;
+  /**
+   * Adds the module of the loaded API under `api::<name>` and returns it. Throws when the API is
+   * already registered.
+   */
+  add(apiName: string, apiConfig: RawModuleInput): RegisteredModule;
 }
 
 /**

@@ -136,18 +136,18 @@ declare const open: [
   Expect<Equal<typeof unregisteredApiService, unknown>>,
   Expect<Equal<typeof adminService, Service>>,
   Expect<Equal<typeof adminServices, Record<string, Service>>>,
-  Expect<Equal<(typeof strapi.admin)['controllers'], Module['controllers']>>,
-  Expect<Equal<(typeof strapi.admin)['config'], Module['config']>>,
+  Expect<Equal<(typeof strapi.admin)['controllers'], Record<string, Controller>>>,
+  Expect<Equal<(typeof strapi.admin)['config'], Record<string, unknown>>>,
   Expect<Equal<typeof unregisteredPlugin, Plugin>>,
   Expect<Equal<typeof dynamicPlugin, Plugin>>,
-  Expect<Equal<typeof dynamicPluginServices, Record<string, unknown>>>,
+  Expect<Equal<typeof dynamicPluginServices, Readonly<Record<string, unknown>>>>,
   Expect<Equal<typeof unregisteredApi, Module>>,
-  Expect<Equal<(typeof dynamicApi)['services'], Record<string, unknown>>>,
+  Expect<Equal<(typeof dynamicApi)['services'], Readonly<Record<string, unknown>>>>,
 ];
 open satisfies unknown;
 
-// The maps stay iterable and writable. Service maps are no longer assignable to the legacy record:
-// their unregistered keys are `unknown`.
+// The maps stay iterable, and read-only: they are built on each read, so a write would be lost.
+// Service maps are no longer assignable to the legacy record: unregistered keys are `unknown`.
 // @ts-expect-error Unregistered services are not legacy services.
 const legacyServices: Record<string, Service> = strapi.services;
 const legacyControllers: Record<string, Controller> = strapi.controllers;
@@ -167,7 +167,7 @@ for (const [uid, entry] of Object.entries(strapi.services)) {
   iterated satisfies unknown;
 }
 Object.keys(strapi.plugin('map-lab').services) satisfies string[];
+// @ts-expect-error The map is read-only: register services through the registry.
 strapi.services[dynamicKey] = { anything: () => undefined };
+// @ts-expect-error Even a write matching the registered contract.
 strapi.services['plugin::map-lab.greeting'] = { greet: async (name: string) => name };
-// @ts-expect-error Writes to a registered UID must satisfy its contract.
-strapi.services['plugin::map-lab.greeting'] = { greet: (value: number) => value };

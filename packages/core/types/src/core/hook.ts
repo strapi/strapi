@@ -107,7 +107,7 @@ export type HookLookup<TUID extends HookLookupName, T> = HookLookupName extends 
  */
 export type HookMap = IsStrict extends false
   ? Record<string, any>
-  : RegisteredRecord<{ [TUID in RegisteredHookUID]: HookFor<TUID> }, unknown>;
+  : Readonly<RegisteredRecord<{ [TUID in RegisteredHookUID]: HookFor<TUID> }, unknown>>;
 
 /**
  * The hooks registry, `strapi.get('hooks')`, with strict types enabled.
