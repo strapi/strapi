@@ -1,8 +1,7 @@
-import { useStore } from 'react-redux';
 import { act, renderHook, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
+import { useStore } from 'react-redux';
 
-import { contentManagerApi } from '../api';
 import { useGetDocumentQuery, useUpdateDocumentMutation } from '../documents';
 
 const documentArg = {
@@ -143,17 +142,27 @@ describe('updateDocument', () => {
 
     /**
      * `UpdateAction` calls `resetForm(latestValues)` as soon as the mutation resolves,
-     * and it reads this cache — so the new data has to be there by then. Reading the
+     * and it reads this cache, so the new data has to be there by then. Reading the
      * store directly avoids waiting for the hook's next render.
      */
-    const cachedDocument = contentManagerApi.endpoints.getDocument.select(documentArg)(
-      result.current.store.getState()
+    const state = result.current.store.getState() as {
+      adminApi: {
+        queries: Record<
+          string,
+          { endpointName?: string; data?: typeof documentResponse }
+        >;
+      };
+    };
+    const cachedDocument = Object.values(state.adminApi.queries).find(
+      (query) => query?.endpointName === 'getDocument'
     );
 
-    expect(cachedDocument.data?.data?.title).toBe('Edited title');
+    expect(cachedDocument?.data?.data.title).toBe('Edited title');
 
     await act(async () => {
       releaseRefetch();
     });
+
+    await waitFor(() => expect(result.current.document.data?.data?.title).toBe('Saved title'));
   });
 });
