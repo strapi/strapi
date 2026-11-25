@@ -42,7 +42,8 @@ Global setup prepares one app, `test-apps/next/ui`, and builds its admin panel. 
 reuse both when nothing that shapes them changed (`prepareApp` in `@strapi/tests-shared`), which
 saves about 10 s per run and keeps every file of the app as it was:
 
-- The app is regenerated when the Strapi version, the generation code (`tests-next/shared`) or
+- The app is regenerated when the Strapi version, the generation code
+  (`tests-next/shared/src/app/generate*` and `config.ts`, the test plugin entry) or
   create-strapi-app (`dist`, `templates`) changed.
 - The admin panel is rebuilt with the app, when `build/` is missing, when a `STRAPI_*` env var of
   the run changed, or when a package under `packages/` was built again (`yarn build`,

@@ -7,7 +7,8 @@ test('opens the admin panel in the browser of the project', async ({
   browserName,
   server,
 }, testInfo) => {
-  expect(browserName).toBe(testInfo.project.name);
+  // The browser the project configures, not its name: a `chromium-prod` project must pass too.
+  expect(browserName).toBe(testInfo.project.use.defaultBrowserType);
 
   await page.goto(`${server.url}/admin`);
 
