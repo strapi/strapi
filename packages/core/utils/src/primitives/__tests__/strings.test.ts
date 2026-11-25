@@ -73,6 +73,11 @@ describe('string-formatting', () => {
       [['/', 'a/', '/b/', '/c'], 'a/b/c'],
       [['/', 'a//', '//b//', '//c'], 'a/b/c'],
       [['/', '///a///', '///b///', '///c///'], '///a/b/c///'],
+      [['-', 'a--', '--b--', '--c'], 'a-b-c'],
+      [['^', '^a^', '^b^'], '^a^b^'],
+      [[']', 'a]]', ']]b'], 'a]b'],
+      [['\\', 'a\\', '\\b'], 'a\\b'],
+      [['/.', 'a./', '/.b./', './c'], 'a/.b/.c'],
     ])('%s => %s', (args, expectedResult) => {
       const [joint, ...rest] = args;
       expect(joinBy(joint, ...rest)).toBe(expectedResult);

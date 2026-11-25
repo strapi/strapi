@@ -26,12 +26,18 @@ const isCamelCase = (value: string) => /^[a-z][a-zA-Z0-9]+$/.test(value);
 const isKebabCase = (value: string) => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
 const startsWithANumber = (value: string) => /^[0-9]/.test(value);
 
+// Like lodash trim with `chars`: strips any of the characters in `joint`, not the whole string.
+const jointPattern = (joint: string) => `[${joint.replace(/[\\\]^-]/g, '\\$&')}]+`;
+
 const joinBy = (joint: string, ...args: string[]) => {
+  const start = new RegExp(`^${jointPattern(joint)}`);
+  const end = new RegExp(`${jointPattern(joint)}$`);
+
   return args.reduce((url, path, index) => {
     if (args.length === 1) return path;
-    if (index === 0) return _.trimEnd(path, joint);
-    if (index === args.length - 1) return url + joint + _.trimStart(path, joint);
-    return url + joint + _.trim(path, joint);
+    if (index === 0) return path.replace(end, '');
+    if (index === args.length - 1) return url + joint + path.replace(start, '');
+    return url + joint + path.replace(start, '').replace(end, '');
   }, '');
 };
 
