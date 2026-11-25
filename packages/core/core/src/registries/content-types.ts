@@ -40,7 +40,7 @@ const contentTypesRegistry = () => {
     /**
      * Returns a map with all the contentTypes in a namespace
      */
-    getAll(namespace: string) {
+    getAll(namespace?: string) {
       return pickBy(contentTypes, (_, uid) => hasNamespace(uid, namespace));
     },
 

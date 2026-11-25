@@ -1,4 +1,4 @@
-const hasNamespace = (name: string, namespace: string) => {
+const hasNamespace = (name: string, namespace?: string) => {
   if (!namespace) {
     return true;
   }

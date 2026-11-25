@@ -145,7 +145,7 @@ const policiesRegistry = () => {
     /**
      * Returns a map with all the policies in a namespace
      */
-    getAll(namespace: string) {
+    getAll(namespace?: string) {
       return pickBy(Object.fromEntries(policies), (_, uid) => hasNamespace(uid, namespace));
     },
 

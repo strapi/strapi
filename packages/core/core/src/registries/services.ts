@@ -40,7 +40,7 @@ const servicesRegistry = (strapi: Core.Strapi) => {
     /**
      * Returns a map with all the services in a namespace
      */
-    getAll(namespace: string): ServiceMap {
+    getAll(namespace?: string): ServiceMap {
       const filteredServices = pickBy(services, (_, uid) => hasNamespace(uid, namespace));
 
       // create lazy accessor to avoid instantiating the services;
