@@ -17,6 +17,7 @@ import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
 import { createServer } from './services/server';
+import { isAbortReadsOnRequestDisconnectEnabled } from './services/server/client-abort';
 import { createReloader } from './services/reloader';
 
 import { providers } from './providers';
@@ -311,9 +312,12 @@ class Strapi extends Container implements Core.Strapi {
       .add('fs', () => createStrapiFs(this))
       .add('eventHub', () =>
         createEventHub({
-          // Requests (and so abort signals) only exist once loaded; avoid touching the db before
+          // Requests (and so abort signals) only exist once loaded: don't resolve the db before.
+          // While the setting is off, listeners run exactly as they did without it.
           detachFromAbortSignal: (cb) =>
-            this.isLoaded ? this.db.runDetachedFromAbortSignal(cb) : cb(),
+            this.isLoaded && isAbortReadsOnRequestDisconnectEnabled(this)
+              ? this.db.runDetachedFromAbortSignal(cb)
+              : cb(),
         })
       )
       .add('startupLogger', () => utils.createStartupLogger(this))

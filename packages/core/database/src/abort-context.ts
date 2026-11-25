@@ -40,6 +40,16 @@ const abortCtx = {
     return storage.exit(cb);
   },
 
+  /**
+   * A check of whether the running unit of work has written, bound to that unit of work, so it
+   * stays valid where the async context is another one (e.g. an abort listener). Always false
+   * outside a unit of work.
+   */
+  bindHasWritten(): () => boolean {
+    const store = storage.getStore();
+    return () => store?.written === true;
+  },
+
   /** The signal of the running unit of work, or undefined once it has written. */
   get(): AbortSignal | undefined {
     const store = storage.getStore();

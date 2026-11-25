@@ -48,8 +48,9 @@ export const isQueryOnlyBody = (body: unknown): boolean => {
 export const createArmQueriesMiddleware =
   (strapi: Core.Strapi): Core.MiddlewareHandler =>
   (ctx, next) => {
-    // The server arms these itself
-    if (ctx.method === 'GET' || ctx.method === 'HEAD') {
+    // GraphQL queries are sent with POST (a GET or HEAD is armed by the server itself). Any other
+    // method is left alone: nothing documents it as read-only.
+    if (ctx.method !== 'POST') {
       return next();
     }
 
@@ -58,12 +59,11 @@ export const createArmQueriesMiddleware =
       return next();
     }
 
-    if (
-      typeof strapi.server?.runWithClientAbortSignal !== 'function' ||
-      !isQueryOnlyBody(ctx.request.body)
-    ) {
+    const arm = strapi.server?.armClientAbortSignal;
+
+    if (typeof arm !== 'function' || !isQueryOnlyBody(ctx.request.body)) {
       return next();
     }
 
-    return strapi.server.runWithClientAbortSignal(ctx, () => next());
+    return arm.call(strapi.server, ctx, () => next());
   };

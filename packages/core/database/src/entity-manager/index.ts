@@ -2185,5 +2185,8 @@ export const createEntityManager = (db: Database): EntityManager => {
     },
   };
 
-  return detachWritesFromAbort(entityManager);
+  // While the setting is off nothing is ever aborted: keep the methods as they are
+  return db.config?.settings?.abortReadsOnRequestDisconnect === true
+    ? detachWritesFromAbort(entityManager)
+    : entityManager;
 };

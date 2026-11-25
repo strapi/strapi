@@ -172,6 +172,16 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
           query()
             .select(['id', s.db.connection.raw(`pg_sleep(${seconds})`)])
             .execute({ mapResults: false });
+        // Proves the request is armed and its client gone: a read before any write is refused
+        const readIsRefused = async () => {
+          try {
+            await query().select('id').execute({ mapResults: false });
+            return false;
+          } catch (error: any) {
+            return error?.name === 'QueryAbortedError';
+          }
+        };
+        const notArmed = 'not armed: a read before the write was not refused';
 
         // Delays admin logout so the client is gone before the auth strategy reads the session
         s.server.use(async (ctx: any, next: () => Promise<any>) => {
@@ -284,31 +294,39 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
               },
               config: { auth: false },
             },
+            // The routes below write on a GET, so the request is armed: they check that a write,
+            // and what reads around it, run to completion once the client is gone
             {
-              // A transaction that outlives the client: select, then writes
-              method: 'POST',
+              // A transaction that starts after the client left: writes, a slow select, then writes
+              // again. Once it wrote, none of its reads is refused
+              method: 'GET',
               path: '/abort-write-tx',
               handler: async (ctx: any) => {
                 started.resolve();
+                // Once the client is gone: the request is armed, so a read before any write is
+                // refused. It runs outside the transaction, which it would otherwise roll back.
+                await sleep(1000);
+                const armed = await readIsRefused();
                 await s.db.transaction(async () => {
                   await query().insert({ name: 'tx before' }).execute();
                   await slow(1.5);
                   await query().insert({ name: 'tx after' }).execute();
                 });
-                handlerSettled.resolve('done');
+                handlerSettled.resolve(armed ? 'done' : notArmed);
                 ctx.body = { ok: true };
               },
               config: { auth: false },
             },
             {
               // A write outside any transaction, issued after the client left
-              method: 'POST',
+              method: 'GET',
               path: '/abort-write-plain',
               handler: async (ctx: any) => {
                 started.resolve();
                 await sleep(1500);
+                const armed = await readIsRefused();
                 await query().insert({ name: 'plain after' }).execute();
-                handlerSettled.resolve('done');
+                handlerSettled.resolve(armed ? 'done' : notArmed);
                 ctx.body = { ok: true };
               },
               config: { auth: false },
@@ -316,14 +334,48 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
             {
               // A document write that commits after the client left: its entry.create event must
               // still be emitted (the hook re-reads the entry with a select)
-              method: 'POST',
+              method: 'GET',
               path: '/abort-write-event',
               handler: async (ctx: any) => {
                 started.resolve();
                 await sleep(1500);
+                const armed = await readIsRefused();
                 try {
                   await s.documents(ITEM_UID).create({ data: { name: 'event after' } });
-                  handlerSettled.resolve('done');
+                  handlerSettled.resolve(armed ? 'done' : notArmed);
+                } catch (error: any) {
+                  handlerSettled.resolve(`failed: ${error?.name}`);
+                  throw error;
+                }
+                ctx.body = { ok: true };
+              },
+              config: { auth: false },
+            },
+            {
+              // A query engine write after the client left: create reads the row back and runs
+              // afterCreate, and the flow's reads after the write are not refused either
+              method: 'GET',
+              path: '/abort-write-query-engine',
+              handler: async (ctx: any) => {
+                started.resolve();
+                await sleep(1500);
+                const armed = await readIsRefused();
+                try {
+                  const created = await s.db
+                    .query(ITEM_UID)
+                    .create({ data: { name: 'query engine after' } });
+                  const rows = await s.db
+                    .query(ITEM_UID)
+                    .findMany({ where: { name: 'query engine after' } });
+                  if (!armed) {
+                    handlerSettled.resolve(notArmed);
+                  } else {
+                    handlerSettled.resolve(
+                      created?.name === 'query engine after' && rows.length === 1
+                        ? 'done'
+                        : `unexpected: ${JSON.stringify({ created, rows })}`
+                    );
+                  }
                 } catch (error: any) {
                   handlerSettled.resolve(`failed: ${error?.name}`);
                   throw error;
@@ -333,6 +385,15 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
               config: { auth: false },
             },
           ],
+        });
+
+        s.db.lifecycles.subscribe({
+          models: [ITEM_UID],
+          async afterCreate(event: any) {
+            if (event.result?.name === 'query engine after') {
+              createdEvents.push('afterCreate');
+            }
+          },
         });
 
         // Like review workflows (before) and content history (after): a document middleware that
@@ -423,6 +484,7 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     await strapi.db.connection('abort_items').where('name', 'like', 'tx %').del();
     await strapi.db.connection('abort_items').where('name', 'plain after').del();
     await strapi.db.connection('abort_items').where('name', 'event after').del();
+    await strapi.db.connection('abort_items').where('name', 'query engine after').del();
     await strapi.db.query('admin::session').deleteMany({});
   });
 
@@ -513,11 +575,8 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     }
   });
 
-  test('guard: a transaction that wrote is not aborted by a disconnect, and still commits its writes', async () => {
-    const aborted = requestAndAbort(
-      { port, method: 'POST', path: '/api/abort-write-tx', body: '{}' },
-      300
-    );
+  test('guard (GET, armed): a transaction that wrote is not aborted by a disconnect, and still commits its writes', async () => {
+    const aborted = requestAndAbort({ port, path: '/api/abort-write-tx' }, 300);
     await started.promise;
     await aborted;
 
@@ -530,11 +589,8 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     expect(rows.map((row: { name: string }) => row.name).sort()).toEqual(['tx after', 'tx before']);
   });
 
-  test('guard: a write outside a transaction is still executed after the disconnect', async () => {
-    const aborted = requestAndAbort(
-      { port, method: 'POST', path: '/api/abort-write-plain', body: '{}' },
-      300
-    );
+  test('guard (GET, armed): a write outside a transaction is still executed after the disconnect', async () => {
+    const aborted = requestAndAbort({ port, path: '/api/abort-write-plain' }, 300);
     await started.promise;
     await aborted;
 
@@ -547,17 +603,29 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     expect(rows).toHaveLength(1);
   });
 
-  test('guard: a document write and its middlewares run to completion, and its entry.create event fires', async () => {
-    const aborted = requestAndAbort(
-      { port, method: 'POST', path: '/api/abort-write-event', body: '{}' },
-      300
-    );
+  test('guard (GET, armed): a document write and its middlewares run to completion, and its entry.create event fires', async () => {
+    const aborted = requestAndAbort({ port, path: '/api/abort-write-event' }, 300);
     await started.promise;
     await aborted;
 
     await expect(handlerSettled.promise).resolves.toBe('done');
     const fired = await waitUntil(() => createdEvents.length > 0, 3000);
     expect(fired).toBe(true);
+  });
+
+  test('guard (GET, armed): a query engine create reads its row back and runs afterCreate after the disconnect', async () => {
+    const aborted = requestAndAbort({ port, path: '/api/abort-write-query-engine' }, 300);
+    await started.promise;
+    await aborted;
+
+    await expect(handlerSettled.promise).resolves.toBe('done');
+    expect(createdEvents).toEqual(['afterCreate']);
+
+    const rows = await strapi.db
+      .connection('abort_items')
+      .where('name', 'query engine after')
+      .select('id');
+    expect(rows).toHaveLength(1);
   });
 
   test('scope: a read sent with POST is not cancelled by a disconnect', async () => {

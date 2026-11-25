@@ -888,11 +888,31 @@ describe('getActionValidity and a request abort', () => {
       name: 'QueryAbortedError',
     });
 
+  const withAbortReads = (strapi: Core.Strapi, abortReadsOnRequestDisconnect: boolean) =>
+    Object.assign(strapi, {
+      db: { ...strapi.db, config: { settings: { abortReadsOnRequestDisconnect } } },
+    });
+
   test('rethrows a QueryAbortedError instead of storing the entry as not valid', async () => {
     const aborted = abortedError();
-    const strapi = buildStrapi({ findOne: jest.fn().mockRejectedValue(aborted) });
+    const strapi = withAbortReads(
+      buildStrapi({ findOne: jest.fn().mockRejectedValue(aborted) }),
+      true
+    );
 
     await expect(getActionValidity(draftRef, { strapi })).rejects.toBe(aborted);
+  });
+
+  test('stores an error named QueryAbortedError as any failed read while the setting is off', async () => {
+    const strapi = withAbortReads(
+      buildStrapi({ findOne: jest.fn().mockRejectedValue(abortedError()) }),
+      false
+    );
+
+    await expect(getActionValidity(draftRef, { strapi })).resolves.toStrictEqual({
+      isEntryValid: false,
+      reason: { error: { name: 'QueryAbortedError' } },
+    });
   });
 
   test('still stores any other failed read as not valid', async () => {

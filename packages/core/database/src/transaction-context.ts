@@ -159,6 +159,15 @@ const runCallbacks = async (callbacks: Callback[], options?: CallbackRunOptions)
   }
 };
 
+/**
+ * Runs the rollback callbacks of a savepoint that was rolled back. Like the hooks of a transaction,
+ * they are detached from the request's abort signal: they undo or report work, and must not see
+ * their reads refused because the client left.
+ */
+const runSavepointRollbackCallbacks = (callbacks: Callback[]) => {
+  abortCtx.exit(() => callbacks.forEach((callback) => callback()));
+};
+
 const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: CallbackRunOptions) => {
   if (!callbacks?.length) {
     return;
@@ -330,7 +339,7 @@ const transactionCtx = {
       result = await storage.run(store, cb);
     } catch (error) {
       const rollbackError = await endSavepoint(trx, 'rollback');
-      store.rollbackCallbacks.forEach((callback) => callback());
+      runSavepointRollbackCallbacks(store.rollbackCallbacks);
       throw rollbackError
         ? new SavepointError('Failed to roll back to the savepoint', {
             cause: rollbackError,
@@ -341,7 +350,7 @@ const transactionCtx = {
 
     const releaseError = await endSavepoint(trx, 'commit');
     if (releaseError) {
-      store.rollbackCallbacks.forEach((callback) => callback());
+      runSavepointRollbackCallbacks(store.rollbackCallbacks);
       throw new SavepointError('Failed to release the savepoint', { cause: releaseError });
     }
     parent.commitCallbacks.push(...store.commitCallbacks);

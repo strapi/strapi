@@ -8,10 +8,11 @@ import composeEndpoint from '../compose-endpoint';
  * Minimal stand-in for the database abort context: reads are refused while the flow's signal is
  * aborted, unless the flow ran through `runWithoutAbortSignal`.
  */
-const createStrapi = () => {
+const createStrapi = (settingOn = true) => {
   const storage = new AsyncLocalStorage<{ signal: AbortSignal; written: boolean }>();
 
   const db = {
+    config: { settings: { abortReadsOnRequestDisconnect: settingOn } },
     runWithAbortSignal: (signal: AbortSignal, cb: () => unknown) =>
       storage.run({ signal, written: false }, cb),
     runWithoutAbortSignal: vi.fn((cb: () => unknown) => {
@@ -96,6 +97,19 @@ describe('route config abortReadsOnRequestDisconnect', () => {
 
     expect(reads).toEqual(['rows']);
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not detach anything while the setting is off', async () => {
+    const { strapi, storage } = createStrapi(false);
+
+    const { result, handler } = await dispatch(strapi, storage, {
+      abortReadsOnRequestDisconnect: false,
+    });
+    // The test's stand-in arms the flow regardless of the setting: only the route decides here
+    await expect(result).rejects.toThrow('QueryAbortedError');
+
+    expect(strapi.db.runWithoutAbortSignal).not.toHaveBeenCalled();
+    expect(handler).not.toHaveBeenCalled();
   });
 
   test('runs the route normally when the database is unavailable', async () => {

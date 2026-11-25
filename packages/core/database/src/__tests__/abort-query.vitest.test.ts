@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { Database } from '..';
+import { abortCtx } from '../abort-context';
 import { QueryAbortedError } from '../errors';
-import { runAbortable } from '../utils/abort';
+import { getActiveAbortSignal, runAbortable } from '../utils/abort';
 
 type Conn = { id: number; __knex__disposed?: unknown };
 
@@ -173,5 +174,74 @@ describe('runAbortable with a cancellable client', () => {
     expect(trxClient.cancelQuery).toHaveBeenCalledWith(trxConnection);
     expect(poolClient.acquireConnection).not.toHaveBeenCalled();
     expect(poolClient.cancelQuery).not.toHaveBeenCalled();
+  });
+});
+
+describe('runAbortable once the flow wrote', () => {
+  const enable = (db: Database) => {
+    (db as any).config = { settings: { abortReadsOnRequestDisconnect: true } };
+  };
+  // In production the signal aborts from the socket's 'close' event, outside the request's async
+  // context: abort from outside the flow too, so the check can't rely on the context at abort time
+  const abortFromOutside = (controller: AbortController) => abortCtx.exit(() => controller.abort());
+
+  it('does not cancel a read already running once a sibling branch of the flow wrote', async () => {
+    const { db, client, query, result } = setup();
+    enable(db);
+    const controller = new AbortController();
+
+    const promise = abortCtx.run(controller.signal, async () => {
+      const signal = getActiveAbortSignal(db, { type: 'select' })!;
+      const read = runAbortable(db, query, signal);
+      await vi.waitFor(() => expect(query.connection).toHaveBeenCalled());
+      abortCtx.markWritten(); // a sibling branch wrote
+      abortFromOutside(controller);
+      result.resolve('rows');
+      return read;
+    });
+
+    await expect(promise).resolves.toBe('rows');
+    expect(client.cancelQuery).not.toHaveBeenCalled();
+    expect(client.releaseConnection).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not refuse a read whose flow wrote while it waited for a connection', async () => {
+    const { db, client, query, result, connection } = setup();
+    enable(db);
+    const controller = new AbortController();
+    const acquired = deferred<Conn>();
+    client.acquireConnection.mockImplementationOnce(() => acquired.promise);
+
+    const promise = abortCtx.run(controller.signal, async () => {
+      const signal = getActiveAbortSignal(db, { type: 'select' })!;
+      const read = runAbortable(db, query, signal);
+      abortCtx.markWritten(); // a sibling branch wrote while this read waited on the pool
+      abortFromOutside(controller);
+      acquired.resolve(connection);
+      result.resolve('rows');
+      return read;
+    });
+
+    await expect(promise).resolves.toBe('rows');
+    expect(query.connection).toHaveBeenCalledWith(connection);
+    expect(client.cancelQuery).not.toHaveBeenCalled();
+  });
+
+  it('still cancels a running read when the flow has not written', async () => {
+    const { db, client, query, result } = setup();
+    enable(db);
+    const controller = new AbortController();
+
+    const promise = abortCtx.run(controller.signal, async () => {
+      const signal = getActiveAbortSignal(db, { type: 'select' })!;
+      const read = runAbortable(db, query, signal);
+      await vi.waitFor(() => expect(query.connection).toHaveBeenCalled());
+      abortFromOutside(controller);
+      result.reject(new Error('canceling statement due to user request'));
+      return read;
+    });
+
+    await expect(promise).rejects.toBeInstanceOf(QueryAbortedError);
+    expect(client.cancelQuery).toHaveBeenCalledTimes(1);
   });
 });

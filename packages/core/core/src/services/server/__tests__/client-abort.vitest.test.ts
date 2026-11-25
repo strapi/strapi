@@ -6,7 +6,7 @@ import type { Core } from '@strapi/types';
 import {
   armClientAbortSignal,
   isClientDisconnected,
-  runWithClientAbortSignal,
+  armReadOnlyRequestAbortSignal,
 } from '../client-abort';
 
 const createCtx = (writableEnded = false, method = 'GET') => {
@@ -31,12 +31,12 @@ const createStrapi = (
   return { strapi, signals };
 };
 
-describe('runWithClientAbortSignal', () => {
+describe('armReadOnlyRequestAbortSignal', () => {
   it('aborts the signal when the response closes before it ended', async () => {
     const { strapi, signals } = createStrapi();
     const { ctx, res } = createCtx();
 
-    await runWithClientAbortSignal(strapi, ctx, async () => {
+    await armReadOnlyRequestAbortSignal(strapi, ctx, async () => {
       expect(signals[0].aborted).toBe(false);
       res.emit('close');
       expect(signals[0].aborted).toBe(true);
@@ -47,7 +47,7 @@ describe('runWithClientAbortSignal', () => {
     const { strapi, signals } = createStrapi();
     const { ctx, res } = createCtx(true);
 
-    await runWithClientAbortSignal(strapi, ctx, async () => {
+    await armReadOnlyRequestAbortSignal(strapi, ctx, async () => {
       res.emit('close');
     });
 
@@ -58,11 +58,11 @@ describe('runWithClientAbortSignal', () => {
     const { strapi } = createStrapi();
     const { ctx, res } = createCtx();
 
-    await runWithClientAbortSignal(strapi, ctx, async () => undefined);
+    await armReadOnlyRequestAbortSignal(strapi, ctx, async () => undefined);
     expect(res.listenerCount('close')).toBe(0);
 
     await expect(
-      runWithClientAbortSignal(strapi, ctx, async () => {
+      armReadOnlyRequestAbortSignal(strapi, ctx, async () => {
         throw new Error('boom');
       })
     ).rejects.toThrow('boom');
@@ -75,7 +75,7 @@ describe('runWithClientAbortSignal', () => {
       const { strapi } = createStrapi(settings);
       const { ctx, res } = createCtx();
 
-      await runWithClientAbortSignal(strapi, ctx, async () => {
+      await armReadOnlyRequestAbortSignal(strapi, ctx, async () => {
         expect(res.listenerCount('close')).toBe(0);
       });
 
@@ -87,7 +87,7 @@ describe('runWithClientAbortSignal', () => {
     const { strapi } = createStrapi();
     const { ctx } = createCtx(false, method);
 
-    await runWithClientAbortSignal(strapi, ctx, async () => undefined);
+    await armReadOnlyRequestAbortSignal(strapi, ctx, async () => undefined);
 
     expect(strapi.db.runWithAbortSignal).toHaveBeenCalledTimes(1);
   });
@@ -98,7 +98,7 @@ describe('runWithClientAbortSignal', () => {
       const { strapi } = createStrapi();
       const { ctx, res } = createCtx(false, method);
 
-      await runWithClientAbortSignal(strapi, ctx, async () => {
+      await armReadOnlyRequestAbortSignal(strapi, ctx, async () => {
         expect(res.listenerCount('close')).toBe(0);
       });
 
@@ -110,7 +110,7 @@ describe('runWithClientAbortSignal', () => {
     const { ctx } = createCtx();
 
     await expect(
-      runWithClientAbortSignal({} as unknown as Core.Strapi, ctx, async () => 'ok')
+      armReadOnlyRequestAbortSignal({} as unknown as Core.Strapi, ctx, async () => 'ok')
     ).resolves.toBe('ok');
   });
 });

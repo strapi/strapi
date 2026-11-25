@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Database } from '..';
 import * as errors from '../errors';
+import { abortCtx } from '../abort-context';
 import { getActiveAbortSignal } from '../utils/abort';
 
 /**
@@ -385,6 +386,24 @@ describe('abort signal on the query builder (#28646)', () => {
       await vi.waitFor(() => expect(hookRows).toEqual([{ id: 1, name: 'first' }]));
     });
 
+    it('runs a savepoint rollback hook detached from the signal', async () => {
+      let hookRows: unknown;
+      await runWithAbortSignal(abortedSignal(), () =>
+        db.transaction(async ({ onRollback }) => {
+          await db
+            .savepoint(async () => {
+              onRollback(async () => {
+                hookRows = await selectItems().catch((e) => e);
+              });
+              throw new Error('undo');
+            })
+            .catch(() => undefined);
+        })
+      );
+
+      await vi.waitFor(() => expect(hookRows).toEqual([{ id: 1, name: 'first' }]));
+    });
+
     it('runs a select detached from the signal without marking the flow as written', async () => {
       const controller = new AbortController();
 
@@ -490,5 +509,55 @@ describe('abort signal on the query builder (#28646)', () => {
 
       await expect(runWithAbortSignal(abortedSignal(), () => selectItems())).resolves.toEqual([]);
     });
+
+    it('leaves the entity manager write methods unwrapped, and never enters the abort context', async () => {
+      await db.destroy();
+      const detachWrite = vi.spyOn(abortCtx, 'detachWrite');
+      const run = vi.spyOn(abortCtx, 'run');
+      try {
+        db = createSqliteDb({ abortReadsOnRequestDisconnect: value });
+        await db.init({
+          models: [
+            {
+              uid: ITEM_UID,
+              singularName: 'item',
+              tableName: 'items',
+              attributes: { id: { type: 'increments' }, name: { type: 'string' } },
+            },
+          ],
+        });
+        await db.connection.schema.createTable('items', (table) => {
+          table.increments('id');
+          table.string('name');
+        });
+
+        // The entity manager opens its transactions through the global `strapi.db`
+        (globalThis as any).strapi = { db };
+        const created = await runWithAbortSignal(abortedSignal(), () =>
+          db.query(ITEM_UID).create({ data: { name: 'off' } })
+        );
+
+        expect(created).toMatchObject({ name: 'off' });
+        expect(detachWrite).not.toHaveBeenCalled();
+        expect(run).not.toHaveBeenCalled();
+      } finally {
+        delete (globalThis as any).strapi;
+        detachWrite.mockRestore();
+        run.mockRestore();
+      }
+    });
+  });
+
+  it('wraps the entity manager write methods when the setting is on', async () => {
+    const detachWrite = vi.spyOn(abortCtx, 'detachWrite');
+    (globalThis as any).strapi = { db };
+    try {
+      await db.query(ITEM_UID).create({ data: { name: 'on' } });
+
+      expect(detachWrite).toHaveBeenCalled();
+    } finally {
+      delete (globalThis as any).strapi;
+      detachWrite.mockRestore();
+    }
   });
 });

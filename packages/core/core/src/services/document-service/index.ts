@@ -3,7 +3,7 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
-import { detachWritesFromClientAbort } from './client-abort';
+import { createDetachWritesMiddleware } from './client-abort';
 
 import entityValidator from '../entity-validator';
 
@@ -31,6 +31,8 @@ export const createDocumentService = (
 
   // Manager to handle document service middlewares
   const middlewares = createMiddlewareManager();
+  // First, so it wraps every other middleware: they read before and after the write
+  middlewares.use(createDetachWritesMiddleware(strapi));
   middlewares.use(databaseErrorsMiddleware);
 
   const factory = function factory(uid: UID.ContentType) {
@@ -41,15 +43,12 @@ export const createDocumentService = (
     const contentType = strapi.contentType(uid);
     const repository = createContentTypeRepository(uid, validator);
 
-    const instance = detachWritesFromClientAbort(
-      strapi,
-      middlewares.wrapObject(
-        repository,
-        { uid, contentType },
-        {
-          exclude: ['updateComponents', 'omitComponentData'],
-        }
-      )
+    const instance = middlewares.wrapObject(
+      repository,
+      { uid, contentType },
+      {
+        exclude: ['updateComponents', 'omitComponentData'],
+      }
     );
 
     repositories.set(uid, instance);

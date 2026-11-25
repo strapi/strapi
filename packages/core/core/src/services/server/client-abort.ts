@@ -5,6 +5,15 @@ import type { Core } from '@strapi/types';
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD']);
 
 /**
+ * Whether `database.settings.abortReadsOnRequestDisconnect` is on. While it is off, none of the
+ * abort machinery runs (no signal, no detaching, no wrapping), so nothing changes for the app.
+ *
+ * @internal
+ */
+export const isAbortReadsOnRequestDisconnectEnabled = (strapi: Core.Strapi): boolean =>
+  strapi.db?.config?.settings?.abortReadsOnRequestDisconnect === true;
+
+/**
  * Whether the HTTP client left before the response ended.
  *
  * @internal
@@ -20,8 +29,8 @@ export const isClientDisconnected = (ctx: Context): boolean => {
  * response ended, as the database abort signal: `select` queries stop being issued (and a running
  * one is cancelled) for a request nobody waits on. See the database docs.
  *
- * Unlike {@link runWithClientAbortSignal}, it does not look at the method: the caller must know
- * that the request only reads (e.g. a GraphQL query). Exposed as `strapi.server.runWithClientAbortSignal`.
+ * Unlike {@link armReadOnlyRequestAbortSignal}, it does not look at the method: the caller must know
+ * that the request only reads (e.g. a GraphQL query). Exposed as `strapi.server.armClientAbortSignal`.
  *
  * @internal
  */
@@ -32,7 +41,7 @@ export const armClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, run: 
   }
 
   // Nothing would consume the signal, so skip the controller and listener on every request
-  if (strapi.db.config?.settings?.abortReadsOnRequestDisconnect !== true) {
+  if (!isAbortReadsOnRequestDisconnectEnabled(strapi)) {
     return run();
   }
 
@@ -69,7 +78,11 @@ export const armClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, run: 
  * and run without one. A route that does write on a GET opts out with
  * `config.abortReadsOnRequestDisconnect: false`.
  */
-export const runWithClientAbortSignal = <T>(strapi: Core.Strapi, ctx: Context, run: () => T): T => {
+export const armReadOnlyRequestAbortSignal = <T>(
+  strapi: Core.Strapi,
+  ctx: Context,
+  run: () => T
+): T => {
   if (!READ_ONLY_METHODS.has(ctx.method)) {
     return run();
   }

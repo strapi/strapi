@@ -1,6 +1,8 @@
 import type { Modules } from '@strapi/types';
 import type { Cron } from 'croner';
 
+import { isAbortReadsOnRequestDisconnectEnabled } from './server/client-abort';
+
 type RecurrenceSpecObjLit = Modules.Cron.RecurrenceSpecObjLit;
 type CronRuleOptions = Modules.Cron.CronRuleOptions;
 type CronSchedule = Modules.Cron.CronSchedule;
@@ -163,10 +165,13 @@ const toCronerArgs = (
 
 /**
  * Cron jobs belong to the application, not to the request that happened to schedule them: the
- * timer and every run must not inherit that request's database abort signal.
+ * timer and every run must not inherit that request's database abort signal. Requests (and so
+ * abort signals) only exist once Strapi is loaded, and resolving `strapi.db` earlier would create
+ * the database before its config is final, so jobs added before then run as they are. While the
+ * setting is off, nothing is detached.
  */
 const runDetached = <T>(cb: () => T): T =>
-  typeof strapi.db?.runDetachedFromAbortSignal === 'function'
+  strapi.isLoaded && isAbortReadsOnRequestDisconnectEnabled(strapi)
     ? strapi.db.runDetachedFromAbortSignal(cb)
     : cb();
 

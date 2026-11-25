@@ -6,6 +6,7 @@ import Router from '@koa/router';
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
+import { isAbortReadsOnRequestDisconnectEnabled } from './client-abort';
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
@@ -32,8 +33,8 @@ const createRouteInfoMiddleware =
 const createDetachFromAbortMiddleware =
   (strapi: Core.Strapi): Core.MiddlewareHandler =>
   (ctx, next) => {
-    // The database can be unavailable (e.g. requests served before it is loaded)
-    if (typeof strapi.db?.runWithoutAbortSignal !== 'function') {
+    // Nothing to detach from while the setting is off
+    if (!isAbortReadsOnRequestDisconnectEnabled(strapi)) {
       return next();
     }
 

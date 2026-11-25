@@ -275,8 +275,11 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     strapi.log.debug('Body parser has been disabled for Apollo server');
   }
 
-  // a query only reads, so a client that disconnects can stop its database reads
-  handler.push(createArmQueriesMiddleware(strapi));
+  // a query only reads, so a client that disconnects can stop its database reads. Only when the
+  // setting is on: otherwise the request chain is left as it is.
+  if (strapi.db?.config?.settings?.abortReadsOnRequestDisconnect === true) {
+    handler.push(createArmQueriesMiddleware(strapi));
+  }
 
   // add the Strapi auth middleware
   handler.push((ctx, next) => {

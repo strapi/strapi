@@ -73,6 +73,9 @@ export async function runAbortable<T>(
     return (await query) as T;
   }
 
+  // Bound now: the abort listener runs in the async context of whoever aborts, not of this flow
+  const hasWritten = abortCtx.bindHasWritten();
+
   // The connection is acquired here, not by knex, so the query can be cancelled on it. knex does
   // not release a connection it was given with `.connection()`, so it is released in `finally`.
   const connection = await client.acquireConnection();
@@ -80,6 +83,12 @@ export async function runAbortable<T>(
   let cancellation: Promise<void> | undefined;
 
   const onAbort = () => {
+    // Another branch of the same flow wrote while this read ran: the read may decide or follow up
+    // on that write, so it runs to completion like every query after a write
+    if (hasWritten()) {
+      return;
+    }
+
     cancelled = true;
     cancellation = client.cancelQuery(connection).then(
       () => undefined,
@@ -92,8 +101,9 @@ export async function runAbortable<T>(
   };
 
   try {
-    // The pool can make a request wait for a connection long after the client left
-    if (signal.aborted) {
+    // The pool can make a request wait for a connection long after the client left. A flow that
+    // wrote in the meantime is not refused anymore.
+    if (signal.aborted && !hasWritten()) {
       throw new QueryAbortedError();
     }
 

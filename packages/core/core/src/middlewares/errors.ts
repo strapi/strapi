@@ -4,7 +4,10 @@ import type { Core } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
 import { isDatabaseInputError } from '../utils/database-input-errors';
-import { isClientDisconnected } from '../services/server/client-abort';
+import {
+  isAbortReadsOnRequestDisconnectEnabled,
+  isClientDisconnected,
+} from '../services/server/client-abort';
 
 declare module 'koa' {
   interface BaseResponse {
@@ -48,7 +51,7 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
       // QueryAbortedError while it is still there is unexpected, so it is logged as one.
       if (
         error instanceof databaseErrors.QueryAbortedError &&
-        strapi.db?.config?.settings?.abortReadsOnRequestDisconnect === true &&
+        isAbortReadsOnRequestDisconnectEnabled(strapi) &&
         isClientDisconnected(ctx)
       ) {
         strapi.log.debug(`Request aborted before the query completed: ${error.message}`);

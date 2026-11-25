@@ -23,13 +23,14 @@ export interface Server {
   use(...args: Parameters<Koa['use']>): Server;
   /**
    * Runs `run` with a per-request database abort signal that aborts when the client disconnects
-   * before the response ended (see `database.settings.abortReadsOnRequestDisconnect`). The server
-   * arms `GET` and `HEAD` requests on its own. Call it only for a request that you know to only
-   * read, such as a GraphQL query sent with `POST`.
+   * before the response ended (see `database.settings.abortReadsOnRequestDisconnect`), whatever
+   * the method. The server arms `GET` and `HEAD` requests on its own. Call it only for a request
+   * that you know to only read, such as a GraphQL query sent with `POST`. Optional: a custom
+   * `Server` implementation or mock does not have to provide it, so callers check for it first.
    *
    * @internal
    */
-  runWithClientAbortSignal<T>(ctx: Koa.Context, run: () => T): T;
+  armClientAbortSignal?<T>(ctx: Koa.Context, run: () => T): T;
   routes(routes: Core.Router | Omit<Core.Route, 'info'>[]): this;
   mount(): this;
   initRouting(): this;

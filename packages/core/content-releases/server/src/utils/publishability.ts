@@ -123,9 +123,13 @@ export const isRunConflict = (error: unknown) =>
   (error instanceof Error && error.name === 'SavepointError') ||
   CONFLICT_CODES.has(getErrorCode(error) ?? '');
 
-// A read the database refused or cancelled because the client of the request left
-const isQueryAborted = (error: unknown) =>
-  error instanceof Error && error.name === 'QueryAbortedError';
+// A read the database refused or cancelled because the client of the request left. Only the
+// database setting that does so throws it: with the setting off, an error with that name is an
+// ordinary failed check.
+const isQueryAborted = (error: unknown, strapi: Core.Strapi) =>
+  error instanceof Error &&
+  error.name === 'QueryAbortedError' &&
+  strapi.db.config?.settings?.abortReadsOnRequestDisconnect === true;
 
 // The reason shapes an entry that wasn't released stores
 export const toValidationReason = (error: Error) => ({
@@ -180,7 +184,7 @@ const readCheck = async <TResult>(
     }
     // The request was abandoned: the entry's validity is unknown, not false, so nothing may be
     // stored for it (matched by name, like the conflict above)
-    if (isQueryAborted(error)) {
+    if (isQueryAborted(error, strapi)) {
       throw error;
     }
     return toError(error);

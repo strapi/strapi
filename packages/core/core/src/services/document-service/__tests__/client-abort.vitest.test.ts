@@ -1,101 +1,116 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { Core, Modules } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-import { detachWritesFromClientAbort } from '../client-abort';
+import { createDetachWritesMiddleware } from '../client-abort';
+import { createMiddlewareManager } from '../middlewares/middleware-manager';
 
-const createInstance = () => {
-  const calls: string[] = [];
-  const action = (name: string) =>
-    vi.fn(async (params?: unknown) => {
-      calls.push(name);
-      return { name, params };
-    });
+const WRITE_ACTIONS = [
+  'create',
+  'update',
+  'delete',
+  'clone',
+  'publish',
+  'unpublish',
+  'discardDraft',
+];
+const READ_ACTIONS = ['findMany', 'findFirst', 'findOne', 'count'];
 
-  const instance = {
-    findMany: action('findMany'),
-    findOne: action('findOne'),
-    create: action('create'),
-    update: action('update'),
-    delete: action('delete'),
-    clone: action('clone'),
-    publish: action('publish'),
-    unpublish: action('unpublish'),
-    discardDraft: action('discardDraft'),
-  } as unknown as Modules.Documents.ServiceInstance;
-
-  return { instance, calls };
-};
-
-const createStrapi = () => {
-  const detached: unknown[] = [];
+const createStrapi = (settingOn = true) => {
+  // Whether the code that runs is inside runWithoutAbortSignal
+  let detached = false;
   const strapi = {
     db: {
-      runWithoutAbortSignal: vi.fn((cb: () => unknown) => {
-        const result = cb();
-        detached.push(result);
-        return result;
+      config: { settings: { abortReadsOnRequestDisconnect: settingOn } },
+      runWithoutAbortSignal: vi.fn(async (cb: () => Promise<unknown>) => {
+        detached = true;
+        try {
+          return await cb();
+        } finally {
+          detached = false;
+        }
       }),
     },
   } as unknown as Core.Strapi;
 
-  return { strapi, detached };
+  return { strapi, isDetached: () => detached };
 };
 
-describe('detachWritesFromClientAbort', () => {
-  it('runs every write action detached from the abort signal, with its arguments and result', async () => {
-    const { strapi } = createStrapi();
-    const { instance } = createInstance();
+/** A document service like the real one: the detach middleware first, then the app's middlewares */
+const createService = (strapi: Core.Strapi, isDetached: () => boolean) => {
+  const manager = createMiddlewareManager();
+  manager.use(createDetachWritesMiddleware(strapi));
 
-    const detachedInstance = detachWritesFromClientAbort(strapi, instance);
+  const seen: Record<string, { middleware: boolean; action: boolean }> = {};
+  let middlewareDetached = false;
+  manager.use(async (_ctx, next) => {
+    middlewareDetached = isDetached();
+    return next();
+  });
 
-    for (const action of [
-      'create',
-      'update',
-      'delete',
-      'clone',
-      'publish',
-      'unpublish',
-      'discardDraft',
-    ] as const) {
-      vi.mocked(strapi.db.runWithoutAbortSignal).mockClear();
+  const repository = Object.fromEntries(
+    [...WRITE_ACTIONS, ...READ_ACTIONS].map((action) => [
+      action,
+      async (params: unknown) => {
+        seen[action] = { middleware: middlewareDetached, action: isDetached() };
+        return { action, params };
+      },
+    ])
+  );
 
-      await expect((detachedInstance[action] as any)({ documentId: 'a' })).resolves.toEqual({
-        name: action,
+  return { service: manager.wrapObject(repository) as Record<string, any>, seen };
+};
+
+describe('createDetachWritesMiddleware', () => {
+  it.each(WRITE_ACTIONS)(
+    'runs %s and the middlewares after it detached from the abort signal, with its params and result',
+    async (action) => {
+      const { strapi, isDetached } = createStrapi();
+      const { service, seen } = createService(strapi, isDetached);
+
+      await expect(service[action]({ documentId: 'a' })).resolves.toEqual({
+        action,
         params: { documentId: 'a' },
       });
+
       expect(strapi.db.runWithoutAbortSignal).toHaveBeenCalledTimes(1);
+      expect(seen[action]).toEqual({ middleware: true, action: true });
     }
-  });
+  );
 
-  it('leaves read actions under the abort signal', async () => {
-    const { strapi } = createStrapi();
-    const { instance } = createInstance();
+  it.each(READ_ACTIONS)('leaves %s under the abort signal', async (action) => {
+    const { strapi, isDetached } = createStrapi();
+    const { service, seen } = createService(strapi, isDetached);
 
-    const detachedInstance = detachWritesFromClientAbort(strapi, instance);
-    await detachedInstance.findMany({});
-    await detachedInstance.findOne({ documentId: 'a' });
+    await service[action]({});
 
     expect(strapi.db.runWithoutAbortSignal).not.toHaveBeenCalled();
+    expect(seen[action]).toEqual({ middleware: false, action: false });
   });
 
-  it('skips actions the content type does not have (no draft and publish)', () => {
-    const { strapi } = createStrapi();
-    const { instance } = createInstance();
-    Object.assign(instance, { publish: undefined, unpublish: undefined, discardDraft: undefined });
+  it('only calls next while the setting is off', async () => {
+    const { strapi, isDetached } = createStrapi(false);
+    const { service, seen } = createService(strapi, isDetached);
 
-    const detachedInstance = detachWritesFromClientAbort(strapi, instance);
+    await expect(service.create({ data: {} })).resolves.toEqual({
+      action: 'create',
+      params: { data: {} },
+    });
 
-    expect(detachedInstance.publish).toBeUndefined();
-    expect(detachedInstance.unpublish).toBeUndefined();
-    expect(detachedInstance.discardDraft).toBeUndefined();
+    expect(strapi.db.runWithoutAbortSignal).not.toHaveBeenCalled();
+    expect(seen.create).toEqual({ middleware: false, action: false });
   });
 
-  it('just runs the action when the database is unavailable', async () => {
-    const { instance, calls } = createInstance();
+  it('does not touch the database for a read', async () => {
+    const strapi = {} as Core.Strapi;
+    Object.defineProperty(strapi, 'db', {
+      get() {
+        throw new Error('the database must not be resolved');
+      },
+    });
+    const next = vi.fn(async () => 'rows');
 
-    const detachedInstance = detachWritesFromClientAbort({} as Core.Strapi, instance);
-
-    await detachedInstance.create({ data: {} } as any);
-    expect(calls).toEqual(['create']);
+    await expect(createDetachWritesMiddleware(strapi)({ action: 'findMany' }, next)).resolves.toBe(
+      'rows'
+    );
   });
 });

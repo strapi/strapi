@@ -54,39 +54,39 @@ describe('isQueryOnlyBody', () => {
 
 describe('createArmQueriesMiddleware', () => {
   const setup = (method: string, body: unknown, settingOn = true) => {
-    const runWithClientAbortSignal = vi.fn((_ctx: unknown, run: () => unknown) => run());
+    const armClientAbortSignal = vi.fn((_ctx: unknown, run: () => unknown) => run());
     const strapi = {
-      server: { runWithClientAbortSignal },
+      server: { armClientAbortSignal },
       db: { config: { settings: { abortReadsOnRequestDisconnect: settingOn } } },
     } as any;
     const ctx = { method, request: { body } } as any;
     const next = vi.fn(async () => undefined);
 
-    return { middleware: createArmQueriesMiddleware(strapi), ctx, next, runWithClientAbortSignal };
+    return { middleware: createArmQueriesMiddleware(strapi), ctx, next, armClientAbortSignal };
   };
 
   it('runs a POST query under the client abort signal', async () => {
-    const { middleware, ctx, next, runWithClientAbortSignal } = setup('POST', { query: '{ a }' });
+    const { middleware, ctx, next, armClientAbortSignal } = setup('POST', { query: '{ a }' });
 
     await middleware(ctx, next);
 
-    expect(runWithClientAbortSignal).toHaveBeenCalledWith(ctx, expect.any(Function));
+    expect(armClientAbortSignal).toHaveBeenCalledWith(ctx, expect.any(Function));
     expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('does not arm a POST mutation', async () => {
-    const { middleware, ctx, next, runWithClientAbortSignal } = setup('POST', {
+    const { middleware, ctx, next, armClientAbortSignal } = setup('POST', {
       query: 'mutation { a }',
     });
 
     await middleware(ctx, next);
 
-    expect(runWithClientAbortSignal).not.toHaveBeenCalled();
+    expect(armClientAbortSignal).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('does not parse or arm anything when the setting is off', async () => {
-    const { middleware, ctx, next, runWithClientAbortSignal } = setup(
+    const { middleware, ctx, next, armClientAbortSignal } = setup(
       'POST',
       { query: '{ a }' },
       false
@@ -94,20 +94,32 @@ describe('createArmQueriesMiddleware', () => {
 
     await middleware(ctx, next);
 
-    expect(runWithClientAbortSignal).not.toHaveBeenCalled();
+    expect(armClientAbortSignal).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('does not arm again for GET and HEAD, the server did already', async () => {
     for (const method of ['GET', 'HEAD']) {
-      const { middleware, ctx, next, runWithClientAbortSignal } = setup(method, undefined);
+      const { middleware, ctx, next, armClientAbortSignal } = setup(method, undefined);
 
       await middleware(ctx, next);
 
-      expect(runWithClientAbortSignal).not.toHaveBeenCalled();
+      expect(armClientAbortSignal).not.toHaveBeenCalled();
       expect(next).toHaveBeenCalledTimes(1);
     }
   });
+
+  it.each(['PUT', 'PATCH', 'DELETE', 'OPTIONS'])(
+    'does not arm a %s request, even with a query body',
+    async (method) => {
+      const { middleware, ctx, next, armClientAbortSignal } = setup(method, { query: '{ a }' });
+
+      await middleware(ctx, next);
+
+      expect(armClientAbortSignal).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it('just continues when the server cannot arm a signal', async () => {
     const next = vi.fn(async () => undefined);
