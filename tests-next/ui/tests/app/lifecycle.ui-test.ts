@@ -3,11 +3,11 @@ import path from 'node:path';
 
 import { expect, test } from '../../fixtures';
 
-test('generates an app without content types', ({ server }) => {
+test('has the content types of setup/schema.ts only', ({ server }) => {
   // Ignore dotfiles such as the .gitkeep create-strapi-app leaves.
   expect(
     fs.readdirSync(path.join(server.app.dir, 'src', 'api')).filter((name) => !name.startsWith('.'))
-  ).toEqual([]);
+  ).toEqual(['article']);
 });
 
 test('serves the prebuilt admin panel', async ({ server }) => {
