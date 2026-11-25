@@ -372,6 +372,28 @@ describe('Content-API Token Auth Strategy', () => {
       }
     });
 
+    test('Throws if a sparse scope hides a write action from a read-only key', () => {
+      global.strapi = strapiMock as any;
+
+      // eslint-disable-next-line no-sparse-arrays
+      const scope = [, 'api::model.model.find'];
+
+      expect(() =>
+        contentApiTokenStrategy.verify({ credentials: readOnlyApiToken }, { scope })
+      ).toThrow(errors.ForbiddenError);
+    });
+
+    test('Throws if a sparse scope hides an action from a custom key', () => {
+      global.strapi = strapiMock as any;
+
+      // eslint-disable-next-line no-sparse-arrays
+      const scope = [, 'api::model.model.update'];
+
+      expect(() =>
+        contentApiTokenStrategy.verify({ credentials: customApiToken, ability }, { scope })
+      ).toThrow(errors.ForbiddenError);
+    });
+
     test('Throws if the credentials are not passed in the auth object', () => {
       global.strapi = strapiMock as any;
 

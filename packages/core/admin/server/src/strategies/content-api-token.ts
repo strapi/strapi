@@ -9,7 +9,8 @@ import '@strapi/types';
 
 const { UnauthorizedError, ForbiddenError } = errors;
 
-const isReadScope = (scope: string) => scope.endsWith('find') || scope.endsWith('findOne');
+const isReadScope = (scope: unknown) =>
+  typeof scope === 'string' && (scope.endsWith('find') || scope.endsWith('findOne'));
 
 /**
  * Authenticate a content-api token. Rejects tokens with kind !== 'content-api'.
@@ -76,7 +77,8 @@ export const verify = (auth: any, config: any) => {
 
   // Read only
   if (apiToken.type === constants.API_TOKEN_TYPE.READ_ONLY) {
-    const scopes = castArray(config.scope);
+    // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
+    const scopes = Array.from(castArray(config.scope));
 
     if (config.scope && scopes.every(isReadScope)) {
       return;
@@ -89,7 +91,8 @@ export const verify = (auth: any, config: any) => {
       throw new ForbiddenError();
     }
 
-    const scopes = castArray(config.scope);
+    // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
+    const scopes = Array.from(castArray(config.scope));
     const isAllowed = scopes.every((scope: string) => ability.can(scope));
 
     if (isAllowed === true) {

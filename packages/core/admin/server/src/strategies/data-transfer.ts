@@ -96,7 +96,8 @@ export const verify = async (auth: any, config: any = {}) => {
     throw new ForbiddenError();
   }
 
-  const scopes = castArray(config.scope ?? []);
+  // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
+  const scopes = Array.from(castArray(config.scope ?? []));
 
   const isAllowed = scopes.every((scope) => ability.can(scope));
 
