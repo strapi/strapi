@@ -15,7 +15,7 @@ A query scope is a function that returns a `where` condition for a model. A plug
 
 A plugin uses a scope to narrow every query to the rows that a request may see. For example, a plugin keeps the rows of several groups in the same tables. A read sees the rows of its group and the shared rows, and a write changes only the rows of its group. The `type` in the scope context lets one scope return a different condition for reads and for writes.
 
-Code: [`src/query/scopes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/scopes.ts) (registry), [`src/query/query-builder.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/query-builder.ts) (`processState` and `scopeJoin`), [`src/query/helpers/join.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/helpers/join.ts) (`Join.uid`, `idColumn` and `scope`). Tests: `src/query/__tests__/scopes.test.ts` and `tests/api/core/database/query-scopes.test.api.ts`.
+Code: [`src/query/scopes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/scopes.ts) (registry), [`src/query/query-builder.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/query-builder.ts) (`processState` and `scopeJoin`), [`src/query/helpers/join.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/helpers/join.ts) (`Join.uid`, `idColumn` and `scope`). Tests: `src/query/__tests__/scopes.test.ts` and `tests-next/api/tests/core/database/query-scopes.api-test.ts`.
 
 ## The contract
 

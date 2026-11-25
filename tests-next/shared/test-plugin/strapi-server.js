@@ -22,6 +22,10 @@
  * - POST /seed <SeedPlan>         run the seeders in the running server (lib/seed.js)
  * - POST /db/query { uid, method, params }    strapi.db.query(uid)[method](params) (lib/data.js)
  * - POST /documents { uid, method, params }   strapi.documents(uid)[method](params)
+ * - POST /scripts/run { script, action, args } an action of a server script (lib/scripts.js)
+ *
+ * The server scripts of the app (`test-scripts/*.js`, see lib/scripts.js) are loaded in
+ * `register`, and their own `register` and `bootstrap` run in the plugin's.
  *
  * With `STRAPI_TEST_AI_PROVIDER=fake`, registers a fake AI translations provider. Strapi only
  * accepts a custom provider in EE with the `cms-byok-ai` license feature, and otherwise
@@ -34,6 +38,7 @@ const { createFakeAiTranslationsProvider } = require('./lib/fake-ai-provider');
 const sqliteSnapshot = require('./lib/sqlite-snapshot');
 const { runSeed } = require('./lib/seed');
 const { runDocuments, runQuery } = require('./lib/data');
+const serverScripts = require('./lib/scripts');
 
 /** Changes on every worker start, so a restart can be told apart from the previous worker. */
 const BOOT_ID = `${process.pid}-${Date.now()}`;
@@ -44,6 +49,9 @@ const fakeAi = createFakeAiTranslationsProvider();
 
 /** True once Strapi has accepted the fake AI translations provider. */
 let fakeAiRegistered = false;
+
+/** The app's server scripts, loaded in `register`. */
+let scripts = new Map();
 
 const route = (method, path, handler) => ({
   method,
@@ -56,19 +64,20 @@ const route = (method, path, handler) => ({
  * Answers `{ result }`. An error is a test mistake (unknown uid, bad params) or what the test
  * checks (a validation error): return it whole, with its name, instead of a bare 500.
  */
-const answerData = async (ctx, run) => {
+const answerData = async (ctx, run, { stack = false } = {}) => {
   try {
     // JSON drops an `undefined` value: `null` keeps `result` in the body when a method returns
     // nothing.
     ctx.body = { result: (await run()) ?? null };
   } catch (error) {
+    const { stack: errorStack, ...serialized } = serverScripts.serializeError(error);
     ctx.status = 400;
-    ctx.body = { error: { name: error.name, message: error.message, details: error.details } };
+    ctx.body = { error: stack ? { ...serialized, stack: errorStack } : serialized };
   }
 };
 
 module.exports = {
-  register({ strapi }) {
+  async register({ strapi }) {
     if (!isEnabled()) {
       throw new Error(
         `The tests plugin is loaded but ${constants.envVar} is not "true". It must never run outside the test apps.`
@@ -88,11 +97,15 @@ module.exports = {
       }
       fakeAiRegistered = true;
     }
+
+    scripts = serverScripts.loadScripts(strapi);
+    await serverScripts.runHook(scripts, 'register', strapi);
   },
 
   async bootstrap({ strapi }) {
     // The old app template turned the rate limit off on every boot; tests turn it back on.
     strapi.config.set('admin.rateLimit.enabled', false);
+    await serverScripts.runHook(scripts, 'bootstrap', strapi);
   },
 
   policies: {
@@ -116,6 +129,7 @@ module.exports = {
         route('POST', '/seed', 'seed'),
         route('POST', '/db/query', 'query'),
         route('POST', '/documents', 'documents'),
+        route('POST', '/scripts/run', 'runScript'),
       ],
     },
   },
@@ -229,6 +243,12 @@ module.exports = {
 
       async documents(ctx) {
         await answerData(ctx, () => runDocuments(strapi, ctx.request.body));
+      },
+
+      async runScript(ctx) {
+        await answerData(ctx, () => serverScripts.runScript(strapi, scripts, ctx.request.body), {
+          stack: true,
+        });
       },
 
       clearAiCalls(ctx) {

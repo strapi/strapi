@@ -8,6 +8,7 @@
     "test:ts": "run -T tsc -p tsconfig.json"
   },
   "devDependencies": {
+    "@strapi/database": "workspace:*",
     "@strapi/tests-shared": "workspace:*",
     "@strapi/types": "workspace:*",
     "@types/node": "22.20.0",

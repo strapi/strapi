@@ -6,3 +6,4 @@ export * from './scaffold';
 export * from './seed';
 export * from './edition';
 export * from './data';
+export * from './scripts';

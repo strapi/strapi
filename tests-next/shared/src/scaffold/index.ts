@@ -69,6 +69,14 @@ export const scaffoldContentType = (app: App, definition: ContentTypeDefinition)
     throw new Error(`Content type names must be kebab-case: ${singularName}, ${pluralName}.`);
   }
 
+  // The test plugin's routes live under /api/tests: a content type routed there (GET
+  // /api/tests/:id) answers instead of them, and the server fails its edition check with a 403.
+  if ((kind === 'singleType' ? singularName : pluralName) === 'tests') {
+    throw new Error(
+      `A content type routed at /api/tests hides the test plugin's routes: rename "${singularName}".`
+    );
+  }
+
   const uid = `api::${singularName}.${singularName}`;
   const apiDir = path.join(app.dir, 'src', 'api', singularName);
 
@@ -237,4 +245,24 @@ export const scaffoldPlugin = (
   scaffoldConfig(app, 'plugins', {
     [name]: { enabled, ...(config ? { config } : {}), ...(resolve ? { resolve } : {}) },
   });
+};
+
+/**
+ * Add a package the repo has to the app's dependencies, as `yarn add` would, for example a
+ * plugin of the monorepo: `scaffoldDependency(app, '@strapi/plugin-graphql')`. Strapi loads every
+ * plugin the app's package.json depends on. Nothing is installed: the package resolves from the
+ * repo root, at its workspace version.
+ */
+export const scaffoldDependency = (app: App, packageName: string) => {
+  let manifest: string;
+  try {
+    manifest = require.resolve(`${packageName}/package.json`, { paths: [app.dir] });
+  } catch {
+    throw new Error(`${packageName} is not a package of the repo: cannot add it to ${app.name}.`);
+  }
+  const { version } = JSON.parse(fs.readFileSync(manifest, 'utf8'));
+  const file = path.join(app.dir, 'package.json');
+  const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+  pkg.dependencies = { ...pkg.dependencies, [packageName]: version };
+  fs.writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
 };

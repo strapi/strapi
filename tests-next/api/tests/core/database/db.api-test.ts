@@ -1,49 +1,29 @@
-'use strict';
-
 // `strapi.db.query` behaviour: createMany batching, deep filters, deleteMany (incl. relation + filters parity).
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createTestBuilder } = require('api-tests/builder');
+// The db query API is what this file tests: it calls it through `queryDb`, in the server.
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { queryDb, scaffoldContentType, stopAllServers } from '@strapi/tests-shared';
+import type { UID } from '@strapi/types';
 
-const builder = createTestBuilder();
-let strapi;
+import { setupApp, type TestApp } from '../../helpers';
 
-const testCT = {
-  displayName: 'test',
-  singularName: 'test',
-  pluralName: 'tests',
-  kind: 'collectionType',
-  attributes: {
-    name: {
-      type: 'string',
-    },
-    locale: {
-      type: 'string',
-    },
-    related: {
-      type: 'relation',
-      relation: 'manyToOne',
-      target: 'api::related.related',
-    },
-  },
-};
+// `api::test.test` in the old suite: a content type routed at /api/tests hides the test plugin
+const TEST_UID: UID.ContentType = 'api::db-test.db-test';
+const RELATED_UID: UID.ContentType = 'api::related.related';
 
-const relatedCT = {
-  displayName: 'related',
-  singularName: 'related',
-  pluralName: 'relateds',
-  kind: 'collectionType',
-  attributes: {
-    title: {
-      type: 'string',
-    },
-    locale: {
-      type: 'string',
-    },
-  },
-};
+type Row = { id: number } & Record<string, any>;
+type Params = Record<string, unknown>;
+
+interface DeleteManyCase {
+  label: string;
+  params?: Params;
+  /** For cases that need runtime ids from the DB. */
+  getParams?: () => Promise<Params>;
+  deletedCount: number;
+  remaining: string[];
+}
 
 const fixtures = {
-  test: ({ related }) => {
+  test({ related }: { related: Row[] }) {
     return [
       {
         name: 'Hugo LLORIS',
@@ -74,8 +54,75 @@ const fixtures = {
   ],
 };
 
-const TEST_UID = 'api::test.test';
-const RELATED_UID = 'api::related.related';
+let ctx: TestApp;
+const server = () => ctx.server;
+
+const query = <T = any>(
+  method: Parameters<typeof queryDb>[2],
+  params: Params = {},
+  uid: UID.ContentType = TEST_UID
+) => queryDb<T>(ctx.server, uid, method, params);
+
+/** The fixture rows of the test content type, and only them. */
+const resetTestEntries = async () => {
+  await query('deleteMany', {});
+  const related = await query<Row[]>('findMany', { orderBy: { id: 'asc' } }, RELATED_UID);
+
+  for (const entry of fixtures.test({ related })) {
+    await query('create', { data: entry });
+  }
+};
+
+const remainingNamesOf = async () =>
+  (await query<Row[]>('findMany')).map((entry) => entry.name).sort();
+
+beforeAll(async () => {
+  ctx = await setupApp({
+    name: 'db-query',
+    scaffold(app) {
+      scaffoldContentType(app, {
+        displayName: 'related',
+        singularName: 'related',
+        pluralName: 'relateds',
+        attributes: {
+          title: {
+            type: 'string',
+          },
+          locale: {
+            type: 'string',
+          },
+        },
+      });
+      scaffoldContentType(app, {
+        displayName: 'test',
+        singularName: 'db-test',
+        pluralName: 'db-tests',
+        attributes: {
+          name: {
+            type: 'string',
+          },
+          locale: {
+            type: 'string',
+          },
+          related: {
+            type: 'relation',
+            relation: 'manyToOne',
+            target: RELATED_UID,
+          },
+        },
+      });
+    },
+  });
+
+  for (const data of fixtures.related) {
+    await query('create', { data }, RELATED_UID);
+  }
+});
+
+afterAll(stopAllServers);
+
+// Each test starts from the fixture rows (the old suite rebuilt the app or reset them)
+beforeEach(resetTestEntries);
 
 /** Fixture rows: Hugo + Lucas → Category A; Samuel → Category B */
 const ALL_ENTRY_NAMES = ['Hugo LLORIS', 'Lucas HERNANDEZ', 'Samuel UMTITI'];
@@ -85,7 +132,7 @@ const ALL_RELATED_TITLES = ['Category A', 'Category B'];
  * deleteMany filter matrix (GH#11998, PR #25420).
  * Each case asserts count/deleteMany parity and the surviving row names.
  */
-const deleteManyFilterCases = [
+const deleteManyFilterCases: DeleteManyCase[] = [
   // --- where only ---
   {
     label: 'where: scalar field',
@@ -227,7 +274,7 @@ const deleteManyFilterCases = [
  * Relation-filtered deleteMany must remove source rows only — never the joined targets.
  * `getParams` is optional for cases that need runtime ids from the DB.
  */
-const deleteManyPreservesRelationTargetsCases = [
+const deleteManyPreservesRelationTargetsCases: DeleteManyCase[] = [
   {
     label: 'where: nested relation title',
     params: { where: { related: { title: 'Category A' } } },
@@ -242,10 +289,10 @@ const deleteManyPreservesRelationTargetsCases = [
   },
   {
     label: 'where: nested relation id',
-    getParams: async () => {
-      const categoryA = await strapi.db
-        .query(RELATED_UID)
-        .findOne({ where: { title: 'Category A' } });
+    async getParams() {
+      const categoryA = await queryDb<Row>(server(), RELATED_UID, 'findOne', {
+        where: { title: 'Category A' },
+      });
       return { where: { related: { id: categoryA.id } } };
     },
     deletedCount: 2,
@@ -287,7 +334,7 @@ const deleteManyPreservesRelationTargetsCases = [
  * deleteMany uses pick(['_q', 'where', 'filters']) — same filter keys as count, not full findMany params.
  * Pagination/populate/select must not change which rows are deleted.
  */
-const deleteManyIgnoredParamCases = [
+const deleteManyIgnoredParamCases: Array<DeleteManyCase & { expectedCount: number }> = [
   {
     label: 'limit is ignored',
     params: { where: { related: { title: 'Category A' } }, limit: 1 },
@@ -353,7 +400,7 @@ const deleteManyIgnoredParamCases = [
 ];
 
 /** deleteMany and count share the same picked filter keys. */
-const deleteManyCountParityCases = [
+const deleteManyCountParityCases: Array<{ label: string; params: Params }> = [
   { label: 'where only', params: { where: { related: { title: 'Category A' } } } },
   { label: 'filters only', params: { filters: { name: 'Samuel UMTITI' } } },
   {
@@ -365,25 +412,8 @@ const deleteManyCountParityCases = [
 ];
 
 describe('Deep Filtering API', () => {
-  beforeEach(async () => {
-    await builder
-      .addContentTypes([relatedCT, testCT])
-      .addFixtures(relatedCT.singularName, fixtures.related)
-      .addFixtures(testCT.singularName, fixtures.test)
-      .build();
-
-    strapi = await createStrapiInstance();
-  });
-
-  afterEach(async () => {
-    await strapi.destroy();
-    await builder.cleanup();
-  });
-
   test('Return an array of ids on createMany', async () => {
-    const res = await strapi.db
-      .query('api::test.test')
-      .createMany({ data: [{ name: 'foo' }, { name: 'bar' }] });
+    const res = await query('createMany', { data: [{ name: 'foo' }, { name: 'bar' }] });
 
     expect(res).toMatchObject({ count: expect.any(Number) });
     expect(Array.isArray(res.ids)).toBe(true);
@@ -396,60 +426,27 @@ describe('Deep Filtering API', () => {
   test('createMany with 550 items succeeds on all databases (batched insert)', async () => {
     const count = 550;
     const data = Array.from({ length: count }, (_, i) => ({ name: `item-${i}` }));
-    const res = await strapi.db.query('api::test.test').createMany({ data });
+    const res = await query('createMany', { data });
 
     expect(res.count).toBe(count);
     expect(Array.isArray(res.ids)).toBe(true);
     expect(res.ids.length).toBe(count);
-  }, 120000);
+  });
 });
 
 /**
- * deleteMany filter matrix — one Strapi boot, reset rows between cases.
- * Avoids 18× listen/destroy cycles (~3 min) and reduces open-handle noise at teardown.
+ * deleteMany filter matrix: one Strapi boot, rows reset between cases.
  */
 describe('deleteMany filter params', () => {
-  const resetTestEntries = async () => {
-    await strapi.db.query(TEST_UID).deleteMany({});
-    const related = await strapi.db
-      .query('api::related.related')
-      .findMany({ orderBy: { id: 'asc' } });
-
-    for (const entry of fixtures.test({ related })) {
-      await strapi.db.query(TEST_UID).create({ data: entry });
-    }
-  };
-
-  beforeAll(async () => {
-    await builder
-      .addContentTypes([relatedCT, testCT])
-      .addFixtures(relatedCT.singularName, fixtures.related)
-      .addFixtures(testCT.singularName, fixtures.test)
-      .build();
-
-    strapi = await createStrapiInstance();
-  });
-
-  afterAll(async () => {
-    await strapi.destroy();
-    await builder.cleanup();
-  });
-
-  beforeEach(async () => {
-    await resetTestEntries();
-  });
-
   test.each(deleteManyFilterCases)(
     'deleteMany ($label): count/deleteMany agree and remaining rows match',
     async ({ params, deletedCount, remaining }) => {
-      expect(await strapi.db.query(TEST_UID).count(params)).toBe(deletedCount);
+      expect(await query('count', params)).toBe(deletedCount);
 
-      const deleteRes = await strapi.db.query(TEST_UID).deleteMany(params);
+      const deleteRes = await query('deleteMany', params);
       expect(deleteRes.count).toBe(deletedCount);
 
-      const remainingNames = (await strapi.db.query(TEST_UID).findMany())
-        .map((entry) => entry.name)
-        .sort();
+      const remainingNames = await remainingNamesOf();
 
       expect(remainingNames).toEqual([...remaining].sort());
     }
@@ -458,23 +455,21 @@ describe('deleteMany filter params', () => {
   test.each(deleteManyPreservesRelationTargetsCases)(
     'deleteMany ($label): does not delete relation targets used in the filter',
     async ({ params, getParams, deletedCount, remaining }) => {
-      const relatedBefore = await strapi.db.query(RELATED_UID).findMany({ orderBy: { id: 'asc' } });
+      const relatedBefore = await query<Row[]>('findMany', { orderBy: { id: 'asc' } }, RELATED_UID);
 
       expect(relatedBefore.map((entry) => entry.title)).toEqual(ALL_RELATED_TITLES);
 
       const queryParams = getParams ? await getParams() : params;
 
-      expect(await strapi.db.query(TEST_UID).count(queryParams)).toBe(deletedCount);
+      expect(await query('count', queryParams)).toBe(deletedCount);
 
-      const deleteRes = await strapi.db.query(TEST_UID).deleteMany(queryParams);
+      const deleteRes = await query('deleteMany', queryParams);
       expect(deleteRes.count).toBe(deletedCount);
 
-      const remainingNames = (await strapi.db.query(TEST_UID).findMany())
-        .map((entry) => entry.name)
-        .sort();
+      const remainingNames = await remainingNamesOf();
       expect(remainingNames).toEqual([...remaining].sort());
 
-      const relatedAfter = await strapi.db.query(RELATED_UID).findMany({ orderBy: { id: 'asc' } });
+      const relatedAfter = await query<Row[]>('findMany', { orderBy: { id: 'asc' } }, RELATED_UID);
 
       expect(relatedAfter).toHaveLength(relatedBefore.length);
       relatedAfter.forEach((entry, index) => {
@@ -484,7 +479,7 @@ describe('deleteMany filter params', () => {
 
       // Surviving source rows keep a valid relation to an untouched target.
       if (remaining.length > 0) {
-        const survivors = await strapi.db.query(TEST_UID).findMany({
+        const survivors = await query<Row[]>('findMany', {
           populate: { related: { select: ['title'] } },
         });
 
@@ -499,18 +494,16 @@ describe('deleteMany filter params', () => {
   test.each(deleteManyIgnoredParamCases)(
     'deleteMany ignored params ($label)',
     async ({ params, deletedCount, remaining, expectedCount }) => {
-      expect(await strapi.db.query(TEST_UID).count(params)).toBe(expectedCount);
+      expect(await query('count', params)).toBe(expectedCount);
 
-      const deleteRes = await strapi.db.query(TEST_UID).deleteMany(params);
+      const deleteRes = await query('deleteMany', params);
       expect(deleteRes.count).toBe(deletedCount);
       expect(deleteRes.count).toBe(expectedCount);
 
-      const remainingNames = (await strapi.db.query(TEST_UID).findMany())
-        .map((entry) => entry.name)
-        .sort();
+      const remainingNames = await remainingNamesOf();
       expect(remainingNames).toEqual([...remaining].sort());
 
-      const relatedAfter = await strapi.db.query(RELATED_UID).findMany();
+      const relatedAfter = await query<Row[]>('findMany', {}, RELATED_UID);
       expect(relatedAfter.map((entry) => entry.title).sort()).toEqual(
         [...ALL_RELATED_TITLES].sort()
       );
@@ -520,18 +513,16 @@ describe('deleteMany filter params', () => {
   test.each(deleteManyCountParityCases)(
     'deleteMany ($label): delete count matches count() with the same params',
     async ({ params }) => {
-      expect(await strapi.db.query(TEST_UID).count(params)).toBe(
-        (await strapi.db.query(TEST_UID).deleteMany(params)).count
-      );
+      expect(await query('count', params)).toBe((await query('deleteMany', params)).count);
     }
   );
 
   test('deleteMany: limit in params does not cap deletions (unlike findMany)', async () => {
     const params = { where: { related: { title: 'Category A' } }, limit: 1 };
 
-    expect(await strapi.db.query(TEST_UID).findMany(params)).toHaveLength(1);
-    expect(await strapi.db.query(TEST_UID).count(params)).toBe(2);
-    expect((await strapi.db.query(TEST_UID).deleteMany(params)).count).toBe(2);
+    expect(await query('findMany', params)).toHaveLength(1);
+    expect(await query('count', params)).toBe(2);
+    expect((await query('deleteMany', params)).count).toBe(2);
   });
 });
 
@@ -539,73 +530,41 @@ describe('deleteMany filter params', () => {
  * updateMany with relation filters uses the same subquery path as deleteMany (GH#11998 class).
  */
 describe('updateMany relation filters', () => {
-  const resetTestEntries = async () => {
-    await strapi.db.query(TEST_UID).deleteMany({});
-    const related = await strapi.db
-      .query('api::related.related')
-      .findMany({ orderBy: { id: 'asc' } });
-
-    for (const entry of fixtures.test({ related })) {
-      await strapi.db.query(TEST_UID).create({ data: entry });
-    }
-  };
-
-  beforeAll(async () => {
-    await builder
-      .addContentTypes([relatedCT, testCT])
-      .addFixtures(relatedCT.singularName, fixtures.related)
-      .addFixtures(testCT.singularName, fixtures.test)
-      .build();
-
-    strapi = await createStrapiInstance();
-  });
-
-  afterAll(async () => {
-    await strapi.destroy();
-    await builder.cleanup();
-  });
-
-  beforeEach(async () => {
-    await resetTestEntries();
-  });
-
   test('updateMany: nested relation where updates matching rows only', async () => {
-    const result = await strapi.db.query(TEST_UID).updateMany({
+    const result = await query('updateMany', {
       where: { related: { title: 'Category A' } },
       data: { name: 'UPDATED' },
     });
 
     expect(result.count).toBe(2);
 
-    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    const names = await remainingNamesOf();
     expect(names).toEqual(['Samuel UMTITI', 'UPDATED', 'UPDATED']);
   });
 
   test('updateMany: relation + overlapping locale applies the root predicate', async () => {
-    const result = await strapi.db.query(TEST_UID).updateMany({
+    const result = await query('updateMany', {
       where: { related: { title: 'Category A' }, locale: 'en' },
       data: { name: 'UPDATED LOCALE' },
     });
 
     expect(result.count).toBe(1);
 
-    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    const names = await remainingNamesOf();
     expect(names).toEqual(['Lucas HERNANDEZ', 'Samuel UMTITI', 'UPDATED LOCALE']);
   });
 
   test('updateMany: scalar relation id shorthand', async () => {
-    const categoryB = await strapi.db
-      .query(RELATED_UID)
-      .findOne({ where: { title: 'Category B' } });
+    const categoryB = await query<Row>('findOne', { where: { title: 'Category B' } }, RELATED_UID);
 
-    const result = await strapi.db.query(TEST_UID).updateMany({
+    const result = await query('updateMany', {
       where: { related: categoryB.id },
       data: { name: 'CATEGORY B ROW' },
     });
 
     expect(result.count).toBe(1);
 
-    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    const names = await remainingNamesOf();
     expect(names).toEqual(['CATEGORY B ROW', 'Hugo LLORIS', 'Lucas HERNANDEZ']);
   });
 
@@ -617,19 +576,19 @@ describe('updateMany relation filters', () => {
    * space never can.
    */
   test('updateMany: _q updates matching rows only', async () => {
-    const result = await strapi.db.query(TEST_UID).updateMany({
+    const result = await query('updateMany', {
       _q: 'Hugo LLORIS',
       data: { name: 'Q UPDATED' },
     });
 
     expect(result.count).toBe(1);
 
-    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    const names = await remainingNamesOf();
     expect(names).toEqual(['Lucas HERNANDEZ', 'Q UPDATED', 'Samuel UMTITI']);
   });
 
   test('updateMany: _q + relation where updates matching rows only', async () => {
-    const result = await strapi.db.query(TEST_UID).updateMany({
+    const result = await query('updateMany', {
       _q: 'Hugo LLORIS',
       where: { related: { title: 'Category A' } },
       data: { name: 'Q UPDATED' },
@@ -637,12 +596,12 @@ describe('updateMany relation filters', () => {
 
     expect(result.count).toBe(1);
 
-    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    const names = await remainingNamesOf();
     expect(names).toEqual(['Lucas HERNANDEZ', 'Q UPDATED', 'Samuel UMTITI']);
   });
 
   test('updateMany: filters + relation where updates matching rows only', async () => {
-    const result = await strapi.db.query(TEST_UID).updateMany({
+    const result = await query('updateMany', {
       where: { related: { title: 'Category A' } },
       filters: { name: 'Hugo LLORIS' },
       data: { name: 'FILTERED' },
@@ -650,7 +609,7 @@ describe('updateMany relation filters', () => {
 
     expect(result.count).toBe(1);
 
-    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    const names = await remainingNamesOf();
     expect(names).toEqual(['FILTERED', 'Lucas HERNANDEZ', 'Samuel UMTITI']);
   });
 });
