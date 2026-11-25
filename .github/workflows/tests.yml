@@ -1034,6 +1034,14 @@ jobs:
   # package.json and its Playwright pin, yarn.lock) like the other test jobs. Then the `if:`
   # becomes nx affected (CMS-2242): the suites depend on @strapi/tests-shared, which depends on
   # @strapi/strapi, so a change in a tested package triggers them.
+  #
+  # Editions (RFC D6, tests-next/README.md "Edition"): each suite runs in full as CE, plus an EE
+  # leg (STRAPI_TEST_EDITION=ee with the license secret). The ui EE leg replays the `@ee` and
+  # `@smoke` tests only (playwright.config.ts); the api and cli EE legs run on SQLite only.
+  # The EE legs need the license secret. On pull requests only local branches have it
+  # (is_local, which is false on every other event), so pushes always run them. Fork and
+  # Dependabot PRs get no EE leg: the suites fail an EE run without a license rather than test
+  # CE, so the leg is left out of the matrix instead.
   tests_next_ui:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
@@ -1051,12 +1059,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # `ee` only where the license secret is available (see above).
+        edition: ${{ fromJSON((github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true') && '["ce","ee"]' || '["ce"]') }}
         # `project` is a Playwright project of tests-next/ui/playwright.config.ts (WebKit is
-        # defined when CI is set). One worker per job, no sharding yet (CMS-2483). `edition` is a
-        # label for now: the suites read STRAPI_TEST_EDITION (default ce, CMS-1944), and the EE
-        # replay of the @ee and @smoke tests (an `ee` entry with the license secret) comes with
-        # CMS-2242.
-        edition: [ce]
+        # defined when CI is set). One worker per job, no sharding yet (CMS-2483).
         project: [chromium, webkit]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -1069,6 +1075,9 @@ jobs:
         uses: ./.github/actions/run-build
       - name: Run tests-next ui
         run: yarn nx run @strapi/tests-e2e:test --skip-nx-cache -- --project=${{ matrix.project }}
+        env:
+          STRAPI_TEST_EDITION: ${{ matrix.edition }}
+          STRAPI_LICENSE: ${{ matrix.edition == 'ee' && secrets.strapiLicense || '' }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -1083,12 +1092,15 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
     needs: [conditions, build]
-    name: 'tests-next api (ce, ${{ matrix.database }})'
+    name: 'tests-next api (${{ matrix.edition }}, ${{ matrix.database }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
+        edition: [ce]
         database: [sqlite, postgres, mysql]
+        # The EE leg, on SQLite only, where the license secret is available (see tests_next_ui).
+        include: ${{ fromJSON((github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true') && '[{"edition":"ee","database":"sqlite"}]' || '[]') }}
     # Same images as the API integration jobs. A service whose image is empty doesn't start, so
     # each matrix entry starts only its own database. Credentials match the TESTS_DATABASE_*
     # defaults (tests-next/shared/src/db/database.ts): the suites create and drop a database per
@@ -1134,10 +1146,12 @@ jobs:
         run: yarn nx run @strapi/tests-api:test --skip-nx-cache
         env:
           TESTS_DATABASE: ${{ matrix.database }}
+          STRAPI_TEST_EDITION: ${{ matrix.edition }}
+          STRAPI_LICENSE: ${{ matrix.edition == 'ee' && secrets.strapiLicense || '' }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
-          name: tests-next-api-${{ matrix.database }}-reports
+          name: tests-next-api-${{ matrix.edition }}-${{ matrix.database }}-reports
           path: test-apps/next/reports/junit/
           retention-days: 7
           if-no-files-found: ignore
@@ -1146,12 +1160,15 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
     needs: [conditions, build]
-    name: 'tests-next cli (ce, ${{ matrix.database }})'
+    name: 'tests-next cli (${{ matrix.edition }}, ${{ matrix.database }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
+        edition: [ce]
         database: [sqlite, postgres, mysql]
+        # The EE leg, on SQLite only, where the license secret is available (see tests_next_ui).
+        include: ${{ fromJSON((github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true') && '[{"edition":"ee","database":"sqlite"}]' || '[]') }}
     # Same images as the API integration jobs. A service whose image is empty doesn't start, so
     # each matrix entry starts only its own database. Credentials match the TESTS_DATABASE_*
     # defaults (tests-next/shared/src/db/database.ts): the suites create and drop a database per
@@ -1197,10 +1214,12 @@ jobs:
         run: yarn nx run @strapi/tests-cli:test --skip-nx-cache
         env:
           TESTS_DATABASE: ${{ matrix.database }}
+          STRAPI_TEST_EDITION: ${{ matrix.edition }}
+          STRAPI_LICENSE: ${{ matrix.edition == 'ee' && secrets.strapiLicense || '' }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
-          name: tests-next-cli-${{ matrix.database }}-reports
+          name: tests-next-cli-${{ matrix.edition }}-${{ matrix.database }}-reports
           path: test-apps/next/reports/junit/
           retention-days: 7
           if-no-files-found: ignore
