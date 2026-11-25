@@ -98,6 +98,93 @@ test('blocks an end user', async ({ seed, unique }) => {
 There is no `sharedSetup`: the per-file reset and `seedPlan` give each file its own data, and
 `role` its login, with no module-level registry of setup ids that two files could share.
 
+## Page Objects and interactions
+
+Selectors live in Page Objects, never in tests. When the selector strategy changes (test ids, a
+design-system update), only Page Objects change.
+
+| Folder                                       | What                                                                                     |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [`pages/`](./pages/index.ts)                 | One class per page of the panel, grouped like the panel (`pages/settings/roles-page.ts`) |
+| [`components/`](./components/index.ts)       | UI shared by pages: `Navigation` (main menu, Settings menu), `ConfirmDialog`             |
+| [`pages/responses.ts`](./pages/responses.ts) | `adminResponse(page, method, pathname)`: waits for the admin API call a click causes     |
+
+Tests create Page Objects with `new`, from the page they drive. Example from
+[`tests/settings/rbac/create-role.ui-test.ts`](./tests/settings/rbac/create-role.ui-test.ts):
+
+```ts
+import { expect, test } from '../../../fixtures';
+import { RolePage, RolesPage } from '../../../pages';
+
+test('Super Admin can create a new role', { tag: ['@critical'] }, async ({ page }) => {
+  const roles = new RolesPage(page);
+  const role = new RolePage(page);
+
+  await roles.goto();
+  await roles.addRole();
+  await role.fill({ name: 'Publisher', description: 'Role with publishing capabilities' });
+  await role.permission('Publish', 'article').check();
+  await role.create();
+
+  await roles.open(); // through the main navigation and the Settings menu
+  await expect(roles.cell('Publisher', 'Role with publishing capabilities')).toBeVisible();
+});
+```
+
+- **Constructors, not a fixture.** A Page Object only needs a `Page`, so `new RolesPage(page)`
+  works the same for the test's page and for a second context opened as another role
+  (`storageStates`). The fixtures stay about the app, roles and data.
+- **One class per page, component objects for shared UI.** A page opens itself (`goto()` by URL,
+  `open()` through `Navigation`) and waits until it shows (its heading or first field). The menus
+  are in `Navigation` only, so a menu change is fixed in one place.
+- **Page Objects act and expose locators; tests assert.** `roles.row('Editor')`,
+  `role.permission('Read', 'article')` and `user.roles` are locators the test checks with
+  `expect`. Waiting for the page to be ready (`await expect(this.heading).toBeVisible()`) is the
+  only `expect` inside a Page Object.
+- **Selectors**: roles and accessible names (`getByRole`, `getByText`), scoped to a landmark or a
+  row (`navigation 'Settings'`, `row.filter({ has: gridcell })`), `exact: true` when a name is a
+  prefix of another (`Editor` / `Super Editor`, `Settings` / `Profile settings`). No positional index (`nth()`, `.last()`), XPath, `'..'` or CSS selectors: a legacy one
+  that uses them is rewritten from the page's accessibility tree, not ported. `.first()` only
+  picks between copies of one control (`Add new role` shows above and below the list).
+  [`RolesPage.row`](./pages/settings/roles-page.ts) replaces a substring row match,
+  [`Navigation.settingsLink`](./components/navigation.ts) replaces the XPath of `navToHeader`.
+- **Waits**: no `networkidle`, no `clickAndWait`, no `waitForTimeout`. After a click, wait for
+  what it causes: a locator (`expect(dialog).toBeHidden()`), a URL
+  (`expect(page).toHaveURL(/roles\/\d+$/)` after creating a role), or the API response when
+  nothing visible changes (`RolePage.save()`):
+
+  ```ts
+  const saved = adminResponse(this.page, 'PUT', /^\/admin\/roles\/\d+$/);
+  await this.page.getByRole('button', { name: 'Save' }).click();
+  await saved; // throws when the response isn't a success
+  ```
+
+- **Content types**: tests use the content types of [`setup/schema.ts`](./setup/schema.ts),
+  written into the app by global setup before any server starts (the role specs need `article`
+  in the permission matrix). Add one there when a migrated spec needs it.
+
+## Migrating a domain
+
+The legacy suite (`tests/e2e`) moves here domain by domain (`settings` first, CMS-1956).
+
+- **Where a new test goes**: where its domain lives at that moment, `tests/e2e` until the domain
+  is migrated, `tests-next/ui` after. While a migration PR for a domain is open, new tests for
+  that domain are agreed with its author and migrated in the same PR. The legacy folder is not
+  frozen as a whole.
+- **Moved, not rewritten**: a migrated test keeps its name, tags, intent and assertions. Only
+  what this suite does differently changes: setup (`role` instead of UI logins, `seedPlan` /
+  `seed` instead of DTS imports and `sharedSetup`), selectors (into Page Objects) and forbidden
+  waits. Each test is independent: it seeds what it needs and never relies on another test.
+
+Checklist for each migration PR:
+
+1. **Inventory**: list every legacy test of the migrated files, and say where each one went
+   (file and test name) or why it was dropped.
+2. **Delete the legacy files** in the same PR, with their entries in
+   `tests/e2e/shard-weights.json` and any legacy helper only they used.
+3. **Runtime**: give the runtime of the migrated tests next to the legacy baseline (a local run
+   of the legacy specs, or their `tests/e2e/shard-weights.json` CI weights).
+
 ## The app
 
 Global setup prepares one app, `test-apps/next/ui`, and builds its admin panel. The next runs
