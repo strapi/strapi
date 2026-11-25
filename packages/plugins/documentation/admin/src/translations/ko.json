@@ -35,5 +35,8 @@
   "pages.SettingsPage.toggle.label": "액세스 제한",
   "plugin.description.long": "Swagger UI를 사용하여 오픈 API 문서를 만들고 API를 시각화합니다.",
   "plugin.description.short": "Swagger UI를 사용하여 오픈 API 문서를 만들고 API를 시각화합니다.",
-  "plugin.name": "도큐멘테이션"
+  "plugin.name": "도큐멘테이션",
+  "Input.error.contain.lowercase": "비밀번호에는 소문자가 하나 이상 포함되어야 합니다",
+  "Input.error.contain.number": "비밀번호에는 숫자가 하나 이상 포함되어야 합니다",
+  "Input.error.contain.uppercase": "비밀번호에는 대문자가 하나 이상 포함되어야 합니다"
 }

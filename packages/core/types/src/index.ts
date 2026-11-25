@@ -1,15 +1,28 @@
-import { Strapi } from './core';
+import type { Strapi } from './core';
 
 export type * as Core from './core';
 export type * as Data from './data';
 export type * as Internal from './internal';
 export type * as Modules from './modules';
 export type * as Plugin from './plugin';
+export type * as Providers from './providers';
 export type * as Public from './public';
 export type * as Schema from './schema';
 export type * as Utils from './utils';
 export type * as Struct from './struct';
 export type * as UID from './uid';
+
+// The upload provider contract also at the root, so the declarations a provider emits import it
+// from `@strapi/types` itself
+export type {
+  ActionOptions as UploadProviderActionOptions,
+  CheckFileSizeOptions as UploadProviderCheckFileSizeOptions,
+  Factory as UploadProviderFactory,
+  Provider as UploadProvider,
+  ProviderFile as UploadProviderFile,
+  SignableProviderFile as UploadProviderSignableFile,
+  StoredProviderFile as UploadProviderStoredFile,
+} from './providers/upload';
 
 declare global {
   // eslint-disable-next-line vars-on-top,no-var

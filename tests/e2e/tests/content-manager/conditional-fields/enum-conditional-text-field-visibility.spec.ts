@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../../../fixtures';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { createContent, fillField } from '../../../../utils/content-creation';
 import { findAndClose, navToHeader } from '../../../../utils/shared';
 import { resetFiles } from '../../../../utils/file-reset';
@@ -8,9 +8,9 @@ import { createComponent, addAttributesToContentType } from '../../../../utils/c
 
 test.describe('Conditional Fields - Enum-controlled conditional text fields and value are cleared when hidden', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test.afterAll(async () => {
@@ -39,7 +39,7 @@ test.describe('Conditional Fields - Enum-controlled conditional text fields and 
     await fillField(page, { name: 'personality', type: 'enumeration', value: 'lazy' });
 
     // Verify favoriteToy field is hidden
-    await page.getByLabel('favoriteToy').isHidden();
+    await expect(page.getByLabel('favoriteToy')).toBeHidden();
 
     // Save the content
     await page.getByRole('button', { name: 'Save' }).click();
@@ -149,9 +149,13 @@ test.describe('Conditional Fields - Enum-controlled conditional text fields and 
 
     await page.getByRole('combobox', { name: 'target' }).click();
     await page.getByRole('option', { name: 'Same window' }).click();
-    await expect(page.getByLabel('linkInternal*')).toBeVisible();
+    const linkInternalInput = page.getByLabel('linkInternal*');
+    await expect(linkInternalInput).toBeVisible();
     await expect(page.getByLabel('linkExternal')).toBeHidden();
-    await page.getByLabel('linkInternal*').fill('/internal-link');
+    await linkInternalInput.fill('/internal-link');
+    // Ensure the controlled field has committed before Publish (avoids Yup seeing an empty value when the DOM already shows text)
+    await expect(linkInternalInput).toHaveValue('/internal-link');
+    await linkInternalInput.blur();
 
     await page.getByRole('button', { name: 'Publish' }).click();
 

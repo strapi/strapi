@@ -1,4 +1,4 @@
-import { merge } from 'lodash/fp';
+import { merge } from 'lodash';
 import { async } from '@strapi/utils';
 
 import type { Context } from 'koa';
@@ -6,6 +6,7 @@ import type { Context } from 'koa';
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
+import { validateGenerateAIMetadataBody } from './validation/admin/ai-metadata';
 
 export default {
   async find(ctx: Context) {
@@ -32,7 +33,7 @@ export default {
       // Start by sanitizing the incoming query
       (q) => pm.sanitizeQuery(q),
       // Add the default query which should not be validated or sanitized
-      (q) => merge(defaultQuery, q),
+      (q) => merge({}, defaultQuery, q),
       // Add the dynamic filters based on permissions' conditions
       (q) => pm.addPermissionsQueryTo(q)
     )(ctx.query);
@@ -83,7 +84,13 @@ export default {
     ctx.body = body;
   },
 
-  async getAIMetadataCount(ctx: Context) {
+  /**
+   * `GET /upload/ai-metadata-jobs/pending-count`
+   *
+   * How many images a backfill job would have to process, i.e. those still
+   * missing AI metadata, alongside the total image count.
+   */
+  async getAIMetadataPendingCount(ctx: Context) {
     const { userAbility } = ctx.state;
 
     const pm = strapi.service('admin::permission').createPermissionsManager({
@@ -123,7 +130,15 @@ export default {
     }
   },
 
-  async generateAIMetadata(ctx: Context) {
+  /**
+   * `POST /upload/ai-metadata-jobs`
+   *
+   * Create a backfill job that generates AI metadata for every image still
+   * missing it, and return the job so the client can poll it. Processing runs
+   * detached from this request; see `generateAIMetadata` for the synchronous
+   * counterpart that works on an explicit selection.
+   */
+  async createAIMetadataJob(ctx: Context) {
     const { userAbility } = ctx.state;
 
     const pm = strapi.service('admin::permission').createPermissionsManager({
@@ -183,12 +198,79 @@ export default {
     }
   },
 
+  /**
+   * `POST /upload/actions/generate-ai-metadata`
+   *
+   * Generate AI metadata for the explicit selection of files in the body,
+   * synchronously: the request resolves once every file has been processed and
+   * reports the outcome per file, so a single bad id or a non-image in the
+   * selection never fails the whole batch.
+   *
+   * For the whole-library backfill, see `createAIMetadataJob`.
+   */
+  async generateAIMetadata(ctx: Context) {
+    const { userAbility } = ctx.state;
+    const { body } = ctx.request;
+
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.update,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    const { fileIds } = await validateGenerateAIMetadataBody(body);
+
+    const aiMetadataService = getService('aiMetadata');
+
+    if (!(await aiMetadataService.isEnabled())) {
+      return ctx.badRequest('AI Metadata service is not enabled');
+    }
+
+    const results = await aiMetadataService.generateForFiles(fileIds, ctx.state.user);
+
+    ctx.body = { data: results };
+  },
+
+  /**
+   * `GET /upload/ai-metadata-jobs/latest`
+   *
+   * The most recent backfill job, whatever its status, sent as the bare body
+   * (see `GetLatestAIMetadataJob`). A client that reloads mid-run picks the
+   * progress bar back up, and one that polls sees the run complete or fail.
+   * 404s when no job exists or AI metadata is not enabled.
+   *
+   * A job whose server stopped or crashed is failed first, so the client sees
+   * it fail without waiting for a server to restart. If that sweep fails, the
+   * error is logged and the job is still sent: an error response would stop the
+   * settings page polling a job that may still run.
+   */
   async getLatestAIMetadataJob(ctx: Context) {
+    if ((await getService('aiMetadata').isEnabled()) === false) {
+      return ctx.notFound();
+    }
+
     const jobService = getService('aiMetadataJobs');
+
+    try {
+      await jobService.failInterruptedJobs();
+    } catch (error) {
+      strapi.log.error(
+        'Could not fail the interrupted AI metadata jobs before reading the latest one',
+        {
+          message: error instanceof Error ? error.message : String(error),
+          error,
+        }
+      );
+    }
+
     const job = await jobService.getLatestActiveJob();
 
     if (!job) {
-      return ctx.notFound('No active job found');
+      return ctx.notFound('No AI metadata job found');
     }
 
     ctx.body = job;

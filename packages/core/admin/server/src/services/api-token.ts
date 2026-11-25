@@ -1,25 +1,126 @@
+import {
+  pick,
+  omit,
+  difference,
+  isEmpty,
+  isNumber,
+  differenceWith,
+  isEqual,
+  isPlainObject,
+  mapValues,
+} from 'lodash';
 import crypto from 'crypto';
-import { omit, difference, isNil, isEmpty, map, isArray, uniq, isNumber } from 'lodash/fp';
-import type { Core } from '@strapi/types';
-import { errors } from '@strapi/utils';
-import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
+
+import type { Core, Data } from '@strapi/types';
+import { errors, emitAudit, quoteForLog } from '@strapi/utils';
+import type { Ability } from '@casl/ability';
+import type {
+  Update,
+  ContentApiApiToken,
+  ContentApiApiTokenBody,
+} from '../../../shared/contracts/api-token';
+import type { AdminApiToken, AdminTokenBody } from '../../../shared/contracts/admin-token';
+import type { AdminTokenOwner, AdminUser, Permission } from '../../../shared/contracts/shared';
 import constants from './constants';
 import { getService } from '../utils';
+import permissionDomain from '../domain/permission';
+import { validatePermissionsExist } from '../validation/permission';
+import {
+  toEnforcedCeilingPermissions,
+  toEnforcedParameterizedPermissions,
+} from './permission/enforced-permissions';
+import { findRequesterCeilings } from './permission/ceiling-requester';
+import type { CeilingPermission } from '../domain/permission/ceiling';
+import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
+import {
+  AUDITED_EVENTS,
+  getTokenChanges,
+  toActionRefs,
+  toAdminPermissionRefs,
+} from '../audit-logs/tokens';
+import type { PermissionRef, TokenKind } from '../audit-logs/tokens';
 
-const { ValidationError, NotFoundError } = errors;
+type AnyApiToken = ContentApiApiToken | AdminApiToken;
 
-type ApiTokenPermission = {
-  id: number | `${number}`;
-  action: string;
-  token: DBApiToken | number;
+const { SUPER_ADMIN_CODE } = constants;
+
+const { ValidationError, NotFoundError, UnauthorizedError } = errors;
+
+export type AdminTokenAuthenticationResult =
+  | { authenticated: false; error?: InstanceType<typeof UnauthorizedError> }
+  | { authenticated: true; credentials: AdminApiToken; user: AdminUser; ability: Ability };
+
+const assertOwnerMatchesCallingUser = async (
+  adminUserOwner: Data.ID,
+  callingUser: AdminUser | undefined
+): Promise<void> => {
+  if (callingUser === undefined || callingUser === null) {
+    throw new ValidationError('adminUserOwner requires an authenticated admin user');
+  }
+
+  const ownerId = String(adminUserOwner);
+  const callingUserId = String(callingUser.id);
+
+  if (ownerId !== callingUserId) {
+    throw new ValidationError('adminUserOwner must match the authenticated admin user');
+  }
+
+  const existingUser = await strapi.db.query('admin::user').findOne({
+    select: ['id'],
+    where: { id: callingUser.id },
+  });
+
+  if (existingUser === null || existingUser === undefined) {
+    throw new ValidationError('adminUserOwner must reference an existing admin user');
+  }
 };
 
-type DBApiToken = ApiToken & {
-  permissions: (number | ApiTokenPermission)[];
+const isSuperAdmin = (user: AdminUser | undefined): boolean =>
+  user?.roles?.some((r) => r.code === SUPER_ADMIN_CODE) === true;
+
+const getOwnerId = (token: AdminApiToken): string => {
+  const owner = token.adminUserOwner;
+  return String(typeof owner === 'object' ? owner.id : owner);
+};
+
+const resolveAdminTokenOwnerId = (token: AdminApiToken): Data.ID | null => {
+  const owner = token.adminUserOwner;
+
+  if (owner === null || owner === undefined) {
+    return null;
+  }
+
+  if (typeof owner === 'object') {
+    return owner.id;
+  }
+
+  return owner;
+};
+
+const toAdminTokenOwner = (
+  owner: AdminApiToken['adminUserOwner'] | null | undefined
+): Data.ID | AdminTokenOwner => {
+  if (owner === null || owner === undefined) {
+    throw new Error('adminUserOwner is required');
+  }
+
+  // Bare id
+  if (typeof owner === 'number' || typeof owner === 'string') {
+    return owner;
+  }
+
+  return {
+    id: owner.id,
+    firstname: owner.firstname,
+    lastname: owner.lastname,
+    username: owner.username,
+    email: owner.email,
+  };
 };
 
 const SELECT_FIELDS = [
   'id',
+  'kind',
   'name',
   'description',
   'lastUsedAt',
@@ -30,7 +131,8 @@ const SELECT_FIELDS = [
   'updatedAt',
 ];
 
-const POPULATE_FIELDS = ['permissions'];
+const POPULATE_FIELDS = ['permissions', 'adminPermissions', 'adminUserOwner'];
+const UPDATABLE_FIELDS = ['name', 'description', 'type'] as const;
 
 // TODO: we need to ensure the permissions are actually valid registered permissions!
 
@@ -38,8 +140,8 @@ const POPULATE_FIELDS = ['permissions'];
  * Assert that a token's permissions attribute is valid for its type
  */
 const assertCustomTokenPermissionsValidity = (
-  type: ApiTokenBody['type'],
-  permissions: ApiTokenBody['permissions']
+  type: ContentApiApiToken['type'],
+  permissions: string[] | null | undefined
 ) => {
   // Ensure non-custom tokens doesn't have permissions
   if (type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(permissions)) {
@@ -47,7 +149,7 @@ const assertCustomTokenPermissionsValidity = (
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(permissions)) {
+  if (type === constants.API_TOKEN_TYPE.CUSTOM && !Array.isArray(permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 
@@ -66,7 +168,7 @@ const assertCustomTokenPermissionsValidity = (
  * Check if a token's lifespan is valid
  */
 const isValidLifespan = (lifespan: unknown) => {
-  if (isNil(lifespan)) {
+  if (lifespan == null) {
     return true;
   }
 
@@ -89,18 +191,564 @@ const assertValidLifespan = (lifespan: unknown) => {
   }
 };
 
+/** API/body shape: permission without ids/timestamps and without actionParameters (defaulted by domain when creating). */
+type PermissionInput = Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>;
+
+/**
+ * Assert that a legacy-kind token body does not carry admin-only fields
+ */
+const assertLegacyKindFields = (attributes: ContentApiApiTokenBody): void => {
+  const raw = attributes as Record<string, unknown>;
+  if (raw.adminPermissions !== undefined && raw.adminPermissions !== null) {
+    throw new ValidationError('Legacy tokens cannot carry admin permissions');
+  }
+  if (raw.adminUserOwner !== undefined && raw.adminUserOwner !== null) {
+    throw new ValidationError('Legacy tokens cannot have an admin user owner');
+  }
+};
+
+/**
+ * Assert that an admin-kind token body does not carry legacy-only fields
+ */
+const assertAdminKindFields = (attributes: AdminTokenBody): void => {
+  const raw = attributes as Record<string, unknown>;
+  if (raw.type !== undefined && raw.type !== null) {
+    throw new ValidationError(
+      'Admin tokens cannot carry a legacy type (custom/read-only/full-access)'
+    );
+  }
+  if (raw.permissions !== undefined && raw.permissions !== null) {
+    throw new ValidationError('Admin tokens cannot carry legacy content-API permissions');
+  }
+};
+
+/**
+ * Assert that admin permissions are valid
+ */
+const assertAdminPermissionsValidity = async (adminPermissions?: PermissionInput[]) => {
+  if (!adminPermissions || adminPermissions.length === 0) {
+    return;
+  }
+
+  // Validate that all actions exist in the admin action provider
+  const validActions = getService('permission').actionProvider.keys();
+
+  for (const perm of adminPermissions) {
+    if (!validActions.includes(perm.action)) {
+      throw new ValidationError(`Unknown admin action: ${perm.action}`);
+    }
+  }
+
+  // Use existing permission validation
+  await validatePermissionsExist(adminPermissions as any);
+};
+
+/**
+ * Why a requested admin permission cannot be inherited from the user's permissions, for the
+ * error message. `null` when the user holds no permission with the same action and subject.
+ */
+const describeCeilingRejection = (
+  requested: PermissionInput,
+  userPermissions: CeilingPermission[]
+): string | null => {
+  const matching = permissionDomain.ceiling.findMatchingPermissions(requested, userPermissions);
+
+  if (matching.length === 0) {
+    return null;
+  }
+
+  const isOpenAgainstRestriction = (property: string) =>
+    !Array.isArray(requested.properties?.[property]) &&
+    matching.some((permission) => Array.isArray(permission.properties?.[property]));
+
+  if (isOpenAgainstRestriction('fields')) {
+    return 'fields are required due to owner field restrictions';
+  }
+
+  if (isOpenAgainstRestriction('locales')) {
+    return 'locales are required due to owner locale restrictions';
+  }
+
+  return 'fields, locales and conditions are not held together';
+};
+
+/**
+ * Enforce that every requested admin permission stays within the calling
+ * user's own permission ceiling, then return the clamped permissions.
+ *
+ * When the request is made with an admin token (`callingTokenPermissions` is given), the
+ * requested permissions must stay within the calling token's permissions and, unless `user` (the
+ * token owner) is a super admin, within the owner's too, the same two ceilings as a role update
+ * (`findRequesterCeilings`). A super-admin owner does not lift the token check. An empty list is
+ * a token that holds nothing.
+ *
+ * Otherwise super-admins bypass this (they hold every permission).
+ * When admin permissions are requested, an authenticated user is required (no bypass when user is missing).
+ *
+ * Each requested permission follows the same per-permission rule as roles (`ceiling.ts`): every
+ * combination of a requested field and locale must be covered by one held permission, and
+ * omitting `fields` against a ceiling restricted on it is rejected. Both sides are read as the
+ * engine enforces them: an omitted `locales` on a localized subject is no locale, so it needs
+ * nothing to cover it, and a held permission without `locales` there holds no locale. A
+ * request that only several held permissions together would cover (`title` on `fr` from `title`
+ * on `en` plus `body` on `fr`) is rejected. Conditions are inherited, never taken from the
+ * request (`getInheritedConditions`): from the owner, or from the calling token when the owner
+ * is a super admin, and the result must be within every ceiling.
+ *
+ * Returns the permissions with their inherited conditions.
+ * Throws ValidationError if any permission exceeds a ceiling.
+ *
+ * Guaranteed postcondition: all returned permissions have conditions filtered to
+ * registered conditions only, regardless of the user type.
+ */
+const enforceAdminPermissionsCeiling = async (
+  user: AdminUser | undefined | null,
+  requestedPermissions?: PermissionInput[],
+  callingTokenPermissions?: CeilingPermission[]
+): Promise<PermissionInput[]> => {
+  if (!requestedPermissions || requestedPermissions.length === 0) {
+    return requestedPermissions || [];
+  }
+  if (user === undefined || user === null) {
+    throw new ValidationError(
+      'Admin permission ceiling cannot be enforced without an authenticated user'
+    );
+  }
+
+  const hasCallingToken = callingTokenPermissions !== undefined;
+
+  if (!hasCallingToken && isSuperAdmin(user)) {
+    // Sanitize conditions even for super-admins so this function is a complete boundary.
+    // createApiTokenAdminPermissions also sanitizes, but relying on that downstream
+    // is fragile — any future call path that skips it would store invalid conditions.
+    const { conditionProvider } = getService('permission');
+    const sanitize = permissionDomain.sanitizeConditions(conditionProvider as any);
+    return requestedPermissions.map((perm) => {
+      const sanitized = sanitize({ ...perm, actionParameters: {} } as Permission);
+      return { ...perm, conditions: sanitized.conditions };
+    });
+  }
+
+  // The calling token first, then the owner (left out for a super-admin owner)
+  const ceilings = await findRequesterCeilings(
+    hasCallingToken ? { tokenPermissions: callingTokenPermissions, owner: user } : { user }
+  );
+  const ceilingHolders = hasCallingToken ? ['the calling token', 'the owner'] : ['the owner'];
+
+  // Only compared: the stored permission keeps the requested shape, which the engine enforces.
+  // The requested conditions are ignored (inherited instead) and the requested action parameters
+  // are checked as the plain action, the widest case, so no requested permission is dropped here.
+  const enforcedRequested = await toEnforcedCeilingPermissions(
+    requestedPermissions.map((permission) => omit(permission, 'actionParameters')),
+    { conditions: false }
+  );
+
+  const exceeding: string[] = [];
+  const enforcedClamped: PermissionInput[] = [];
+
+  const clamped = requestedPermissions.map((requested, index) => {
+    const requestedSubject = requested.subject || null;
+    const label =
+      requestedSubject !== null ? `${requested.action} on ${requestedSubject}` : requested.action;
+
+    const enforced = enforcedRequested[index];
+    const inherited = ceilings.map((held) =>
+      permissionDomain.ceiling.getInheritedConditions(enforced, held)
+    );
+    const rejectedBy = inherited.findIndex((conditions) => conditions === null);
+
+    if (rejectedBy !== -1) {
+      const reason = describeCeilingRejection(enforced, ceilings[rejectedBy]);
+      const holder = hasCallingToken ? `not held by ${ceilingHolders[rejectedBy]}` : null;
+      const details = [holder, reason].filter((part) => part !== null).join(': ');
+      exceeding.push(details === '' ? label : `${label} (${details})`);
+      return requested;
+    }
+
+    // The owner's conditions when the owner is a ceiling, as for every token: the owner re-sync
+    // (`reconcileTokenPermissionsToUserCeiling`) makes a token's conditions follow its owner, so
+    // storing the calling token's stricter ones would be undone. A super-admin owner is not
+    // re-synced, so there the calling token's conditions are kept.
+    const conditions = (inherited as string[][])[inherited.length - 1];
+
+    if (
+      ceilings.length > 1 &&
+      !permissionDomain.ceiling.isPermissionWithinCeiling({ ...enforced, conditions }, ceilings[0])
+    ) {
+      exceeding.push(`${label} (not held by the calling token under the owner's conditions)`);
+      return requested;
+    }
+
+    enforcedClamped.push({ ...enforced, conditions });
+    return { ...requested, conditions };
+  });
+
+  if (exceeding.length > 0) {
+    throw new ValidationError(
+      `Cannot assign admin permissions that exceed your own. ` +
+        `Exceeding: ${exceeding.join(', ')}`
+    );
+  }
+
+  // The inherited conditions must keep every permission inside every ceiling. A failure here is
+  // a bug in getInheritedConditions, so refuse to store the permission rather than widen the token.
+  const outsideCeiling = enforcedClamped.filter((permission) =>
+    ceilings.some((held) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, held))
+  );
+
+  if (outsideCeiling.length > 0) {
+    throw new ValidationError(
+      `Cannot assign admin permissions that exceed your own. ` +
+        `Exceeding: ${outsideCeiling.map((permission) => permission.action).join(', ')}`
+    );
+  }
+
+  return clamped;
+};
+
+/**
+ * Create admin permissions for an API token
+ */
+const createApiTokenAdminPermissions = async (tokenId: Data.ID, permissions: PermissionInput[]) => {
+  const { conditionProvider } = getService('permission');
+  const sanitizeConditions = permissionDomain.sanitizeConditions(conditionProvider as any);
+
+  const permissionsWithToken = permissions.map((perm) => {
+    const permAsPermission = { ...perm, actionParameters: {} } as Permission;
+    const sanitized = sanitizeConditions(permAsPermission);
+    return permissionDomain.create({
+      ...sanitized,
+      apiToken: tokenId as any,
+      role: null,
+    } as any);
+  });
+
+  const createdPermissions = await getService('permission').createMany(permissionsWithToken as any);
+
+  return createdPermissions;
+};
+
+/**
+ * Fields to compare when checking if two permissions are equal
+ */
+const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
+const pickComparableFields = (permission: Permission) => pick(permission, COMPARABLE_FIELDS);
+
+/**
+ * Helper to clean JSON (remove undefined values)
+ */
+const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
+
+/**
+ * Arrays of strings in a permission (`conditions`, `properties.fields`, `properties.locales`
+ * and any other property) are sets: the engine applies them regardless of order. Dedupe and
+ * sort them so two permissions that differ only in order compare equal. `null`, `[]` and a
+ * missing key stay distinct, and arrays holding anything but strings are left as they are.
+ */
+const normalizeSets = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.every((item) => typeof item === 'string') ? [...new Set(value)].sort() : value;
+  }
+  if (isPlainObject(value)) {
+    return mapValues(value as Record<string, unknown>, normalizeSets);
+  }
+  return value;
+};
+
+/**
+ * Compare two permissions for equality
+ */
+const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
+  if (p1.action !== p2.action) {
+    return false;
+  }
+  return isEqual(
+    jsonClean(normalizeSets(pickComparableFields(p1)) as object),
+    jsonClean(normalizeSets(pickComparableFields(p2)) as object)
+  );
+};
+
+/**
+ * Assign admin permissions to an API token (similar to role permission assignment).
+ * ceilingUser is the user whose permissions act as the ceiling — always the token owner,
+ * regardless of who is making the request. When the request is made with an admin token, its
+ * permissions are a ceiling too (`enforceAdminPermissionsCeiling`), so the conditions inherited
+ * here match the ones the caller already inherited.
+ */
+const assignAdminPermissionsToToken = async (
+  tokenId: Data.ID,
+  permissions: PermissionInput[],
+  ceilingUser: AdminUser,
+  callingTokenPermissions?: CeilingPermission[]
+): Promise<Permission[]> => {
+  await validatePermissionsExist(permissions as any);
+  const clampedPermissions = await enforceAdminPermissionsCeiling(
+    ceilingUser,
+    permissions,
+    callingTokenPermissions
+  );
+
+  const permissionsWithToken = clampedPermissions.map((perm) =>
+    permissionDomain.create({
+      ...perm,
+      apiToken: tokenId as any,
+      role: null,
+    } as any)
+  );
+
+  const existingPermissions = await getService('permission').findMany({
+    where: { apiToken: { id: tokenId } },
+  });
+
+  const permissionsToAdd = differenceWith(
+    permissionsWithToken,
+    existingPermissions,
+    arePermissionsEqual
+  ) as any as Permission[];
+
+  const permissionsToDelete = differenceWith(
+    existingPermissions,
+    permissionsWithToken,
+    arePermissionsEqual
+  ) as any as Permission[];
+
+  if (permissionsToDelete.length > 0) {
+    await getService('permission').deleteByIds(
+      permissionsToDelete.map((permission) => permission?.id) as Data.ID[]
+    );
+  }
+
+  if (permissionsToAdd.length > 0) {
+    await createApiTokenAdminPermissions(tokenId, permissionsToAdd as any);
+  }
+
+  // Return all current permissions
+  const allCurrentPermissions = await getService('permission').findMany({
+    where: { apiToken: { id: tokenId } },
+  });
+
+  return allCurrentPermissions;
+};
+
+/**
+ * Reconcile a token's admin permissions against the owner's current effective ceiling, with the
+ * same rule as `enforceAdminPermissionsCeiling` (`getInheritedConditions`).
+ *
+ * Pure / sync — no DB calls. Returns two buckets:
+ *   toDelete  – permissions no single user permission covers any more: some combination of a
+ *               field and locale is not held, or no condition is shared by all of them
+ *   toUpdate  – permissions that are still covered but whose inherited conditions changed
+ */
+const reconcileTokenPermissionsToUserCeiling = (
+  userPermissions: Permission[],
+  tokenPermissions: Permission[]
+): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] } => {
+  const toDelete: Permission[] = [];
+  const toUpdate: { id: Data.ID; conditions: string[] }[] = [];
+
+  tokenPermissions.forEach((tokenPerm) => {
+    const conditions = permissionDomain.ceiling.getInheritedConditions(tokenPerm, userPermissions);
+
+    if (conditions === null) {
+      toDelete.push(tokenPerm);
+      return;
+    }
+
+    const currentConditions: string[] = (tokenPerm.conditions as string[]) || [];
+    const conditionsChanged =
+      conditions.length !== currentConditions.length ||
+      conditions.some((c) => !currentConditions.includes(c));
+
+    if (conditionsChanged) {
+      toUpdate.push({ id: tokenPerm.id as Data.ID, conditions });
+    }
+  });
+
+  return { toDelete, toUpdate };
+};
+
+/**
+ * Reconcile the token permissions that carry action parameters. The engine registers them as
+ * `<action>?<parameters>`, a separate ability from the plain action, so only the owner's
+ * permissions with the same action, subject and action parameters can cover one. Against those,
+ * the rule is the one of `reconcileTokenPermissionsToUserCeiling`: a token permission no single
+ * owner permission covers is deleted, and inherited conditions that drifted are updated.
+ * Permissions without action parameters are ignored here.
+ *
+ * Pure / sync — no DB calls. Both lists are read as the engine enforces them, apart from the
+ * action parameters (`toEnforcedParameterizedPermissions`).
+ */
+const reconcileParameterizedTokenPermissions = (
+  userPermissions: Permission[],
+  tokenPermissions: Permission[]
+): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] } => {
+  const toDelete: Permission[] = [];
+  const toUpdate: { id: Data.ID; conditions: string[] }[] = [];
+  const withoutParameters = (permission: Permission) =>
+    ({ ...permission, actionParameters: {} }) as Permission;
+
+  tokenPermissions
+    .filter((tokenPerm) => !isEmpty(tokenPerm.actionParameters))
+    .forEach((tokenPerm) => {
+      const sameParameters = userPermissions
+        .filter(
+          (userPerm) =>
+            !isEmpty(userPerm.actionParameters) &&
+            permissionDomain.ceiling.haveSameActionParameters(userPerm, tokenPerm)
+        )
+        .map(withoutParameters);
+
+      const result = reconcileTokenPermissionsToUserCeiling(sameParameters, [
+        withoutParameters(tokenPerm),
+      ]);
+
+      if (result.toDelete.length > 0) {
+        toDelete.push(tokenPerm);
+      }
+
+      toUpdate.push(...result.toUpdate);
+    });
+
+  return { toDelete, toUpdate };
+};
+
+/**
+ * Re-sync all admin token permissions for a given user against their current effective ceiling.
+ *
+ * Skips super-admins (no ceiling). For each admin token owned by the user:
+ *   - Deletes permissions that are no longer within the user's scope. A permission with action
+ *     parameters is only within it while the user holds the same action, subject and parameters
+ *     (`reconcileParameterizedTokenPermissions`)
+ *   - Updates conditions on permissions whose conditions have drifted from the role's current set
+ */
+const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> => {
+  const user = await strapi.db.query('admin::user').findOne({
+    where: { id: userId },
+    populate: ['roles'],
+  });
+
+  if (user === null || user === undefined) return;
+  if (isSuperAdmin(user as AdminUser)) return;
+
+  // Both sides as the engine enforces them. Only compared: deletes and updates use the ids.
+  // Unregistered conditions are kept: this also runs at startup, before the app's `bootstrap()`
+  // registers custom conditions. An unregistered id written back here is skipped by the engine.
+  const userPermissions: Permission[] = await getService('permission').findUserPermissions(
+    user as AdminUser
+  );
+  const userEffectivePermissions = await toEnforcedCeilingPermissions(userPermissions, {
+    conditions: false,
+  });
+  // Enforcing drops the permissions with action parameters, so they are reconciled on their own
+  const userParameterizedPermissions = await toEnforcedParameterizedPermissions(userPermissions, {
+    conditions: false,
+  });
+
+  const tokens = await strapi.db.query('admin::api-token').findMany({
+    where: { kind: 'admin', adminUserOwner: { id: userId } },
+    populate: ['adminPermissions'],
+  });
+
+  const tokensWithPermissions = tokens.filter(
+    (token: { adminPermissions?: Permission[] }) =>
+      Array.isArray(token.adminPermissions) && token.adminPermissions.length > 0
+  );
+
+  for (const token of tokensWithPermissions) {
+    const tokenPermissions: Permission[] = token.adminPermissions as Permission[];
+
+    const plain = reconcileTokenPermissionsToUserCeiling(
+      userEffectivePermissions,
+      await toEnforcedCeilingPermissions(tokenPermissions, { conditions: false })
+    );
+    const parameterized = reconcileParameterizedTokenPermissions(
+      userParameterizedPermissions,
+      await toEnforcedParameterizedPermissions(tokenPermissions, { conditions: false })
+    );
+    const toDelete = [...plain.toDelete, ...parameterized.toDelete];
+    const toUpdate = [...plain.toUpdate, ...parameterized.toUpdate];
+
+    const tokenLabel = `Admin token ${token.id} (${quoteForLog(token.name)}) of user ${userId}`;
+    const describePermission = (id: Data.ID) =>
+      `${id} ${quoteForLog(tokenPermissions.find((p) => p.id === id)?.action)}`;
+
+    if (toDelete.length > 0) {
+      const permissions = toDelete.map((p) => describePermission(p.id)).join(', ');
+      strapi.log.warn(
+        `${tokenLabel}: deleting permissions outside the owner's ceiling: ${permissions}`
+      );
+      await getService('permission').deleteByIds(toDelete.map((p) => p.id as Data.ID));
+    }
+
+    if (toUpdate.length > 0) {
+      const permissions = toUpdate.map(({ id }) => describePermission(id)).join(', ');
+      strapi.log.warn(`${tokenLabel}: updating conditions to the owner's ceiling: ${permissions}`);
+    }
+
+    for (const { id, conditions } of toUpdate) {
+      await strapi.db.query('admin::permission').update({ where: { id }, data: { conditions } });
+    }
+  }
+};
+
+/**
+ * Re-sync admin token permissions for all admin users who hold a given role.
+ * Called after role permissions are updated.
+ */
+const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> => {
+  const users = await strapi.db.query('admin::user').findMany({
+    where: { roles: { id: roleId } },
+    populate: ['roles'],
+  });
+
+  await Promise.allSettled(users.map((user) => syncApiTokenPermissionsForUser(user.id as Data.ID)));
+};
+
+/**
+ * Re-clamp every admin token to its owner's current ceiling. Runs when the server starts so a
+ * token written under an earlier rule, or edited while the server was down, cannot grant more
+ * than its owner holds before the owner's next role or user change.
+ *
+ * Sequential per owner so the writes do not race, and one failing owner is logged and skipped
+ * rather than aborting the start.
+ */
+const syncApiTokenPermissionsForAllUsers = async (): Promise<void> => {
+  const tokens = await strapi.db.query('admin::api-token').findMany({
+    where: { kind: 'admin' },
+    populate: { adminUserOwner: { select: ['id'] }, adminPermissions: { select: ['id'] } },
+  });
+
+  const ownerIds = [
+    ...new Set(
+      tokens
+        .filter(
+          (token) => Array.isArray(token.adminPermissions) && token.adminPermissions.length > 0
+        )
+        .map((token) => token.adminUserOwner?.id)
+        .filter((id): id is Data.ID => id !== undefined && id !== null)
+    ),
+  ];
+
+  for (const ownerId of ownerIds) {
+    try {
+      await syncApiTokenPermissionsForUser(ownerId);
+    } catch (error) {
+      strapi.log.warn(
+        `Could not re-clamp the admin token permissions of user ${ownerId} on startup: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+};
+
 /**
  * Flatten a token's database permissions objects to an array of strings
  */
-const flattenTokenPermissions = (token: DBApiToken): ApiToken => {
-  if (!token) {
-    return token;
-  }
-
-  return {
-    ...token,
-    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
-  };
+const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
+  return Array.isArray(permissions)
+    ? Array.from(permissions, (permission) => permission?.action)
+    : [];
 };
 
 type WhereParams = {
@@ -109,18 +757,32 @@ type WhereParams = {
   lastUsedAt?: number;
   description?: string;
   accessKey?: string;
+  kind?: 'content-api' | 'admin';
+};
+
+type GetByOptions = {
+  includeDecryptedKey?: boolean;
 };
 
 /**
- *  Get a token
+ *  Get a token.
+ *  By default the plaintext accessKey is NOT included.
+ *  Pass { includeDecryptedKey: true } to decrypt and return it (owner-only paths).
  */
-const getBy = async (whereParams: WhereParams = {}): Promise<ApiToken | null> => {
+const getBy = async (
+  whereParams: WhereParams = {},
+  options: GetByOptions = {}
+): Promise<AnyApiToken | null> => {
   if (Object.keys(whereParams).length === 0) {
     return null;
   }
 
+  const { includeDecryptedKey = false } = options;
+
+  const selectFields = includeDecryptedKey ? [...SELECT_FIELDS, 'encryptedKey'] : SELECT_FIELDS;
+
   const token = await strapi.db.query('admin::api-token').findOne({
-    select: [...SELECT_FIELDS, 'encryptedKey'],
+    select: selectFields,
     populate: POPULATE_FIELDS,
     where: whereParams,
   });
@@ -129,18 +791,37 @@ const getBy = async (whereParams: WhereParams = {}): Promise<ApiToken | null> =>
     return token;
   }
 
-  const { encryptedKey, ...rest } = token;
+  // Tokens created before kind introduction case: force kind to be content-api
+  const computedKind = token.kind ?? 'content-api';
 
-  if (!encryptedKey) {
-    return flattenTokenPermissions(rest);
+  const result = omit(token, [
+    'accessKey',
+    'encryptedKey',
+    'type',
+    'permissions',
+    'adminPermissions',
+    'adminUserOwner',
+  ]);
+
+  if (computedKind === 'content-api') {
+    Object.assign(result, {
+      kind: 'content-api',
+      type: token.type,
+      permissions: flattenTokenPermissions(token.permissions),
+    });
+  } else if (computedKind === 'admin') {
+    Object.assign(result, {
+      kind: 'admin',
+      adminPermissions: token.adminPermissions,
+      adminUserOwner: toAdminTokenOwner(token.adminUserOwner),
+    });
   }
 
-  const accessKey = getService('encryption').decrypt(encryptedKey);
+  if (includeDecryptedKey && token.encryptedKey) {
+    Object.assign(result, { accessKey: getService('encryption').decrypt(token.encryptedKey) });
+  }
 
-  return flattenTokenPermissions({
-    ...rest,
-    accessKey,
-  });
+  return result as AnyApiToken;
 };
 
 /**
@@ -162,78 +843,221 @@ const hash = (accessKey: string) => {
   return crypto.createHmac('sha512', salt).update(accessKey).digest('hex');
 };
 
-const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
+const authenticateAdminToken = async (
+  accessToken: string
+): Promise<AdminTokenAuthenticationResult> => {
+  const apiToken = (await getBy({ accessKey: hash(accessToken) })) as AdminApiToken | null;
+
+  if (apiToken === null || apiToken === undefined) {
+    return { authenticated: false };
+  }
+
+  if (apiToken.kind !== 'admin') {
+    return { authenticated: false };
+  }
+
+  const expiryError = checkExpiry(apiToken);
+  if (expiryError !== null) {
+    return { authenticated: false, error: expiryError };
+  }
+
+  const ownerId = resolveAdminTokenOwnerId(apiToken);
+  if (ownerId === null) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  const user = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { id: ownerId }, populate: ['roles'] });
+
+  if (user === null || user === undefined) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  if (user.isActive !== true || user.blocked === true) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
+  }
+
+  await updateLastUsedAt(apiToken);
+
+  const ability = await getService('permission').engine.generateTokenAbility(
+    apiToken.adminPermissions ?? [],
+    user
+  );
+
+  return { authenticated: true, credentials: apiToken, user, ability };
+};
+
+const getExpirationFields = (lifespan: AnyApiToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
-  if (!isValidNumber && !isNil(lifespan)) {
+  if (!isValidNumber && lifespan != null) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
   return {
-    lifespan: lifespan || null,
+    lifespan: lifespan ?? null,
     expiresAt: lifespan ? Date.now() + lifespan : null,
   };
 };
 
 /**
- * Create a token and its permissions
+ * Create a token and its permissions. `callingTokenPermissions` are the permissions of the admin
+ * token the request is made with, if any: an admin token cannot grant more than it holds.
  */
-const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
+const create = async <K extends AnyApiToken['kind']>(
+  attributes: { kind: K } & (ContentApiApiTokenBody | AdminTokenBody),
+  callingUser?: AdminUser,
+  callingTokenPermissions?: CeilingPermission[]
+): Promise<
+  K extends 'content-api' ? ContentApiApiToken : K extends 'admin' ? AdminApiToken : AnyApiToken
+> => {
   const encryptionService = getService('encryption');
   const accessKey = crypto.randomBytes(128).toString('hex');
   const encryptedKey = encryptionService.encrypt(accessKey);
 
-  assertCustomTokenPermissionsValidity(attributes.type, attributes.permissions);
   assertValidLifespan(attributes.lifespan);
 
-  // Create the token
-  const apiToken: ApiToken = await strapi.db.query('admin::api-token').create({
+  if (attributes.kind === 'content-api') {
+    const castedContentApiApiTokenBody = attributes as ContentApiApiTokenBody;
+    assertLegacyKindFields(castedContentApiApiTokenBody);
+    assertCustomTokenPermissionsValidity(
+      castedContentApiApiTokenBody.type,
+      castedContentApiApiTokenBody.permissions
+    );
+
+    // content api tokens have no owner
+    const apiToken = await strapi.db.query('admin::api-token').create({
+      select: SELECT_FIELDS,
+      populate: POPULATE_FIELDS,
+      data: {
+        ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
+        accessKey: hash(accessKey),
+        encryptedKey,
+        adminUserOwner: null,
+        ...getExpirationFields(castedContentApiApiTokenBody.lifespan ?? null),
+      },
+    });
+
+    const result: ContentApiApiToken = { ...apiToken, accessKey };
+
+    // If this is a custom type token, create the related content-API permissions
+    if (castedContentApiApiTokenBody.type === constants.API_TOKEN_TYPE.CUSTOM) {
+      // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
+      await Promise.all(
+        [...new Set(castedContentApiApiTokenBody.permissions)].map((action) =>
+          strapi.db.query('admin::api-token-permission').create({
+            data: { action, token: apiToken },
+          })
+        )
+      );
+
+      const currentPermissions = await strapi.db
+        .query('admin::api-token')
+        .load(apiToken, 'permissions');
+
+      if (currentPermissions) {
+        Object.assign(result, { permissions: flattenTokenPermissions(currentPermissions) });
+      }
+    }
+
+    await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_CREATE, {
+      tokenId: apiToken.id,
+      name: apiToken.name,
+      kind: 'content-api',
+      description: apiToken.description ?? null,
+      lifespan: apiToken.lifespan,
+      expiresAt: apiToken.expiresAt,
+      type: apiToken.type,
+      ...(apiToken.type === constants.API_TOKEN_TYPE.CUSTOM && {
+        permissions: result.permissions ?? [],
+      }),
+    });
+
+    // Casted to any to avoid complex type duplication
+    return omit(result, ['adminPermissions', 'adminUserOwner']) as any;
+  }
+
+  // kind === 'admin'
+  assertAdminKindFields(attributes);
+  const castedAdminTokenBody = attributes as AdminTokenBody;
+  await assertAdminPermissionsValidity(castedAdminTokenBody.adminPermissions);
+  const clampedAdminPermissions = await enforceAdminPermissionsCeiling(
+    callingUser,
+    castedAdminTokenBody.adminPermissions,
+    callingTokenPermissions
+  );
+
+  // Owner: when explicitly provided, it must match the caller.
+  // When omitted, always defaults to the calling user (including super admins).
+  let ownerId: Data.ID;
+  if (
+    castedAdminTokenBody.adminUserOwner !== undefined &&
+    castedAdminTokenBody.adminUserOwner !== null
+  ) {
+    await assertOwnerMatchesCallingUser(castedAdminTokenBody.adminUserOwner, callingUser);
+    ownerId = castedAdminTokenBody.adminUserOwner;
+  } else {
+    if (callingUser === undefined || callingUser === null) {
+      throw new ValidationError('Creating an admin token requires an authenticated admin user');
+    }
+    ownerId = callingUser.id as Data.ID;
+  }
+
+  const apiToken = await strapi.db.query('admin::api-token').create({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     data: {
-      ...omit('permissions', attributes),
+      ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
       accessKey: hash(accessKey),
       encryptedKey,
-      ...getExpirationFields(attributes.lifespan),
+      adminUserOwner: ownerId,
+      ...getExpirationFields(castedAdminTokenBody.lifespan ?? null),
     },
   });
 
-  const result: ApiToken = { ...apiToken, accessKey };
+  const result = { ...apiToken, accessKey } as AnyApiToken;
 
-  // If this is a custom type token, create and the related permissions
-  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
-    // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
-    // const permissionsCount = await strapi.db.query('admin::api-token-permission').createMany({
-    //   populate: POPULATE_FIELDS,
-    //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
-    // });
-    await Promise.all(
-      uniq(attributes.permissions).map((action) =>
-        strapi.db.query('admin::api-token-permission').create({
-          data: { action, token: apiToken },
-        })
-      )
-    );
+  // Handle admin permissions (using ceiling-clamped permissions with inherited conditions)
+  if (clampedAdminPermissions.length > 0) {
+    await createApiTokenAdminPermissions(apiToken.id, clampedAdminPermissions);
 
-    const currentPermissions = await strapi.db
+    const currentAdminPermissions = await strapi.db
       .query('admin::api-token')
-      .load(apiToken, 'permissions');
+      .load(apiToken, 'adminPermissions');
 
-    if (currentPermissions) {
-      Object.assign(result, { permissions: map('action', currentPermissions) });
+    if (currentAdminPermissions) {
+      Object.assign(result, { adminPermissions: currentAdminPermissions });
     }
   }
 
-  return result;
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_CREATE, {
+    tokenId: apiToken.id,
+    name: apiToken.name,
+    kind: 'admin',
+    adminUserOwner: ownerId,
+    description: apiToken.description ?? null,
+    lifespan: apiToken.lifespan,
+    expiresAt: apiToken.expiresAt,
+    permissions: toAdminPermissionRefs((result as AdminApiToken).adminPermissions),
+  });
+
+  // Casted to any to avoid complex type duplication
+  return {
+    ...(omit(result, ['permissions']) as object),
+    adminUserOwner: toAdminTokenOwner((result as AdminApiToken).adminUserOwner),
+  } as any;
 };
 
-const regenerate = async (id: string | number): Promise<ApiToken> => {
+const regenerate = async (id: string | number): Promise<ContentApiApiToken | AdminApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
   const encryptionService = getService('encryption');
   const encryptedKey = encryptionService.encrypt(accessKey);
 
-  const apiToken: ApiToken = await strapi.db.query('admin::api-token').update({
-    select: ['id', 'accessKey'],
+  const apiToken: AnyApiToken = await strapi.db.query('admin::api-token').update({
+    select: ['id', 'name', 'accessKey', 'kind'],
+    // The owner id only, for the audit row; it is stripped from the response below
+    populate: { adminUserOwner: { select: ['id'] } },
     where: { id },
     data: {
       accessKey: hash(accessKey),
@@ -245,10 +1069,21 @@ const regenerate = async (id: string | number): Promise<ApiToken> => {
     throw new NotFoundError('The provided token id does not exist');
   }
 
+  const ownerId =
+    apiToken.kind === 'admin' ? resolveAdminTokenOwnerId(apiToken as AdminApiToken) : null;
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_REGENERATE, {
+    tokenId: apiToken.id,
+    name: apiToken.name,
+    kind: (apiToken.kind ?? 'content-api') as TokenKind,
+    ...(ownerId != null && { adminUserOwner: ownerId }),
+  });
+
   return {
-    ...apiToken,
+    ...omit(apiToken, ['adminUserOwner']),
+    kind: (apiToken.kind ?? 'content-api') as AnyApiToken['kind'],
     accessKey,
-  };
+  } as any;
 };
 
 const checkSaltIsDefined = () => {
@@ -270,137 +1105,555 @@ For security reasons, prefer storing the secret in an environment variable and r
 };
 
 /**
- * Return a list of all tokens and their permissions
+ * Return a list of tokens visible to the calling user.
+ * Super-admins see all tokens; regular admins see only ownerless tokens and their own.
  */
-const list = async (): Promise<Array<ApiToken>> => {
-  const tokens: Array<DBApiToken> = await strapi.db.query('admin::api-token').findMany({
+const list = async <K extends AnyApiToken['kind']>(
+  callingUser: AdminUser,
+  { filter }: { filter?: { kind?: K } } = {}
+): Promise<
+  Array<
+    K extends 'content-api' ? ContentApiApiToken : K extends 'admin' ? AdminApiToken : AnyApiToken
+  >
+> => {
+  const ownershipWhere = isSuperAdmin(callingUser)
+    ? {}
+    : { $or: [{ adminUserOwner: null }, { adminUserOwner: { id: callingUser.id } }] };
+
+  // Tokens without a persisted kind are content-api tokens (pre-migration rows).
+  let kindWhere: Record<string, unknown> = {};
+  if (filter?.kind === 'content-api') {
+    kindWhere = { $or: [{ kind: 'content-api' }, { kind: { $null: true } }] };
+  } else if (filter?.kind !== undefined) {
+    kindWhere = { kind: filter.kind };
+  }
+
+  const where = { ...ownershipWhere, ...kindWhere };
+
+  const tokens = await strapi.db.query('admin::api-token').findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
+    where,
   });
 
   if (!tokens) {
     return tokens;
   }
 
-  return tokens.map((token) => flattenTokenPermissions(token));
+  return tokens.map((token) =>
+    token.kind === null || token.kind === 'content-api'
+      ? omit(
+          {
+            ...token,
+            // Tokens created before kind introduction case: force kind to be content-api
+            kind: 'content-api',
+            permissions: flattenTokenPermissions(token.permissions),
+          },
+          ['adminPermissions', 'adminUserOwner']
+        )
+      : ({
+          ...(omit(token, ['permissions']) as object),
+          adminUserOwner:
+            token.adminUserOwner !== null && token.adminUserOwner !== undefined
+              ? toAdminTokenOwner(token.adminUserOwner)
+              : null,
+        } as any)
+  );
 };
 
 /**
  * Revoke (delete) a token
  */
-const revoke = async (id: string | number): Promise<ApiToken> => {
-  return strapi.db
+const revoke = async (id: string | number): Promise<AnyApiToken> => {
+  const token = await strapi.db.query('admin::api-token').findOne({
+    where: { id },
+    select: ['id'],
+    populate: ['adminPermissions'],
+  });
+
+  if (token !== null && token !== undefined) {
+    const permissionIds = ((token.adminPermissions as Array<{ id: Data.ID }>) ?? [])
+      .map((p) => p.id)
+      .filter((permId) => permId !== null && permId !== undefined);
+
+    if (permissionIds.length > 0) {
+      await getService('permission').deleteByIds(permissionIds);
+    }
+  }
+
+  const deletedToken = await strapi.db
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
+
+  if (deletedToken === null || deletedToken === undefined) {
+    return deletedToken;
+  }
+
+  const ownerId =
+    deletedToken.kind === 'admin' ? resolveAdminTokenOwnerId(deletedToken as AdminApiToken) : null;
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_DELETE, {
+    tokenId: deletedToken.id,
+    name: deletedToken.name,
+    kind: (deletedToken.kind ?? 'content-api') as TokenKind,
+    ...(ownerId != null && { adminUserOwner: ownerId }),
+  });
+
+  if (deletedToken.kind === 'admin') {
+    return {
+      ...deletedToken,
+      adminUserOwner: toAdminTokenOwner(deletedToken.adminUserOwner),
+    };
+  }
+
+  // content-api tokens (including legacy null-kind rows): normalise shape
+  return omit(
+    {
+      ...deletedToken,
+      kind: 'content-api' as const,
+      permissions: flattenTokenPermissions(deletedToken.permissions),
+    },
+    ['adminPermissions', 'adminUserOwner']
+  ) as ContentApiApiToken;
 };
 
 /**
  * Retrieve a token by id
  */
-const getById = async (id: string | number) => {
-  return getBy({ id });
+const getById = async (id: string | number, options?: GetByOptions) => {
+  return getBy({ id }, options);
 };
 
 /**
  * Retrieve a token by name
  */
-const getByName = async (name: string) => {
-  return getBy({ name });
+const getByName = async (name: string, options?: GetByOptions) => {
+  return getBy({ name }, options);
 };
 
 /**
- * Update a token and its permissions
+ * Update a token and its permissions. `callingTokenPermissions` are the permissions of the admin
+ * token the request is made with, if any: an admin token cannot grant more than it holds.
  */
 const update = async (
   id: string | number,
-  attributes: Update.Request['body']
-): Promise<ApiToken> => {
-  // retrieve token without permissions
-  const originalToken: DBApiToken = await strapi.db
-    .query('admin::api-token')
-    .findOne({ where: { id } });
+  attributes: Update.Request['body'],
+  callingTokenPermissions?: CeilingPermission[]
+): Promise<AnyApiToken> => {
+  const originalToken = await strapi.db.query('admin::api-token').findOne({
+    select: SELECT_FIELDS,
+    populate: ['adminUserOwner', 'permissions', 'adminPermissions'],
+    where: { id },
+  });
 
   if (!originalToken) {
     throw new NotFoundError('Token not found');
   }
 
-  const changingTypeToCustom =
-    attributes.type === constants.API_TOKEN_TYPE.CUSTOM &&
-    originalToken.type !== constants.API_TOKEN_TYPE.CUSTOM;
+  // Populated with its permissions: the audit row for this update lists what changed,
+  // so the state before the write is needed. `type` is a content-api concept: admin
+  // tokens only carry the column default.
+  const previousSnapshot = {
+    name: originalToken.name,
+    description: originalToken.description,
+    ...(originalToken.kind !== 'admin' && { type: originalToken.type }),
+    permissions:
+      originalToken.kind === 'admin'
+        ? toAdminPermissionRefs(originalToken.adminPermissions)
+        : toActionRefs(originalToken.permissions),
+  };
 
-  // if we're updating the permissions on any token type, or changing from non-custom to custom, ensure they're still valid
-  // if neither type nor permissions are changing, we don't need to validate again or else we can't allow partial update
-  if (attributes.permissions || changingTypeToCustom) {
-    assertCustomTokenPermissionsValidity(
-      attributes.type || originalToken.type,
-      attributes.permissions || originalToken.permissions
-    );
+  const emitUpdate = async (
+    kind: TokenKind,
+    next: {
+      name: string;
+      description: string | null;
+      type?: string | null;
+      permissions: PermissionRef[];
+    },
+    adminUserOwner?: Data.ID | null
+  ) => {
+    const changes = getTokenChanges(previousSnapshot, next);
+
+    if (Object.keys(changes).length === 0) {
+      return;
+    }
+
+    await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_UPDATE, {
+      tokenId: originalToken.id,
+      name: next.name,
+      kind,
+      changes,
+      ...(adminUserOwner != null && { adminUserOwner }),
+    });
+  };
+
+  const raw = attributes as Record<string, unknown>;
+
+  // kind is immutable after creation.
+  // Null-kind rows are legacy content-api tokens — treat null and 'content-api' as the same
+  // effective value so that clients echoing back the normalised kind from a GET don't get rejected.
+  const effectiveStoredKind = originalToken.kind ?? 'content-api';
+  if (raw.kind !== undefined && raw.kind !== null && raw.kind !== effectiveStoredKind) {
+    throw new ValidationError('kind is immutable after creation');
   }
 
-  assertValidLifespan(attributes.lifespan);
+  let clampedAdminPermissions: PermissionInput[] | undefined;
+  let tokenOwnerUser: AdminUser | undefined;
 
-  const updatedToken: ApiToken = await strapi.db.query('admin::api-token').update({
+  if (originalToken.kind === null || originalToken.kind === 'content-api') {
+    assertLegacyKindFields(attributes as ContentApiApiTokenBody);
+
+    const incomingType = raw.type as ContentApiApiToken['type'] | undefined;
+    const incomingPermissions = raw.permissions as string[] | null | undefined;
+    const resolvedType = incomingType ?? (originalToken.type as ContentApiApiToken['type']);
+    const changingTypeToCustom =
+      incomingType === constants.API_TOKEN_TYPE.CUSTOM &&
+      originalToken.type !== constants.API_TOKEN_TYPE.CUSTOM;
+
+    // Only re-validate if permissions or type are being changed
+    if (incomingPermissions !== undefined || changingTypeToCustom) {
+      assertCustomTokenPermissionsValidity(resolvedType, incomingPermissions);
+    }
+  } else if (originalToken.kind === 'admin') {
+    assertAdminKindFields(attributes as AdminTokenBody);
+
+    const incomingAdminPermissions = raw.adminPermissions as PermissionInput[] | undefined;
+    if (incomingAdminPermissions !== undefined) {
+      await assertAdminPermissionsValidity(incomingAdminPermissions);
+
+      // Ceiling is always the owner's permissions, not the calling user's.
+      // A super admin editing another user's token must not overflow that user's scope.
+      // A request made with an admin token is limited by that token too.
+      const ownerId = getOwnerId(originalToken as AdminApiToken);
+      const resolvedOwner = await getService('user').findOne(ownerId);
+      if (resolvedOwner === null || resolvedOwner === undefined) {
+        throw new ValidationError('Token owner no longer exists');
+      }
+      tokenOwnerUser = resolvedOwner;
+      clampedAdminPermissions = await enforceAdminPermissionsCeiling(
+        tokenOwnerUser,
+        incomingAdminPermissions,
+        callingTokenPermissions
+      );
+    }
+
+    const incomingAdminUserOwner = raw.adminUserOwner;
+    if (incomingAdminUserOwner !== undefined) {
+      // Owner is immutable; the provided value must match the existing one
+      const existingOwner = originalToken.adminUserOwner;
+      const existingOwnerId =
+        existingOwner === null || existingOwner === undefined
+          ? null
+          : String(typeof existingOwner === 'object' ? existingOwner.id : existingOwner);
+      const requestedOwnerId =
+        incomingAdminUserOwner === null ? null : String(incomingAdminUserOwner);
+
+      if (requestedOwnerId !== existingOwnerId) {
+        throw new ValidationError('adminUserOwner cannot be changed on update');
+      }
+    }
+  }
+
+  const baseData = pick(attributes, UPDATABLE_FIELDS) as Record<string, unknown>;
+
+  // Migrate legacy null-kind rows to the explicit value on first write
+  if (originalToken.kind === null) {
+    baseData.kind = 'content-api';
+  }
+
+  const updatedToken = await strapi.db.query('admin::api-token').update({
     select: SELECT_FIELDS,
     where: { id },
-    data: omit('permissions', attributes),
+    data: baseData,
   });
 
-  // custom tokens need to have their permissions updated as well
-  if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
-    const currentPermissionsResult = await strapi.db
+  if (originalToken.kind === null || originalToken.kind === 'content-api') {
+    const incomingPermissions = raw.permissions as string[] | null | undefined;
+
+    // custom tokens need to have their permissions updated as well
+    if (
+      updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM &&
+      incomingPermissions !== undefined
+    ) {
+      const currentPermissionsResult = await strapi.db
+        .query('admin::api-token')
+        .load(updatedToken, 'permissions');
+
+      const currentPermissions = Array.from(
+        currentPermissionsResult || [],
+        (permission: Pick<Permission, 'action'>) => permission?.action
+      );
+      const newPermissions = [...new Set(incomingPermissions || [])];
+
+      const actionsToDelete = difference(currentPermissions, newPermissions);
+      const actionsToAdd = difference(newPermissions, currentPermissions);
+
+      // TODO: improve efficiency here
+      await Promise.all(
+        actionsToDelete.map((action) =>
+          strapi.db.query('admin::api-token-permission').delete({
+            where: { action, token: id },
+          })
+        )
+      );
+
+      // TODO: improve efficiency here
+      await Promise.all(
+        actionsToAdd.map((action) =>
+          strapi.db.query('admin::api-token-permission').create({
+            data: { action, token: id },
+          })
+        )
+      );
+    }
+    // if type is not custom, make sure any old permissions get removed
+    else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {
+      await strapi.db.query('admin::api-token-permission').delete({
+        where: { token: id },
+      });
+    }
+
+    const permissionsFromDb = await strapi.db
       .query('admin::api-token')
       .load(updatedToken, 'permissions');
 
-    const currentPermissions = map('action', currentPermissionsResult || []);
-    const newPermissions = uniq(attributes.permissions);
+    const permissions = permissionsFromDb ? toActionRefs(permissionsFromDb) : undefined;
 
-    const actionsToDelete = difference(currentPermissions, newPermissions);
-    const actionsToAdd = difference(newPermissions, currentPermissions);
-
-    // TODO: improve efficiency here
-    // method using a loop -- works but very inefficient
-    await Promise.all(
-      actionsToDelete.map((action) =>
-        strapi.db.query('admin::api-token-permission').delete({
-          where: { action, token: id },
-        })
-      )
-    );
-
-    // TODO: improve efficiency here
-    // using a loop -- works but very inefficient
-    await Promise.all(
-      actionsToAdd.map((action) =>
-        strapi.db.query('admin::api-token-permission').create({
-          data: { action, token: id },
-        })
-      )
-    );
-  }
-  // if type is not custom, make sure any old permissions get removed
-  else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {
-    await strapi.db.query('admin::api-token-permission').delete({
-      where: { token: id },
+    await emitUpdate('content-api', {
+      name: updatedToken.name,
+      description: updatedToken.description ?? null,
+      type: updatedToken.type,
+      permissions: permissions ?? [],
     });
+
+    return { ...updatedToken, permissions } as AnyApiToken;
   }
 
-  // retrieve permissions
-  const permissionsFromDb = await strapi.db
+  // kind === 'admin'
+  if (clampedAdminPermissions !== undefined) {
+    if (tokenOwnerUser === undefined) {
+      throw new ValidationError('Updating admin permissions requires a resolved token owner');
+    }
+    await assignAdminPermissionsToToken(
+      id,
+      clampedAdminPermissions,
+      tokenOwnerUser,
+      callingTokenPermissions
+    );
+  }
+
+  const adminPermissionsFromDb = await strapi.db
     .query('admin::api-token')
-    .load(updatedToken, 'permissions');
+    .load(updatedToken, 'adminPermissions');
+
+  const adminUserOwnerFromDb = await strapi.db
+    .query('admin::api-token')
+    .load(updatedToken, 'adminUserOwner');
+
+  await emitUpdate(
+    'admin',
+    {
+      name: updatedToken.name,
+      description: updatedToken.description ?? null,
+      permissions: toAdminPermissionRefs(adminPermissionsFromDb || []),
+    },
+    resolveAdminTokenOwnerId(originalToken as AdminApiToken)
+  );
 
   return {
     ...updatedToken,
-    permissions: permissionsFromDb ? permissionsFromDb.map((p: any) => p.action) : undefined,
-  };
+    adminPermissions: adminPermissionsFromDb || [],
+    adminUserOwner: toAdminTokenOwner(adminUserOwnerFromDb),
+  } as AnyApiToken;
 };
 
 const count = async (where = {}): Promise<number> => {
   return strapi.db.query('admin::api-token').count({ where });
 };
 
+/**
+ * Delete all admin API tokens owned by the given user, including their associated admin permissions.
+ * Called when the owner user is deleted so tokens don't linger with a dangling owner FK.
+ */
+const deleteAdminTokensForUser = async (userId: Data.ID): Promise<void> => {
+  const tokens = await strapi.db.query('admin::api-token').findMany({
+    where: { kind: 'admin', adminUserOwner: { id: userId } },
+    select: ['id'],
+    populate: ['adminPermissions'],
+  });
+
+  for (const token of tokens) {
+    const permissionIds = ((token.adminPermissions as Array<{ id: Data.ID }>) ?? [])
+      .map((p) => p.id)
+      .filter((id) => id !== null && id !== undefined);
+
+    if (permissionIds.length > 0) {
+      await getService('permission').deleteByIds(permissionIds);
+    }
+
+    await strapi.db.query('admin::api-token').delete({ where: { id: token.id } });
+  }
+};
+
+// -------------------------------------------------------------------------
+// Service interfaces
+// -------------------------------------------------------------------------
+
+interface SharedTokenMethods {
+  hash(accessKey: string): string;
+  checkSaltIsDefined(): void;
+  /** Kind-agnostic lookup by hashed access key — used by the auth strategy. */
+  getByAccessKey(accessKeyHash: string, options?: GetByOptions): Promise<AnyApiToken | null>;
+  /** Total count across all kinds. */
+  countAll(where?: object): Promise<number>;
+  reconcileTokenPermissionsToUserCeiling(
+    userPermissions: Permission[],
+    tokenPermissions: Permission[]
+  ): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] };
+  reconcileParameterizedTokenPermissions(
+    userPermissions: Permission[],
+    tokenPermissions: Permission[]
+  ): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] };
+}
+
+export interface ContentApiTokenService extends SharedTokenMethods {
+  create(attributes: ContentApiApiTokenBody, callingUser?: AdminUser): Promise<ContentApiApiToken>;
+  list(callingUser: AdminUser): Promise<ContentApiApiToken[]>;
+  getById(id: string | number, options?: GetByOptions): Promise<ContentApiApiToken | null>;
+  getByName(name: string, options?: GetByOptions): Promise<ContentApiApiToken | null>;
+  update(
+    id: string | number,
+    attributes: Partial<ContentApiApiTokenBody>
+  ): Promise<ContentApiApiToken>;
+  revoke(id: string | number): Promise<ContentApiApiToken>;
+  regenerate(id: string | number): Promise<ContentApiApiToken>;
+  exists(where: WhereParams): Promise<boolean>;
+  count(where?: object): Promise<number>;
+}
+
+export interface AdminTokenService extends SharedTokenMethods {
+  authenticateAdminToken(accessToken: string): Promise<AdminTokenAuthenticationResult>;
+  create(
+    attributes: AdminTokenBody,
+    callingUser: AdminUser,
+    callingTokenPermissions?: CeilingPermission[]
+  ): Promise<AdminApiToken>;
+  list(callingUser: AdminUser): Promise<AdminApiToken[]>;
+  getById(id: string | number, options?: GetByOptions): Promise<AdminApiToken | null>;
+  getByName(name: string, options?: GetByOptions): Promise<AdminApiToken | null>;
+  update(
+    id: string | number,
+    attributes: Partial<AdminTokenBody>,
+    callingTokenPermissions?: CeilingPermission[]
+  ): Promise<AdminApiToken>;
+  revoke(id: string | number): Promise<AdminApiToken>;
+  regenerate(id: string | number): Promise<AdminApiToken>;
+  exists(where: WhereParams): Promise<boolean>;
+  count(where?: object): Promise<number>;
+  assignAdminPermissionsToToken(
+    tokenId: Data.ID,
+    permissions: PermissionInput[],
+    ceilingUser: AdminUser,
+    callingTokenPermissions?: CeilingPermission[]
+  ): Promise<Permission[]>;
+  syncPermissionsForUser(userId: Data.ID): Promise<void>;
+  syncPermissionsForRole(roleId: Data.ID): Promise<void>;
+  syncPermissionsForAllUsers(): Promise<void>;
+  deleteTokensForUser(userId: Data.ID): Promise<void>;
+}
+
+// -------------------------------------------------------------------------
+// Factory
+// -------------------------------------------------------------------------
+
+function createTokenService(kind: 'content-api'): ContentApiTokenService;
+function createTokenService(kind: 'admin'): AdminTokenService;
+function createTokenService(
+  kind: 'content-api' | 'admin'
+): ContentApiTokenService | AdminTokenService {
+  const shared: SharedTokenMethods = {
+    hash,
+    checkSaltIsDefined,
+    getByAccessKey: (accessKeyHash, options) => getBy({ accessKey: accessKeyHash }, options),
+    countAll: count,
+    reconcileTokenPermissionsToUserCeiling,
+    reconcileParameterizedTokenPermissions,
+  };
+
+  if (kind === 'content-api') {
+    const svc: ContentApiTokenService = {
+      ...shared,
+      create: (attributes: ContentApiApiTokenBody, callingUser?: AdminUser) =>
+        create({ ...attributes, kind: 'content-api' }, callingUser) as Promise<ContentApiApiToken>,
+      list: (callingUser: AdminUser) =>
+        list(callingUser, { filter: { kind: 'content-api' } }) as Promise<ContentApiApiToken[]>,
+      getById: (id: string | number, options?: GetByOptions) =>
+        getBy(
+          {
+            $and: [{ id }, { $or: [{ kind: 'content-api' }, { kind: { $null: true } }] }],
+          } as any,
+          options
+        ) as Promise<ContentApiApiToken | null>,
+      getByName: (name: string, options?: GetByOptions) =>
+        getBy(
+          {
+            $and: [{ name }, { $or: [{ kind: 'content-api' }, { kind: { $null: true } }] }],
+          } as any,
+          options
+        ) as Promise<ContentApiApiToken | null>,
+      update: (id: string | number, attributes: Partial<ContentApiApiTokenBody>) =>
+        update(id, attributes) as Promise<ContentApiApiToken>,
+      revoke: (id: string | number) => revoke(id) as Promise<ContentApiApiToken>,
+      regenerate: (id: string | number) => regenerate(id) as Promise<ContentApiApiToken>,
+      exists,
+      count,
+    };
+    return svc;
+  }
+
+  const svc: AdminTokenService = {
+    ...shared,
+    authenticateAdminToken,
+    create: (
+      attributes: AdminTokenBody,
+      callingUser: AdminUser,
+      callingTokenPermissions?: CeilingPermission[]
+    ) =>
+      create(
+        { ...attributes, kind: 'admin' },
+        callingUser,
+        callingTokenPermissions
+      ) as Promise<AdminApiToken>,
+    list: (callingUser: AdminUser) =>
+      list(callingUser, { filter: { kind: 'admin' } }) as Promise<AdminApiToken[]>,
+    getById: (id: string | number, options?: GetByOptions) =>
+      getBy({ id, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
+    getByName: (name: string, options?: GetByOptions) =>
+      getBy({ name, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
+    update: (
+      id: string | number,
+      attributes: Partial<AdminTokenBody>,
+      callingTokenPermissions?: CeilingPermission[]
+    ) => update(id, attributes, callingTokenPermissions) as Promise<AdminApiToken>,
+    revoke: (id: string | number) => revoke(id) as Promise<AdminApiToken>,
+    regenerate: (id: string | number) => regenerate(id) as Promise<AdminApiToken>,
+    exists,
+    count,
+    assignAdminPermissionsToToken,
+    syncPermissionsForUser: syncApiTokenPermissionsForUser,
+    syncPermissionsForRole: syncApiTokenPermissionsForRole,
+    syncPermissionsForAllUsers: syncApiTokenPermissionsForAllUsers,
+    deleteTokensForUser: deleteAdminTokensForUser,
+  };
+  return svc;
+}
+
+export type { GetByOptions };
+
 export {
+  createTokenService,
   create,
   count,
   regenerate,
@@ -413,4 +1666,13 @@ export {
   update,
   getByName,
   getBy,
+  authenticateAdminToken,
+  assignAdminPermissionsToToken,
+  enforceAdminPermissionsCeiling,
+  reconcileTokenPermissionsToUserCeiling,
+  reconcileParameterizedTokenPermissions,
+  syncApiTokenPermissionsForUser,
+  syncApiTokenPermissionsForRole,
+  syncApiTokenPermissionsForAllUsers,
+  deleteAdminTokensForUser,
 };

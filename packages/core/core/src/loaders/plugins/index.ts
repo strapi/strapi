@@ -1,6 +1,6 @@
 import { join } from 'path';
 import fse from 'fs-extra';
-import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
+import { defaults, defaultsDeep, get } from 'lodash';
 import * as resolve from 'resolve.exports';
 
 import { env } from '@strapi/utils';
@@ -43,17 +43,26 @@ const applyUserExtension = async (plugins: Plugins) => {
   for (const pluginName of Object.keys(plugins)) {
     const plugin = plugins[pluginName];
     // first: load json schema
-    for (const ctName of Object.keys(plugin.contentTypes)) {
-      const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
-      if (extendedSchema) {
+    const extendedContentTypes = get(extendedSchemas, [pluginName, 'content-types']) ?? {};
+    for (const ctName of Object.keys(extendedContentTypes)) {
+      const extendedSchema = extendedContentTypes?.[ctName]?.schema;
+      if (!extendedSchema) {
+        continue;
+      }
+
+      if (!plugin.contentTypes[ctName]) {
+        plugin.contentTypes[ctName] = { schema: extendedSchema };
+      } else {
         plugin.contentTypes[ctName].schema = {
           ...plugin.contentTypes[ctName].schema,
           ...extendedSchema,
         };
       }
     }
+
+    formatContentTypes(pluginName, plugin.contentTypes);
     // second: execute strapi-server extension
-    const strapiServer = get([pluginName, 'strapi-server'], strapiServers);
+    const strapiServer = get(strapiServers, [pluginName, 'strapi-server']);
     if (strapiServer) {
       plugins[pluginName] = await strapiServer(plugin);
     }
@@ -65,13 +74,13 @@ const applyUserConfig = async (plugins: Plugins) => {
 
   for (const pluginName of Object.keys(plugins)) {
     const plugin = plugins[pluginName];
-    const userPluginConfig = getOr({}, `${pluginName}.config`, userPluginsConfig);
+    const userPluginConfig = get(userPluginsConfig, `${pluginName}.config`, {});
     const defaultConfig =
       typeof plugin.config.default === 'function'
         ? plugin.config.default({ env })
         : plugin.config.default;
 
-    const config = defaultsDeep(defaultConfig, userPluginConfig);
+    const config = defaultsDeep({}, userPluginConfig, defaultConfig);
     try {
       plugin.config.validator(config);
     } catch (e) {
@@ -104,13 +113,13 @@ export default async function loadPlugins(strapi: Core.Strapi) {
           require: true,
         }) ?? './strapi-server.js'
       ).toString();
-    } catch (e) {
+    } catch {
       // no export map or missing strapi-server export => fallback to default
     }
 
     try {
       serverEntrypointPath = join(enabledPlugin.pathToPlugin, resolvedExport);
-    } catch (e) {
+    } catch {
       throw new Error(
         `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove its configuration.`
       );
@@ -126,7 +135,7 @@ export default async function loadPlugins(strapi: Core.Strapi) {
       ...defaultPlugin,
       ...pluginServer,
       contentTypes: formatContentTypes(pluginName, pluginServer.contentTypes ?? {}),
-      config: defaults(defaultPlugin.config, pluginServer.config),
+      config: defaults({}, pluginServer.config, defaultPlugin.config),
       routes: pluginServer.routes ?? defaultPlugin.routes,
     };
   }

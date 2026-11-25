@@ -209,6 +209,7 @@ const expectedModels = [
         relation: 'morphOne',
         target: 'plugin::upload.file',
         morphBy: 'related',
+        singleRow: true,
       },
       repeatableImage: {
         type: 'relation',
@@ -342,5 +343,23 @@ describe('transformContentTypesToModels', () => {
         );
       }
     );
+
+    it('declares a single documents index covering document_id, locale and published_at when present', () => {
+      const patched = patchContentTypes('countries', {
+        attributes: {
+          locale: { type: 'string' },
+          publishedAt: { type: 'datetime' },
+        },
+      });
+      const models = transformContentTypesToModels(patched, identifiers);
+      const country = models.find((m) => m.uid === 'api::countries.countries');
+
+      expect(country?.indexes).toEqual([
+        {
+          name: 'countries_documents_index',
+          columns: ['document_id', 'locale', 'published_at'],
+        },
+      ]);
+    });
   });
 });

@@ -1,31 +1,59 @@
 import chalk from 'chalk';
 import CLITable from 'cli-table3';
-import _ from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
+
+const ROUNDED_CHARS = {
+  top: '─',
+  'top-mid': '┬',
+  'top-left': '╭',
+  'top-right': '╮',
+  bottom: '─',
+  'bottom-mid': '┴',
+  'bottom-left': '╰',
+  'bottom-right': '╯',
+  left: '│',
+  right: '│',
+  middle: '│',
+  mid: '',
+  'left-mid': '',
+  'mid-mid': '',
+  'right-mid': '',
+};
 
 export const createStartupLogger = (app: Core.Strapi) => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
       console.log();
-      console.log(chalk.black.bgWhite(_.padEnd(columns, ' Project information')));
+      console.log(chalk.black.bgWhite(' Project information'.padEnd(columns)));
       console.log();
 
       const infoTable = new CLITable({
         colWidths: [20, 50],
-        chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
+        chars: ROUNDED_CHARS,
       });
 
       const dbInfo = app.db?.getInfo();
 
+      const getPlan = () => {
+        if (!app.EE) {
+          return 'Community';
+        }
+
+        return app.ee.planPriceId?.toLowerCase().includes('growth') ? 'Growth' : 'Enterprise';
+      };
+
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
-        [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
-        [chalk.blue('Environment'), app.config.environment],
+        [chalk.blue('Launched in'), `${Date.now() - app.config.get<number>('launchedAt')} ms`],
+        [chalk.blue('Environment'), app.config.get<string>('environment')],
         [chalk.blue('Process PID'), process.pid],
-        [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
-        [chalk.blue('Edition'), app.EE ? 'Enterprise' : 'Community'],
+        [
+          chalk.blue('Version'),
+          `${app.config.get<string>('info.strapi')} (node ${process.version})`,
+        ],
+        [chalk.blue('Plan'), getPlan()],
         [chalk.blue('Database'), dbInfo?.client],
         [chalk.blue('Database name'), dbInfo?.displayName]
       );
@@ -36,7 +64,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
 
       console.log(infoTable.toString());
       console.log();
-      console.log(chalk.black.bgWhite(_.padEnd(columns, ' Actions available')));
+      console.log(chalk.black.bgWhite(' Actions available'.padEnd(columns)));
       console.log();
     },
 

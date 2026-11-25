@@ -57,16 +57,56 @@ export const collect = <T = unknown>(
   const chunks: T[] = [];
 
   return new Promise((resolve, reject) => {
-    stream
-      .on('close', () => resolve(chunks))
-      .on('error', reject)
-      .on('data', (chunk) => chunks.push(chunk))
-      .on('end', () => {
-        if (options.destroy) {
-          stream.destroy();
-        }
+    let settled = false;
 
-        resolve(chunks);
-      });
+    const cleanup = () => {
+      stream.removeListener('data', onData);
+      stream.removeListener('end', onEnd);
+      stream.removeListener('close', onClose);
+      stream.removeListener('error', onError);
+    };
+
+    const finishResolve = () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
+      resolve(chunks);
+    };
+
+    const finishReject = (err: unknown) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
+      reject(err);
+    };
+
+    const onData = (chunk: T) => {
+      chunks.push(chunk);
+    };
+
+    const onEnd = () => {
+      if (options.destroy) {
+        stream.destroy();
+      }
+      finishResolve();
+    };
+
+    const onClose = () => {
+      // Handles streams that emit `close` without `end` (e.g. `destroy()` in `_read`).
+      finishResolve();
+    };
+
+    const onError = (err: Error) => {
+      finishReject(err);
+    };
+
+    stream.on('data', onData);
+    stream.on('end', onEnd);
+    stream.on('close', onClose);
+    stream.on('error', onError);
   });
 };

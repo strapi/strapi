@@ -1,4 +1,3 @@
-import { prop } from 'lodash/fp';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createRequest, createAuthRequest } from 'api-tests/request';
@@ -55,6 +54,7 @@ interface TestData {
   };
   entry: Entry;
   role: Role;
+  otherRole?: Role;
   permissions: Permission[];
   userPassword: string;
   users: User[];
@@ -162,7 +162,7 @@ describe('Admin Permissions - Conditions', () => {
     }
 
     // Update the local data store
-    Object.assign(localTestData, { role, permissions, users });
+    Object.assign(localTestData, { role, otherRole, permissions, users });
   };
 
   const getUserRequest = (idx: number) => requests[localTestData.users[idx].id];
@@ -170,11 +170,11 @@ describe('Admin Permissions - Conditions', () => {
 
   const deleteFixtures = async (): Promise<void> => {
     // Delete users
-    const usersId = localTestData.users.map(prop('id'));
+    const usersId = localTestData.users.map((user) => user?.id);
     await utils.deleteUsersById(usersId);
 
-    // Delete the foobar role
-    await utils.deleteRolesById([localTestData.role.id]);
+    // Delete the foobar role and otherRole
+    await utils.deleteRolesById([localTestData.role.id, localTestData.otherRole.id]);
   };
 
   beforeAll(async () => {

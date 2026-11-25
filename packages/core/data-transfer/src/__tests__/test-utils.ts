@@ -1,10 +1,103 @@
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import type { Core } from '@strapi/types';
-import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
+import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../types';
+
+/**
+ * Create a slow Writable that applies backpressure (low highWaterMark, delayed write).
+ * Used to verify that source streams pause when the consumer is slow.
+ */
+export const createSlowWritable = <T = unknown>(
+  options: {
+    objectMode?: boolean;
+    highWaterMark?: number;
+    delayMs?: number;
+    onChunk?: (chunk: T) => void;
+  } = {}
+): { writable: Writable; chunks: T[] } => {
+  const { objectMode = true, highWaterMark = 1, delayMs = 10, onChunk } = options;
+  const chunks: T[] = [];
+  const writable = new Writable({
+    objectMode,
+    highWaterMark,
+    write(chunk: T, _encoding, callback) {
+      chunks.push(chunk);
+      onChunk?.(chunk);
+      setTimeout(callback, delayMs);
+    },
+  });
+  return { writable, chunks };
+};
+
+/**
+ * Run a backpressure test on a Readable: pipe to a slow consumer and assert the source stream
+ * was paused at least once (proving backpressure is applied). Returns collected chunks for integrity checks.
+ */
+export const assertReadStreamBackpressure = async <T = unknown>(
+  stream: Readable,
+  options: { delayMs?: number; minChunksForBackpressure?: number } = {}
+): Promise<{ sourcePaused: boolean; chunks: T[] }> => {
+  const { delayMs = 10, minChunksForBackpressure } = options;
+  let sourcePaused = false;
+  const originalPause = stream.pause.bind(stream);
+  stream.pause = function pauseWithBackpressureTracking(this: Readable) {
+    sourcePaused = true;
+    return originalPause();
+  };
+
+  const { writable, chunks } = createSlowWritable<T>({ delayMs, highWaterMark: 1 });
+  await pipeline(stream, writable);
+
+  if (minChunksForBackpressure !== undefined && chunks.length < minChunksForBackpressure) {
+    throw new Error(
+      `assertReadStreamBackpressure: need at least ${minChunksForBackpressure} chunk(s) to meaningfully test backpressure, got ${chunks.length}`
+    );
+  }
+
+  return {
+    sourcePaused,
+    chunks,
+  };
+};
+
+/**
+ * Run a backpressure test on a Writable: pipe a fast Readable (many chunks) into it and assert
+ * the readable was paused (proving the destination applies backpressure).
+ */
+export const assertWriteStreamBackpressure = async <T = unknown>(
+  writable: Writable,
+  chunks: T[]
+): Promise<{ sourcePaused: boolean }> => {
+  const source = Readable.from(chunks, { objectMode: true });
+  let sourcePaused = false;
+  const originalPause = source.pause.bind(source);
+  source.pause = function pauseWithBackpressureTracking(this: Readable) {
+    sourcePaused = true;
+    return originalPause();
+  };
+  await pipeline(source, writable);
+  return { sourcePaused };
+};
 
 /**
  * Collect every entity in a Readable stream
  */
+/**
+ * Entity sources for `maxSizeJsonl: 10` tests. The oversized row is rejected asynchronously by
+ * the entry writer, so it can surface either after the input ended or while it is still flowing.
+ */
+export async function* oversizedLast() {
+  yield { id: 1, title: 'longer than ten bytes' };
+}
+
+export async function* oversizedThenMore() {
+  yield { id: 1, title: 'longer than ten bytes' };
+  await new Promise((resolve) => {
+    setTimeout(resolve, 20);
+  });
+  yield { id: 2 };
+}
+
 export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
   const chunks: T[] = [];
 
@@ -165,7 +258,7 @@ export const extendExpectForDataTransferTests = () => {
           pass: true,
           message: () => 'Expected source provider not to have all stages called',
         };
-      } catch (e) {
+      } catch {
         return {
           pass: false,
           message: () =>
@@ -181,7 +274,7 @@ export const extendExpectForDataTransferTests = () => {
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;
-          } catch (e) {
+          } catch {
             return true;
           }
         }
@@ -213,7 +306,7 @@ export const extendExpectForDataTransferTests = () => {
           pass: true,
           message: () => 'Expected destination provider not to have all stages called',
         };
-      } catch (e) {
+      } catch {
         return {
           pass: false,
           message: () =>
@@ -229,7 +322,7 @@ export const extendExpectForDataTransferTests = () => {
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;
-          } catch (e) {
+          } catch {
             return true;
           }
         }

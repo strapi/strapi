@@ -22,8 +22,8 @@ describe('admin:create-user', () => {
     appPath = testApps.at(0);
 
     // Reset the database using the programmatic function (no HTTP server required)
-    // Use without-admin.tar to start with an empty database (no admin users)
-    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin.tar');
+    // Use without-admin to start with an empty database (no admin users)
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin');
   });
 
   it('should create an admin user and persist it to the database', async () => {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { map, isEmpty } from 'lodash/fp';
+import { map, isEmpty } from 'lodash';
 import type { Knex } from 'knex';
 
 import {
@@ -39,7 +39,7 @@ const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
 
   // NOTE: SubQueries are wrapped in a function to not reuse the same connection,
   // which causes infinite self references
-  return function (query) {
+  return function findDocumentSiblingIds(query) {
     query
       .select('id')
       .from(tableName)
@@ -130,7 +130,7 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinTable.on || {})
       .transacting(trx);
 
-    const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
+    const relIdsToDelete = map(relsToDelete, inverseJoinColumn.name);
 
     await createQueryBuilder(joinTable.name, db)
       .delete()
@@ -182,7 +182,14 @@ const deleteRelations = async ({
   const { joinColumn, inverseJoinColumn } = joinTable;
   const all = relIdsToDelete === 'all';
 
-  if (hasOrderColumn(attribute) || hasInverseOrderColumn(attribute)) {
+  // Removing every relation of the entity leaves no row on its side to renumber, and the other
+  // side only has order values to fix when the relation is bidirectional. Everything else needs
+  // the batched deletion below, which renumbers the order columns as it goes.
+  const deletesEverything = all && isEmpty(relIdsToNotDelete);
+  const needsOrderCleanup =
+    hasInverseOrderColumn(attribute) || (hasOrderColumn(attribute) && !deletesEverything);
+
+  if (needsOrderCleanup) {
     let lastId: ID = 0;
     let done = false;
     const batchSize = 100;
@@ -205,7 +212,7 @@ const deleteRelations = async ({
       done = batchToDelete.length < batchSize;
       lastId = batchToDelete[batchToDelete.length - 1]?.id || 0;
 
-      const batchIds = map(inverseJoinColumn.name, batchToDelete);
+      const batchIds = map(batchToDelete, inverseJoinColumn.name);
 
       await createQueryBuilder(joinTable.name, db)
         .delete()
@@ -284,7 +291,7 @@ const cleanOrderColumns = async ({
         .where(joinColumn.name, id)
         .toSQL();
 
-    switch (strapi.db.dialect.client) {
+    switch (db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
         const select = selectRowsToOrder(joinTable.name);
@@ -339,10 +346,10 @@ const cleanOrderColumns = async ({
         .connection(joinTableName)
         .select('id')
         .rowNumber('inv_order', inverseOrderColumnName, inverseJoinColumn.name)
-        .where(inverseJoinColumn.name, 'in', inverseRelIds)
+        .whereIn(inverseJoinColumn.name, inverseRelIds)
         .toSQL();
 
-    switch (strapi.db.dialect.client) {
+    switch (db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
         const select = selectRowsToOrder(joinTable.name);
@@ -376,7 +383,9 @@ const cleanOrderColumns = async ({
     }
   };
 
-  return Promise.all([updateOrderColumn(), updateInverseOrderColumn()]);
+  // Run updates in a deterministic order to avoid lock cycles on the same join table.
+  await updateOrderColumn();
+  await updateInverseOrderColumn();
 };
 
 export {

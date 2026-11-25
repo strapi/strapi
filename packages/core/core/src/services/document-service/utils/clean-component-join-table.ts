@@ -86,7 +86,7 @@ const findContentTypeParentForComponentInstance = async (
   if (strapi.components[parent.uid as keyof typeof strapi.components]) {
     // If the parent is a component, we need to check its parents recursively
     const parentComponentSchema = strapi.components[parent.uid as keyof typeof strapi.components];
-    return findContentTypeParentForComponentInstance(parentComponentSchema, parent.parentId);
+    return await findContentTypeParentForComponentInstance(parentComponentSchema, parent.parentId);
   }
 
   if (strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes]) {
@@ -153,7 +153,6 @@ const findPublicationStateMismatches = async (
     for (const [sourceId, entries] of Object.entries(entriesBySource)) {
       // Skip entries with single relations
       if (entries.length <= 1) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -162,7 +161,6 @@ const findPublicationStateMismatches = async (
         try {
           const componentSchema = strapi.components[sourceModel.uid] as Schema.Component;
           if (!componentSchema) {
-            // eslint-disable-next-line no-continue
             continue;
           }
 
@@ -176,15 +174,13 @@ const findPublicationStateMismatches = async (
             strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes];
           if (!parentContentType?.options?.draftAndPublish) {
             // This component instance's parent does NOT support D&P - skip cleanup
-            // eslint-disable-next-line no-continue
             continue;
           }
 
           // If we reach here, this component instance's parent DOES support D&P
           // Continue to process this component instance for ghost relations
-        } catch (error) {
+        } catch {
           // Skip this component instance on error
-          // eslint-disable-next-line no-continue
           continue;
         }
       }
@@ -220,7 +216,7 @@ const findPublicationStateMismatches = async (
     }
 
     return ghostEntries;
-  } catch (error) {
+  } catch {
     return [];
   }
 };

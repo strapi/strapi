@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../fixtures';
 import { resetFiles } from '../../../../utils/file-reset';
 import { sharedSetup } from '../../../../utils/setup';
 import {
@@ -61,7 +61,7 @@ test.describe('Update a new component', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('update-component', page, {
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       login: true,
       afterSetup: async () => {
         const options = {

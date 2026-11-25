@@ -31,7 +31,7 @@ describe('ComponentPicker', () => {
   it('should render the category names by default', () => {
     render();
 
-    expect(screen.getByText('blog')).toBeInTheDocument();
+    expect(screen.getByText('Blog')).toBeInTheDocument();
   });
 
   it('should open the first category of components when isOpen changes to true from false', () => {
@@ -55,8 +55,8 @@ describe('ComponentPicker', () => {
 
     rerender(<Component isOpen />);
 
-    expect(screen.getByRole('button', { name: /blog/ })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /seo/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Blog/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Seo/ })).not.toBeInTheDocument();
   });
 
   it('should call onClickAddComponent with the componentUid when a Component is clicked', async () => {
@@ -66,6 +66,28 @@ describe('ComponentPicker', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'component' }));
+
+    expect(onClickAddComponent).toHaveBeenCalledWith('blog.test-como');
+  });
+
+  it('should offer to add an empty component or to copy one when copying is available', async () => {
+    const onClickAddComponent = jest.fn();
+    const onClickCopyComponent = jest.fn();
+    const { user } = render({
+      onClickAddComponent,
+      onClickCopyComponent,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'component' }));
+
+    expect(onClickAddComponent).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('menuitem', { name: /Use existing content/ }));
+
+    expect(onClickCopyComponent).toHaveBeenCalledWith('blog.test-como');
+
+    await user.click(screen.getByRole('button', { name: 'component' }));
+    await user.click(screen.getByRole('menuitem', { name: /Empty component/ }));
 
     expect(onClickAddComponent).toHaveBeenCalledWith('blog.test-como');
   });

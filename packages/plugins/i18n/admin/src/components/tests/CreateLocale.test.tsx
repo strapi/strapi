@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import { fireEvent } from '@testing-library/react';
 import { screen, render, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { CreateLocale } from '../CreateLocale';
 
@@ -61,12 +61,12 @@ describe('Create Locale', () => {
 
   it('should show an error if the creation fails', async () => {
     server.use(
-      rest.post('/i18n/locales', (_, res, ctx) =>
-        res(
-          ctx.status(500),
-          ctx.json({
+      http.post('/i18n/locales', () =>
+        HttpResponse.json(
+          {
             error: new errors.ApplicationError('Could not create locale'),
-          })
+          },
+          { status: 500 }
         )
       )
     );
@@ -117,10 +117,9 @@ describe('Create Locale', () => {
 
     it('should handle validation errors from the server', async () => {
       server.use(
-        rest.post('/i18n/locales', (_, res, ctx) =>
-          res(
-            ctx.status(400),
-            ctx.json({
+        http.post('/i18n/locales', () =>
+          HttpResponse.json(
+            {
               error: new errors.ValidationError('Valiation error', {
                 errors: [
                   {
@@ -133,7 +132,8 @@ describe('Create Locale', () => {
                   },
                 ],
               }),
-            })
+            },
+            { status: 400 }
           )
         )
       );

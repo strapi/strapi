@@ -5,22 +5,84 @@ const fs = require('node:fs/promises');
 const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
-const execa = require('execa');
-const {
-  publishYalc,
-  setupTestApps,
-  getCurrentTestApps,
-  setupTestEnvironment,
-} = require('../utils/runners/shared-setup');
-const { runPlaywright } = require('../utils/runners/browser-runner');
+
+const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/runners/shared-setup');
+const { buildAdmin, piwiRunLabel, runPlaywright } = require('../utils/runners/browser-runner');
+const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
+const { selectRunnableDomains } = require('../utils/runners/e2e-domains');
 const {
   loadDomainConfigs,
   calculateTestAppsRequired,
+  buildForwardedRunnerArgs,
   runCLI,
 } = require('../utils/runners/cli-runner');
 const { createConfig } = require('../../playwright.base.config');
 
+/**
+ * Rough share of e2e time per domain, measured on CI (Oct 2026). Only the order matters:
+ * starting the heaviest domains first keeps parallel test apps finishing close together.
+ * Unknown domains go last.
+ */
+const DOMAIN_WEIGHTS = {
+  'content-manager': 102,
+  'content-type-builder': 71,
+  admin: 32,
+  i18n: 31,
+  'media-library': 16,
+  settings: 15,
+  'content-releases': 13,
+  'review-workflows': 12,
+  search: 9,
+};
+
+const sortDomainsByExpectedDuration = (domains) =>
+  [...domains].sort((a, b) => (DOMAIN_WEIGHTS[b] ?? 0) - (DOMAIN_WEIGHTS[a] ?? 0));
+
+/**
+ * Measured seconds per `<domain>/<spec file>` for this edition and browser, from
+ * tests/e2e/shard-weights.json (rebuilt with tests/scripts/e2e-shard-weights.js). Null when
+ * there are no measurements, which falls back to Playwright's own --shard.
+ */
+const loadShardWeights = ({ edition, project }) => {
+  try {
+    const all = require('../e2e/shard-weights.json');
+    const weights = all[String(edition ?? '').toLowerCase()]?.[project];
+    return weights && Object.keys(weights).length > 0 ? weights : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Every spec file of the given domains, as paths relative to the domain folder. */
+const listSpecFiles = async (testDomainRoot, domains) => {
+  const units = [];
+  for (const domain of domains) {
+    const entries = await fs.readdir(path.join(testDomainRoot, domain), { recursive: true });
+    for (const file of entries) {
+      if (file.endsWith('.spec.ts')) {
+        units.push({ domain, file: file.split(path.sep).join('/') });
+      }
+    }
+  }
+  return units;
+};
+
+/** Playwright reads file arguments as regular expressions: match this exact file only. */
+const toFileFilter = (filePath) => `${filePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`;
+
 const cwd = path.resolve(__dirname, '../..');
+
+/**
+ * Test app `j` listens on `E2E_PORT_BASE + j` (default 8000). Set another base to run two e2e
+ * runs on one machine, for example from two worktrees.
+ */
+const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
+
+// These domains need setup that the default runs do not have, so they run only when named with `--domains`.
+const OPT_IN_DOMAINS_BY_TYPE = {
+  e2e: ['enterprise-plugins'],
+  cli: [],
+};
 
 const pathExists = async (filePath) => {
   try {
@@ -64,8 +126,16 @@ yargs
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
+        if (type === 'e2e') {
+          const { applyE2eEditionEnv } = require('../utils/e2e-edition.ts');
+          applyE2eEditionEnv();
+        }
+
         // Read domains
         const domains = await fs.readdir(testDomainRoot);
+        const defaultDomains = domains.filter(
+          (domain) => !OPT_IN_DOMAINS_BY_TYPE[type].includes(domain)
+        );
 
         // Parse test-specific arguments - need to reconstruct the full argv without --type
         // The outer yargs already parsed --type, so we need to get the remaining args
@@ -83,7 +153,7 @@ yargs
           .option('concurrency', {
             alias: 'c',
             type: 'number',
-            default: domains.length,
+            default: defaultDomains.length,
             describe: `Number of concurrent test ${type === 'cli' ? 'domains' : 'apps'} to run`,
           })
           .option('domains', {
@@ -91,7 +161,7 @@ yargs
             describe: 'Run a specific test suite domain',
             type: 'array',
             choices: domains,
-            default: domains,
+            default: defaultDomains,
           })
           .option('setup', {
             alias: 'f',
@@ -99,9 +169,25 @@ yargs
             type: 'boolean',
             default: false,
           })
+          .option('updateSnapshot', {
+            alias: 'u',
+            describe: 'Pass -u to Jest to update snapshots',
+            type: 'boolean',
+            default: false,
+          })
           .parse();
 
-        const { concurrency, domains: selectedDomains, setup } = testYargs;
+        const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
+
+        const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
+
+        // Locally, e2e runs Chromium only unless a --project is passed. CI passes one per job.
+        if (type === 'e2e' && !process.env.CI && !extractShardArgs(forwardedRunnerArgs).project) {
+          console.log(
+            'Running e2e tests on Chromium only. Pass `-- --project=webkit` to run another browser.'
+          );
+          forwardedRunnerArgs.push('--project=chromium');
+        }
 
         /**
          * Publishing all packages to the yalc store
@@ -143,7 +229,7 @@ yargs
           templateDir,
           setup,
           currentTestApps: currentTestApps.map((appPath) => path.basename(appPath)),
-          setupTestEnvironment: type === 'e2e' ? setupTestEnvironment : null,
+          commitE2eBaseline: type === 'e2e',
         });
 
         if (wasSetup) {
@@ -162,238 +248,141 @@ yargs
          * Run the appropriate test runner
          */
         if (type === 'e2e') {
-          // Playwright orchestration: init git and start Strapi once per test app, then run tests for each domain
-          const testAppsToSpawn = testAppPaths.length;
-          const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
+          // Git baseline: single commit during `setupTestApps` when apps are generated (`commitE2eBaseline`).
+          // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
 
-          // Initialize git and start Strapi once per test app (not per domain)
-          // Start sequentially to avoid port conflicts with internal services (e.g., Vite on 5173)
-          // eslint-disable-next-line no-plusplus
-          for (let j = 0; j < testAppPaths.length; j++) {
-            const testAppPath = testAppPaths[j];
-            await (async () => {
-              const port = 8000 + j;
+          // Every domain starts its app with `--no-build-admin`, so build the panel once here,
+          // with the same environment (edition, feature flags) the app will run with.
+          await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
 
-              // Store the filesystem state with git so it can be reset between tests
-              console.log(`Initializing git for test app ${j} at ${testAppPath}`);
+          const failedDomains = [];
 
-              // Check if git repo already exists
-              const gitDir = path.join(testAppPath, '.git');
-              const gitExists = await pathExists(gitDir);
-
-              if (!gitExists) {
-                await execa('git', [...gitUser, 'init'], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
-              }
-
-              await execa('git', [...gitUser, 'add', '-A', '.'], {
-                stdio: 'inherit',
-                cwd: testAppPath,
-              });
-
-              // Check if there are changes to commit
-              try {
-                await execa('git', [...gitUser, 'diff', '--cached', '--quiet'], {
-                  cwd: testAppPath,
-                });
-                // If exit code is 0, there are no changes, skip commit
-              } catch (err) {
-                // Exit code 1 means there are changes, proceed with commit
-                await execa(
-                  'git',
-                  [...gitUser, '-c', 'commit.gpgsign=false', 'commit', '-m', 'initial commit'],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                );
-              }
-
-              // Start Strapi and wait for it to be ready to generate files
-              console.log(`Starting Strapi for test app ${j} to generate files...`);
-              const strapiProcess = execa('npm', ['run', 'develop'], {
-                cwd: testAppPath,
-                env: {
-                  PORT: port,
-                  STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
-                },
-                detached: true,
-              });
-
-              await new Promise((resolve, reject) => {
-                const startTime = Date.now();
-                const timeout = 160 * 1000;
-                const checkInterval = 1000;
-
-                const checkServer = async () => {
-                  try {
-                    const response = await fetch(`http://127.0.0.1:${port}/_health`);
-                    if (response.ok) {
-                      console.log(`Strapi is ready for test app ${j}, shutting down...`);
-                      if (process.env.CI) {
-                        process.kill(-strapiProcess.pid, 'SIGINT');
-                      } else {
-                        strapiProcess.kill('SIGINT');
-                      }
-                      resolve();
-                      return;
-                    }
-                  } catch (err) {
-                    // Server not ready yet, continue checking
-                  }
-
-                  if (Date.now() - startTime > timeout) {
-                    console.log('Timeout reached, forcing shutdown...');
-                    if (process.env.CI) {
-                      process.kill(-strapiProcess.pid, 'SIGKILL');
-                    } else {
-                      strapiProcess.kill('SIGKILL');
-                    }
-                    reject(new Error('Strapi failed to start within timeout period'));
-                    return;
-                  }
-
-                  setTimeout(checkServer, checkInterval);
-                };
-
-                checkServer();
-
-                strapiProcess.stdout.on('data', (data) => {
-                  console.log(`[stdout] ${data.toString().trim()}`);
-                });
-
-                strapiProcess.stderr.on('data', (data) => {
-                  console.error(`[stderr] ${data.toString().trim()}`);
-                });
-
-                strapiProcess.on('error', (err) => {
-                  console.error(`[Strapi ERROR] Process error:`, err);
-                  reject(err);
-                });
-
-                strapiProcess.on('exit', (code) => {
-                  console.log(`Strapi process exited with code ${code}`);
-                });
-              });
-
-              // Wait for Strapi to fully shut down
-              await new Promise((resolve) => {
-                const checkPort = async () => {
-                  try {
-                    await fetch(`http://127.0.0.1:${port}/_health`);
-                    setTimeout(checkPort, 1000);
-                  } catch (err) {
-                    resolve();
-                  }
-                };
-                checkPort();
-              });
-
-              // Commit the generated files
-              await execa('git', [...gitUser, 'add', '-A', '.'], {
-                stdio: 'inherit',
-                cwd: testAppPath,
-              });
-
-              // Check if there are changes to commit
-              try {
-                await execa('git', [...gitUser, 'diff', '--cached', '--quiet'], {
-                  cwd: testAppPath,
-                });
-                // If exit code is 0, there are no changes, skip commit
-              } catch (err) {
-                // Exit code 1 means there are changes, proceed with commit
-                await execa(
-                  'git',
-                  [
-                    ...gitUser,
-                    '-c',
-                    'commit.gpgsign=false',
-                    'commit',
-                    '-m',
-                    'commit generated files',
-                  ],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                );
-              }
-            })();
+          // A domain whose specs are all gated off for this run would start Strapi only to skip
+          // every test (see tests/utils/runners/e2e-domains.js).
+          const { runnable: runnableDomains, skipped: skippedDomains } = selectRunnableDomains(
+            selectedDomains,
+            {
+              isCE: process.env.STRAPI_DISABLE_EE === 'true',
+              mediaLibrarySuite: process.env.E2E_MEDIA_LIBRARY,
+            }
+          );
+          for (const { domain, reason } of skippedDomains) {
+            console.log(`Skipping ${domain} e2e tests: ${reason}`);
           }
 
-          // Now chunk domains and run tests
-          const chunkedDomains = selectedDomains.reduce((acc, _, i) => {
-            if (i % testAppsToSpawn === 0) acc.push(selectedDomains.slice(i, i + testAppsToSpawn));
-            return acc;
-          }, []);
+          const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
 
-          // eslint-disable-next-line no-plusplus
-          for (let i = 0; i < chunkedDomains.length; i++) {
-            const domainBatch = chunkedDomains[i];
+          // Without a CI label, the reporter would give every local process the same
+          // `hostname|project` id, and parallel domains would cancel each other's run. One base
+          // per invocation keeps the shard, domain and lane suffixes working locally too.
+          const piwiBaseLabel = process.env.PIWI_RUN_LABEL || `local-${Date.now()}`;
 
-            await Promise.all(
-              domainBatch.map(async (domain, j) => {
-                const testAppPath = testAppPaths[j];
-                const port = 8000 + j;
-                const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
+          const runDomain = async ({ domain, testAppPath, port, testArgs, lane }) => {
+            const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
-                console.log(
-                  `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
-                );
+            console.log(
+              `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
+            );
 
-                const config = createConfig({
-                  testDir: path.join(testDomainRoot, domain),
-                  port,
-                  appDir: testAppPath,
-                  reportFileName: `playwright-${domain}-${port}.xml`,
-                });
+            const config = createConfig({
+              testDir: path.join(testDomainRoot, domain),
+              port,
+              appDir: testAppPath,
+              reportFileName: `playwright-${domain}-${port}.xml`,
+              domain,
+            });
 
-                const configFileTemplate = `
+            // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
+            // canonical port is `E2E_PORT_BASE + j` below, the same as baseURL / webServer;
+            // helpers read PORT.
+            // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
+            // embeds a numeric literal; Node coerces env values to strings on read.
+            const configFileTemplate = `
+process.env.PORT = ${JSON.stringify(port)};
 const config = ${JSON.stringify(config)}
 
 module.exports = config
                 `;
 
-                await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
+            await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
-                // Add the config file to git so it persists through git clean
-                await execa('git', [...gitUser, 'add', pathToPlaywrightConfig], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
-                await execa(
-                  'git',
-                  [
-                    ...gitUser,
-                    '-c',
-                    'commit.gpgsign=false',
-                    'commit',
-                    '-m',
-                    'Add playwright config',
-                  ],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                ).catch(() => {
-                  // Ignore error if there's nothing to commit (file already tracked)
-                });
+            console.log(`Running ${domain} e2e tests`);
 
-                console.log(`Running ${domain} e2e tests`);
+            try {
+              await runPlaywright({
+                configPath: pathToPlaywrightConfig,
+                cwd,
+                port,
+                testAppPath,
+                testArgs,
+                runLabel: piwiRunLabel({
+                  baseLabel: piwiBaseLabel,
+                  shard,
+                  domain,
+                  lane,
+                }),
+              });
+            } catch (err) {
+              console.error(`${domain} e2e tests failed`);
+              failedDomains.push(domain);
+            }
+          };
 
-                // Run Playwright - this is the only line that differs!
-                await runPlaywright({
-                  configPath: pathToPlaywrightConfig,
-                  cwd,
-                  port,
-                  testAppPath,
-                  testArgs: testYargs._,
-                });
+          // With measured durations and a --shard, split the spec files by duration across the
+          // shards and the test apps of this shard (see tests/utils/runners/shard-plan.js).
+          // Otherwise each test app takes the next whole domain as soon as it is free, heaviest
+          // first. Either way a failing domain doesn't stop the others: every domain runs and the
+          // run fails at the end, like the CLI runner.
+          const weights = shard
+            ? loadShardWeights({ edition: process.env.STRAPI_E2E_EDITION, project })
+            : null;
+
+          if (shard && weights) {
+            const lanePlans = planShard({
+              weights,
+              units: await listSpecFiles(testDomainRoot, runnableDomains),
+              shard,
+              lanes: testAppPaths.length,
+            });
+
+            await Promise.all(
+              testAppPaths.map(async (testAppPath, j) => {
+                for (const run of lanePlans[j]) {
+                  await runDomain({
+                    domain: run.domain,
+                    testAppPath,
+                    port: E2E_PORT_BASE + j,
+                    lane: j,
+                    testArgs: [
+                      ...argsWithoutShard,
+                      ...run.files.map((file) =>
+                        toFileFilter(path.join(testDomainRoot, run.domain, file))
+                      ),
+                    ],
+                  });
+                }
               })
             );
+          } else {
+            const pendingDomains = sortDomainsByExpectedDuration(runnableDomains);
+
+            await Promise.all(
+              testAppPaths.map(async (testAppPath, j) => {
+                while (pendingDomains.length > 0) {
+                  await runDomain({
+                    domain: pendingDomains.shift(),
+                    testAppPath,
+                    port: E2E_PORT_BASE + j,
+                    lane: j,
+                    testArgs: forwardedRunnerArgs,
+                  });
+                }
+              })
+            );
+          }
+
+          if (failedDomains.length > 0) {
+            throw new Error(`e2e tests failed for: ${failedDomains.join(', ')}`);
           }
         } else {
           // CLI orchestration: batch domains, assign test apps, then run tests
@@ -432,7 +421,8 @@ module.exports = config
                     domainDir,
                     jestConfigPath,
                     testApps,
-                    testArgs: testYargs._,
+                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...forwardedRunnerArgs],
+                    domain,
                   });
                 } catch (err) {
                   console.error('Test suite failed for', domain);

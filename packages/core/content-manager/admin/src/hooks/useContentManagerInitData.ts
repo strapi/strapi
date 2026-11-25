@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import {
+  getAdminUserId,
   useAuth,
   type Permission,
   useNotification,
@@ -13,7 +14,7 @@ import { useIntl } from 'react-intl';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { HOOKS } from '../constants/hooks';
-import { AppState, setInitialData } from '../modules/app';
+import { AppState, initialState, setInitialData } from '../modules/app';
 import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
@@ -39,6 +40,26 @@ interface ContentManagerLink {
   isDisplayed: boolean;
 }
 
+const getPermissionKey = (permission: Pick<Permission, 'action' | 'subject'>) =>
+  `${permission.action}::${permission.subject ?? ''}`;
+
+const authorizeLinks = async (
+  links: ContentManagerLink[],
+  checkUserHasPermissions: (
+    permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>
+  ) => Promise<Permission[]>
+) => {
+  const authorizedPermissions = await checkUserHasPermissions(
+    links.flatMap(({ permissions }) => permissions)
+  );
+
+  const authorizedPermissionKeys = new Set(authorizedPermissions.map(getPermissionKey));
+
+  return links.filter(({ permissions }) =>
+    permissions.some((permission) => authorizedPermissionKeys.has(getPermissionKey(permission)))
+  );
+};
+
 const useContentManagerInitData = (): AppState => {
   const { toggleNotification } = useNotification();
   const dispatch = useTypedDispatch();
@@ -53,6 +74,8 @@ const useContentManagerInitData = (): AppState => {
     'useContentManagerInitData',
     (state) => state.checkUserHasPermissions
   );
+  const isLoadingAuth = useAuth('useContentManagerInitData', (state) => state.isLoading);
+  const adminUserId = useAuth('useContentManagerInitData', (state) => getAdminUserId(state.user));
 
   const state = useTypedSelector((state) => state['content-manager'].app);
 
@@ -92,87 +115,116 @@ const useContentManagerInitData = (): AppState => {
     }
   }, [formatAPIError, contentTypeSettingsQuery.error, toggleNotification]);
 
-  const formatData = async (
-    components: Component[],
-    contentTypes: ContentType[],
-    fieldSizes: GetInitData.Response['data']['fieldSizes'],
-    contentTypeConfigurations: FindContentTypesSettings.Response['data']
-  ) => {
-    /**
-     * We group these by the two types we support. We do with an object because we can use default
-     * values of arrays to make sure we always have an array to manipulate further on if, for example,
-     * a user has not made any single types.
-     *
-     * This means we have to manually add new content types to this hook if we add a new type – but
-     * the safety is worth it.
-     */
-    const { collectionType: collectionTypeLinks, singleType: singleTypeLinks } =
-      contentTypes.reduce<{
-        collectionType: ContentType[];
-        singleType: ContentType[];
-      }>(
-        (acc, model) => {
-          acc[model.kind].push(model);
-          return acc;
-        },
-        {
-          collectionType: [],
-          singleType: [],
-        }
+  const formatData = useCallback(
+    async (
+      components: Component[],
+      contentTypes: ContentType[],
+      fieldSizes: GetInitData.Response['data']['fieldSizes'],
+      contentTypeConfigurations: FindContentTypesSettings.Response['data'],
+      contentStructure: GetInitData.Response['data']['contentStructure']
+    ) => {
+      /**
+       * We group these by the two types we support. We do with an object because we can use default
+       * values of arrays to make sure we always have an array to manipulate further on if, for example,
+       * a user has not made any single types.
+       *
+       * This means we have to manually add new content types to this hook if we add a new type – but
+       * the safety is worth it.
+       */
+      const { collectionType: collectionTypeLinks, singleType: singleTypeLinks } =
+        contentTypes.reduce<{
+          collectionType: ContentType[];
+          singleType: ContentType[];
+        }>(
+          (acc, model) => {
+            acc[model.kind].push(model);
+            return acc;
+          },
+          {
+            collectionType: [],
+            singleType: [],
+          }
+        );
+      const collectionTypeSectionLinks = generateLinks(
+        collectionTypeLinks,
+        'collectionTypes',
+        contentTypeConfigurations
       );
-    const collectionTypeSectionLinks = generateLinks(
-      collectionTypeLinks,
-      'collectionTypes',
-      contentTypeConfigurations
-    );
-    const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
+      const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
 
-    // Collection Types verifications
-    const collectionTypeLinksPermissions = await Promise.all(
-      collectionTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
-    );
+      const authorizedLinks = await authorizeLinks(
+        [...collectionTypeSectionLinks, ...singleTypeSectionLinks],
+        checkUserHasPermissions
+      );
+      const authorizedCollectionTypeLinks = authorizedLinks.filter(
+        (link) => link.kind === 'collectionType'
+      );
+      const authorizedSingleTypeLinks = authorizedLinks.filter(
+        (link) => link.kind === 'singleType'
+      );
+      const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
+        ctLinks: authorizedCollectionTypeLinks,
+        models: contentTypes,
+      });
+      const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
+        stLinks: authorizedSingleTypeLinks,
+        models: contentTypes,
+      });
 
-    const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
-      (_, index) => collectionTypeLinksPermissions[index].length > 0
-    );
-
-    // Single Types verifications
-    const singleTypeLinksPermissions = await Promise.all(
-      singleTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
-    );
-    const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
-      (_, index) => singleTypeLinksPermissions[index].length > 0
-    );
-    const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
-      ctLinks: authorizedCollectionTypeLinks,
-      models: contentTypes,
-    });
-    const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-      stLinks: authorizedSingleTypeLinks,
-      models: contentTypes,
-    });
-
-    dispatch(
-      setInitialData({
+      return {
+        adminUserId,
         authorizedCollectionTypeLinks: ctLinks,
         authorizedSingleTypeLinks: stLinks,
         components,
+        contentStructure,
         contentTypeSchemas: contentTypes,
         fieldSizes,
-      })
-    );
-  };
+      };
+    },
+    [adminUserId, checkUserHasPermissions, runHookWaterfall]
+  );
 
   useEffect(() => {
+    let cancelled = false;
+
     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
       formatData(
         initialDataQuery.data.components,
         initialDataQuery.data.contentTypes,
         initialDataQuery.data.fieldSizes,
-        contentTypeSettingsQuery.data
-      );
+        contentTypeSettingsQuery.data,
+        initialDataQuery.data.contentStructure
+      )
+        .then((data) => {
+          if (!cancelled) {
+            dispatch(setInitialData(data));
+          }
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            toggleNotification({
+              type: 'danger',
+              message: formatAPIError(error),
+            });
+          }
+        });
     }
-  }, [initialDataQuery.data, contentTypeSettingsQuery.data]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    dispatch,
+    formatAPIError,
+    formatData,
+    initialDataQuery.data,
+    contentTypeSettingsQuery.data,
+    toggleNotification,
+  ]);
+
+  if (isLoadingAuth || state.adminUserId !== adminUserId) {
+    return { ...initialState };
+  }
 
   return { ...state };
 };

@@ -79,12 +79,6 @@ interface SendOptions {
   /** Convert data: URIs in HTML to embedded CID attachments automatically */
   attachDataUrls?: SendMailOptions['attachDataUrls'];
 
-  // --- Security ---
-  /** Fail with an error when content tries to load from a URL */
-  disableUrlAccess?: SendMailOptions['disableUrlAccess'];
-  /** Fail with an error when content tries to load from a file path */
-  disableFileAccess?: SendMailOptions['disableFileAccess'];
-
   // --- Raw MIME ---
   /**
    * Pre-built MIME message. When set, skips message generation entirely.
@@ -266,14 +260,6 @@ export default {
           message.attachDataUrls = options.attachDataUrls;
         }
 
-        // Security
-        if (options.disableUrlAccess) {
-          message.disableUrlAccess = options.disableUrlAccess;
-        }
-        if (options.disableFileAccess) {
-          message.disableFileAccess = options.disableFileAccess;
-        }
-
         // Raw MIME
         if (options.raw) {
           message.raw = options.raw;
@@ -291,6 +277,13 @@ export default {
             ...(options.auth.expires != null ? { expires: options.auth.expires } : {}),
           };
         }
+
+        // Security: always block nodemailer from reading local files or fetching
+        // URLs referenced by attachments[].path / attachments[].href. These are
+        // forced on after the message is built so caller-supplied values cannot
+        // re-enable file/URL access (prevents LFI/SSRF via attachment sources).
+        message.disableFileAccess = true;
+        message.disableUrlAccess = true;
 
         return transporter.sendMail(message);
       },

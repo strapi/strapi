@@ -43,6 +43,39 @@ const expectConsoleLinesToInclude = (received, expected) => {
   });
 };
 
+/** Lines Strapi logs to stdout during CLI (timestamps change every run). */
+const LOGGER_LINE =
+  /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}\] (warn|info|error|debug|verbose):/;
+
+/**
+ * Normalize CLI table/list stdout for Jest snapshots (strip ANSI, trim lines, drop
+ * empty/garbled lines — same rules as expectConsoleLinesToInclude). Also drops
+ * Winston-style log lines so snapshots stay stable.
+ *
+ * @param {string} received
+ * @returns {string}
+ */
+const normalizeCliOutputForSnapshot = (received) =>
+  trimLines(received)
+    .filter((line) => !LOGGER_LINE.test(line))
+    .join('\n');
+
+/**
+ * Masks the numeric ID in `admin:list-users` table rows for a known fixture email so
+ * snapshots do not depend on DB auto-increment (varies with leftover rows / import order).
+ *
+ * @param {string} normalized - output already passed through {@link normalizeCliOutputForSnapshot}
+ * @param {string} fixtureEmail - email column value identifying the row to mask (default: list-users CLI test)
+ * @returns {string}
+ */
+const maskVolatileAdminListUsersTableIds = (normalized, fixtureEmail = 'test.list@strapi.io') => {
+  const escaped = fixtureEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const row = new RegExp(`^(│)(\\s*)(\\d+)(\\s*)(│\\s*${escaped}\\b.*)$`, 'gm');
+  return normalized.replace(row, (_, pipe, sp1, digits, sp2, tail) => {
+    return `${pipe}${sp1}${'*'.repeat(digits.length)}${sp2}${tail}`;
+  });
+};
+
 /**
  * Load environment variables from a test app's .env file
  * This ensures consistent environment setup for both browser and CLI tests
@@ -79,4 +112,6 @@ module.exports = {
   expectConsoleLinesToEqual,
   expectConsoleLinesToInclude,
   loadTestAppEnv,
+  normalizeCliOutputForSnapshot,
+  maskVolatileAdminListUsersTableIds,
 };

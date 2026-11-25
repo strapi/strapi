@@ -1,4 +1,4 @@
-import { padCharsEnd, isString, toString } from 'lodash/fp';
+import { isString, toString } from 'lodash';
 import * as dateFns from 'date-fns';
 
 import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
@@ -9,7 +9,7 @@ const isDate = (value: unknown): value is Date => {
 
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 const PARTIAL_DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/g;
-const TIME_REGEX = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
+const TIME_REGEX = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]{1,3})?$/;
 
 export const parseDateTimeOrTimestamp = (value: unknown): Date => {
   if (isDate(value)) {
@@ -28,7 +28,7 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
     }
 
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
-  } catch (error) {
+  } catch {
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
   }
 };
@@ -77,7 +77,7 @@ export const parseTime = (value: unknown) => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = padCharsEnd('0', 3, fraction.slice(1));
+  const fractionPart = fraction.slice(1).padEnd(3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };

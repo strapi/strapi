@@ -5,7 +5,7 @@
  * of incoming data.
  */
 
-import { type Schema, UID } from '@strapi/types';
+import { type Core, type Schema, UID } from '@strapi/types';
 
 import {
   relations,
@@ -75,11 +75,13 @@ export const booleanToSchema = (attribute: Schema.Attribute.Boolean): z.Schema =
  * @returns A Zod schema representing the component field.
  */
 export const componentToSchema = (
+  strapi: Core.Strapi,
   attribute: Schema.Attribute.Component<UID.Component, boolean>
 ): z.Schema => {
   const { writable, required, min, max, component, repeatable } = attribute;
 
   const componentSchema = safeSchemaCreation(
+    strapi,
     component,
     () => new CoreComponentRouteValidator(strapi, component).entry
   ) as z.ZodType;
@@ -188,14 +190,25 @@ export const emailToSchema = (attribute: Schema.Attribute.Email): z.Schema => {
 };
 
 /**
+ * Returns the allowed values of an enumeration attribute.
+ *
+ * An enumeration custom field can be registered without an `enum` option, so its attributes
+ * may have no `enum`. Such an attribute allows no value: the entity validator rejects every
+ * non-null value, so an empty list keeps route validation as strict while letting the schema build.
+ */
+const getEnumValues = (attribute: Schema.Attribute.Enumeration<string[]>): string[] => {
+  return Array.isArray(attribute.enum) === true ? attribute.enum : [];
+};
+
+/**
  * Converts an enumeration attribute to a Zod schema.
  * @param attribute - The Enumeration attribute object from the Strapi schema.
  * @returns A Zod schema representing the enumeration field.
  */
 export const enumToSchema = (attribute: Schema.Attribute.Enumeration<string[]>): z.Schema => {
-  const { writable, required, default: defaultValue, enum: enumValues } = attribute;
+  const { writable, required, default: defaultValue } = attribute;
 
-  const baseSchema = z.enum(enumValues);
+  const baseSchema = z.enum(getEnumValues(attribute));
 
   const schema = augmentSchema(baseSchema, [
     maybeRequired(required),
@@ -267,6 +280,7 @@ export const jsonToSchema = (attribute: Schema.Attribute.JSON): z.Schema => {
  * @returns A Zod schema representing the media field.
  */
 export const mediaToSchema = (
+  strapi: Core.Strapi,
   attribute: Schema.Attribute.Media<Schema.Attribute.MediaKind | undefined, boolean>
 ): z.Schema => {
   const { writable, required, multiple } = attribute;
@@ -277,6 +291,7 @@ export const mediaToSchema = (
   const fileSchema = uploadPlugin.contentTypes.file as Struct.ContentTypeSchema;
 
   const mediaSchema = safeSchemaCreation(
+    strapi,
     fileSchema.uid,
     () => new CoreContentTypeRouteValidator(strapi, fileSchema.uid).document
   ) as z.ZodType;
@@ -293,7 +308,10 @@ export const mediaToSchema = (
  * @param attribute - The Relation attribute object from the Strapi schema.
  * @returns A Zod schema representing the relational field.
  */
-export const relationToSchema = (attribute: Schema.Attribute.Relation): z.Schema => {
+export const relationToSchema = (
+  strapi: Core.Strapi,
+  attribute: Schema.Attribute.Relation
+): z.Schema => {
   if (!('target' in attribute)) {
     return z.any();
   }
@@ -301,6 +319,7 @@ export const relationToSchema = (attribute: Schema.Attribute.Relation): z.Schema
   const { writable, required, target } = attribute as Schema.Attribute.RelationWithTarget;
 
   const targetSchema = safeSchemaCreation(
+    strapi,
     target,
     () => new CoreContentTypeRouteValidator(strapi, target).document
   ) as z.ZodType;
@@ -545,9 +564,9 @@ export const emailToInputSchema = (attribute: Schema.Attribute.Email) => {
  * @returns A Zod schema for input validation of the enumeration field.
  */
 export const enumerationToInputSchema = (attribute: Schema.Attribute.Enumeration<string[]>) => {
-  const { required, default: defaultValue, enum: enumValues } = attribute;
+  const { required, default: defaultValue } = attribute;
 
-  const baseSchema = z.enum(enumValues);
+  const baseSchema = z.enum(getEnumValues(attribute));
 
   const schema = augmentSchema(baseSchema, [
     maybeRequired(required),
@@ -632,8 +651,8 @@ export const relationToInputSchema = (attribute: Schema.Attribute.Relation) => {
   const { required } = attribute;
 
   const isToMany = relations.isAnyToMany(attribute);
-  const uuid = z.string().uuid();
-  const baseSchema = isToMany ? z.array(uuid) : uuid;
+  const documentId = z.string();
+  const baseSchema = isToMany ? z.array(documentId) : documentId;
 
   const schema = augmentSchema(baseSchema, [maybeRequired(required)]);
 

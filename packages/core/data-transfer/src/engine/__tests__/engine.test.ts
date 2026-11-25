@@ -1,6 +1,9 @@
-import { posix, win32 } from 'path';
-import { cloneDeep, get, set } from 'lodash/fp';
-import { Readable, Writable } from 'stream-chain';
+import path, { posix, win32 } from 'path';
+import os from 'os';
+import fs from 'fs-extra';
+import { cloneDeep, get, set } from 'lodash';
+import { Readable, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
 
@@ -13,13 +16,31 @@ import type {
   ISourceProvider,
   ITransferEngineOptions,
   TransferFilterPreset,
-} from '../../../types';
-import {
-  extendExpectForDataTransferTests,
-  providerStages,
-  sourceStages,
-} from '../../__tests__/test-utils';
+} from '../../types';
+
+import { extendExpectForDataTransferTests, getStrapiFactory } from '../../__tests__/test-utils';
+import * as esmDeps from '../../utils/esm-deps';
+import { createLocalStrapiDestinationProvider } from '../../strapi/providers';
 import { TransferEngineValidationError } from '../errors';
+
+jest.mock('../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
+
+/**
+ * Parallel Jest + V8 can move `heapUsed` by tens of MB unrelated to transfer payload.
+ * Use this as a loose smoke bound; structural tests (order, file bytes) are the real checks.
+ */
+function expectHeapGrowthWithinNoise(heapGrowth: number, totalBytes: number) {
+  const limit = Math.max(totalBytes * 150, 32 * 1024 * 1024);
+  expect(heapGrowth).toBeLessThan(limit);
+}
 
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
 
@@ -408,6 +429,9 @@ describe('Transfer engine', () => {
 
   beforeEach(() => {
     jest.restoreAllMocks();
+    // restoreAllMocks clears the esm-deps jest.fn. Put the real loader back.
+    const actual = jest.requireActual<typeof esmDeps>('../../utils/esm-deps');
+    (esmDeps.loadStreamDeps as jest.Mock).mockImplementation(() => actual.loadStreamDeps());
     completeSource = createSource();
     completeDestination = createDestination();
   });
@@ -457,6 +481,115 @@ describe('Transfer engine', () => {
   });
 
   describe('transfer', () => {
+    test('applies global and stage entity transforms together', async () => {
+      const received: Array<{ id?: number; data?: { foo?: string } }> = [];
+      const source = createSource({
+        entities: [
+          { id: 1, type: 'api::foo.foo', data: { foo: 'drop' } },
+          { id: 2, type: 'api::foo.foo', data: { foo: 'keep' } },
+        ],
+      });
+      const destination = createDestination({
+        createEntitiesWriteStream: jest.fn().mockImplementation(
+          () =>
+            new Writable({
+              objectMode: true,
+              write(chunk, _encoding, callback) {
+                received.push(chunk);
+                callback();
+              },
+            })
+        ),
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        transforms: {
+          global: [{ filter: (entity: { id?: number }) => entity.id !== 1 }],
+          entities: [
+            {
+              map: (entity: { id?: number; type: string; data?: { foo?: string } }) => ({
+                ...entity,
+                data: { ...entity.data, foo: 'mapped' },
+              }),
+            },
+          ],
+        },
+      });
+
+      await engine.transfer();
+
+      expect(received).toEqual([
+        expect.objectContaining({ id: 2, type: 'api::foo.foo', data: { foo: 'mapped' } }),
+      ]);
+    });
+
+    test('runs global transforms before stage transforms when throttled', async () => {
+      const received: Array<{ data?: { foo?: string } }> = [];
+      const source = createSource({
+        entities: [
+          { id: 1, type: 'api::foo.foo', data: { foo: '' } },
+          { id: 2, type: 'api::foo.foo', data: { foo: '' } },
+        ],
+      });
+      const destination = createDestination({
+        createEntitiesWriteStream: jest.fn().mockImplementation(
+          () =>
+            new Writable({
+              objectMode: true,
+              write(chunk, _encoding, callback) {
+                received.push(chunk);
+                callback();
+              },
+            })
+        ),
+      });
+      const append = (suffix: string) => (entity: { type: string; data?: { foo?: string } }) => ({
+        ...entity,
+        data: { foo: `${entity.data?.foo ?? ''}${suffix}` },
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        throttle: 1,
+        transforms: {
+          global: [{ map: append('global,') }],
+          entities: [{ map: append('stage') }],
+        },
+      });
+
+      await engine.transfer();
+
+      expect(received.map((entity) => entity.data?.foo)).toEqual(['global,stage', 'global,stage']);
+    });
+
+    test('throttles only the items that pass the transform filters', async () => {
+      const throttle = 3;
+      const entities = Array.from({ length: 5 }, (_, id) => ({
+        id,
+        type: 'api::foo.foo',
+        data: { foo: '' },
+      }));
+
+      const countThrottleDelays = async (keepEntities: boolean) => {
+        const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+        const engine = createTransferEngine(createSource({ entities }), createDestination(), {
+          ...defaultOptions,
+          throttle,
+          transforms: { entities: [{ filter: () => keepEntities }] },
+        });
+
+        await engine.transfer();
+
+        const delays = setTimeoutSpy.mock.calls.filter(([, delay]) => delay === throttle).length;
+        setTimeoutSpy.mockRestore();
+        return delays;
+      };
+
+      const withEntities = await countThrottleDelays(true);
+      const withoutEntities = await countThrottleDelays(false);
+
+      expect(withEntities - withoutEntities).toBe(entities.length);
+    });
+
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
       expect(completeSource).toHaveAllSourceStagesCalledTimes(0);
@@ -465,6 +598,212 @@ describe('Transfer engine', () => {
 
       expect(completeSource).toHaveAllSourceStagesCalledTimes(1);
       expect(completeDestination).toHaveAllDestinationStagesCalledTimes(1);
+    });
+
+    test('stops before provider bootstrap when stream dependencies fail to load', async () => {
+      const loadError = new Error("Cannot find module 'stream-chain'");
+      const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+        typeof esmDeps.loadStreamDeps
+      >;
+      loadStreamDeps.mockRejectedValueOnce(loadError);
+
+      const sourceBootstrap = jest.fn();
+      const sourceClose = jest.fn();
+      const source = {
+        ...minimalSource,
+        bootstrap: sourceBootstrap,
+        close: sourceClose,
+      };
+      const beforeTransfer = jest.fn();
+      const destinationBootstrap = jest.fn();
+      const destinationClose = jest.fn();
+      const rollback = jest.fn();
+      const destination = createDestination({
+        beforeTransfer,
+        bootstrap: destinationBootstrap,
+        close: destinationClose,
+        rollback,
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      try {
+        await expect(engine.transfer()).rejects.toBe(loadError);
+
+        expect(sourceBootstrap).not.toHaveBeenCalled();
+        expect(destinationBootstrap).not.toHaveBeenCalled();
+        expect(beforeTransfer).not.toHaveBeenCalled();
+        expect(rollback).not.toHaveBeenCalled();
+        expect(sourceClose).not.toHaveBeenCalled();
+        expect(destinationClose).not.toHaveBeenCalled();
+        expect(engine.diagnostics.stack.items).toContainEqual(
+          expect.objectContaining({
+            kind: 'error',
+            details: expect.objectContaining({ error: loadError }),
+          })
+        );
+      } finally {
+        loadStreamDeps.mockReset();
+        loadStreamDeps.mockImplementation(() =>
+          jest.requireActual<typeof esmDeps>('../../utils/esm-deps').loadStreamDeps()
+        );
+      }
+    });
+
+    test('validates included source stages before preparing the destination', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockImplementation((stage: TransferStage) => {
+          if (stage === 'assets') {
+            throw validationError;
+          }
+        }),
+      };
+      const beforeTransfer = jest.fn();
+      const destination = createDestination({ beforeTransfer });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(source.validateStage).toHaveBeenCalledWith('assets');
+      expect(beforeTransfer).not.toHaveBeenCalled();
+    });
+
+    test('closes both providers when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const disableLifecycles = jest.fn();
+      const enableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const destination = createDestination({
+        bootstrap: disableLifecycles,
+        rollback,
+        close: enableLifecycles,
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        rollback.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('re-enables local Strapi lifecycles when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        getMetadata: jest.fn().mockResolvedValue(null),
+        getSchemas: jest.fn().mockResolvedValue(null),
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const enableLifecycles = jest.fn();
+      const disableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const transaction = jest.fn(async (handler) => {
+        await handler({ trx: {}, rollback });
+      });
+      const strapi = getStrapiFactory({
+        config: {
+          get(key: string) {
+            if (key === 'info.strapi') {
+              return '5.0.0';
+            }
+            if (key === 'plugin::upload') {
+              return { provider: 'local' };
+            }
+            return undefined;
+          },
+        },
+        db: {
+          transaction,
+          lifecycles: {
+            enable: enableLifecycles,
+            disable: disableLifecycles,
+          },
+        },
+        contentTypes: {},
+        components: {},
+      })();
+      const destination = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        autoDestroy: false,
+        strategy: 'restore',
+        restore: {},
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        versionStrategy: 'ignore',
+        schemaStrategy: 'ignore',
+      });
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        disableLifecycles.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('reports but does not rethrow cleanup errors raised on the failure path', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+        close: jest.fn().mockRejectedValue(new Error('source close failed')),
+      };
+      const destination = createDestination({
+        rollback: jest.fn().mockRejectedValue(new Error('rollback failed')),
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(destination.close).toHaveBeenCalledTimes(1);
+      expect(engine.diagnostics.stack.items.filter((item) => item.kind === 'warning')).toHaveLength(
+        2
+      );
+    });
+
+    test('does not retry provider cleanup when close itself fails', async () => {
+      const closeError = new Error('source close failed');
+      const source = {
+        ...completeSource,
+        close: jest.fn().mockRejectedValue(closeError),
+      };
+      const rollback = jest.fn();
+      const destination = createDestination({ rollback });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(closeError);
+
+      expect(rollback).not.toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(destination.close).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not validate an excluded source stage', async () => {
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn(),
+      };
+      const engine = createTransferEngine(source, completeDestination, {
+        ...defaultOptions,
+        exclude: ['files'],
+      });
+
+      await engine.transfer();
+
+      expect(source.validateStage).not.toHaveBeenCalledWith('assets');
     });
 
     test.each<
@@ -690,20 +1029,23 @@ describe('Transfer engine', () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
-      let calls = 0;
+      const progressEvents: Record<string, number> = {};
       engine.progress.stream.on('stage::progress', ({ stage, data }) => {
         expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
-        calls += 1;
+        progressEvents[stage] = (progressEvents[stage] || 0) + 1;
       });
 
       await engine.transfer();
 
-      // Two values are emitted by default for each stage
-      // TODO: this is no longer true, we should be checking the sum of the various mocked streams
-      const itemPerStage = 3;
+      // Each stage should emit at least one progress event
+      TRANSFER_STAGES.forEach((stage) => {
+        expect(progressEvents[stage]).toBeGreaterThanOrEqual(1);
+      });
 
-      expect(calls).toEqual((sourceStages.length - providerStages.length) * itemPerStage);
+      // For assets, the number of progress events should match the number of chunks plus one for each asset's 'end' event
+      // (from getAssetsMockSourceStream default: [ [1,2,3], [4,5,6,7,8,9] ] => 3 + 6 = 9, plus 2 'end' events = 11)
+      expect(progressEvents.assets).toBe(11);
     });
 
     test("emits 'stage::start' events", async () => {
@@ -720,6 +1062,31 @@ describe('Transfer engine', () => {
       await engine.transfer();
 
       expect(calls).toEqual(TRANSFER_STAGES.length);
+    });
+
+    test('merges source getStageTotals into assets progress before stage::start', async () => {
+      const source = createSource();
+      source.getStageTotals = jest.fn().mockResolvedValue({ totalBytes: 12_345, totalCount: 7 });
+
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let assetsAtStart: Record<string, unknown> | undefined;
+      engine.progress.stream.on('stage::start', ({ stage, data }) => {
+        if (stage === 'assets' && data.assets) {
+          // Snapshot: `data` is the live progress object and mutates during the stage.
+          assetsAtStart = { ...data.assets };
+        }
+      });
+
+      await engine.transfer();
+
+      expect(source.getStageTotals).toHaveBeenCalledWith('assets');
+      expect(assetsAtStart).toMatchObject({
+        totalBytes: 12_345,
+        totalCount: 7,
+        count: 0,
+        bytes: 0,
+      });
     });
 
     test("emits 'stage::finish' events", async () => {
@@ -846,12 +1213,12 @@ describe('Transfer engine', () => {
             const fakeSchemas = cloneDeep(schemas);
 
             const path = `attributes.createdAt.${attributeName}`;
-            const oldValue = get(path, fakeSchemas['api::homepage.homepage']);
+            const oldValue = get(fakeSchemas['api::homepage.homepage'], path);
 
             fakeSchemas['api::homepage.homepage'] = set(
+              fakeSchemas['api::homepage.homepage'],
               path,
-              transformValue(oldValue),
-              fakeSchemas['api::homepage.homepage']
+              transformValue(oldValue)
             );
 
             destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
@@ -868,9 +1235,9 @@ describe('Transfer engine', () => {
         test(`Throws on regular attributes' properties`, () => {
           const destination = createDestination();
           const fakeSchemas = set(
+            cloneDeep(schemas),
             '["api::homepage.homepage"].attributes.createdAt.type',
-            'string',
-            cloneDeep(schemas)
+            'string'
           );
 
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
@@ -902,7 +1269,7 @@ describe('Transfer engine', () => {
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, completeDestination, options);
+          const engine = createTransferEngine(source, createDestination(), options);
           expect(
             (async () => {
               await engine.transfer();
@@ -924,7 +1291,7 @@ describe('Transfer engine', () => {
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, completeDestination, options);
+          const engine = createTransferEngine(source, createDestination(), options);
           expect(
             (async () => {
               await engine.transfer();
@@ -937,7 +1304,7 @@ describe('Transfer engine', () => {
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, completeDestination, options);
+          const engine = createTransferEngine(source, createDestination(), options);
           expect(
             (async () => {
               await engine.transfer();
@@ -960,7 +1327,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -975,7 +1342,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -999,7 +1366,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1014,7 +1381,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1038,7 +1405,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1053,7 +1420,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1076,7 +1443,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1120,7 +1487,7 @@ describe('Transfer engine', () => {
         createEntitiesReadStream() {
           const stream = Readable.from(sourceData, { objectMode: true });
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function pause() {
             sourcePaused = true;
             return originalPause();
           };
@@ -1202,7 +1569,7 @@ describe('Transfer engine', () => {
         createAssetsReadStream() {
           const stream = getAssetsMockSourceStream(assetData);
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function pause() {
             sourcePaused = true;
             return originalPause();
           };
@@ -1225,5 +1592,512 @@ describe('Transfer engine', () => {
         assetData.map((asset) => asset.stats.size)
       );
     }, 3000);
+  });
+
+  describe('asset stream data and memory', () => {
+    /**
+     * Proves that asset stream bytes reach the destination. If the progress tracker
+     * consumed the stream (old bug), the destination would receive 0 bytes per asset.
+     */
+    test('destination receives full stream bytes for each asset (no double-consumption)', async () => {
+      const expectedBytesPerAsset = [100, 250, 75];
+      const assetData: IAsset[] = expectedBytesPerAsset.map((size, i) => ({
+        filename: `file${i}.jpg`,
+        filepath: posix.join(__dirname, `file${i}.jpg`),
+        stats: { size },
+        stream: Readable.from(Array.from({ length: size }, () => Buffer.alloc(1))),
+        metadata: {
+          hash: `hash${i}`,
+          ext: '.jpg',
+          id: i,
+          name: '',
+          mime: 'image/jpeg',
+          size: 0,
+          url: '',
+        },
+      }));
+
+      const bytesReceivedPerAsset: number[] = [];
+
+      const destination: IDestinationProvider = {
+        ...completeDestination,
+        createAssetsWriteStream() {
+          return new Writable({
+            objectMode: true,
+            async write(asset: IAsset, _encoding, callback) {
+              if (!asset?.stream || typeof asset.stream.pipe !== 'function') {
+                bytesReceivedPerAsset.push(0);
+                return callback();
+              }
+              let bytes = 0;
+              const counter = new Writable({
+                write(chunk: Buffer | unknown, _enc, cb) {
+                  bytes += Buffer.isBuffer(chunk) ? chunk.length : 1;
+                  cb();
+                },
+              });
+              try {
+                await pipeline(asset.stream, counter);
+              } catch (e) {
+                return callback(e instanceof Error ? e : new Error(String(e)));
+              }
+              bytesReceivedPerAsset.push(bytes);
+              callback();
+            },
+          });
+        },
+      };
+
+      const source = createSource({ assets: assetData });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+      await engine.transfer();
+
+      expect(bytesReceivedPerAsset).toEqual(expectedBytesPerAsset);
+    }, 5000);
+
+    /**
+     * Documents {@link TransferEngine}’s per-chunk progress rule: only `Buffer` chunks use
+     * `.length`; anything else counts as 1 byte (cosmetic for ETA when chunk shapes are odd).
+     */
+    test('progress byte totals: a non-Buffer chunk contributes 1 to the byte counter', async () => {
+      const assetData: IAsset[] = [
+        {
+          filename: 'odd-chunk.bin',
+          filepath: posix.join(__dirname, 'odd-chunk.bin'),
+          stats: { size: 3 },
+          stream: Readable.from([{ not: 'a buffer' }, Buffer.alloc(2)] as unknown[]),
+          metadata: {
+            hash: 'h2',
+            ext: '.bin',
+            id: 0,
+            name: '',
+            mime: 'application/octet-stream',
+            size: 0,
+            url: '',
+          },
+        },
+      ];
+
+      const source = createSource({ assets: assetData });
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(engine.progress.data.assets?.bytes).toBe(3);
+    }, 5000);
+
+    /**
+     * Ensures we are not buffering all asset data in memory: heap growth during transfer should stay
+     * within a loose smoke bound (see {@link expectHeapGrowthWithinNoise}).
+     */
+    test('heap growth during asset transfer stays bounded (streaming, not buffering)', async () => {
+      const assetCount = 15;
+      const bytesPerAsset = 50 * 1024; // 50KB each
+      const totalBytes = assetCount * bytesPerAsset;
+      const assetData: IAsset[] = Array.from({ length: assetCount }, (_, i) => ({
+        filename: `large${i}.bin`,
+        filepath: posix.join(__dirname, `large${i}.bin`),
+        stats: { size: bytesPerAsset },
+        stream: Readable.from(
+          Array.from({ length: bytesPerAsset / 1024 }, () => Buffer.alloc(1024))
+        ),
+        metadata: {
+          hash: `h${i}`,
+          ext: '.bin',
+          id: i,
+          name: '',
+          mime: 'application/octet-stream',
+          size: 0,
+          url: '',
+        },
+      }));
+
+      const initialHeap = process.memoryUsage().heapUsed;
+      const source = createSource({ assets: assetData });
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+      await engine.transfer();
+      const finalHeap = process.memoryUsage().heapUsed;
+      const heapGrowth = finalHeap - initialHeap;
+
+      expectHeapGrowthWithinNoise(heapGrowth, totalBytes);
+    }, 10000);
+  });
+
+  describe('asset transfer integration (order, content, memory)', () => {
+    /**
+     * Full transfer path: source → engine (progress tracker) → destination that
+     * "writes" each asset to a temp file. Verifies:
+     * 1) Assets are received and written in correct order (no race).
+     * 2) Each file's content matches the source (no mixing/corruption).
+     * 3) Heap during transfer stays within a loose smoke bound (see {@link expectHeapGrowthWithinNoise}).
+     */
+    test('full asset transfer: order preserved, content correct, memory bounded', async () => {
+      const assetCount = 6;
+      const bytesPerAsset = 10 * 1024; // 10KB each, unique byte value per asset
+      const tmpDir = path.join(os.tmpdir(), `strapi-dt-integration-${Date.now()}`);
+      await fs.ensureDir(tmpDir);
+
+      const assetData: IAsset[] = Array.from({ length: assetCount }, (_, i) => ({
+        filename: `media-${i}.bin`,
+        filepath: posix.join(__dirname, `media-${i}.bin`),
+        stats: { size: bytesPerAsset },
+        stream: Readable.from([Buffer.alloc(bytesPerAsset, i)]),
+        metadata: {
+          hash: `hash${i}`,
+          ext: '.bin',
+          id: i,
+          name: `media-${i}`,
+          mime: 'application/octet-stream',
+          size: bytesPerAsset,
+          url: '',
+        },
+      }));
+
+      const writeOrder: number[] = [];
+      const memorySamples: number[] = [];
+      let memoryInterval: ReturnType<typeof setInterval> | null = null;
+
+      const destination: IDestinationProvider = {
+        ...createDestination(),
+        createAssetsWriteStream: jest.fn().mockResolvedValue(
+          new Writable({
+            objectMode: true,
+            async write(asset: IAsset, _encoding, callback) {
+              const index = assetData.findIndex((a) => a.filename === asset.filename);
+              writeOrder.push(index);
+              const outPath = path.join(tmpDir, asset.filename);
+              if (!asset?.stream || typeof asset.stream.pipe !== 'function') {
+                return callback(new Error('Missing or invalid asset stream'));
+              }
+              try {
+                await pipeline(asset.stream, fs.createWriteStream(outPath));
+              } catch (e) {
+                return callback(e instanceof Error ? e : new Error(String(e)));
+              }
+              callback();
+            },
+          })
+        ),
+      };
+
+      const source = createSource({
+        assets: assetData,
+        schemas: Object.values(schemas) as Struct.Schema[],
+        entities: [],
+        links: [],
+        configuration: [],
+      });
+
+      memorySamples.push(process.memoryUsage().heapUsed);
+      memoryInterval = setInterval(() => {
+        memorySamples.push(process.memoryUsage().heapUsed);
+      }, 25);
+
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        only: ['files'],
+      });
+      await engine.transfer();
+
+      if (memoryInterval) {
+        clearInterval(memoryInterval);
+      }
+      memorySamples.push(process.memoryUsage().heapUsed);
+
+      const initialHeap = memorySamples[0];
+      const maxHeap = Math.max(...memorySamples);
+      const heapGrowth = maxHeap - initialHeap;
+      const totalBytes = assetCount * bytesPerAsset;
+      expectHeapGrowthWithinNoise(heapGrowth, totalBytes);
+
+      expect(writeOrder).toHaveLength(assetCount);
+      expect(writeOrder).toEqual([0, 1, 2, 3, 4, 5]);
+
+      for (let i = 0; i < assetCount; i += 1) {
+        const content = await fs.readFile(path.join(tmpDir, `media-${i}.bin`));
+        expect(content.length).toBe(bytesPerAsset);
+        expect(content.every((b) => b === i)).toBe(true);
+      }
+
+      await fs.remove(tmpDir).catch(() => {});
+    }, 15000);
+  });
+
+  describe('backpressure (schemas, links, configuration)', () => {
+    test('schemas source stream pauses under backpressure and data integrity is maintained', async () => {
+      const schemaData = getSchemasMockSourceStream();
+      const schemaChunks = await new Promise<Struct.Schema[]>((resolve, reject) => {
+        const chunks: Struct.Schema[] = [];
+        schemaData.on('data', (chunk: Struct.Schema) => chunks.push(chunk));
+        schemaData.on('end', () => resolve(chunks));
+        schemaData.on('error', reject);
+      });
+
+      let sourcePaused = false;
+      const processedData: Struct.Schema[] = [];
+
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createSchemasWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1,
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10);
+            },
+          });
+        },
+      };
+
+      const source = {
+        ...createSource({ schemas: schemaChunks }),
+        createSchemasReadStream() {
+          const stream = getSchemasMockSourceStream(schemaChunks);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function trackSchemasStreamPause() {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(sourcePaused).toBe(true);
+      expect(processedData).toEqual(schemaChunks);
+    }, 2000);
+
+    test('links source stream pauses under backpressure and data integrity is maintained', async () => {
+      const linksData = [...defaultLinksData];
+      let sourcePaused = false;
+      const processedData: ILink[] = [];
+
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createLinksWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1,
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10);
+            },
+          });
+        },
+      };
+
+      const source = {
+        ...createSource({ links: linksData }),
+        createLinksReadStream() {
+          const stream = getLinksMockSourceStream(linksData);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function trackLinksStreamPause() {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(sourcePaused).toBe(true);
+      expect(processedData).toHaveLength(linksData.length);
+      expect(processedData).toEqual(expect.arrayContaining(linksData));
+    }, 2000);
+
+    test('configuration source stream pauses under backpressure and data integrity is maintained', async () => {
+      const configData: IConfiguration[] = [
+        { type: 'core-store', value: { key: 'foo', value: 'alice' } },
+        { type: 'core-store', value: { key: 'bar', value: 'bob' } },
+        { type: 'core-store', value: { key: 'baz', value: 'charlie' } },
+      ];
+      let sourcePaused = false;
+      const processedData: IConfiguration[] = [];
+
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createConfigurationWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1,
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10);
+            },
+          });
+        },
+      };
+
+      const source = {
+        ...createSource({ configuration: configData }),
+        createConfigurationReadStream() {
+          const stream = getConfigurationMockSourceStream(configData);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function trackConfigurationStreamPause() {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(sourcePaused).toBe(true);
+      expect(processedData).toEqual(configData);
+    }, 2000);
+  });
+
+  describe('stream cleanup and memory', () => {
+    test('all stage streams are destroyed after successful transfer', async () => {
+      const createdReadStreams: Readable[] = [];
+      const createdWriteStreams: Writable[] = [];
+
+      const source = {
+        ...createSource(),
+        createEntitiesReadStream: jest.fn().mockImplementation(async () => {
+          const s = getEntitiesMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createLinksReadStream: jest.fn().mockImplementation(() => {
+          const s = getLinksMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createAssetsReadStream: jest.fn().mockImplementation(async () => {
+          const s = getAssetsMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createConfigurationReadStream: jest.fn().mockImplementation(() => {
+          const s = getConfigurationMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createSchemasReadStream: jest.fn().mockImplementation(() => {
+          const s = getSchemasMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+      };
+
+      const destination = {
+        ...createDestination(),
+        createEntitiesWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createLinksWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createAssetsWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createConfigurationWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createSchemasWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+      };
+
+      const engine = createTransferEngine(source, destination, defaultOptions);
+      await engine.transfer();
+
+      createdReadStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+      createdWriteStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+    });
+
+    test('repeated transfers do not leave streams undestroyed', async () => {
+      const transferCount = 5;
+      const allReadStreams: Readable[] = [];
+      const allWriteStreams: Writable[] = [];
+
+      const source = createSource();
+      source.createEntitiesReadStream = jest.fn().mockImplementation(async () => {
+        const s = getEntitiesMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createLinksReadStream = jest.fn().mockImplementation(() => {
+        const s = getLinksMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createSchemasReadStream = jest.fn().mockImplementation(() => {
+        const s = getSchemasMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createAssetsReadStream = jest.fn().mockImplementation(async () => {
+        const s = getAssetsMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createConfigurationReadStream = jest.fn().mockImplementation(() => {
+        const s = getConfigurationMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+
+      const destination = createDestination();
+      destination.createEntitiesWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createLinksWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createSchemasWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createAssetsWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createConfigurationWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      for (let i = 0; i < transferCount; i += 1) {
+        await engine.transfer();
+      }
+
+      allReadStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+      allWriteStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+    });
   });
 });

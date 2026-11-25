@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { navToHeader, clickAndWait } from '../../../utils/shared';
 import {
   addAttributesToContentType,
@@ -9,9 +9,9 @@ import {
 
 test.describe('Decimal field hint with min/max values', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('should display correct hint for decimal field with min/max values in content manager', async ({

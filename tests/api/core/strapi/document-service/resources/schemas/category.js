@@ -23,5 +23,17 @@ module.exports = {
         },
       },
     },
+    parentCategory: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'api::category.category',
+      inversedBy: 'subcategories',
+    },
+    subcategories: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::category.category',
+      mappedBy: 'parentCategory',
+    },
   },
 };

@@ -1,15 +1,16 @@
 import { Readable } from 'stream';
-import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
-import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
+import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
 import { createAssetsStream } from './assets';
+import { estimateAssetTotals } from './estimate-asset-totals';
 import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
@@ -38,6 +39,13 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
+
+    // Remote pull runs this on the server during the CLI engine bootstrap, which
+    // is before the CLI destination beforeTransfer moves or deletes local uploads.
+    // Load here so a missing stream-chain fails the pull at that point. Later
+    // reads reuse the cached load. Do this before touching the Strapi instance.
+    await loadStreamDeps();
+
     this.strapi = await this.options.getStrapi();
     this.strapi.db.lifecycles.disable();
   }
@@ -50,6 +58,17 @@ class LocalStrapiSourceProvider implements ISourceProvider {
         origin: 'local-source-provider',
       },
       kind: 'info',
+    });
+  }
+
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'local-source-provider',
+      },
+      kind: 'warning',
     });
   }
 
@@ -86,6 +105,11 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async close(): Promise<void> {
+    // bootstrap() can reject before getStrapi(), and close() is still called after that.
+    if (!this.strapi) {
+      return;
+    }
+
     const { autoDestroy } = this.options;
     assertValidStrapi(this.strapi);
     this.strapi.db.lifecycles.enable();
@@ -97,7 +121,8 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   getMetadata(): IMetadata {
     this.#reportInfo('getting metadata');
-    const strapiVersion = strapi.config.get<string>('info.strapi');
+    assertValidStrapi(this.strapi);
+    const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {
@@ -111,9 +136,15 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   async createEntitiesReadStream(): Promise<Readable> {
     assertValidStrapi(this.strapi, 'Not able to stream entities');
     this.#reportInfo('creating entities read stream');
+    const { chain } = await loadStreamDeps();
     return chain([
       // Entities stream
-      createEntitiesStream(this.strapi),
+      createEntitiesStream(this.strapi, {
+        onWarning: (message) => {
+          this.strapi?.log.warn(message);
+          this.#reportWarning(message);
+        },
+      }),
 
       // Transform stream
       createEntitiesTransformStream(),
@@ -124,7 +155,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream links');
     this.#reportInfo('creating links read stream');
 
-    return createLinksStream(this.strapi);
+    return createLinksStream(this.strapi, {
+      onWarning: (message) => {
+        this.strapi?.log.warn(message);
+        this.#reportWarning(message);
+      },
+    });
   }
 
   createConfigurationReadStream(): Readable {
@@ -152,13 +188,25 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream assets');
     this.#reportInfo('creating assets read stream');
 
-    const stream = createAssetsStream(this.strapi);
+    const stream = createAssetsStream(this.strapi, {
+      onWarning: (message) => this.#reportWarning(message),
+    });
     stream.on('error', (err) => {
       this.#handleStreamError('assets', err);
     });
 
     return stream;
   }
+
+  async getStageTotals(stage: TransferStage) {
+    if (stage !== 'assets') {
+      return null;
+    }
+    assertValidStrapi(this.strapi, 'Not able to estimate asset totals');
+    return estimateAssetTotals(this.strapi);
+  }
 }
 
 export type ILocalStrapiSourceProvider = InstanceType<typeof LocalStrapiSourceProvider>;
+
+export { estimateAssetTotals } from './estimate-asset-totals';

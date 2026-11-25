@@ -1,9 +1,9 @@
 import type { Context } from 'koa';
-import { update, map, property } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 
+import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
@@ -24,30 +24,75 @@ function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, user
 /**
  * Transforms workflow to an admin UI format.
  * Some attributes (like permissions) are presented in a different format in the admin UI.
- * @param {Workflow} workflow
+ *
+ * Permissions stored on each stage are split into two arrays:
+ *  - `fromPermissions`: entries with `actionParameters.from` (controls who can move
+ *    content out of the stage)
+ *  - `toPermissions`: entries with `actionParameters.to` (controls who can move
+ *    content into the stage)
+ *
+ * Role objects are also flattened to their numeric id.
  */
-function formatWorkflowToAdmin(workflow: any) {
+
+/**
+ * Shape of a permission row as returned by the DB populate.
+ */
+interface PopulatedPermission {
+  action: string;
+  subject?: string | null;
+  role: number | { id: number };
+  actionParameters?: { from?: number; to?: number };
+}
+
+interface PopulatedStage {
+  permissions?: PopulatedPermission[];
+  [key: string]: unknown;
+}
+
+function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: string]: unknown }) {
   if (!workflow) return;
   if (!workflow.stages) return workflow;
 
-  // Transform permissions roles to be the id string instead of an object
-  const transformPermissions = map(update('role', property('id')));
-  const transformStages = map(update('permissions', transformPermissions));
-  return update('stages', transformStages, workflow);
+  const transformRoleToId = ({
+    actionParameters: _,
+    role,
+    ...rest
+  }: PopulatedPermission): StagePermission => ({
+    ...rest,
+    role: typeof role === 'object' ? role.id : role,
+  });
+
+  const stages = workflow.stages.map((stage) => {
+    const { permissions: allPermissions = [], ...rest } = stage;
+
+    const fromPermissions = allPermissions
+      .filter((p) => p.actionParameters?.from)
+      .map((permission) => transformRoleToId(permission));
+
+    const toPermissions = allPermissions
+      .filter((p) => p.actionParameters?.to)
+      .map((permission) => transformRoleToId(permission));
+
+    return {
+      ...rest,
+      fromPermissions,
+      toPermissions,
+    };
+  });
+
+  return { ...workflow, stages };
 }
 
 export default {
   /**
    * Create a new workflow
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async create(ctx: Context) {
-    const { body, query } = ctx.request;
-    const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { body } = ctx.request;
+    const { sanitizeCreateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
-    const { populate } = await sanitizedQuery.create(query);
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
@@ -55,7 +100,6 @@ export default {
     const createdWorkflow = await workflowService
       .create({
         data: await sanitizeCreateInput(workflowBody),
-        populate,
       })
       .then(formatWorkflowToAdmin);
 
@@ -66,17 +110,15 @@ export default {
 
   /**
    * Update a workflow
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const { body, query } = ctx.request;
+    const { body } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeUpdateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeUpdateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
-    const { populate } = await sanitizedQuery.update(query);
     const workflowBody = await validateWorkflowUpdate(body.data);
 
     // Find if workflow exists
@@ -93,7 +135,6 @@ export default {
     const updatedWorkflow = await workflowService
       .update(workflow, {
         data: dataToUpdate,
-        populate,
       })
       .then(formatWorkflowToAdmin);
 
@@ -105,7 +146,6 @@ export default {
 
   /**
    * Delete a workflow
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async delete(ctx: Context) {
     const { id } = ctx.params;
@@ -133,7 +173,6 @@ export default {
 
   /**
    * List all workflows
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx: Context) {
     const { query } = ctx.request;
@@ -145,7 +184,11 @@ export default {
     const { populate, filters, sort } = await sanitizedQuery.read(query);
 
     const [workflows, workflowCount] = await Promise.all([
-      workflowService.find({ populate, filters, sort }).then(map(formatWorkflowToAdmin)),
+      workflowService
+        .find({ populate, filters, sort })
+        .then((workflows: Parameters<typeof formatWorkflowToAdmin>[0][]) =>
+          workflows.map((workflow) => formatWorkflowToAdmin(workflow))
+        ),
       workflowService.count(),
     ]);
 

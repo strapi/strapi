@@ -8,7 +8,7 @@ const LocationDisplay = () => {
 
   return (
     <ul>
-      <li data-testId="location">{location.search}</li>
+      <li data-testid="location">{location.search}</li>
     </ul>
   );
 };
@@ -75,6 +75,46 @@ describe('Pagination', () => {
       expect(screen.getByRole('combobox')).toHaveTextContent('50');
     });
 
+    it('should use pageSize from a spread pagination object when defaultPageSize is omitted', () => {
+      render({ pageSize: 100, defaultPageSize: undefined });
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('100');
+      expect(screen.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
+        'href',
+        '/?pageSize=100&page=2'
+      );
+    });
+
+    it('should prefer defaultPageSize over a spread pageSize', () => {
+      render({ pageSize: 100 });
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('50');
+    });
+
+    it('should prefer the URL pageSize over a spread pageSize', () => {
+      render({
+        pageSize: 100,
+        defaultPageSize: undefined,
+        initialEntries: [{ search: 'pageSize=20' }],
+      });
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('20');
+    });
+
+    it('should ignore a spread page', () => {
+      // @ts-expect-error `page` is not a Root prop; this mimics spreading an API pagination object
+      render({ page: 3, pageCount: 5 });
+
+      expect(screen.getByRole('link', { name: 'Go to previous page' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByRole('link', { name: 'Go to next page' })).toHaveAttribute(
+        'href',
+        '/?pageSize=50&page=2'
+      );
+    });
+
     it('should render a custom list of options if provided', async () => {
       const options = ['5', '10', '15'];
 
@@ -115,6 +155,20 @@ describe('Pagination', () => {
         await user.click(getByRole('option', { name: '50' }));
 
         expect(getByRole('combobox')).toHaveTextContent('50');
+      });
+
+      it('should keep an applied filter when the user selects a new value', async () => {
+        const encoded = `filters[$and][0][name][$eq]=${encodeURIComponent('a&b')}`;
+        const { user } = render({ initialEntries: [{ search: `?${encoded}` }] });
+
+        await user.click(screen.getByRole('combobox'));
+        await user.click(screen.getByRole('option', { name: '10' }));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('location')).toHaveTextContent('pageSize=10');
+        });
+
+        expect(screen.getByTestId('location')).toHaveTextContent(encoded);
       });
     });
   });

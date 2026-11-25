@@ -1,4 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
+
 import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
 import {
@@ -6,6 +7,8 @@ import {
   type DocumentActionPosition,
   type DocumentActionDescription,
 } from './pages/EditView/components/DocumentActions';
+import { RichTextBlocksStore } from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { defaultBlocksStore } from './pages/EditView/components/FormInputs/BlocksInput/DefaultBlocksStore';
 import {
   DEFAULT_HEADER_ACTIONS,
   type HeaderActionDescription,
@@ -26,6 +29,7 @@ import type { DescriptionComponent, PluginConfig } from '@strapi/admin/strapi-ad
  * -----------------------------------------------------------------------------------------------*/
 
 type DescriptionReducer<Config extends object> = (prev: Config[]) => Config[];
+type DescriptionObjReducer<Config extends object> = (prev: Config) => Config;
 
 interface EditViewContext {
   /**
@@ -82,8 +86,10 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
 
 interface DocumentActionProps extends EditViewContext {}
 
-interface DocumentActionComponent
-  extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
+interface DocumentActionComponent extends DescriptionComponent<
+  DocumentActionProps,
+  DocumentActionDescription
+> {
   type?:
     | 'clone'
     | 'configure-the-view'
@@ -100,13 +106,17 @@ interface DocumentActionComponent
 
 interface HeaderActionProps extends EditViewContext {}
 
-interface HeaderActionComponent
-  extends DescriptionComponent<HeaderActionProps, HeaderActionDescription> {}
+interface HeaderActionComponent extends DescriptionComponent<
+  HeaderActionProps,
+  HeaderActionDescription
+> {}
 
 interface BulkActionComponentProps extends ListViewContext {}
 
-interface BulkActionComponent
-  extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
+interface BulkActionComponent extends DescriptionComponent<
+  BulkActionComponentProps,
+  BulkActionDescription
+> {
   type?: 'delete' | 'publish' | 'unpublish';
 }
 
@@ -121,6 +131,7 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
+  richTextBlocksStore: RichTextBlocksStore = { ...defaultBlocksStore };
   bulkActions: BulkActionComponent[] = [...DEFAULT_BULK_ACTIONS];
   documentActions: DocumentActionComponent[] = [
     ...DEFAULT_ACTIONS,
@@ -132,13 +143,38 @@ class ContentManagerPlugin {
 
   constructor() {}
 
+  addRichTextBlocks(blocks: RichTextBlocksStore): void;
+  addRichTextBlocks(blocks: DescriptionObjReducer<RichTextBlocksStore>): void;
+  addRichTextBlocks(blocks: RichTextBlocksStore | DescriptionObjReducer<RichTextBlocksStore>) {
+    if (typeof blocks === 'function') {
+      const result = blocks(this.richTextBlocksStore);
+      if (typeof result !== 'object' || result === null) {
+        throw new Error(
+          `Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received ${getPrintableType(result)}`
+        );
+      }
+      this.richTextBlocksStore = result;
+    } else if (typeof blocks === 'object') {
+      this.richTextBlocksStore = { ...this.richTextBlocksStore, ...blocks };
+    } else {
+      throw new Error(
+        `Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received ${getPrintableType(
+          blocks
+        )}`
+      );
+    }
+  }
+
   addEditViewSidePanel(panels: DescriptionReducer<PanelComponent>): void;
   addEditViewSidePanel(panels: PanelComponent[]): void;
   addEditViewSidePanel(panels: DescriptionReducer<PanelComponent> | PanelComponent[]) {
     if (Array.isArray(panels)) {
+      validateDescriptionItems(panels, 'addEditViewSidePanel', 'panels');
       this.editViewSidePanels = [...this.editViewSidePanels, ...panels];
     } else if (typeof panels === 'function') {
-      this.editViewSidePanels = panels(this.editViewSidePanels);
+      const result = panels(this.editViewSidePanels);
+      validateDescriptionItems(result, 'addEditViewSidePanel', 'panels');
+      this.editViewSidePanels = result;
     } else {
       throw new Error(
         `Expected the \`panels\` passed to \`addEditViewSidePanel\` to be an array or a function, but received ${getPrintableType(
@@ -154,9 +190,12 @@ class ContentManagerPlugin {
     actions: DescriptionReducer<DocumentActionComponent> | DocumentActionComponent[]
   ) {
     if (Array.isArray(actions)) {
+      validateDescriptionItems(actions, 'addDocumentAction', 'actions');
       this.documentActions = [...this.documentActions, ...actions];
     } else if (typeof actions === 'function') {
-      this.documentActions = actions(this.documentActions);
+      const result = actions(this.documentActions);
+      validateDescriptionItems(result, 'addDocumentAction', 'actions');
+      this.documentActions = result;
     } else {
       throw new Error(
         `Expected the \`actions\` passed to \`addDocumentAction\` to be an array or a function, but received ${getPrintableType(
@@ -172,9 +211,12 @@ class ContentManagerPlugin {
     actions: DescriptionReducer<HeaderActionComponent> | HeaderActionComponent[]
   ) {
     if (Array.isArray(actions)) {
+      validateDescriptionItems(actions, 'addDocumentHeaderAction', 'actions');
       this.headerActions = [...this.headerActions, ...actions];
     } else if (typeof actions === 'function') {
-      this.headerActions = actions(this.headerActions);
+      const result = actions(this.headerActions);
+      validateDescriptionItems(result, 'addDocumentHeaderAction', 'actions');
+      this.headerActions = result;
     } else {
       throw new Error(
         `Expected the \`actions\` passed to \`addDocumentHeaderAction\` to be an array or a function, but received ${getPrintableType(
@@ -188,9 +230,12 @@ class ContentManagerPlugin {
   addBulkAction(actions: BulkActionComponent[]): void;
   addBulkAction(actions: DescriptionReducer<BulkActionComponent> | BulkActionComponent[]) {
     if (Array.isArray(actions)) {
+      validateDescriptionItems(actions, 'addBulkAction', 'actions');
       this.bulkActions = [...this.bulkActions, ...actions];
     } else if (typeof actions === 'function') {
-      this.bulkActions = actions(this.bulkActions);
+      const result = actions(this.bulkActions);
+      validateDescriptionItems(result, 'addBulkAction', 'actions');
+      this.bulkActions = result;
     } else {
       throw new Error(
         `Expected the \`actions\` passed to \`addBulkAction\` to be an array or a function, but received ${getPrintableType(
@@ -210,6 +255,7 @@ class ContentManagerPlugin {
         addDocumentAction: this.addDocumentAction.bind(this),
         addDocumentHeaderAction: this.addDocumentHeaderAction.bind(this),
         addEditViewSidePanel: this.addEditViewSidePanel.bind(this),
+        addRichTextBlocks: this.addRichTextBlocks.bind(this),
         getBulkActions: () => this.bulkActions,
         getDocumentActions: (position?: DocumentActionPosition) => {
           /**
@@ -229,6 +275,7 @@ class ContentManagerPlugin {
         },
         getEditViewSidePanels: () => this.editViewSidePanels,
         getHeaderActions: () => this.headerActions,
+        getRichTextBlocks: () => ({ ...this.richTextBlocksStore }),
       },
     } satisfies PluginConfig;
   }
@@ -255,6 +302,29 @@ const getPrintableType = (value: unknown): string => {
   }
 
   return nativeType;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * validateDescriptionItems
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description Descriptions must be functions (they're rendered as components so hooks can be used
+ * inside them), not plain objects. Passing a plain object crashes deep inside
+ * `DescriptionComponentRenderer` with an unhelpful `description is not a function` error, so we
+ * validate eagerly here to fail fast with a clear message pointing at the offending API call.
+ */
+const validateDescriptionItems = (items: unknown[], apiName: string, argName: string): void => {
+  items.forEach((item, index) => {
+    if (typeof item !== 'function') {
+      throw new Error(
+        `Expected every item in the \`${argName}\` array passed to \`${apiName}\` to be a function that returns a description object, but received ${getPrintableType(
+          item
+        )} at index ${index}. Did you forget to wrap it in a function, e.g. \`() => ({ ...yourAction })\`?`
+      );
+    }
+  });
 };
 
 export { ContentManagerPlugin };

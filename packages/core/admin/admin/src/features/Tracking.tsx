@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from 'axios';
 
 import { Tours } from '../components/GuidedTour/Tours';
 import { useDeviceType } from '../hooks/useDeviceType';
-import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
+import { useInformationQuery, useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
@@ -17,11 +17,19 @@ export interface TelemetryProperties {
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
+  numberOfContentTypeFolders?: number;
 }
 
 export interface TrackingContextValue {
   uuid?: string | boolean;
   telemetryProperties?: TelemetryProperties;
+  strapiVersion?: string | null;
+  /**
+   * True once the version that `trackUsage` will attach is known, or the
+   * information request has failed. Callers that must send a single event
+   * wait for this so a later version update does not send the event again.
+   */
+  isStrapiVersionReady: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -30,6 +38,7 @@ export interface TrackingContextValue {
 
 const TrackingContext = React.createContext<TrackingContextValue>({
   uuid: false,
+  isStrapiVersionReady: false,
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -49,8 +58,19 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
+  const versionQueryEnabled = Boolean(initData?.uuid && token);
+  const {
+    data: appInfo,
+    isLoading: isLoadingAppInfo,
+    isError: isInformationError,
+  } = useInformationQuery(undefined, {
+    skip: !versionQueryEnabled,
+  });
+  const strapiVersion = appInfo?.strapiVersion;
+  const isStrapiVersionReady =
+    Boolean(strapiVersion) || (versionQueryEnabled && isInformationError);
   React.useEffect(() => {
-    if (uuid && data) {
+    if (uuid && data && !isLoadingAppInfo) {
       const event = 'didInitializeAdministration';
       try {
         fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`, {
@@ -64,6 +84,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
               ...data,
               projectId: uuid,
               registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+              version: strapiVersion,
             },
           }),
           headers: {
@@ -75,13 +96,15 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
         // silence is golden
       }
     }
-  }, [data, uuid, getAllWidgets]);
+  }, [data, uuid, getAllWidgets, isLoadingAppInfo, strapiVersion]);
   const value = React.useMemo(
     () => ({
       uuid,
       telemetryProperties: data,
+      strapiVersion,
+      isStrapiVersionReady,
     }),
-    [uuid, data]
+    [uuid, data, strapiVersion, isStrapiVersionReady]
   );
 
   return <TrackingContext.Provider value={value}>{children}</TrackingContext.Provider>;
@@ -191,12 +214,12 @@ export interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease'
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
     | 'didEditAIAlternativeText'
-    | 'didGenerateMetadataRetroactively';
+    | 'didGenerateMetadataRetroactively'
+    | 'didActOnFolders';
 
   properties?: never;
 }
@@ -284,6 +307,14 @@ interface WillNavigateEvent {
   };
 }
 
+interface DidClickOnDocLink {
+  name: 'didClickOnDocLink';
+  properties: {
+    from: string;
+    to: string;
+  };
+}
+
 interface DidAccessTokenListEvent {
   name: 'didAccessTokenList';
   properties: {
@@ -318,7 +349,8 @@ interface WillModifyTokenEvent {
   name: 'didCreateToken' | 'didEditToken';
   properties: {
     tokenType: TokenEvents['properties']['tokenType'];
-    type: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
+    kind?: 'admin' | 'content-api';
+    type?: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
   };
 }
 
@@ -368,22 +400,11 @@ interface DidFilterEntriesEvent {
   };
 }
 
-interface DidPublishRelease {
-  name: 'didPublishRelease';
-  properties: {
-    totalEntries: number;
-    totalPublishedEntries: number;
-    totalUnpublishedEntries: number;
-  };
-}
-
 interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
     promptType:
-      | 'generate-product-schema'
-      | 'tell-me-about-the-content-type-builder'
-      | 'tell-me-about-strapi';
+      'generate-product-schema' | 'tell-me-about-the-content-type-builder' | 'tell-me-about-strapi';
   };
 }
 
@@ -483,7 +504,7 @@ type EventsWithProperties =
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
-  | DidPublishRelease
+  | DidClickOnDocLink
   | MediaEvents
   | DidUpdateCTBSchema
   | DidSkipGuidedTour
@@ -507,7 +528,6 @@ export interface UseTrackingReturn {
     event: TEvent['name'],
     properties?: never
   ): Promise<null | AxiosResponse<string>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trackUsage<TEvent extends Extract<TrackingEvent, { properties: object }>>(
     event: TEvent['name'],
     properties: TEvent['properties']
@@ -534,7 +554,9 @@ export interface UseTrackingReturn {
  */
 const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
-  const { uuid, telemetryProperties } = React.useContext(TrackingContext);
+  const deviceTypeRef = React.useRef(deviceType);
+  deviceTypeRef.current = deviceType;
+  const { uuid, telemetryProperties, strapiVersion } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
@@ -550,12 +572,13 @@ const useTracking = (): UseTrackingReturn => {
               userId,
               eventProperties: { ...properties },
               userProperties: {
-                deviceType,
+                deviceType: deviceTypeRef.current,
               },
               groupProperties: {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                version: strapiVersion,
               },
             },
             {
@@ -568,16 +591,21 @@ const useTracking = (): UseTrackingReturn => {
 
           return res;
         }
-      } catch (err) {
+      } catch {
         // Silence is golden
       }
 
       return null;
     },
-    [telemetryProperties, userId, uuid]
+    [strapiVersion, telemetryProperties, userId, uuid]
   );
 
   return { trackUsage };
 };
 
-export { TrackingProvider, useTracking };
+/**
+ * Internal readiness signal for events that must wait for the provider's version.
+ */
+const useStrapiVersionReady = () => React.useContext(TrackingContext).isStrapiVersionReady;
+
+export { TrackingProvider, useTracking, useStrapiVersionReady };

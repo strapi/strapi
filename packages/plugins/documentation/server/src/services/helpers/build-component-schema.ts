@@ -10,6 +10,17 @@ import { hasFindMethod } from './utils/routes';
 
 import type { Api, ApiInfo } from '../../types';
 
+/**
+ * Attributes Strapi adds to content types for its own needs, hidden from the Content Manager
+ * and never accepted nor returned by the Content API, such as the position of a document in
+ * the custom order of its collection type.
+ */
+const isInternalAttribute = (attribute: Struct.SchemaAttributes[string]) => {
+  const { visible, private: isPrivate } = attribute as { visible?: boolean; private?: boolean };
+
+  return visible === false && isPrivate === true;
+};
+
 const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
   const requiredAttributes: string[] = [];
 
@@ -32,7 +43,13 @@ const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
  *
  * @returns {object} Open API schemas
  */
-const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiInfo) => {
+const getAllSchemasForContentType = ({
+  routeInfo,
+  attributes: allAttributes,
+  uniqueName,
+  relationTargetSchemaNames,
+}: ApiInfo & { relationTargetSchemaNames: Map<string, string> }) => {
+  const attributes = _.omitBy(allAttributes, isInternalAttribute) as Struct.SchemaAttributes;
   // Store response and request schemas in an object
   let strapiComponentSchemas = {};
   const schemas: OpenAPIV3.ComponentsObject = {};
@@ -52,7 +69,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
   };
 
   // Get all the route methods
-  const routeMethods = routeInfo.routes.map((route: Core.Route) => route.method);
+  const routeMethods = new Set(routeInfo.routes.map((route: Core.Route) => route.method));
 
   const attributesToOmit = [
     'createdAt',
@@ -67,7 +84,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
   // Get a list of required attribute names
   const requiredRequestAttributes = getRequiredAttributes(attributesForRequest);
   // Build the request schemas when the route has POST or PUT methods
-  if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
+  if (routeMethods.has('POST') || routeMethods.has('PUT')) {
     // Build localization requests schemas
 
     // Build the request schema
@@ -134,7 +151,10 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
       properties: {
         id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
         documentId: { type: 'string' },
-        ...cleanSchemaAttributes(attributes, { didAddStrapiComponentsToSchemas }),
+        ...cleanSchemaAttributes(attributes, {
+          relationTargetSchemaNames,
+          didAddStrapiComponentsToSchemas,
+        }),
       },
     },
 
@@ -152,11 +172,28 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
   return { ...schemas, ...strapiComponentSchemas };
 };
 
-const buildComponentSchema = (api: Api) => {
+const getRelationTargetSchemaNames = (api: Api) => {
+  const relationTargetSchemaNames = new Map<string, string>();
+
+  loopContentTypeNames(api, ({ uid, uniqueName }) => {
+    relationTargetSchemaNames.set(uid, pascalCase(uniqueName));
+    return {};
+  });
+
+  return relationTargetSchemaNames;
+};
+
+const buildComponentSchema = (
+  api: Api,
+  relationTargetSchemaNames = getRelationTargetSchemaNames(api)
+) => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided
-  return loopContentTypeNames(api, getAllSchemasForContentType);
+  return loopContentTypeNames(api, (apiInfo) =>
+    getAllSchemasForContentType({ ...apiInfo, relationTargetSchemaNames })
+  );
 };
 
 export default buildComponentSchema;
+export { getRelationTargetSchemaNames };

@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import resources from './resources/index';
+import resources from './resources/article-query';
 import { ARTICLE_UID, findArticlesDb } from './utils';
 
 let strapi: Core.Strapi;

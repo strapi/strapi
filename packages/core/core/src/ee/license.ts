@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
+import * as z from 'zod/v4';
 import type { Core } from '@strapi/types';
 
 import { generateInstallId } from '@strapi/utils';
@@ -13,6 +14,12 @@ interface LicenseInfo {
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
   subscriptionId?: string;
   planPriceId?: string;
+  /** End of the subscription term, epoch milliseconds. */
+  // The registry sends an ISO date string; kept open to a timestamp
+  renewalDate?: string | number;
+  // Present on the payload at runtime; declared here so the type reflects reality.
+  licenseKey?: string;
+  customerId?: string;
 }
 
 const DEFAULT_FEATURES = {
@@ -30,7 +37,39 @@ const DEFAULT_FEATURES = {
   ],
 };
 
+/**
+ * Features that can appear on a plan, in the order the admin panel lists them.
+ * Used to render entitlement rows for features a plan supports but this license
+ * does not include. `cms-ai` is deliberately absent: AI usage has its own panel.
+ */
+export const PLAN_FEATURE_CATALOG: Record<'bronze' | 'silver' | 'gold', string[]> = {
+  bronze: [],
+  silver: ['sso', 'cms-advanced-preview', 'cms-content-releases', 'cms-content-history'],
+  gold: [
+    'sso',
+    'cms-advanced-preview',
+    'cms-content-releases',
+    'review-workflows',
+    'cms-content-history',
+    'audit-logs',
+  ],
+};
+
 const LICENSE_REGISTRY_URI = 'https://license.strapi.io';
+
+// Shape of a successful (200) response from the license registry.
+const licenseSuccessSchema = z.object({
+  data: z.object({
+    license: z.string(),
+  }),
+});
+
+// Shape of a bad-request (400) response from the license registry.
+const licenseErrorSchema = z.object({
+  error: z.object({
+    message: z.string(),
+  }),
+});
 
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
@@ -88,8 +127,12 @@ const verifyLicense = (license: string) => {
   return licenseInfo;
 };
 
-const throwError = () => {
-  throw new LicenseCheckError('Could not proceed to the online validation of your license.', true);
+const createShouldFallbackError = () => {
+  return new LicenseCheckError('Could not proceed to the online validation of your license.', true);
+};
+
+const throwShouldFallbackError = () => {
+  throw createShouldFallbackError();
 };
 
 const fetchLicense = async (
@@ -97,7 +140,7 @@ const fetchLicense = async (
   key: string,
   projectId: string
 ) => {
-  const { installId: installIdFromPackageJson } = strapi.config;
+  const installIdFromPackageJson = strapi.config.get<string | undefined>('installId');
 
   const response = await strapi
     .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {
@@ -109,25 +152,33 @@ const fetchLicense = async (
         deviceId: generateInstallId(projectId, installIdFromPackageJson),
       }), // NOTE: Doing nothing on the LR with the installId
     })
-    .catch(throwError);
+    .catch(throwShouldFallbackError);
 
   const contentType = response.headers.get('Content-Type');
 
   if (contentType?.includes('application/json')) {
-    const { data, error } = await response.json();
+    // A body that does not parse is an outage like any other malformed response, so it keeps
+    // the stored license instead of reading as a rejection.
+    const body = await response.json().catch(throwShouldFallbackError);
 
     switch (response.status) {
-      case 200:
-        return data.license;
-      case 400:
-        throw new LicenseCheckError(error.message);
+      case 200: {
+        const result = licenseSuccessSchema.safeParse(body);
+        if (!result.success) throw createShouldFallbackError();
+        return result.data.data.license;
+      }
+      case 400: {
+        const result = licenseErrorSchema.safeParse(body);
+        if (!result.success) throw createShouldFallbackError();
+        throw new LicenseCheckError(result.data.error.message);
+      }
       case 404:
         throw new LicenseCheckError('The license used does not exists.');
       default:
-        throwError();
+        throw createShouldFallbackError();
     }
   } else {
-    throwError();
+    throw createShouldFallbackError();
   }
 };
 

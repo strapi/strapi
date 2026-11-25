@@ -4,19 +4,30 @@ import stream from 'stream';
 jest.mock('fs');
 
 import fs from 'fs-extra';
-import { Writable } from 'stream-chain';
 import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '..';
+import {
+  assertWriteStreamBackpressure,
+  createSlowWritable,
+} from '../../../../__tests__/test-utils';
 import * as encryption from '../../../../utils/encryption';
 import { createFilePathFactory, createTarEntryStream } from '../utils';
 
-fs.createWriteStream = jest.fn().mockReturnValue(
-  new Writable({
-    objectMode: true,
-    write() {},
-  })
+fs.createWriteStream = jest.fn().mockImplementation(
+  () =>
+    new stream.Writable({
+      objectMode: true,
+      write() {},
+    })
 );
 
 const filePath = './test-file';
+
+const createEntryStub = () =>
+  new stream.Writable({
+    write(_chunk, _encoding, callback) {
+      callback();
+    },
+  });
 
 jest.mock('../../../../utils/encryption', () => {
   return {
@@ -43,7 +54,7 @@ describe('Local File Destination Provider', () => {
       };
       const provider = createLocalFileDestinationProvider(providerOptions);
 
-      expect(() => provider.bootstrap()).toThrowError("Can't encrypt without a key");
+      expect(() => provider.bootstrap()).toThrow("Can't encrypt without a key");
     });
 
     it('Adds .gz extension to the archive path when compression is enabled', async () => {
@@ -121,7 +132,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -148,7 +159,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream for schemas', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -176,7 +187,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream for links', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -204,7 +215,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream for configuration', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -224,5 +235,32 @@ describe('Local File Destination Provider', () => {
 
       expect(configurationStream instanceof stream.Writable).toBeTruthy();
     });
+  });
+
+  describe('Backpressure', () => {
+    it('entities write stream applies backpressure when downstream is slow', async () => {
+      const { writable: slowWritable } = createSlowWritable<string>({
+        objectMode: true,
+        highWaterMark: 1,
+        delayMs: 12,
+      });
+      (createTarEntryStream as jest.Mock).mockImplementation(() => slowWritable);
+
+      const provider = createLocalFileDestinationProvider({
+        encryption: { enabled: false },
+        compression: { enabled: false },
+        file: { path: filePath },
+      });
+      await provider.bootstrap();
+
+      const writeStream = provider.createEntitiesWriteStream();
+      const chunks = Array.from({ length: 25 }, (_, i) => ({ id: i, title: `Item ${i}` }));
+
+      const { sourcePaused } = await assertWriteStreamBackpressure(writeStream, chunks, {
+        delayMs: 12,
+      });
+
+      expect(sourcePaused).toBe(true);
+    }, 5000);
   });
 });

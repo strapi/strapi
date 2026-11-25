@@ -19,7 +19,8 @@ import {
 } from '../../../../../services/apiTokens';
 import { useGetPermissionsQuery, useGetRoutesQuery } from '../../../../../services/contentApi';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
-import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
+import { API_TOKEN_TYPE, apiTokenInformationSchema } from '../../../components/Tokens/constants';
+import { FormApiTokenContainer } from '../../../components/Tokens/FormApiTokenContainer';
 import { FormHead } from '../../../components/Tokens/FormHead';
 import { ApiTokenBox } from '../../../components/Tokens/TokenBox';
 
@@ -27,12 +28,10 @@ import {
   ApiTokenPermissionsContextValue,
   ApiTokenPermissionsProvider,
 } from './apiTokenPermissions';
-import { FormApiTokenContainer } from './components/FormApiTokenContainer';
 import { Permissions } from './components/Permissions';
-import { schema } from './constants';
 import { initialState, reducer } from './reducer';
 
-import type { Get, ApiToken } from '../../../../../../../shared/contracts/api-token';
+import type { ContentApiApiToken, Get } from '../../../../../../../shared/contracts/api-token';
 
 /**
  * TODO: this could definitely be refactored to avoid using redux and instead just use the
@@ -43,15 +42,17 @@ export const EditView = () => {
   const { toggleNotification } = useNotification();
   const { state: locationState } = useLocation();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const [apiToken, setApiToken] = React.useState<ApiToken | null>(
-    locationState?.apiToken?.accessKey
+  const [apiToken, setApiToken] = React.useState<ContentApiApiToken | null>(
+    locationState?.apiToken?.accessKey !== undefined && locationState?.apiToken?.accessKey !== ''
       ? {
           ...locationState.apiToken,
         }
       : null
   );
 
-  const [showToken, setShowToken] = React.useState(Boolean(locationState?.apiToken?.accessKey));
+  const [showToken, setShowToken] = React.useState(
+    locationState?.apiToken?.accessKey !== undefined && locationState?.apiToken?.accessKey !== ''
+  );
   const hideTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const { trackUsage } = useTracking();
   const {
@@ -63,7 +64,7 @@ export const EditView = () => {
   const isCreating = id === 'create';
   const {
     _unstableFormatAPIError: formatAPIError,
-    _unstableFormatValidationErrors: formatValidtionErrors,
+    _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
 
   const navigate = useNavigate();
@@ -111,22 +112,15 @@ export const EditView = () => {
   }, [contentAPIRoutesQuery.data]);
 
   React.useEffect(() => {
-    if (apiToken) {
+    if (apiToken !== null) {
       if (apiToken.type === 'read-only') {
-        dispatch({
-          type: 'ON_CHANGE_READ_ONLY',
-        });
+        dispatch({ type: 'ON_CHANGE_READ_ONLY' });
       }
       if (apiToken.type === 'full-access') {
-        dispatch({
-          type: 'SELECT_ALL_ACTIONS',
-        });
+        dispatch({ type: 'SELECT_ALL_ACTIONS' });
       }
       if (apiToken.type === 'custom') {
-        dispatch({
-          type: 'UPDATE_PERMISSIONS',
-          value: apiToken?.permissions,
-        });
+        dispatch({ type: 'UPDATE_PERMISSIONS', value: apiToken.permissions });
       }
     }
   }, [apiToken]);
@@ -154,21 +148,16 @@ export const EditView = () => {
     if (data) {
       setApiToken(data);
 
-      if (data.type === 'read-only') {
-        dispatch({
-          type: 'ON_CHANGE_READ_ONLY',
-        });
-      }
-      if (data.type === 'full-access') {
-        dispatch({
-          type: 'SELECT_ALL_ACTIONS',
-        });
-      }
-      if (data.type === 'custom') {
-        dispatch({
-          type: 'UPDATE_PERMISSIONS',
-          value: data?.permissions,
-        });
+      if (data.kind === 'content-api') {
+        if (data.type === 'read-only') {
+          dispatch({ type: 'ON_CHANGE_READ_ONLY' });
+        }
+        if (data.type === 'full-access') {
+          dispatch({ type: 'SELECT_ALL_ACTIONS' });
+        }
+        if (data.type === 'custom') {
+          dispatch({ type: 'UPDATE_PERMISSIONS', value: data.permissions });
+        }
       }
     }
   }, [data]);
@@ -195,8 +184,11 @@ export const EditView = () => {
 
   interface FormValues extends Pick<Get.Response['data'], 'name' | 'description'> {
     lifespan: Get.Response['data']['lifespan'] | undefined;
-    type: Get.Response['data']['type'] | undefined;
+    type: ContentApiApiToken['type'] | undefined;
   }
+
+  const buildLifespan = (raw: FormValues['lifespan']): number | null =>
+    raw && raw !== '0' ? parseInt(raw.toString(), 10) : null;
 
   const handleSubmit = async (body: FormValues, formik: FormikHelpers<FormValues>) => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
@@ -206,16 +198,16 @@ export const EditView = () => {
     try {
       if (isCreating) {
         const res = await createToken({
-          ...body,
-          // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
-          lifespan:
-            body?.lifespan && body.lifespan !== '0' ? parseInt(body.lifespan.toString(), 10) : null,
+          name: body.name,
+          description: body.description,
+          type: body.type!,
+          lifespan: buildLifespan(body.lifespan),
           permissions: body.type === 'custom' ? state.selectedActions : null,
         });
 
         if ('error' in res) {
           if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-            formik.setErrors(formatValidtionErrors(res.error));
+            formik.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
               type: 'danger',
@@ -235,7 +227,7 @@ export const EditView = () => {
         });
 
         trackUsage('didCreateToken', {
-          type: res.data.type,
+          kind: 'content-api',
           tokenType: API_TOKEN_TYPE,
         });
 
@@ -248,13 +240,13 @@ export const EditView = () => {
           id: id!,
           name: body.name,
           description: body.description,
-          type: body.type,
+          type: body.type!,
           permissions: body.type === 'custom' ? state.selectedActions : null,
         });
 
         if ('error' in res) {
           if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-            formik.setErrors(formatValidtionErrors(res.error));
+            formik.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
               type: 'danger',
@@ -274,7 +266,8 @@ export const EditView = () => {
         });
 
         trackUsage('didEditToken', {
-          type: res.data.type,
+          kind: res.data.kind,
+          type: (res.data as ContentApiApiToken).type,
           tokenType: API_TOKEN_TYPE,
         });
       }
@@ -336,7 +329,10 @@ export const EditView = () => {
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
-  const canShowToken = !!apiToken?.accessKey;
+  const canShowToken = apiToken?.accessKey !== undefined && apiToken.accessKey !== '';
+
+  const initialType =
+    apiToken !== null && apiToken.kind === 'content-api' ? apiToken.type : undefined;
 
   if (isLoading) {
     return <Page.Loading />;
@@ -352,12 +348,12 @@ export const EditView = () => {
           )}
         </Page.Title>
         <Formik
-          validationSchema={schema}
+          validationSchema={apiTokenInformationSchema}
           validateOnChange={false}
           initialValues={{
             name: apiToken?.name || '',
             description: apiToken?.description || '',
-            type: apiToken?.type,
+            type: initialType,
             lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
@@ -371,10 +367,17 @@ export const EditView = () => {
             return (
               <Form>
                 <FormHead
-                  title={{
-                    id: 'Settings.apiTokens.createPage.title',
-                    defaultMessage: 'Create API Token',
-                  }}
+                  title={
+                    isCreating
+                      ? {
+                          id: 'Settings.apiTokens.createPage.title',
+                          defaultMessage: 'Create API Token',
+                        }
+                      : {
+                          id: 'Settings.apiTokens.createPage.title',
+                          defaultMessage: 'Edit API Token',
+                        }
+                  }
                   token={apiToken}
                   setToken={setApiToken}
                   toggleToken={toggleToken}
@@ -388,11 +391,13 @@ export const EditView = () => {
 
                 <Layouts.Content>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    {apiToken?.accessKey && showToken && (
-                      <>
-                        <ApiTokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
-                      </>
-                    )}
+                    {apiToken?.accessKey !== undefined &&
+                      apiToken.accessKey !== '' &&
+                      showToken === true && (
+                        <>
+                          <ApiTokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
+                        </>
+                      )}
 
                     <FormApiTokenContainer
                       errors={errors}
@@ -401,9 +406,11 @@ export const EditView = () => {
                       isCreating={isCreating}
                       values={values}
                       apiToken={apiToken}
+                      kind="content-api"
                       onDispatch={dispatch}
                       setHasChangedPermissions={setHasChangedPermissions}
                     />
+
                     <Permissions
                       disabled={
                         !canEditInputs ||

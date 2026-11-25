@@ -1,0 +1,222 @@
+import fs from 'fs-extra';
+import { tmpdir } from 'os';
+import path from 'path';
+import { Readable } from 'stream';
+
+import { createLocalDirectorySourceProvider } from '..';
+import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
+
+const minimalMetadata = { strapi: { version: '5.0.0' }, createdAt: new Date().toISOString() };
+
+const minimalSchemaLine = JSON.stringify({
+  uid: 'api::test.test',
+  kind: 'collectionType',
+  modelType: 'contentType',
+  modelName: 'test',
+  collectionName: 'tests',
+  info: {
+    singularName: 'test',
+    pluralName: 'tests',
+    displayName: 'Test',
+  },
+  options: {},
+  pluginOptions: {},
+  attributes: {
+    title: { type: 'string' },
+  },
+});
+
+describe('Directory source provider', () => {
+  test('bootstrap fails when metadata.json is missing', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await expect(provider.bootstrap({ report: jest.fn() } as never)).rejects.toThrow();
+  });
+
+  test('getMetadata and getSchemas after bootstrap', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'schemas'));
+    await fs.writeFile(path.join(dir, 'schemas', 'schemas_00000.jsonl'), `${minimalSchemaLine}\n`);
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.getMetadata()).resolves.toMatchObject({ strapi: { version: '5.0.0' } });
+    await expect(provider.getSchemas()).resolves.toMatchObject({
+      'api::test.test': expect.objectContaining({ uid: 'api::test.test' }),
+    });
+  });
+
+  test('createAssetsReadStream returns readable', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createAssetsReadStream();
+    expect(stream instanceof Readable).toBe(true);
+    stream.destroy();
+  });
+
+  test('asset preflight accepts uploads with valid sidecar metadata', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-valid-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.ensureDir(path.join(dir, 'assets', 'metadata'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
+    await fs.writeJson(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'), {
+      id: 1,
+      name: 'photo.jpg',
+      hash: 'photo',
+      ext: '.jpg',
+      mime: 'image/jpeg',
+      size: 1,
+      url: '/uploads/photo.jpg',
+    });
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.validateStage('assets')).resolves.toBeUndefined();
+
+    await fs.remove(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'));
+    const assets = [];
+    for await (const asset of provider.createAssetsReadStream()) {
+      assets.push(asset);
+      asset.stream.resume();
+    }
+    expect(assets).toHaveLength(1);
+    expect(assets[0].metadata).toMatchObject({ id: 1, hash: 'photo' });
+
+    await fs.remove(dir);
+  });
+
+  test('asset preflight rejects an upload with no sidecar', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-missing-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.validateStage('assets')).rejects.toThrow(
+      'Asset metadata preflight failed for "photo.jpg"'
+    );
+
+    await fs.remove(dir);
+  });
+
+  test('asset preflight rejects incomplete object sidecar metadata', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-incomplete-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.ensureDir(path.join(dir, 'assets', 'metadata'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
+    await fs.writeFile(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'), '{}');
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.validateStage('assets')).rejects.toThrow(
+      'Asset sidecar metadata has invalid required fields'
+    );
+
+    await fs.remove(dir);
+  });
+
+  test('asset preflight rejects non-object sidecar JSON', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-invalid-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.ensureDir(path.join(dir, 'assets', 'metadata'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
+    await fs.writeFile(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'), 'null');
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.validateStage('assets')).rejects.toThrow(
+      'Asset sidecar metadata must be a JSON object'
+    );
+
+    await fs.remove(dir);
+  });
+
+  test('asset preflight rejects malformed sidecar JSON', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-malformed-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.ensureDir(path.join(dir, 'assets', 'metadata'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
+    await fs.writeFile(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'), '{not valid json');
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.validateStage('assets')).rejects.toThrow(
+      'Asset metadata preflight failed for "photo.jpg"'
+    );
+
+    await fs.remove(dir);
+  });
+
+  test('entities read stream pauses under backpressure (slow consumer)', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-bp-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'entities'));
+    const entityLines = Array.from(
+      { length: 25 },
+      (_, i) => `${JSON.stringify({ type: 'api::test.test', id: i + 1, data: {} })}\n`
+    ).join('');
+    await fs.writeFile(path.join(dir, 'entities', 'entities_00000.jsonl'), entityLines);
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
+      delayMs: 12,
+    });
+
+    expect(sourcePaused).toBe(true);
+    expect(chunks).toHaveLength(25);
+  }, 8000);
+
+  test('rejects a malformed JSONL line', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-bad-jsonl-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'entities'));
+    await fs.writeFile(path.join(dir, 'entities', 'entities_00000.jsonl'), '{not json\n');
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const readAll = async () => {
+      for await (const chunk of stream) {
+        expect(chunk).toBeDefined();
+      }
+    };
+    await expect(readAll()).rejects.toThrow(/Error parsing JSONL/);
+  });
+
+  test('streams entities from jsonl shards in order', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'schemas'));
+    await fs.writeFile(path.join(dir, 'schemas', 'schemas_00000.jsonl'), `${minimalSchemaLine}\n`);
+    await fs.ensureDir(path.join(dir, 'entities'));
+    await fs.writeFile(
+      path.join(dir, 'entities', 'entities_00000.jsonl'),
+      `${JSON.stringify({ type: 'api::test.test', id: 1, data: {} })}\n`
+    );
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const chunks: unknown[] = [];
+    const stream = provider.createEntitiesReadStream();
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]).toMatchObject({ type: 'api::test.test', id: 1 });
+  });
+});

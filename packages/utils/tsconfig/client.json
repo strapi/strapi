@@ -17,6 +17,8 @@
     "noImplicitAny": true,
     "declaration": true,
     "jsx": "react-jsx",
-    "types": ["@testing-library/jest-dom"]
+    "types": [],
+    "noUncheckedSideEffectImports": true,
+    "erasableSyntaxOnly": true
   }
 }

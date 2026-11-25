@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "hc_m2m_targets",
+  "info": {
+    "singularName": "hc-m2m-target",
+    "pluralName": "hc-m2m-targets",
+    "displayName": "HC M2M Target",
+    "description": "High-cardinality many-to-many target. Paired with hc-m2m-source. See that type's description for the purpose."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::hc-m2m-source.hc-m2m-source",
+      "mappedBy": "targets"
+    }
+  }
+}

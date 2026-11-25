@@ -4,7 +4,7 @@ import { Box, Button, Flex, LinkButton, Modal, Typography } from '@strapi/design
 import { Cross } from '@strapi/icons';
 import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { useScopedPersistentState } from '../../../hooks/usePersistentState';
@@ -47,9 +47,9 @@ export const FreeTrialEndedModal = () => {
   // We show the banner to encourage the user to upgrade (for 7 days after the trial ends)
   const isTrialEndedRecently = Boolean(
     !license?.isTrial &&
-      !window.strapi.isEE &&
-      cachedTrialEndsAt &&
-      isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
+    !window.strapi.isEE &&
+    cachedTrialEndsAt &&
+    isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
   );
 
   const handleClose = () => {
@@ -68,7 +68,7 @@ export const FreeTrialEndedModal = () => {
   if (!previouslyOpen && isTrialEndedRecently) {
     return (
       <Modal.Root open={open} onOpenChange={handleOnOpenChange}>
-        <StyledModalContent aria-labelledby="title">
+        <StyledModalContent>
           <StyledModalBody>
             <Box position="absolute" top={0} right={0} padding={2}>
               <StyledButton
@@ -91,12 +91,12 @@ export const FreeTrialEndedModal = () => {
               padding={8}
               gap={4}
             >
-              <Typography variant="alpha" fontWeight="bold" fontSize={4} id="title">
+              <Modal.Title variant="alpha" fontWeight="bold" fontSize={4}>
                 {formatMessage({
                   id: 'app.components.FreeTrialEndedModal.title',
                   defaultMessage: 'Your trial has ended',
                 })}
-              </Typography>
+              </Modal.Title>
               <Typography>
                 {formatMessage({
                   id: 'app.components.FreeTrialEndedModal.description',
@@ -148,7 +148,7 @@ export const FreeTrialEndedModal = () => {
                 </ul>
               </Box>
               <Flex marginTop={4} gap={2}>
-                <LinkButton href="https://strapi.chargebeeportal.com/" target="_blank">
+                <LinkButton href="https://billing.strapi.io/" target="_blank">
                   {formatMessage({
                     id: 'app.components.FreeTrialEndedModal.button.upgrade',
                     defaultMessage: 'Stay on the Growth plan',

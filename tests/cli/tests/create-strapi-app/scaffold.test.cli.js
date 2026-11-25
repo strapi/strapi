@@ -9,17 +9,54 @@ const semver = require('semver');
 const repoRoot = path.resolve(__dirname, '../../../..');
 const bin = path.join(repoRoot, 'packages/cli/create-strapi-app/bin/index.js');
 
-const baseScaffoldArgs = ['--non-interactive', '--skip-cloud', '--no-install', '--no-git-init'];
+const baseScaffoldArgs = ['--non-interactive', '--no-install', '--no-git-init'];
 
-function spawnCsa(args, env = {}) {
+// Every flag that would otherwise open a prompt, so a run without --non-interactive completes
+// only if no other prompt (such as the removed Strapi Cloud login) is asked.
+// The child process has no terminal, so `--interactive` keeps the prompts on: without it the CLI
+// switches to non-interactive mode and an unanswered prompt would go unnoticed.
+// Run these args with spawnCsaWithoutAnswers so that an unanswered prompt fails the test.
+const promptFreeArgs = [
+  '--interactive',
+  '--typescript',
+  '--no-example',
+  '--skip-db',
+  '--no-install',
+  '--no-git-init',
+];
+
+const cloudPromptPattern = /log in|sign up|strapi cloud|strapi servers|trial/i;
+
+function spawnCsa(args, env = {}, cwd = repoRoot) {
+  return coffee.spawn(process.execPath, [bin, ...args], {
+    cwd,
+    env: { ...process.env, ...env },
+  });
+}
+
+// coffee closes stdin only after input queued with .write(), so without input a prompt waits forever.
+// An empty stdin makes a prompt read end-of-file at once: the CLI then exits with an error.
+function spawnCsaWithoutAnswers(args) {
   return coffee.spawn(process.execPath, [bin, ...args], {
     cwd: repoRoot,
-    env: { ...process.env, ...env },
+    env: process.env,
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
 }
 
 function mkProjectDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-cli-test-'));
+}
+
+function expectGeneratedUploadPolicy(pluginsConfig) {
+  const allowedMediaTypes = pluginsConfig.match(/const allowedMediaTypes = \[([\s\S]*?)\];/);
+  const deniedTypes = pluginsConfig.match(/const deniedTypes = \[([\s\S]*?)\];/);
+
+  expect(allowedMediaTypes?.[1]).toContain("'image/*'");
+  expect(deniedTypes?.[1]).toContain("'image/svg+xml'");
+  expect(pluginsConfig).toMatch(
+    /security:\s*{\s*allowedTypes:\s*allowedMediaTypes,\s*deniedTypes,\s*}/
+  );
 }
 
 describe('create-strapi-app', () => {
@@ -42,6 +79,22 @@ describe('create-strapi-app', () => {
       expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'tsconfig.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'config', 'database.ts'))).toBe(true);
+
+      const apiConfig = fs.readFileSync(path.join(projectDir, 'config', 'api.ts'), 'utf8');
+      expect(apiConfig).toContain('strictParams: true');
+
+      const serverConfig = fs.readFileSync(path.join(projectDir, 'config', 'server.ts'), 'utf8');
+      expect(serverConfig).toContain('populateRelations: env.bool(');
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.ts'), 'utf8');
+      expect(pluginsConfig).toContain("jwtManagement: 'refresh'");
+      expect(pluginsConfig).toContain('httpOnly: true');
+      expect(pluginsConfig).toContain('allowedTypes:');
+      expect(pluginsConfig).toContain('application/x-executable');
+      expectGeneratedUploadPolicy(pluginsConfig);
+
+      const envFile = fs.readFileSync(path.join(projectDir, '.env'), 'utf8');
+      expect(envFile).toMatch(/^JWT_SECRET=.+/m);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
@@ -57,6 +110,9 @@ describe('create-strapi-app', () => {
       expect(fs.existsSync(path.join(projectDir, 'config', 'database.js'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'src', 'index.js'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'tsconfig.json'))).toBe(false);
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.js'), 'utf8');
+      expectGeneratedUploadPolicy(pluginsConfig);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
@@ -71,18 +127,338 @@ describe('create-strapi-app', () => {
 
       expect(fs.existsSync(path.join(projectDir, 'data', 'data.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.ts'), 'utf8');
+      expectGeneratedUploadPolicy(pluginsConfig);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
   });
 
+  it('scaffolds the JavaScript example template with --example --javascript', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--example', '--javascript'])
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, 'data', 'data.json'))).toBe(true);
+      expect(fs.existsSync(path.join(projectDir, 'config', 'plugins.js'))).toBe(true);
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.js'), 'utf8');
+      expectGeneratedUploadPolicy(pluginsConfig);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('writes a Yarn node-modules linker config for Yarn projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
+        npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(fs.readFileSync(path.join(projectDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: node-modules\n'
+      );
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not write a Yarn config for Yarn classic projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
+        npm_config_user_agent: 'yarn/1.22.22 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not write a Yarn config or .npmrc for npm projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-npm'])
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+      // npm install must use default peer resolution so the lockfile works with
+      // plain `npm ci` (#27019) — do not force legacy-peer-deps via .npmrc
+      expect(fs.existsSync(path.join(projectDir, '.npmrc'))).toBe(false);
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      // Templates import @strapi/database directly; must be a direct dep for pnpm (#26949)
+      expect(pkg.dependencies['@strapi/database']).toBe(pkg.dependencies['@strapi/strapi']);
+      // Align with @strapi/* peer ranges so strict npm peer resolution succeeds
+      expect(pkg.dependencies['react-router-dom']).toBe('^6.30.3');
+      expect(pkg.dependencies.react).toBe('^18.0.0');
+      expect(pkg.dependencies['react-dom']).toBe('^18.0.0');
+      expect(pkg.dependencies['styled-components']).toBe('^6.0.0');
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('scaffolds pnpm-workspace.yaml allowBuilds for SQLite projects on pnpm 11', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-pnpm'], {
+        npm_config_user_agent: 'pnpm/11.8.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      const workspace = fs.readFileSync(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+
+      expect(pkg.dependencies).toMatchObject({ 'better-sqlite3': expect.any(String) });
+      expect(pkg.pnpm).toBeUndefined();
+      expect(workspace).toContain('allowBuilds:');
+      expect(workspace).toContain('better-sqlite3: true');
+      expect(workspace).toContain('sharp: true');
+      expect(workspace).toContain("'@swc/core': true");
+      expect(workspace).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('writes package.json onlyBuiltDependencies for pnpm 10', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-pnpm'], {
+        npm_config_user_agent: 'pnpm/10.25.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+
+      expect(pkg.pnpm.onlyBuiltDependencies).toEqual(
+        expect.arrayContaining(['@swc/core', 'better-sqlite3', 'esbuild', 'sharp'])
+      );
+      expect(fs.existsSync(path.join(projectDir, 'pnpm-workspace.yaml'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('scaffolds inside an existing Yarn workspace monorepo', async () => {
+    const monorepoDir = mkProjectDir();
+    const projectDir = path.join(monorepoDir, 'packages', 'strapi-app');
+
+    try {
+      fs.mkdirSync(path.dirname(projectDir), { recursive: true });
+      fs.writeFileSync(
+        path.join(monorepoDir, 'package.json'),
+        JSON.stringify(
+          {
+            private: true,
+            packageManager: 'yarn@4.12.0',
+            workspaces: ['packages/*'],
+          },
+          null,
+          2
+        )
+      );
+      fs.writeFileSync(path.join(monorepoDir, '.yarnrc.yml'), 'nodeLinker: pnp\n');
+
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
+        npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(fs.readFileSync(path.join(projectDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: node-modules\n'
+      );
+      expect(fs.readFileSync(path.join(monorepoDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: pnp\n'
+      );
+    } finally {
+      fs.rmSync(monorepoDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not ask for a Strapi Cloud login or write a trial license', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      // No --non-interactive and no --skip-cloud: this combination used to open the cloud login prompt
+      const { stdout, stderr } = await spawnCsaWithoutAnswers([projectDir, ...promptFreeArgs])
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('Your application was created');
+      expect(`${stdout}${stderr}`).not.toMatch(cloudPromptPattern);
+      expect(fs.existsSync(path.join(projectDir, 'license.txt'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts the legacy --skip-cloud flag as a no-op', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout, stderr } = await spawnCsaWithoutAnswers([
+        projectDir,
+        ...promptFreeArgs,
+        '--skip-cloud',
+      ])
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('Your application was created');
+      expect(`${stdout}${stderr}`).not.toMatch(/unknown option/i);
+      expect(`${stdout}${stderr}`).not.toMatch(cloudPromptPattern);
+      expect(fs.existsSync(path.join(projectDir, 'license.txt'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not list the legacy no-op flags in --help', async () => {
+    const { stdout } = await spawnCsa(['--help']).expect('code', 0).end();
+
+    expect(stdout).toContain('--non-interactive');
+    expect(stdout).not.toContain('--skip-cloud');
+    expect(stdout).not.toContain('--enable-ab-tests');
+  });
+
   it('fails when --non-interactive is used without a directory', async () => {
-    const { stderr, stdout } = await spawnCsa(['--non-interactive', '--skip-cloud'])
-      .expect('code', 1)
-      .end();
+    const { stderr, stdout } = await spawnCsa(['--non-interactive']).expect('code', 1).end();
 
     const out = `${stdout}${stderr}`;
     expect(out).toMatch(/non-interactive|directory/i);
+  });
+
+  it('switches to non-interactive mode without a terminal', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout } = await spawnCsa([projectDir, '--no-install', '--no-git-init'], {
+        CI: 'false',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toMatch(/not a terminal/i);
+      expect(stdout).toContain('Your application was created');
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('switches to non-interactive mode with --quickstart and no terminal', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout, stderr } = await spawnCsa(
+        [projectDir, '--quickstart', '--no-run', '--no-install', '--no-git-init'],
+        { CI: 'false' }
+      )
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toMatch(/not a terminal/i);
+      expect(`${stdout}${stderr}`).not.toMatch(cloudPromptPattern);
+      expect(stdout).toContain('Your application was created');
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each(['false', 'true'])(
+    'preserves custom template devDependencies in automatic prompt mode (CI=%s)',
+    async (ci) => {
+      const tempDir = mkProjectDir();
+      const templateDir = path.join(tempDir, 'template');
+      const projectDir = path.join(tempDir, 'project');
+      const devDependencies = { typescript: '5.8.3', '@types/node': '24.0.0' };
+
+      try {
+        fs.mkdirSync(templateDir);
+        fs.writeFileSync(
+          path.join(templateDir, 'package.json'),
+          JSON.stringify({ devDependencies })
+        );
+
+        const { stdout } = await spawnCsa(
+          [projectDir, '--template', templateDir, '--no-install', '--no-git-init'],
+          { CI: ci }
+        )
+          .expect('code', 0)
+          .end();
+
+        expect(stdout).toMatch(ci === 'true' ? /A CI environment was detected/ : /not a terminal/i);
+
+        const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+        expect(pkg.devDependencies).toEqual(devDependencies);
+      } finally {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it('shows the prompts with --interactive when there is no terminal', async () => {
+    const tempDir = mkProjectDir();
+    const projectDir = path.join(tempDir, 'app');
+    try {
+      const { stdout } = await spawnCsa(
+        [
+          '--interactive',
+          '--no-install',
+          '--no-git-init',
+          '--typescript',
+          '--no-example',
+          '--skip-db',
+        ],
+        { CI: 'true' },
+        tempDir
+      )
+        .write(`${projectDir}\n`)
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('What is the name of your project?');
+      expect(stdout).not.toMatch(/not a terminal|CI environment was detected/i);
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails without a directory when there is no terminal', async () => {
+    const { stderr, stdout } = await spawnCsa([], { CI: 'false' }).expect('code', 1).end();
+
+    const out = `${stdout}${stderr}`;
+    expect(out).toMatch(/directory/i);
+    expect(out).toMatch(/not a terminal/i);
+  });
+
+  it('fails when --interactive and --non-interactive are both set', async () => {
+    const tempDir = mkProjectDir();
+    const projectDir = path.join(tempDir, 'my-app');
+    try {
+      const { stderr, stdout } = await spawnCsa([projectDir, '--interactive', '--non-interactive'])
+        .expect('code', 1)
+        .end();
+
+      const out = `${stdout}${stderr}`;
+      expect(out).toMatch(/--interactive.*--non-interactive/i);
+      expect(fs.existsSync(projectDir)).toBe(false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it('fails when --typescript and --javascript are both set', async () => {

@@ -1,11 +1,14 @@
 import { createLocalStrapiDestinationProvider } from '../index';
 import * as restoreApi from '../strategies/restore';
 import {
+  assertWriteStreamBackpressure,
+  createSlowWritable,
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
   getStrapiModels,
 } from '../../../../__tests__/test-utils';
+import type { IEntity } from '../../../../types';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -125,7 +128,7 @@ describe('Local Strapi Source Destination', () => {
                 },
               },
             }),
-            /* @ts-ignore: disable-next-line */
+            // @ts-expect-error -- Invalid strategy exercises provider validation.
             strategy: 'foo',
           });
           await invalidProvider.bootstrap();
@@ -133,7 +136,81 @@ describe('Local Strapi Source Destination', () => {
       ).rejects.toThrow();
     });
 
-    test.todo('Should not delete entities that are not included');
+    test('Should not delete entities that are not included', async () => {
+      const query = jest.fn((uid) => ({
+        deleteMany: jest.fn(async () => ({ count: uid === 'foo' ? 3 : 0 })),
+        findMany: jest.fn(async () => []),
+      }));
+
+      const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
+
+      const strapi = getStrapiFactory({
+        contentTypes: getContentTypes(),
+        query,
+        getModel,
+        get() {
+          return {
+            get() {
+              return getStrapiModels();
+            },
+          };
+        },
+        db: {
+          query,
+          transaction,
+          queryBuilder: jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              stream: jest.fn().mockReturnValue([]),
+              transacting: jest.fn().mockReturnThis(),
+            }),
+          }),
+          lifecycles: {
+            enable: jest.fn(),
+            disable: jest.fn(),
+          },
+        },
+        ...strapiCommonProperties,
+      })();
+
+      setGlobalStrapi(strapi);
+
+      const provider = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        strategy: 'restore',
+        restore: {
+          entities: {
+            include: ['foo'],
+            exclude: [],
+          },
+          assets: false,
+          configuration: {
+            coreStore: false,
+            webhook: false,
+          },
+        },
+      });
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
+      const diagnostics = { report: jest.fn() };
+
+      await provider.bootstrap(diagnostics as any);
+      await provider.beforeTransfer();
+
+      expect(deleteAllSpy).toHaveBeenCalledTimes(1);
+      expect(deleteAllSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          entities: expect.objectContaining({
+            include: ['foo'],
+          }),
+        })
+      );
+      expect(diagnostics.report).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'info',
+          details: expect.objectContaining({ message: 'deleting all assets' }),
+        })
+      );
+    });
 
     test('Should delete all entities if it is a restore with only exclude property', async () => {
       const entities = [
@@ -252,5 +329,43 @@ describe('Local Strapi Source Destination', () => {
 
       expect(deleteAllSpy).toBeCalledTimes(1);
     });
+  });
+
+  describe('Backpressure', () => {
+    test('entities write stream applies backpressure to slow down fast readables', async () => {
+      const { writable: slowWritable } = createSlowWritable<IEntity>({
+        highWaterMark: 1,
+        delayMs: 15,
+      });
+      jest
+        .spyOn(restoreApi, 'createEntitiesWriteStream')
+        .mockReturnValue(slowWritable as ReturnType<typeof restoreApi.createEntitiesWriteStream>);
+
+      const provider = createLocalStrapiDestinationProvider({
+        getStrapi: getStrapiFactory({
+          db: {
+            transaction,
+            lifecycles: { enable: jest.fn(), disable: jest.fn() },
+          },
+          ...strapiCommonProperties,
+        }),
+        strategy: 'restore',
+        restore: { entities: { exclude: [] } },
+      });
+      await provider.bootstrap();
+
+      const writeStream = provider.createEntitiesWriteStream();
+      const entityChunks: IEntity[] = Array.from({ length: 25 }, (_, i) => ({
+        id: i + 1,
+        type: 'api::foo.foo',
+        data: { title: `Entity ${i}`, documentId: `doc-${i}` },
+      }));
+
+      const { sourcePaused } = await assertWriteStreamBackpressure(writeStream, entityChunks, {
+        delayMs: 15,
+      });
+
+      expect(sourcePaused).toBe(true);
+    }, 5000);
   });
 });

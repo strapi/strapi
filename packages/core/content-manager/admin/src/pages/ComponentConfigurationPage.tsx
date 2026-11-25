@@ -7,11 +7,7 @@ import { useParams } from 'react-router-dom';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
 import { ComponentsDictionary, extractContentTypeComponents } from '../hooks/useContentTypeSchema';
-import {
-  DEFAULT_SETTINGS,
-  EditLayout,
-  convertEditLayoutToFieldLayouts,
-} from '../hooks/useDocumentLayout';
+import { DEFAULT_SETTINGS, EditLayout } from '../hooks/useDocumentLayout';
 import { useTypedSelector } from '../modules/hooks';
 import {
   useGetComponentConfigurationQuery,
@@ -20,7 +16,8 @@ import {
 import { useGetInitialDataQuery } from '../services/init';
 import { setIn } from '../utils/objects';
 
-import type { Component, FindComponentConfiguration } from '../../../shared/contracts/components';
+import { formatComponentConfigurationEditLayout } from './formatComponentConfigurationEditLayout';
+
 import type { Metadatas } from '../../../shared/contracts/content-types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -43,6 +40,7 @@ const ComponentConfigurationPage = () => {
     components,
     fieldSizes,
     schema,
+    schemas,
     error: errorSchema,
     isLoading: isLoadingSchema,
     isFetching: isFetchingSchema,
@@ -75,6 +73,7 @@ const ComponentConfigurationPage = () => {
         error: res.error,
         components,
         schema,
+        schemas: res.data?.contentTypes ?? [],
         fieldSizes,
       };
     },
@@ -114,7 +113,7 @@ const ComponentConfigurationPage = () => {
   const editLayout = React.useMemo(
     () =>
       data && !isLoading
-        ? formatEditLayout(data, { schema, components })
+        ? formatComponentConfigurationEditLayout(data, { schema, components, schemas })
         : ({
             layout: [],
             components: {},
@@ -122,7 +121,7 @@ const ComponentConfigurationPage = () => {
             options: {},
             settings: DEFAULT_SETTINGS,
           } as EditLayout),
-    [data, isLoading, schema, components]
+    [data, isLoading, schema, components, schemas]
   );
 
   const [updateConfiguration] = useUpdateComponentConfigurationMutation();
@@ -212,65 +211,6 @@ const ComponentConfigurationPage = () => {
       />
     </>
   );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Header
- * -----------------------------------------------------------------------------------------------*/
-
-const formatEditLayout = (
-  data: FindComponentConfiguration.Response['data'],
-  { schema, components }: { schema?: Component; components: ComponentsDictionary }
-) => {
-  const editAttributes = convertEditLayoutToFieldLayouts(
-    data.component.layouts.edit,
-    schema?.attributes,
-    data.component.metadatas,
-    { configurations: data.components, schemas: components }
-  );
-
-  const componentEditAttributes = Object.entries(data.components).reduce<EditLayout['components']>(
-    (acc, [uid, configuration]) => {
-      acc[uid] = {
-        layout: convertEditLayoutToFieldLayouts(
-          configuration.layouts.edit,
-          components[uid].attributes,
-          configuration.metadatas
-        ),
-        settings: {
-          ...configuration.settings,
-          icon: components[uid].info.icon,
-          displayName: components[uid].info.displayName,
-        },
-      };
-      return acc;
-    },
-    {}
-  );
-
-  const editMetadatas = Object.entries(data.component.metadatas).reduce<EditLayout['metadatas']>(
-    (acc, [attribute, metadata]) => {
-      return {
-        ...acc,
-        [attribute]: metadata.edit,
-      };
-    },
-    {}
-  );
-
-  return {
-    layout: [editAttributes],
-    components: componentEditAttributes,
-    metadatas: editMetadatas,
-    options: {
-      ...schema?.options,
-      ...schema?.pluginOptions,
-    },
-    settings: {
-      ...data.component.settings,
-      displayName: schema?.info.displayName,
-    },
-  };
 };
 
 /* -------------------------------------------------------------------------------------------------

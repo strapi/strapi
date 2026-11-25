@@ -1,7 +1,8 @@
-import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect } from '../fixtures';
 import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
 import { rowHeight } from '@strapi/admin/admin/src/pages/Settings/pages/Roles/utils/constants';
 
@@ -127,6 +128,7 @@ export interface CreateContentTypeOptions {
   name: string;
   singularId?: string;
   pluralId?: string;
+  folder?: string;
   attributes: AddAttribute[];
 }
 
@@ -392,7 +394,7 @@ export const addRelationAttribute = async (
     await page.locator('input[name="name"]').fill(name);
   }
 
-  await page.getByRole('button', { name: 'Finish' }).click();
+  await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
 };
 
 export const addComponentAttribute = async (
@@ -445,6 +447,8 @@ export const addComponentAttribute = async (
     }
 
     await addAttributes(page, attrCompOptions.attributes, { clickFinish: false, ...options });
+    // Inner addAttributes skips Finish on the last nested field when clickFinish is false; submit the component form here.
+    await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
   }
 };
 
@@ -458,16 +462,12 @@ export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZ
     page.getByRole('button', { name: new RegExp('Add components to the zone', 'i') })
   );
 
-  // Add the components to the dynamic zone
+  // Creating a DZ does not show a Finish control on the DZ modal (see FormModalEndActions); the
+  // add-component-to-DZ flow closes the modal when the component is done. Skip the outer Finish.
   await addAttributes(page, attribute.dz.components, {
-    fromDz: attribute.name, // Pass the DZ name to ensure subsequent components are added to the DZ
+    fromDz: attribute.name,
+    clickFinish: false,
   });
-
-  // Finish the dynamic zone creation
-  const finishButton = page.getByRole('button', { name: 'Finish' });
-  if (await finishButton.isVisible({ timeout: 0 })) {
-    await finishButton.click();
-  }
 };
 
 // Add contentTypeName to options interface
@@ -631,10 +631,16 @@ export const addAttributes = async (
           page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
         );
       }
-    } else {
-      // Last attribute, click 'Finish' only if it's visible
-      if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
-        await page.getByRole('button', { name: 'Finish' }).click({ force: true });
+    } else if (options?.clickFinish !== false) {
+      // Some attribute flows finalize themselves and leave no "Finish" on the CT field list:
+      //  - relation: addRelationAttribute clicks Finish internally,
+      //  - new component: addComponentAttribute clicks Finish once its first field is added,
+      //  - dynamic zone: adding its components closes the modal.
+      // Others (e.g. an existing `useExisting` component) do NOT, so the outer Finish is still
+      // required. Rather than encode every case, click Finish only when it is actually present.
+      const finishButton = page.getByRole('button', { name: 'Finish' });
+      if (await finishButton.isVisible({ timeout: 1000 })) {
+        await clickAndWait(page, finishButton);
       }
     }
   }
@@ -685,6 +691,12 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await saveAndVerifyContent(page, options);
 };
 
+export const startCreateContentType = async (page: Page, type: 'single' | 'collection') => {
+  const label = type === 'single' ? 'New Single-Type' : 'New Collection-Type';
+  await page.getByRole('button', { name: label }).click();
+  await page.getByRole('menuitem', { name: label }).click();
+};
+
 // Helper function for creating content types
 const createContentType = async (
   page: Page,
@@ -693,10 +705,9 @@ const createContentType = async (
 ) => {
   const { name, singularId, pluralId } = options;
 
-  const buttonName = type === 'single' ? 'Create new single type' : 'Create new collection type';
   const headingName = type === 'single' ? 'Create a single type' : 'Create a collection type';
 
-  await page.getByRole('button', { name: buttonName }).click();
+  await startCreateContentType(page, type);
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
   const displayName = page.getByLabel('Display name');
@@ -705,13 +716,18 @@ const createContentType = async (
   const singularIdField = page.getByLabel('API ID (Singular)');
   await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
   if (singularId) {
-    singularIdField.fill(singularId);
+    await singularIdField.fill(singularId);
   }
 
   const pluralIdField = page.getByLabel('API ID (Plural)');
   await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
   if (pluralId) {
-    pluralIdField.fill(pluralId);
+    await pluralIdField.fill(pluralId);
+  }
+
+  if (options.folder) {
+    await page.getByLabel('Select a folder or enter a value to create a new one').click();
+    await page.getByRole('option', { name: options.folder }).click();
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();

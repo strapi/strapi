@@ -1,25 +1,35 @@
-import type { Struct } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 import _ from 'lodash';
 import { hasDefaultAttribute } from '../../utils/typeguards';
 
-export const removeEmptyDefaults = (
-  data: Partial<Struct.ContentTypeSchema> | Partial<Struct.ComponentSchema> | undefined
-) => {
+// Runs before the payload is validated, so attributes are not yet known to be valid
+export const removeEmptyDefaults = (data: { attributes?: Record<string, unknown> } | undefined) => {
   const { attributes } = data || {};
 
-  Object.keys(attributes!).forEach((attributeName) => {
-    const attribute = attributes![attributeName];
+  // Leave attributes that are not an object to the validation, which rejects them
+  if (_.isPlainObject(attributes) === false) {
+    return;
+  }
 
-    if (hasDefaultAttribute(attribute) && attribute.default === '') {
+  Object.keys(attributes!).forEach((attributeName) => {
+    const attribute = attributes![attributeName] as Schema.Attribute.AnyAttribute;
+
+    if (
+      _.isPlainObject(attribute) === true &&
+      hasDefaultAttribute(attribute) &&
+      attribute.default === ''
+    ) {
       attribute.default = undefined;
     }
   });
 };
 
 export const removeDeletedUIDTargetFields = (data: Struct.ContentTypeSchema) => {
-  if (_.has(data, 'attributes')) {
+  // Leave attributes that are not an object to the validation, which rejects them
+  if (_.isPlainObject(data?.attributes) === true) {
     Object.values(data.attributes).forEach((attribute) => {
       if (
+        _.isPlainObject(attribute) === true &&
         attribute.type === 'uid' &&
         !_.isUndefined(attribute.targetField) &&
         !_.has(data.attributes, attribute.targetField)

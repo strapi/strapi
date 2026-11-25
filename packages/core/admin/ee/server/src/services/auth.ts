@@ -1,7 +1,11 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
-import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
+import {
+  assignResetPasswordToken,
+  assertResetPasswordTokenIsValid,
+  completePasswordReset,
+} from '../../../../server/src/services/auth';
 
 const { ApplicationError } = errors;
 /**
@@ -18,8 +22,7 @@ const forgotPassword = async ({ email }: any = {}) => {
     return;
   }
 
-  const resetPasswordToken = getService('token').createToken();
-  await getService('user').updateById(user.id, { resetPasswordToken });
+  const resetPasswordToken = await assignResetPasswordToken(user.id);
 
   // Send an email to the admin.
   const url = `${strapi.config.get(
@@ -61,10 +64,9 @@ const resetPassword = async ({ resetPasswordToken, password }: any = {}) => {
     throw new ApplicationError();
   }
 
-  return getService('user').updateById(matchingUser.id, {
-    password,
-    resetPasswordToken: null,
-  });
+  await assertResetPasswordTokenIsValid(matchingUser);
+
+  return completePasswordReset(matchingUser, password);
 };
 
 export default {

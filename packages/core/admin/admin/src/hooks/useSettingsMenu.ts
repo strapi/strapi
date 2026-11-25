@@ -3,9 +3,10 @@ import * as React from 'react';
 import sortBy from 'lodash/sortBy';
 import { useSelector } from 'react-redux';
 
+import { useIsAuditLogsDisabledByConfig } from '../../../ee/admin/src/hooks/useIsAuditLogsDisabledByConfig';
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
-import { useAuth } from '../features/Auth';
+import { getAdminUserId, useAuth } from '../features/Auth';
 import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
@@ -66,13 +67,18 @@ const useSettingsMenu = (): {
     isLoading: true,
     menu: [],
   });
+  const isLoadingAuth = useAuth('useSettingsMenu', (state) => state.isLoading);
   const checkUserHasPermission = useAuth(
     'useSettingsMenu',
     (state) => state.checkUserHasPermissions
   );
+  const adminUserId = useAuth('useSettingsMenu', (state) => getAdminUserId(state.user));
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
-  const settings = useStrapiApp('useSettingsMenu', (state) => state.settings);
+  const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
+  const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
+  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+  const resolvedPermissionsRef = React.useRef(permissions);
 
   /**
    * memoize the return value of this function to avoid re-computing it on every render
@@ -97,6 +103,8 @@ const useSettingsMenu = (): {
     }
   );
 
+  const { isDisabledByConfig: isAuditLogsDisabledByConfig } = useIsAuditLogsDisabledByConfig();
+
   const addPermissions = React.useCallback(
     (link: SettingsMenuLink) => {
       if (!link.id) {
@@ -112,6 +120,12 @@ const useSettingsMenu = (): {
   );
 
   React.useEffect(() => {
+    if (isLoadingAuth) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
     const getData = async () => {
       interface MenuLinkPermission {
         hasPermission: boolean;
@@ -134,26 +148,30 @@ const useSettingsMenu = (): {
 
       const menuPermissions = await buildMenuPermissions(sections);
 
-      setData((prev) => {
-        return {
-          ...prev,
-          isLoading: false,
-          menu: sections.map((section, sectionIndex) => ({
-            ...section,
-            links: section.links.map((link, linkIndex) => {
-              const permission = menuPermissions.find(
-                (permission) =>
-                  permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
-              );
+      if (!cancelled) {
+        resolvedAdminUserIdRef.current = adminUserId;
+        resolvedPermissionsRef.current = permissions;
+        setData((prev) => {
+          return {
+            ...prev,
+            isLoading: false,
+            menu: sections.map((section, sectionIndex) => ({
+              ...section,
+              links: section.links.map((link, linkIndex) => {
+                const permission = menuPermissions.find(
+                  (permission) =>
+                    permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
+                );
 
-              return {
-                ...link,
-                isDisplayed: Boolean(permission?.hasPermission),
-              };
-            }),
-          })),
-        };
-      });
+                return {
+                  ...link,
+                  isDisplayed: Boolean(permission?.hasPermission),
+                };
+              }),
+            })),
+          };
+        });
+      }
     };
 
     const { global, ...otherSections } = settings;
@@ -170,20 +188,41 @@ const useSettingsMenu = (): {
       {
         id: 'permissions',
         intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
-        links: adminLinks.map(addPermissions),
+        links: adminLinks
+          .filter((link) => isAuditLogsDisabledByConfig === false || link.id !== 'auditLogs')
+          .map(addPermissions),
       },
       ...Object.values(otherSections),
     ]);
 
-    getData();
+    void getData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     adminLinks,
     globalLinks,
+    isAuditLogsDisabledByConfig,
     settings,
     shouldUpdateStrapi,
     addPermissions,
     checkUserHasPermission,
+    adminUserId,
+    isLoadingAuth,
+    permissions,
   ]);
+
+  if (
+    isLoadingAuth ||
+    resolvedAdminUserIdRef.current !== adminUserId ||
+    resolvedPermissionsRef.current !== permissions
+  ) {
+    return {
+      isLoading: true,
+      menu: [],
+    };
+  }
 
   return {
     isLoading,
@@ -194,5 +233,90 @@ const useSettingsMenu = (): {
   };
 };
 
-export { useSettingsMenu };
+const normalizeSettingsLink = (
+  link: unknown
+): (SettingsMenuLinkWithPermissions | StrapiAppSettingsLink) | null => {
+  if (!link || typeof link !== 'object') {
+    return null;
+  }
+
+  const candidate = link as Partial<SettingsMenuLinkWithPermissions | StrapiAppSettingsLink>;
+
+  if (
+    !candidate.id ||
+    typeof candidate.to !== 'string' ||
+    !candidate.intlLabel?.id ||
+    !candidate.intlLabel.defaultMessage
+  ) {
+    return null;
+  }
+
+  return {
+    ...candidate,
+    permissions: Array.isArray(candidate.permissions) ? candidate.permissions : [],
+  } as SettingsMenuLinkWithPermissions | StrapiAppSettingsLink;
+};
+
+const normalizeSettingsSection = (section: unknown): SettingsMenuSection | null => {
+  if (!section || typeof section !== 'object') {
+    return null;
+  }
+
+  const candidate = section as Partial<SettingsMenuSection>;
+
+  if (!candidate.id || !candidate.intlLabel?.id || !candidate.intlLabel.defaultMessage) {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    intlLabel: candidate.intlLabel,
+    links: Array.isArray(candidate.links)
+      ? candidate.links.map(normalizeSettingsLink).filter(isSettingsLink)
+      : [],
+  };
+};
+
+const isSettingsLink = (
+  link: ReturnType<typeof normalizeSettingsLink>
+): link is SettingsMenuLinkWithPermissions | StrapiAppSettingsLink => {
+  return link !== null;
+};
+
+const normalizeSettings = (settings: unknown): Record<string, SettingsMenuSection> => {
+  const defaultGlobal: SettingsMenuSection = {
+    id: 'global',
+    intlLabel: {
+      id: 'Settings.global',
+      defaultMessage: 'Global Settings',
+    },
+    links: [],
+  };
+
+  if (!settings || typeof settings !== 'object') {
+    return {
+      global: defaultGlobal,
+    };
+  }
+
+  const normalizedSections = Object.entries(settings).reduce<Record<string, SettingsMenuSection>>(
+    (acc, [key, section]) => {
+      const normalizedSection = normalizeSettingsSection(section);
+
+      if (normalizedSection) {
+        acc[key] = normalizedSection;
+      }
+
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    ...normalizedSections,
+    global: normalizedSections.global ?? defaultGlobal,
+  };
+};
+
+export { useSettingsMenu, normalizeSettings };
 export type { SettingsMenu };

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../../fixtures';
 
 import { sharedSetup } from '../../../../../utils/setup';
 import { navToHeader, clickAndWait } from '../../../../../utils/shared';
@@ -10,7 +10,7 @@ test.describe('RBAC - See Roles', () => {
     await sharedSetup('rbac-see-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Roles management page

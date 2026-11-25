@@ -361,7 +361,6 @@ describe('Sort', () => {
       {
         body: { data: { primary: cat('d').id } },
         qs: {
-          filter: { title: articleToModify.title },
           sort: 'categories.name',
           populate: 'categories',
         },
@@ -380,7 +379,6 @@ describe('Sort', () => {
       `/${schemas.contentTypes.article.pluralName}/${articleToDelete.documentId}`,
       {
         qs: {
-          filter: { title: articleToDelete.title },
           sort: 'categories.name',
           populate: 'categories',
         },

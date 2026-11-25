@@ -1,101 +1,143 @@
-import { createEntityManager } from '..';
+import { createEntityManager } from '../index';
+import { createQueryBuilder } from '../../query';
+import { deleteRelations } from '../regular-relations';
 
-describe('deleteMany', () => {
-  test('cleans up relations for each deleted entity', async () => {
-    const commitMock = jest.fn();
-    const rollbackMock = jest.fn();
-    const transactionMock = jest.fn().mockResolvedValue({
-      get: () => 'trx',
-      commit: commitMock,
-      rollback: rollbackMock,
-    });
+jest.mock('../../query', () => ({
+  createQueryBuilder: jest.fn(),
+}));
 
-    const executeMock = jest.fn();
-    const initMock = jest.fn().mockReturnValue({ execute: executeMock });
-    const deleteMock = jest.fn().mockReturnValue({ execute: executeMock });
-    const whereMock = jest.fn().mockReturnValue({ delete: deleteMock });
-    const createQueryBuilderMock = jest.fn().mockReturnValue({
-      init: initMock,
-      where: whereMock,
-    });
+jest.mock('../regular-relations', () => ({
+  ...jest.requireActual('../regular-relations'),
+  deleteRelations: jest.fn(async () => undefined),
+}));
 
-    const lifecycleRunMock = jest.fn().mockResolvedValue({});
-    const deleteRelationsMock = jest.fn().mockResolvedValue(undefined);
+const LINK_UID = 'monster.links';
 
-    const db = {
-      metadata: { get: jest.fn().mockReturnValue({ attributes: {} }) },
-      lifecycles: { run: lifecycleRunMock },
-      transaction: transactionMock,
-    } as any;
+const createBuilder = () => {
+  const builder: Record<string, jest.Mock> = {};
+  for (const method of ['select', 'delete', 'update', 'where', 'transacting']) {
+    builder[method] = jest.fn(() => builder);
+  }
+  builder.execute = jest.fn(async () => undefined);
 
-    const strapi = { db: { transaction: transactionMock } } as any;
-    (global as any).strapi = strapi;
+  return builder;
+};
 
-    const em = createEntityManager(db);
+const linkModel = {
+  uid: LINK_UID,
+  attributes: {
+    title: { type: 'string' },
+    // one-way to-many: one statement for every id
+    tags: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::tag.tag',
+      joinTable: {
+        name: 'links_tags_lnk',
+        joinColumn: { name: 'links_id', referencedColumn: 'id' },
+        inverseJoinColumn: { name: 'tag_id', referencedColumn: 'id' },
+        orderColumnName: 'tag_ord',
+      },
+    },
+    // bidirectional: the other side keeps an order column, handled id by id
+    categories: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::category.category',
+      inversedBy: 'links',
+      joinTable: {
+        name: 'links_categories_lnk',
+        joinColumn: { name: 'links_id', referencedColumn: 'id' },
+        inverseJoinColumn: { name: 'category_id', referencedColumn: 'id' },
+        orderColumnName: 'category_ord',
+        inverseOrderColumnName: 'links_ord',
+      },
+    },
+    // polymorphic owner side (dynamic zone like)
+    blocks: {
+      type: 'relation',
+      relation: 'morphToMany',
+      joinTable: {
+        name: 'links_cmps',
+        joinColumn: { name: 'entity_id', referencedColumn: 'id' },
+        on: { field: 'blocks' },
+      },
+    },
+  },
+};
 
-    // Mock internal methods
-    em.createQueryBuilder = createQueryBuilderMock;
-    em.deleteRelations = deleteRelationsMock;
+const createDb = ({ usesForeignKeys = false } = {}) =>
+  ({
+    metadata: { get: jest.fn(() => linkModel) },
+    dialect: { usesForeignKeys: jest.fn(() => usesForeignKeys) },
+    lifecycles: { run: jest.fn(async () => undefined) },
+  }) as any;
 
-    // First call (init select) returns entity IDs
-    executeMock
-      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }, { id: 3 }])
-      // Second call (delete) returns count
-      .mockResolvedValueOnce(3);
-
-    const result = await em.deleteMany('api::article.article', {
-      where: { publishedAt: null },
-    });
-
-    expect(result).toEqual({ count: 3 });
-
-    // Verify IDs were fetched before deletion
-    expect(initMock).toHaveBeenCalledWith({
-      select: ['id'],
-      where: { publishedAt: null },
-    });
-
-    // Verify relations were cleaned up for each entity
-    expect(deleteRelationsMock).toHaveBeenCalledTimes(3);
-    expect(deleteRelationsMock).toHaveBeenCalledWith('api::article.article', 1, {
-      transaction: 'trx',
-    });
-    expect(deleteRelationsMock).toHaveBeenCalledWith('api::article.article', 2, {
-      transaction: 'trx',
-    });
-    expect(deleteRelationsMock).toHaveBeenCalledWith('api::article.article', 3, {
-      transaction: 'trx',
-    });
-
-    expect(commitMock).toHaveBeenCalled();
-    expect(rollbackMock).not.toHaveBeenCalled();
+describe('entity-manager deleteManyRelations', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('skips relation cleanup when no entities match', async () => {
-    const transactionMock = jest.fn();
-    const executeMock = jest.fn();
-    const initMock = jest.fn().mockReturnValue({ execute: executeMock });
-    const deleteMock = jest.fn().mockReturnValue({ execute: executeMock });
-    const whereMock = jest.fn().mockReturnValue({ delete: deleteMock });
+  it('does nothing without ids', async () => {
+    const db = createDb();
 
-    const db = {
-      metadata: { get: jest.fn().mockReturnValue({ attributes: {} }) },
-      lifecycles: { run: jest.fn().mockResolvedValue({}) },
-      transaction: transactionMock,
-    } as any;
+    await createEntityManager(db).deleteManyRelations(LINK_UID, []);
 
-    const em = createEntityManager(db);
-    em.createQueryBuilder = jest.fn().mockReturnValue({ init: initMock, where: whereMock });
-    em.deleteRelations = jest.fn();
+    expect(createQueryBuilder).not.toHaveBeenCalled();
+  });
 
-    executeMock.mockResolvedValueOnce([]).mockResolvedValueOnce(0);
+  it('removes the join rows of every id with one statement per attribute', async () => {
+    const builder = createBuilder();
+    (createQueryBuilder as jest.Mock).mockReturnValue(builder);
+    const db = createDb();
+    const trx = { id: 'trx' } as any;
 
-    const result = await em.deleteMany('api::article.article', {
-      where: { id: 999 },
+    await createEntityManager(db).deleteManyRelations(LINK_UID, [1, 2, 3], { transaction: trx });
+
+    // one-way join table and polymorphic join table: one delete each
+    expect(createQueryBuilder).toHaveBeenCalledWith('links_tags_lnk', db);
+    expect(createQueryBuilder).toHaveBeenCalledWith('links_cmps', db);
+    expect(builder.delete).toHaveBeenCalledTimes(2);
+    expect(builder.where).toHaveBeenCalledWith({ links_id: { $in: [1, 2, 3] } });
+    expect(builder.where).toHaveBeenCalledWith({ entity_id: { $in: [1, 2, 3] }, field: 'blocks' });
+    expect(builder.transacting).toHaveBeenCalledWith(trx);
+
+    // bidirectional: falls back to the per-entity deletion that renumbers the other side
+    expect(deleteRelations).toHaveBeenCalledTimes(3);
+    expect(deleteRelations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 2,
+        attribute: linkModel.attributes.categories,
+        relIdsToDelete: 'all',
+      })
+    );
+  });
+
+  it('cleans existing links during schema migration without querying new tables', async () => {
+    const builder = createBuilder();
+    (createQueryBuilder as jest.Mock).mockReturnValue(builder);
+    const em = createEntityManager(createDb());
+
+    await em.deleteManyRelations(LINK_UID, [1, 2], {
+      hasStorage: (table) => table === 'links_cmps',
     });
 
-    expect(result).toEqual({ count: 0 });
-    expect(transactionMock).not.toHaveBeenCalled();
-    expect(em.deleteRelations).not.toHaveBeenCalled();
+    expect(createQueryBuilder).toHaveBeenCalledTimes(1);
+    expect(createQueryBuilder).toHaveBeenCalledWith('links_cmps', expect.anything());
+    expect(builder.where).toHaveBeenCalledWith({ entity_id: { $in: [1, 2] }, field: 'blocks' });
+    expect(deleteRelations).not.toHaveBeenCalled();
+  });
+
+  it('leaves the join tables to the foreign keys when the dialect has them', async () => {
+    const builder = createBuilder();
+    (createQueryBuilder as jest.Mock).mockReturnValue(builder);
+    const db = createDb({ usesForeignKeys: true });
+
+    await createEntityManager(db).deleteManyRelations(LINK_UID, [1, 2]);
+
+    // the polymorphic join rows have no foreign key, they are still removed
+    expect(createQueryBuilder).toHaveBeenCalledTimes(1);
+    expect(createQueryBuilder).toHaveBeenCalledWith('links_cmps', db);
+    expect(deleteRelations).not.toHaveBeenCalled();
   });
 });

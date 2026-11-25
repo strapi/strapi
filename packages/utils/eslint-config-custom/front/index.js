@@ -1,4 +1,8 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
+  reportUnusedDisableDirectives: true,
   parser: '@babel/eslint-parser',
   extends: ['@strapi/eslint-config/front/javascript'],
   env: {
@@ -67,3 +71,5 @@ module.exports = {
     ],
   },
 };
+
+module.exports = config;

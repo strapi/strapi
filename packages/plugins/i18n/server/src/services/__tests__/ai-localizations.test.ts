@@ -1,6 +1,6 @@
-import type { Schema, UID } from '@strapi/types';
+import type { Core, Modules, Schema, UID } from '@strapi/types';
 
-import { mergeUnsupportedFields } from '../ai-localizations';
+import { createAILocalizationsService, mergeUnsupportedFields } from '../ai-localizations';
 
 describe('ai-localizations service', () => {
   describe('mergeUnsupportedFields', () => {
@@ -43,6 +43,7 @@ describe('ai-localizations service', () => {
     ): Schema.Schema => {
       return {
         modelType: 'contentType',
+        kind: 'collectionType',
         uid: 'api::test.test',
         modelName: 'test',
         globalId: 'Test',
@@ -515,6 +516,387 @@ describe('ai-localizations service', () => {
         expect(result.blocks[0].sectionBackground).toBe('blue');
         expect(result.blocks[1].metaTitle).toBe('Translated Meta');
         expect(result.blocks[1].ogImage).toEqual({ id: 2, url: '/og.jpg' });
+      });
+    });
+  });
+
+  describe('generateDocumentLocalizations - issue #26579 (maxLength constraints)', () => {
+    const MODEL = 'api::article.article' as UID.ContentType;
+
+    const buildSchema = (): Schema.Schema =>
+      ({
+        modelType: 'contentType',
+        uid: MODEL,
+        modelName: 'article',
+        globalId: 'Article',
+        info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+        options: { draftAndPublish: true },
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          title: {
+            type: 'string',
+            pluginOptions: { i18n: { localized: true } },
+          },
+          description: {
+            type: 'text',
+            maxLength: 80,
+            minLength: 10,
+            pluginOptions: { i18n: { localized: true } },
+          },
+        },
+      }) as unknown as Schema.Schema;
+
+    const buildMockStrapi = (schema: Schema.Schema) => {
+      const jobsService = { upsertJobForDocument: jest.fn().mockResolvedValue(undefined) };
+      const settingsService = {
+        getSettings: jest.fn().mockResolvedValue({ aiLocalizations: true }),
+      };
+      const contentTypesService = { isLocalizedContentType: jest.fn().mockReturnValue(true) };
+      const localesService = {
+        getDefaultLocale: jest.fn().mockResolvedValue('en'),
+        find: jest.fn().mockResolvedValue([{ code: 'en' }, { code: 'pt-BR' }, { code: 'fr' }]),
+      };
+
+      const documentsApi = {
+        findOne: jest.fn().mockResolvedValue({
+          documentId: 'doc1',
+          title: 'Some title',
+          description: 'Some description',
+        }),
+        update: jest.fn().mockResolvedValue({}),
+      };
+
+      const generateTranslations = jest.fn();
+
+      const mockStrapi = {
+        getModel: jest.fn(() => schema),
+        documents: jest.fn(() => documentsApi),
+        plugins: {
+          i18n: {
+            services: {
+              'ai-localization-jobs': jobsService,
+              'ai-translations': {
+                hasProvider: () => true,
+                generateTranslations,
+              },
+              settings: settingsService,
+              'content-types': contentTypesService,
+              locales: localesService,
+            },
+          },
+          'content-manager': {
+            services: {
+              'populate-builder': () => ({
+                populateDeep: () => ({ build: async () => ({}) }),
+              }),
+            },
+          },
+        },
+        ai: {
+          admin: {
+            isStrapiManagedAiEnabled: jest.fn(() => true),
+            getAiToken: jest.fn().mockResolvedValue({ token: 'test-token' }),
+          },
+        },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() },
+      };
+
+      return { mockStrapi, jobsService, documentsApi, generateTranslations };
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      delete (global as any).fetch;
+      // global.strapi is a non-configurable accessor from unit.setup — cannot delete;
+      // each test reassigns its mock.
+    });
+
+    it('forwards maxLength/minLength to the AI so translations can respect the limit', async () => {
+      const schema = buildSchema();
+      const { mockStrapi, generateTranslations } = buildMockStrapi(schema);
+
+      (global as any).strapi = mockStrapi;
+
+      generateTranslations.mockResolvedValue({
+        localizations: [
+          { locale: 'pt-BR', content: { title: 'Título', description: 'Descrição' } },
+          { locale: 'fr', content: { title: 'Titre', description: 'Description' } },
+        ],
+      });
+
+      const service = createAILocalizationsService({ strapi: mockStrapi as any });
+
+      await service.generateDocumentLocalizations({
+        model: MODEL,
+        document: {
+          documentId: 'doc1',
+          locale: 'en',
+          title: 'With Teltec Data support',
+          description:
+            'With Teltec Data support, this Brazilian publisher cut costs and improved a lot.',
+        } as any,
+      });
+
+      expect(generateTranslations).toHaveBeenCalledTimes(1);
+      const [input] = generateTranslations.mock.calls[0];
+
+      expect(input.contentTypeSchema.description).toMatchObject({
+        type: 'text',
+        maxLength: 80,
+        minLength: 10,
+      });
+    });
+
+    it('persists valid locales even if another locale fails validation, and reports which locale failed', async () => {
+      const schema = buildSchema();
+      const { mockStrapi, jobsService, documentsApi, generateTranslations } =
+        buildMockStrapi(schema);
+      (global as any).strapi = mockStrapi;
+
+      documentsApi.update.mockImplementation(async ({ locale }: { locale: string }) => {
+        if (locale === 'fr') {
+          throw new Error('description must be at most 80 characters');
+        }
+        return {};
+      });
+
+      generateTranslations.mockResolvedValue({
+        localizations: [
+          { locale: 'pt-BR', content: { title: 'Título', description: 'curto' } },
+          {
+            locale: 'fr',
+            content: {
+              title: 'Titre',
+              description: 'a'.repeat(103), // exceeds maxLength 80
+            },
+          },
+        ],
+      });
+
+      const errorSpy = mockStrapi.log.error;
+      const service = createAILocalizationsService({ strapi: mockStrapi as any });
+
+      await service.generateDocumentLocalizations({
+        model: MODEL,
+        document: {
+          documentId: 'doc1',
+          locale: 'en',
+          title: 'A title',
+          description: 'A source description that expands when translated.',
+        } as any,
+      });
+
+      const updatedLocales = documentsApi.update.mock.calls.map((c: any[]) => c[0].locale);
+      expect(updatedLocales).toContain('pt-BR');
+
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/"fr".*80 characters/));
+
+      const lastJobStatus = jobsService.upsertJobForDocument.mock.calls.at(-1)?.[0]?.status;
+      expect(lastJobStatus).toBe('failed');
+    });
+  });
+
+  /**
+   * The document middleware hands the `next()` result of every `create` and `update` to
+   * `generateDocumentLocalizations`. The document shapes below are what the document service
+   * returns at runtime (getstarted app, SQLite):
+   * - non-localized content types: `locale: null` (i18n adds the column to every content type)
+   * - `update` of a document that does not exist: `null`
+   * - `create`/`update` with a `fields` selection that leaves out `locale`: no `locale` key
+   */
+  describe('documents without a string locale', () => {
+    const MODEL = 'api::article.article' as UID.ContentType;
+
+    const schema = {
+      modelType: 'contentType',
+      kind: 'collectionType',
+      uid: MODEL,
+      modelName: 'article',
+      globalId: 'Article',
+      info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+      options: { draftAndPublish: true },
+      pluginOptions: { i18n: { localized: true } },
+      attributes: {
+        title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+      },
+    } as unknown as Schema.Schema;
+
+    const buildMockStrapi = ({
+      isLocalizedContentType = true,
+      defaultLocale = 'en',
+    }: { isLocalizedContentType?: boolean; defaultLocale?: string | null } = {}) => {
+      const jobsService = { upsertJobForDocument: jest.fn().mockResolvedValue(undefined) };
+      const generateTranslations = jest.fn().mockResolvedValue({
+        localizations: [{ locale: 'fr', content: { title: 'Titre' } }],
+      });
+      const documentsApi = {
+        findOne: jest.fn().mockResolvedValue({ documentId: 'doc1', title: 'Title' }),
+        update: jest.fn().mockResolvedValue({}),
+      };
+      const documents = Object.assign(
+        jest.fn(() => documentsApi),
+        { use: jest.fn() }
+      );
+      const aiLocalizationsService = {
+        generateDocumentLocalizations: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const mockStrapi = {
+        getModel: jest.fn(() => schema),
+        documents,
+        plugins: {
+          i18n: {
+            services: {
+              'ai-localization-jobs': jobsService,
+              'ai-localizations': aiLocalizationsService,
+              'ai-translations': { hasProvider: () => true, generateTranslations },
+              settings: { getSettings: jest.fn().mockResolvedValue({ aiLocalizations: true }) },
+              'content-types': {
+                isLocalizedContentType: jest.fn().mockReturnValue(isLocalizedContentType),
+              },
+              locales: {
+                getDefaultLocale: jest.fn().mockResolvedValue(defaultLocale),
+                find: jest.fn().mockResolvedValue([{ code: 'en' }, { code: 'fr' }]),
+              },
+            },
+          },
+          'content-manager': {
+            services: {
+              'populate-builder': () => ({
+                populateDeep: () => ({ build: async () => ({}) }),
+              }),
+            },
+          },
+        },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      };
+
+      (global as unknown as { strapi: unknown }).strapi = mockStrapi;
+      const service = createAILocalizationsService({
+        strapi: mockStrapi as unknown as Core.Strapi,
+      });
+
+      return {
+        service,
+        documents,
+        jobsService,
+        generateTranslations,
+        documentsApi,
+        aiLocalizationsService,
+      };
+    };
+
+    describe('document middleware', () => {
+      const runMiddleware = async (action: string, result: unknown) => {
+        const { service, documents, aiLocalizationsService } = buildMockStrapi();
+        service.setupMiddleware();
+
+        const [middleware] = documents.use.mock.calls[0];
+        const returned = await middleware(
+          { action, contentType: { uid: MODEL }, uid: MODEL, params: {} },
+          async () => result
+        );
+
+        return { returned, aiLocalizationsService };
+      };
+
+      it.each(['create', 'update'])(
+        'hands the %s result to generateDocumentLocalizations as is',
+        async (action) => {
+          const result = { id: 1, documentId: 'doc1', locale: null };
+          const { returned, aiLocalizationsService } = await runMiddleware(action, result);
+
+          expect(returned).toBe(result);
+          expect(aiLocalizationsService.generateDocumentLocalizations).toHaveBeenCalledWith({
+            model: MODEL,
+            document: result,
+          });
+        }
+      );
+
+      it.each([
+        'findOne',
+        'findFirst',
+        'findMany',
+        'count',
+        'delete',
+        'clone',
+        'publish',
+        'unpublish',
+        'discardDraft',
+      ])('does not generate localizations for %s', async (action) => {
+        const { aiLocalizationsService } = await runMiddleware(action, { documentId: 'doc1' });
+
+        expect(aiLocalizationsService.generateDocumentLocalizations).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('generateDocumentLocalizations', () => {
+      it.each<{ name: string; isLocalizedContentType: boolean; document: unknown }>([
+        {
+          name: 'a document of a non-localized content type (locale: null)',
+          isLocalizedContentType: false,
+          document: { id: 1, documentId: 'doc1', name: 'Tag', locale: null },
+        },
+        {
+          name: 'the null result of updating a missing document',
+          isLocalizedContentType: true,
+          document: null,
+        },
+        {
+          name: 'a document selected with fields: [] (no locale key)',
+          isLocalizedContentType: true,
+          document: { id: 1, documentId: 'doc1' },
+        },
+        {
+          name: 'a default-locale document selected with fields: ["title"] (no locale key)',
+          isLocalizedContentType: true,
+          document: { id: 1, documentId: 'doc1', title: 'Title' },
+        },
+      ])('does nothing for $name', async ({ isLocalizedContentType, document }) => {
+        const { service, jobsService, generateTranslations, documentsApi } = buildMockStrapi({
+          isLocalizedContentType,
+        });
+
+        await service.generateDocumentLocalizations({
+          model: MODEL,
+          document: document as Modules.Documents.AnyDocument,
+        });
+
+        expect(jobsService.upsertJobForDocument).not.toHaveBeenCalled();
+        expect(generateTranslations).not.toHaveBeenCalled();
+        expect(documentsApi.update).not.toHaveBeenCalled();
+      });
+
+      it('does nothing for a document without a string locale when no default locale is stored', async () => {
+        const { service, jobsService, generateTranslations, documentsApi } = buildMockStrapi({
+          defaultLocale: null,
+        });
+
+        await service.generateDocumentLocalizations({
+          model: MODEL,
+          document: { id: 1, documentId: 'doc1', title: 'Title', locale: null },
+        });
+
+        expect(jobsService.upsertJobForDocument).not.toHaveBeenCalled();
+        expect(generateTranslations).not.toHaveBeenCalled();
+        expect(documentsApi.update).not.toHaveBeenCalled();
+      });
+
+      it('still translates a document in the default locale', async () => {
+        const { service, generateTranslations, documentsApi } = buildMockStrapi();
+
+        await service.generateDocumentLocalizations({
+          model: MODEL,
+          document: { id: 1, documentId: 'doc1', title: 'Title', locale: 'en' },
+        });
+
+        expect(generateTranslations).toHaveBeenCalledWith(
+          expect.objectContaining({ sourceLocale: 'en', targetLocales: ['fr'] })
+        );
+        expect(documentsApi.update).toHaveBeenCalledWith(
+          expect.objectContaining({ documentId: 'doc1', locale: 'fr' })
+        );
       });
     });
   });

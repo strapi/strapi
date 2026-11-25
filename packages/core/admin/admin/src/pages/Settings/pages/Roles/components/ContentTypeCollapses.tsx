@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import { styled, DefaultTheme } from 'styled-components';
 
 import { Action, Subject } from '../../../../../../../shared/contracts/permissions';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -24,6 +25,11 @@ import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
 import { HiddenAction } from './HiddenAction';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
+
+const EMPTY_ACTIONS: NonNullable<ContentTypeCollapsesProps['actions']> = [];
+const EMPTY_SUBJECTS: NonNullable<ContentTypeCollapsesProps['subjects']> = [];
+const EMPTY_AVAILABLE_ACTIONS: NonNullable<CollapseProps['availableActions']> = [];
 
 /* -------------------------------------------------------------------------------------------------
  * ContentTypeCollapses
@@ -36,10 +42,10 @@ interface ContentTypeCollapsesProps extends Pick<CollapseProps, 'pathToData'> {
 }
 
 const ContentTypeCollapses = ({
-  actions = [],
+  actions = EMPTY_ACTIONS,
   isFormDisabled,
   pathToData,
-  subjects = [],
+  subjects = EMPTY_SUBJECTS,
 }: ContentTypeCollapsesProps) => {
   const [collapseToOpen, setCollapseToOpen] = React.useState<string | null>(null);
 
@@ -49,14 +55,22 @@ const ContentTypeCollapses = ({
     setCollapseToOpen(nextCollapseToOpen);
   };
 
-  return (
-    <>
-      {subjects.map(({ uid, label, properties }, index) => {
-        const isActive = collapseToOpen === uid;
+  const subjectsWithActions = React.useMemo(
+    () =>
+      subjects.map(({ uid, label, properties }) => {
         const availableActions = actions.map((action) => ({
           ...action,
           isDisplayed: Array.isArray(action.subjects) && action.subjects.indexOf(uid) !== -1,
         }));
+        return { uid, label, properties, availableActions };
+      }),
+    [subjects, actions]
+  );
+
+  return (
+    <>
+      {subjectsWithActions.map(({ uid, label, properties, availableActions }, index) => {
+        const isActive = collapseToOpen === uid;
         return (
           <Flex
             key={uid}
@@ -74,6 +88,7 @@ const ContentTypeCollapses = ({
               label={label}
               onClickToggle={handleClickToggleCollapse(uid)}
               pathToData={[pathToData, uid].join('..')}
+              subject={uid}
             />
             {isActive &&
               properties.map(({ label: propertyLabel, value, children: childrenForm }) => {
@@ -86,6 +101,7 @@ const ContentTypeCollapses = ({
                     pathToData={[pathToData, uid].join('..')}
                     propertyName={value}
                     key={value}
+                    subject={uid}
                   />
                 );
               })}
@@ -100,26 +116,35 @@ const ContentTypeCollapses = ({
  * Collapse
  * -----------------------------------------------------------------------------------------------*/
 
-interface CollapseProps
-  extends Pick<RowLabelWithCheckboxProps, 'isActive' | 'isFormDisabled' | 'label'> {
+interface CollapseProps extends Pick<
+  RowLabelWithCheckboxProps,
+  'isActive' | 'isFormDisabled' | 'label'
+> {
   availableActions?: Array<Action & { isDisplayed: boolean }>;
   isGrey?: boolean;
   onClickToggle: RowLabelWithCheckboxProps['onClick'];
   pathToData: string;
+  subject: string;
 }
 
 const Collapse = ({
-  availableActions = [],
+  availableActions = EMPTY_AVAILABLE_ACTIONS,
   isActive = false,
   isGrey = false,
   isFormDisabled = false,
   label,
   onClickToggle,
   pathToData,
+  subject,
 }: CollapseProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
-    usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+    checkUserHasPermission,
+    inheritConditions,
+  } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
 
   // This corresponds to the data related to the CT left checkbox
@@ -184,6 +209,8 @@ const Collapse = ({
                 label: permissionLabel,
               } = restAction as VisibleCheckboxAction;
 
+              const userHasPermission = checkUserHasPermission(actionId, subject);
+
               if (isParentCheckbox) {
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
@@ -200,27 +227,32 @@ const Collapse = ({
                           background="primary600"
                         />
                       )}
-                      <Checkbox
-                        disabled={isFormDisabled}
-                        name={checkboxName}
-                        aria-label={formatMessage(
-                          {
-                            id: `Settings.permissions.select-by-permission`,
-                            defaultMessage: 'Select {label} permission',
-                          },
-                          { label: `${permissionLabel} ${label}` }
-                        )}
-                        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                        onCheckedChange={(value) => {
-                          onChangeParentCheckbox({
-                            target: {
-                              name: checkboxName,
-                              value: !!value,
+                      <UnheldPermissionTooltip
+                        isFormDisabled={isFormDisabled}
+                        userHasPermission={userHasPermission}
+                      >
+                        <Checkbox
+                          disabled={isFormDisabled || !userHasPermission}
+                          name={checkboxName}
+                          aria-label={formatMessage(
+                            {
+                              id: `Settings.permissions.select-by-permission`,
+                              defaultMessage: 'Select {label} permission',
                             },
-                          });
-                        }}
-                        checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
-                      />
+                            { label: `${permissionLabel} ${label}` }
+                          )}
+                          // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                          onCheckedChange={(value) => {
+                            onChangeParentCheckbox({
+                              target: {
+                                name: checkboxName,
+                                value: !!value,
+                              },
+                            });
+                          }}
+                          checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
+                        />
+                      </UnheldPermissionTooltip>
                     </Box>
                   </Cell>
                 );
@@ -240,20 +272,25 @@ const Collapse = ({
                       background="primary600"
                     />
                   )}
-                  <Checkbox
-                    disabled={isFormDisabled}
-                    name={checkboxName}
-                    // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onCheckedChange={(value) => {
-                      onChangeSimpleCheckbox({
-                        target: {
-                          name: checkboxName,
-                          value: !!value,
-                        },
-                      });
-                    }}
-                    checked={hasConditions ? 'indeterminate' : hasAllActionsSelected}
-                  />
+                  <UnheldPermissionTooltip
+                    isFormDisabled={isFormDisabled}
+                    userHasPermission={userHasPermission}
+                  >
+                    <Checkbox
+                      disabled={isFormDisabled || !userHasPermission}
+                      name={checkboxName}
+                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                      onCheckedChange={(value) => {
+                        onChangeSimpleCheckbox({
+                          target: {
+                            name: checkboxName,
+                            value: !!value,
+                          },
+                        });
+                      }}
+                      checked={hasConditions ? 'indeterminate' : hasAllActionsSelected}
+                    />
+                  </UnheldPermissionTooltip>
                 </Cell>
               );
             }
@@ -261,12 +298,7 @@ const Collapse = ({
         </Flex>
       </Wrapper>
       <Box bottom="10px" right="9px" position="absolute">
-        <Modal.Root
-          open={isConditionModalOpen}
-          onOpenChange={() => {
-            setIsConditionModalOpen((prev) => !prev);
-          }}
-        >
+        <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
           <Modal.Trigger>
             <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
           </Modal.Trigger>
@@ -274,11 +306,12 @@ const Collapse = ({
             headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
+            isReadOnly={inheritConditions}
             onClose={() => {
               setIsConditionModalOpen(false);
             }}
           />
-        </Modal.Root>
+        </UnsavedChangesModal>
       </Box>
     </BoxWrapper>
   );

@@ -23,6 +23,7 @@ import type {
   Unpublish,
   Update,
 } from '../../../shared/contracts/collection-types';
+import type { MoveDocument } from '../../../shared/contracts/custom-order';
 
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
@@ -176,14 +177,15 @@ const documentApi = contentManagerApi.injectEndpoints({
         Partial<Pick<Discard.Params, 'documentId'>> & {
           collectionType: string;
           params?: Find.Request['query'] & {
-            [key: string]: any;
+            [key: string]: unknown;
           };
         }
     >({
       query: ({ collectionType, model, documentId, params }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
-          : `/content-manager/${collectionType}/${model}/actions/discard`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
+            : `/content-manager/${collectionType}/${model}/actions/discard`,
         method: 'POST',
         config: {
           params,
@@ -212,7 +214,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       Find.Response,
       Find.Params & {
         params?: Find.Request['query'] & {
-          [key: string]: any;
+          [key: string]: unknown;
         };
       }
     >({
@@ -234,6 +236,28 @@ const documentApi = contentManagerApi.injectEndpoints({
         ];
       },
     }),
+    /**
+     * Places a document right before or after another one in the custom order
+     * of its collection type.
+     */
+    moveDocument: builder.mutation<
+      MoveDocument.Response,
+      MoveDocument.Params & {
+        body: MoveDocument.Request['body'];
+        params?: MoveDocument.Request['query'];
+      }
+    >({
+      query: ({ model, id, body, params }) => ({
+        url: `/content-manager/collection-types/${model}/${id}/actions/move`,
+        method: 'POST',
+        data: body,
+        config: {
+          params,
+        },
+      }),
+      invalidatesTags: (_result, error, { model }) =>
+        error ? [] : [{ type: 'Document', id: `${model}_LIST` }],
+    }),
     getDraftRelationCount: builder.query<
       CountDraftRelations.Response,
       {
@@ -247,14 +271,45 @@ const documentApi = contentManagerApi.injectEndpoints({
       }
     >({
       query: ({ collectionType, model, documentId, params }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
-          : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
+            : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
         method: 'GET',
         config: {
           params,
         },
       }),
+    }),
+    /**
+     * Fetches multiple documents with deep populate in a single request for bulk publish validation.
+     */
+    getDocumentsForValidation: builder.query<
+      Find.Response['results'],
+      {
+        model: string;
+        documentIds: string[];
+        locale?: string;
+        sort?: string;
+      }
+    >({
+      query: ({ model, documentIds, locale, sort }) => ({
+        url: `/content-manager/collection-types/${model}/actions/bulkFindForValidation`,
+        method: 'POST',
+        data: { documentIds, locale, sort },
+      }),
+      transformResponse: (response: { results: Find.Response['results'] }) =>
+        response?.results ?? [],
+      providesTags: (result, _error, { model }) =>
+        result
+          ? [
+              ...result.map((doc) => ({
+                type: 'Document' as const,
+                id: `${model}_${doc.documentId}`,
+              })),
+              { type: 'Document', id: `${model}_LIST` },
+            ]
+          : [],
     }),
     getDocument: builder.query<
       FindOne.Response,
@@ -272,7 +327,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         baseQuery
       ) => {
         const res = await baseQuery({
-          url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
+          url: `/content-manager/${collectionType}/${model}${
+            documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
+          }`,
           method: 'GET',
           config: {
             params,
@@ -336,9 +393,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params, data }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
-          : `/content-manager/${collectionType}/${model}/actions/publish`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
+            : `/content-manager/${collectionType}/${model}/actions/publish`,
         method: 'POST',
         data,
         config: {
@@ -394,7 +452,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, data, params }) => ({
-        url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
+        url: `/content-manager/${collectionType}/${model}${
+          documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
+        }`,
         method: 'PUT',
         data,
         config: {
@@ -461,9 +521,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params, data }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
-          : `/content-manager/${collectionType}/${model}/actions/unpublish`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
+            : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
         data,
         config: {
@@ -504,6 +565,28 @@ const documentApi = contentManagerApi.injectEndpoints({
         'UpcomingReleasesList',
       ],
     }),
+    /**
+     * Used by field-lock on the create view, where document metadata (and
+     * `meta.defaultLocale`) is not fetched. Same payload as the i18n plugin's
+     * locales list — a separate slice so content-manager does not import `@strapi/i18n`.
+     */
+    getI18nLocales: builder.query<
+      Array<{ id: number | string; code: string; isDefault: boolean }>,
+      void
+    >({
+      query: () => '/i18n/locales',
+      // Match the i18n locales query. Settings invalidates each locale id when the
+      // default locale changes, not only the LIST tag, so create-view lock stays in sync.
+      providesTags: (res) => [
+        { type: 'Locale', id: 'LIST' },
+        ...(Array.isArray(res)
+          ? res.map((locale) => ({
+              type: 'Locale' as const,
+              id: locale.id,
+            }))
+          : []),
+      ],
+    }),
   }),
 });
 
@@ -515,10 +598,15 @@ const {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useLazyGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
+  useGetDraftRelationCountQuery,
+  useGetI18nLocalesQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
+  useMoveDocumentMutation,
   usePublishDocumentMutation,
   usePublishManyDocumentsMutation,
   useUpdateDocumentMutation,
@@ -534,10 +622,15 @@ export {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useLazyGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
-  useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,
+  useGetDraftRelationCountQuery,
+  useGetI18nLocalesQuery,
+  useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
+  useMoveDocumentMutation,
   usePublishDocumentMutation,
   usePublishManyDocumentsMutation,
   useUpdateDocumentMutation,

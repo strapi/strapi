@@ -1,23 +1,33 @@
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import { render as renderRTL, waitFor, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
 
-jest.mock('@strapi/content-manager/strapi-admin', () => ({
-  unstable_useDocument: jest.fn().mockReturnValue({
-    document: {
-      documentId: '12345',
-      id: 12345,
-      ['strapi_stage']: {
-        id: 1,
-        color: '#4945FF',
-        name: 'Stage 1',
-      },
+const defaultDocument = {
+  document: {
+    documentId: '12345',
+    id: 12345,
+    ['strapi_stage']: {
+      id: 1,
+      color: '#4945FF',
+      name: 'Stage 1',
     },
-  }),
+  },
+};
+
+const useDocumentMock = jest.fn().mockReturnValue(defaultDocument);
+
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
+  get unstable_useDocument() {
+    return useDocumentMock;
+  },
 }));
+
+afterEach(() => {
+  useDocumentMock.mockReturnValue(defaultDocument);
+});
 
 describe('StageSelect', () => {
   const render = () =>
@@ -50,9 +60,11 @@ describe('StageSelect', () => {
 
   it("renders the select as disabled with a hint, if there aren't any stages", async () => {
     server.use(
-      rest.get('*/content-manager/:kind/:uid/:id/stages', (req, res, ctx) => {
-        return res.once(ctx.json({ data: [] }));
-      })
+      http.get(
+        '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
+        () => HttpResponse.json({ data: [] }),
+        { once: true }
+      )
     );
 
     render();
@@ -63,5 +75,147 @@ describe('StageSelect', () => {
       expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
     );
     await screen.findByText('You don’t have the permission to update this stage.');
+  });
+
+  it('shows the single-stage hint when the workflow has one stage (empty options but meta says so)', async () => {
+    server.use(
+      http.get(
+        '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
+        () =>
+          HttpResponse.json({
+            data: [],
+            meta: {
+              workflowCount: 1,
+              stageCount: 1,
+              canTransition: true,
+            },
+          }),
+        { once: true }
+      )
+    );
+
+    render();
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
+    );
+    // Matches `defaultMessage` in `StageSelect.tsx`; full `en.json` copy may differ in the app.
+    await screen.findByText(
+      'This workflow only has one stage. Add more stages to be able to update it here.'
+    );
+  });
+
+  it('shows the no-permission hint when there are multiple stages but the user cannot transition', async () => {
+    server.use(
+      http.get(
+        '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
+        () =>
+          HttpResponse.json({
+            data: [],
+            meta: {
+              workflowCount: 1,
+              stageCount: 3,
+              canTransition: false,
+            },
+          }),
+        { once: true }
+      )
+    );
+
+    render();
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
+    );
+    await screen.findByText('You don’t have the permission to update this stage.');
+  });
+
+  it('renders the select as disabled with a "save first" hint when the locale entry does not exist yet', async () => {
+    useDocumentMock.mockReturnValue({ document: undefined });
+
+    server.use(
+      http.get(
+        '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
+        () =>
+          HttpResponse.json({
+            data: [],
+            meta: { workflowCount: 1, stageCount: 2, canTransition: true },
+          }),
+        { once: true }
+      )
+    );
+
+    render();
+
+    await waitFor(() =>
+      expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
+    );
+    await screen.findByText('Save this entry to assign a workflow stage.');
+    expect(
+      screen.queryByText('You don’t have the permission to update this stage.')
+    ).not.toBeInTheDocument();
+  });
+
+  describe('license limits', () => {
+    const serveLicenseLimits = (options: Record<string, string>) =>
+      server.use(
+        http.get('/admin/license-limit-information', () =>
+          HttpResponse.json({
+            data: { features: [{ name: 'review-workflows', options }] },
+          })
+        )
+      );
+
+    it('updates the stage when the instance is above the workflow limit', async () => {
+      // The stages handler reports 10 workflows
+      serveLicenseLimits({ numberOfWorkflows: '2', stagesPerWorkflow: '200' });
+      const updateStage = jest.fn();
+      server.use(
+        http.put(
+          '/review-workflows/content-manager/:collectionType/:contentType/:id/stage',
+          async ({ request }) => {
+            updateStage(await request.json());
+            return HttpResponse.json({ data: { id: 12345 } });
+          }
+        )
+      );
+
+      const { user } = render();
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+      await user.click(await screen.findByRole('combobox'));
+      await user.click(screen.getByRole('option', { name: 'Stage 2' }));
+
+      await waitFor(() => expect(updateStage).toHaveBeenCalledWith({ data: { id: 2 } }));
+      expect(
+        screen.queryByText('You’ve reached the limit of workflows in your plan')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the limits modal instead of updating when the workflow is above the stage limit', async () => {
+      serveLicenseLimits({ numberOfWorkflows: '200', stagesPerWorkflow: '1' });
+      const updateStage = jest.fn();
+      server.use(
+        http.put('/review-workflows/content-manager/:collectionType/:contentType/:id/stage', () => {
+          updateStage();
+          return HttpResponse.json({ data: { id: 12345 } });
+        })
+      );
+
+      const { user } = render();
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+      await user.click(await screen.findByRole('combobox'));
+      await user.click(screen.getByRole('option', { name: 'Stage 2' }));
+
+      await screen.findByText(
+        'You have reached the limit of stages for this workflow in your plan'
+      );
+      expect(updateStage).not.toHaveBeenCalled();
+    });
   });
 });

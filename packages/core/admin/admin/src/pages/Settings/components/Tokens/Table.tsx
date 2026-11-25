@@ -23,14 +23,27 @@ import { Table as TableImpl } from '../../../../components/Table';
 import { useTracking } from '../../../../features/Tracking';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 
+import type { AdminTokenOwner } from '../../../../../../shared/contracts/shared';
 import type { Data } from '@strapi/types';
+
+const EMPTY_HEADERS: NonNullable<TableProps['headers']> = [];
+const EMPTY_TOKENS: NonNullable<TableProps['tokens']> = [];
+
+const formatAdminUserName = (
+  owner: Pick<AdminTokenOwner, 'firstname' | 'lastname' | 'email' | 'username'>
+): string => {
+  const full = [owner.firstname, owner.lastname].filter(Boolean).join(' ');
+  return full || owner.username || owner.email || '';
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Table
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableProps
-  extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken>, 'headers' | 'isLoading'> {
+interface TableProps extends Pick<
+  TableImpl.Props<SanitizedTransferToken | ApiToken>,
+  'headers' | 'isLoading'
+> {
   onConfirmDelete: (id: Data.ID) => void;
   permissions: {
     canRead: boolean;
@@ -39,15 +52,17 @@ interface TableProps
   };
   tokens: SanitizedTransferToken[] | ApiToken[];
   tokenType: 'api-token' | 'transfer-token';
+  showOwner?: boolean;
 }
 
 const Table = ({
   permissions,
-  headers = [],
+  headers = EMPTY_HEADERS,
   isLoading = false,
-  tokens = [],
+  tokens = EMPTY_TOKENS,
   onConfirmDelete,
   tokenType,
+  showOwner = false,
 }: TableProps) => {
   const [{ query }] = useQueryParams<{ sort?: string }>();
   const { formatMessage, locale } = useIntl();
@@ -124,6 +139,22 @@ const Table = ({
                     </Typography>
                   )}
                 </TableImpl.Cell>
+                {showOwner === true &&
+                  (() => {
+                    const apiToken = token as ApiToken;
+                    const owner = apiToken.kind === 'admin' ? apiToken.adminUserOwner : undefined;
+                    const ownerName =
+                      owner !== undefined && owner !== null && typeof owner === 'object'
+                        ? formatAdminUserName(owner)
+                        : '';
+                    return (
+                      <TableImpl.Cell maxWidth="20rem">
+                        <Typography textColor="neutral800" ellipsis>
+                          {ownerName}
+                        </Typography>
+                      </TableImpl.Cell>
+                    );
+                  })()}
                 {canUpdate || canRead || canDelete ? (
                   <TableImpl.Cell>
                     <Flex justifyContent="end">

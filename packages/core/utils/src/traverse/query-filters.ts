@@ -1,13 +1,21 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
+import { isObject, isEmpty, cloneDeep, omit } from 'lodash';
 
+import { curry } from '../curry';
+import { isScalarAttribute } from '../content-types';
+import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
+import type { Model } from '../types';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
+
+/** True if this object should be walked as a filter subtree (operators / attributes), not an opaque operand. */
+const isFilterLikeObject = (value: Record<string, unknown>, schema?: Model) =>
+  Object.keys(value).some((k) => isOperator(k) || Boolean(schema?.attributes?.[k]));
 
 const filters = traverseFactory()
   .intercept(
     // Intercept filters arrays and apply the traversal to each one individually
-    isArray,
+    Array.isArray,
     async (visitor, options, filters, { recurse }) => {
       return Promise.all(
         filters.map((filter, i) => {
@@ -35,7 +43,7 @@ const filters = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
-      return omit(key, data);
+      return omit(data, key);
     },
 
     set(key, value, data) {
@@ -51,12 +59,28 @@ const filters = traverseFactory()
     },
   }))
   // Ignore null or undefined values
-  .ignore(({ value }) => isNil(value))
+  .ignore(({ value }) => value == null)
   // Recursion on operators (non attributes)
   .on(
-    ({ attribute }) => isNil(attribute),
+    ({ attribute }) => attribute == null,
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
+
+      // Operator operands that are plain objects (not arrays) are only traversed when they look like
+      // filter subtrees (nested operators or schema attributes). Otherwise treat as opaque operands
+      // (e.g. GraphQL DateTime / Date for $gt, $null / $notNull booleans, or { $null: { anything } }).
+      // Without this, traversing into e.g. { $null: { anything: 'x' } } makes validate throw on "anything".
+      // $not is excluded: its value is always a nested filter map, not an opaque scalar operand.
+      if (
+        isOperator(key) &&
+        key !== '$not' &&
+        isObj(value) &&
+        !Array.isArray(value) &&
+        !isFilterLikeObject(value, schema)
+      ) {
+        set(key, value);
+        return;
+      }
 
       set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
     }
@@ -112,6 +136,16 @@ const filters = traverseFactory()
     );
 
     set(key, newValue);
-  });
+  })
+  // Scalar fields: recurse into operator maps (e.g. { $contains: 'x' }) so visitors see nested keys.
+  .onAttribute(
+    ({ attribute, value }) =>
+      Boolean(isScalarAttribute(attribute)) && isObj(value) && !Array.isArray(value),
+    async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
+      const parent: Parent = { key, path, schema, attribute };
+
+      set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
+    }
+  );
 
 export default curry(filters.traverse);

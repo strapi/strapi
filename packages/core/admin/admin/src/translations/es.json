@@ -136,7 +136,7 @@
   "Settings.application.description": "Información global del panel de administración",
   "Settings.application.edition-title": "Edición actual",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Edición comunitaria} other {Edición Empresarial}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Añadir asientos} other {contactar con ventas}}",
+  "Settings.application.ee.admin-seats.add-seats": "Gestionar suscripción",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Al límite: añade más asientos para añadir más usuarios",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Consigue ayuda",
@@ -510,8 +510,11 @@
   "app.components.PluginCard.compatible": "Compatible con su aplicación",
   "app.components.PluginCard.compatibleCommunity": "Compatible con la comunidad",
   "app.components.PluginCard.more-details": "Más detalles",
+  "app.components.Select.placeholder": "Seleccionar",
   "app.components.ToggleCheckbox.off-label": "Apagado",
   "app.components.ToggleCheckbox.on-label": "Encendido",
+  "app.components.UpsellBanner.close": "Cerrar el banner.",
+  "app.components.UpsellBanner.reopen": "Volver a abrir el banner.",
   "app.components.Users.MagicLink.connect": "Envíe este enlace al usuario para que se conecte.",
   "app.components.Users.MagicLink.connect.sso": "Envíe este enlace al usuario, el primer inicio de sesión se puede realizar a través de un proveedor de SSO",
   "app.components.Users.ModalCreateBody.block-title.details": "Detalles",
@@ -799,5 +802,8 @@
   "widget.key-statistics.list.entries": "Entradas",
   "widget.key-statistics.list.locales": "Idiomas",
   "widget.key-statistics.list.webhooks": "Webhooks",
-  "widget.profile.title": "Perfil"
+  "widget.profile.title": "Perfil",
+  "HomePage.widget.deploy-now.title": "¿Listo para publicar?",
+  "HomePage.widget.deploy-now.description": "Despliega tu proyecto.",
+  "HomePage.widget.deploy-now.button": "Desplegar ahora"
 }

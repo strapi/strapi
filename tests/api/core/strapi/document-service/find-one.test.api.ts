@@ -2,8 +2,13 @@ import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import resources from './resources/index';
+import { createMinimalArticleCategoryResources } from './resources/minimal-article-category';
 import { ARTICLE_UID, findArticleDb, AUTHOR_UID, findAuthorDb } from './utils';
+
+const resources = createMinimalArticleCategoryResources({
+  withAuthor: true,
+  withFindOneFixtures: true,
+});
 
 describe('Document Service', () => {
   let testUtils;

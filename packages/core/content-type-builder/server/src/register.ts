@@ -2,10 +2,9 @@ import type { Core } from '@strapi/types';
 import { CSP_DEFAULTS, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  const aiEnabledConfig = strapi.config.get('admin.ai.enabled') !== false;
-  const isAIEnabled = aiEnabledConfig && strapi.ee.features.isEnabled('cms-ai');
+  const isAiEnabled = strapi.ai.admin.isStrapiManagedAiEnabled();
 
-  if (isAIEnabled) {
+  if (isAiEnabled) {
     const s3Domains = [
       'strapi-ai-staging.s3.us-east-1.amazonaws.com',
       'strapi-ai-production.s3.us-east-1.amazonaws.com',
@@ -16,8 +15,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
     // Extend the security middleware configuration to include S3 domains + defaults
     const middlewares = strapi.config.get('middlewares') as (
-      | string
-      | { name?: string; config?: any }
+      string | { name?: string; config?: any }
     )[];
 
     const configuredMiddlewares = extendMiddlewareConfiguration(middlewares, {

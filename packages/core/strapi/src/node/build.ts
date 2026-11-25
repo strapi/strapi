@@ -1,6 +1,6 @@
 import * as tsUtils from '@strapi/typescript-utils';
 import type { CLIContext } from '../cli/types';
-import { checkRequiredDependencies } from './core/dependencies';
+import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './create-build-context';
 import { writeStaticClientFiles } from './staticFiles';
@@ -9,7 +9,7 @@ interface BuildOptions extends CLIContext {
   /**
    * Which bundler to use for building.
    *
-   * @default webpack
+   * @default vite
    */
   bundler?: 'webpack' | 'vite';
   /**
@@ -21,11 +21,17 @@ interface BuildOptions extends CLIContext {
   /**
    * Generate sourcemaps – useful for debugging bugs in the admin panel UI.
    */
-  sourcemaps?: boolean;
+  sourcemap?: boolean;
   /**
    * Print stats for build
    */
   stats?: boolean;
+  /**
+   * Auto-install missing admin dependencies
+   *
+   * @default false
+   */
+  installDeps?: boolean;
 }
 
 /**
@@ -33,15 +39,16 @@ interface BuildOptions extends CLIContext {
  *
  * @description Builds the admin panel of the strapi application.
  */
-const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
+const build = async ({ logger, cwd, tsconfig, installDeps = false, ...options }: BuildOptions) => {
   const timer = getTimer();
 
-  const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
-    logger.error(err.message);
-    process.exit(1);
+  const shouldContinue = await handleAdminDependencies({
+    cwd,
+    logger,
+    installIfMissing: installDeps,
   });
 
-  if (didInstall) {
+  if (!shouldContinue) {
     return;
   }
 
@@ -49,7 +56,12 @@ const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
     timer.start('compilingTS');
     const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
-    tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+    try {
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+    } catch {
+      // Match previous compiler behavior (process.exit inside basic.run).
+      process.exit(1);
+    }
 
     const compilingDuration = timer.end('compilingTS');
     compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;

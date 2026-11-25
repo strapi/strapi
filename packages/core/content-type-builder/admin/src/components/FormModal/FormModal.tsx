@@ -7,12 +7,13 @@ import {
   ConfirmDialog,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
+  UnsavedChangesModal,
+  type StrapiApp,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
-import pick from 'lodash/pick';
 import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
@@ -22,7 +23,9 @@ import * as yup from 'yup';
 
 import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
+import { getFirstVisibleConditionEntry } from '../../utils/conditions';
 import { findAttribute } from '../../utils/findAttribute';
+import { DID_ACT_ON_FOLDERS, folderTelemetryOperation } from '../../utils/folderTelemetry';
 import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
@@ -36,6 +39,7 @@ import { useCTBTracking } from '../CTBSession/ctbSession';
 import { CustomRadioGroup } from '../CustomRadioGroup';
 import { useDataManager } from '../DataManager/useDataManager';
 import { DraftAndPublishToggle } from '../DraftAndPublishToggle';
+import { FolderSelect } from '../FolderSelect';
 import { FormModalEndActions } from '../FormModalEndActions';
 import { FormModalHeader } from '../FormModalHeader';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
@@ -54,14 +58,76 @@ import { TextareaEnum } from '../TextareaEnum';
 
 import { ConditionForm } from './attributes/ConditionForm';
 import { forms } from './forms/forms';
-import { actions, initialState, type State as FormModalState } from './reducer';
+import {
+  actions,
+  initialState,
+  type ComponentToCreateData,
+  type FormModalData,
+  type State as FormModalState,
+} from './reducer';
 import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
+import { getRenameStorageChange, type RenameStorageChange } from './utils/getRenameStorageChange';
 
-import type { ContentType } from '../../types';
-import type { Internal } from '@strapi/types';
+import type { AnyAttribute, ContentType } from '../../types';
+import type { FormAPI } from '../../utils/formAPI';
+import type { FolderSelection } from '../DataManager/utils/contentStructure';
+import type { Tab } from '../FormModalNavigation/FormModalNavigationProvider';
+import type { GenericInputType } from '../GenericInputs';
+import type { Internal, Struct } from '@strapi/types';
+
+/**
+ * Input renderers the Content-Type Builder form passes to `GenericInput` as `customInputs`,
+ * keyed by the input `type` they render. Plugins add theirs on top.
+ */
+const CUSTOM_INPUTS = {
+  'allowed-types-select': AllowedTypesSelect,
+  'boolean-radio-group': BooleanRadioGroup,
+  'checkbox-with-number-field': CheckboxWithNumberField,
+  'icon-picker': IconPicker,
+  'content-type-radio-group': ContentTypeRadioGroup,
+  'content-type-folder-select': FolderSelect,
+  'radio-group': CustomRadioGroup,
+  relation: Relation,
+  'select-category': SelectCategory,
+  'select-component': SelectComponent,
+  'select-components': SelectComponents,
+  'select-default-boolean': BooleanDefaultValueSelect,
+  'select-number': SelectNumber,
+  'select-date': SelectDateType,
+  'toggle-draft-publish': DraftAndPublishToggle,
+  'text-plural': PluralName,
+  'text-singular': SingularName,
+  'textarea-enum': TextareaEnum,
+  'condition-form': ConditionForm,
+};
+
+type RenderedInputType = keyof typeof CUSTOM_INPUTS | GenericInputType;
+
+type CustomField = NonNullable<ReturnType<StrapiApp['customFields']['get']>>;
+type CustomFieldOptionEntry = NonNullable<NonNullable<CustomField['options']>['base']>[number];
+type CustomFieldOption = Exclude<CustomFieldOptionEntry, { items: unknown }>;
+
+/**
+ * The option input types a custom field can declare (`CustomFieldOptionInput` in `@strapi/admin`).
+ */
+type CustomFieldOptionInput = CustomFieldOption['type'];
+
+type AssertRendered<TInputType extends RenderedInputType> = TInputType;
+
+/**
+ * Compile-time guard: every option input type `@strapi/admin` accepts for a custom field must
+ * have a renderer, either in `CUSTOM_INPUTS` or built into `GenericInput`.
+ * A type check error here names the option input type the form cannot render.
+ *
+ * `CustomFieldOptionInput` comes from the built `@strapi/admin` declarations (`dist`), not its
+ * source, because the package exports resolve types to `dist`. Rebuild the admin types
+ * (`yarn build:types:admin` in `packages/core/admin`) before you trust this check locally:
+ * a stale build makes it check old types. CI builds first.
+ */
+type _AssertCustomFieldOptionInputsAreRendered = AssertRendered<CustomFieldOptionInput>;
 
 const FormComponent = styled.form`
   overflow: auto;
@@ -69,6 +135,35 @@ const FormComponent = styled.form`
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_formModal'] || initialState) as FormModalState;
+
+type PendingSubmit = {
+  e: React.SyntheticEvent;
+  shouldContinue: boolean;
+};
+
+const toStringValue = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+const toOptionalStringValue = (value: unknown): string | undefined => {
+  if (typeof value !== 'string' || value === '') {
+    return undefined;
+  }
+
+  return value;
+};
+
+const toBooleanValue = (value: unknown): boolean => (typeof value === 'boolean' ? value : false);
+
+const toContentTypeKind = (value: unknown): Struct.ContentTypeKind =>
+  value === 'singleType' ? 'singleType' : 'collectionType';
+
+const toRecordValue = (value: unknown): Record<string, unknown> =>
+  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+
+const toComponentDraft = (value?: ComponentToCreateData) => ({
+  category: toStringValue(value?.category),
+  displayName: toStringValue(value?.displayName),
+  icon: toOptionalStringValue(value?.icon),
+});
 
 export const FormModal = () => {
   const {
@@ -104,7 +199,7 @@ export const FormModal = () => {
   const { trackUsage } = useCTBTracking();
   const { formatMessage } = useIntl();
   const ctbPlugin = getPlugin(pluginId);
-  const ctbFormsAPI: any = ctbPlugin?.apis.forms;
+  const ctbFormsAPI = ctbPlugin?.apis.forms as FormAPI;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
 
   const dispatchGuidedTour = useGuidedTour('FormModal', (s) => s.dispatch);
@@ -128,6 +223,9 @@ export const FormModal = () => {
     updateComponentSchema,
     updateComponentUid,
     reservedNames,
+    confirmAttributeRenameMigration,
+    attributeRenameMigrationMode,
+    strictRelations,
   } = useDataManager();
 
   const {
@@ -136,60 +234,74 @@ export const FormModal = () => {
     initialData,
     isCreatingComponentWhileAddingAField,
     modifiedData,
+    pristineData,
   } = reducerState;
 
-  const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+  const type =
+    forTarget === 'component'
+      ? components[targetUid as Internal.UID.Component]
+      : contentTypes[targetUid as Internal.UID.ContentType];
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState<any>(null);
+  const [pendingSubmit, setPendingSubmit] = useState<PendingSubmit | null>(null);
+  // Set when the edit renames an existing field *and* changes its storage: the
+  // data cannot be preserved, so the user confirms before the field is recreated.
+  const [storageChangeWarning, setStorageChangeWarning] = useState<RenameStorageChange | null>(
+    null
+  );
 
-  const checkFieldNameChanges = () => {
-    // Only check when editing an attribute
+  const checkRenameStorageChange = (): RenameStorageChange | null => {
+    if (actionType !== 'edit' || (modalType !== 'attribute' && modalType !== 'customField')) {
+      return null;
+    }
+
+    return getRenameStorageChange(initialData, modifiedData, attributeRenameMigrationMode);
+  };
+
+  /**
+   * Fields whose visibility condition depends on this field and references an
+   * enum value that this edit removes or changes. Renames are followed
+   * automatically, so only an enum value change can break a condition.
+   */
+  const getConditionsBrokenByEnumChange = (): AnyAttribute[] | false => {
     if (actionType !== 'edit' || modalType !== 'attribute') {
       return false;
     }
 
-    const oldName = initialData.name;
     const oldEnum = initialData.enum;
     const newEnum = modifiedData.enum;
 
-    // Get all attributes from the content type schema
-    const contentTypeAttributes = type?.attributes || [];
-
-    // Find all fields that reference this field in their conditions
-    const referencedFields = contentTypeAttributes.filter((attr: any) => {
-      if (!attr.conditions) return false;
-
-      const condition = attr.conditions.visible;
-      if (!condition) return false;
-
-      const [[, conditions]] = Object.entries(condition);
-      const [fieldVar, value] = conditions as [{ var: string }, any];
-
-      // Check if this condition references our field
-      if (fieldVar.var !== oldName) return false;
-
-      // If it's an enum field, also check if the value is being deleted/changed
-      if (oldEnum && newEnum) {
-        const deletedOrChangedValues = oldEnum.filter(
-          (oldValue: string) => !newEnum.includes(oldValue)
-        );
-        return deletedOrChangedValues.includes(value);
-      }
-
-      return true;
-    });
-
-    // If any fields reference this field, return them
-    if (referencedFields.length > 0) {
-      return referencedFields;
+    if (!Array.isArray(oldEnum) || !Array.isArray(newEnum)) {
+      return false;
     }
 
-    return false;
+    const removedValues = oldEnum.filter((value: string) => !newEnum.includes(value));
+
+    if (removedValues.length === 0) {
+      return false;
+    }
+
+    const fieldName = initialData.name;
+    const contentTypeAttributes: AnyAttribute[] = type?.attributes ?? [];
+
+    const brokenFields = contentTypeAttributes.filter((attr) => {
+      const conditionEntry = getFirstVisibleConditionEntry(attr.conditions);
+      if (conditionEntry === null) {
+        return false;
+      }
+
+      const { fieldVar, value } = conditionEntry;
+
+      return (
+        fieldVar.var === fieldName && typeof value === 'string' && removedValues.includes(value)
+      );
+    });
+
+    return brokenFields.length > 0 ? brokenFields : false;
   };
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && modalType) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
         isAllowedContentTypesForRelations
       );
@@ -224,10 +336,10 @@ export const FormModal = () => {
             data: {
               displayName: type.info.displayName,
               draftAndPublish: type.options?.draftAndPublish,
-              kind: 'kind' in type && type.kind,
+              kind: type.modelType === 'contentType' ? type.kind : 'collectionType',
               pluginOptions: type.pluginOptions,
-              pluralName: 'pluralName' in type.info && type.info.pluralName,
-              singularName: 'singularName' in type.info && type.info.singularName,
+              pluralName: type.modelType === 'contentType' ? type.info.pluralName : '',
+              singularName: type.modelType === 'contentType' ? type.info.singularName : '',
             },
           })
         );
@@ -239,7 +351,7 @@ export const FormModal = () => {
           actions.setDataToEdit({
             data: {
               displayName: type.info.displayName,
-              category: 'category' in type && type.category,
+              category: type.modelType === 'component' ? type.category : '',
               icon: type.info.icon,
             },
           })
@@ -255,7 +367,7 @@ export const FormModal = () => {
           components: [],
           name: dynamicZoneTarget,
           createComponent: false,
-          componentToCreate: { type: 'component' },
+          componentToCreate: { type: 'component' as const },
         };
 
         dispatch(
@@ -289,16 +401,19 @@ export const FormModal = () => {
             dispatch(
               actions.setCustomFieldDataSchema({
                 isEditing: true,
-                modifiedDataToSetForEditing: attributeToEdit,
+                modifiedDataToSetForEditing: attributeToEdit as FormModalData,
                 uid: type.uid,
               })
             );
           } else {
             dispatch(
               actions.setCustomFieldDataSchema({
-                customField: pick(customField, ['type', 'options']),
+                customField: {
+                  type: customField?.type ?? '',
+                  options: customField?.options,
+                },
                 isEditing: false,
-                modifiedDataToSetForEditing: attributeToEdit,
+                modifiedDataToSetForEditing: attributeToEdit as FormModalData,
                 uid: type.uid,
               })
             );
@@ -310,7 +425,7 @@ export const FormModal = () => {
               nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
               targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
               isEditing: actionType === 'edit',
-              modifiedDataToSetForEditing: attributeToEdit,
+              modifiedDataToSetForEditing: attributeToEdit as FormModalData,
               step,
               uid: type.uid,
             })
@@ -361,11 +476,11 @@ export const FormModal = () => {
     } else if (isCreatingComponent) {
       schema = forms.component.schema(
         Object.keys(components) as Internal.UID.Component[],
-        modifiedData.category || '',
+        toStringValue(modifiedData.category),
         reservedNames,
         actionType === 'edit',
         components,
-        modifiedData.displayName || '',
+        toStringValue(modifiedData.displayName),
         (type?.uid ?? null) as Internal.UID.Component
         // ctbFormsAPI
       );
@@ -386,28 +501,28 @@ export const FormModal = () => {
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
         Object.keys(components) as Internal.UID.Component[],
-        get(modifiedData, 'componentToCreate.category', ''),
+        toStringValue(get(modifiedData, 'componentToCreate.category', '')),
         reservedNames,
         actionType === 'edit',
         components,
-        modifiedData.componentToCreate.displayName || ''
+        toStringValue(modifiedData.componentToCreate?.displayName)
       );
 
       // Check form validity for creating a 'common attribute'
       // We need to make sure that it is independent from the step
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
-      const computedAttrbiuteType = attributeType === 'relation' ? 'relation' : modifiedData.type;
+      const computedAttributeType = attributeType === 'relation' ? 'relation' : modifiedData.type;
 
-      let alreadyTakenTargetContentTypeAttributes: any[] = [];
+      let alreadyTakenTargetContentTypeAttributes: Array<{ name: string }> = [];
 
-      if (computedAttrbiuteType === 'relation') {
-        const targetContentTypeUID = get(modifiedData, ['target'], null);
+      if (computedAttributeType === 'relation') {
+        const targetContentTypeUID = toStringValue(get(modifiedData, ['target'], ''));
 
         const targetContentTypeAttributes = get(
           contentTypes,
-          [targetContentTypeUID, 'attributes'],
+          [targetContentTypeUID as Internal.UID.ContentType, 'attributes'],
           []
-        );
+        ) as Array<{ name: string }>;
 
         // Create an array with all the targetContentType attributes name
         // in order to prevent the user from creating a relation with a targetAttribute
@@ -426,7 +541,7 @@ export const FormModal = () => {
       }
       schema = forms.attribute.schema(
         type,
-        computedAttrbiuteType,
+        (computedAttributeType ?? 'string') as Parameters<typeof forms.attribute.schema>[1],
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
         { modifiedData, initialData },
@@ -435,15 +550,14 @@ export const FormModal = () => {
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
-      // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components) as Internal.UID.Component[],
-          get(modifiedData, 'componentToCreate.category', ''),
+          toStringValue(get(modifiedData, 'componentToCreate.category', '')),
           reservedNames,
           actionType === 'edit',
           components,
-          modifiedData.componentToCreate.displayName || ''
+          toStringValue(modifiedData.componentToCreate?.displayName)
         );
       } else {
         // The form is valid
@@ -456,11 +570,7 @@ export const FormModal = () => {
   };
 
   const handleChange = React.useCallback(
-    ({
-      target: { name, value, type, ...rest },
-    }: {
-      target: { name: string; value: string | string[]; type: string };
-    }) => {
+    ({ target: { name, value } }: { target: { name: string; value?: unknown } }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
         'max',
@@ -477,7 +587,7 @@ export const FormModal = () => {
         val = null;
       } else if (name === 'enum') {
         // For enum values, ensure we're working with an array
-        val = Array.isArray(value) ? value : [value];
+        val = Array.isArray(value) ? value : typeof value === 'string' ? [value] : [];
       } else {
         val = value;
       }
@@ -513,9 +623,73 @@ export const FormModal = () => {
     [dispatch, formErrors]
   );
 
-  const submitForm = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
+  const submitForm = async (
+    e: React.SyntheticEvent,
+    shouldContinue = isCreating,
+    // The user already confirmed the field will be recreated empty (rename +
+    // storage change): there is no data to preserve, so don't ask about it.
+    { skipRenameMigration = false }: { skipRenameMigration?: boolean } = {}
+  ) => {
     try {
       await checkFormValidity();
+
+      let recordRename = !skipRenameMigration;
+      let declineRename = false;
+      if (
+        !skipRenameMigration &&
+        actionType === 'edit' &&
+        (isCreatingAttribute || isCreatingCustomFieldAttribute) &&
+        // A field that was never saved has no data to preserve (and
+        // `recordRename` skips it), so there is nothing to ask about.
+        initialData.status !== 'NEW' &&
+        toStringValue(initialData.name) !== toStringValue(modifiedData.name)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          forTarget,
+          uid: targetUid,
+          oldName: toStringValue(initialData.name),
+          newName: toStringValue(modifiedData.name),
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordRename = decision;
+        declineRename = !decision;
+      }
+
+      // Renaming the other side of a relation from this form renames a field
+      // of the target type, which may own the join table: ask for that one
+      // too, after the field's own prompt.
+      const oldTargetAttribute = toStringValue(initialData.targetAttribute);
+      const newTargetAttribute = toStringValue(modifiedData.targetAttribute);
+      let recordTargetRename = !skipRenameMigration;
+      let declineTargetRename = false;
+      if (
+        !skipRenameMigration &&
+        actionType === 'edit' &&
+        isCreatingAttribute &&
+        attributeType === 'relation' &&
+        oldTargetAttribute !== '' &&
+        newTargetAttribute !== '' &&
+        oldTargetAttribute !== newTargetAttribute &&
+        toStringValue(initialData.target) === toStringValue(modifiedData.target)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          forTarget: 'contentType',
+          uid: toStringValue(modifiedData.target) as Internal.UID.ContentType,
+          oldName: oldTargetAttribute,
+          newName: newTargetAttribute,
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordTargetRename = decision;
+        declineTargetRename = !decision;
+      }
 
       dispatch(
         actions.setErrors({
@@ -527,20 +701,36 @@ export const FormModal = () => {
 
       const ctTargetUid = targetUid;
 
+      const folderSelection = modifiedData.folder as FolderSelection | undefined;
+      const trackFolderAssignment = () => {
+        if (!folderSelection) {
+          return;
+        }
+
+        if ('newFolderName' in folderSelection) {
+          trackUsage(DID_ACT_ON_FOLDERS, { operation: folderTelemetryOperation('create') });
+        }
+
+        trackUsage(DID_ACT_ON_FOLDERS, { operation: folderTelemetryOperation('assign') });
+      };
+
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
           createSchema({
             data: {
               kind,
-              displayName: modifiedData.displayName,
-              draftAndPublish: modifiedData.draftAndPublish,
-              pluginOptions: modifiedData.pluginOptions,
-              singularName: modifiedData.singularName,
-              pluralName: modifiedData.pluralName,
+              displayName: toStringValue(modifiedData.displayName),
+              draftAndPublish: toBooleanValue(modifiedData.draftAndPublish),
+              pluginOptions: toRecordValue(modifiedData.pluginOptions),
+              singularName: toStringValue(modifiedData.singularName),
+              pluralName: toStringValue(modifiedData.pluralName),
             },
             uid,
+            folder: folderSelection,
           });
+
+          trackFolderAssignment();
 
           // Redirect the user to the created content type
           navigate({ pathname: `/plugins/${pluginId}/content-types/${uid}` });
@@ -556,12 +746,15 @@ export const FormModal = () => {
             await updateSchema({
               uid: contentType.uid,
               data: {
-                displayName: modifiedData.displayName,
-                kind: modifiedData.kind,
-                draftAndPublish: modifiedData.draftAndPublish,
-                pluginOptions: modifiedData.pluginOptions,
+                displayName: toStringValue(modifiedData.displayName),
+                kind: toContentTypeKind(modifiedData.kind),
+                draftAndPublish: toBooleanValue(modifiedData.draftAndPublish),
+                pluginOptions: toRecordValue(modifiedData.pluginOptions),
               },
+              folder: folderSelection,
             });
+
+            trackFolderAssignment();
           } else {
             toggleNotification({
               type: 'danger',
@@ -575,21 +768,22 @@ export const FormModal = () => {
       } else if (modalType === 'component') {
         if (isCreating) {
           // Create the component schema
-          const componentUid = createComponentUid(modifiedData.displayName, modifiedData.category);
-          const { category, ...rest } = modifiedData;
+          const componentCategory = toStringValue(modifiedData.category);
+          const componentDisplayName = toStringValue(modifiedData.displayName);
+          const componentUid = createComponentUid(componentDisplayName, componentCategory);
 
           createComponentSchema({
             data: {
-              displayName: rest.displayName,
-              icon: rest.icon,
+              displayName: componentDisplayName,
+              icon: toOptionalStringValue(modifiedData.icon),
             },
             uid: componentUid,
-            componentCategory: category,
+            componentCategory,
           });
 
           // Redirect the user to the created component
           navigate({
-            pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
+            pathname: `/plugins/${pluginId}/component-categories/${componentCategory}/${componentUid}`,
           });
 
           onCloseModal();
@@ -598,25 +792,25 @@ export const FormModal = () => {
         } else {
           updateComponentSchema({
             data: {
-              icon: modifiedData.icon,
-              displayName: modifiedData.displayName,
+              icon: toOptionalStringValue(modifiedData.icon),
+              displayName: toStringValue(modifiedData.displayName),
             },
-            componentUID: targetUid,
+            componentUID: targetUid as Internal.UID.Component,
           });
 
           if (type.status === 'NEW') {
             const componentUid = createComponentUid(
-              modifiedData.displayName,
-              modifiedData.category
+              toStringValue(modifiedData.displayName),
+              toStringValue(modifiedData.category)
             );
 
             updateComponentUid({
-              componentUID: targetUid,
+              componentUID: targetUid as Internal.UID.Component,
               newComponentUID: componentUid,
             });
 
             navigate({
-              pathname: `/plugins/${pluginId}/component-categories/${modifiedData.category}/${componentUid}`,
+              pathname: `/plugins/${pluginId}/component-categories/${toStringValue(modifiedData.category)}/${componentUid}`,
             });
           }
 
@@ -630,7 +824,9 @@ export const FormModal = () => {
           attributeToSet: { ...modifiedData, customField: customFieldUid },
           forTarget,
           targetUid,
-          name: initialData.name,
+          name: toStringValue(initialData.name),
+          recordRename,
+          declineRename,
         };
 
         if (actionType === 'edit') {
@@ -665,7 +861,9 @@ export const FormModal = () => {
               attributeToSet: modifiedData,
               forTarget,
               targetUid,
-              name: initialData.name,
+              name: toStringValue(initialData.name),
+              recordRename,
+              declineRename,
             });
           }
 
@@ -676,7 +874,7 @@ export const FormModal = () => {
             dispatch(actions.resetPropsAndSetTheFormForAddingACompoToADz());
 
             setActiveTab('basic');
-            onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
+            onNavigateToAddCompoToDZModal({ dynamicZoneTarget: toStringValue(modifiedData.name) });
           } else {
             onCloseModal();
           }
@@ -697,7 +895,11 @@ export const FormModal = () => {
               attributeToSet: modifiedData,
               forTarget,
               targetUid,
-              name: initialData.name,
+              name: toStringValue(initialData.name),
+              recordRename,
+              declineRename,
+              recordTargetRename,
+              declineTargetRename,
             });
           }
 
@@ -714,7 +916,6 @@ export const FormModal = () => {
 
           // Adding an existing component
         }
-        // eslint-disable-next-line no-lonely-if
         if (isInFirstComponentStep) {
           // Navigate the user to step 2
           onNavigateToCreateComponentStep2();
@@ -761,7 +962,9 @@ export const FormModal = () => {
             attributeToSet: attributeData,
             forTarget,
             targetUid,
-            name: initialData.name,
+            name: toStringValue(initialData.name),
+            recordRename,
+            declineRename,
           });
         }
 
@@ -805,19 +1008,22 @@ export const FormModal = () => {
           // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
         }
         // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
-        const { category, ...rest } = componentToCreate;
+        const draftComponent = toComponentDraft(componentToCreate);
         // Create a the component temp UID
         // This could be refactored but I think it's more understandable to separate the logic
-        const componentUid = createComponentUid(componentToCreate.displayName, category);
+        const componentUid = createComponentUid(
+          draftComponent.displayName,
+          draftComponent.category
+        );
         // Create the component first and add it to the components data
         createComponentSchema({
           // Component data
           data: {
-            icon: rest.icon,
-            displayName: rest.displayName,
+            icon: draftComponent.icon,
+            displayName: draftComponent.displayName,
           },
           uid: componentUid,
-          componentCategory: category,
+          componentCategory: draftComponent.category,
         });
 
         // Add the field to the schema
@@ -841,16 +1047,19 @@ export const FormModal = () => {
         // The modal is addComponentToDynamicZone
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
-            const { category, type, ...rest } = modifiedData.componentToCreate;
+            const draftComponent = toComponentDraft(modifiedData.componentToCreate);
             const componentUid = createComponentUid(
-              modifiedData.componentToCreate.displayName,
-              category
+              draftComponent.displayName,
+              draftComponent.category
             );
             // Create the component first and add it to the components data
             createComponentSchema({
-              data: rest,
+              data: {
+                displayName: draftComponent.displayName,
+                icon: draftComponent.icon,
+              },
               uid: componentUid,
-              componentCategory: category,
+              componentCategory: draftComponent.category,
             });
             // Add the created component to the DZ
             // We don't want to remove the old ones
@@ -870,7 +1079,7 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               dynamicZoneTarget,
-              newComponents: modifiedData.components,
+              newComponents: modifiedData.components ?? [],
             });
 
             onCloseModal();
@@ -896,44 +1105,53 @@ export const FormModal = () => {
     }
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
-    e.preventDefault();
-
-    // Check for field name changes when clicking Finish
-    const referencedFields = checkFieldNameChanges();
-    if (referencedFields) {
+  // Runs after the condition warning (if any): warn when the rename also
+  // changes the field's storage, otherwise submit.
+  const continueSubmit = async (e: React.SyntheticEvent, shouldContinue: boolean) => {
+    const storageChange = checkRenameStorageChange();
+    if (storageChange) {
       setPendingSubmit({ e, shouldContinue });
-      setShowWarningDialog(true);
+      setStorageChangeWarning(storageChange);
       return;
     }
 
     await submitForm(e, shouldContinue);
   };
 
-  const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
-    const confirm = window.confirm(
-      formatMessage({
-        id: 'window.confirm.close-modal.file',
-        defaultMessage: 'Are you sure? Your changes will be lost.',
-      })
-    );
-
-    if (confirm) {
-      onCloseModal();
-      dispatch(actions.resetProps());
-    }
+  const cancelStorageChange = () => {
+    setStorageChangeWarning(null);
+    setPendingSubmit(null);
   };
 
-  const handleClosed = () => {
-    // Close the modal
-    if (!isEqual(modifiedData, initialData)) {
-      handleConfirmClose();
-    } else {
-      onCloseModal();
-      // Reset the reducer
-      dispatch(actions.resetProps());
+  const confirmStorageChange = () => {
+    if (pendingSubmit === null) {
+      return;
     }
+
+    const { e, shouldContinue } = pendingSubmit;
+    cancelStorageChange();
+    submitForm(e, shouldContinue, { skipRenameMigration: true });
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
+    e.preventDefault();
+
+    // Check for conditions broken by an enum value change when clicking Finish
+    const brokenFields = getConditionsBrokenByEnumChange();
+    if (brokenFields) {
+      setPendingSubmit({ e, shouldContinue });
+      setShowWarningDialog(true);
+      return;
+    }
+
+    await continueSubmit(e, shouldContinue);
+  };
+
+  // Runs once UnsavedChangesModal has confirmed the close when there are unsaved changes.
+  const handleClosed = () => {
+    onCloseModal();
+    // Reset the reducer
+    dispatch(actions.resetProps());
   };
 
   const sendAdvancedTabEvent = (tab: string) => {
@@ -1000,24 +1218,7 @@ export const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
-      'allowed-types-select': AllowedTypesSelect,
-      'boolean-radio-group': BooleanRadioGroup,
-      'checkbox-with-number-field': CheckboxWithNumberField,
-      'icon-picker': IconPicker,
-      'content-type-radio-group': ContentTypeRadioGroup,
-      'radio-group': CustomRadioGroup,
-      relation: Relation,
-      'select-category': SelectCategory,
-      'select-component': SelectComponent,
-      'select-components': SelectComponents,
-      'select-default-boolean': BooleanDefaultValueSelect,
-      'select-number': SelectNumber,
-      'select-date': SelectDateType,
-      'toggle-draft-publish': DraftAndPublishToggle,
-      'text-plural': PluralName,
-      'text-singular': SingularName,
-      'textarea-enum': TextareaEnum,
-      'condition-form': ConditionForm,
+      ...CUSTOM_INPUTS,
       ...inputsFromPlugins,
     },
     componentToCreate,
@@ -1044,6 +1245,7 @@ export const FormModal = () => {
     forTarget,
     contentTypeSchema: type || {},
     customField,
+    strictRelations,
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,
@@ -1084,17 +1286,21 @@ export const FormModal = () => {
   };
 
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClosed}>
+    <UnsavedChangesModal
+      open={isOpen}
+      onOpenChange={handleClosed}
+      hasUnsavedChanges={!isEqual(modifiedData, pristineData)}
+    >
       <Modal.Content>
         <Dialog.Root open={showWarningDialog} onOpenChange={setShowWarningDialog}>
           <Dialog.Trigger />
           <ConfirmDialog
             onConfirm={() => {
-              if (pendingSubmit) {
+              if (pendingSubmit !== null) {
                 const { e, shouldContinue } = pendingSubmit;
                 setShowWarningDialog(false);
                 setPendingSubmit(null);
-                submitForm(e, shouldContinue);
+                continueSubmit(e, shouldContinue);
               }
             }}
             onCancel={() => {
@@ -1103,60 +1309,86 @@ export const FormModal = () => {
             }}
           >
             {(() => {
-              const referencedFields = checkFieldNameChanges();
-              if (!referencedFields) return null;
+              const brokenFields = getConditionsBrokenByEnumChange();
+              if (brokenFields === false) return null;
 
-              const fieldNames = referencedFields.map((field: any) => field.name).join(', ');
-              const isEnum = initialData.enum && modifiedData.enum;
-
-              if (isEnum) {
-                const oldEnum = initialData.enum;
-                const newEnum = modifiedData.enum;
-                const deletedOrChangedValues = oldEnum.filter(
-                  (value: string) => !newEnum.includes(value)
-                );
-
-                return (
-                  <Box>
-                    <Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning',
-                        defaultMessage:
-                          'The following fields have conditions that depend on this field: ',
-                      })}
-                      <Typography fontWeight="bold">{fieldNames}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-values',
-                        defaultMessage: '. Changing or removing the enum values ',
-                      })}
-                      <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-end',
-                        defaultMessage: ' will break these conditions. Do you want to proceed?',
-                      })}
-                    </Typography>
-                  </Box>
-                );
-              }
+              const fieldNames = brokenFields.map((field) => field.name).join(', ');
+              const oldEnum = initialData.enum ?? [];
+              const newEnum = modifiedData.enum ?? [];
+              const deletedOrChangedValues = oldEnum.filter((value) => !newEnum.includes(value));
 
               return (
                 <Box>
                   <Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning',
+                      id: 'form.attribute.condition.enum-change-warning',
                       defaultMessage:
                         'The following fields have conditions that depend on this field: ',
                     })}
                     <Typography fontWeight="bold">{fieldNames}</Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning-end',
-                      defaultMessage:
-                        '. Renaming it will break these conditions. Do you want to proceed?',
+                      id: 'form.attribute.condition.enum-change-warning-values',
+                      defaultMessage: '. Changing or removing the enum values ',
+                    })}
+                    <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
+                    {formatMessage({
+                      id: 'form.attribute.condition.enum-change-warning-end',
+                      defaultMessage: ' will break these conditions. Do you want to proceed?',
                     })}
                   </Typography>
                 </Box>
               );
             })()}
+          </ConfirmDialog>
+        </Dialog.Root>
+        <Dialog.Root
+          open={storageChangeWarning !== null}
+          onOpenChange={(open) => !open && cancelStorageChange()}
+        >
+          <ConfirmDialog
+            title={formatMessage({
+              id: getTrad('form.attribute.rename-type-change-warning.title'),
+              defaultMessage: 'Existing data will be lost',
+            })}
+            onCancel={cancelStorageChange}
+            endAction={
+              <Dialog.Action>
+                <Button fullWidth variant="danger" onClick={confirmStorageChange}>
+                  {formatMessage({
+                    id: getTrad('form.attribute.rename-type-change-warning.confirm'),
+                    defaultMessage: 'Continue',
+                  })}
+                </Button>
+              </Dialog.Action>
+            }
+          >
+            {storageChangeWarning && (
+              <Box>
+                <Typography>
+                  {formatMessage(
+                    {
+                      id: getTrad('form.attribute.rename-type-change-warning.body'),
+                      defaultMessage:
+                        'You are renaming {oldName} to {newName} and changing it from {oldType} to {newType}. Strapi cannot preserve the existing data of this field when both change at once. The field will be recreated empty when you save.',
+                    },
+                    {
+                      oldName: (
+                        <Typography fontWeight="bold">{storageChangeWarning.oldName}</Typography>
+                      ),
+                      newName: (
+                        <Typography fontWeight="bold">{storageChangeWarning.newName}</Typography>
+                      ),
+                      oldType: (
+                        <Typography fontWeight="bold">{storageChangeWarning.oldType}</Typography>
+                      ),
+                      newType: (
+                        <Typography fontWeight="bold">{storageChangeWarning.newType}</Typography>
+                      ),
+                    }
+                  )}
+                </Typography>
+              </Box>
+            )}
           </ConfirmDialog>
         </Dialog.Root>
         <FormModalHeader
@@ -1185,7 +1417,7 @@ export const FormModal = () => {
                 variant="simple"
                 value={activeTab}
                 onValueChange={(value) => {
-                  setActiveTab(value);
+                  setActiveTab(value as Tab);
                   sendAdvancedTabEvent(value);
                 }}
                 hasError={
@@ -1197,7 +1429,7 @@ export const FormModal = () => {
                     actionType={actionType}
                     forTarget={forTarget}
                     kind={kind}
-                    step={step}
+                    step={step ?? undefined}
                     modalType={modalType}
                     attributeType={attributeType}
                     attributeName={attributeName}
@@ -1244,16 +1476,11 @@ export const FormModal = () => {
               </Tabs.Root>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                type="button"
-                variant="tertiary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleClosed();
-                }}
-              >
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
+              <Modal.Close>
+                <Button type="button" variant="tertiary">
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              </Modal.Close>
               {/* TODO: refactor this component. Nuf said. */}
               <FormModalEndActions
                 deleteContentType={() => deleteContentType(targetUid as Internal.UID.ContentType)}
@@ -1289,6 +1516,6 @@ export const FormModal = () => {
           </FormComponent>
         )}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

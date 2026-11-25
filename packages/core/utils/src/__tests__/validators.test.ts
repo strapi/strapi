@@ -15,7 +15,7 @@ describe('validators', () => {
       let result = true;
       try {
         await strapiID().validate(value);
-      } catch (e) {
+      } catch {
         result = false;
       }
 
@@ -35,7 +35,7 @@ describe('validators', () => {
       let result = true;
       try {
         await strapiID().required().validate(value);
-      } catch (e) {
+      } catch {
         result = false;
       }
 
@@ -55,7 +55,7 @@ describe('validators', () => {
       let result = true;
       try {
         await strapiID().nullable().validate(value);
-      } catch (e) {
+      } catch {
         result = false;
       }
 
@@ -75,7 +75,7 @@ describe('validators', () => {
       let result = true;
       try {
         await strapiID().nullable().defined().validate(value);
-      } catch (e) {
+      } catch {
         result = false;
       }
 

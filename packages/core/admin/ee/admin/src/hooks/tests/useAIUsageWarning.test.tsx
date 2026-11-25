@@ -2,7 +2,7 @@
 import { renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { useGetAIUsageQuery } from '../../services/ai';
+import { useGetAiUsageQuery } from '../../services/ai';
 import { useAIAvailability } from '../useAIAvailability';
 import { useAIUsageWarning } from '../useAIUsageWarning';
 
@@ -35,7 +35,7 @@ jest.mock('../../../../../admin/src/features/Notifications', () => {
 });
 
 jest.mock('../../services/ai', () => ({
-  useGetAIUsageQuery: jest.fn(() => ({
+  useGetAiUsageQuery: jest.fn(() => ({
     data: baseAIUsageData,
     isLoading: false,
     error: null,
@@ -68,7 +68,7 @@ describe('useAIUsageWarning', () => {
 
   it('should not display notification when data is loading', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: null,
       isLoading: true,
       error: null,
@@ -80,7 +80,7 @@ describe('useAIUsageWarning', () => {
 
   it('should not display notification when there is an error', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: null,
       isLoading: false,
       error: 'API Error',
@@ -92,7 +92,7 @@ describe('useAIUsageWarning', () => {
 
   it('should not display notification when AI is not enabled in subscription', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         subscription: {
@@ -110,7 +110,7 @@ describe('useAIUsageWarning', () => {
 
   it('should not display notification when total credits is 0 or negative', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         subscription: {
@@ -128,7 +128,7 @@ describe('useAIUsageWarning', () => {
 
   it('should display warning notification at default threshold (80%)', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         cmsAiCreditsUsed: 800, // 80% of 1000
@@ -148,7 +148,7 @@ describe('useAIUsageWarning', () => {
 
   it('should display warning notification at custom threshold (70%)', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         cmsAiCreditsUsed: 700, // 70% of 1000
@@ -168,7 +168,7 @@ describe('useAIUsageWarning', () => {
 
   it('should display warning notification at 90%', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         cmsAiCreditsUsed: 900, // 90% of 1000
@@ -188,7 +188,7 @@ describe('useAIUsageWarning', () => {
 
   it('should display danger notification when credits are exhausted (100%) with overages', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         subscription: {
@@ -212,7 +212,7 @@ describe('useAIUsageWarning', () => {
 
   it('should display danger notification when credits are exhausted (100%) without overages', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         cmsAiCreditsUsed: 1000, // 100% of 1000
@@ -232,7 +232,7 @@ describe('useAIUsageWarning', () => {
 
   it('should display danger notification when credits are over 100%', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         subscription: {
@@ -256,7 +256,7 @@ describe('useAIUsageWarning', () => {
 
   it('should not display notification when usage is below threshold', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         cmsAiCreditsUsed: 500, // 50% of 1000
@@ -272,7 +272,7 @@ describe('useAIUsageWarning', () => {
 
   it('should handle remaining credits calculation correctly when used credits exceed total', () => {
     // @ts-expect-error – mock
-    useGetAIUsageQuery.mockImplementationOnce(() => ({
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
       data: {
         ...baseAIUsageData,
         cmsAiCreditsUsed: 1200, // More than 1000 total

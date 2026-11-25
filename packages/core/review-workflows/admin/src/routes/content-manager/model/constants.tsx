@@ -17,7 +17,7 @@ export const REVIEW_WORKFLOW_COLUMNS = [
     },
     label: {
       id: 'review-workflows.containers.list.table-headers.reviewWorkflows.stage',
-      defaultMessage: 'Review stage',
+      defaultMessage: 'review stage',
     },
     searchable: false,
     sortable: true,
@@ -25,7 +25,7 @@ export const REVIEW_WORKFLOW_COLUMNS = [
       name: 'name',
       type: 'string',
     },
-    cellFormatter: (props) => <StageColumn {...props} />,
+    cellFormatter: (props) => <StageColumn strapi_stage={props.strapi_stage} />,
   },
   {
     name: ASSIGNEE_ATTRIBUTE_NAME,
@@ -36,7 +36,7 @@ export const REVIEW_WORKFLOW_COLUMNS = [
     },
     label: {
       id: 'review-workflows.containers.list.table-headers.reviewWorkflows.assignee',
-      defaultMessage: 'Assignee',
+      defaultMessage: 'assignee',
     },
     searchable: false,
     sortable: true,
@@ -44,7 +44,7 @@ export const REVIEW_WORKFLOW_COLUMNS = [
       name: 'firstname',
       type: 'string',
     },
-    cellFormatter: (props) => <AssigneeColumn {...props} />,
+    cellFormatter: (props) => <AssigneeColumn strapi_assignee={props.strapi_assignee} />,
   },
 ] satisfies Array<Omit<ListFieldLayout, 'label'> & { label: MessageDescriptor }>;
 
@@ -57,7 +57,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
     input: StageFilter,
     label: {
       id: 'review-workflows.containers.list.table-headers.reviewWorkflows.stage',
-      defaultMessage: 'Review stage',
+      defaultMessage: 'review stage',
     },
     name: 'strapi_stage',
     type: 'relation',
@@ -85,10 +85,24 @@ export const REVIEW_WORKFLOW_FILTERS = [
         },
         value: '$ne',
       },
+      {
+        label: {
+          id: 'components.FilterOptions.FILTER_TYPES.$null',
+          defaultMessage: 'is null',
+        },
+        value: '$null',
+      },
+      {
+        label: {
+          id: 'components.FilterOptions.FILTER_TYPES.$notNull',
+          defaultMessage: 'is not null',
+        },
+        value: '$notNull',
+      },
     ],
     label: {
-      id: 'review-workflows.containers.list.table-headers.reviewWorkflows.assignee.label',
-      defaultMessage: 'Assignee',
+      id: 'review-workflows.containers.list.table-headers.reviewWorkflows.assignee',
+      defaultMessage: 'assignee',
     },
     name: 'strapi_assignee',
   },

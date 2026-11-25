@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../fixtures';
 import { waitForRestart } from '../../../../utils/restart';
 import { resetFiles } from '../../../../utils/file-reset';
 import { navToHeader } from '../../../../utils/shared';
@@ -14,7 +14,7 @@ test.describe('Edit collection type', () => {
   test.beforeEach(async ({ page }) => {
     await resetFiles();
     await sharedSetup('ctb-edit-ct', page, {
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       login: true,
       resetFiles: true,
     });

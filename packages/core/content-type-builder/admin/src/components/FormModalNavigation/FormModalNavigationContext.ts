@@ -12,6 +12,7 @@ import type {
   OpenModalEditCustomFieldPayload,
   OpenModalEditSchemaPayload,
   OpenModalAddFieldPayload,
+  OpenModalCreateSchemaPayload,
 } from './FormModalNavigationProvider';
 
 export type FormModalNavigationContextValue = State & {
@@ -23,7 +24,7 @@ export type FormModalNavigationContextValue = State & {
   onNavigateToAddCompoToDZModal: (options: NavigateToAddCompoToDZModalPayload) => void;
   onOpenModalAddComponentsToDZ: (options: OpenModalAddComponentsToDZPayload) => void;
   onNavigateToCreateComponentStep2: () => void;
-  onOpenModalCreateSchema: (options: State) => void;
+  onOpenModalCreateSchema: (options: OpenModalCreateSchemaPayload) => void;
   onOpenModalEditField: (options: OpenModalEditFieldPayload) => void;
   onOpenModalEditCustomField: (options: OpenModalEditCustomFieldPayload) => void;
   onOpenModalEditSchema: (options: OpenModalEditSchemaPayload) => void;

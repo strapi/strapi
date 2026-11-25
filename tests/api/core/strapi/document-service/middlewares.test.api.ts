@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import resources from './resources/index';
+import resources from './resources/middlewares';
 import { ARTICLE_UID } from './utils';
 
 describe('Document Service', () => {
@@ -27,7 +27,7 @@ describe('Document Service', () => {
         return next();
       });
 
-      const articles = await strapi.documents('api::article.article').findMany();
+      const articles = await strapi.documents(ARTICLE_UID).findMany();
 
       expect(articles).toHaveLength(1);
     });

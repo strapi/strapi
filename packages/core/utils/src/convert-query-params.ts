@@ -1,33 +1,29 @@
-/* eslint-disable max-classes-per-file */
-
 /**
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
-import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+import _, { cloneDeep, get, isEmpty, isObject, isString, toNumber } from 'lodash';
 import {
   constants,
   hasDraftAndPublish,
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } from './content-types';
-import { PaginationError } from './errors';
+import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
+import type { PublicationFilterMode } from './publication-filter';
+import {
+  getMeaningfulSortSegments,
+  hasSort,
+  type SortParams,
+  type SortParamsObject,
+} from './sort-query';
 import { Model } from './types';
+
+export type { SortParams, SortParamsObject } from './sort-query';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
 
@@ -37,12 +33,82 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-export interface SortParamsObject {
-  [key: string]: SortOrder | SortParamsObject;
+type FieldsParams = string | string[];
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+
+const hasOwnProperty = (object: object, key: PropertyKey): boolean =>
+  Object.prototype.hasOwnProperty.call(object, key);
+
+const setSortMapValue = (field: string, order: SortOrder): SortMap => {
+  const path = _.toPath(field);
+  const sortMap: SortMap = {};
+  let current: SortMap | SortMap[] = sortMap;
+
+  for (const [index, key] of path.entries()) {
+    const isLastSegment = index === path.length - 1;
+
+    if (key === 'prototype' || (key in current && !hasOwnProperty(current, key))) {
+      throw new ValidationError('Invalid sort query');
+    }
+
+    if (isLastSegment) {
+      Object.defineProperty(current, key, {
+        configurable: true,
+        enumerable: true,
+        value: order,
+        writable: true,
+      });
+      continue;
+    }
+
+    const nextValue = /^\d+$/.test(path[index + 1]) ? [] : {};
+
+    Object.defineProperty(current, key, {
+      configurable: true,
+      enumerable: true,
+      value: nextValue,
+      writable: true,
+    });
+
+    current = nextValue;
+  }
+
+  return sortMap;
+};
+
+function isEmptySortMap(sortMap: SortMap): boolean {
+  const keys = Object.keys(sortMap);
+
+  if (keys.length === 0) {
+    return true;
+  }
+
+  return keys.every((key) => {
+    const value = sortMap[key];
+
+    if (typeof value === 'string') {
+      return value.trim().length === 0;
+    }
+
+    if (isPlainObject(value)) {
+      return isEmptySortMap(value as SortMap);
+    }
+
+    return true;
+  });
 }
 
-type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
-type FieldsParams = string | string[];
+/** Drops empty sort maps so a trailing comma does not leave a truthy but meaningless `orderBy`. */
+function normalizeOrderBy(orderBy: OrderByQuery): OrderByQuery | undefined {
+  if (Array.isArray(orderBy)) {
+    const filtered = orderBy.filter((sortMap) => !isEmptySortMap(sortMap));
+
+    return filtered.length > 0 ? filtered : undefined;
+  }
+
+  return isEmptySortMap(orderBy) ? undefined : orderBy;
+}
 
 type FiltersParams = unknown;
 
@@ -80,9 +146,10 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
+  publicationFilter?: PublicationFilterMode;
   /**
-   * Filter documents by whether they have a published version.
-   * Use with `status: 'draft'` to find documents that have never been published.
+   * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
+   * Retained for backward compatibility with existing REST and GraphQL clients.
    */
   hasPublishedVersion?: boolean | 'true' | 'false';
 }
@@ -118,18 +185,59 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+const NULL_OPERAND_TRUE_VALUES = new Set(['true', 't', '1']);
+const NULL_OPERAND_FALSE_VALUES = new Set(['false', 'f', '0']);
+
+/**
+ * Reads a `$null` / `$notNull` operand with the values boolean filters accept (case-insensitive).
+ * A forced cast read `no` or `FALSE` as true, so `filters[x][$null]=no` matched the null rows.
+ *
+ * `null` and `undefined` keep the loose reading (false): optional flags (`{ $null: someFlag }`),
+ * GraphQL's nullable input and a bare `?filters[x][$null]` pass them.
+ */
+const parseNullOperand = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    const normalized = String(value).toLowerCase();
+
+    if (NULL_OPERAND_TRUE_VALUES.has(normalized) === true) {
+      return true;
+    }
+
+    if (NULL_OPERAND_FALSE_VALUES.has(normalized) === true) {
+      return false;
+    }
+  }
+
+  throw new ValidationError(
+    'Invalid boolean, expected one of true, t, 1, false, f, 0 (case-insensitive)'
+  );
+};
+
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
+  }
+}
+
+class InvalidPopulateError extends ValidationError {
+  constructor() {
+    super('Invalid populate parameter. Expected a string, an array of strings, a populate object');
   }
 }
 
@@ -147,15 +255,62 @@ const convertOrderingQueryParams = (ordering: unknown) => {
   return ordering;
 };
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
+
+/**
+ * Describes a filter key that `convertAndSanitizeFilters` removed because it is neither an
+ * attribute of the model it was resolved against, nor `id`/`documentId`, nor a known operator.
+ */
+export type UnknownFilterKey = {
+  /** The removed key */
+  key: string;
+  /** UID of the model the key was resolved against, `undefined` when no model was available */
+  uid: string | undefined;
+  /**
+   * Attribute path to the removed key, operators excluded. It starts at the model the filters
+   * apply to: the queried model, or the populated model for filters nested in `populate`
+   * (e.g. `populate: { author: { filters: { nmae: 'x' } } }` reports `['nmae']` with the uid
+   * of the author model).
+   */
+  path: string[];
+  /**
+   * Set when the key sits inside the object operand of an operator applied to a scalar
+   * (non-relational) attribute, at any depth, e.g. `$eq` in `{ meta: { $eq: { a: 1 } } }`
+   * and in `{ meta: { $eq: { title: { a: 1 } } } }`. It is the nearest such operator.
+   */
+  operator: string | undefined;
+};
 
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;
+  /**
+   * Called each time an unknown filter key is removed from the filters.
+   * The key is still removed: the hook only observes the removal.
+   * An error thrown by the hook is not caught: it propagates to the caller of the transformer.
+   */
+  onUnknownFilterKey?: (unknownFilterKey: UnknownFilterKey) => void;
 }
 
-const createTransformer = ({ getModel }: TransformerOptions) => {
+/**
+ * Where `convertAndSanitizeFilters` is in the filters tree
+ */
+type FiltersWalkContext = {
+  /** Attribute path from the model the filters apply to, operators excluded */
+  path: string[];
+  /** Whether the walk is inside the value of a scalar (non-relational) attribute */
+  isInScalarValue: boolean;
+  /** Nearest operator met inside a scalar attribute value, kept through nested attributes */
+  operator: string | undefined;
+};
+
+const ROOT_FILTERS_WALK_CONTEXT: FiltersWalkContext = {
+  path: [],
+  isInScalarValue: false,
+  operator: undefined,
+};
+
+const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions) => {
   /**
    * Sort query parser
    */
@@ -180,30 +335,35 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   };
 
   const convertStringSortQueryParam = (sortQuery: string): SortMap[] => {
-    return sortQuery.split(',').map((value) => convertSingleSortQueryParam(value));
+    return getMeaningfulSortSegments(sortQuery).map((segment) =>
+      convertSingleSortQueryParam(segment)
+    );
   };
 
   const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
-    if (!sortQuery) {
+    const trimmed = sortQuery.trim();
+
+    if (!trimmed) {
       return {};
     }
 
-    if (!isString(sortQuery)) {
-      throw new Error('Invalid sort query');
+    if (!isString(trimmed)) {
+      throw new ValidationError('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
-    const [field, order = 'asc'] = sortQuery.split(':');
+    const [rawField, order = 'asc'] = trimmed.split(':');
+    const field = rawField.trim();
 
     if (field.length === 0) {
-      throw new Error('Field cannot be empty');
+      throw new ValidationError('Field cannot be empty');
     }
 
-    validateOrder(order);
+    validateOrder(order.trim());
 
     // TODO: field should be a valid path on an object model
 
-    return _.set({}, field, order);
+    return setSortMapValue(field, order.trim() as SortOrder);
   };
 
   const convertNestedSortQueryParam = (sortQuery: SortParamsObject): SortMap => {
@@ -213,16 +373,38 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // this is a deep sort
       if (isPlainObject(order)) {
-        transformedSort[field] = convertNestedSortQueryParam(order);
+        const nested = convertNestedSortQueryParam(order as SortParamsObject);
+
+        if (!isEmptySortMap(nested)) {
+          transformedSort[field] = nested;
+        }
       } else if (typeof order === 'string') {
-        validateOrder(order);
-        transformedSort[field] = order;
+        const trimmedOrder = order.trim();
+
+        if (trimmedOrder.length > 0) {
+          validateOrder(trimmedOrder);
+          transformedSort[field] = trimmedOrder;
+        }
       } else {
-        throw Error(`Invalid sort type expected object or string got ${typeof order}`);
+        throw new ValidationError(
+          `Invalid sort type expected object or string got ${typeof order}`
+        );
       }
     }
 
     return transformedSort;
+  };
+
+  const applySortToQuery = (query: Query, sortParam?: SortParams | null) => {
+    if (!hasSort(sortParam)) {
+      return;
+    }
+
+    const orderBy = normalizeOrderBy(convertSortQueryParams(sortParam));
+
+    if (orderBy !== undefined) {
+      query.orderBy = orderBy;
+    }
   };
 
   /**
@@ -232,7 +414,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const startAsANumber = toNumber(startQuery);
 
     if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
-      throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
+      throw new ValidationError(
+        `convertStartQueryParams expected a positive integer got ${startAsANumber}`
+      );
     }
 
     return startAsANumber;
@@ -245,7 +429,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const limitAsANumber = toNumber(limitQuery);
 
     if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
-      throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
+      throw new ValidationError(
+        `convertLimitQueryParams expected a positive integer got ${limitAsANumber}`
+      );
     }
 
     if (limitAsANumber === -1) {
@@ -258,7 +444,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageQueryParams = (page: unknown): number => {
     const pageVal = toNumber(page);
 
-    if (!isInteger(pageVal) || pageVal <= 0) {
+    if (!Number.isInteger(pageVal) || pageVal <= 0) {
       throw new PaginationError(
         `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
       );
@@ -271,7 +457,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
-    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+    if (!Number.isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
         `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
@@ -286,8 +472,8 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     start: unknown,
     limit: unknown
   ) => {
-    const isPagePagination = !isNil(page) || !isNil(pageSize);
-    const isOffsetPagination = !isNil(start) || !isNil(limit);
+    const isPagePagination = page != null || pageSize != null;
+    const isOffsetPagination = start != null || limit != null;
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
@@ -295,14 +481,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       );
     }
   };
-
-  class InvalidPopulateError extends Error {
-    constructor() {
-      super();
-      this.message =
-        'Invalid populate parameter. Expected a string, an array of strings, a populate object';
-    }
-  }
 
   // NOTE: we could support foo.* or foo.bar.* etc later on
   const convertPopulateQueryParams = (
@@ -341,7 +519,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const hasPopulateFragmentDefined = (
     populate: PopulateObjectParams
   ): populate is PopulateObjectParams & Required<Pick<PopulateObjectParams, 'on'>> => {
-    return typeof populate === 'object' && 'on' in populate && !isNil(populate.on);
+    return typeof populate === 'object' && 'on' in populate && populate.on != null;
   };
 
   const hasCountDefined = (
@@ -391,7 +569,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         );
 
         if (hasInvalidProperties) {
-          throw new Error(
+          throw new ValidationError(
             `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
           );
         }
@@ -401,8 +579,12 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          *
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
-        if ('populate' in subPopulate && subPopulate.populate !== '*') {
-          throw new Error(
+        if (
+          'populate' in subPopulate &&
+          subPopulate.populate != null &&
+          subPopulate.populate !== '*'
+        ) {
+          throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
               `Consider using the fragment API for more granular population control.`
@@ -413,7 +595,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         const newSubPopulate = {};
 
         // case: { populate: '*' }
-        if ('populate' in subPopulate) {
+        if ('populate' in subPopulate && subPopulate.populate === '*') {
           Object.assign(newSubPopulate, { populate: true });
         }
 
@@ -442,7 +624,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // Edge case when trying to use the fragment ('on') on a non-morph like attribute
       if (!isMorphLikeRelationalAttribute && hasPopulateFragmentDefined(subPopulate)) {
-        throw new Error(`Using fragments is not permitted to populate "${key}" in "${schema.uid}"`);
+        throw new ValidationError(
+          `Using fragments is not permitted to populate "${key}" in "${schema.uid}"`
+        );
       }
 
       // NOTE: Retrieve the target schema UID.
@@ -490,7 +674,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isPlainObject(subPopulate)) {
-      throw new Error(`Invalid nested populate. Expected '*' or an object`);
+      throw new ValidationError(`Invalid nested populate. Expected '*' or an object`);
     }
 
     const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
@@ -498,9 +682,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    if (sort) {
-      query.orderBy = convertSortQueryParams(sort);
-    }
+    applySortToQuery(query, sort);
 
     if (filters) {
       query.where = convertFiltersQueryParams(filters, schema);
@@ -524,19 +706,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 
@@ -567,7 +749,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       // map convert
       const fieldsValues = fields
         .flatMap((value) => convertFieldsQueryParams(value, schema, depth + 1))
-        .filter((v) => !isNil(v)) as string[];
+        .filter((v) => v != null) as string[];
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {
@@ -576,7 +758,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       return _.uniq([ID_ATTRIBUTE, ...fieldsValues]);
     }
 
-    throw new Error('Invalid fields parameter. Expected a string or an array of strings');
+    throw new ValidationError('Invalid fields parameter. Expected a string or an array of strings');
   };
 
   const isValidSchemaAttribute = (key: string, schema?: Model) => {
@@ -595,21 +777,25 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     // Filters need to be either an array or an object
     // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
     if (!isObject(filters)) {
-      throw new Error('The filters parameter must be an object or an array');
+      throw new ValidationError('The filters parameter must be an object or an array');
     }
 
     // Don't mutate the original object
     const filtersCopy = cloneDeep(filters);
 
-    return convertAndSanitizeFilters(filtersCopy, schema);
+    return convertAndSanitizeFilters(filtersCopy, schema, ROOT_FILTERS_WALK_CONTEXT);
   };
 
-  const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): WhereQuery => {
+  const convertAndSanitizeFilters = (
+    filters: FiltersParams,
+    schema: Model | undefined,
+    context: FiltersWalkContext
+  ): WhereQuery => {
     if (Array.isArray(filters)) {
       return (
         filters
           // Sanitize each filter
-          .map((filter) => convertAndSanitizeFilters(filter, schema))
+          .map((filter) => convertAndSanitizeFilters(filter, schema, context))
           // Filter out empty filters
           .filter((filter) => !isPlainObject(filter) || !isEmpty(filter))
       );
@@ -623,27 +809,55 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     // Here, `key` can either be an operator or an attribute name
     for (const [key, value] of Object.entries(filters)) {
-      const attribute = get(key, schema?.attributes);
+      const attribute = get(schema?.attributes, key);
       const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
 
       if (!validKey) {
         removeOperator(key);
+
+        if (onUnknownFilterKey !== undefined) {
+          onUnknownFilterKey({
+            key,
+            uid: schema?.uid,
+            path: [...context.path, key],
+            operator: context.operator,
+          });
+        }
       }
       // Handle attributes
       else if (attribute) {
+        const attributeContext: FiltersWalkContext = {
+          path: [...context.path, key],
+          isInScalarValue: false,
+          // Inside an object operand, keep reporting the operand's operator
+          operator: context.operator,
+        };
+
         // Relations
         if (attribute.type === 'relation') {
-          filters[key] = convertAndSanitizeFilters(value, getModel(attribute.target!));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel(attribute.target!),
+            attributeContext
+          );
         }
 
         // Components
         else if (attribute.type === 'component') {
-          filters[key] = convertAndSanitizeFilters(value, getModel(attribute.component));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel(attribute.component),
+            attributeContext
+          );
         }
 
         // Media
         else if (attribute.type === 'media') {
-          filters[key] = convertAndSanitizeFilters(value, getModel('plugin::upload.file'));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel('plugin::upload.file'),
+            attributeContext
+          );
         }
 
         // Dynamic Zones
@@ -659,15 +873,24 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
         // Scalar attributes
         else {
-          filters[key] = convertAndSanitizeFilters(value, schema);
+          filters[key] = convertAndSanitizeFilters(value, schema, {
+            ...attributeContext,
+            isInScalarValue: true,
+          });
         }
       }
 
       // Handle operators
       else if (['$null', '$notNull'].includes(key)) {
-        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+        filters[key] = parseNullOperand(filters[key]);
       } else if (isObject(value)) {
-        filters[key] = convertAndSanitizeFilters(value, schema);
+        const nestedContext: FiltersWalkContext =
+          isOperator(key) === true
+            ? { ...context, operator: context.isInScalarValue === true ? key : context.operator }
+            : // `id` and `documentId`, valid without being declared as attributes
+              { path: [...context.path, key], isInScalarValue: true, operator: context.operator };
+
+        filters[key] = convertAndSanitizeFilters(value, schema, nestedContext);
       }
 
       // Remove empty objects & arrays
@@ -699,48 +922,57 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
-      params;
+    const {
+      _q: searchQuery,
+      sort,
+      filters,
+      fields,
+      populate,
+      page,
+      pageSize,
+      start,
+      limit,
+      status,
+      ...rest
+    } = params;
 
-    if (!isNil(status)) {
+    if (status != null) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(_q)) {
-      query._q = _q;
+    if (searchQuery != null) {
+      query._q = searchQuery;
     }
 
-    if (!isNil(sort)) {
-      query.orderBy = convertSortQueryParams(sort);
-    }
+    applySortToQuery(query, sort);
 
-    if (!isNil(filters)) {
+    if (filters != null) {
       query.where = convertFiltersQueryParams(filters, schema);
     }
 
-    if (!isNil(fields)) {
+    if (fields != null) {
       query.select = convertFieldsQueryParams(fields, schema);
     }
 
-    if (!isNil(populate)) {
+    if (populate != null) {
       query.populate = convertPopulateQueryParams(populate, schema);
     }
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 

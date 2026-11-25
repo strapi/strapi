@@ -32,26 +32,38 @@ export const setGuidedTourLocalStorage = async (
   page: Page,
   guidedTourState: typeof STRAPI_GUIDED_TOUR_CONFIG
 ) => {
-  // Navigate to the admin page to set localStorage
-  const port = process.env.PORT || 1337;
-  await page.goto(`http://127.0.0.1:${port}/admin`);
+  // Seed storage on the same origin without mounting the admin app: its
+  // hydration can otherwise overwrite this fixture before the next navigation.
+  await page.goto('/admin/init');
 
-  // Set a default local storage so the guided tour is disabled by default
   await page.evaluate((config) => {
     localStorage.setItem('STRAPI_GUIDED_TOUR', JSON.stringify(config));
   }, guidedTourState);
 };
 
 async function globalSetup() {
-  // Create a browser context and set up localStorage
+  const port = process.env.PORT?.trim();
+  if (!port) {
+    throw new Error(
+      'globalSetup: PORT is not set. Run e2e via `yarn test:e2e` so the browser runner sets PORT (same port as the Playwright webServer).'
+    );
+  }
   const browser = await chromium.launch();
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}`,
+  });
   const page = await context.newPage();
 
   await setGuidedTourLocalStorage(page, STRAPI_GUIDED_TOUR_CONFIG);
 
-  // Save the storage state to be used by all tests - save it in the e2e directory
-  const storageStatePath = path.join(__dirname, '..', 'e2e', 'playwright-storage-state.json');
+  // Save the storage state to be used by all tests - save it in the e2e directory. One file per
+  // port: localStorage is scoped to the origin, and apps running side by side use different ports.
+  const storageStatePath = path.join(
+    __dirname,
+    '..',
+    'e2e',
+    `playwright-storage-state-${port}.json`
+  );
   await context.storageState({ path: storageStatePath });
 
   await browser.close();

@@ -1,7 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import { render, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
+import { SIZE } from '../../utils/constants';
 import { LogoInput } from '../LogoInput';
 
 const CUSTOM_IMAGE_FIXTURES = {
@@ -217,12 +218,13 @@ describe('ApplicationsInfosPage || LogoInput', () => {
   describe('from url', () => {
     it('should show error message when uploading wrong file format', async () => {
       server.use(
-        rest.get('http://gifs.com/some-gif.gif', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/gif'),
-            ctx.body(new Blob(['my-image'], { type: 'image/gif' }))
-          );
-        })
+        http.get(
+          'http://gifs.com/some-gif.gif',
+          () =>
+            new HttpResponse(new Blob(['my-image'], { type: 'image/gif' }), {
+              headers: { 'content-type': 'image/gif' },
+            })
+        )
       );
 
       const { getByLabelText, getByRole, findByText, user } = render(
@@ -246,11 +248,22 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should show error message when uploading unauthorized width/height', async () => {
       server.use(
-        rest.get('http://gifs.com/some-png.png', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.body(new File(['1'.repeat(1024 * 1024 + 1)], 'my-image', { type: 'image/png' }))
-          );
+        http.get('http://gifs.com/some-png.png', () => {
+          // msw v2 + jsdom: jsdom's `new File([blob], ...)` doesn't read Blob bytes,
+          // so the downstream size check sees 13 instead of the true byte count.
+          // Return a typed-array body so axios surfaces it as something the File
+          // constructor can read directly.
+          //
+          // Keep the body only just over the size limit. `parseFileMetadatas`
+          // reads it via `FileReader.readAsDataURL` (and feeds the result to
+          // `Image.src`); the cost of that scales with the byte count, so an
+          // oversized payload (previously 1MB) could push the async pipeline past
+          // `findByText`'s default 1s timeout on a loaded CI runner and flake.
+          // `asset.size` is `file.size / 1000` (KB) and must exceed `SIZE`.
+          const body = new Uint8Array(SIZE * 1000 + 1).fill(0x31);
+          return new HttpResponse(body, {
+            headers: { 'content-type': 'image/png' },
+          });
         })
       );
 
@@ -277,12 +290,13 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should accept upload and lead user to next modal', async () => {
       server.use(
-        rest.get('http://gifs.com/some-png.png', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.body(new File(['1'], 'my-image', { type: 'image/png' }))
-          );
-        })
+        http.get(
+          'http://gifs.com/some-png.png',
+          () =>
+            new HttpResponse(new File(['1'], 'my-image', { type: 'image/png' }), {
+              headers: { 'content-type': 'image/png' },
+            })
+        )
       );
 
       const { getByLabelText, getByRole, findByText, user } = render(
@@ -306,12 +320,13 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should let user choose another logo', async () => {
       server.use(
-        rest.get('http://gifs.com/some-png.png', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.body(new File(['1'], 'my-image', { type: 'image/png' }))
-          );
-        })
+        http.get(
+          'http://gifs.com/some-png.png',
+          () =>
+            new HttpResponse(new File(['1'], 'my-image', { type: 'image/png' }), {
+              headers: { 'content-type': 'image/png' },
+            })
+        )
       );
 
       const { getByLabelText, getByRole, findByText, user } = render(

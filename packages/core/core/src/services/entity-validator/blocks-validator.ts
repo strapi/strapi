@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import { isValidBlocksLink, yup } from '@strapi/utils';
 
 const textNodeValidator = yup.object().shape({
   type: yup.string().equals(['text']).required(),
@@ -18,21 +18,11 @@ const textNodeValidator = yup.object().shape({
   code: yup.boolean(),
 });
 
-const checkValidLink = (link: string) => {
-  try {
-    // eslint-disable-next-line no-new
-    new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
-  } catch (error) {
-    return false;
-  }
-  return true;
-};
-
 const linkNodeValidator = yup.object().shape({
   type: yup.string().equals(['link']).required(),
   url: yup
     .string()
-    .test('invalid-url', 'Please specify a valid link.', (value) => checkValidLink(value ?? '')),
+    .test('invalid-url', 'Please specify a valid link.', (value) => isValidBlocksLink(value ?? '')),
   children: yup.array().of(textNodeValidator).required(),
 });
 
@@ -80,7 +70,7 @@ const quoteNodeValidator = yup.object().shape({
 
 const codeBlockValidator = yup.object().shape({
   type: yup.string().equals(['code']).required(),
-  syntax: yup.string().nullable(),
+  language: yup.string().nullable(),
   children: yup
     .array()
     .of(textNodeValidator)
@@ -128,7 +118,7 @@ const imageNodeValidator = yup.object().shape({
     caption: yup.string().nullable(),
     width: yup.number().required(),
     height: yup.number().required(),
-    formats: yup.object().required(),
+    formats: yup.object().nullable(),
     hash: yup.string().required(),
     ext: yup.string().required(),
     mime: yup.string().required(),

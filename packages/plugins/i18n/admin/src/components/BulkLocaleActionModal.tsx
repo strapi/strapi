@@ -15,6 +15,8 @@ import { LocaleStatus } from './CMHeaderActions';
 
 import type { Modules } from '@strapi/types';
 
+const EMPTY_VALIDATION_ERRORS: NonNullable<BulkLocaleActionModalProps['validationErrors']> = {};
+
 type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
 /* -------------------------------------------------------------------------------------------------
@@ -23,13 +25,24 @@ type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
 interface EntryValidationTextProps {
   status: Status;
-  validationErrors: FormErrors[string] | null;
+  validationErrors: FormErrors | null;
   action: 'bulk-publish' | 'bulk-unpublish';
 }
 
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
 }
+
+type ValidationErrorValue =
+  | string
+  | TranslationMessage
+  | ValidationErrorValue[]
+  | { [key: string]: ValidationErrorValue | undefined };
+
+type ValidationErrorRecord = Record<string, ValidationErrorValue | undefined>;
+
+type LocaleValidationErrors = Partial<Record<string, FormErrors>>;
+type LocaleTableRow = LocaleStatus & { id: string };
 
 const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
   return (
@@ -48,7 +61,7 @@ const EntryValidationText = ({
    * TODO: Should this be extracted an made into a factory to recursively get
    * error messages??
    */
-  const getErrorStr = (key: string, value?: FormErrors[string]): string => {
+  const getErrorStr = (key: string, value?: ValidationErrorValue): string => {
     if (typeof value === 'string') {
       return `${key}: ${value}`;
     } else if (isErrorMessageDescriptor(value)) {
@@ -67,8 +80,8 @@ const EntryValidationText = ({
     }
   };
 
-  if (validationErrors) {
-    const validationErrorsMessages = Object.entries(validationErrors)
+  if (validationErrors !== null) {
+    const validationErrorsMessages = Object.entries(validationErrors as ValidationErrorRecord)
       .map(([key, value]) => {
         return getErrorStr(key, value);
       })
@@ -175,7 +188,7 @@ interface BulkLocaleActionModalProps {
     name: string;
   }[];
   localesMetadata: Locale[];
-  validationErrors?: FormErrors;
+  validationErrors?: LocaleValidationErrors;
   action: 'bulk-publish' | 'bulk-unpublish';
 }
 
@@ -183,15 +196,15 @@ const BulkLocaleActionModal = ({
   headers,
   rows,
   localesMetadata,
-  validationErrors = {},
+  validationErrors = EMPTY_VALIDATION_ERRORS,
   action,
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
 
-  const selectedRows = useTable<LocaleStatus[]>(
+  const selectedRows = useTable(
     'BulkLocaleActionModal',
     (state) => state.selectedRows
-  );
+  ) as LocaleTableRow[];
 
   const getFormattedCountMessage = () => {
     const currentStatusByLocale = rows.reduce<Record<string, string>>((acc, { locale, status }) => {
@@ -248,14 +261,14 @@ const BulkLocaleActionModal = ({
             ))}
           </Table.Head>
           <Table.Body>
-            {rows.map(({ locale, status }, index) => {
+            {rows.map(({ locale, status }) => {
               const error = validationErrors?.[locale] ?? null;
 
               const statusVariant =
                 status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
 
               return status && locale ? (
-                <Table.Row key={index}>
+                <Table.Row key={locale}>
                   <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
                   <Table.Cell>
                     <Typography variant="sigma" textColor="neutral600">
@@ -315,4 +328,4 @@ const BulkLocaleActionModal = ({
 };
 
 export { BulkLocaleActionModal };
-export type { BulkLocaleActionModalProps };
+export type { BulkLocaleActionModalProps, LocaleValidationErrors };

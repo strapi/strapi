@@ -344,6 +344,42 @@ describe('Role CRUD End to End', () => {
             ],
             "settings": [
               {
+                "action": "admin::admin-tokens.access",
+                "category": "admin tokens",
+                "displayName": "Access the Admin tokens settings page",
+                "subCategory": "admin tokens",
+              },
+              {
+                "action": "admin::admin-tokens.create",
+                "category": "admin tokens",
+                "displayName": "Create (generate)",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.delete",
+                "category": "admin tokens",
+                "displayName": "Delete (revoke)",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.read",
+                "category": "admin tokens",
+                "displayName": "Read",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.regenerate",
+                "category": "admin tokens",
+                "displayName": "Regenerate",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.update",
+                "category": "admin tokens",
+                "displayName": "Update",
+                "subCategory": "general",
+              },
+              {
                 "action": "admin::api-tokens.access",
                 "category": "api tokens",
                 "displayName": "Access the API tokens settings page",
@@ -380,10 +416,22 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
+                "action": "admin::audit-logs.export",
+                "category": "audit logs",
+                "displayName": "Export",
+                "subCategory": "options",
+              },
+              {
                 "action": "admin::audit-logs.read",
                 "category": "audit logs",
                 "displayName": "Read",
                 "subCategory": "options",
+              },
+              {
+                "action": "admin::debug-dump.read",
+                "category": "debug and support",
+                "displayName": "Generate a support debug dump",
+                "subCategory": "general",
               },
               {
                 "action": "admin::marketplace.read",
@@ -930,6 +978,42 @@ describe('Role CRUD End to End', () => {
             ],
             "settings": [
               {
+                "action": "admin::admin-tokens.access",
+                "category": "admin tokens",
+                "displayName": "Access the Admin tokens settings page",
+                "subCategory": "admin tokens",
+              },
+              {
+                "action": "admin::admin-tokens.create",
+                "category": "admin tokens",
+                "displayName": "Create (generate)",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.delete",
+                "category": "admin tokens",
+                "displayName": "Delete (revoke)",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.read",
+                "category": "admin tokens",
+                "displayName": "Read",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.regenerate",
+                "category": "admin tokens",
+                "displayName": "Regenerate",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::admin-tokens.update",
+                "category": "admin tokens",
+                "displayName": "Update",
+                "subCategory": "general",
+              },
+              {
                 "action": "admin::api-tokens.access",
                 "category": "api tokens",
                 "displayName": "Access the API tokens settings page",
@@ -963,6 +1047,12 @@ describe('Role CRUD End to End', () => {
                 "action": "admin::api-tokens.update",
                 "category": "api tokens",
                 "displayName": "Update",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::debug-dump.read",
+                "category": "debug and support",
+                "displayName": "Generate a support debug dump",
                 "subCategory": "general",
               },
               {

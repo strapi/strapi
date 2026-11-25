@@ -1,10 +1,20 @@
-## disable EE if options not set
-if [[ -z "$RUN_EE" ]]; then
-  export STRAPI_DISABLE_EE=true
+#!/usr/bin/env bash
+## Align with `tests/utils/e2e-edition.ts`: explicit CE vs EE for the whole e2e run.
+if [[ "${RUN_EE:-}" == "true" ]]; then
+  export STRAPI_E2E_EDITION=ee
+  if [[ "${DISABLE_LICENSE_PING:-true}" == "true" ]]; then
+    export STRAPI_DISABLE_LICENSE_PING=true
+  fi
 else
-  export STRAPI_DISABLE_LICENSE_PING=true
+  export STRAPI_E2E_EDITION=ce
 fi
 
 jestOptions=($JEST_OPTIONS)
 
-yarn test:e2e --setup --concurrency=1 -- "${jestOptions[@]}"
+domainArgs=()
+if [[ -n "${DOMAINS:-}" ]]; then
+  # shellcheck disable=SC2206 # deliberate word splitting: DOMAINS is a space separated list
+  domainArgs=(--domains ${DOMAINS})
+fi
+
+yarn test:e2e --setup --concurrency=2 "${domainArgs[@]}" -- "${jestOptions[@]}"

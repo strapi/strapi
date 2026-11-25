@@ -3,9 +3,8 @@ import * as React from 'react';
 import { useDroppable, DndContext, UniqueIdentifier, DragOverlay } from '@dnd-kit/core';
 import { arraySwap, SortableContext, useSortable, rectSwappingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useField, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
+import { UnsavedChangesModal, useField, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
-  Modal,
   Box,
   Flex,
   Grid,
@@ -29,6 +28,8 @@ import { EditFieldForm, EditFieldFormProps } from './EditFieldForm';
 
 import type { ConfigurationFormData, EditFieldSpacerLayout } from './Form';
 import type { EditLayout } from '../../hooks/useDocumentLayout';
+
+const EMPTY_METADATAS: NonNullable<FieldsProps['metadatas']> = {};
 
 type FormField = ConfigurationFormData['layout'][number]['children'][number];
 type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '__temp_key__'>;
@@ -110,19 +111,24 @@ const createDragAndDropContainersFromLayout = (layout: ConfigurationFormData['la
   }));
 };
 
-const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
+const Fields = ({
+  attributes,
+  fieldSizes,
+  components,
+  metadatas = EMPTY_METADATAS,
+}: FieldsProps) => {
   const { formatMessage } = useIntl();
 
   const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
-    (state) => state.values.layout ?? []
+    (state) => (state.values as ConfigurationFormData).layout ?? []
   );
 
   const onChange = useForm('Fields', (state) => state.onChange);
   const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
 
-  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
+  const existingFields = new Set(layout.flatMap((row) => row.children.map((field) => field.name)));
 
   /**
    * Get the fields that are not already in the layout
@@ -132,7 +138,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
     const [name, { visible, ...field }] = current;
 
-    if (!existingFields.includes(name) && visible === true) {
+    if (!existingFields.has(name) && visible === true) {
       const type = attributes[name]?.type;
       const size = type ? fieldSizes[type] : GRID_COLUMNS;
 
@@ -334,7 +340,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             activeIndex !== -1 &&
             overIndex !== -1;
           const canCreateNewRowForItem =
-            activeContainerIndex !== overContainerIndex && GRID_COLUMNS - spaceTaken === 0;
+            activeContainerIndex !== overContainerIndex &&
+            GRID_COLUMNS - spaceTaken < draggedItem.size;
           const isHoveringOverSpacer = overItem?.name === TEMP_FIELD_NAME;
 
           /**
@@ -368,25 +375,42 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             // If there is absolutely no space left in the target row and the
             // dragged item comes from a different row, add it to a new row
             if (canCreateNewRowForItem) {
-              const insertIndex = overContainerIndex + 1;
-              const existingRow = draft[insertIndex];
+              // Default: insert a new row after the row being hovered (between that row and the
+              // next). For row 0, use index 0 instead so fields that are not full-width can still
+              // be moved above the first row—there is no separate drop area above it in the UI.
+              const insertIndex = overContainerIndex === 0 ? 0 : overContainerIndex + 1;
 
-              if (existingRow) {
-                const nonTempChildren = existingRow.children.filter(
-                  (child) => child.name !== TEMP_FIELD_NAME
-                );
-                const isNextRowEmpty = nonTempChildren.length === 0;
+              /**
+               * When inserting *after* the hovered row, reuse the following row if it only
+               * contains spacers. Skip when inserting at index 0 — draft[0] is the hovered row.
+               */
+              if (insertIndex > overContainerIndex) {
+                const existingRow = draft[insertIndex];
 
-                // If the row directly after is empty (only spacers), reuse it
-                // instead of creating yet another row.
-                if (isNextRowEmpty) {
-                  existingRow.children = [draggedItem];
-                  return;
+                if (existingRow) {
+                  const nonTempChildren = existingRow.children.filter(
+                    (child) => child.name !== TEMP_FIELD_NAME
+                  );
+                  const isNextRowEmpty = nonTempChildren.length === 0;
+
+                  // If the row directly after is empty (only spacers), reuse it
+                  // instead of creating yet another row.
+                  if (isNextRowEmpty) {
+                    existingRow.children = [draggedItem];
+                    return;
+                  }
                 }
               }
 
               const newContainerPrototype = draft[overContainerIndex];
-              const newContainerId = `container-${draft.length}`;
+
+              // Using draft.length directly can collide with an existing container id
+              // (e.g. after rows were removed), causing React key conflicts and flicker.
+              const findFreeContainerId = (i: number): string =>
+                containersAsDictionary[`container-${i}`]
+                  ? findFreeContainerId(i + 1)
+                  : `container-${i}`;
+              const newContainerId = findFreeContainerId(draft.length);
 
               draft.splice(insertIndex, 0, {
                 ...newContainerPrototype,
@@ -409,7 +433,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           targetChildren.splice(overIndex, 0, draggedItem);
         });
 
-        setContainers(update);
+        setContainers(update.filter((container) => container.children.length > 0));
       }}
       onDragEnd={(event) => {
         const { active, over } = event;
@@ -431,7 +455,12 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         );
 
         const movedContainerItems = produce(containersAsDictionary, (draft) => {
-          if (activeIndex !== overIndex && activeContainer === overContainer) {
+          if (
+            activeIndex >= 0 &&
+            overIndex >= 0 &&
+            activeIndex !== overIndex &&
+            activeContainer === overContainer
+          ) {
             // Move items around inside their own container
             draft[activeContainer].children = arraySwap(
               draft[activeContainer].children,
@@ -599,7 +628,7 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
   }
 
   return (
-    <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <UnsavedChangesModal open={isModalOpen} onOpenChange={setIsModalOpen}>
       <Flex
         borderColor="neutral150"
         background="neutral100"
@@ -750,7 +779,7 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
       {value.name !== TEMP_FIELD_NAME && (
         <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
       )}
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

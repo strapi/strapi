@@ -35,5 +35,8 @@
   "pages.SettingsPage.toggle.label": "Dostęp ograniczony",
   "plugin.description.long": "Stwórz dokument OpenAPI i zwizualizuj swoje API z Swagger UI.",
   "plugin.description.short": "Stwórz dokument OpenAPI i zwizualizuj swoje API z Swagger UI.",
-  "plugin.name": "Dokumentacja"
+  "plugin.name": "Dokumentacja",
+  "Input.error.contain.lowercase": "Hasło musi zawierać co najmniej jedną małą literę",
+  "Input.error.contain.number": "Hasło musi zawierać co najmniej jedną cyfrę",
+  "Input.error.contain.uppercase": "Hasło musi zawierać co najmniej jedną wielką literę"
 }

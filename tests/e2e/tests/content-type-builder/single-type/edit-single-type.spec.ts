@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../fixtures';
 import { waitForRestart } from '../../../../utils/restart';
 import { resetFiles } from '../../../../utils/file-reset';
 import { navToHeader } from '../../../../utils/shared';
@@ -16,7 +16,7 @@ test.describe('Edit single type', () => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);

@@ -82,5 +82,11 @@ export default {
       private: true,
       searchable: false,
     },
+    metadata: {
+      type: 'json',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
   },
 };

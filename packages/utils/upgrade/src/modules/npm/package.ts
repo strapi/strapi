@@ -3,7 +3,14 @@ import semver from 'semver';
 import execa from 'execa';
 import { packageManager } from '@strapi/utils';
 
-import { ProxyAgent } from 'undici';
+// Import undici's dispatchers from their own files: loading undici's main entry replaces the
+// dispatcher of Node's built-in fetch (https://github.com/nodejs/undici/issues/5500)
+/* eslint-disable import/extensions -- required by the ESM build: undici has no exports map */
+import ProxyAgent from 'undici/lib/dispatcher/proxy-agent.js';
+import Dispatcher1Wrapper from 'undici/lib/dispatcher/dispatcher1-wrapper.js';
+import Dispatcher from 'undici/lib/dispatcher/dispatcher.js';
+import connect from 'undici/lib/api/api-connect.js';
+/* eslint-enable import/extensions */
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
@@ -11,8 +18,13 @@ import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from 
 import type { Version } from '../version';
 import { Logger } from '../logger';
 
+// undici's main entry adds connect() to every dispatcher. ProxyAgent needs it to open the CONNECT
+// tunnel used for https targets such as the npm registry, so add it here since the entry is skipped.
+Dispatcher.prototype.connect ??= connect;
+
 const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
-const agent = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
+// Wrapped so Node's built-in fetch (bundling its own undici) can use an undici 8 dispatcher
+const agent = proxyUrl ? new Dispatcher1Wrapper(new ProxyAgent(proxyUrl)) : undefined;
 
 export class Package implements PackageInterface {
   name: string;
@@ -34,7 +46,7 @@ export class Package implements PackageInterface {
     return this.npmPackage !== null;
   }
 
-  private assertPackageIsLoaded(npmPackage: NPMPackage | null): asserts npmPackage is NPMPackage {
+  private assertPackageIsLoaded(_npmPackage: NPMPackage | null): asserts _npmPackage is NPMPackage {
     assert(this.isLoaded, 'The package is not loaded yet');
   }
 
@@ -64,25 +76,52 @@ export class Package implements PackageInterface {
     );
   }
 
+  private async getYarnMajorVersion(): Promise<number> {
+    try {
+      const { stdout } = await execa('yarn', ['--version'], { timeout: 5_000 });
+      const version = stdout.trim();
+      return parseInt(version.split('.')[0], 10);
+    } catch {
+      // Default to Yarn Berry (v2+) if version check fails
+      return 2;
+    }
+  }
+
+  private normalizeRegistryOutput(stdout: string): string | undefined {
+    const registry = stdout.trim();
+
+    // Yarn Classic (v1) may return literal "undefined" for unset config values
+    if (!registry || registry === 'undefined') {
+      return undefined;
+    }
+
+    return registry;
+  }
+
   private async getRegistryFromPackageManager(): Promise<string | undefined> {
     try {
       const packageManagerName = await packageManager.getPreferred(this.cwd);
       if (!packageManagerName) return undefined;
 
-      const registryCommands = {
-        yarn: ['config', 'get', 'npmRegistryServer'],
-        npm: ['config', 'get', 'registry'],
-      } as const;
+      let command: readonly string[];
 
-      const command = registryCommands[packageManagerName as keyof typeof registryCommands];
-      if (!command) {
+      if (packageManagerName === 'yarn') {
+        const yarnMajorVersion = await this.getYarnMajorVersion();
+        // Yarn Classic (v1) uses 'registry', Yarn Berry (v2+) uses 'npmRegistryServer'
+        command =
+          yarnMajorVersion >= 2
+            ? ['config', 'get', 'npmRegistryServer']
+            : ['config', 'get', 'registry'];
+      } else if (packageManagerName === 'npm' || packageManagerName === 'pnpm') {
+        command = ['config', 'get', 'registry'];
+      } else {
         this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
         return undefined;
       }
 
-      const { stdout } = await execa(packageManagerName, command, { timeout: 10_000 });
-      return stdout.trim() || undefined;
-    } catch (error) {
+      const { stdout } = await execa(packageManagerName, [...command], { timeout: 10_000 });
+      return this.normalizeRegistryOutput(stdout);
+    } catch {
       this.logger.warn('Failed to determine registry URL from package manager');
       return undefined;
     }
@@ -114,8 +153,8 @@ export class Package implements PackageInterface {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
-      // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
-      dispatcher: agent,
+      // The global RequestInit types its dispatcher with Node's bundled undici types
+      dispatcher: agent as unknown as RequestInit['dispatcher'],
     });
 
     // TODO: Use a validation library to make sure the response structure is correct

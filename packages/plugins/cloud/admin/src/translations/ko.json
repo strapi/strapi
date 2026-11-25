@@ -1,0 +1,20 @@
+{
+  "Plugin.name": "배포",
+  "Homepage.title": "Strapi Cloud로 배포하기",
+  "Homepage.subTitle": "자동화된 배포와 글로벌 CDN을 갖춘 매니지드 클라우드 플랫폼에서 Strapi 프로젝트를 호스팅하세요.",
+  "Homepage.features.cdn": "글로벌 CDN",
+  "Homepage.features.pushToDeploy": "Push로 배포",
+  "Homepage.features.customDomain": "커스텀 도메인",
+  "Homepage.deploy.title": "원하는 배포 방식을 선택하세요",
+  "Homepage.deploy.ariaLabel": "배포 옵션",
+  "Homepage.deploy.git.badge": "추천",
+  "Homepage.deploy.git.title": "Strapi Cloud에 배포",
+  "Homepage.deploy.git.subTitle": "Strapi Cloud에서 GitHub 또는 GitLab 프로젝트를 직접 배포하세요",
+  "Homepage.deploy.git.button": "Strapi Cloud에 배포",
+  "Homepage.deploy.cli.title": "CLI로 배포",
+  "Homepage.deploy.cli.subTitle": "명령줄을 사용해 프로젝트를 기존 Strapi Cloud 프로젝트에 연결하고, CLI에서 직접 변경 사항을 배포하세요.",
+  "Homepage.deploy.cli.ariaLabel": "패키지 매니저",
+  "Homepage.deploy.cli.copy": "복사",
+  "Homepage.deploy.cli.copySuccess": "명령어가 클립보드에 복사되었습니다",
+  "Homepage.deploy.documentation": "문제가 있으신가요? 문서를 확인해보세요"
+}

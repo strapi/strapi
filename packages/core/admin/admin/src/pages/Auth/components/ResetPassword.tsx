@@ -16,9 +16,9 @@ import {
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
-import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { establishAdminSession } from '../../../utils/establishAdminSession';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
@@ -47,10 +47,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'lowercase',
       {
-        message: {
-          id: 'components.Input.error.contain.lowercase',
-          defaultMessage: 'Password must contain at least 1 lowercase letter',
-        },
+        id: 'components.Input.error.contain.lowercase',
+        defaultMessage: 'Password must contain at least 1 lowercase letter',
       },
       (value) => {
         if (!value) return true;
@@ -60,10 +58,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'uppercase',
       {
-        message: {
-          id: 'components.Input.error.contain.uppercase',
-          defaultMessage: 'Password must contain at least 1 uppercase letter',
-        },
+        id: 'components.Input.error.contain.uppercase',
+        defaultMessage: 'Password must contain at least 1 uppercase letter',
       },
       (value) => {
         if (!value) return true;
@@ -73,10 +69,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'number',
       {
-        message: {
-          id: 'components.Input.error.contain.number',
-          defaultMessage: 'Password must contain at least 1 number',
-        },
+        id: 'components.Input.error.contain.number',
+        defaultMessage: 'Password must contain at least 1 number',
       },
       (value) => {
         if (!value) return true;
@@ -115,7 +109,7 @@ const ResetPassword = () => {
     const res = await resetPassword(body);
 
     if ('data' in res) {
-      dispatch(login({ token: res.data.token }));
+      establishAdminSession(dispatch, { token: res.data.token });
       navigate('/');
     }
   };

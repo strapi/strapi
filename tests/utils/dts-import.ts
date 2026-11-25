@@ -1,12 +1,17 @@
-import { resolve } from 'path';
+import { statSync } from 'fs';
+import { basename, resolve } from 'path';
 import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../e2e/constants';
 
 const {
   file: {
     providers: { createLocalFileSourceProvider },
   },
+  directory: {
+    providers: { createLocalDirectorySourceProvider },
+  },
   strapi: {
     providers: { createRemoteStrapiDestinationProvider, createLocalStrapiDestinationProvider },
+    isProtectedRemotePushType,
   },
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
@@ -14,6 +19,49 @@ const {
 interface RestoreConfiguration {
   coreStore: boolean;
 }
+
+/** Fixtures under `tests/e2e/data` the test app can restore itself (see `reset-admin-fixture.js`). */
+const IN_APP_FIXTURES = new Set(['with-admin', 'without-admin']);
+
+/**
+ * Base URL for the Strapi instance under test (HTTP DTS). **Requires a non-empty `process.env.PORT`.**
+ *
+ * **Normal e2e (`yarn test:e2e`):** `tests/utils/runners/browser-runner.js` passes `PORT` (and
+ * `HOST`, `TEST_APP_PATH`) into the Playwright subprocess **before** config loads; the generated
+ * per-app `playwright.config.js` assigns `process.env.PORT` again (`tests/scripts/run-tests.js`).
+ * `tests/utils/global-setup.ts` also fails fast if `PORT` is missing — same contract.
+ *
+ * **Manual CLI:** only `importData()` at the bottom of this file defaults `PORT` to `8000` when unset
+ * (first test-app slot). Other programmatic callers must set `PORT` themselves — we deliberately
+ * removed `?? 1337` so we never silently hit Strapi’s dev default while the runner uses `8000 + index`.
+ */
+const getStrapiTestBaseUrl = () => {
+  const port = process.env.PORT?.trim();
+  if (!port) {
+    throw new Error(
+      'getStrapiTestBaseUrl: PORT is not set. Use `yarn test:e2e` (runner sets PORT), or set PORT yourself (e.g. `PORT=8000` for the first e2e test app).'
+    );
+  }
+  return `http://127.0.0.1:${port}`;
+};
+
+export const resyncSuperAdminPermissionsAfterImport = async () => {
+  try {
+    const resyncRes = await fetch(
+      new URL('/api/config/permissions/resync-super-admin', getStrapiTestBaseUrl()),
+      { method: 'POST' }
+    );
+    if (!resyncRes.ok) {
+      console.error(
+        `Super Admin permission resync failed: HTTP ${resyncRes.status} ${await resyncRes.text()}`
+      );
+      process.exit(1);
+    }
+  } catch (err) {
+    console.error('Super Admin permission resync failed.' + JSON.stringify(err, null, 2));
+    process.exit(1);
+  }
+};
 
 /**
  * Reset the DB and import data from a DTS backup
@@ -30,13 +78,35 @@ export const resetDatabaseAndImportDataFromPath = async (
   // If file is already an absolute path, use it; otherwise resolve relative to e2e/data
   const filePath =
     file.startsWith('/') || file.includes('\\') ? file : resolve(__dirname, '../e2e/data/', file);
+  const fixture = basename(filePath);
+  const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES).filter(
+    (uid) => !isProtectedRemotePushType(uid)
+  );
+
+  // The app restores its own fixtures in-process (test app `api/config/utils/reset-fixture.js`):
+  // the same restore the remote push below runs, without the websocket round trips.
+  if (IN_APP_FIXTURES.has(fixture) && filePath === resolve(__dirname, '../e2e/data', fixture)) {
+    const res = await fetch(new URL('/api/config/reset-fixture', getStrapiTestBaseUrl()), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ fixture, includedTypes, configuration }),
+    });
+    if (!res.ok) {
+      console.error(`Import process failed: HTTP ${res.status} ${await res.text()}`);
+      process.exit(1);
+    }
+    return;
+  }
+
   const source = createSourceProvider(filePath);
-  const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES);
   const destination = createRemoteDestinationProvider(includedTypes, configuration);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
     schemaStrategy: 'ignore',
+    // The without-admin fixture only contains protected admin entities and links. Restore those
+    // locally above and keep the remote transfer for its configuration records only.
+    only: fixture === 'without-admin' ? ['config'] : undefined,
     transforms: {
       links: [
         {
@@ -65,8 +135,22 @@ export const resetDatabaseAndImportDataFromPath = async (
   });
 
   try {
+    const resetAdminRes = await fetch(
+      new URL('/api/config/reset-admin-fixture', getStrapiTestBaseUrl()),
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ fixture }),
+      }
+    );
+    if (!resetAdminRes.ok) {
+      throw new Error(
+        `Admin fixture reset failed: HTTP ${resetAdminRes.status} ${await resetAdminRes.text()}`
+      );
+    }
+
     // reset the transfer token to allow the transfer if it's been wiped (that is, not included in previous import data)
-    await fetch(`http://127.0.0.1:${process.env.PORT ?? 1337}/api/config/resettransfertoken`, {
+    await fetch(new URL('/api/config/resettransfertoken', getStrapiTestBaseUrl()), {
       method: 'POST',
     });
   } catch (err) {
@@ -89,7 +173,7 @@ export const resetDatabaseAndImportDataFromPath = async (
  * The function handles loading and destroying the Strapi instance internally
  *
  * @param appPath - Path to the Strapi app directory
- * @param file - Path to the DTS backup file (relative to tests/e2e/data or absolute)
+ * @param file - Name or path of an unpacked export directory or `.tar` under tests/e2e/data (or absolute)
  * @param modifiedContentTypesFn - Optional function to modify content types
  * @param configuration - Restore configuration
  */
@@ -172,6 +256,11 @@ const importData = async () => {
     process.exit(1);
   }
 
+  // Manual CLI only: default to the first e2e test app port so `getStrapiTestBaseUrl` does not guess.
+  if (!process.env.PORT?.trim()) {
+    process.env.PORT = '8000';
+  }
+
   await resetDatabaseAndImportDataFromPath(filePath);
   console.log('Data transfer succeeded');
   process.exit(0);
@@ -193,19 +282,26 @@ if (isDirectExecution) {
   importData();
 }
 
-const createSourceProvider = (filePath: string) =>
-  createLocalFileSourceProvider({
+const createSourceProvider = (filePath: string) => {
+  const st = statSync(filePath);
+  if (st.isDirectory()) {
+    return createLocalDirectorySourceProvider({
+      directory: { path: filePath },
+    });
+  }
+  return createLocalFileSourceProvider({
     file: { path: filePath },
     encryption: { enabled: false },
     compression: { enabled: false },
   });
+};
 
 const createRemoteDestinationProvider = (
   includedTypes: any[] = [],
   configuration: RestoreConfiguration
 ) => {
   return createRemoteStrapiDestinationProvider({
-    url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
+    url: new URL('/admin', getStrapiTestBaseUrl()),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {

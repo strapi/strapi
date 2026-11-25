@@ -3,7 +3,9 @@ import {
   retrieveComponentsThatHaveComponents,
 } from '../retrieveComponentsThatHaveComponents';
 
-const data: any = {
+import type { Components } from '../../../../types';
+
+const data: Components = {
   // Slider has a component
   'blog.slider': {
     uid: 'blog.slider',

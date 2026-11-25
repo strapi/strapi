@@ -10,6 +10,10 @@ type DocumentMetadata = {
   availableStatus: Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>[];
   // Available locales within the same status of the returned document
   availableLocales: Pick<Document, 'id' | 'locale' | 'status' | AT_FIELDS>[];
+  /**
+   * i18n default locale code. See collection-types DocumentMetadata.
+   */
+  defaultLocale?: string | null;
 };
 
 /**
@@ -123,7 +127,10 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: number;
+    data: {
+      unpublishedRelations: number;
+      draftM2mLinks: number;
+    };
     error?: errors.ApplicationError;
   }
 }

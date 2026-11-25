@@ -8,6 +8,8 @@ import type { SanitizeService } from '../services/sanitize';
 import type { SettingsService } from '../services/settings';
 import type { createAILocalizationsService } from '../services/ai-localizations';
 import type { createAILocalizationJobsService } from '../services/ai-localization-jobs';
+import type { createAITranslationsService } from '../services/ai-translations';
+import type { createFillFromLocaleService } from '../services/fill-from-locale';
 
 type S = {
   permissions: PermissionsService;
@@ -20,6 +22,8 @@ type S = {
   sanitize: SanitizeService;
   ['ai-localizations']: ReturnType<typeof createAILocalizationsService>;
   'ai-localization-jobs': ReturnType<typeof createAILocalizationJobsService>;
+  'ai-translations': ReturnType<typeof createAITranslationsService>;
+  'fill-from-locale': ReturnType<typeof createFillFromLocaleService>;
 };
 
 const getCoreStore = () => {

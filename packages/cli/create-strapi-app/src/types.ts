@@ -1,11 +1,13 @@
+import type { Invocation } from './utils/invocation';
+
 export interface Options {
+  agent?: string;
   useNpm?: boolean;
   usePnpm?: boolean;
   useYarn?: boolean;
   quickstart?: boolean;
   run?: boolean;
   dbclient?: DBClient;
-  skipCloud?: boolean;
   skipDb?: boolean;
   dbhost?: string;
   dbport?: string;
@@ -20,8 +22,8 @@ export interface Options {
   install?: boolean;
   example?: boolean;
   gitInit?: boolean;
-  enableAbTests?: boolean;
   nonInteractive?: boolean;
+  interactive?: boolean;
   templateBranch?: string;
   templatePath?: string;
 }
@@ -65,8 +67,16 @@ export interface Scope {
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
-  shouldCreateGrowthSsoTrial: boolean;
-  isABTestEnabled: boolean;
+  /**
+   * @deprecated The Growth SSO trial was removed. This field is ignored and kept only so
+   * existing callers that still pass it keep compiling.
+   */
+  shouldCreateGrowthSsoTrial?: boolean;
+  /** How the CLI was started: by an agent, in CI, by a person at a terminal, or unknown. */
+  invocation: Invocation;
+  agentName: string | null;
+  /** Resolved at scaffold time when packageManager is pnpm (npm_config_user_agent or pnpm --version). */
+  pnpmVersion?: string | null;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

@@ -12,7 +12,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       path: '/',
       handler: 'content-api.upload',
       request: {
-        query: { id: validator.fileId.optional() },
+        query: { id: validator.fileIdOrDocumentId.optional() },
         // Note: multipart/form-data is handled by Koa middleware, not Zod
       },
       response: z.union([validator.file, validator.files]),
@@ -34,10 +34,25 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
     },
     {
       method: 'GET',
+      path: '/files/page',
+      handler: 'content-api.findPage',
+      request: {
+        query: {
+          fields: validator.queryFields.optional(),
+          populate: validator.queryPopulate.optional(),
+          sort: validator.querySort.optional(),
+          pagination: validator.pagination.optional(),
+          filters: validator.filters.optional(),
+        },
+      },
+      response: validator.paginatedFiles,
+    },
+    {
+      method: 'GET',
       path: '/files/:id',
       handler: 'content-api.findOne',
       request: {
-        params: { id: validator.fileId },
+        params: { id: validator.fileIdOrDocumentId },
         query: {
           fields: validator.queryFields.optional(),
           populate: validator.queryPopulate.optional(),
@@ -50,9 +65,31 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       path: '/files/:id',
       handler: 'content-api.destroy',
       request: {
-        params: { id: validator.fileId },
+        params: { id: validator.fileIdOrDocumentId },
       },
       response: validator.file,
+    },
+    {
+      method: 'GET',
+      path: '/folders',
+      handler: 'folder.find',
+      request: {
+        query: {
+          sort: validator.querySort.optional(),
+          pagination: validator.pagination.optional(),
+          filters: validator.filters.optional(),
+        },
+      },
+      response: validator.paginatedFolders,
+    },
+    {
+      method: 'GET',
+      path: '/folders/:id',
+      handler: 'folder.findOne',
+      request: {
+        params: { id: validator.folderIdOrDocumentId },
+      },
+      response: z.object({ data: validator.folder }),
     },
   ];
 });

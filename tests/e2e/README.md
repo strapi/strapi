@@ -1,13 +1,17 @@
 # End-to-End Playwright Tests
 
-## Overview
+Playwright specs live under **`tests/e2e/tests/`** (each top-level folder is a **domain**). E2E shares app generation and the unified runner (`tests/scripts/run-tests.js`) with CLI tests.
 
-E2E tests use Playwright to test Strapi's browser-based functionality. They share the same infrastructure as CLI tests:
+**Do not duplicate setup here.** Use the contributor documentation:
 
-- **Shared app template**: Both test types use `tests/app-template` to generate test applications
-- **Shared utilities**: Common test utilities are in `tests/utils/`
-- **Shared runners**: Test app setup and management is handled by `tests/utils/runners/shared-setup.js`
-- **Unified test runner**: Both use `tests/scripts/run-tests.js` with different execution strategies
+| Guide                                                                                      | Contents                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Setup](../../docs/docs/contributing/03-testing/e2e/00-setup.md)                           | Playwright install, `tests/e2e/.env` / `STRAPI_LICENSE`, `yarn test:e2e` / `:ce` / `:ee`, domains, concurrency, runner vs Playwright args, env vars, cleaning test apps |
+| [App template](../../docs/docs/contributing/03-testing/e2e/01-app-template.md)             | How the shared `tests/app-template` feeds generated `test-apps/e2e/`                                                                                                    |
+| [Data transfer](../../docs/docs/contributing/03-testing/e2e/02-data-transfer.md)           | DTS-related e2e workflows                                                                                                                                               |
+| [Enterprise plugins](../../docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md) | Opt-in `enterprise-plugins` domain and its CI job, which check that changes do not break the private Enterprise plugins                                                 |
+
+For scripted or agent-driven runs from the repo root, see **[AGENTS.md](../../AGENTS.md)**.
 
 The main difference is that e2e tests use Playwright for browser automation, while CLI tests use Jest for command-line testing.
 
@@ -19,6 +23,12 @@ The `-c X` option can be used to limit the number of concurrent test apps, where
 
 If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:e2e:clean` before running the tests.
 
+Options meant for Playwright (for example `--grep`) are forwarded by the unified runner after the runner-only flags (`-d`, `-c`, `-f`). With **npm**, pass them after `--`: `npm run test:e2e -- -d settings --grep "My test"`. See `tests/cli/README.md` for the same pattern on CLI/Jest.
+
+### Environment variables
+
+Playwright is spawned from `tests/utils/runners/browser-runner.js` with a **small** `env` override (`PORT`, `HOST`, `TEST_APP_PATH`). **execa** merges that with the parent environment by default, so other variables you export before `yarn test:e2e` still reach Playwright and the app under test. The edition (`STRAPI_E2E_EDITION`, `STRAPI_DISABLE_EE`) comes from that parent environment: `applyE2eEditionEnv()` in `tests/utils/e2e-edition.ts` sets it when `tests/scripts/run-tests.js` starts. Details and the parallel Jest behaviour are in `tests/cli/README.md` → **Environment variables**.
+
 ## Additional Documentation
 
-See contributor docs in `docs/docs/guides/e2e` for more detailed information about writing and maintaining e2e tests.
+See contributor docs in `docs/docs/contributing/03-testing/e2e` for more detailed information about writing and maintaining e2e tests.

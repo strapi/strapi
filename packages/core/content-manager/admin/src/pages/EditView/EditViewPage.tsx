@@ -11,7 +11,7 @@ import {
   useIsDesktop,
   useIsMobile,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Tabs, Box } from '@strapi/design-system';
+import { Grid, Tabs, Box, ScrollArea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -20,11 +20,15 @@ import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
+import { I18nSharedFieldsLock } from '../../features/I18nSharedFieldsLock';
 import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -33,6 +37,7 @@ import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
+import { getPublishValidationErrors } from './utils/forms';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -42,12 +47,17 @@ const EditViewPage = () => {
   const location = useLocation();
   const [
     {
-      query: { status },
+      query: { status, plugins },
     },
     setQuery,
-  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+  ] = useQueryParams<{
+    status: 'draft' | 'published';
+    plugins?: { i18n?: { locale?: string } };
+  }>({
     status: 'draft',
   });
+
+  const activeLocale = plugins?.i18n?.locale;
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
@@ -55,9 +65,19 @@ const EditViewPage = () => {
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
   const drawerHasContent = visiblePanels.length > 0;
 
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    []
+  );
 
-  const doc = useDoc();
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
+
+  const doc = useDoc({ skip: !isHydrated });
   const {
     document,
     meta,
@@ -111,11 +131,13 @@ const EditViewPage = () => {
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading = !isHydrated || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
+  // Remount (key) so unlock cannot flash on the next locale/document before the effect runs.
+  const sharedFieldsLockKey = `${id ?? 'create'}:${activeLocale ?? 'default'}`;
 
-  if (isLoading && !document?.documentId) {
+  if (isLoadingActionsRBAC || (isLoading && !document?.documentId)) {
     return <Page.Loading />;
   }
 
@@ -129,135 +151,158 @@ const EditViewPage = () => {
     }
   };
 
-  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
-    const yupSchema = createYupSchema(schema?.attributes, components, {
-      status,
-      ...options,
-    });
-
-    return yupSchema.validateSync(values, { abortEarly: false });
-  };
-
   return (
     <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
-      {isSingleType && (
-        <tours.contentManager.Introduction>
-          {/* Invisible Anchor */}
-          <Box />
-        </tours.contentManager.Introduction>
-      )}
-      <Form
-        disabled={hasDraftAndPublished && status === 'published'}
-        initialValues={initialValues}
-        method={isCreatingDocument ? 'POST' : 'PUT'}
-        validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-          // removes hidden fields from the validation
-          // this is necessary because the yup schema doesn't know about the visibility conditions
-          // and we don't want to validate fields that are not visible
-          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
-            schema,
-            initialValues,
-            components,
-          });
+      <I18nSharedFieldsLock key={sharedFieldsLockKey}>
+        {isSingleType && (
+          <tours.contentManager.Introduction>
+            {/* Invisible Anchor */}
+            <Box />
+          </tours.contentManager.Introduction>
+        )}
+        <Form
+          key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
+          disabled={hasDraftAndPublished && status === 'published'}
+          initialValues={initialValues}
+          method={isCreatingDocument ? 'POST' : 'PUT'}
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            // removes hidden fields from the validation
+            // this is necessary because the yup schema doesn't know about the visibility conditions
+            // and we don't want to validate fields that are not visible
+            const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+              schema,
+              initialValues,
+              components,
+            });
 
-          const yupSchema = createYupSchema(schema?.attributes, components, {
-            status,
-            removedAttributes,
-            ...options,
-          });
+            const yupSchema = createYupSchema(schema?.attributes, components, {
+              status,
+              removedAttributes,
+              ...options,
+            });
 
-          return yupSchema.validate(cleanedValues, { abortEarly: false });
-        }}
-        initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
-      >
-        <>
-          <Header
-            isCreating={isCreatingDocument}
-            status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-            title={pageTitle}
-          />
-          <Layouts.Content>
-            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: getTranslation('containers.edit.tabs.label'),
-                  defaultMessage: 'Document status',
-                })}
-              >
-                {hasDraftAndPublished ? (
-                  <>
-                    <StatusTab value="draft">
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.draft'),
-                        defaultMessage: 'draft',
-                      })}
-                    </StatusTab>
-                    <StatusTab
-                      disabled={!meta || meta.availableStatus.length === 0}
-                      value="published"
-                    >
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.published'),
-                        defaultMessage: 'published',
-                      })}
-                    </StatusTab>
-                  </>
-                ) : null}
-              </Tabs.List>
-              <Grid.Root
-                paddingTop={{
-                  initial: 6,
-                  medium: 4,
-                  large: 8,
-                }}
-                gap={4}
-              >
-                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
-                  <Tabs.Content value="draft">
-                    <tours.contentManager.Fields>
-                      <Box />
-                    </tours.contentManager.Fields>
-                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
-                  </Tabs.Content>
-                  <Tabs.Content value="published">
-                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
-                  </Tabs.Content>
-                </Grid.Item>
-                {isDesktop && (
-                  <Grid.Item col={3} direction="column" alignItems="stretch">
-                    <Panels />
+            return yupSchema.validate(cleanedValues, { abortEarly: false });
+          }}
+          initialErrors={
+            location?.state?.forceValidation
+              ? getPublishValidationErrors(initialValues, { schema, components })
+              : {}
+          }
+        >
+          <>
+            <Header
+              isCreating={isCreatingDocument}
+              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+              title={pageTitle}
+            />
+            <Layouts.Content>
+              <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+                <Tabs.List
+                  aria-label={formatMessage({
+                    id: getTranslation('containers.edit.tabs.label'),
+                    defaultMessage: 'Document status',
+                  })}
+                >
+                  {hasDraftAndPublished ? (
+                    <>
+                      <StatusTab value="draft">
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.draft'),
+                          defaultMessage: 'draft',
+                        })}
+                      </StatusTab>
+                      <StatusTab
+                        disabled={!meta || meta.availableStatus.length === 0}
+                        value="published"
+                      >
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.published'),
+                          defaultMessage: 'published',
+                        })}
+                      </StatusTab>
+                    </>
+                  ) : null}
+                </Tabs.List>
+                <Grid.Root
+                  paddingTop={{
+                    initial: 6,
+                    medium: 4,
+                    large: 8,
+                  }}
+                  gap={4}
+                >
+                  <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
+                    <Tabs.Content value="draft">
+                      <tours.contentManager.Fields>
+                        <Box />
+                      </tours.contentManager.Fields>
+                      <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                    </Tabs.Content>
+                    <Tabs.Content value="published">
+                      <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                    </Tabs.Content>
                   </Grid.Item>
-                )}
-              </Grid.Root>
-            </Tabs.Root>
-            {!isDesktop && (
-              <>
-                <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
-                  <ActionsDrawer.Overlay />
-                  <ActionsDrawer.Header>
-                    <ActionsPanelContent />
-                  </ActionsDrawer.Header>
-                  <ActionsDrawer.Content>
-                    <Panels withActions={false} />
-                  </ActionsDrawer.Content>
-                </ActionsDrawer.Root>
-                {/* Adding a fixed height to the bottom of the page to prevent 
-                the actions drawer from covering the content
-                (40px button + 12px * 2 padding + 1px border) */}
-                <Box height="6.5rem" />
-              </>
-            )}
-          </Layouts.Content>
-          <Blocker />
-        </>
-      </Form>
+                  {isDesktop && (
+                    <Grid.Item col={3} direction="column" alignItems="stretch">
+                      <StickyPanels>
+                        <Panels actionsOnly />
+                        <ScrollingPanels>
+                          <Panels withActions={false} />
+                        </ScrollingPanels>
+                      </StickyPanels>
+                    </Grid.Item>
+                  )}
+                </Grid.Root>
+              </Tabs.Root>
+              {!isDesktop && (
+                <>
+                  <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
+                    <ActionsDrawer.Overlay />
+                    <ActionsDrawer.Header>
+                      <ActionsPanelContent />
+                    </ActionsDrawer.Header>
+                    <ActionsDrawer.Content>
+                      <Panels withActions={false} />
+                    </ActionsDrawer.Content>
+                  </ActionsDrawer.Root>
+                </>
+              )}
+            </Layouts.Content>
+            <Blocker />
+          </>
+        </Form>
+      </I18nSharedFieldsLock>
     </Page.Main>
   );
 };
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
+`;
+
+const StickyPanels = styled.div`
+  position: sticky;
+  top: ${({ theme }) => theme.spaces[4]};
+  max-height: calc(100dvh - 2 * ${({ theme }) => theme.spaces[4]});
+  margin-bottom: calc(${({ theme }) => theme.spaces[4]} - ${({ theme }) => theme.spaces[10]});
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[2]};
+`;
+
+const ScrollingPanels = styled(ScrollArea)`
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+
+  [data-radix-scroll-area-viewport] {
+    position: relative;
+  }
+
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+  }
 `;
 
 /**

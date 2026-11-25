@@ -3,17 +3,7 @@ import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
 import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
-import {
-  Grid,
-  Flex,
-  Typography,
-  JSONInput,
-  Box,
-  IconButton,
-  Link,
-  LinkButton,
-  Button,
-} from '@strapi/design-system';
+import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
 import { ChevronDown, ChevronRight } from '@strapi/icons';
 
 const filterAttributes = (item) => {
@@ -55,8 +45,57 @@ const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
   );
 };
 
+const isImageMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('image/')
+  );
+};
+
+const isVideoMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('video/')
+  );
+};
+
+const isAudioMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('audio/')
+  );
+};
+
+// Immutably sets a dotted path (e.g. "teamMembers.bio" or "components.2.title")
+// on a clone of `obj`. Only the objects/arrays actually on the path get cloned —
+// string-key indexing works the same for array segments as for object keys, so
+// numeric path segments naturally index into arrays without special-casing.
+const setDeep = (obj, path, value) => {
+  const keys = path.split('.');
+  const clone = Array.isArray(obj) ? [...obj] : { ...obj };
+  let cursor = clone;
+  keys.forEach((key, index) => {
+    if (index === keys.length - 1) {
+      cursor[key] = value;
+      return;
+    }
+    const next = cursor[key];
+    cursor[key] = Array.isArray(next) ? [...next] : { ...(next ?? {}) };
+    cursor = cursor[key];
+  });
+  return clone;
+};
+
+const isBlocksValue = (value) =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  value.every(
+    (node) =>
+      node !== null &&
+      typeof node === 'object' &&
+      typeof node.type === 'string' &&
+      Array.isArray(node.children)
+  );
+
 const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
-  if (fieldName === 'blocks') {
+  if (fieldName === 'blocks' || isBlocksValue(value)) {
     return (
       <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
         {value ? <BlocksRenderer content={value} /> : 'null'}
@@ -70,6 +109,69 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
       <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
         {value}
       </Button>
+    );
+  }
+
+  // Handle image media fields
+  if (isImageMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box
+          tag="img"
+          src={value.url}
+          alt={value.alternativeText || value.name || 'Image'}
+          maxWidth="100%"
+          maxHeight="300px"
+          borderRadius="4px"
+          style={{
+            objectFit: 'contain',
+          }}
+        />
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  // Handle video media fields
+  if (isVideoMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box
+          tag="video"
+          src={value.url}
+          controls
+          maxWidth="100%"
+          maxHeight="300px"
+          borderRadius="4px"
+        >
+          Your browser does not support the video tag.
+        </Box>
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  // Handle audio media fields
+  if (isAudioMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box tag="audio" src={value.url} controls>
+          Your browser does not support the audio tag.
+        </Box>
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
     );
   }
 
@@ -160,6 +262,20 @@ const PreviewComponent = () => {
   const { main, unrelated } = useLoaderData();
   const revalidator = useRevalidator();
 
+  // Live blocks field overrides — updated by strapiFieldChange events so that
+  // BlocksRenderer re-renders in real time while the popover is open. Keyed by
+  // the raw dotted field path (e.g. "teamMembers.bio"), applied onto `main` via
+  // setDeep at render time so nested component/DZ fields update in place too.
+  const [liveFields, setLiveFields] = React.useState({});
+
+  const mergedData = React.useMemo(
+    () =>
+      main
+        ? Object.entries(liveFields).reduce((acc, [path, value]) => setDeep(acc, path, value), main)
+        : main,
+    [main, liveFields]
+  );
+
   React.useEffect(() => {
     const handleMessage = (event) => {
       const { origin, data } = event;
@@ -174,7 +290,8 @@ const PreviewComponent = () => {
       }
 
       if (data?.type === 'strapiUpdate') {
-        // The data is stale, force a refetch
+        // The data is stale, force a refetch — also reset live overrides
+        setLiveFields({});
         revalidator.revalidate();
       } else if (data?.type === 'strapiScript') {
         const script = window.document.createElement('script');
@@ -189,6 +306,19 @@ const PreviewComponent = () => {
 
     return () => {
       window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const handleFieldChange = (event) => {
+      const { field, value } = event.detail;
+      setLiveFields((prev) => ({ ...prev, [field]: value }));
+    };
+
+    window.addEventListener('strapiFieldChange', handleFieldChange);
+
+    return () => {
+      window.removeEventListener('strapiFieldChange', handleFieldChange);
     };
   }, []);
 
@@ -264,7 +394,7 @@ const PreviewComponent = () => {
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
               {main ? (
                 <>
-                  <Entry data={main} />
+                  <Entry data={mergedData} />
                   <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (

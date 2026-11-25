@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
 
@@ -23,7 +23,7 @@ test.describe('API Tokens', () => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
   });
 

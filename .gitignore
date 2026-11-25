@@ -47,6 +47,8 @@ $RECYCLE.BIN/
 *.class
 *.dll
 *.exe
+# Deliberate e2e fixture for the upload MIME-denylist test — not a build artifact.
+!tests/e2e/data/uploads/blocked-file.exe
 *.o
 *.seed
 *.so
@@ -94,6 +96,13 @@ package-lock.json
 *.heapsnapshot
 
 ############################
+# Local environment
+############################
+# Ignore real env files anywhere; tracked templates use other names (e.g. `.env.example`).
+**/.env
+!tests/cli/data/*.tar.gz
+
+############################
 # Tests
 ############################
 
@@ -123,7 +132,6 @@ dist
 ############################
 
 .vscode/
-!.vscode/settings.json
 front-workspace.code-workspace
 .yarnrc
 
@@ -146,17 +154,28 @@ npm-debug.log
 # Playwright
 ############################
 playwright-report
-tests/e2e/playwright-storage-state.json
+tests/e2e/playwright-storage-state*.json
 test-results
-!tests/e2e/data/*.tar
-tests/e2e/.env
-!tests/cli/data/*.tar.gz
-tests/cli/.env
 
 ############################
 # AI tools
 ############################
+.brain
+.brain.*
+
+# Claude
 CLAUDE.local.md
+.claude/
+
+# Cursor
+.cursor/
+!.cursor/worktrees.json
+
+# Codex
+.agents/
+
+# omp
+.omp/
 
 ############################
 # Strapi

@@ -1,5 +1,5 @@
 {
-  "BoundRoute.title": "Wywoływanie",
+  "BoundRoute.title": "Przypisane ścieżki",
   "EditForm.inputSelect.description.role": "Połączy nowego uwierzytelnionego użytkownika z wybraną rolą.",
   "EditForm.inputSelect.label.role": "Domyślna rola dla uwierzytelnionych użytkowników",
   "EditForm.inputToggle.description.email": "Nie zezwalaj użytkownikowi na tworzenie wielu kont za pomocą tego samego adresu e-mail u różnych dostawców uwierzytelniania.",
@@ -17,6 +17,7 @@
   "EditPage.form.roles": "Szczegóły roli",
   "Email.template.data.loaded": "Szablon email został załadowany",
   "Email.template.email_confirmation": "Potwierdzenie adresu email",
+  "Email.template.reset_password": "Zresetuj hasło",
   "Email.template.form.edit.label": "Edytuj szablon",
   "Email.template.table.action.label": "akcja",
   "Email.template.table.icon.label": "ikonka",

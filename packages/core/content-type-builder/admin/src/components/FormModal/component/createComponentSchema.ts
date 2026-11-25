@@ -1,5 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
-import { snakeCase } from 'lodash/fp';
+import snakeCase from 'lodash/snakeCase';
 import * as yup from 'yup';
 
 import { getTrad } from '../../../utils/getTrad';
@@ -57,7 +57,7 @@ export const createComponentSchema = (
       .required(errorsTrads.required.id),
     category: yup
       .string()
-      .matches(CATEGORY_NAME_REGEX, errorsTrads.regex.id)
+      .matches(CATEGORY_NAME_REGEX, getTrad('error.category.format'))
       .required(errorsTrads.required.id),
 
     icon: yup.string(),

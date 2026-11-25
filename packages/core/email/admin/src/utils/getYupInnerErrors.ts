@@ -5,16 +5,32 @@ interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
 }
 
+const isPrimitiveType = (value: unknown): value is PrimitiveType => {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null ||
+    value === undefined
+  );
+};
+
 const extractValuesFromYupError = (
   errorType?: string | undefined,
-  errorParams?: Record<string, any> | undefined
+  errorParams?: Record<string, unknown> | undefined
 ) => {
-  if (!errorType || !errorParams) {
+  if (errorType === undefined || errorParams === undefined) {
+    return {};
+  }
+
+  const value = errorParams[errorType];
+
+  if (isPrimitiveType(value) === false) {
     return {};
   }
 
   return {
-    [errorType]: errorParams[errorType],
+    [errorType]: value,
   };
 };
 

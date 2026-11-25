@@ -6,6 +6,7 @@ import { logger } from './logger';
 
 export function checkNodeRequirements() {
   const currentNodeVersion = process.versions.node;
+  const nodeMajor = semver.major(currentNodeVersion);
 
   // error if the node version isn't supported
   if (!semver.satisfies(currentNodeVersion, engines.node)) {
@@ -16,8 +17,8 @@ export function checkNodeRequirements() {
     ]);
   }
 
-  // warn if not using a LTS version
-  else if (semver.major(currentNodeVersion) % 2 !== 0) {
+  // warn if not using a LTS version (odd majors are non-LTS before Node 26)
+  else if (nodeMajor < 26 && nodeMajor % 2 !== 0) {
     logger.warn([
       chalk.yellow(`You are running ${chalk.bold(`Node.js ${currentNodeVersion}`)}`),
       `Strapi only supports ${chalk.bold(chalk.green('LTS versions of Node.js'))}, other versions may not be compatible.`,

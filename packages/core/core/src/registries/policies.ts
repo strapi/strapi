@@ -1,4 +1,4 @@
-import { pickBy, has, castArray } from 'lodash/fp';
+import { castArray, has, pickBy } from 'lodash';
 import type { Core } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
@@ -48,6 +48,27 @@ const policiesRegistry = () => {
     }
   };
 
+  /**
+   * Returns the uid under which `find` looks up a policy, for error messages
+   */
+  const getUid = (name: string, namespaceInfo?: NamespaceInfo) => {
+    const { pluginName, apiName } = namespaceInfo ?? {};
+
+    if (policies.has(name) === true) {
+      return name;
+    }
+
+    if (pluginName !== undefined) {
+      return `${PLUGIN_PREFIX}${pluginName}.${name}`;
+    }
+
+    if (apiName !== undefined) {
+      return `${API_PREFIX}${apiName}.${name}`;
+    }
+
+    return name;
+  };
+
   function resolveHandler(policyConfig: PolicyConfig, namespaceInfo?: NamespaceInfo): Core.Policy;
   function resolveHandler(
     policyConfig: PolicyConfig[],
@@ -73,6 +94,14 @@ const policiesRegistry = () => {
 
     if (typeof policy === 'function') {
       return policy;
+    }
+
+    // A module without a default export (e.g. an ESM `.js` file with only named exports, loaded
+    // through Node's `require(esm)`) is registered as its namespace object, which has no handler
+    if (typeof policy.handler !== 'function') {
+      throw new Error(
+        `Policy ${getUid(policyName, namespaceInfo)} has no handler (no default export?)`
+      );
     }
 
     if (policy.validator) {
@@ -109,7 +138,7 @@ const policiesRegistry = () => {
      * Returns a map with all the policies in a namespace
      */
     getAll(namespace: string) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(Object.fromEntries(policies));
+      return pickBy(Object.fromEntries(policies), (_, uid) => hasNamespace(uid, namespace));
     },
 
     /**
@@ -128,7 +157,7 @@ const policiesRegistry = () => {
         const policy = newPolicies[policyName];
         const uid = addNamespace(policyName, namespace);
 
-        if (has(uid, policies)) {
+        if (has(policies, uid)) {
           throw new Error(`Policy ${uid} has already been registered.`);
         }
 

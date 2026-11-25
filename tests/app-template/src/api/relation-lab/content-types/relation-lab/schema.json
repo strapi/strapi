@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_labs",
+  "info": {
+    "singularName": "relation-lab",
+    "pluralName": "relation-labs",
+    "displayName": "Relation lab",
+    "description": "Exercises every relation type against relation-target for publish-warning E2E tests"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "manyToOne": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::relation-target.relation-target"
+    },
+    "oneToOne": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-target.relation-target"
+    },
+    "oneToMany": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-target.relation-target"
+    },
+    "manyToMany": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-target.relation-target"
+    },
+    "manyToManyBi": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "relationLabs"
+    }
+  }
+}

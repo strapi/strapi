@@ -13,15 +13,20 @@ import { cellWidth, firstRowWidth } from '../utils/constants';
 import { RecursiveRecordOfBooleans, getCheckboxState } from '../utils/getCheckboxState';
 import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData';
 
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
+
+const EMPTY_ACTIONS: NonNullable<GlobalActionsProps['actions']> = [];
+
 interface GlobalActionsProps {
   actions: Action[];
   isFormDisabled?: boolean;
   kind: Extract<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
 }
 
-const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProps) => {
+const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: GlobalActionsProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox } = usePermissionsDataManager();
+  const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox, checkUserHasPermission } =
+    usePermissionsDataManager();
 
   const displayedActions = actions.filter(({ subjects }) => subjects && subjects.length);
 
@@ -69,7 +74,12 @@ const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProp
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
       <Flex gap={0}>
-        {displayedActions.map(({ label, actionId }) => {
+        {displayedActions.map(({ label, actionId, subjects }) => {
+          const allSubjects = subjects || [];
+          const userHasPermissionForAll =
+            allSubjects.length > 0 &&
+            allSubjects.every((subject) => checkUserHasPermission(actionId, subject));
+
           return (
             <Flex
               shrink={0}
@@ -86,30 +96,35 @@ const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProp
                   defaultMessage: label,
                 })}
               </Typography>
-              <Checkbox
-                disabled={isFormDisabled}
-                onCheckedChange={(value) => {
-                  onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);
-                }}
-                name={actionId}
-                aria-label={formatMessage(
-                  {
-                    id: `Settings.permissions.select-all-by-permission`,
-                    defaultMessage: 'Select all {label} permissions',
-                  },
-                  {
-                    label: formatMessage({
-                      id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-                      defaultMessage: label,
-                    }),
+              <UnheldPermissionTooltip
+                isFormDisabled={isFormDisabled}
+                userHasPermission={userHasPermissionForAll}
+              >
+                <Checkbox
+                  disabled={isFormDisabled || !userHasPermissionForAll}
+                  onCheckedChange={(value) => {
+                    onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);
+                  }}
+                  name={actionId}
+                  aria-label={formatMessage(
+                    {
+                      id: `Settings.permissions.select-all-by-permission`,
+                      defaultMessage: 'Select all {label} permissions',
+                    },
+                    {
+                      label: formatMessage({
+                        id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+                        defaultMessage: label,
+                      }),
+                    }
+                  )}
+                  checked={
+                    get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)
+                      ? 'indeterminate'
+                      : get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)
                   }
-                )}
-                checked={
-                  get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)
-                    ? 'indeterminate'
-                    : get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)
-                }
-              />
+                />
+              </UnheldPermissionTooltip>
             </Flex>
           );
         })}

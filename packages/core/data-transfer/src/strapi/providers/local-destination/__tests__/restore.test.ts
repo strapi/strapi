@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import { deleteRecords, restoreConfigs } from '../strategies/restore';
 import {
   getStrapiFactory,
@@ -6,7 +6,7 @@ import {
   setGlobalStrapi,
   getStrapiModels,
 } from '../../../../__tests__/test-utils';
-import { IConfiguration } from '../../../../../types';
+import { IConfiguration } from '../../../../types';
 
 const entities = [
   {
@@ -86,6 +86,20 @@ const query = jest.fn((uid) => {
   };
 });
 
+const createDtsBoundaryGuards = () => {
+  const get = jest.fn(() => {
+    throw new Error('Configuration restore must not resolve services');
+  });
+  const app = jest.fn(() => {
+    throw new Error('Configuration restore must not access app directories');
+  });
+  const dirs = {};
+
+  Object.defineProperty(dirs, 'app', { get: app });
+
+  return { get, app, dirs };
+};
+
 describe('Restore ', () => {
   test('Should delete all models and contentTypes', async () => {
     const strapi = getStrapiFactory({
@@ -108,6 +122,64 @@ describe('Restore ', () => {
 
     const { count } = await deleteRecords(strapi);
     expect(count).toBe(entities.length);
+  });
+
+  test('Should not delete internal models when entities.include lists content types only', async () => {
+    const coreStoreDeleteMany = jest.fn(async () => ({ count: 5 }));
+    const webhookDeleteMany = jest.fn(async () => ({ count: 2 }));
+
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      query: jest.fn((uid: string) => {
+        if (uid === 'strapi::core-store') {
+          return { deleteMany: coreStoreDeleteMany, findMany: jest.fn(), create };
+        }
+        if (uid === 'strapi::webhook') {
+          return { deleteMany: webhookDeleteMany, findMany: jest.fn(), create };
+        }
+
+        return query(uid);
+      }),
+      getModel,
+      get() {
+        return {
+          get() {
+            return [
+              { uid: 'strapi::core-store' },
+              { uid: 'strapi::webhook' },
+              ...getStrapiModels(),
+            ];
+          },
+        };
+      },
+      db: {
+        query: jest.fn((uid: string) => {
+          if (uid === 'strapi::core-store') {
+            return { deleteMany: coreStoreDeleteMany, findMany: jest.fn(), create };
+          }
+          if (uid === 'strapi::webhook') {
+            return { deleteMany: webhookDeleteMany, findMany: jest.fn(), create };
+          }
+
+          return query(uid);
+        }),
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    await deleteRecords(strapi, {
+      entities: {
+        include: ['foo', 'bar'],
+      },
+      configuration: {
+        coreStore: false,
+        webhook: false,
+      },
+    });
+
+    expect(coreStoreDeleteMany).not.toHaveBeenCalled();
+    expect(webhookDeleteMany).not.toHaveBeenCalled();
   });
 
   test('Should only delete chosen contentType', async () => {
@@ -134,6 +206,35 @@ describe('Restore ', () => {
         include: ['foo'],
       },
     });
+    expect(count).toBe(3);
+  });
+
+  test('Should keep included content type filtering when restore filters are empty', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      query,
+      getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        include: ['foo'],
+        filters: [],
+      },
+    });
+
     expect(count).toBe(3);
   });
 
@@ -165,9 +266,41 @@ describe('Restore ', () => {
     expect(count).toBe(1);
   });
 
-  test('Should add core store data', async () => {
+  test('Should keep excluded content types when restore filters are empty', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
+      query,
+      getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        exclude: ['foo'],
+        filters: [],
+      },
+    });
+
+    expect(count).toBe(6);
+  });
+
+  test('Should add core store data', async () => {
+    const guards = createDtsBoundaryGuards();
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      get: guards.get,
+      dirs: guards.dirs,
       db: {
         query,
       },
@@ -193,11 +326,16 @@ describe('Restore ', () => {
     expect(strapi.db.query).toBeCalledTimes(1);
     expect(strapi.db.query).toBeCalledWith('strapi::core-store');
     expect(result.data).toMatchObject(config.value);
+    expect(guards.get).not.toHaveBeenCalled();
+    expect(guards.app).not.toHaveBeenCalled();
   });
 
   test('Should add webhook data', async () => {
+    const guards = createDtsBoundaryGuards();
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
+      get: guards.get,
+      dirs: guards.dirs,
       db: {
         query,
       },
@@ -233,6 +371,8 @@ describe('Restore ', () => {
     const result = await restoreConfigs(strapi, config);
     expect(strapi.db.query).toBeCalledTimes(1);
     expect(strapi.db.query).toBeCalledWith('strapi::webhook');
-    expect(result.data).toMatchObject(omit(['id'])(config.value));
+    expect(result.data).toMatchObject(omit(config.value, ['id']));
+    expect(guards.get).not.toHaveBeenCalled();
+    expect(guards.app).not.toHaveBeenCalled();
   });
 });

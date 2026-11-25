@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useIsMobile } from '@strapi/admin/strapi-admin';
+import { useIsMobile, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
   Box,
   BoxComponent,
@@ -21,10 +21,13 @@ import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop'
 import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
+import { createDroppedImagesInserter } from './Blocks/Image';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
+
+import type { Schema } from '@strapi/types';
 
 const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
@@ -330,7 +333,7 @@ const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStor
 
 type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
-  blocks: BlocksStore;
+  blocks: Partial<BlocksStore>;
   editor: Editor;
   isMobile: boolean;
 };
@@ -345,8 +348,13 @@ const baseRenderElement = ({
 }: BaseRenderElementProps) => {
   const { element } = props;
 
-  const blockMatch = Object.values(blocks).find((block) => block.matchNode(element));
+  const blockMatch = Object.values(blocks).find((block) => block?.matchNode(element));
   const block = blockMatch || blocks.paragraph;
+
+  if (!block) {
+    return <></>;
+  }
+
   const nodePath = ReactEditor.findPath(editor, element);
 
   const isDraggable = block.isDraggable?.(element) ?? true;
@@ -369,19 +377,42 @@ const baseRenderElement = ({
 
 const dragNoop = () => true;
 
+interface FileDropZoneProps {
+  children: React.ReactNode;
+  allowedTypes: Schema.Attribute.MediaKind[];
+  onDropFiles: (
+    event: React.DragEvent<HTMLElement>
+  ) => (asset: Schema.Attribute.MediaValue<true>[number]) => void;
+}
+
 interface BlocksContentProps {
   placeholder?: string;
   ariaLabelId: string;
+  autoFocus?: boolean;
+  onFocus?: React.FocusEventHandler<HTMLElement>;
+  onBlur?: React.FocusEventHandler<HTMLElement>;
 }
 
-const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
-  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
+const BlocksContent = ({
+  placeholder,
+  ariaLabelId,
+  autoFocus,
+  onFocus,
+  onBlur,
+}: BlocksContentProps) => {
+  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode, flushPendingFormSync } =
     useBlocksEditorContext('BlocksContent');
   const isMobile = useIsMobile();
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
+  // Registered by the Media Library: uploads files dropped onto the content
+  // and hands them back to be inserted as image blocks.
+  const FileDropZone = useStrapiApp(
+    'BlocksContent',
+    (state) => state.components?.['media-library-file-drop-zone']
+  ) as React.ComponentType<FileDropZoneProps> | undefined;
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -455,7 +486,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
     // Check if the text node starts with a known snippet
     const blockMatchingSnippet = Object.values(blocks).find((block) => {
-      return block.snippets?.includes(textNode.text);
+      return block?.snippets?.includes(textNode.text);
     });
 
     if (blockMatchingSnippet?.handleConvert) {
@@ -479,7 +510,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
@@ -494,7 +525,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     if (selectedBlock.handleEnterKey) {
       selectedBlock.handleEnterKey(editor);
     } else {
-      blocks.paragraph.handleEnterKey!(editor);
+      blocks.paragraph?.handleEnterKey!(editor);
     }
   };
 
@@ -504,7 +535,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
 
     if (!selectedBlock) {
       return;
@@ -521,7 +552,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
@@ -544,6 +575,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       // Check if there's a modifier to toggle
       Object.values(modifiers).forEach((value) => {
         if (value.isValidEventKey(event)) {
+          event.preventDefault();
           value.handleToggle(editor);
           return;
         }
@@ -558,8 +590,11 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     // Find the right block-specific handlers for enter and backspace key presses
     switch (event.key) {
       case 'Enter':
-        event.preventDefault();
-        return handleEnter(event);
+        if (!event.nativeEvent.isComposing) {
+          event.preventDefault();
+          return handleEnter(event);
+        }
+        break;
       case 'Backspace':
         return handleBackspaceEvent(event);
       case 'Tab':
@@ -601,7 +636,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
   }, [editor]);
 
-  return (
+  const content = (
     <Box
       ref={blocksRef}
       grow={1}
@@ -626,12 +661,31 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
+        autoFocus={autoFocus}
+        onFocus={onFocus}
+        onBlur={(event) => {
+          flushPendingFormSync();
+          onBlur?.(event);
+        }}
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
         onDrop={dragNoop}
         onDragStart={dragNoop}
       />
       {modalElement}
     </Box>
+  );
+
+  if (!FileDropZone || disabled) {
+    return content;
+  }
+
+  return (
+    <FileDropZone
+      allowedTypes={['images']}
+      onDropFiles={(event) => createDroppedImagesInserter(editor, event)}
+    >
+      {content}
+    </FileDropZone>
   );
 };
 

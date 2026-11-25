@@ -1,8 +1,9 @@
-import _, { snakeCase } from 'lodash/fp';
+import _, { snakeCase } from 'lodash';
 
 import { identifiers } from '../utils/identifiers';
+import { attributeNaming } from './attribute-naming';
 import type { Meta, Metadata } from './metadata';
-import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
+import type { Attribute, RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;
@@ -68,6 +69,47 @@ export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
   isBidirectional(attribute) && isManyToAny(attribute);
 
 /**
+ * An inverse (mappedBy) side stores nothing itself: it reads the join column or join table that its
+ * owner side assigns through `inversedBy`. With no owner pointing back, writes to it are dropped and
+ * reads return nothing, so fail instead of loading a dead relation.
+ *
+ * Out of scope: the check only reads the owner's `target` and `inversedBy`, not whether the owner
+ * builds storage. An owner that builds no join table or join column (for example a manyToMany owner
+ * with `useJoinTable: false`) still passes, as before, and its inverse side still reads nothing.
+ */
+const assertInverseSideHasOwner = (
+  attributeName: string,
+  attribute: Relation.Bidirectional,
+  meta: Meta,
+  metadata: Metadata
+) => {
+  const targetMeta = metadata.get(attribute.target);
+
+  const pointsBack = (candidate: Attribute | undefined) =>
+    candidate !== undefined &&
+    candidate.type === 'relation' &&
+    'target' in candidate &&
+    candidate.target === meta.uid &&
+    'inversedBy' in candidate &&
+    candidate.inversedBy === attributeName;
+
+  if (attribute.mappedBy !== undefined && pointsBack(targetMeta.attributes[attribute.mappedBy])) {
+    return;
+  }
+
+  // An owner that points back under another name still builds the relation: the mappedBy name only
+  // picks which attribute is checked first and appears in the error, so whether the app loads does
+  // not depend on it and apps relying on this keep booting.
+  if (Object.values(targetMeta.attributes).some(pointsBack)) {
+    return;
+  }
+
+  throw new Error(
+    `mappedBy attribute ${attribute.mappedBy} in ${targetMeta.uid} must be a relation to ${meta.uid} with inversedBy "${attributeName}"`
+  );
+};
+
+/**
  * Creates a oneToOne relation metadata
  *
  * if owner then
@@ -79,7 +121,7 @@ export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
  *     set inverse attribute joinCol or joinTable info correctly
  * else
  *   this property must be set by the owner side
- *   verify the owner side is valid // should be done before or at the same time ?
+ *   assert an owner on the target points back with inversedBy
  */
 const createOneToOne = (
   attributeName: string,
@@ -102,7 +144,7 @@ const createOneToOne = (
       });
     }
   } else {
-    // TODO: verify other side is valid
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
   }
 };
 
@@ -113,7 +155,7 @@ const createOneToOne = (
  *   create join table
  * if bidirectional then
  *   cannot be owning side
- *   do nothing
+ *   assert an owner on the target points back with inversedBy
  */
 const createOneToMany = (
   attributeName: string,
@@ -129,6 +171,8 @@ const createOneToMany = (
     });
   } else if (isOwner(attribute)) {
     throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
+  } else {
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
   }
 };
 
@@ -183,7 +227,7 @@ const createManyToOne = (
  *     if with join table then
  *       create join table
  *   else
- *     do nothing
+ *     assert an owner on the target points back with inversedBy
  */
 const createManyToMany = (
   attributeName: string,
@@ -191,7 +235,9 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if (shouldUseJoinTable(attribute) && (!isBidirectional(attribute) || isOwner(attribute))) {
+  if (!isOwner(attribute)) {
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
+  } else if (shouldUseJoinTable(attribute)) {
     createJoinTable(metadata, {
       attribute,
       attributeName,
@@ -351,7 +397,7 @@ const createMorphOne = (
     throw new Error(`Morph target not found. Looking for ${attribute.target}`);
   }
 
-  if (attribute.morphBy && !_.has(attribute.morphBy, targetMeta.attributes)) {
+  if (attribute.morphBy && !_.has(targetMeta.attributes, attribute.morphBy)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
 };
@@ -371,7 +417,7 @@ const createMorphMany = (
     throw new Error(`Morph target not found. Looking for ${attribute.target}`);
   }
 
-  if (attribute.morphBy && !_.has(attribute.morphBy, targetMeta.attributes)) {
+  if (attribute.morphBy && !_.has(targetMeta.attributes, attribute.morphBy)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
 };
@@ -386,7 +432,7 @@ const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: Join
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(attributeName));
+  const joinColumnName = attributeNaming.joinColumnName(attributeName);
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: ID,
@@ -433,10 +479,7 @@ const createJoinTable = (
     return;
   }
 
-  const joinTableName = identifiers.getJoinTableName(
-    snakeCase(meta.tableName),
-    snakeCase(attributeName)
-  );
+  const joinTableName = attributeNaming.joinTableName(meta.tableName, attributeName);
 
   const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(meta.singularName));
 
@@ -625,6 +668,13 @@ export const createRelation = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  // Only owner sides look up their target while building join columns or tables, so check every
+  // declared target here: an inverse (mappedBy) side to a missing model must fail like an owner side.
+  // Polymorphic morphToOne / morphToMany relations declare no target.
+  if (attribute.relation !== 'morphToOne' && attribute.relation !== 'morphToMany') {
+    metadata.get(attribute.target);
+  }
+
   switch (attribute.relation) {
     case 'oneToOne':
       return createOneToOne(attributeName, attribute, meta, metadata);

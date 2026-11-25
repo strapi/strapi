@@ -1,19 +1,23 @@
 import type { Knex } from 'knex';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import type { Database } from '..';
+import type { ID } from '../types';
 
 import { DatabaseError } from '../errors';
 import { transactionCtx } from '../transaction-context';
-import { isKnexQuery } from '../utils/knex';
+import { applyQueryTimeout, isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
+import type { OrderByValue } from './helpers/order-by';
+import type { QueryScopeContext } from './scopes';
 
 interface State {
-  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
+  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
   select: Array<string | Knex.Raw>;
   count: string | null;
   max: string | null;
+  min: string | null;
   first: boolean;
   data: Record<string, unknown> | (null | Record<string, unknown>)[] | null;
   where: Record<string, unknown>[];
@@ -34,6 +38,8 @@ interface State {
   filters: any;
   search: string;
   processed: boolean;
+  /** False for the subquery of a join scope, so it does not apply the scope conditions twice */
+  scoped: boolean;
 }
 
 export interface QueryBuilder {
@@ -73,6 +79,8 @@ export interface QueryBuilder {
 
   max(column: string): QueryBuilder;
 
+  min(column: string): QueryBuilder;
+
   where(where?: object): QueryBuilder;
 
   limit(limit: number): QueryBuilder;
@@ -105,9 +113,11 @@ export interface QueryBuilder {
 
   shouldUseSubQuery(): boolean;
 
-  runSubQuery(): any;
+  runSubQuery(lockDeleteIds?: boolean): any;
 
   processState(): void;
+
+  ensurePaginationOrderStability(): void;
 
   shouldUseDistinct(): boolean;
 
@@ -115,12 +125,21 @@ export interface QueryBuilder {
 
   processSelect(): void;
 
-  getKnexQuery(): Knex.QueryBuilder;
+  getKnexQuery(lockDeleteIds?: boolean): Knex.QueryBuilder;
+
+  deleteReturningIds(trx: Knex.Transaction): Promise<ID[]>;
 
   execute<T>(options?: { mapResults?: boolean }): Promise<T>;
 
   stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
+
+// Keep the delete scope and its relation subquery when locking the target rows on MySQL.
+const buildDelete = (qb: Knex.QueryBuilder, lockIds: boolean) =>
+  lockIds ? qb.select('id').orderBy('id').forUpdate() : qb.delete();
+
+const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
+  ['select', 'count', 'update', 'delete'].includes(type);
 
 const createQueryBuilder = (
   uid: string,
@@ -130,35 +149,64 @@ const createQueryBuilder = (
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
-  const state: State = _.defaults(
-    {
+  const state: State = _.defaults({}, initialState, {
+    type: 'select',
+    select: [],
+    count: null,
+    max: null,
+    min: null,
+    first: false,
+    data: null,
+    where: [],
+    joins: [],
+    populate: null,
+    limit: null,
+    offset: null,
+    transaction: null,
+    forUpdate: false,
+    onConflict: null,
+    merge: null,
+    ignore: false,
+    orderBy: [],
+    groupBy: [],
+    increments: [],
+    decrements: [],
+    aliasCounter: 0,
+    filters: null,
+    search: null,
+    processed: false,
+    scoped: true,
+  });
+
+  const isScoped = () => state.scoped && !db.unstable_scopes.isEmpty();
+
+  // EXISTS, not IN: with IN, SQLite probes the link index once per row and per visible id
+  const scopeJoin = (alias: string, targetUid: string, idColumn = 'id') => {
+    // A join reads its target, also inside an update or delete
+    const wheres = db.unstable_scopes.where({
+      uid: targetUid,
+      meta: db.metadata.get(targetUid),
       type: 'select',
-      select: [],
-      count: null,
-      max: null,
-      first: false,
-      data: null,
-      where: [],
-      joins: [],
-      populate: null,
-      limit: null,
-      offset: null,
-      transaction: null,
-      forUpdate: false,
-      onConflict: null,
-      merge: null,
-      ignore: false,
-      orderBy: [],
-      groupBy: [],
-      increments: [],
-      decrements: [],
-      aliasCounter: 0,
-      filters: null,
-      search: null,
-      processed: false,
-    },
-    initialState
-  );
+    });
+
+    if (wheres.length === 0) {
+      return undefined;
+    }
+
+    // The subquery takes its aliases from this query's counter, so none can shadow an outer alias
+    const sub = createQueryBuilder(targetUid, db, {
+      scoped: false,
+      aliasCounter: state.aliasCounter,
+    })
+      .select([db.connection.raw('1')])
+      .where({ id: db.connection.ref(`${alias}.${idColumn}`) });
+    wheres.forEach((where) => sub.where(where));
+
+    const query = sub.getKnexQuery();
+    state.aliasCounter = sub.state.aliasCounter;
+
+    return db.connection.raw('exists ?', [query]);
+  };
 
   const getAlias = () => {
     const alias = `t${state.aliasCounter}`;
@@ -179,13 +227,13 @@ const createQueryBuilder = (
 
     select(args) {
       state.type = 'select';
-      state.select = _.uniq(_.castArray(args));
+      state.select = [...new Set(_.castArray(args))];
 
       return this;
     },
 
     addSelect(args) {
-      state.select = _.uniq([...state.select, ..._.castArray(args)]);
+      state.select = [...new Set([...state.select, ..._.castArray(args)])];
 
       return this;
     },
@@ -260,6 +308,13 @@ const createQueryBuilder = (
       return this;
     },
 
+    min(column: string) {
+      state.type = 'min';
+      state.min = column;
+
+      return this;
+    },
+
     where(where: Record<string, unknown> = {}) {
       if (!_.isPlainObject(where)) {
         throw new Error('Where must be an object');
@@ -311,43 +366,53 @@ const createQueryBuilder = (
     },
 
     init(params = {}) {
-      const { _q, filters, where, select, limit, offset, orderBy, groupBy, populate } = params;
+      const {
+        _q: searchQuery,
+        filters,
+        where,
+        select,
+        limit,
+        offset,
+        orderBy,
+        groupBy,
+        populate,
+      } = params;
 
-      if (!_.isNil(where)) {
+      if (where != null) {
         this.where(where);
       }
 
-      if (!_.isNil(_q)) {
-        this.search(_q);
+      if (searchQuery != null) {
+        this.search(searchQuery);
       }
 
-      if (!_.isNil(select)) {
+      if (select != null) {
         this.select(select);
       } else {
         this.select('*');
       }
 
-      if (!_.isNil(limit)) {
+      if (limit != null) {
         this.limit(limit);
       }
 
-      if (!_.isNil(offset)) {
+      if (offset != null) {
         this.offset(offset);
       }
 
-      if (!_.isNil(orderBy)) {
+      if (orderBy != null) {
         this.orderBy(orderBy);
       }
 
-      if (!_.isNil(groupBy)) {
+      if (groupBy != null) {
         this.groupBy(groupBy);
       }
 
-      if (!_.isNil(populate)) {
+      if (populate != null) {
         this.populate(populate);
       }
 
-      if (!_.isNil(filters)) {
+      if (filters != null) {
         this.filters(filters);
       }
 
@@ -398,7 +463,7 @@ const createQueryBuilder = (
         return key;
       }
 
-      if (!_.isNil(alias)) {
+      if (alias != null) {
         return `${alias}.${key}`;
       }
 
@@ -411,16 +476,39 @@ const createQueryBuilder = (
       return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
     },
 
-    runSubQuery() {
+    runSubQuery(lockDeleteIds = false) {
       const originalType = state.type;
 
-      this.select('id');
-      const subQB = this.getKnexQuery();
+      // Build the inner SELECT from a clone that stays `select`, so the outer write
+      // state is never mutated. clone() shallow-merges state (shared where/joins,
+      // new alias) — preserve the original alias because joins were already baked
+      // against it. The clone inherits processed: true and must only read shared arrays.
+      const sub = this.clone();
+      sub.alias = this.alias;
+      // The clone shares these arrays: on the inner SELECT they would make it an UPDATE
+      sub.state.increments = [];
+      sub.state.decrements = [];
+      const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const connection = db.getConnection(tableName);
+      const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
 
-      return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
+      if (state.transaction) {
+        qb.transacting(state.transaction);
+      }
+
+      if (originalType === 'delete') {
+        return buildDelete(qb, lockDeleteIds);
+      }
+
+      if (state.data) {
+        qb.update(state.data);
+      }
+
+      state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+
+      return qb;
     },
 
     processState() {
@@ -430,11 +518,11 @@ const createQueryBuilder = (
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
 
-      if (!_.isNil(state.filters)) {
-        if (_.isFunction(state.filters)) {
+      if (state.filters != null) {
+        if (typeof state.filters === 'function') {
           const filters = state.filters({ qb: this, uid, meta, db });
 
-          if (!_.isNil(filters)) {
+          if (filters != null) {
             state.where.push(filters);
           }
         } else {
@@ -442,14 +530,75 @@ const createQueryBuilder = (
         }
       }
 
+      const scopeType = isScoped() && isScopedType(state.type) ? state.type : null;
+
+      // Copy instead of push: clones share the state.where array, so a push would scope them twice
+      if (scopeType) {
+        state.where = [...state.where, ...db.unstable_scopes.where({ uid, meta, type: scopeType })];
+      }
+
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
+
+      // After processWhere, so the joins that filters add are scoped too
+      if (scopeType) {
+        state.joins = state.joins.map((join) =>
+          join.uid ? { ...join, scope: scopeJoin(join.alias, join.uid, join.idColumn) } : join
+        );
+      }
+
+      // processWhere emits bare root columns while type is still update/delete
+      // (mustUseAlias is false). Qualify them now that joins from the relation
+      // predicate are known, so overlapping names (published_at, locale, id) are not ambiguous.
+      if (this.shouldUseSubQuery()) {
+        state.where = helpers.qualifyRootColumns(state.where, this.alias);
+      }
+
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
 
       state.data = helpers.toRow(meta, state.data);
 
+      this.ensurePaginationOrderStability();
+
       this.processSelect();
 
       this.state.processed = true;
+    },
+
+    /**
+     * OFFSET/LIMIT without a unique ORDER BY is undefined behavior on SQL databases (notably MySQL).
+     * That can repeat or skip rows across pages. Deep sort already appends a primary-key tie-breaker;
+     * for all other paginated selects, append id ASC when it is not already the last sort key.
+     */
+    ensurePaginationOrderStability() {
+      if (state.type !== 'select' || state.first) {
+        return;
+      }
+
+      if (state.limit === null && state.offset === null) {
+        return;
+      }
+
+      if (state.limit === -1) {
+        return;
+      }
+
+      if (this.shouldUseDeepSort()) {
+        return;
+      }
+
+      if (!meta.attributes.id) {
+        return;
+      }
+
+      const idColumnName = helpers.toColumnName(meta, 'id');
+      const aliasedId = this.aliasColumn(idColumnName);
+      const lastOrder = state.orderBy[state.orderBy.length - 1];
+
+      if (lastOrder && lastOrder.column === aliasedId) {
+        return;
+      }
+
+      state.orderBy = [...state.orderBy, { column: aliasedId, order: 'asc' }];
     },
 
     shouldUseDistinct() {
@@ -459,9 +608,9 @@ const createQueryBuilder = (
     shouldUseDeepSort() {
       return (
         state.orderBy
-          .filter(({ column }) => column.indexOf('.') >= 0)
-          .filter(({ column }) => {
-            const col = column.split('.');
+          .filter((ob: any) => 'column' in ob && ob.column.indexOf('.') >= 0)
+          .filter((ob: any) => {
+            const col = ob.column.split('.');
 
             for (let i = 0; i < col.length - 1; i += 1) {
               const el = col[i];
@@ -495,15 +644,31 @@ const createQueryBuilder = (
 
       if (this.shouldUseDistinct()) {
         const joinsOrderByColumns = state.joins.flatMap((join) => {
-          return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
+          return Object.keys(join.orderBy ?? {}).map((key) => this.aliasColumn(key, join.alias));
         });
-        const orderByColumns = state.orderBy.map(({ column }) => column);
+        // Only include column-based orderBy entries here (raw expressions are handled below)
+        const orderByColumns = state.orderBy
+          .filter((ob: any) => 'column' in ob)
+          .map((ob: any) => ob.column);
 
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+        state.select = [...new Set([...joinsOrderByColumns, ...orderByColumns, ...state.select])];
+
+        // PostgreSQL requires every ORDER BY expression to appear in the SELECT list when
+        // SELECT DISTINCT is used. Raw expressions (e.g. the `status` CASE ranking) are not
+        // plain columns, so add them explicitly — using the same builder/alias as the ORDER BY
+        // so the rendered SQL matches and PostgreSQL accepts the query. The deep-sort path
+        // dedupes via row numbering instead of DISTINCT, so it strips these out later.
+        const rawOrderByExpressions = state.orderBy
+          .filter((ob: any) => 'rawExpression' in ob)
+          .map((ob: any) =>
+            helpers.buildStatusSortExpression(db, tableName, this.alias, ob.isI18n)
+          );
+
+        state.select = [...state.select, ...rawOrderByExpressions];
       }
     },
 
-    getKnexQuery() {
+    getKnexQuery(lockDeleteIds = false) {
       if (!state.type) {
         this.select('*');
       }
@@ -517,7 +682,7 @@ const createQueryBuilder = (
       this.processState();
 
       if (this.shouldUseSubQuery()) {
-        return this.runSubQuery();
+        return this.runSubQuery(lockDeleteIds);
       }
 
       switch (state.type) {
@@ -545,10 +710,15 @@ const createQueryBuilder = (
           qb.max({ max: dbColumnName });
           break;
         }
+        case 'min': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.min));
+          qb.min({ min: dbColumnName });
+          break;
+        }
         case 'insert': {
           qb.insert(state.data);
 
-          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
+          if (db.dialect.useReturning() && _.has(meta.attributes, 'id')) {
             qb.returning('id');
           }
 
@@ -561,7 +731,7 @@ const createQueryBuilder = (
           break;
         }
         case 'delete': {
-          qb.delete();
+          buildDelete(qb, lockDeleteIds);
 
           break;
         }
@@ -606,10 +776,6 @@ const createQueryBuilder = (
         qb.offset(state.offset);
       }
 
-      if (state.orderBy.length > 0) {
-        qb.orderBy(state.orderBy);
-      }
-
       if (state.first) {
         qb.first();
       }
@@ -630,8 +796,23 @@ const createQueryBuilder = (
         });
       }
 
+      /**
+       * Join `orderBy` (e.g. join-table ordinal for relations) must precede root `state.orderBy`
+       * when both are emitted. Otherwise pagination stability (`ensurePaginationOrderStability`)
+       * appending `id ASC` on the root alias wins over distinct target ids and breaks relation ordering.
+       */
       if (state.joins.length > 0) {
         helpers.applyJoins(qb, state.joins);
+      }
+
+      if (state.orderBy.length > 0) {
+        // `processState` normalizes entries to OrderByValue[] (string/object input from `.init()`).
+        const knexOrderBy: helpers.KnexOrderByColumnDescriptor[] = (
+          state.orderBy as OrderByValue[]
+        ).map((entry) => helpers.toKnexOrderByDescriptor(db, tableName, this.alias, entry));
+        // Knex compound `orderBy` typings list `column: string | QueryBuilder` — `Knex.Raw` works at runtime
+        // (e.g. `status` sort). See helpers.toKnexOrderByDescriptor / buildStatusSortExpression.
+        qb.orderBy(knexOrderBy as never);
       }
 
       if (this.shouldUseDeepSort()) {
@@ -641,9 +822,57 @@ const createQueryBuilder = (
       return qb;
     },
 
+    async deleteReturningIds(trx) {
+      this.delete().transacting(trx);
+      try {
+        if (db.dialect.client === 'mysql') {
+          const rows: { id: ID }[] = await applyQueryTimeout(this.getKnexQuery(true), db);
+          const ids = rows.map((row) => row.id);
+
+          const deletion = this.getKnexQuery();
+          const deletedIds: ID[] = [];
+          for (const batch of _.chunk(ids, db.dialect.getBatchInsertSize())) {
+            // Keep the delete predicate: a related row used by a filter can change even
+            // while the source rows stay locked. Read survivors only on a partial delete.
+            const count = await applyQueryTimeout(deletion.clone().whereIn('id', batch), db);
+            if (count === batch.length) {
+              deletedIds.push(...batch);
+            } else if (count > 0) {
+              const survivors = await applyQueryTimeout(
+                db
+                  .getConnection(tableName)
+                  .whereIn('id', batch)
+                  .pluck('id')
+                  .forUpdate()
+                  .transacting(trx),
+                db
+              );
+              deletedIds.push(..._.difference(batch, survivors));
+            }
+          }
+          return deletedIds;
+        }
+
+        const query = this.getKnexQuery();
+        // Knex does not emit RETURNING for SQLite DELETE. Bind the compiled query so its
+        // filters and values are preserved. The better-sqlite3 driver returns the rows.
+        const returning =
+          db.dialect.client === 'sqlite'
+            ? db.connection.raw('? returning ??', [query, 'id']).transacting(trx)
+            : query.returning('id');
+        const rows: { id: ID }[] = await applyQueryTimeout(returning, db);
+        return rows.map((row) => row.id);
+      } catch (error) {
+        if (error instanceof Error) {
+          db.dialect.transformErrors(error);
+        }
+        throw error;
+      }
+    },
+
     async execute({ mapResults = true } = {}) {
       try {
-        const qb = this.getKnexQuery();
+        const qb = applyQueryTimeout(this.getKnexQuery(), db);
 
         const transaction = transactionCtx.get();
         if (transaction) {
@@ -652,7 +881,7 @@ const createQueryBuilder = (
 
         const rows = await qb;
 
-        if (state.populate && !_.isNil(rows)) {
+        if (state.populate && rows != null) {
           await helpers.applyPopulate(_.castArray(rows), state.populate, {
             qb: this,
             uid,

@@ -3,7 +3,9 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`, `flag: documentation`];
+const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
+const QA_COMPLETION_LABELS = ['qa-done', 'qa-skipped'];
+const STRAPI_ENGINEER_ASSOCIATIONS = ['MEMBER', 'OWNER'];
 
 async function main() {
   try {
@@ -21,6 +23,17 @@ async function main() {
       return;
     }
 
+    const labelNames = new Set(labels.map((label) => label.name));
+    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.has(label));
+
+    if (hasQaResolution === false) {
+      core.setFailed(
+        `The PR must have one of the following QA labels: ${QA_COMPLETION_LABELS.join(', ')}.`
+      );
+
+      return;
+    }
+
     const sourceLabelCount = labels.filter((label) => label.name.startsWith('source: ')).length;
     const issueLabelCount = labels.filter((label) => label.name.startsWith('pr: ')).length;
 
@@ -33,12 +46,17 @@ async function main() {
     }
 
     const baseRef = github.context.payload.pull_request?.base?.ref;
-    const milestone = github.context.payload.pull_request?.milestone;
-    const requiresMilestone = baseRef === 'develop';
-    const isMissingMilestone = milestone === null || milestone === undefined;
+    const authorAssociation = github.context.payload.pull_request?.author_association;
+    const isStrapiEngineer = STRAPI_ENGINEER_ASSOCIATIONS.includes(authorAssociation);
 
-    if (requiresMilestone === true && isMissingMilestone === true) {
-      core.setFailed(`The PR must have a milestone.`);
+    if (baseRef === 'main') {
+      core.info(`PR author_association: ${authorAssociation ?? 'undefined'}`);
+
+      if (isStrapiEngineer === false) {
+        core.setFailed(
+          'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
+        );
+      }
     }
   } catch (error) {
     core.setFailed(error.message);
@@ -46,6 +64,8 @@ async function main() {
 }
 
 main.BLOCKING_LABELS = BLOCKING_LABELS;
+main.QA_COMPLETION_LABELS = QA_COMPLETION_LABELS;
+main.STRAPI_ENGINEER_ASSOCIATIONS = STRAPI_ENGINEER_ASSOCIATIONS;
 
 if (require.main === module) {
   main();

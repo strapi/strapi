@@ -1,11 +1,70 @@
-import { Readable } from 'stream';
+import path from 'path';
+import os from 'os';
+import { gzipSync } from 'zlib';
+import fs from 'fs-extra';
+import tarStream from 'tar-stream';
+import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
 
 import { createLocalFileSourceProvider } from '..';
-import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from '../utils';
+import * as esmDeps from '../../../../utils/esm-deps';
+import {
+  isFilePathInDirname,
+  isPathEquivalent,
+  unknownPathToPosix,
+  validateAssetMetadata,
+} from '../utils';
+import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
+import { createEncryptionCipher } from '../../../../utils/encryption';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('File source provider', () => {
-  test('returns assets stream', () => {
+  const createTar = async (
+    entries: Array<{ name: string; content: string | Buffer }>
+  ): Promise<string> => {
+    const tarPath = path.join(os.tmpdir(), `strapi-dt-assets-${Date.now()}-${Math.random()}.tar`);
+    const pack = tarStream.pack();
+    for (const entry of entries) {
+      pack.entry({ name: entry.name }, entry.content);
+    }
+    pack.finalize();
+    await pipeline(pack, fs.createWriteStream(tarPath));
+    return tarPath;
+  };
+
+  test('bootstrap surfaces a stream dependency load failure', async () => {
+    const loadError = new Error("Cannot find module 'stream-chain'");
+    const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+      typeof esmDeps.loadStreamDeps
+    >;
+    loadStreamDeps.mockRejectedValueOnce(loadError);
+
+    const provider = createLocalFileSourceProvider({
+      file: { path: './test-file' },
+      compression: { enabled: false },
+      encryption: { enabled: true, key: 'secret' },
+    });
+
+    try {
+      await expect(provider.bootstrap({ report: jest.fn() } as never)).rejects.toBe(loadError);
+    } finally {
+      loadStreamDeps.mockReset();
+      loadStreamDeps.mockImplementation(() =>
+        jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+      );
+    }
+  });
+
+  test('exposes createAssetsReadStream (starting the stream opens the backup file on disk)', () => {
     const options: ILocalFileSourceProviderOptions = {
       file: {
         path: './test-file',
@@ -18,12 +77,108 @@ describe('File source provider', () => {
       },
     };
     const provider = createLocalFileSourceProvider(options);
-    const stream = provider.createAssetsReadStream();
-
-    expect(stream instanceof Readable).toBeTruthy();
+    expect(provider.createAssetsReadStream).toEqual(expect.any(Function));
   });
 
   describe('utils', () => {
+    const validAssetMetadata = {
+      id: 1,
+      name: 'photo.jpg',
+      hash: 'photo',
+      ext: '.jpg',
+      mime: 'image/jpeg',
+      size: 1,
+      url: '/uploads/photo.jpg',
+    };
+
+    test.each(['id', 'name', 'hash', 'mime', 'size', 'url'])(
+      'validateAssetMetadata rejects a missing %s',
+      (field) => {
+        const metadata: Record<string, unknown> = { ...validAssetMetadata };
+        delete metadata[field];
+
+        expect(() => validateAssetMetadata(metadata, 'photo.jpg')).toThrow(field);
+      }
+    );
+
+    test('validateAssetMetadata rejects metadata for a different upload filename', () => {
+      expect(() => validateAssetMetadata(validAssetMetadata, 'other.jpg')).toThrow(
+        'does not match upload filename "other.jpg"'
+      );
+    });
+
+    test('validateAssetMetadata accepts zero-byte files without an extension', () => {
+      expect(
+        validateAssetMetadata(
+          {
+            ...validAssetMetadata,
+            name: 'photo',
+            hash: 'photo',
+            ext: undefined,
+            size: 0,
+            url: '/uploads/photo',
+          },
+          'photo'
+        )
+      ).toMatchObject({ hash: 'photo', size: 0 });
+    });
+
+    test('validateAssetMetadata treats null optional fields as absent', () => {
+      expect(
+        validateAssetMetadata(
+          {
+            ...validAssetMetadata,
+            name: 'photo',
+            ext: null,
+            type: null,
+            mainHash: null,
+            url: '/uploads/photo',
+          },
+          'photo'
+        )
+      ).toMatchObject({ ext: null, type: null, mainHash: null });
+    });
+
+    test.each([
+      [null, 'photonull'],
+      [undefined, 'photoundefined'],
+    ])('validateAssetMetadata accepts legacy filenames for a %s extension', (ext, filename) => {
+      expect(
+        validateAssetMetadata(
+          {
+            ...validAssetMetadata,
+            name: 'photo',
+            hash: 'photo',
+            ext,
+            url: '/uploads/photo',
+          },
+          filename
+        )
+      ).toMatchObject({ hash: 'photo' });
+    });
+
+    test('validateAssetMetadata accepts responsive format metadata', () => {
+      expect(
+        validateAssetMetadata(
+          {
+            ...validAssetMetadata,
+            name: 'small_photo.jpg',
+            hash: 'small_photo',
+            type: 'small',
+            mainHash: 'photo',
+            url: '/uploads/small_photo.jpg',
+          },
+          'small_photo.jpg'
+        )
+      ).toMatchObject({ type: 'small', mainHash: 'photo' });
+    });
+
+    test('validateAssetMetadata rejects invalid optional field types', () => {
+      expect(() => validateAssetMetadata({ ...validAssetMetadata, type: 1 }, 'photo.jpg')).toThrow(
+        'type'
+      );
+    });
+
     const unknownConversionCases = [
       ['some/path/on/posix', 'some/path/on/posix'],
       ['some/path/on/posix/', 'some/path/on/posix/'],
@@ -129,5 +284,278 @@ describe('File source provider', () => {
         expect(isPathEquivalent(inputA, inputB)).toEqual(expected);
       }
     );
+  });
+
+  describe('asset preflight', () => {
+    const archiveMetadata = {
+      createdAt: new Date().toISOString(),
+      strapi: { version: '1.0.0' },
+    };
+    const assetMetadata = {
+      id: 1,
+      name: 'photo.jpg',
+      hash: 'photo',
+      ext: '.jpg',
+      mime: 'image/jpeg',
+      size: 1,
+      url: '/uploads/photo.jpg',
+    };
+
+    test('accepts an archive when every upload has valid sidecar metadata', async () => {
+      const tarPath = await createTar([
+        { name: 'metadata.json', content: JSON.stringify(archiveMetadata) },
+        { name: 'assets/uploads/photo.jpg', content: 'jpeg-bytes' },
+        {
+          name: 'assets/metadata/photo.jpg.json',
+          content: JSON.stringify(assetMetadata),
+        },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      await provider.bootstrap({ report: jest.fn() } as never);
+      await expect(provider.validateStage('assets')).resolves.toBeUndefined();
+
+      const assets = [];
+      const stream = provider.createAssetsReadStream();
+      for await (const asset of stream) {
+        assets.push(asset);
+        asset.stream.resume();
+      }
+      expect(assets).toHaveLength(1);
+      expect(assets[0].metadata).toMatchObject({ id: 1, hash: 'photo' });
+
+      await fs.remove(tarPath);
+    });
+
+    test('validates and restores a compressed encrypted archive', async () => {
+      const tarPath = await createTar([
+        { name: 'metadata.json', content: JSON.stringify(archiveMetadata) },
+        { name: 'assets/uploads/photo.jpg', content: 'jpeg-bytes' },
+        { name: 'assets/metadata/photo.jpg.json', content: JSON.stringify(assetMetadata) },
+      ]);
+      const key = 'preflight-test-key';
+      const cipher = createEncryptionCipher(key);
+      const encryptedArchive = Buffer.concat([
+        cipher.update(gzipSync(await fs.readFile(tarPath))),
+        cipher.final(),
+      ]);
+      await fs.writeFile(tarPath, encryptedArchive);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: true },
+        encryption: { enabled: true, key },
+      });
+
+      await provider.bootstrap({ report: jest.fn() } as never);
+      await expect(provider.validateStage('assets')).resolves.toBeUndefined();
+
+      const assets = [];
+      const stream = provider.createAssetsReadStream();
+      for await (const asset of stream) {
+        assets.push(asset);
+        asset.stream.resume();
+      }
+      expect(assets).toHaveLength(1);
+      expect(assets[0].metadata).toMatchObject({ id: 1, hash: 'photo' });
+
+      await fs.remove(tarPath);
+    });
+
+    test('rejects an archive with a missing asset sidecar', async () => {
+      const tarPath = await createTar([
+        { name: 'metadata.json', content: JSON.stringify(archiveMetadata) },
+        { name: 'assets/uploads/photo.jpg', content: 'jpeg-bytes' },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      await provider.bootstrap({ report: jest.fn() } as never);
+      await expect(provider.validateStage('assets')).rejects.toThrow(
+        'Asset metadata preflight failed: missing sidecar metadata for "photo.jpg"'
+      );
+
+      await fs.remove(tarPath);
+    });
+
+    test('rejects an archive with incomplete object asset metadata', async () => {
+      const tarPath = await createTar([
+        { name: 'metadata.json', content: JSON.stringify(archiveMetadata) },
+        { name: 'assets/uploads/photo.jpg', content: 'jpeg-bytes' },
+        { name: 'assets/metadata/photo.jpg.json', content: '{}' },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      await provider.bootstrap({ report: jest.fn() } as never);
+      await expect(provider.validateStage('assets')).rejects.toThrow(
+        'Asset sidecar metadata has invalid required fields'
+      );
+
+      await fs.remove(tarPath);
+    });
+
+    test('rejects an archive with non-object asset sidecar JSON', async () => {
+      const tarPath = await createTar([
+        { name: 'metadata.json', content: JSON.stringify(archiveMetadata) },
+        { name: 'assets/uploads/photo.jpg', content: 'jpeg-bytes' },
+        { name: 'assets/metadata/photo.jpg.json', content: 'null' },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      await provider.bootstrap({ report: jest.fn() } as never);
+      await expect(provider.validateStage('assets')).rejects.toThrow(
+        'Asset sidecar metadata must be a JSON object'
+      );
+
+      await fs.remove(tarPath);
+    });
+
+    test('rejects an archive with malformed asset sidecar JSON', async () => {
+      const tarPath = await createTar([
+        { name: 'metadata.json', content: JSON.stringify(archiveMetadata) },
+        { name: 'assets/uploads/photo.jpg', content: 'jpeg-bytes' },
+        { name: 'assets/metadata/photo.jpg.json', content: '{not valid json' },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      await provider.bootstrap({ report: jest.fn() } as never);
+      await expect(provider.validateStage('assets')).rejects.toThrow(
+        'Asset metadata preflight failed for "photo.jpg.json"'
+      );
+
+      await fs.remove(tarPath);
+    });
+  });
+
+  test('rejects a malformed JSONL line', async () => {
+    const tarPath = await createTar([
+      {
+        name: 'metadata.json',
+        content: JSON.stringify({
+          createdAt: new Date().toISOString(),
+          strapi: { version: '1.0.0' },
+        }),
+      },
+      { name: 'entities/entities_00001.jsonl', content: '{not json\n' },
+    ]);
+    const provider = createLocalFileSourceProvider({
+      file: { path: tarPath },
+      compression: { enabled: false },
+      encryption: { enabled: false },
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const readAll = async () => {
+      for await (const chunk of stream) {
+        expect(chunk).toBeDefined();
+      }
+    };
+
+    await expect(readAll()).rejects.toThrow(/Error parsing backup files/);
+    await fs.remove(tarPath);
+  });
+
+  describe('last JSONL line without a trailing newline', () => {
+    const readEntities = async (content: string) => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'entities/entities_00001.jsonl', content },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      try {
+        await provider.bootstrap({ report: jest.fn() } as never);
+        const entities: unknown[] = [];
+        for await (const chunk of provider.createEntitiesReadStream()) {
+          entities.push(chunk);
+        }
+        return entities;
+      } finally {
+        await fs.remove(tarPath);
+      }
+    };
+
+    test('is read', async () => {
+      await expect(readEntities('{"id":1}\n{"id":2}')).resolves.toEqual([{ id: 1 }, { id: 2 }]);
+    });
+
+    test('is rejected when malformed', async () => {
+      await expect(readEntities('{"id":1}\n{not json')).rejects.toThrow(
+        /Error parsing backup files/
+      );
+    });
+  });
+
+  describe('Backpressure', () => {
+    test('entities read stream pauses under backpressure when reading from tar', async () => {
+      const tmpDir = os.tmpdir();
+      const tarPath = path.join(tmpDir, `strapi-dt-backpressure-${Date.now()}.tar`);
+      const pack = tarStream.pack();
+
+      pack.entry(
+        { name: 'metadata.json' },
+        JSON.stringify({
+          createdAt: new Date().toISOString(),
+          strapi: { version: '1.0.0' },
+        })
+      );
+      const entityLines = Array.from(
+        { length: 25 },
+        (_, i) => `${JSON.stringify({ uid: 'api::foo.foo', id: i + 1, title: `Entity ${i}` })}\n`
+      ).join('');
+      pack.entry({ name: 'entities/entities_00000.jsonl' }, entityLines);
+      pack.finalize();
+
+      const writeStream = fs.createWriteStream(tarPath);
+      await pipeline(pack, writeStream);
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap();
+
+      const stream = provider.createEntitiesReadStream();
+      const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
+        delayMs: 12,
+        minChunksForBackpressure: 10,
+      });
+
+      await fs.remove(tarPath).catch(() => {});
+
+      expect(sourcePaused).toBe(true);
+      expect(chunks.length).toBe(25);
+    }, 8000);
   });
 });

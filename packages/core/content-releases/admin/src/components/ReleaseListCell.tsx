@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useTable, useQueryParams } from '@strapi/admin/strapi-admin';
-import { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
+import { ListCellMeta, ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
 import { Box, Popover, Typography, Button, Link } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -21,15 +21,30 @@ interface QueryParams {
   };
 }
 
+type DocumentRow = {
+  id: string | number;
+  documentId: Modules.Documents.ID;
+};
+
+const isDocumentRow = (entry: { id: string | number }): entry is DocumentRow => {
+  if ('documentId' in entry) {
+    return typeof entry.documentId === 'string';
+  }
+
+  return false;
+};
+
 const useReleasesList = (contentTypeUid: UID.ContentType, documentId: Modules.Documents.ID) => {
   const listViewData = useTable('ListView', (state) => state.rows);
-  const documentIds = listViewData.map((entry) => entry.documentId);
+  const documentIds = listViewData
+    .filter((entry) => isDocumentRow(entry))
+    .map((entry) => entry.documentId);
   const [{ query }] = useQueryParams();
   const locale = (query as QueryParams)?.plugins?.i18n?.locale || undefined;
 
   const response = useGetMappedEntriesInReleasesQuery(
     { contentTypeUid, documentIds, locale },
-    { skip: !documentIds || !contentTypeUid || documentIds.length === 0 }
+    { skip: !contentTypeUid || documentIds.length === 0 }
   );
 
   const mappedEntriesInReleases = response.data || {};
@@ -45,6 +60,8 @@ interface AddColumnToTableHookArgs {
   layout: ListLayout;
   displayedHeaders: ListFieldLayout[];
 }
+
+type CellFormatterArgs = Parameters<NonNullable<ListFieldLayout['cellFormatter']>>;
 
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
   const { options } = layout;
@@ -65,10 +82,10 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
           defaultMessage: 'To be released in',
         },
         cellFormatter: (
-          props: Modules.Documents.AnyDocument,
-          _: any,
-          { model }: { model: UID.ContentType }
-        ) => <ReleaseListCell {...props} model={model} />,
+          props: CellFormatterArgs[0],
+          _header: CellFormatterArgs[1],
+          { model }: ListCellMeta
+        ) => <ReleaseListCell documentId={props.documentId} model={model as UID.ContentType} />,
       },
     ],
     layout,
@@ -79,7 +96,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
  * ReleaseListCell
  * -----------------------------------------------------------------------------------------------*/
 
-interface ReleaseListCellProps extends Modules.Documents.AnyDocument {
+interface ReleaseListCellProps {
   documentId: Modules.Documents.ID;
   model: UID.ContentType;
 }

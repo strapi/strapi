@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from '../../../../fixtures';
 import { resetFiles } from '../../../../utils/file-reset';
 import { sharedSetup } from '../../../../utils/setup';
 import { createComponent, type AddAttribute } from '../../../../utils/content-types';
@@ -10,7 +10,7 @@ test.describe('Create a new component', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('create-component', page, {
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       login: true,
       afterSetup: async () => {},
     });
@@ -97,7 +97,6 @@ test.describe('Create a new component', () => {
           type: 'oneWay',
           target: { select: 'Article', name: 'comptestonewayrelationtarget' },
         },
-        advanced: advancedRequired,
       },
       {
         type: 'relation',
@@ -106,7 +105,6 @@ test.describe('Create a new component', () => {
           type: 'manyWay',
           target: { select: 'Article', name: 'comptestmanywayrelationtarget' },
         },
-        advanced: advancedRequired,
       },
       {
         type: 'enumeration',

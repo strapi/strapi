@@ -57,6 +57,13 @@ const RecentDocumentsTable = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
+  // An empty main field returns an empty title, shown as "Untitled" like the rest of the admin
+  const getDocumentTitle = (document: RecentDocument): string =>
+    document.title === '' ? emptyLabel : document.title;
 
   const getEditViewLink = (document: RecentDocument): string => {
     const isSingleType = document.kind === 'singleType';
@@ -78,15 +85,19 @@ const RecentDocumentsTable = ({
     <Table colCount={5} rowCount={documents?.length ?? 0}>
       <Tbody>
         {documents?.map((document) => (
-          <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
+          <Tr
+            onClick={handleRowClick(document)}
+            cursor="pointer"
+            key={`${document.documentId}-${document.locale ?? 'default'}`}
+          >
             <Td>
               <CellTypography
-                title={document.title}
+                title={getDocumentTitle(document)}
                 variant="omega"
                 textColor="neutral800"
                 $maxWidth={dynamicMaxWidth}
               >
-                {document.title}
+                {getDocumentTitle(document)}
               </CellTypography>
             </Td>
             <Td>

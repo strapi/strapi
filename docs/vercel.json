@@ -1,0 +1,3 @@
+{
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ':(glob)../packages/**/package.json' && exit 0 || exit 1"
+}

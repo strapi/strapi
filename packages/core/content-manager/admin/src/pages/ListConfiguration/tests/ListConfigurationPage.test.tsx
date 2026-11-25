@@ -66,6 +66,46 @@ describe('Configure the List View', () => {
     expect(screen.getByRole('button', { name: 'Add a field' })).toBeInTheDocument();
   });
 
+  describe('custom order', () => {
+    afterEach(() => {
+      window.strapi.future = {
+        isEnabled: () => false,
+      };
+    });
+
+    it('is not offered while its future flag is off', async () => {
+      render();
+
+      await screen.findByRole('heading', { name: 'Configure the view - Address' });
+
+      expect(
+        screen.queryByRole('checkbox', { name: 'Enable custom order' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('takes over the default sort when it is turned on', async () => {
+      window.strapi.future = {
+        isEnabled: () => true,
+      };
+
+      render();
+
+      await screen.findByRole('heading', { name: 'Configure the view - Address' });
+
+      const defaultSortBy = screen.getByRole('combobox', { name: 'Default sort attribute' });
+      const defaultSortOrder = screen.getByRole('combobox', { name: 'Default sort order' });
+
+      expect(defaultSortBy).not.toHaveAttribute('aria-disabled');
+      expect(defaultSortOrder).not.toHaveAttribute('aria-disabled');
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Enable custom order' }));
+
+      expect(screen.getByRole('checkbox', { name: 'Enable custom order' })).toBeChecked();
+      expect(defaultSortBy).toHaveAttribute('aria-disabled', 'true');
+      expect(defaultSortOrder).toHaveAttribute('aria-disabled', 'true');
+    });
+  });
+
   it('should add field', async () => {
     const { getByRole, user, findByRole } = render();
 
@@ -83,12 +123,12 @@ describe('Configure the List View', () => {
 
     await findByRole('heading', { name: 'Configure the view - Address' });
 
-    await user.click(getByRole('button', { name: 'Delete id' }));
+    await user.click(getByRole('button', { name: 'Delete documentId' }));
     await user.click(getByRole('button', { name: 'Add a field' }));
-    await user.click(getByRole('menuitem', { name: 'id' }));
+    await user.click(getByRole('menuitem', { name: 'documentId' }));
 
-    expect(await findByRole('button', { name: `Edit id` })).toBeInTheDocument();
-    expect(await findByRole('button', { name: `Delete id` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Edit documentId` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Delete documentId` })).toBeInTheDocument();
   });
 
   describe('Edit modal', () => {
@@ -97,10 +137,10 @@ describe('Configure the List View', () => {
 
       await findByRole('heading', { name: 'Configure the view - Address' });
 
-      await user.click(getByRole('button', { name: 'Edit id' }));
+      await user.click(getByRole('button', { name: 'Edit documentId' }));
 
-      expect(await findByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
-      expect(await findByRole('heading', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(await findByRole('dialog', { name: 'Edit DocumentId' })).toBeInTheDocument();
+      expect(await findByRole('heading', { name: 'Edit DocumentId' })).toBeInTheDocument();
       const labelInput = await findByRole('textbox', { name: 'Label' });
       expect(labelInput).toBeInTheDocument();
       expect(
@@ -115,7 +155,7 @@ describe('Configure the List View', () => {
       fireEvent.click(getByRole('button', { name: 'Finish' }));
 
       await waitFor(() =>
-        expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
+        expect(queryByRole('dialog', { name: 'Edit DocumentId' })).not.toBeInTheDocument()
       );
     });
 
@@ -124,14 +164,14 @@ describe('Configure the List View', () => {
 
       await findByRole('heading', { name: 'Configure the view - Address' });
 
-      await user.click(getByRole('button', { name: 'Edit id' }));
+      await user.click(getByRole('button', { name: 'Edit documentId' }));
 
-      expect(await findByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(await findByRole('dialog', { name: 'Edit DocumentId' })).toBeInTheDocument();
 
       await user.click(await findByRole('button', { name: 'Cancel' }));
 
       await waitFor(() =>
-        expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
+        expect(queryByRole('dialog', { name: 'Edit DocumentId' })).not.toBeInTheDocument()
       );
     });
   });

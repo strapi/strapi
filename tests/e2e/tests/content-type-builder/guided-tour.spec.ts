@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { sharedSetup } from '../../../utils/setup';
 import { STRAPI_GUIDED_TOUR_CONFIG, setGuidedTourLocalStorage } from '../../../utils/global-setup';
 import { clickAndWait, describeOnCondition } from '../../../utils/shared';
@@ -9,10 +9,11 @@ describeOnCondition(edition === 'EE')('Guided tour - Content Type Builder (AI Ch
   test.beforeEach(async ({ page }) => {
     await setGuidedTourLocalStorage(page, { ...STRAPI_GUIDED_TOUR_CONFIG, enabled: true });
 
-    await sharedSetup('guided-tour', page, {
+    await sharedSetup('guided-tour-ctb-ai', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
+      resetAlways: true,
     });
   });
   test('should see the ai content-type-builder tour if ai isenabled', async ({ page }) => {

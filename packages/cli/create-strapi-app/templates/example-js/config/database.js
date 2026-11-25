@@ -1,10 +1,24 @@
+/** @import { Core } from '@strapi/strapi' */
+
 const path = require('path');
+const { isDatabaseClientKind } = require('@strapi/database');
 
 module.exports = ({ env }) => {
   const client = env('DATABASE_CLIENT', 'sqlite');
 
+  if (!isDatabaseClientKind(client)) {
+    throw new Error(
+      `Unsupported DATABASE_CLIENT: ${client}. Use "postgres", "mysql", or "sqlite".`
+    );
+  }
+
+  // An empty DATABASE_FILENAME would resolve to the app root, so it falls back to the default file
+  const sqliteFilename = env('DATABASE_FILENAME', '');
+
+  /** @type {Record<Core.Config.Database.ClientKind, Core.Config.Database['connection']>} */
   const connections = {
     mysql: {
+      client: 'mysql',
       connection: {
         host: env('DATABASE_HOST', 'localhost'),
         port: env.int('DATABASE_PORT', 3306),
@@ -23,6 +37,7 @@ module.exports = ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     postgres: {
+      client: 'postgres',
       connection: {
         connectionString: env('DATABASE_URL'),
         host: env('DATABASE_HOST', 'localhost'),
@@ -43,8 +58,13 @@ module.exports = ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     sqlite: {
+      client: 'sqlite',
       connection: {
-        filename: path.join(__dirname, '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+        filename: path.join(
+          __dirname,
+          '..',
+          sqliteFilename === '' ? '.tmp/data.db' : sqliteFilename
+        ),
       },
       useNullAsDefault: true,
     },
@@ -52,7 +72,6 @@ module.exports = ({ env }) => {
 
   return {
     connection: {
-      client,
       ...connections[client],
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
     },

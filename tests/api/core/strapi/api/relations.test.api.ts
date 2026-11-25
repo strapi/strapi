@@ -1293,6 +1293,60 @@ describe('Relations', () => {
       expect(updatedShop.data).toMatchObject(expectedShop);
     });
 
+    test.each([
+      ['start', () => ({ start: true })],
+      ['before the first relation', () => ({ before: docid1 })],
+    ])('Move an existing relation to the start using %s', async (_, getPosition) => {
+      const shop = await createShop({
+        anyToManyRel: [{ documentId: docid1 }, { documentId: docid2 }],
+      });
+
+      const updatedShop = await updateShop(shop.data, {
+        anyToManyRel: [{ documentId: docid2, position: getPosition() }],
+      });
+
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ documentId: docid2 }, { documentId: docid1 }],
+      });
+      expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+
+    test('Move morphToMany relations to the start repeatedly', async () => {
+      const shop = await createEntry('shops', {
+        name: 'Cazotte Shop',
+        products_morphtomany: {
+          connect: [docid1, docid2, docid3].map((documentId) => ({
+            documentId,
+            __type: 'api::product.product',
+          })),
+        },
+      });
+
+      let expected = [docid1, docid2, docid3];
+
+      for (let i = 0; i < 5; i += 1) {
+        const last = expected[expected.length - 1];
+
+        const updatedShop = await updateEntry(
+          'shops',
+          shop.data.documentId,
+          {
+            products_morphtomany: {
+              connect: [
+                { documentId: last, __type: 'api::product.product', position: { start: true } },
+              ],
+            },
+          },
+          populateShop
+        );
+
+        expected = [last, ...expected.slice(0, -1)];
+        expect(
+          updatedShop.data.products_morphtomany.map((relation) => relation.documentId)
+        ).toEqual(expected);
+      }
+    });
+
     test('Update polymorphic relations with different types using before and after', async () => {
       const shop = await createEntry('shops', {
         name: 'Cazotte Shop',
@@ -1492,6 +1546,94 @@ describe('Relations', () => {
       });
 
       expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+  });
+
+  /**
+   * GH#22611: REST create/update must accept relation values as `{ documentId }` objects
+   * (not only scalars or `{ connect: [...] }`). Previously this failed validation with
+   * "Invalid key documentId".
+   */
+  describe('GH#22611: direct relation object { documentId } (REST shorthand, no connect/set)', () => {
+    test('creates a shop with oneToOne relation using { documentId } object', async () => {
+      const res = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 direct docId',
+          products_ow: { documentId: docid1 },
+        },
+        populateShop
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.data).toMatchObject({
+        name: 'GH22611 direct docId',
+        products_ow: { documentId: docid1 },
+      });
+    });
+
+    test('updates oneToOne relation using { documentId } object', async () => {
+      const created = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 update',
+          products_ow: { documentId: docid1 },
+        },
+        populateShop
+      );
+
+      expect(created.error).toBeUndefined();
+
+      const updated = await updateEntry(
+        'shops',
+        created.data.documentId,
+        {
+          name: 'GH22611 update',
+          products_ow: { documentId: docid2 },
+        },
+        populateShop
+      );
+
+      expect(updated.error).toBeUndefined();
+      expect(updated.data.products_ow).toMatchObject({ documentId: docid2 });
+    });
+
+    test('creates with manyToOne and oneToMany using { documentId } object form', async () => {
+      const res = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 mixed',
+          products_mo: { documentId: docid1 },
+          products_om: [{ documentId: docid2 }, { documentId: docid3 }],
+        },
+        populateShop
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.data).toMatchObject({
+        products_mo: { documentId: docid1 },
+        products_om: [{ documentId: docid2 }, { documentId: docid3 }],
+      });
+    });
+
+    test('creates nested component relation using { documentId } object (non-repeatable myCompo)', async () => {
+      const res = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 component',
+          myCompo: {
+            name: 'inner',
+            compo_products_ow: { documentId: docid1 },
+          },
+        },
+        populateShop
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.data.myCompo).toMatchObject({
+        name: 'inner',
+        compo_products_ow: { documentId: docid1 },
+      });
     });
   });
 });

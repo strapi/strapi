@@ -1,4 +1,4 @@
-import { ComponentType, useState } from 'react';
+import { type ComponentType, useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
@@ -14,10 +14,12 @@ import { useDataManager } from './DataManager/useDataManager';
 
 import type { Internal, Struct } from '@strapi/types';
 
+const EMPTY_COMPONENTS: NonNullable<DynamicZoneListProps['components']> = [];
+
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
   components: Array<Internal.UID.Component>;
-  customRowComponent?: ComponentType<any>;
+  customRowComponent?: ComponentType<Record<string, unknown>>;
   name?: string;
   forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
@@ -46,7 +48,7 @@ const ComponentStack = styled(Flex)`
 `;
 
 export const DynamicZoneList = ({
-  components = [],
+  components = EMPTY_COMPONENTS,
   addComponent,
   name,
   forTarget,

@@ -15,9 +15,7 @@ import type {
 } from '@strapi/content-manager/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
-// eslint-disable-next-line import/no-default-export
 const admin: Plugin.Config.AdminInput = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: StrapiApp) {
     /**
      * Hook that adds the locale column in the Release Details table
@@ -68,10 +66,12 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Releases',
         },
         licenseOnly: true,
+        licenseFeature: 'cms-content-releases',
         permissions: [],
-        async Component() {
-          const { ProtectedReleasesSettingsPage } = await import('./pages/ReleasesSettingsPage');
-          return { default: ProtectedReleasesSettingsPage };
+        Component() {
+          return import('./pages/ReleasesSettingsPage').then((mod) => ({
+            default: mod.ProtectedReleasesSettingsPage,
+          }));
         },
       });
 
@@ -119,17 +119,19 @@ const admin: Plugin.Config.AdminInput = {
     ) {
       app.addSettingsLink('global', {
         id: pluginId,
-        to: '/plugins/purchase-content-releases',
+        to: 'purchase-content-releases',
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
         permissions: [],
-        async Component() {
-          const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
-          return { default: PurchaseContentReleases };
+        Component() {
+          return import('./pages/PurchaseContentReleases').then((mod) => ({
+            default: mod.PurchaseContentReleases,
+          }));
         },
         licenseOnly: true,
+        licenseFeature: 'cms-content-releases',
       });
     }
   },

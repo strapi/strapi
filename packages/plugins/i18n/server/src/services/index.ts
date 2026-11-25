@@ -7,7 +7,9 @@ import contentTypes from './content-types';
 import sanitize from './sanitize';
 import { createSettingsService } from './settings';
 import { createAILocalizationsService } from './ai-localizations';
+import { createAITranslationsService } from './ai-translations';
 import { createAILocalizationJobsService } from './ai-localization-jobs';
+import { createFillFromLocaleService } from './fill-from-locale';
 
 export default {
   permissions,
@@ -18,6 +20,8 @@ export default {
   'iso-locales': isoLocales,
   'content-types': contentTypes,
   'ai-localizations': createAILocalizationsService,
+  'ai-translations': createAITranslationsService,
   'ai-localization-jobs': createAILocalizationJobsService,
   settings: createSettingsService,
+  'fill-from-locale': createFillFromLocaleService,
 };

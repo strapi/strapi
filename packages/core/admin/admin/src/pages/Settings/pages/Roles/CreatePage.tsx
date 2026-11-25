@@ -19,9 +19,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
+import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -36,6 +38,8 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
+import { isPermissionWithinCeiling, toEnforcedPermissions } from './utils/createPermissionChecker';
+import { isPermissionsCeilingError } from './utils/isPermissionsCeilingError';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -64,11 +68,22 @@ const CreatePage = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
+  const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  /**
+   * An admin cannot grant a permission they do not hold themselves, so the permissions
+   * tree is restricted to the current user's own permissions unless they are a super admin.
+   */
+  const currentUserPermissions = useAuth('CreatePage', (state) => state.permissions);
+  const currentUser = useAuth('CreatePage', (state) => state.user);
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles.some((role) => role.code === SUPER_ADMIN_CODE) ?? false;
+  const userPermissions = isCurrentUserSuperAdmin ? undefined : currentUserPermissions;
 
   const { isLoading: isLoadingPermissionsLayout, currentData: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -93,6 +108,28 @@ const CreatePage = () => {
     }
   );
 
+  /**
+   * A duplicated role can only carry what the user may grant: the new role has no permissions
+   * yet, so nothing is exempt from the ceiling, and the server rejects the whole update when one
+   * copied permission is outside it. Permissions outside it are left unticked.
+   */
+  const permissionsToCopy = React.useMemo(() => {
+    if (userPermissions === undefined) {
+      return rolePermissions;
+    }
+
+    // The form is not shown before the layout loads
+    if (permissionsLayout === undefined) {
+      return undefined;
+    }
+
+    const heldPermissions = toEnforcedPermissions(userPermissions, permissionsLayout);
+
+    return rolePermissions?.filter((permission) =>
+      isPermissionWithinCeiling(heldPermissions, permission)
+    );
+  }, [permissionsLayout, rolePermissions, userPermissions]);
+
   const [createRole] = useCreateRoleMutation();
   const [updateRolePermissions] = useUpdateRolePermissionsMutation();
 
@@ -100,6 +137,11 @@ const CreatePage = () => {
     data: CreateRoleFormValues,
     formik: FormikHelpers<CreateRoleFormValues>
   ) => {
+    // Re-check via ref on submit: state may lag behind the latest matrix edits when save is clicked quickly
+    if (permissionsRef.current?.hasLocaleValidationErrors()) {
+      return;
+    }
+
     try {
       if (id) {
         trackUsage('willDuplicateRole');
@@ -136,7 +178,13 @@ const CreatePage = () => {
           } else {
             toggleNotification({
               type: 'danger',
-              message: formatAPIError(updateRes.error),
+              message: isPermissionsCeilingError(updateRes.error)
+                ? formatMessage({
+                    id: 'Settings.permissions.cannot-grant-unheld.error',
+                    defaultMessage:
+                      "Some permissions could not be saved because you don't have them yourself.",
+                  })
+                : formatAPIError(updateRes.error),
             });
           }
 
@@ -150,7 +198,7 @@ const CreatePage = () => {
       });
 
       navigate(`../roles/${res.data.id.toString()}`, { replace: true });
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
@@ -158,7 +206,8 @@ const CreatePage = () => {
     }
   };
 
-  if ((isLoadingPermissionsLayout && isLoadingRole) || !permissionsLayout) {
+  // The permissions form reads its initial permissions once, when it mounts
+  if (isLoadingPermissionsLayout || isLoadingRole || !permissionsLayout) {
     return <Page.Loading />;
   }
 
@@ -205,7 +254,13 @@ const CreatePage = () => {
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button type="submit" loading={isSubmitting} startIcon={<Check />} fullWidth>
+                    <Button
+                      type="submit"
+                      loading={isSubmitting}
+                      disabled={hasLocaleValidationErrors}
+                      startIcon={<Check />}
+                      fullWidth
+                    >
                       {formatMessage({
                         id: 'global.save',
                         defaultMessage: 'Save',
@@ -299,9 +354,11 @@ const CreatePage = () => {
                   <Box shadow="filterShadow" hasRadius>
                     <Permissions
                       isFormDisabled={false}
+                      onLocaleValidationChange={setHasLocaleValidationErrors}
                       ref={permissionsRef}
-                      permissions={rolePermissions}
+                      permissions={permissionsToCopy}
                       layout={permissionsLayout}
+                      userPermissions={userPermissions}
                     />
                   </Box>
                 </Flex>

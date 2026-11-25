@@ -1,4 +1,3 @@
-/* eslint-disable import/no-default-export */
 import * as React from 'react';
 
 import {
@@ -69,10 +68,6 @@ const App = () => {
           message: formatAPIError(err),
         });
       });
-  };
-
-  const handleShowConfirmDelete = () => {
-    setShowConfirmDelete(!showConfirmDelete);
   };
 
   const handleConfirmDelete = async () => {

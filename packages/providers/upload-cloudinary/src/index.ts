@@ -2,6 +2,7 @@ import type { ReadStream } from 'node:fs';
 import { v2 as cloudinary, ConfigOptions, UploadApiOptions } from 'cloudinary';
 import intoStream from 'into-stream';
 import * as utils from '@strapi/utils';
+import type { Providers } from '@strapi/types';
 
 interface File {
   name: string;
@@ -24,7 +25,7 @@ interface File {
   buffer?: Buffer;
 }
 
-export default {
+const providerModule = {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 
@@ -96,12 +97,52 @@ export default {
       });
     };
 
+    const replace = async (newFile: File, oldFile: File, customConfig = {}): Promise<void> => {
+      const { public_id: oldPublicId, resource_type: oldResourceType } =
+        oldFile.provider_metadata ?? {};
+
+      // If the public_id is preserved, we can overwrite in place and invalidate
+      // the CDN cache in a single call.
+      if (oldPublicId && newFile.hash === oldPublicId) {
+        return upload(newFile, {
+          public_id: oldPublicId as string,
+          overwrite: true,
+          invalidate: true,
+          ...(oldResourceType ? { resource_type: oldResourceType } : {}),
+          ...customConfig,
+        });
+      }
+
+      // The public_id differs — upload the new file first, then destroy the old.
+      await upload(newFile, customConfig);
+
+      if (oldPublicId) {
+        try {
+          await cloudinary.uploader.destroy(`${oldPublicId}`, {
+            resource_type: (oldResourceType || 'image') as string,
+            invalidate: true,
+          });
+        } catch (error) {
+          if (error instanceof Error) {
+            throw new Error(`Error deleting on cloudinary: ${error.message}`);
+          }
+          throw error;
+        }
+      }
+    };
+
     return {
       uploadStream(file: File, customConfig = {}) {
         return upload(file, customConfig);
       },
       upload(file: File, customConfig = {}) {
         return upload(file, customConfig);
+      },
+      replaceStream(newFile: File, oldFile: File, customConfig = {}) {
+        return replace(newFile, oldFile, customConfig);
+      },
+      replace(newFile: File, oldFile: File, customConfig = {}) {
+        return replace(newFile, oldFile, customConfig);
       },
       async delete(file: File, customConfig = {}) {
         try {
@@ -128,3 +169,9 @@ export default {
     };
   },
 };
+
+// Checked apart from its declaration, so the contract does not re-type the parameters the
+// provider leaves to inference.
+providerModule satisfies Providers.Upload.Factory<ConfigOptions>;
+
+export default providerModule;

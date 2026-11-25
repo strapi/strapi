@@ -18,8 +18,11 @@ const validation = {
       password: yup
         .string()
         .min(8)
+        // eslint-disable-next-line no-template-curly-in-string -- Yup interpolates ${path} at validation time.
         .matches(/[a-z]/, '${path} must contain at least one lowercase character')
+        // eslint-disable-next-line no-template-curly-in-string -- Yup interpolates ${path} at validation time.
         .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
+        // eslint-disable-next-line no-template-curly-in-string -- Yup interpolates ${path} at validation time.
         .matches(/\d/, '${path} must contain at least one number')
         .when('restrictedAccess', (value, initSchema) => {
           return value ? initSchema.required('password is required') : initSchema;
@@ -59,8 +62,13 @@ export default {
           ? `${major}.${minor}.${patch}`
           : getService('documentation').getDocumentationVersion();
 
+      const extensionsDir =
+        strapi.config.get('environment') === 'production'
+          ? strapi.dirs.dist.extensions
+          : strapi.dirs.app.extensions;
+
       const openAPISpecsPath = path.join(
-        strapi.dirs.app.extensions,
+        extensionsDir,
         'documentation',
         'documentation',
         version,
@@ -73,17 +81,12 @@ export default {
         const layout = (await import('../public/index.html')).default;
 
         const filledLayout = _.template(layout)({
-          backendUrl: strapi.config.server.url,
+          backendUrl: strapi.config.get<string>('server.url'),
           spec: JSON.stringify(JSON.parse(documentation)),
         });
 
         try {
-          const layoutPath = path.resolve(
-            strapi.dirs.app.extensions,
-            'documentation',
-            'public',
-            'index.html'
-          );
+          const layoutPath = path.resolve(extensionsDir, 'documentation', 'public', 'index.html');
           await fs.ensureFile(layoutPath);
           await fs.writeFile(layoutPath, filledLayout);
 
@@ -91,11 +94,7 @@ export default {
           ctx.url = path.basename(`${ctx.url}/index.html`);
 
           try {
-            const staticFolder = path.resolve(
-              strapi.dirs.app.extensions,
-              'documentation',
-              'public'
-            );
+            const staticFolder = path.resolve(extensionsDir, 'documentation', 'public');
             return koaStatic(staticFolder)(ctx, next);
           } catch (e) {
             strapi.log.error(e);
@@ -122,7 +121,7 @@ export default {
       const layout = (await import('../public/login.html')).default;
 
       const filledLayout = _.template(layout.toString())({
-        actionUrl: `${strapi.config.server.url}/documentation/login`,
+        actionUrl: `${strapi.config.get<string>('server.url')}/documentation/login`,
       });
 
       const $ = cheerio.load(filledLayout);
@@ -162,9 +161,13 @@ export default {
 
     const { password: hash } = (await strapi
       .store({ type: 'plugin', name: 'documentation', key: 'config' })
-      .get()) as { password: string };
+      .get()) as { password?: string };
 
-    const isValid = await bcrypt.compare(password, hash);
+    // A missing stored hash or a missing submitted password counts as a wrong password
+    const isValid =
+      typeof password === 'string' && typeof hash === 'string'
+        ? await bcrypt.compare(password, hash)
+        : false;
 
     let querystring = '?error=password';
 
@@ -176,7 +179,7 @@ export default {
       querystring = '';
     }
 
-    ctx.redirect(`${strapi.config.server.url}/documentation${querystring}`);
+    ctx.redirect(`${strapi.config.get<string>('server.url')}/documentation${querystring}`);
   },
 
   async regenerateDoc(ctx: Koa.Context) {

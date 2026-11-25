@@ -1,0 +1,28 @@
+model {
+  environment_values = source_document 'Environment values' {
+    summary 'Deployment-specific settings supplied outside application code.'
+    description 'Process environment and optional .env values feed configuration. Application config files, including config/env/<environment>, are executable source distributed with the app. Selected Admin build variables become public browser code; server-only credentials belong in server configuration, not the browser bundle.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/configuration/index.ts 'Configuration loading and precedence'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/strapi/src/node/core/env.ts 'Admin build environment selection'
+  }
+  extend strapi {
+    admin_browser_bundle = source_document 'Admin browser bundle' {
+      summary 'Built JavaScript and assets, regenerated from application code.'
+      description 'The Admin build combines application customization and enabled plugin UI. Selected URLs and environment settings are embedded at build time. The resulting code executes in the browser; the Strapi server can serve its files. It is replaceable build output, not content or uploaded media.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/strapi/src/node/create-build-context.ts 'Build context'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/routes/serve-admin-panel.ts 'Bundle serving'
+    }
+  }
+  extend strapi.application_source {
+    metadata { configuration 'config/* and config/env/<environment> are application source; environment values are separate inputs' }
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/configuration/index.ts 'Configuration and environment overrides'
+  }
+  extend strapi.database {
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/core-store.ts 'Database-backed settings'
+  }
+  strapi.server_runtime -> environment_values 'loads server configuration from'
+  strapi.cli_tooling.admin_build -> strapi.application_source 'imports customization and configuration'
+  strapi.cli_tooling.admin_build -> environment_values 'reads selected build-time values'
+  strapi.cli_tooling.admin_build -> strapi.admin_browser_bundle 'produces browser assets'
+  strapi.server_runtime -> strapi.admin_browser_bundle 'serves assets when configured'
+}

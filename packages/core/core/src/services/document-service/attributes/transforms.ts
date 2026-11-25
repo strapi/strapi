@@ -1,4 +1,4 @@
-import { getOr, toNumber, isString } from 'lodash/fp';
+import { get, isString, toNumber } from 'lodash';
 import type { Schema } from '@strapi/types';
 import bcrypt from 'bcryptjs';
 
@@ -24,7 +24,7 @@ const transforms: Transforms = {
       return value;
     }
 
-    const rounds = toNumber(getOr(10, 'encryption.rounds', attribute));
+    const rounds = toNumber(get(attribute, 'encryption.rounds', 10));
 
     return bcrypt.hashSync(value.toString(), rounds);
   },

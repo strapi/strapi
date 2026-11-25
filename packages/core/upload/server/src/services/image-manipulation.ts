@@ -1,12 +1,12 @@
 import fs from 'fs';
 import { join } from 'path';
-import sharp from 'sharp';
+import sharp, { type Metadata, type ResizeOptions, type SharpOptions } from 'sharp';
 import crypto from 'crypto';
 import { strings, file as fileUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
 
-import type { UploadableFile } from '../types';
+import type { Config, UploadableFile } from '../types';
 
 type Dimensions = {
   width: number | null;
@@ -15,14 +15,36 @@ type Dimensions = {
 
 const { bytesToKbytes } = fileUtils;
 
-const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
-const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
-const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
+/**
+ * Instance-level sharp options from the plugin config (e.g. `limitInputPixels`).
+ * Global settings (`cache`, `concurrency`) are applied once in the plugin register phase.
+ * Returns `undefined` when nothing is configured so bare stream pipelines can use `sharp()`.
+ */
+const getSharpOptions = (): SharpOptions | undefined => {
+  const { limitInputPixels } = strapi.config.get<Config['sharp']>('plugin::upload.sharp', {}) ?? {};
+
+  if (limitInputPixels == null) {
+    return undefined;
+  }
+
+  return { limitInputPixels };
+};
+
+const FORMATS_TO_RESIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'gif', 'avif']);
+const FORMATS_TO_PROCESS = new Set(['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif']);
+const FORMATS_TO_OPTIMIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'avif']);
 
 const isOptimizableFormat = (
   format: string | undefined
 ): format is 'jpeg' | 'png' | 'webp' | 'tiff' | 'avif' =>
-  format !== undefined && FORMATS_TO_OPTIMIZE.includes(format);
+  format !== undefined && FORMATS_TO_OPTIMIZE.has(format);
+
+/**
+ * sharp reports AVIF files as `heif` with `av1` compression. Normalize them to `avif`;
+ * other HEIF files (e.g. HEIC, `hevc` compression) keep the `heif` format and stay unprocessed.
+ */
+const getFormat = ({ format, compression }: Metadata) =>
+  format === 'heif' && compression === 'av1' ? 'avif' : format;
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
   new Promise<void>((resolve, reject) => {
@@ -34,16 +56,18 @@ const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> => {
+const getMetadata = (file: UploadableFile): Promise<Metadata> => {
+  const options = getSharpOptions();
+
   if (!file.filepath) {
     return new Promise((resolve, reject) => {
-      const pipeline = sharp();
+      const pipeline = options ? sharp(options) : sharp();
       pipeline.metadata().then(resolve).catch(reject);
       file.getStream().pipe(pipeline);
     });
   }
 
-  return sharp(file.filepath).metadata();
+  return sharp(file.filepath, options).metadata();
 };
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
@@ -56,11 +80,11 @@ const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
   height: 156,
   fit: 'inside',
-} satisfies sharp.ResizeOptions;
+} satisfies ResizeOptions;
 
 const resizeFileTo = async (
   file: UploadableFile,
-  options: sharp.ResizeOptions,
+  options: ResizeOptions,
   {
     name,
     hash,
@@ -73,7 +97,7 @@ const resizeFileTo = async (
 
   let newInfo;
   if (!file.filepath) {
-    const transform = sharp()
+    const transform = sharp({ ...getSharpOptions(), animated: true })
       .resize(options)
       .on('info', (info) => {
         newInfo = info;
@@ -81,10 +105,12 @@ const resizeFileTo = async (
 
     await writeStreamToFile(file.getStream().pipe(transform), filePath);
   } else {
-    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+    newInfo = await sharp(file.filepath, { ...getSharpOptions(), animated: true })
+      .resize(options)
+      .toFile(filePath);
   }
 
-  const { width, height, size } = newInfo ?? {};
+  const { width, height, size, pageHeight } = newInfo ?? {};
 
   const newFile: UploadableFile = {
     name,
@@ -98,7 +124,7 @@ const resizeFileTo = async (
 
   Object.assign(newFile, {
     width,
-    height,
+    height: pageHeight ?? height,
     size: size ? bytesToKbytes(size) : 0,
     sizeInBytes: size,
   });
@@ -130,14 +156,16 @@ const optimize = async (file: UploadableFile) => {
   const { sizeOptimization = false, autoOrientation = false } =
     (await getService('upload').getSettings()) ?? {};
 
-  const { format, size } = await getMetadata(file);
+  const metadata = await getMetadata(file);
+  const format = getFormat(metadata);
+  const { size } = metadata;
 
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
     let transformer;
     if (!file.filepath) {
-      transformer = sharp();
+      transformer = sharp({ ...getSharpOptions(), animated: true });
     } else {
-      transformer = sharp(file.filepath);
+      transformer = sharp(file.filepath, { ...getSharpOptions(), animated: true });
     }
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
@@ -160,7 +188,12 @@ const optimize = async (file: UploadableFile) => {
       newInfo = await transformer.toFile(filePath);
     }
 
-    const { width: newWidth, height: newHeight, size: newSize } = newInfo ?? {};
+    const {
+      width: newWidth,
+      height: newHeight,
+      size: newSize,
+      pageHeight: newPageHeight,
+    } = newInfo ?? {};
 
     const newFile = { ...file };
 
@@ -174,7 +207,7 @@ const optimize = async (file: UploadableFile) => {
 
     return Object.assign(newFile, {
       width: newWidth,
-      height: newHeight,
+      height: newPageHeight ?? newHeight,
       size: newSize ? bytesToKbytes(newSize) : 0,
       sizeInBytes: newSize,
     });
@@ -200,17 +233,17 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
   const originalDimensions = await getDimensions(file);
 
   const breakpoints = getBreakpoints();
-  return Promise.all(
-    Object.keys(breakpoints).map((key) => {
-      const breakpoint = breakpoints[key];
+  const results = [];
 
-      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint });
-      }
+  for (const key of Object.keys(breakpoints)) {
+    const breakpoint = breakpoints[key];
 
-      return undefined;
-    })
-  );
+    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+      results.push(await generateBreakpoint(key, { file, breakpoint }));
+    }
+  }
+
+  return results;
 };
 
 const generateBreakpoint = async (
@@ -243,18 +276,23 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
 const isFaultyImage = async (file: UploadableFile) => {
+  const options = getSharpOptions();
+
   if (!file.filepath) {
-    return new Promise((resolve, reject) => {
-      const pipeline = sharp();
-      pipeline.stats().then(resolve).catch(reject);
+    return new Promise<boolean>((resolve) => {
+      const pipeline = options ? sharp(options) : sharp();
+      pipeline
+        .stats()
+        .then(() => resolve(false))
+        .catch(() => resolve(true));
       file.getStream().pipe(pipeline);
     });
   }
 
   try {
-    await sharp(file.filepath).stats();
+    await sharp(file.filepath, options).stats();
     return false;
-  } catch (e) {
+  } catch {
     return true;
   }
 };
@@ -263,36 +301,36 @@ const isOptimizableImage = async (file: UploadableFile) => {
   let format;
   try {
     const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch (e) {
+    format = getFormat(metadata);
+  } catch {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_OPTIMIZE.includes(format);
+  return format && FORMATS_TO_OPTIMIZE.has(format);
 };
 
 const isResizableImage = async (file: UploadableFile) => {
   let format;
   try {
     const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch (e) {
+    format = getFormat(metadata);
+  } catch {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_RESIZE.includes(format);
+  return format && FORMATS_TO_RESIZE.has(format);
 };
 
 const isImage = async (file: UploadableFile) => {
   let format;
   try {
     const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch (e) {
+    format = getFormat(metadata);
+  } catch {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_PROCESS.includes(format);
+  return format && FORMATS_TO_PROCESS.has(format);
 };
 
 const generateFileName = (name: string) => {

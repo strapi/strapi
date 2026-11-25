@@ -1,6 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import { render, waitFor, act, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { NpsSurvey } from '../NpsSurvey';
 
@@ -121,9 +121,11 @@ describe('NPS survey', () => {
     console.error = jest.fn();
 
     server.use(
-      rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
-        return res.once(ctx.status(500));
-      })
+      http.post(
+        'https://analytics.strapi.io/submit-nps',
+        () => new HttpResponse(null, { status: 500 }),
+        { once: true }
+      )
     );
 
     const { getByRole, queryByText, findByText } = render(<NpsSurvey />);

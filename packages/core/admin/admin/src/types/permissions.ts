@@ -1,6 +1,7 @@
 import type { Permission } from '../features/Auth';
 
 type SettingsPermissions =
+  | 'admin-tokens'
   | 'api-tokens'
   | 'project-settings'
   | 'roles'
@@ -29,6 +30,7 @@ interface PermissionMap {
   settings: Record<SettingsPermissions, CRUDPermissions> &
     Partial<Record<EESettingsPermissions, CRUDPermissions>> & {
       plugins: Pick<CRUDPermissions, 'read' | 'main'>;
+      'debug-dump': Pick<CRUDPermissions, 'read' | 'main'>;
     };
 }
 

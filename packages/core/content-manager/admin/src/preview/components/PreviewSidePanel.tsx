@@ -7,6 +7,7 @@ import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useGetPreviewUrlQuery } from '../services/preview';
+import { getPreviewUrlStatus } from '../utils/getPreviewUrlStatus';
 
 import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 import type { UID } from '@strapi/types';
@@ -17,12 +18,18 @@ interface ConditionalTooltipProps {
   children: React.ReactNode;
 }
 
+/**
+ * Always keeps the Tooltip (and therefore the children subtree) mounted: conditionally wrapping
+ * would remount the child button whenever `isShown` flips, and a click landing during that swap
+ * is silently lost. When the tooltip must not show, it is force-closed via the controlled `open`
+ * prop instead of being removed from the tree.
+ */
 const ConditionalTooltip = ({ isShown, label, children }: ConditionalTooltipProps) => {
-  if (isShown) {
-    return <Tooltip label={label}>{children}</Tooltip>;
-  }
-
-  return children;
+  return (
+    <Tooltip label={label} open={isShown ? undefined : false}>
+      {children}
+    </Tooltip>
+  );
 };
 
 const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
@@ -51,12 +58,26 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
       query: {
         documentId,
         locale: document?.locale,
-        status: document?.status,
+        status: getPreviewUrlStatus(document?.status),
       },
     },
     // Don't bother making the request since we won't show any UI
     { skip: isUnsaved }
   );
+
+  /**
+   * The query args above change while the document settles (locale/status resolve after load and
+   * on save/publish), and each change is a new cache entry with transiently empty data. Latch
+   * enablement once a URL has been seen so the "Open preview" button doesn't unmount and remount
+   * mid-interaction — a click landing during such a swap is silently lost.
+   */
+  const [isPreviewEnabled, setIsPreviewEnabled] = React.useState(false);
+  const previewUrl = data?.data?.url;
+  React.useEffect(() => {
+    if (previewUrl) {
+      setIsPreviewEnabled(true);
+    }
+  }, [previewUrl]);
 
   if (isUnsaved) {
     return null;
@@ -85,7 +106,7 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     };
   }
 
-  if (!data?.data?.url || error) {
+  if (!isPreviewEnabled && (!data?.data?.url || error)) {
     return null;
   }
 

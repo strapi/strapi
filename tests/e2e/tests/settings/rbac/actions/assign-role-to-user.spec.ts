@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test, expect } from '../../../../../fixtures';
 
 import { sharedSetup } from '../../../../../utils/setup';
 import { navToHeader, clickAndWait } from '../../../../../utils/shared';
@@ -14,7 +15,7 @@ test.describe('RBAC - Assign Role to Users', () => {
     await sharedSetup('rbac-assign-roles-to-user', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Users management page

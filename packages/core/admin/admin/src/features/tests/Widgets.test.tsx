@@ -1,6 +1,6 @@
 import { server } from '@tests/server';
-import { waitFor, renderHook, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { act, waitFor, renderHook, screen } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import {
   calculateWidgetRows,
@@ -89,6 +89,12 @@ const mockWidgetRows = [
   },
 ];
 
+/**
+ * A handler call whose state change is then read from `result.current` is wrapped in `act()`, not
+ * `waitFor()`. `renderHook` updates `result.current` from a `useEffect`; `act()` flushes the render
+ * and that effect before it returns, `waitFor()` does not, so under CPU load the read could still
+ * see the render from before the call.
+ */
 describe('useWidgets', () => {
   const mockSetFilteredWidgets = jest.fn();
   const defaultProps = {
@@ -118,8 +124,8 @@ describe('useWidgets', () => {
 
     // Setup MSW handlers
     server.use(
-      rest.put('/admin/homepage/layout', (req, res, ctx) => {
-        return res(ctx.json({ success: true }));
+      http.put('/admin/homepage/layout', () => {
+        return HttpResponse.json({ success: true });
       })
     );
   });
@@ -284,7 +290,7 @@ describe('useWidgets', () => {
       mockIsValidResizeOperation.mockReturnValue(false);
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await waitFor(() => {
+      act(() => {
         result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
@@ -296,10 +302,10 @@ describe('useWidgets', () => {
   });
 
   describe('drag state management', () => {
-    it('should handle drag start', async () => {
+    it('should handle drag start', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await waitFor(() => {
+      act(() => {
         result.current.handleDragStart('widget-1');
       });
 
@@ -307,18 +313,18 @@ describe('useWidgets', () => {
       expect(result.current.draggedWidgetId).toBe('widget-1');
     });
 
-    it('should handle drag end', async () => {
+    it('should handle drag end', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       // Start dragging first
-      await waitFor(() => {
+      act(() => {
         result.current.handleDragStart('widget-1');
       });
 
       expect(result.current.isDraggingWidget).toBe(true);
 
       // End dragging
-      await waitFor(() => {
+      act(() => {
         result.current.handleDragEnd();
       });
 
@@ -328,10 +334,10 @@ describe('useWidgets', () => {
   });
 
   describe('columnWidths state management', () => {
-    it('should update columnWidths when setColumnWidths is called', async () => {
+    it('should update columnWidths when setColumnWidths is called', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await waitFor(() => {
+      act(() => {
         result.current.setColumnWidths(mockColumnWidths);
       });
 
@@ -343,8 +349,8 @@ describe('useWidgets', () => {
     it('should handle API errors gracefully', async () => {
       // Mock API error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: { message: 'Server error' } }));
+        http.put('/admin/homepage/layout', () => {
+          return HttpResponse.json({ error: { message: 'Server error' } }, { status: 500 });
         })
       );
 
@@ -359,15 +365,14 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner
       await screen.findByText('Server error');
     });
 
     it('should handle network errors gracefully', async () => {
       // Mock network error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, _ctx) => {
-          return res.networkError('Network error');
+        http.put('/admin/homepage/layout', () => {
+          return HttpResponse.error();
         })
       );
 
@@ -382,8 +387,11 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner
-      await screen.findByText('Network error');
+      // Under msw v1 the network-error message was the string passed to
+      // `res.networkError(...)`. Under msw v2 + undici the thrown `TypeError`
+      // surfaces with messages like "Failed to fetch" / "fetch failed" /
+      // "Network Error" depending on how axios wraps it. Match any of them.
+      await screen.findByText(/failed to fetch|fetch failed|network ?error/i);
     });
   });
 

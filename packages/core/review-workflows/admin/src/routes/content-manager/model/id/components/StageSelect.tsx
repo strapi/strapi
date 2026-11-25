@@ -19,10 +19,7 @@ import { useParams } from 'react-router-dom';
 
 import { Stage } from '../../../../../../../shared/contracts/review-workflows';
 import { LimitsModal, LimitsModalProps } from '../../../../../components/LimitsModal';
-import {
-  CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
-  CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
-} from '../../../../../constants';
+import { CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME } from '../../../../../constants';
 import { useGetStagesQuery, useUpdateStageMutation } from '../../../../../services/content-manager';
 import { buildValidParams } from '../../../../../utils/api';
 import { getStageColorByHex } from '../../../../../utils/colors';
@@ -35,28 +32,6 @@ import type { Data } from '@strapi/types';
  * LimitModals
  * -----------------------------------------------------------------------------------------------*/
 
-const WorkflowLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    <LimitsModal.Root open={open} onOpenChange={onOpenChange}>
-      <LimitsModal.Title>
-        {formatMessage({
-          id: 'content-manager.reviewWorkflows.workflows.limit.title',
-          defaultMessage: 'You’ve reached the limit of workflows in your plan',
-        })}
-      </LimitsModal.Title>
-
-      <LimitsModal.Body>
-        {formatMessage({
-          id: 'content-manager.reviewWorkflows.workflows.limit.body',
-          defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
-        })}
-      </LimitsModal.Body>
-    </LimitsModal.Root>
-  );
-};
-
 const StageLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
   const { formatMessage } = useIntl();
 
@@ -64,14 +39,14 @@ const StageLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
     <LimitsModal.Root open={open} onOpenChange={onOpenChange}>
       <LimitsModal.Title>
         {formatMessage({
-          id: 'content-manager.reviewWorkflows.stages.limit.title',
+          id: 'review-workflows.stages.limit.title',
           defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
         })}
       </LimitsModal.Title>
 
       <LimitsModal.Body>
         {formatMessage({
-          id: 'content-manager.reviewWorkflows.stages.limit.body',
+          id: 'review-workflows.stages.limit.body',
           defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
         })}
       </LimitsModal.Body>
@@ -96,7 +71,7 @@ const Select = ({
     <SingleSelect
       disabled={stages.length === 0}
       placeholder={formatMessage({
-        id: 'content-manager.reviewWorkflows.assignee.placeholder',
+        id: 'review-workflows.assignee.placeholder',
         defaultMessage: 'Select…',
       })}
       startIcon={
@@ -173,29 +148,34 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
       collectionType,
       model,
       documentId: id,
+      params,
     },
     {
       skip: !id && collectionType !== 'single-types',
     }
   );
 
+  // Fall back to the URL `id` so the stages endpoint is still queried when the
+  // selected locale has no entry yet. The backend returns workflow metadata
+  // even when the entity for `documentId + locale` does not exist.
+  const stagesDocumentId = document?.documentId ?? id;
+
   const { data, isLoading: isLoadingStages } = useGetStagesQuery(
     {
       slug: collectionType,
       model: model,
-      // @ts-expect-error – `id` is not correctly typed in the DS.
-      id: document?.documentId,
+      id: stagesDocumentId,
       params,
     },
     {
-      skip: !document?.documentId,
+      skip: !stagesDocumentId || stagesDocumentId === 'create',
     }
   );
 
   const { meta, stages = [] } = data ?? {};
 
   const { getFeature } = useLicenseLimits();
-  const [showLimitModal, setShowLimitModal] = React.useState<'stage' | 'workflow' | null>(null);
+  const [showLimitModal, setShowLimitModal] = React.useState<'stage' | null>(null);
 
   const limits = getFeature<string>('review-workflows') ?? {};
 
@@ -206,31 +186,18 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const handleChange = async (stageId: Data.ID) => {
     try {
       /**
+       * The workflow limit is enforced only when a workflow is created, so an instance above it
+       * can still change the stage of its entries.
+       *
        * If the current license has a limit:
-       * check if the total count of workflows exceeds that limit and display
+       * check if the total count of stages exceeds that limit and display
        * the limits modal.
        *
        * If the current license does not have a limit (e.g. offline license):
        * do nothing (for now).
        *
        */
-
       if (
-        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) < (meta?.workflowCount ?? 0)
-      ) {
-        setShowLimitModal('workflow');
-
-        /**
-         * If the current license has a limit:
-         * check if the total count of stages exceeds that limit and display
-         * the limits modal.
-         *
-         * If the current license does not have a limit (e.g. offline license):
-         * do nothing (for now).
-         *
-         */
-      } else if (
         limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
         parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) < stages.length
       ) {
@@ -249,7 +216,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
             toggleNotification({
               type: 'success',
               message: formatMessage({
-                id: 'content-manager.reviewWorkflows.stage.notification.saved',
+                id: 'review-workflows.stage.notification.saved',
                 defaultMessage: 'Review stage updated',
               }),
             });
@@ -263,11 +230,11 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
           }
         }
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
-          id: 'content-manager.reviewWorkflows.stage.notification.error',
+          id: 'review-workflows.stage.notification.error',
           defaultMessage: 'An error occurred while updating the review stage',
         }),
       });
@@ -277,17 +244,41 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const isLoading = isLoadingStages || isLoadingDocument;
 
   const reviewStageLabel = formatMessage({
-    id: 'content-manager.reviewWorkflows.stage.label',
+    id: 'review-workflows.stage.label',
     defaultMessage: 'Review stage',
   });
-  const reviewStageHint =
-    !isLoading &&
-    stages.length === 0 &&
-    // TODO: Handle errors and hints
-    formatMessage({
-      id: 'content-manager.reviewWorkflows.stages.no-transition',
-      defaultMessage: 'You don’t have the permission to update this stage.',
-    });
+
+  // The Edit View renders the Review Workflows panel even when the user
+  // switches to a locale that has not been saved yet. In that case the
+  // document for the selected locale does not exist and we cannot transition
+  // any stage until the entry is first saved, so surface a dedicated hint
+  // rather than the misleading "no permission" message.
+  const hasDocumentForLocale = Boolean(document?.documentId);
+  const totalWorkflowStages = meta?.stageCount ?? 0;
+  const canTransition = meta?.canTransition ?? true;
+
+  let reviewStageHint: string | undefined;
+  if (!isLoading) {
+    if (!hasDocumentForLocale) {
+      reviewStageHint = formatMessage({
+        id: 'review-workflows.stages.save-first',
+        defaultMessage: 'Save this entry to assign a workflow stage.',
+      });
+    } else if (stages.length === 0) {
+      if (canTransition && totalWorkflowStages === 1) {
+        reviewStageHint = formatMessage({
+          id: 'review-workflows.stages.single-stage',
+          defaultMessage:
+            'This workflow only has one stage. Add more stages to be able to update it here.',
+        });
+      } else {
+        reviewStageHint = formatMessage({
+          id: 'review-workflows.stages.no-transition',
+          defaultMessage: 'You don’t have the permission to update this stage.',
+        });
+      }
+    }
+  }
 
   if (isCompact) {
     return (
@@ -307,17 +298,13 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
                 value={activeWorkflowStage?.id}
                 onChange={handleChange}
                 placeholder={formatMessage({
-                  id: 'content-manager.reviewWorkflows.assignee.placeholder',
+                  id: 'review-workflows.assignee.placeholder',
                   defaultMessage: 'Select…',
                 })}
               />
             </>
           </Field.Root>
         </Tooltip>
-        <WorkflowLimitModal
-          open={showLimitModal === 'workflow'}
-          onOpenChange={() => setShowLimitModal(null)}
-        />
         <StageLimitModal
           open={showLimitModal === 'stage'}
           onOpenChange={() => setShowLimitModal(null)}
@@ -343,17 +330,13 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
           value={activeWorkflowStage?.id}
           onChange={handleChange}
           placeholder={formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.placeholder',
+            id: 'review-workflows.assignee.placeholder',
             defaultMessage: 'Select…',
           })}
         />
         <Field.Hint />
         <Field.Error />
       </Field.Root>
-      <WorkflowLimitModal
-        open={showLimitModal === 'workflow'}
-        onOpenChange={() => setShowLimitModal(null)}
-      />
       <StageLimitModal
         open={showLimitModal === 'stage'}
         onOpenChange={() => setShowLimitModal(null)}

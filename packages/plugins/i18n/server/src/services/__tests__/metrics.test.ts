@@ -35,7 +35,7 @@ describe('Metrics', () => {
         },
       },
       telemetry: {
-        send: jest.fn(),
+        send: jest.fn().mockResolvedValue(true),
       },
     } as any;
 
@@ -81,7 +81,7 @@ describe('Metrics', () => {
         },
       },
       telemetry: {
-        send: jest.fn(),
+        send: jest.fn().mockResolvedValue(true),
       },
     } as any;
 

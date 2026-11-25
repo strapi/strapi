@@ -26,6 +26,7 @@ import {
 import { PublishAction } from './PublishAction';
 
 import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
+import type { Document } from '../../../../hooks/useDocument';
 
 interface BulkActionDescription {
   dialog?: DialogOptions | NotificationOptions | ModalOptions;
@@ -53,6 +54,7 @@ const BulkActionsRenderer = () => {
   const { model, collectionType } = useDoc();
   const { list } = useDocumentLayout(model);
   const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
+  const selectedDocuments = selectedRows as Document[];
 
   return (
     <Flex gap={2}>
@@ -60,14 +62,14 @@ const BulkActionsRenderer = () => {
         props={{
           model,
           collectionType,
-          documents: selectedRows,
+          documents: selectedDocuments,
         }}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getBulkActions()}
       >
         {(actions) =>
-          actions.map((action) => {
+          actions.map(({ type: _bulkType, ...action }) => {
             return list.settings.bulkable && <DocumentActionButton key={action.id} {...action} />;
           })
         }

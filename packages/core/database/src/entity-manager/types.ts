@@ -2,6 +2,9 @@ import type { Knex } from 'knex';
 import type { CountResult, ID } from '../types';
 import { QueryBuilder } from '../query/query-builder';
 
+// A beforeSync migration sees the previous physical schema while metadata describes the next.
+export type RelationStorage = (table: string, columns: string[]) => boolean;
+
 export type Data = Record<string, unknown>;
 
 export type Params = {
@@ -19,21 +22,34 @@ export type Params = {
   count?: boolean;
 };
 
+export type PaginatedResult = {
+  results: any[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    pageCount: number;
+    total: number;
+  };
+};
+
+/**
+ * Populate fragment for the loaded relation, plus the page to load. Required, since the
+ * page defaults are read from it.
+ */
+export type LoadPagesParams = Pick<
+  Params,
+  'select' | 'where' | 'filters' | 'populate' | 'orderBy' | 'page' | 'pageSize'
+> & {
+  ordering?: 'asc' | 'desc';
+};
+
 export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
 
 export interface Repository {
   findOne(params?: FindOneParams): Promise<any>;
   findMany(params?: Params): Promise<any[]>;
   findWithCount(params?: Params): Promise<[any[], number]>;
-  findPage(params: Params): Promise<{
-    results: any[];
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  }>;
+  findPage(params: Params): Promise<PaginatedResult>;
   create(params: Params): Promise<any>;
   createMany(params: Params): Promise<CountResult & { ids: ID[] }>;
   update(params: Params): Promise<any>;
@@ -46,11 +62,11 @@ export interface Repository {
   deleteRelations(id: ID): Promise<any>;
   populate(entity: Entity, populate: Params['populate']): Promise<any>;
   load(entity: any, field: string | string[], populate?: Params['populate']): Promise<any>;
-  loadPages<TField extends string>(
+  loadPages<TField extends string = string>(
     entity: any,
-    field: TField | TField[],
-    populate?: Params['populate']
-  ): Promise<any>;
+    field: TField,
+    params: LoadPagesParams
+  ): Promise<PaginatedResult>;
 }
 
 export type Entity = {
@@ -68,7 +84,7 @@ export interface EntityManager {
   update(uid: string, params: Params): Promise<any>;
   updateMany(uid: string, params: Params): Promise<CountResult>;
   delete(uid: string, params: Params): Promise<any>;
-  deleteMany(uid: string, params: Params): Promise<CountResult>;
+  deleteMany(uid: string, params: Params, hasStorage?: RelationStorage): Promise<CountResult>;
   populate(uid: string, entity: Entity, populate: Params['populate']): Promise<Entity>;
   load(
     uid: string,
@@ -89,6 +105,17 @@ export interface EntityManager {
     options?: { transaction?: Knex.Transaction }
   ): Promise<any>;
   deleteRelations(uid: string, id: ID, options?: { transaction?: Knex.Transaction }): Promise<void>;
+  deleteManyRelations(
+    uid: string,
+    ids: ID[],
+    options?: { transaction?: Knex.Transaction; hasStorage?: RelationStorage }
+  ): Promise<void>;
+  insertJoinTableRows(
+    joinTableName: string,
+    rows: Record<string, unknown>[],
+    trx: any,
+    options?: { onConflict?: string[]; merge?: string[]; ignore?: boolean }
+  ): Promise<void>;
   createQueryBuilder(uid: string): QueryBuilder;
   getRepository(uid: string): Repository;
 }

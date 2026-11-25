@@ -1,4 +1,5 @@
 {
+  "coming-soon": "Tento obsah sa momentálne pripravuje a bude späť o niekoľko týždňov!",
   "components.Row.open": "Otvoriť",
   "components.Row.regenerate": "Znova vygenerovať",
   "containers.HomePage.Block.title": "Verzie",
@@ -19,6 +20,23 @@
   "error.noVersion": "Verzia je povinná",
   "error.regenerateDoc": "Nastala chyba pri generovaní dokumentácie",
   "error.regenerateDoc.versionMissing": "Verzia, ktorú sa snažíte vygenerovať, neexistuje.",
+  "notification.delete.success": "Dokumentácia bola odstránená",
+  "notification.generate.success": "Dokumentácia bola vygenerovaná",
   "notification.update.success": "Nastavenia boli upravené",
-  "plugin.name": "Dokumentácia"
+  "pages.PluginPage.Button.open": "Otvoriť dokumentáciu",
+  "pages.PluginPage.header.description": "Nakonfigurujte plugin dokumentácie",
+  "pages.PluginPage.table.generated": "Naposledy vygenerované",
+  "pages.PluginPage.table.icon.regenerate": "Znova vygenerovať {target}",
+  "pages.PluginPage.table.icon.show": "Otvoriť {target}",
+  "pages.PluginPage.table.version": "Verzia",
+  "pages.SettingsPage.header.description": "Nakonfigurujte plugin dokumentácie",
+  "pages.SettingsPage.header.save": "Uložiť",
+  "pages.SettingsPage.toggle.hint": "Nastaviť endpoint dokumentácie ako súkromný",
+  "pages.SettingsPage.toggle.label": "Obmedzený prístup",
+  "plugin.description.long": "Vytvorte OpenAPI dokument a vizualizujte svoje API pomocou SWAGGER UI.",
+  "plugin.description.short": "Vytvorte OpenAPI dokument a vizualizujte svoje API pomocou SWAGGER UI.",
+  "plugin.name": "Dokumentácia",
+  "Input.error.contain.lowercase": "Heslo musí obsahovať aspoň jedno malé písmeno",
+  "Input.error.contain.number": "Heslo musí obsahovať aspoň jedno číslo",
+  "Input.error.contain.uppercase": "Heslo musí obsahovať aspoň jedno veľké písmeno"
 }

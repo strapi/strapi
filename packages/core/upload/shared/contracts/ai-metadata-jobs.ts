@@ -2,59 +2,42 @@
  * AI Metadata Job types shared between admin and server
  */
 
+/**
+ * A job row as read back from the database and sent to the admin. The database
+ * layer returns `datetime` columns as ISO 8601 strings, and `completedAt` is
+ * `null` until the job finishes. `heartbeatAtMs` is the last time the server
+ * running the job reported it alive, in epoch milliseconds; a big integer
+ * column, so it is read back as a string. It is `null` on jobs created before
+ * it existed.
+ */
 export interface AIMetadataJob {
   id: number;
   status: 'processing' | 'completed' | 'failed';
-  createdAt: Date;
-  completedAt?: Date;
+  createdAt: string;
+  completedAt: string | null;
+  heartbeatAtMs: string | null;
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/latest
+ * GET /upload/ai-metadata-jobs/latest
  *
- * Return the latest AI metadata job
+ * The most recent backfill job, whatever its status, so the admin can resume
+ * polling a running job or report how the last one ended. The job is the bare
+ * response body, not wrapped in `{ data }`. 404s when no job exists or AI
+ * metadata is not enabled, so there is no `null` on the wire — callers get an
+ * error response instead.
  */
 export declare namespace GetLatestAIMetadataJob {
   export interface Request {
     query?: {};
   }
 
-  export interface Response {
-    data: AIMetadataJob | null;
-  }
+  export type Response = AIMetadataJob;
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata
- *
- * Start a new AI metadata generation job
+ * The other two job endpoints — `POST /upload/ai-metadata-jobs` and
+ * `GET /upload/ai-metadata-jobs/pending-count` — are declared in `./files.ts`
+ * as `CreateAIMetadataJob` and `GetAIMetadataPendingCount`, the single source
+ * of truth for both. Like this endpoint, they send a bare response body.
  */
-export declare namespace StartAIMetadataJob {
-  export interface Request {
-    body?: {};
-  }
-
-  export interface Response {
-    data: {
-      jobId: number;
-      status: string;
-    };
-  }
-}
-
-/**
- * GET /upload/actions/generate-ai-metadata/count
- *
- * Return count of images without metadata
- */
-export declare namespace GetAIMetadataCount {
-  export interface Request {
-    query?: {};
-  }
-
-  export interface Response {
-    data: {
-      count: number;
-    };
-  }
-}

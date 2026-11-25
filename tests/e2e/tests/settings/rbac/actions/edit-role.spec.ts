@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test, expect } from '../../../../../fixtures';
 
 import { sharedSetup } from '../../../../../utils/setup';
 import { navToHeader, clickAndWait } from '../../../../../utils/shared';
@@ -20,7 +21,7 @@ test.describe('RBAC - Edit Roles', () => {
     await sharedSetup('rbac-edit-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Roles management page

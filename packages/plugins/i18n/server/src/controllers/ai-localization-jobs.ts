@@ -10,6 +10,11 @@ const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi })
      * There is only 1 job per contentType
      */
     async getJobForSingleType(ctx: any) {
+      const aiLocalizationsService = getService('ai-localizations');
+      if ((await aiLocalizationsService.isEnabled()) === false) {
+        return ctx.notFound();
+      }
+
       const { contentType } = ctx.params;
 
       if (!contentType) {
@@ -32,6 +37,11 @@ const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi })
      * There is only 1 job per documentId
      */
     async getJobForCollectionType(ctx: any) {
+      const aiLocalizationsService = getService('ai-localizations');
+      if ((await aiLocalizationsService.isEnabled()) === false) {
+        return ctx.notFound();
+      }
+
       const { documentId, contentType } = ctx.params;
 
       if (!documentId || !contentType) {

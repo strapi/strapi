@@ -1,0 +1,20 @@
+{
+  "Plugin.name": "Nasazení",
+  "Homepage.title": "Nasazujte se Strapi Cloud",
+  "Homepage.subTitle": "Hostujte svůj projekt Strapi na naší spravované cloudové platformě s automatizovaným nasazením a globálním CDN.",
+  "Homepage.features.cdn": "Globální CDN",
+  "Homepage.features.pushToDeploy": "Push pro nasazení",
+  "Homepage.features.customDomain": "Vlastní domény",
+  "Homepage.deploy.title": "Vyberte preferovaný způsob nasazení",
+  "Homepage.deploy.ariaLabel": "Možnosti nasazení",
+  "Homepage.deploy.git.badge": "Doporučeno",
+  "Homepage.deploy.git.title": "Nasadit do Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Nasaďte projekt z GitHubu nebo GitLabu přímo ve Strapi Cloud",
+  "Homepage.deploy.git.button": "Nasadit do Strapi Cloud",
+  "Homepage.deploy.cli.title": "Nasadit přes CLI",
+  "Homepage.deploy.cli.subTitle": "Pomocí příkazového řádku propojte svůj projekt s existujícím projektem Strapi Cloud a nasazujte změny přímo z CLI.",
+  "Homepage.deploy.cli.ariaLabel": "Správce balíčků",
+  "Homepage.deploy.cli.copy": "Kopírovat",
+  "Homepage.deploy.cli.copySuccess": "Příkaz zkopírován do schránky",
+  "Homepage.deploy.documentation": "Máte potíže? Podívejte se do naší dokumentace"
+}

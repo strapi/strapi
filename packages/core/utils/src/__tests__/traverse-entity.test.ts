@@ -546,6 +546,37 @@ describe('traverse-entity', () => {
       expect(result.dynamicZone).toEqual([]);
       expect(mockGetModel).not.toHaveBeenCalled();
     });
+
+    test('should not crash on a null dynamic zone entry', async () => {
+      const componentSchema = createComponentSchema({
+        text: { type: 'string' },
+      });
+
+      const schema = createBaseSchema({
+        dynamicZone: {
+          type: 'dynamiczone',
+          components: ['default.text-component'],
+        },
+      });
+
+      mockGetModel.mockReturnValue(componentSchema);
+
+      // A dynamic zone array can contain a null entry (e.g. a relation created
+      // inline inside a dynamic zone component leaves a null item). (#24303)
+      const entity = {
+        dynamicZone: [null, { __component: 'default.text-component', text: 'Hello' }],
+      };
+
+      const result = await traverseEntity(mockVisitor, { schema, getModel: mockGetModel }, entity);
+
+      // The null entry is passed through untouched, the real entry is still traversed.
+      expect(result.dynamicZone[0]).toBeNull();
+      expect(mockGetModel).toHaveBeenCalledWith('default.text-component');
+      expect(mockVisitor).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'text', schema: componentSchema }),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('Array handling and index tracking', () => {

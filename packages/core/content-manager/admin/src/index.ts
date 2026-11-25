@@ -1,3 +1,6 @@
+// NOTE: preload before content-manager so Blocks code-editor prism language plugins see global Prism.
+import 'prismjs';
+
 import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
@@ -8,14 +11,11 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { WidgetArgs } from '@strapi/admin/strapi-admin';
-
-// NOTE: we have to preload it to ensure chunks will have it available as global
-import 'prismjs';
+import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     const cm = new ContentManagerPlugin();
 
     app.addReducers({
@@ -106,7 +106,7 @@ export default {
       return [lastEditedWidget, lastPublishedWidget, ...widgets, entriesWidget];
     });
   },
-  bootstrap(app: any) {
+  bootstrap(app: StrapiApp) {
     if (typeof historyAdmin.bootstrap === 'function') {
       historyAdmin.bootstrap(app);
     }

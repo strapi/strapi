@@ -7,23 +7,29 @@ import {
   useTracking,
   useQueryParams,
   useAdminUsers,
+  useStrapiApp,
 } from '@strapi/admin/strapi-admin';
 import { Combobox, ComboboxOption, useCollator } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, useIntl } from 'react-intl';
 
 import { CREATOR_FIELDS } from '../../../constants/attributes';
+import { HOOKS } from '../../../constants/hooks';
 import { useContentTypeSchema } from '../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Schema } from '../../../hooks/useDocument';
-import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
 import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
 
+import type { InjectableListViewFilter } from '../../../constants/hooks';
+import type { ListLayout } from '../../../hooks/useDocumentLayout';
+
+const { INJECT_LIST_VIEW_FILTERS } = HOOKS;
+
 /**
  * If new attributes are added, this list needs to be updated.
  */
-const NOT_ALLOWED_FILTERS = [
+const NOT_ALLOWED_FILTERS = new Set([
   'json',
   'component',
   'media',
@@ -31,9 +37,9 @@ const NOT_ALLOWED_FILTERS = [
   'dynamiczone',
   'password',
   'blocks',
-];
+]);
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
-const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
+const USER_FILTER_ATTRIBUTES = new Set([...CREATOR_FIELDS, 'strapi_assignee']);
 
 /* -------------------------------------------------------------------------------------------------
  * Filters
@@ -41,16 +47,29 @@ const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 interface FiltersProps {
   disabled?: boolean;
   schema: Schema;
+  /**
+   * From `useListViewFilterOptions`. The list page computes them once: its API query reads them
+   * too (`toApiFilters`).
+   */
+  options: Filters.Filter[];
   children: React.ReactNode;
 }
 
-const Root = ({ disabled, schema, children }: FiltersProps) => {
-  const { attributes, uid: model, options } = schema;
+const NO_ATTRIBUTES: Schema['attributes'] = {};
+
+/**
+ * The filters of the list view. The API query reads them too (`toApiFilters`): a filter can take
+ * a value the API doesn't read as it is.
+ */
+const useListViewFilterOptions = (schema: Schema | undefined, layout: ListLayout) => {
+  const attributes = schema?.attributes ?? NO_ATTRIBUTES;
+  const model = schema?.uid;
+  const options = schema?.options;
   const { formatMessage, locale } = useIntl();
-  const { trackUsage } = useTracking();
   const allPermissions = useAuth('FiltersImpl', (state) => state.permissions);
   const [{ query }] = useQueryParams<Filters.Query>();
   const { schemas } = useContentTypeSchema();
+  const runHookWaterfall = useStrapiApp('FiltersImpl', ({ runHookWaterfall }) => runHookWaterfall);
 
   const canReadAdminUsers = React.useMemo(
     () =>
@@ -73,14 +92,14 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
     const isAdminUserRelation =
       attribute?.type === 'relation' && 'target' in attribute && attribute.target === 'admin::user';
 
-    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.includes(key)) && !acc.includes(id)) {
+    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.has(key)) && !acc.includes(id)) {
       acc.push(id);
     }
 
     return acc;
   }, []);
 
-  const { data: userData, isLoading: isLoadingAdminUsers } = useAdminUsers(
+  const { data: userData } = useAdminUsers(
     { filters: { id: { $in: selectedUserIds } } },
     {
       // fetch the list of admin users only if the filter contains users and the
@@ -91,162 +110,205 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
 
   const { users = [] } = userData ?? {};
 
-  const { metadata } = useGetContentTypeConfigurationQuery(model, {
-    selectFromResult: ({ data }) => ({ metadata: data?.contentType.metadatas ?? {} }),
-  });
-
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
 
   const displayedFilters = React.useMemo(() => {
-    const [{ properties: { fields = [] } = { fields: [] } }] = allPermissions.filter(
-      (permission) =>
-        permission.action === 'plugin::content-manager.explorer.read' &&
-        permission.subject === model
-    );
+    // An absent read permission for this model yields no filterable fields.
+    // The empty object lets the defaults below apply instead of throwing.
+    const { properties: { fields = [] } = { fields: [] } } =
+      allPermissions.find(
+        (permission) =>
+          permission.action === 'plugin::content-manager.explorer.read' &&
+          permission.subject === model
+      ) ?? {};
 
     const allowedFields = fields.filter((field) => {
       const attribute = attributes[field] ?? {};
 
-      return attribute.type && !NOT_ALLOWED_FILTERS.includes(attribute.type);
+      return attribute.type && !NOT_ALLOWED_FILTERS.has(attribute.type);
     });
 
-    return (
-      [
-        'id',
-        'documentId',
-        ...allowedFields,
-        ...DEFAULT_ALLOWED_FILTERS,
-        ...(canReadAdminUsers ? CREATOR_FIELDS : []),
-        ...(options?.draftAndPublish === true ? ['__status'] : []),
-      ]
-        .map((name) => {
-          if (name === '__status') {
-            return {
-              name: '__status',
-              type: 'enumeration',
-              label: formatMessage({
-                id: getTranslation('containers.list.filters.status'),
-                defaultMessage: 'Status',
-              }),
-              operators: [
-                {
-                  label: formatMessage({
-                    id: 'components.FilterOptions.FILTER_TYPES.$eq',
-                    defaultMessage: 'is',
-                  }),
-                  value: '$eq',
-                },
-              ],
-              options: [
-                {
-                  label: formatMessage({
-                    id: getTranslation('containers.List.statusFilter.draft'),
-                    defaultMessage: 'Draft (never published)',
-                  }),
-                  value: 'draft',
-                },
-                {
-                  label: formatMessage({
-                    id: getTranslation('containers.List.statusFilter.published'),
-                    defaultMessage: 'Published (all)',
-                  }),
-                  value: 'published',
-                },
-                {
-                  label: formatMessage({
-                    id: getTranslation('containers.List.statusFilter.publishedModified'),
-                    defaultMessage: 'Published (modified)',
-                  }),
-                  value: 'published-modified',
-                },
-                {
-                  label: formatMessage({
-                    id: getTranslation('containers.List.statusFilter.publishedUnmodified'),
-                    defaultMessage: 'Published (unmodified)',
-                  }),
-                  value: 'published-unmodified',
-                },
-              ],
-            } satisfies Filters.Filter;
-          }
-
-          const attribute = attributes[name];
-
-          if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
-            return null;
-          }
-
-          const { mainField: mainFieldName = '', label } = metadata[name].list;
-
-          let filter: Filters.Filter = {
-            name,
-            label: label ?? '',
-            mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
-            type: attribute.type as Filters.Filter['type'],
-          };
-
-          if (
-            attribute.type === 'relation' &&
-            'target' in attribute &&
-            attribute.target === 'admin::user'
-          ) {
-            filter = {
-              ...filter,
-              input: AdminUsersFilter,
-              options: users.map((user) => ({
-                label: getDisplayName(user),
-                value: user.id.toString(),
-              })),
-              operators: [
-                {
-                  label: formatMessage({
-                    id: 'components.FilterOptions.FILTER_TYPES.$eq',
-                    defaultMessage: 'is',
-                  }),
-                  value: '$eq',
-                },
-                {
-                  label: formatMessage({
-                    id: 'components.FilterOptions.FILTER_TYPES.$ne',
-                    defaultMessage: 'is not',
-                  }),
-                  value: '$ne',
-                },
-              ],
-              mainField: {
-                name: 'id',
-                type: 'integer',
+    const baseFilters = [
+      'id',
+      'documentId',
+      ...allowedFields,
+      ...DEFAULT_ALLOWED_FILTERS,
+      ...(canReadAdminUsers ? CREATOR_FIELDS : []),
+      ...(options?.draftAndPublish === true ? ['__status'] : []),
+    ]
+      .map((name) => {
+        if (name === '__status') {
+          return {
+            name: '__status',
+            type: 'enumeration',
+            label: formatMessage({
+              id: getTranslation('containers.list.filters.status'),
+              defaultMessage: 'Status',
+            }),
+            operators: [
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                  defaultMessage: 'is',
+                }),
+                value: '$eq',
               },
-            };
-          }
+            ],
+            options: [
+              {
+                label: formatMessage({
+                  id: getTranslation('containers.List.statusFilter.draft'),
+                  defaultMessage: 'Draft (never published)',
+                }),
+                value: 'draft',
+              },
+              {
+                label: formatMessage({
+                  id: getTranslation('containers.List.statusFilter.published'),
+                  defaultMessage: 'Published (all)',
+                }),
+                value: 'published',
+              },
+              {
+                label: formatMessage({
+                  id: getTranslation('containers.List.statusFilter.publishedModified'),
+                  defaultMessage: 'Published (modified)',
+                }),
+                value: 'published-modified',
+              },
+              {
+                label: formatMessage({
+                  id: getTranslation('containers.List.statusFilter.publishedUnmodified'),
+                  defaultMessage: 'Published (unmodified)',
+                }),
+                value: 'published-unmodified',
+              },
+            ],
+          } satisfies Filters.Filter;
+        }
 
-          if (attribute.type === 'enumeration') {
-            filter = {
-              ...filter,
-              options: attribute.enum.map((value) => ({
-                label: value,
-                value,
-              })),
-            };
-          }
+        const attribute = attributes[name];
 
-          return filter;
-        })
-        .filter(Boolean) as Filters.Filter[]
-    ).toSorted((a, b) => formatter.compare(a.label, b.label));
+        if (!attribute || NOT_ALLOWED_FILTERS.has(attribute.type)) {
+          return null;
+        }
+
+        const fieldMetadata = layout.metadatas?.[name];
+        if (!fieldMetadata) {
+          return null;
+        }
+
+        const { mainField: mainFieldName = '', label } = fieldMetadata;
+
+        let filter: Filters.Filter = {
+          name,
+          label: label ?? '',
+          mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
+          type: attribute.type as Filters.Filter['type'],
+        };
+
+        if (
+          attribute.type === 'relation' &&
+          'target' in attribute &&
+          attribute.target === 'admin::user'
+        ) {
+          filter = {
+            ...filter,
+            input: AdminUsersFilter,
+            options: users.map((user) => ({
+              label: getDisplayName(user),
+              value: user.id.toString(),
+            })),
+            operators: [
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                  defaultMessage: 'is',
+                }),
+                value: '$eq',
+              },
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$ne',
+                  defaultMessage: 'is not',
+                }),
+                value: '$ne',
+              },
+            ],
+            mainField: {
+              name: 'id',
+              type: 'integer',
+            },
+          };
+        }
+
+        if (attribute.type === 'enumeration') {
+          filter = {
+            ...filter,
+            options: attribute.enum.map((value) => ({
+              label: formatMessage({ id: value, defaultMessage: value }),
+              value,
+            })),
+          };
+        }
+
+        return filter;
+      })
+      .filter(Boolean) as Filters.Filter[];
+
+    // Let plugins inject their own filters.
+    // `layout.options` is a merge of schema/pluginOptions/contentType options —
+    // mirrors the column-injection hook contract.
+    const { displayedFilters: extendedFilters } = runHookWaterfall(INJECT_LIST_VIEW_FILTERS, {
+      displayedFilters: baseFilters as InjectableListViewFilter[],
+      layout,
+    });
+
+    const resolveLabel = (label: string | MessageDescriptor): string =>
+      typeof label === 'string' ? label : formatMessage(label);
+
+    const userOptions = users.map((user) => ({
+      label: getDisplayName(user),
+      value: user.id.toString(),
+    }));
+
+    const formatted = extendedFilters.map<Filters.Filter>((filter) => {
+      const next: Filters.Filter = {
+        ...filter,
+        label: resolveLabel(filter.label),
+        operators: filter.operators?.map((op) => ({ ...op, label: resolveLabel(op.label) })),
+      };
+
+      // User-typed filters need user options so the chip can render the display name instead of the id.
+      if (USER_FILTER_ATTRIBUTES.has(filter.name) && !next.options?.length) {
+        next.options = userOptions;
+      }
+
+      return next;
+    });
+
+    return formatted.toSorted((a, b) => formatter.compare(a.label, b.label));
   }, [
     allPermissions,
     canReadAdminUsers,
     model,
     attributes,
-    metadata,
     schemas,
+    layout,
     users,
     formatMessage,
     formatter,
+    options?.draftAndPublish,
+    runHookWaterfall,
   ]);
+
+  return displayedFilters;
+};
+
+const Root = ({ disabled, schema, options, children }: FiltersProps) => {
+  const { trackUsage } = useTracking();
 
   const onOpenChange = (isOpen: boolean) => {
     if (isOpen) {
@@ -255,7 +317,7 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
   };
 
   const handleFilterChange: Filters.Props['onChange'] = (data) => {
-    const attribute = attributes[data.name];
+    const attribute = schema.attributes[data.name];
 
     if (attribute) {
       trackUsage('didFilterEntries', {
@@ -267,7 +329,7 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
   return (
     <Filters.Root
       disabled={disabled}
-      options={displayedFilters}
+      options={options}
       onOpenChange={onOpenChange}
       onChange={handleFilterChange}
     >
@@ -291,7 +353,7 @@ const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
     pageSize,
     _q: debouncedSearch,
   });
-  const field = useField(name);
+  const field = useField<string>(name);
 
   const handleOpenChange = (isOpen?: boolean) => {
     if (!isOpen) {
@@ -336,5 +398,5 @@ const listViewFilters = {
   List: Filters.List,
 };
 
-export { listViewFilters };
+export { listViewFilters, useListViewFilterOptions };
 export type { FiltersProps };

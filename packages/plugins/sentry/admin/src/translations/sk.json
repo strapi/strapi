@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Odosielať chybové udalosti Strapi do Sentry.",
+  "plugin.description.short": "Odosielať chybové udalosti Strapi do Sentry.",
+  "plugin.name": "Sentry"
+}

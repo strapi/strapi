@@ -78,22 +78,31 @@ describe('Widgets', () => {
 
     test('throws when id is missing', () => {
       const invalidWidget = { ...mockWidget, id: undefined };
-      expect(() => widgets.register(invalidWidget as any)).toThrow('An id must be provided');
+      expect(() =>
+        // @ts-expect-error – test case
+        widgets.register(invalidWidget)
+      ).toThrow('An id must be provided');
     });
 
     test('throws when component is missing', () => {
       const invalidWidget = { ...mockWidget, component: undefined };
-      expect(() => widgets.register(invalidWidget as any)).toThrow('A component must be provided');
+      expect(() =>
+        // @ts-expect-error – test case
+        widgets.register(invalidWidget)
+      ).toThrow('A component must be provided');
     });
 
     test('throws when title is missing', () => {
       const invalidWidget = { ...mockWidget, title: undefined };
-      expect(() => widgets.register(invalidWidget as any)).toThrow('A title must be provided');
+      expect(() =>
+        // @ts-expect-error – test case
+        widgets.register(invalidWidget)
+      ).toThrow('A title must be provided');
     });
 
     test('throws when icon is missing', () => {
       const invalidWidget = { ...mockWidget, icon: undefined };
-      expect(() => widgets.register(invalidWidget as any)).toThrow('An icon must be provided');
+      expect(() => widgets.register(invalidWidget)).toThrow('An icon must be provided');
     });
   });
 

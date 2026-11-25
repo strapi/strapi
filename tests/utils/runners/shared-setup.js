@@ -5,34 +5,6 @@ const execa = require('execa');
 const fs = require('node:fs/promises');
 const { cleanTestApp, generateTestApp } = require('../../helpers/test-app');
 
-const pathExists = async (filePath) => {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch (err) {
-    return false;
-  }
-};
-
-/**
- * Updates the env file for a generated test app (browser-specific)
- * - Uses app-template/config/features.js to enable future features in the generated app
- */
-const setupTestEnvironment = async (generatedAppPath, templateDir) => {
-  /*
-   * Enable future features in the generated app manually since a template
-   * does not allow the config folder.
-   */
-  const testRootFeaturesConfigPath = path.join(templateDir, 'config', 'features.js');
-  const hasFeaturesConfig = await pathExists(testRootFeaturesConfigPath);
-
-  if (!hasFeaturesConfig) return;
-
-  const configFeatures = await fs.readFile(testRootFeaturesConfigPath);
-  const appFeaturesConfigPath = path.join(generatedAppPath, 'config', 'features.js');
-  await fs.writeFile(appFeaturesConfigPath, configFeatures);
-};
-
 /**
  * Publish all packages to yalc store
  */
@@ -45,13 +17,16 @@ const publishYalc = async (cwd) => {
 /**
  * Setup test apps - clean and generate
  */
+const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
+
 const setupTestApps = async ({
   testAppDirectory,
   testAppPaths,
   templateDir,
   setup,
   currentTestApps,
-  setupTestEnvironment,
+  // When true (e2e), create one git commit per generated app as the `resetFiles` save point.
+  commitE2eBaseline = false,
 }) => {
   /**
    * If we don't have enough test apps, we make enough.
@@ -96,13 +71,29 @@ const setupTestApps = async ({
         const envFile = (await fs.readFile(pathToEnv)).toString();
         const envWithoutPort = envFile.replace('PORT=1337', '');
         await fs.writeFile(pathToEnv, envWithoutPort);
-
-        // Run additional setup if provided (browser-specific setupTestEnvironment)
-        if (setupTestEnvironment) {
-          await setupTestEnvironment(appPath, templateDir);
-        }
       })
     );
+
+    if (commitE2eBaseline) {
+      for (const appPath of testAppPaths) {
+        await execa('git', [...gitUser, 'init'], {
+          stdio: 'inherit',
+          cwd: appPath,
+        });
+        await execa('git', [...gitUser, 'add', '-A', '.'], {
+          stdio: 'inherit',
+          cwd: appPath,
+        });
+        await execa(
+          'git',
+          [...gitUser, '-c', 'commit.gpgsign=false', 'commit', '-m', 'e2e test app baseline'],
+          {
+            stdio: 'inherit',
+            cwd: appPath,
+          }
+        );
+      }
+    }
 
     return true;
   }
@@ -140,5 +131,4 @@ module.exports = {
   publishYalc,
   setupTestApps,
   getCurrentTestApps,
-  setupTestEnvironment,
 };

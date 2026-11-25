@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import type { StrapiCommand } from '../types';
 
-import { build as nodeBuild, BuildOptions } from '../../node/build';
+import type { BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type BuildCLIOptions = BuildOptions;
@@ -14,6 +14,9 @@ const action = async (options: BuildCLIOptions) => {
       );
     }
 
+    // Loaded lazily: every command is registered on CLI startup, so a static import would make
+    // `strapi start` load the whole admin build toolchain (including admin source via staticFiles).
+    const { build: nodeBuild } = await import('../../node/build');
     await nodeBuild(options);
   } catch (err) {
     handleUnexpectedError(err);
@@ -31,6 +34,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--silent', "Don't log anything", false)
     .option('--sourcemap', 'Produce sourcemaps', false)
     .option('--stats', 'Print build statistics to the console', false)
+    .option('--install-deps', 'Auto-install missing admin dependencies', false)
     .description('Build the strapi admin app')
     .action(async (options: BuildCLIOptions) => {
       return action({ ...options, ...ctx });

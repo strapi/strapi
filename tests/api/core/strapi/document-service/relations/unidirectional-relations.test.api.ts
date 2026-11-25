@@ -10,6 +10,7 @@ import { testInTransaction } from '../../../../utils';
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { rowsFromRaw } = require('../../../../utils/raw-rows');
 
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
@@ -198,6 +199,48 @@ describe('Document Service unidirectional relations', () => {
     });
   });
 
+  /**
+   * Publish with 550 unidirectional relations (GH#25198): exercises document-service
+   * batchInsert path so each batch stays ≤500 on SQLite.
+   * Tags are published first so that when we publish the product, relation id resolution
+   * finds published tag ids (same-status rule for DP); the 550 join rows are then inserted in batches.
+   */
+  testInTransaction(
+    'Publish product with 550 tags (batched unidirectional relation sync)',
+    async () => {
+      const count = 550;
+      await strapi.db.query(TAG_UID).createMany({
+        data: Array.from({ length: count }, (_, i) => ({
+          name: `TagBatch${i}`,
+          documentId: `TagBatch${i}`,
+          publishedAt: null,
+        })),
+      });
+
+      for (let i = 0; i < count; i++) {
+        await strapi.documents(TAG_UID).publish({ documentId: `TagBatch${i}` });
+      }
+
+      const product = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Product550Tags',
+          tags: Array.from({ length: count }, (_, i) => ({ documentId: `TagBatch${i}` })),
+        },
+      });
+
+      await strapi.documents(PRODUCT_UID).publish({ documentId: product.documentId });
+
+      const published = await strapi.documents(PRODUCT_UID).findFirst({
+        filters: { name: 'Product550Tags' },
+        populate: { tags: true },
+        status: 'published',
+      });
+      expect(published).toBeDefined();
+      expect(published!.tags).toHaveLength(count);
+    },
+    120000
+  );
+
   it('Should not create orphaned relations for a draft and publish content-type when updating from the parent side', async () => {
     const joinTableName = 'components_default_compos_tags_lnk';
 
@@ -213,7 +256,7 @@ describe('Document Service unidirectional relations', () => {
 
     // Check join table after step 1
     let result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    let joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    let joinTableRows = rowsFromRaw(result);
 
     // 1 entry is created for draft to draft
     expect(joinTableRows.length).toBe(1);
@@ -223,7 +266,7 @@ describe('Document Service unidirectional relations', () => {
 
     // Check join table after step 2
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    joinTableRows = rowsFromRaw(result);
 
     // No new entry should be created in the join table
     expect(joinTableRows.length).toBe(1);
@@ -233,7 +276,7 @@ describe('Document Service unidirectional relations', () => {
 
     // Check join table after step 3
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    joinTableRows = rowsFromRaw(result);
 
     // 1 entry should be created (2 total) in the join table for published to published
     expect(joinTableRows.length).toBe(2);
@@ -242,7 +285,7 @@ describe('Document Service unidirectional relations', () => {
     await strapi.documents(PRODUCT_UID).delete({ documentId: testProduct.documentId });
 
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    joinTableRows = rowsFromRaw(result);
     expect(joinTableRows.length).toBe(0);
   });
 
@@ -274,7 +317,7 @@ describe('Document Service unidirectional relations', () => {
 
     // Check join table after step 1
     let result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    let joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    let joinTableRows = rowsFromRaw(result);
 
     // Expect 2 entries (draft to draft, published to published)
     expect(joinTableRows.length).toBe(2);
@@ -285,7 +328,7 @@ describe('Document Service unidirectional relations', () => {
 
     // Check join table after step 4
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    joinTableRows = rowsFromRaw(result);
 
     // No new entry should be created in the join table
     expect(joinTableRows.length).toBe(2);
@@ -295,7 +338,7 @@ describe('Document Service unidirectional relations', () => {
 
     // Check join table after step 5
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    joinTableRows = rowsFromRaw(result);
 
     // No new entry should be created in the join table
     expect(joinTableRows.length).toBe(2);
@@ -304,7 +347,7 @@ describe('Document Service unidirectional relations', () => {
     await strapi.documents(PRODUCT_UID).delete({ documentId: testProduct.documentId });
 
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    joinTableRows = rowsFromRaw(result);
     expect(joinTableRows.length).toBe(0);
   });
 

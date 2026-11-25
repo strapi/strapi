@@ -1,5 +1,5 @@
-import { isEmpty, isArray } from 'lodash/fp';
-import koaSession from 'koa-session';
+import { isEmpty } from 'lodash';
+import { type SessionOptions, createSession } from 'koa-session';
 import type { Core } from '@strapi/types';
 
 const defaultConfig = {
@@ -15,18 +15,18 @@ const defaultConfig = {
   sameSite: undefined,
 };
 
-export const session: Core.MiddlewareFactory<Partial<koaSession.opts>> = (
+export const session: Core.MiddlewareFactory<Partial<SessionOptions>> = (
   userConfig,
   { strapi }
 ) => {
   const { keys } = strapi.server.app;
-  if (!isArray(keys) || isEmpty(keys) || keys.some(isEmpty)) {
+  if (!Array.isArray(keys) || keys.length === 0 || keys.some((key) => isEmpty(key))) {
     throw new Error(
       `App keys are required. Please set app.keys in config/server.js (ex: keys: ['myKeyA', 'myKeyB'])`
     );
   }
 
-  const config: Partial<koaSession.opts> = { ...defaultConfig, ...userConfig };
+  const config: Partial<SessionOptions> = { ...defaultConfig, ...userConfig };
 
-  strapi.server.use(koaSession(config, strapi.server.app));
+  strapi.server.use(createSession(config, strapi.server.app));
 };

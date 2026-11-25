@@ -1,6 +1,6 @@
 import { detectSubjectType } from '@casl/ability';
 import { permittedFieldsOf } from '@casl/ability/extra';
-import { isEmpty, isNil, flatMap, some, prop } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import type { Ability } from '@casl/ability';
 
@@ -39,22 +39,31 @@ export const createPermissionFieldsCache = (ability: Ability) => {
       return permissionCache.get(cacheKey)!;
     }
 
-    // Compute permission fields (expensive CASL operation)
-    const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
-      fieldsFrom: (rule) => rule.fields || [],
-    });
+    let result: PermissionFieldsResult;
 
-    const hasAtLeastOneRegistered = some(
-      (fields) => !isNil(fields),
-      flatMap(prop('fields'), rules)
-    );
-    const shouldIncludeAll = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
+    const allFieldsAllowed = rules.some((r) => r.fields == null);
+    if (allFieldsAllowed) {
+      result = {
+        permittedFields: [],
+        hasAtLeastOneRegistered: rules.some((r) => r.fields != null),
+        shouldIncludeAll: true,
+      };
+    } else {
+      // Compute permission fields (expensive CASL operation)
+      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
+        fieldsFrom: (rule) => rule.fields || [],
+      });
 
-    const result: PermissionFieldsResult = {
-      permittedFields,
-      hasAtLeastOneRegistered,
-      shouldIncludeAll,
-    };
+      const hasAtLeastOneRegistered = rules
+        .flatMap((rule) => rule.fields)
+        .some((field) => field != null);
+
+      result = {
+        permittedFields,
+        hasAtLeastOneRegistered,
+        shouldIncludeAll: isEmpty(permittedFields) && !hasAtLeastOneRegistered,
+      };
+    }
 
     // Cache for reuse if no entity-specific conditions
     if (!hasEntityConditions) {

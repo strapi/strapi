@@ -75,6 +75,20 @@ export default {
     },
     {
       method: 'GET',
+      path: '/content-manager/get-fill-from-locale/:model',
+      handler: 'content-types.getFillFromLocaleData',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
       path: '/settings',
       handler: 'settings.getSettings',
       config: {

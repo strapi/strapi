@@ -1,21 +1,17 @@
-import * as yup from 'yup';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 
 import type { Core, UID } from '@strapi/types';
-import { validateYupSchema, errors } from '@strapi/utils';
+import { z, validateZodSchema, errors, statusSchema } from '@strapi/utils';
 
 import { Preview } from '../../../../../shared/contracts';
 import type { HandlerParams } from '../../services/preview-config';
 
-const getPreviewUrlSchema = yup
-  .object()
-  .shape({
-    // Will be undefined for single types
-    documentId: yup.string(),
-    locale: yup.string().nullable(),
-    status: yup.string(),
-  })
-  .required();
+const getPreviewUrlSchema = z.object({
+  // Will be undefined for single types
+  documentId: z.string().optional(),
+  locale: z.string().nullable().optional(),
+  status: statusSchema.optional(),
+});
 
 export const validatePreviewUrl = async (
   strapi: Core.Strapi,
@@ -23,9 +19,15 @@ export const validatePreviewUrl = async (
   params: Preview.GetPreviewUrl.Request['query']
 ): Promise<HandlerParams> => {
   // Validate the request parameters format
-  await validateYupSchema(getPreviewUrlSchema)(params);
+  validateZodSchema(getPreviewUrlSchema)(params);
 
-  const newParams = pick(['documentId', 'locale', 'status'], params) as HandlerParams;
+  const newParams = pick(params, ['documentId', 'locale', 'status']) as HandlerParams;
+
+  // The query parser reads a bare `?locale` as null, which the handler params type does not admit
+  if (params.locale === null) {
+    delete newParams.locale;
+  }
+
   const model = strapi.getModel(uid);
 
   // If it's not a collection type or single type

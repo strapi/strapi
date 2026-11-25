@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test, expect } from '../../../../../fixtures';
 
 import { sharedSetup } from '../../../../../utils/setup';
 import { navToHeader, clickAndWait } from '../../../../../utils/shared';
@@ -20,7 +21,7 @@ test.describe('RBAC - Create Roles', () => {
     await sharedSetup('rbac-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Roles management page
@@ -28,7 +29,7 @@ test.describe('RBAC - Create Roles', () => {
   });
 
   // Test for verifying Super Admin can create a new role
-  test('Super Admin can create a new role', async ({ page }) => {
+  test('Super Admin can create a new role', { tag: ['@critical'] }, async ({ page }) => {
     // Step 1: click "Create new role"
     await clickAndWait(page, page.getByRole('button', { name: 'Add new role' }).first());
 

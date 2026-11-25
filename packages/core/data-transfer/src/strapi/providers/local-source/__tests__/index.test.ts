@@ -1,12 +1,24 @@
 import { Readable } from 'stream';
-import type { IEntity } from '../../../../../types';
+import type { IEntity } from '../../../../types';
 
 import {
+  assertReadStreamBackpressure,
   collect,
   createMockedQueryBuilder,
   getStrapiFactory,
 } from '../../../../__tests__/test-utils';
+import * as esmDeps from '../../../../utils/esm-deps';
 import { createLocalStrapiSourceProvider } from '..';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('Local Strapi Source Provider', () => {
   describe('Bootstrap', () => {
@@ -39,6 +51,40 @@ describe('Local Strapi Source Provider', () => {
       await provider.bootstrap();
 
       expect(provider.strapi).toBeDefined();
+    });
+
+    test('rejects a stream dependency load failure before touching Strapi', async () => {
+      const loadError = new Error("Cannot find module 'stream-chain'");
+      const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+        typeof esmDeps.loadStreamDeps
+      >;
+      loadStreamDeps.mockRejectedValueOnce(loadError);
+
+      const disable = jest.fn();
+      const getStrapi = jest.fn(
+        getStrapiFactory({
+          db: {
+            lifecycles: {
+              enable: jest.fn(),
+              disable,
+            },
+          },
+        })
+      );
+      const provider = createLocalStrapiSourceProvider({ getStrapi });
+
+      try {
+        await expect(provider.bootstrap()).rejects.toBe(loadError);
+        await expect(provider.close()).resolves.toBeUndefined();
+        expect(getStrapi).not.toHaveBeenCalled();
+        expect(disable).not.toHaveBeenCalled();
+        expect(provider.strapi).not.toBeDefined();
+      } finally {
+        loadStreamDeps.mockReset();
+        loadStreamDeps.mockImplementation(() =>
+          jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+        );
+      }
     });
   });
 
@@ -257,5 +303,70 @@ describe('Local Strapi Source Provider', () => {
         },
       ]);
     });
+  });
+
+  describe('Backpressure', () => {
+    test('entities read stream pauses under backpressure and preserves data', async () => {
+      const itemCount = 25;
+      const contentTypes = {
+        foo: { uid: 'foo', attributes: { title: { type: 'string' } } },
+      };
+      const queryBuilder = createMockedQueryBuilder({
+        foo: Array.from({ length: itemCount }, (_, i) => ({ id: i + 1, title: `Title ${i}` })),
+      });
+
+      const provider = createLocalStrapiSourceProvider({
+        getStrapi: getStrapiFactory({
+          contentTypes,
+          db: {
+            queryBuilder,
+            lifecycles: { enable: jest.fn(), disable: jest.fn() },
+          },
+          getModel: jest.fn((uid: string) => contentTypes[uid as keyof typeof contentTypes]),
+        }),
+      });
+      await provider.bootstrap();
+
+      const stream = (await provider.createEntitiesReadStream()) as Readable;
+      const { sourcePaused, chunks } = await assertReadStreamBackpressure<IEntity>(stream, {
+        delayMs: 12,
+        minChunksForBackpressure: 10,
+      });
+
+      expect(sourcePaused).toBe(true);
+      expect(chunks).toHaveLength(itemCount);
+      chunks.forEach((entity) => {
+        expect(entity).toMatchObject({
+          type: 'foo',
+          id: expect.any(Number),
+          data: expect.any(Object),
+        });
+      });
+    }, 5000);
+
+    test('schemas read stream pauses under backpressure', async () => {
+      const contentTypes = {
+        foo: { uid: 'foo', attributes: {} },
+        bar: { uid: 'bar', attributes: {} },
+        baz: { uid: 'baz', attributes: {} },
+      };
+      const components = {};
+      const provider = createLocalStrapiSourceProvider({
+        getStrapi: getStrapiFactory({
+          contentTypes,
+          components,
+          db: { lifecycles: { enable: jest.fn(), disable: jest.fn() } },
+        }),
+      });
+      await provider.bootstrap();
+
+      const stream = provider.createSchemasReadStream();
+      const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
+        delayMs: 12,
+      });
+
+      expect(sourcePaused).toBe(true);
+      expect(chunks).toHaveLength(3);
+    }, 5000);
   });
 });

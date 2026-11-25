@@ -113,7 +113,24 @@ describe('Document Service', () => {
     });
 
     testInTransaction.todo('clone a document with media');
-    testInTransaction.todo('clone a document with relations');
+
+    testInTransaction('clone a document with manyToMany relations', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+      const result = await strapi.documents(ARTICLE_UID).clone({
+        documentId: articleDb.documentId,
+        locale: 'en',
+        data: { title: 'Cloned with relations' },
+        populate: { categories: true },
+      });
+
+      expect(result).not.toBeNull();
+      expect(result.entries).toHaveLength(1);
+      expect(result.entries[0].title).toBe('Cloned with relations');
+      expect(result.entries[0].categories).toEqual(
+        expect.arrayContaining([expect.objectContaining({ documentId: 'Cat1' })])
+      );
+    });
 
     testInTransaction('clone non existing document', async () => {
       const resultPromise = await strapi.documents(ARTICLE_UID).clone({

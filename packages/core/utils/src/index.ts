@@ -8,6 +8,7 @@ export { generateInstallId } from './install-id';
 export { createModelCache } from './model-cache';
 
 export { validateYupSchema, validateYupSchemaSync } from './validators';
+export { formatYupErrors } from './format-yup-error';
 export { isOperator, isOperatorOfType } from './operators';
 
 export * as queryParams from './convert-query-params';
@@ -27,15 +28,31 @@ export * as file from './file';
 export * as async from './async';
 export * as policy from './policy';
 export * as yup from './yup';
+export { EMAIL_REGEX } from './email-regex';
 export * as errors from './errors';
 export * as contentTypes from './content-types';
 export * as relations from './relations';
 export * as hooks from './hooks';
 export * from './zod';
-export { z } from './zod-schema';
 export * from './validation';
 export * from './route-serialization';
+
+export { parseUserAgent, getDeviceName, type ParsedUserAgent } from './user-agent';
+export {
+  sanitizeSessionEntry,
+  buildSessionMetadata,
+  sortSessionsForDisplay,
+  type SanitizedSessionEntry,
+  type SessionDisplayEntry,
+  type SessionEntryLike,
+} from './sessions';
 
 export * from './primitives';
 export * from './content-api-router';
 export * from './security';
+export * from './blocks-link';
+export * from './publication-filter';
+export * from './has-published-version-param';
+export { hasSort } from './sort-query';
+export { quoteForLog } from './quote-for-log';
+export { emitAudit, type AuditEmitter } from './audit-logs';

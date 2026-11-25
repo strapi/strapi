@@ -1,6 +1,6 @@
-import { entries, mapValues, omit } from 'lodash/fp';
+import { mapValues, omit } from 'lodash';
 import { idArg, nonNull } from 'nexus';
-import { pagination } from '@strapi/utils';
+import { hasSort, pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
@@ -38,20 +38,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // On non–D&P roots (e.g. User) these args do not version the parent document, but they
       // are required: association resolvers inherit them into nested D&P relations (see
-      // builders/resolvers/association.ts + rootQueryArgs). Omitting them broke draft/published
-      // control for populated relations (e.g. github.com/strapi/strapi/issues/25746).
+      // builders/resolvers/association.ts + rootQueryArgsByPath). Omitting them broke
+      // draft/published control for populated relations (e.g. github.com/strapi/strapi/issues/25746).
       //
-      // Future direction: add `status` / `hasPublishedVersion` to GraphQL args on nested
+      // Future direction: add `status` / `hasPublishedVersion` / `publicationFilter` to GraphQL args on nested
       // to-many (and to-one) relation fields when the *target* content type has D&P, instead
       // of relying on root-level “context” that is easy to misread (args on User affecting
       // Articles). That would allow different publication settings per relation branch, match
       // how developers think about the graph, and let non-DP roots drop these args if desired.
       // Would require extending getContentTypeArgs(..., { isNested: true }) for D&P targets
-      // and teaching association.ts to honor args.hasPublishedVersion on nested fields, not
+      // and teaching association.ts to honor args.publicationFilter on nested fields, not
       // only root inheritance.
       const publicationArgs = {
         status: args.PublicationStatusArg,
+        // Deprecated: prefer `publicationFilter` (enum cohorts).
         hasPublishedVersion: args.HasPublishedVersionArg,
+        publicationFilter: args.PublicationFilterArg,
       };
 
       // Collection Types
@@ -94,7 +96,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     getUniqueScalarAttributes(attributes: Struct.SchemaAttributes) {
       const { isStrapiScalar } = getService('utils').attributes;
 
-      const uniqueAttributes = entries(attributes).filter(
+      const uniqueAttributes = Object.entries(attributes ?? {}).filter(
         ([, attribute]) => isStrapiScalar(attribute) && 'unique' in attribute && attribute.unique
       );
 
@@ -107,13 +109,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @return {Object<string, string>}
      */
     scalarAttributesToFiltersMap(attributes: Struct.SchemaAttributes) {
-      return mapValues((attribute) => {
+      return mapValues(attributes, (attribute) => {
         const { mappers, naming } = getService('utils');
 
         const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
         return naming.getScalarFilterInputTypeName(gqlScalar);
-      }, attributes);
+      });
     },
 
     /**
@@ -131,7 +133,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { pagination = {}, filters = {} } = args;
 
       // Init
-      const newArgs = omit(['pagination', 'filters'], args);
+      const newArgs = omit(args, ['pagination', 'filters']);
 
       // Pagination
       if (usePagination) {
@@ -155,6 +157,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         Object.assign(newArgs, {
           filters: mappers.graphQLFiltersToStrapiQuery(filters, contentType),
         });
+      }
+
+      // GraphQL SortArg defaults to `[]`; omit meaningless sort so join-table UI order is preserved.
+      if (!hasSort(newArgs.sort)) {
+        delete newArgs.sort;
       }
 
       return newArgs;
