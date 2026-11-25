@@ -16,25 +16,28 @@ runs:
     # add one cache entry per commit and evict the install caches.
     # Pushes don't restore it: they build every package from scratch, so the cache they save is
     # always a clean build and a missing Nx input can't carry stale output from one commit to the
-    # next. (`--skip-nx-cache` would not do: Nx 20 then writes nothing to the cache either.)
+    # next. (`--skip-nx-cache` would not do: Nx then writes nothing to the cache either.)
+    # Nx only replays local artifacts recorded in its own machine-keyed database, so the folder is
+    # served to Nx as a self-hosted remote cache (nx-cache-server.mjs) rather than as `.nx/cache`.
     - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' && github.event_name != 'push' }}
       name: ♻️ Restore Nx cache
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: .nx/cache
+        path: .nx/remote-cache
         key: nx-build-cache-${{ runner.os }}-${{ github.sha }}
         restore-keys: |
           nx-build-cache-${{ runner.os }}-
     - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
       name: 📥 Run build
       shell: bash
-      run: yarn nx run-many --targets build --nx-ignore-cycles
+      run: |
+        node "$GITHUB_ACTION_PATH/nx-cache-server.mjs" .nx/remote-cache 4555 &
+        server=$!
+        trap 'kill "$server"' EXIT
+        until curl -s -o /dev/null http://127.0.0.1:4555; do sleep 0.1; done
+        yarn nx run-many --targets build --nx-ignore-cycles
       env:
-        # Nx 20's database cache only uses artifacts it recorded on the same machine, so it
-        # ignores a .nx/cache restored from another runner. The file cache uses them once
-        # unknown artifacts are accepted, which is safe here: the cache is only saved from pushes.
-        NX_DB_CACHE: 'false'
-        NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
+        NX_SELF_HOSTED_REMOTE_CACHE_SERVER: http://127.0.0.1:4555
     - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
       name: 🔎 Check build outputs
       shell: bash
@@ -43,5 +46,5 @@ runs:
       name: 💾 Save Nx cache
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: .nx/cache
+        path: .nx/remote-cache
         key: nx-build-cache-${{ runner.os }}-${{ github.sha }}

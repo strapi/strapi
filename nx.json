@@ -117,5 +117,8 @@
         }
       }
     }
+  },
+  "affected": {
+    "legacy": true
   }
 }
