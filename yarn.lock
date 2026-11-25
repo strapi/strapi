@@ -10766,6 +10766,7 @@ __metadata:
   resolution: "@strapi/tests-api@workspace:tests-next/api"
   dependencies:
     "@strapi/tests-shared": "workspace:*"
+    "@strapi/types": "workspace:*"
     "@types/node": "npm:22.20.0"
     eslint-config-custom: "workspace:*"
     tsconfig: "workspace:*"
@@ -10802,6 +10803,7 @@ __metadata:
   resolution: "@strapi/tests-shared@workspace:tests-next/shared"
   dependencies:
     "@strapi/strapi": "workspace:*"
+    "@strapi/types": "workspace:*"
     "@types/node": "npm:22.20.0"
     create-strapi-app: "workspace:*"
     eslint-config-custom: "workspace:*"
@@ -10817,7 +10819,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/types@npm:5.64.0, @strapi/types@workspace:packages/core/types":
+"@strapi/types@npm:5.64.0, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:

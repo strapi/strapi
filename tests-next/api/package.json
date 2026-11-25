@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@strapi/tests-shared": "workspace:*",
+    "@strapi/types": "workspace:*",
     "@types/node": "22.20.0",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
