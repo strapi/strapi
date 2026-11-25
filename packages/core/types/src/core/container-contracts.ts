@@ -69,7 +69,7 @@ export interface ContentStructureService {
 export interface ContentTypesRegistry {
   keys(): string[];
   get(uid: string): Struct.ContentTypeSchema;
-  getAll(namespace: string): Record<string, Struct.ContentTypeSchema>;
+  getAll(namespace?: string): Record<string, Struct.ContentTypeSchema>;
   set(uid: string, contentType: Struct.ContentTypeSchema): ContentTypesRegistry;
   /** Throws when a content type of the namespace is already registered. */
   add(namespace: string, contentTypes: Record<string, unknown> | undefined): void;
@@ -108,7 +108,7 @@ export type ServiceFactoryInput = ((params: { strapi: Strapi }) => Service) | Se
 export interface ServicesRegistry {
   keys(): string[];
   get(uid: string): Service | undefined;
-  getAll(namespace: string): Record<string, Service>;
+  getAll(namespace?: string): Record<string, Service>;
   set(uid: string, service: ServiceFactoryInput): ServicesRegistry;
   /** Throws when a service of the namespace is already registered. */
   add(
@@ -130,7 +130,7 @@ export type ControllerFactoryInput = ((params: { strapi: Strapi }) => Controller
 export interface ControllersRegistry {
   keys(): string[];
   get(uid: string): Controller | undefined;
-  getAll(namespace: string): Record<string, Controller>;
+  getAll(namespace?: string): Record<string, Controller>;
   set(uid: UID.Controller, controller: ControllerFactoryInput): ControllersRegistry;
   /** Throws when a controller of the namespace is already registered. */
   add(
@@ -159,7 +159,7 @@ export interface PoliciesRegistry {
   keys(): string[];
   get(name: string, namespaceInfo?: PolicyNamespaceInfo): Policy | undefined;
   has(name: string, namespaceInfo?: PolicyNamespaceInfo): boolean;
-  getAll(namespace: string): Record<string, Policy>;
+  getAll(namespace?: string): Record<string, Policy>;
   set(uid: string, policy: Policy): PoliciesRegistry;
   /** Throws when a policy of the namespace is already registered. */
   add(namespace: string, policies: Record<string, Policy> | undefined): void;
@@ -181,7 +181,7 @@ export interface PoliciesRegistry {
 export interface MiddlewaresRegistry {
   keys(): string[];
   get(uid: string): Middleware;
-  getAll(namespace: string): Record<string, Middleware>;
+  getAll(namespace?: string): Record<string, Middleware>;
   set(uid: UID.Middleware, middleware: Middleware): MiddlewaresRegistry;
   /** Throws when a middleware of the namespace is already registered. */
   add(namespace: string, middlewares?: Record<string, Middleware>): void;

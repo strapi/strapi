@@ -26,7 +26,7 @@ const middlewaresRegistry = () => {
     /**
      * Returns a map with all the middlewares in a namespace
      */
-    getAll(namespace: string) {
+    getAll(namespace?: string) {
       return pickBy(middlewares, (_, uid) => hasNamespace(uid, namespace));
     },
 
