@@ -483,6 +483,31 @@ describe('relation subquery and deep sort paths', () => {
     }
   );
 
+  it('query builder lists the qualified ORDER BY columns in the DISTINCT select (pg SQL)', async () => {
+    // Postgres and MySQL reject an ORDER BY on a column missing from a DISTINCT select list, and
+    // a bare `id` is ambiguous next to the joined tables. Only the SQL is generated here.
+    const connection = knex({ client: 'pg' });
+    const db = {
+      ...makeDb().db,
+      connection,
+      getConnection: (table?: string) => (table ? connection(table) : connection),
+    } as any;
+    const em = createEntityManager(db);
+
+    const sql = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } }, orderBy: { name: 'desc', id: 'asc' } })
+      .first()
+      .increment('views', 1)
+      .getKnexQuery()
+      .toString();
+
+    expect(sql).toMatch(/select distinct "t0"\."id", "t0"\."name" from/i);
+    expect(sql).toMatch(/order by "t0"\."name" desc, "t0"\."id" asc limit 1/i);
+
+    await connection.destroy();
+  });
+
   it.each([
     ['numeric string increment', (qb: any) => qb.increment('views', '2'), [12, 10, 12]],
     ['numeric string decrement', (qb: any) => qb.decrement('views', '3'), [7, 10, 7]],

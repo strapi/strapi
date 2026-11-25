@@ -561,15 +561,41 @@ const createQueryBuilder = (
       // because joins were already baked against it. The clone inherits processed: true.
       const sub = this.clone();
       sub.alias = this.alias;
-      // Postgres rejects FOR UPDATE with DISTINCT, and Postgres/MySQL reject ORDER BY on a
-      // column missing from the DISTINCT select list. Ordering only matters when it picks which
-      // rows are written: with a limit, an offset or first(). Unpaginated writes already had
-      // their orderBy dropped in processState, before it could add relation-sort joins.
+      // Postgres rejects FOR UPDATE with DISTINCT, so the inner SELECT never locks.
       sub.state.forUpdate = false;
       // The inner SELECT must not carry counters meant for the outer write.
       sub.state.increments = [];
       sub.state.decrements = [];
-      const subQB = sub.select('id').getKnexQuery();
+
+      const selected: Array<string | Knex.Raw> = [`${this.alias}.id`];
+
+      // Ordering only matters when it picks which rows are written: with a limit, an offset or
+      // first(). Otherwise drop it, as Postgres and MySQL reject an ORDER BY on a column missing
+      // from the DISTINCT select list.
+      if (state.limit == null && state.offset == null && !state.first) {
+        sub.state.orderBy = [];
+      } else {
+        // processOrderBy ran while the type was update/delete, so root columns are still bare:
+        // qualify them (a bare `id` is ambiguous next to the joined tables), then list every
+        // ORDER BY expression in the DISTINCT select, as processSelect does for a select.
+        sub.state.orderBy = state.orderBy.map((order) =>
+          'column' in order && !order.column.includes('.')
+            ? { ...order, column: `${this.alias}.${order.column}` }
+            : order
+        );
+
+        sub.state.orderBy.forEach((order) => {
+          if ('column' in order) {
+            selected.push(order.column);
+          } else {
+            selected.push(
+              helpers.buildStatusSortExpression(db, tableName, this.alias, order.isI18n)
+            );
+          }
+        });
+      }
+
+      const subQB = sub.select(selected).getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
