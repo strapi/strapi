@@ -228,7 +228,7 @@ const VersionSource = ({ source }: { source: HistoryVersions.HistoryVersionSourc
 
   return (
     <Status variant="neutral" size="XS">
-      <Typography tag="span" variant="omega" fontWeight="bold">
+      <Typography tag="span" variant="pi" fontWeight="bold">
         {formatMessage(SOURCE_LABELS[source])}
       </Typography>
     </Status>
@@ -311,7 +311,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
         </VersionDescription>
       </Flex>
       <Flex gap={2} wrap="wrap">
-        {version.status && <DocumentStatus status={version.status} size="XS" />}
+        {version.status && <DocumentStatus status={version.status} size="XS" textVariant="pi" />}
         <VersionSource source={version.source} />
       </Flex>
     </Flex>
