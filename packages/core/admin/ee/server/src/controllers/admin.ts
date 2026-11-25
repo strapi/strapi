@@ -9,50 +9,6 @@ import { isAuditLogsEnabled } from '../audit-logs/utils';
 
 type RetainedFeature = { name: string; [key: string]: any };
 
-type AdminUsersAcrossInstances = NonNullable<
-  GetLicenseLimitInformation.Response['data']['adminUsersAcrossInstances']
->;
-
-const isAdminUsersAcrossInstances = (value: unknown): value is AdminUsersAcrossInstances => {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const { activeUsers, contractedUsers, updatedAt } = value as Record<string, unknown>;
-
-  return (
-    typeof activeUsers === 'number' &&
-    (contractedUsers === null || typeof contractedUsers === 'number') &&
-    typeof updatedAt === 'string'
-  );
-};
-
-// Older than this, the registry has missed several reports in a row (404, 429, another license
-// key), so the count is likely stale. The admin shows this instance's count instead.
-const ADMIN_USERS_ACROSS_INSTANCES_MAX_AGE_MS = 48 * 60 * 60 * 1000;
-
-/** Count stored by the online license check (`reportActiveAdminUsers` in @strapi/core). */
-const getStoredAdminUsersAcrossInstances = async (): Promise<AdminUsersAcrossInstances | null> => {
-  try {
-    const stored = await strapi.store.get({ type: 'ee', key: 'admin_users_across_instances' });
-
-    if (!isAdminUsersAcrossInstances(stored)) {
-      return null;
-    }
-
-    const { activeUsers, contractedUsers, updatedAt } = stored;
-
-    // Also rejects an unparsable date (NaN)
-    if (!(Date.now() - Date.parse(updatedAt) <= ADMIN_USERS_ACROSS_INSTANCES_MAX_AGE_MS)) {
-      return null;
-    }
-
-    return { activeUsers, contractedUsers, updatedAt };
-  } catch {
-    return null;
-  }
-};
-
 const findRetainedFeature = (
   retainedFeatures: Array<RetainedFeature | string> | undefined,
   featureName: string
@@ -168,7 +124,7 @@ export default {
     // reporting, so its last count would be stale.
     const adminUsersAcrossInstances =
       licenseMode === 'online' && isActiveLicense
-        ? await getStoredAdminUsersAcrossInstances()
+        ? await strapi.ee.getAdminUsersAcrossInstances({ strapi })
         : null;
 
     const data: GetLicenseLimitInformation.Response['data'] = {
@@ -191,7 +147,7 @@ export default {
             feature,
             available,
             limits: available
-              ? (activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? [])
+              ? activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? []
               : [],
           };
         }
@@ -202,7 +158,7 @@ export default {
           feature,
           available: Boolean(retainedFeature),
           limits: retainedFeature
-            ? (retainedEntitlements.find((entry) => entry.feature === feature)?.limits ?? [])
+            ? retainedEntitlements.find((entry) => entry.feature === feature)?.limits ?? []
             : [],
         };
       }),

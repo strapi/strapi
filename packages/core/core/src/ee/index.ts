@@ -6,22 +6,19 @@ import {
   readLicense,
   verifyLicense,
   fetchLicense,
-  reportAdminUsers,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
   PLAN_FEATURE_CATALOG,
 } from './license';
 import { createEntitlementsRegistry, parseNumericString } from './entitlements';
-import { getUserHashes } from './user-hashes';
+import {
+  getAdminUsersAcrossInstances,
+  reportActiveAdminUsers,
+  watchAdminUsers,
+} from './admin-users';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
-
-// Last count of active admin users across all instances, from the license registry
-const ADMIN_USERS_STORE_KEY = { type: 'ee', key: 'admin_users_across_instances' } as const;
-
-// Admin user changes are reported after this delay, so a bulk change sends one report
-const ADMIN_USERS_REPORT_DELAY_MS = 10_000;
 
 type LicenseFeature = { name: string; [key: string]: any };
 
@@ -146,63 +143,8 @@ const init = (licenseDir: string, logger?: Logger) => {
   }
 };
 
-/**
- * Reports this instance's active admin users to the license registry and stores the count it
- * returns. Keeps the previous count on failure. Never throws.
- */
-const reportActiveAdminUsers = async ({ strapi }: { strapi: Core.Strapi }) => {
-  // Nothing to report for an inactive license (rejected, expired or invalid)
-  if (!ee.enabled) return;
-
-  try {
-    const { licenseKey } = ee.licenseInfo;
-    if (!licenseKey) return;
-
-    const userHashes = await getUserHashes(strapi, licenseKey);
-    if (!userHashes) return;
-
-    const count = await reportAdminUsers({ strapi }, licenseKey, userHashes);
-
-    if (count) {
-      await strapi.store.set({ ...ADMIN_USERS_STORE_KEY, value: count });
-    }
-  } catch (error) {
-    ee.logger?.debug(
-      `Could not report the admin users: ${error instanceof Error ? error.message : String(error)}`
-    );
-  }
-};
-
-let isWatchingAdminUsers = false;
-
-/** Reports the admin users again shortly after one is created, (de)activated, renamed or deleted. */
-const watchAdminUsers = ({ strapi }: { strapi: Core.Strapi }) => {
-  if (isWatchingAdminUsers) return;
-  isWatchingAdminUsers = true;
-
-  let timer: NodeJS.Timeout | undefined;
-  const scheduleReport = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      reportActiveAdminUsers({ strapi }).catch(() => {});
-    }, ADMIN_USERS_REPORT_DELAY_MS);
-    timer.unref?.();
-  };
-  const scheduleReportOnUpdate = (event: { params?: { data?: Record<string, unknown> } }) => {
-    const data = event.params?.data ?? {};
-    if ('isActive' in data || 'email' in data) scheduleReport();
-  };
-
-  strapi.db.lifecycles.subscribe({
-    models: ['admin::user'],
-    afterCreate: scheduleReport,
-    afterCreateMany: scheduleReport,
-    afterUpdate: scheduleReportOnUpdate,
-    afterUpdateMany: scheduleReportOnUpdate,
-    afterDelete: scheduleReport,
-    afterDeleteMany: scheduleReport,
-  });
-};
+// Read when a report runs, so a license disabled after the watcher started stops the reports
+const getActiveLicenseKey = () => (ee.enabled ? ee.licenseInfo.licenseKey : undefined);
 
 /**
  * Contact the license registry to update the license to its latest state.
@@ -318,7 +260,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Not awaited: it must not delay startup
   if (registryAnswered) {
-    reportActiveAdminUsers({ strapi }).catch(() => {});
+    reportActiveAdminUsers(strapi, getActiveLicenseKey).catch(() => {});
   }
 };
 
@@ -352,7 +294,7 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
-    watchAdminUsers({ strapi });
+    watchAdminUsers(strapi, getActiveLicenseKey);
   } else {
     if (!ee.licenseInfo.expireAt) {
       return disable('Your license does not have offline support.');
@@ -417,6 +359,7 @@ export default Object.freeze({
   init,
   checkLicense,
   getTrialEndDate,
+  getAdminUsersAcrossInstances,
 
   get isEE() {
     return ee.enabled;

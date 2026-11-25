@@ -74,15 +74,17 @@ const licenseErrorSchema = z.object({
 // Identifies this process. Changes on every restart.
 const INSTANCE_ID = crypto.randomUUID();
 
-const adminUsersResponseSchema = z.object({
-  data: z.object({
-    activeUsers: z.number().int().nonnegative(),
-    contractedUsers: z.number().int().nonnegative().nullable(),
-    updatedAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
-  }),
+// Active admin users across all instances of a license, as the registry sends it and as it is
+// stored in the core store
+const adminUsersAcrossInstancesSchema = z.object({
+  activeUsers: z.number().int().nonnegative(),
+  contractedUsers: z.number().int().nonnegative().nullable(),
+  updatedAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
 });
 
-type AdminUsersAcrossInstances = z.infer<typeof adminUsersResponseSchema>['data'];
+const adminUsersResponseSchema = z.object({ data: adminUsersAcrossInstancesSchema });
+
+type AdminUsersAcrossInstances = z.infer<typeof adminUsersAcrossInstancesSchema>;
 
 const ADMIN_USERS_REPORT_TIMEOUT_MS = 5000;
 
@@ -251,6 +253,7 @@ export {
   verifyLicense,
   fetchLicense,
   reportAdminUsers,
+  adminUsersAcrossInstancesSchema,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
 };

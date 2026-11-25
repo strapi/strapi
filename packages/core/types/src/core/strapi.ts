@@ -75,6 +75,15 @@ export interface Strapi extends Container {
     }: {
       strapi: Core.Strapi;
     }) => Promise<{ trialEndsAt: string } | null>;
+    /**
+     * Active admin users across all instances of the license, as last reported by the license
+     * registry. `null` when there is none yet or it is older than 48 hours.
+     */
+    getAdminUsersAcrossInstances: ({ strapi }: { strapi: Core.Strapi }) => Promise<{
+      activeUsers: number;
+      contractedUsers: number | null;
+      updatedAt: string;
+    } | null>;
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
@@ -90,7 +99,8 @@ export interface Strapi extends Container {
           // snapshot); returns the limit the feature enforces.
           get: (
             feature?:
-              string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+              | string
+              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
           ) => unknown;
         }>;
       }) => void;
@@ -183,8 +193,8 @@ export interface Strapi extends Container {
   ): TSchemaUID extends UID.ContentType
     ? Schema.ContentType<TSchemaUID>
     : TSchemaUID extends UID.Component
-      ? Schema.Component<TSchemaUID>
-      : never;
+    ? Schema.Component<TSchemaUID>
+    : never;
   /**
    * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
    */

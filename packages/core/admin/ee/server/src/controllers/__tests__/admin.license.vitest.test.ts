@@ -41,6 +41,7 @@ const createStrapiMock = (overrides: any = {}) => {
           { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
         ],
       },
+      getAdminUsersAcrossInstances: vi.fn(async () => null),
       ...overrides.ee,
     },
     db: {
@@ -571,115 +572,66 @@ describe('licenseLimitInformation (planEntitlements)', () => {
 describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
   const OLD_ENV = process.env;
   const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
-  const HOUR = 60 * 60 * 1000;
 
   beforeEach(() => {
     process.env = { ...OLD_ENV };
-    // Two hours after USAGE was stored
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date('2026-11-13T12:00:00.000Z'));
   });
   afterEach(() => {
     process.env = OLD_ENV;
-    vi.useRealTimers();
   });
 
-  const withStoredCount = (value: unknown) => {
-    const get = vi.fn(async () => value);
-    (global.strapi as any).store = { get };
-    return get;
+  // Reading, validating and ageing the stored count is core's job (ee/admin-users.ts)
+  const withCount = (value: unknown) => {
+    const getAdminUsersAcrossInstances = vi.fn(async () => value);
+    (global.strapi as any).ee.getAdminUsersAcrossInstances = getAdminUsersAcrossInstances;
+    return getAdminUsersAcrossInstances;
   };
 
-  it('reports the usage stored from the license registry', async () => {
+  it('reports the count core read from the license registry', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    const get = withStoredCount(USAGE);
+    const getCount = withCount(USAGE);
 
     const { data } = await adminController.licenseLimitInformation();
 
-    expect(get).toHaveBeenCalledWith({ type: 'ee', key: 'admin_users_across_instances' });
+    expect(getCount).toHaveBeenCalledWith({ strapi: global.strapi });
     expect(data.adminUsersAcrossInstances).toEqual(USAGE);
   });
 
-  it('still reports a usage the registry sent less than 48 hours ago', async () => {
+  it('is null when core has no usable count', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    const recent = {
-      ...USAGE,
-      updatedAt: new Date(Date.parse('2026-11-13T12:00:00.000Z') - 47 * HOUR).toISOString(),
-    };
-    withStoredCount(recent);
-
-    const { data } = await adminController.licenseLimitInformation();
-
-    expect(data.adminUsersAcrossInstances).toEqual(recent);
-  });
-
-  it('reports a usage without a contracted number of users', async () => {
-    createStrapiMock({ stored: null });
-    stubUserServices();
-    withStoredCount({ ...USAGE, contractedUsers: null });
-
-    const { data } = await adminController.licenseLimitInformation();
-
-    expect(data.adminUsersAcrossInstances).toEqual({ ...USAGE, contractedUsers: null });
-  });
-
-  it.each([
-    ['nothing is stored', null],
-    ['the stored value is malformed', { activeUsers: '12', updatedAt: 1 }],
-    ['the stored date is not a date', { ...USAGE, updatedAt: 'yesterday' }],
-    [
-      'the registry last answered more than 48 hours ago',
-      {
-        ...USAGE,
-        updatedAt: new Date(Date.parse('2026-11-13T12:00:00.000Z') - 49 * HOUR).toISOString(),
-      },
-    ],
-  ])('is null when %s', async (_label, value) => {
-    createStrapiMock({ stored: null });
-    stubUserServices();
-    withStoredCount(value);
+    withCount(null);
 
     const { data } = await adminController.licenseLimitInformation();
 
     expect(data.adminUsersAcrossInstances).toBeNull();
   });
 
-  it('is null when the store cannot be read', async () => {
+  it('is null for an offline license, even with a count stored by an earlier online run', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    (global.strapi as any).store = { get: vi.fn().mockRejectedValue(new Error('db down')) };
-
-    const { data } = await adminController.licenseLimitInformation();
-
-    expect(data.adminUsersAcrossInstances).toBeNull();
-  });
-
-  it('is null for an offline license, even with a usage stored by an earlier online run', async () => {
-    createStrapiMock({ stored: null });
-    stubUserServices();
-    const get = withStoredCount(USAGE);
+    const getCount = withCount(USAGE);
     process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
 
     const { data } = await adminController.licenseLimitInformation();
 
     expect(data.licenseMode).toBe('offline');
     expect(data.adminUsersAcrossInstances).toBeNull();
-    expect(get).not.toHaveBeenCalled();
+    expect(getCount).not.toHaveBeenCalled();
   });
 
   it.each(['expired', 'unknown'])(
-    'is null for an %s license, even with a usage stored while it was active',
+    'is null for an %s license, even with a count stored while it was active',
     async (licenseStatus) => {
       createStrapiMock({ stored: null, ee: { licenseStatus, seats: undefined } });
       stubUserServices();
-      const get = withStoredCount(USAGE);
+      const getCount = withCount(USAGE);
 
       const { data } = await adminController.licenseLimitInformation();
 
       expect(data.adminUsersAcrossInstances).toBeNull();
-      expect(get).not.toHaveBeenCalled();
+      expect(getCount).not.toHaveBeenCalled();
     }
   );
 
@@ -689,7 +641,7 @@ describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
       getCurrentActiveUserCount: async () => 3,
       getDisabledUserList: async () => [],
     });
-    withStoredCount(USAGE);
+    withCount(USAGE);
 
     const { data } = await adminController.licenseLimitInformation();
 
@@ -698,14 +650,14 @@ describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
     expect(data.shouldStopCreate).toBe(false);
   });
 
-  it("still stops user creation at this instance's seat limit, whatever the usage", async () => {
+  it("still stops user creation at this instance's seat limit, whatever the count", async () => {
     createStrapiMock({ stored: null, ee: { seats: 10 } });
     (global.strapi as any).service = () => ({
       getCurrentActiveUserCount: async () => 10,
       getDisabledUserList: async () => [],
     });
     // Fewer users across instances doesn't lift this instance's limit
-    withStoredCount({ ...USAGE, activeUsers: 4 });
+    withCount({ ...USAGE, activeUsers: 4 });
 
     const { data } = await adminController.licenseLimitInformation();
 

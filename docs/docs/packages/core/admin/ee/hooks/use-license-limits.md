@@ -58,6 +58,7 @@ interface License {
   // Active admin users counted across all instances. Information only.
   // null for offline or inactive licenses, until the registry answered, and when its last
   // answer is older than 48 hours (this instance's count is shown instead).
+  // Read by strapi.ee.getAdminUsersAcrossInstances (packages/core/core/src/ee/admin-users.ts).
   adminUsersAcrossInstances?: {
     activeUsers: number;
     contractedUsers: number | null;
