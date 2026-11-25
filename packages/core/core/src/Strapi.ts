@@ -50,6 +50,31 @@ const tsUtils = (): typeof import('@strapi/typescript-utils') => {
   return lazyTsUtils as typeof import('@strapi/typescript-utils');
 };
 
+/**
+ * A loaded module (`strapi.plugin(name)`, `strapi.api(name)`) as the plugins and APIs registries
+ * hold it, without the members its public strict type does not check against it: the lifecycles,
+ * which only `@strapi/core` calls and the public type leaves out; the lookups and the `services`
+ * map, whose registered contracts are the registries' claim; and `routes`, typed as built routers
+ * although a module holds its declared routers until `server.initRouting()`. Without strict types,
+ * `unknown`: develop's plugin and module types are not checked against the runtime module.
+ */
+type CheckedLoadedModule = Core.IsStrict extends false
+  ? unknown
+  : Omit<
+      Core.RegisteredModule,
+      | 'bootstrap'
+      | 'register'
+      | 'destroy'
+      | 'isDestroyed'
+      | 'load'
+      | 'service'
+      | 'controller'
+      | 'policy'
+      | 'middleware'
+      | 'services'
+      | 'routes'
+    >;
+
 class Strapi extends Container implements Core.Strapi {
   app: any;
 
@@ -197,9 +222,12 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('services').getAll();
   }
 
-  service<T = unknown, TUID extends UID.Service = UID.Service>(
+  // Registry trust boundary: the services registry holds `Core.Service | undefined`. The registered
+  // contract of `uid` is the registries' claim, not checked here (overload, as `getModel`).
+  service<T = unknown, TUID extends Core.ServiceLookupName = Core.ServiceLookupName>(
     uid: TUID
-  ): Core.ServiceLookup<TUID, T> {
+  ): Core.ServiceLookup<TUID, T>;
+  service(uid: string) {
     return this.get('services').get(uid);
   }
 
@@ -207,11 +235,19 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('controllers').getAll();
   }
 
-  controller(uid: UID.Controller) {
+  // Registry trust boundary: the controllers registry holds `Core.Controller | undefined`. The
+  // registered contract of `uid` is the registries' claim, not checked here (overload, as
+  // `getModel`).
+  controller<T = unknown, TUID extends Core.ControllerLookupName = Core.ControllerLookupName>(
+    uid: TUID
+  ): Core.ControllerLookup<TUID, T>;
+  controller(uid: string) {
     return this.get('controllers').get(uid);
   }
 
-  get contentTypes(): Schema.ContentTypes {
+  // The registry's string-keyed record, which `Schema.ContentTypes` alone does not expose: the
+  // content-types sync hooks and the core store receive it as such.
+  get contentTypes(): Readonly<Schema.ContentTypes & Record<string, Struct.ContentTypeSchema>> {
     return this.get('content-types').getAll();
   }
 
@@ -227,39 +263,71 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('policies').getAll();
   }
 
+  // Registry trust boundary: the policies registry holds `Core.Policy | undefined`. The registered
+  // contract of `name` is the registries' claim, not checked here (overload, as `getModel`).
+  policy<T = unknown, TName extends Core.PolicyLookupName = Core.PolicyLookupName>(
+    name: TName
+  ): Core.PolicyLookup<TName, T>;
   policy(name: string) {
     return this.get('policies').get(name);
   }
 
-  get middlewares() {
-    return this.get('middlewares').getAll();
+  // Registry trust boundary: the middlewares registry holds `Record<string, Core.Middleware>`. The
+  // registered entries are the registries' claim, not checked here (explicit container type
+  // argument).
+  get middlewares(): Core.Strapi['middlewares'] {
+    return this.get<{ getAll(): Core.Strapi['middlewares'] }>('middlewares').getAll();
   }
 
+  // Registry trust boundary: the middlewares registry holds `Core.Middleware`. The registered
+  // contract of `name` is the registries' claim, not checked here (overload, as `getModel`).
+  middleware<T = unknown, TName extends Core.MiddlewareLookupName = Core.MiddlewareLookupName>(
+    name: TName
+  ): Core.MiddlewareLookup<TName, T>;
   middleware(name: string) {
     return this.get('middlewares').get(name);
   }
 
-  get plugins(): Core.PluginMap {
-    return this.get('plugins').getAll();
+  // Registry trust boundary: the plugins registry holds `Core.RegisteredModule` values. The
+  // registered entries are the registries' claim, not checked here (explicit container type
+  // argument).
+  get plugins(): Core.Strapi['plugins'] {
+    return this.get<{ getAll(): Core.Strapi['plugins'] }>('plugins').getAll();
   }
 
-  plugin<TName extends string>(name: TName): Core.PluginOf<TName> {
+  // Registry trust boundary: the plugins registry holds `Core.RegisteredModule`. The overload's
+  // registered lookups, `services` and `routes` are the registries' claim; the implementation's
+  // return type checks the other members against the runtime module (see `CheckedLoadedModule`).
+  plugin<TName extends string>(name: TName): Core.PluginOf<TName>;
+  plugin(name: string): CheckedLoadedModule {
     return this.get('plugins').get(name);
   }
 
-  get hooks() {
-    return this.get('hooks').getAll();
+  // Registry trust boundary: the hooks registry holds `unknown` values. The registered entries are
+  // the registries' claim, not checked here (explicit container type argument).
+  get hooks(): Core.Strapi['hooks'] {
+    return this.get<{ getAll(): Core.Strapi['hooks'] }>('hooks').getAll();
   }
 
+  // Registry trust boundary: the hooks registry holds `HookFor<name> | undefined`. The registered
+  // contract of `name` is the registries' claim, not checked here (overload, as `getModel`).
+  hook<T = unknown, TName extends Core.HookLookupName = Core.HookLookupName>(
+    name: TName
+  ): Core.HookLookup<TName, T>;
   hook(name: string) {
     return this.get('hooks').get(name);
   }
 
-  get apis() {
-    return this.get('apis').getAll();
+  // Registry trust boundary: the apis registry holds `Core.RegisteredModule` values. The registered
+  // entries are the registries' claim, not checked here (explicit container type argument).
+  get apis(): Core.Strapi['apis'] {
+    return this.get<{ getAll(): Core.Strapi['apis'] }>('apis').getAll();
   }
 
-  api<TName extends string>(name: TName): Core.ModuleOf<`api::${TName}`> {
+  // Registry trust boundary: the apis registry holds `Core.RegisteredModule`. As for `plugin`, the
+  // implementation's return type checks the members the registries do not claim.
+  api<TName extends string>(name: TName): Core.ModuleOf<`api::${TName}`>;
+  api(name: string): CheckedLoadedModule {
     return this.get('apis').get(name);
   }
 
@@ -545,7 +613,7 @@ class Strapi extends Container implements Core.Strapi {
       type: 'strapi',
       name: 'content_types',
       key: 'schema',
-      value: this.contentTypes as Record<string, Struct.ContentTypeSchema>,
+      value: this.contentTypes,
     });
 
     await this.server.initMiddlewares();
