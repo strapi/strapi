@@ -1,6 +1,8 @@
+import { useStore } from 'react-redux';
 import { act, renderHook, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { contentManagerApi } from '../api';
 import { useGetDocumentQuery, useUpdateDocumentMutation } from '../documents';
 
 const documentArg = {
@@ -88,5 +90,70 @@ describe('updateDocument', () => {
 
     await waitFor(() => expect(result.current.update[1].isError).toBe(true));
     expect(result.current.document.data?.data?.title).toBe('Saved title');
+  });
+
+  it('copies the saved data into the getDocument cache before the mutation resolves', async () => {
+    let releaseRefetch = () => {};
+    const refetchGate = new Promise<void>((resolve) => {
+      releaseRefetch = resolve;
+    });
+    let getCount = 0;
+
+    server.use(
+      http.get('/content-manager/collection-types/:model/:documentId', async () => {
+        getCount += 1;
+
+        /**
+         * The invalidation refetch starts as soon as the mutation succeeds. Hold it
+         * so the assertion below reads the cache the patch produced instead of the
+         * refetch response.
+         */
+        if (getCount > 1) {
+          await refetchGate;
+        }
+
+        return HttpResponse.json(documentResponse);
+      }),
+      http.put('/content-manager/collection-types/:model/:documentId', () =>
+        HttpResponse.json({
+          data: { ...documentResponse.data, title: 'Edited title' },
+          meta: documentResponse.meta,
+        })
+      )
+    );
+
+    const { result } = renderHook(() => ({
+      document: useGetDocumentQuery(documentArg),
+      update: useUpdateDocumentMutation(),
+      store: useStore(),
+    }));
+
+    await waitFor(() => expect(result.current.document.data?.data?.title).toBe('Saved title'));
+
+    let mutation: Promise<unknown> = Promise.resolve();
+
+    act(() => {
+      const [updateDocument] = result.current.update;
+      mutation = updateDocument({ ...documentArg, data: { title: 'Edited title' } });
+    });
+
+    await act(async () => {
+      await mutation;
+    });
+
+    /**
+     * `UpdateAction` calls `resetForm(latestValues)` as soon as the mutation resolves,
+     * and it reads this cache — so the new data has to be there by then. Reading the
+     * store directly avoids waiting for the hook's next render.
+     */
+    const cachedDocument = contentManagerApi.endpoints.getDocument.select(documentArg)(
+      result.current.store.getState()
+    );
+
+    expect(cachedDocument.data?.data?.title).toBe('Edited title');
+
+    await act(async () => {
+      releaseRefetch();
+    });
   });
 });
