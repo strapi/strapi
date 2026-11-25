@@ -106,6 +106,32 @@ describe('future folders service - getFolders filter shape', () => {
     });
   });
 
+  describe('search limited to a folder', () => {
+    it('matches only subfolders of that folder, at any depth', async () => {
+      const { result } = renderHook(() =>
+        useGetFoldersQuery({ parentId: 4, search: 'photos', searchFolderPath: '/1/4' })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams?._q).toBe('photos');
+      expect(lastRequestParams?.filters).toEqual({
+        $and: [{ path: { $startsWith: '/1/4/' } }],
+      });
+    });
+
+    it('ignores the folder path when not searching', async () => {
+      const { result } = renderHook(() =>
+        useGetFoldersQuery({ parentId: 4, searchFolderPath: '/1/4' })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams).toMatchObject({ filters: { $and: [{ parent: { id: '4' } }] } });
+      expect(JSON.stringify(lastRequestParams)).not.toContain('$startsWith');
+    });
+  });
+
   describe('search combined with list filters', () => {
     const DATE_FILTER = { createdAt: { $gte: '2026-07-01T00:00:00.000Z' } };
 
