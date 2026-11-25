@@ -503,6 +503,76 @@ describe('create-strapi-app', () => {
     }
   });
 
+  describe('admin user', () => {
+    // The admin flags fail before the project folder is created, so no folder must exist.
+    it.each([
+      [['--admin-email=dev@example.com'], /--admin-email needs --admin-password/],
+      [['--admin-password=Secret123'], /--admin-password needs --admin-email/],
+      [['--admin-firstname=Kai'], /--admin-firstname needs --admin-email/],
+      // admin:create-user rejects this email, so the CLI must reject it before the install
+      [['--admin-email=a@x..com', '--admin-password=Secret123'], /is not a valid email address/],
+      [['--admin-email=dev@example.com', '--admin-password=secret'], /admin password must/],
+      [
+        ['--admin-email=dev@example.com', '--admin-password=Secret123', '--no-install'],
+        /cannot use --admin-email with --no-install/,
+      ],
+    ])('fails before scaffolding with %j', async (adminArgs, message) => {
+      const projectDir = path.join(mkProjectDir(), 'app');
+      try {
+        const { stdout, stderr } = await spawnCsa([
+          projectDir,
+          '--non-interactive',
+          '--no-git-init',
+          ...adminArgs,
+        ])
+          .expect('code', 1)
+          .end();
+
+        expect(`${stdout}${stderr}`).toMatch(message);
+        expect(fs.existsSync(projectDir)).toBe(false);
+      } finally {
+        fs.rmSync(path.dirname(projectDir), { recursive: true, force: true });
+      }
+    });
+
+    it('creates the project with no admin and says how to create one', async () => {
+      const projectDir = mkProjectDir();
+      try {
+        const { stdout } = await spawnCsa([projectDir, ...baseScaffoldArgs], {
+          AI_AGENT: 'claude-code',
+        })
+          .expect('code', 0)
+          .end();
+
+        expect(stdout).toContain('No admin user yet.');
+        // the package manager comes from the environment that runs the test
+        expect(stdout).toContain(
+          'strapi admin:create-user --firstname="<first name>" --email="<email>" --password="<password>"'
+        );
+        expect(stdout).toMatch(/(npx|yarn|pnpm) strapi admin:create-user/);
+        expect(stdout).toContain('STRAPI_ADMIN_PASSWORD');
+        expect(stdout).toContain('AI agents: ask the developer');
+      } finally {
+        fs.rmSync(projectDir, { recursive: true, force: true });
+      }
+    });
+
+    it('ignores STRAPI_ADMIN_PASSWORD without --admin-email', async () => {
+      const projectDir = mkProjectDir();
+      try {
+        const { stdout } = await spawnCsa([projectDir, ...baseScaffoldArgs], {
+          STRAPI_ADMIN_PASSWORD: 'Secret123',
+        })
+          .expect('code', 0)
+          .end();
+
+        expect(stdout).toContain('No admin user yet.');
+      } finally {
+        fs.rmSync(projectDir, { recursive: true, force: true });
+      }
+    });
+  });
+
   it('prints a semver version with --version', async () => {
     const { stdout } = await spawnCsa(['--version']).expect('code', 0).end();
 

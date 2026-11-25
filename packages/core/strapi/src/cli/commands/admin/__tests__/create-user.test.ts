@@ -60,6 +60,45 @@ describe('admin:create command', () => {
     consoleLog.mockRestore();
   });
 
+  describe('STRAPI_ADMIN_PASSWORD', () => {
+    const user = { email: 'email@email.fr', firstname: 'John', lastname: 'Doe' };
+
+    afterEach(() => {
+      delete process.env.STRAPI_ADMIN_PASSWORD;
+    });
+
+    test('uses the environment password when --password is missing', async () => {
+      process.env.STRAPI_ADMIN_PASSWORD = 'envPassword123';
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand(user);
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ ...user, password: 'envPassword123', registrationToken: null })
+      );
+      expect(mockExit).toHaveBeenCalledWith(0);
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+
+    test('uses --password over the environment password', async () => {
+      process.env.STRAPI_ADMIN_PASSWORD = 'envPassword123';
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand({ ...user, password: 'flagPassword123' });
+
+      expect(create).toHaveBeenCalledWith(expect.objectContaining({ password: 'flagPassword123' }));
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+  });
+
   describe('Handles prompt input', () => {
     test('Only prompt on TTY', async () => {
       const tmpTTY = process.stdin.isTTY;

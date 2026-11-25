@@ -83,8 +83,14 @@ const command = new commander.Command('create-strapi-app')
   .option('--skip-db', 'Skip database configuration')
 
   // Admin user options
-  .option('--admin-email <email>', 'Email of the first admin user. Needs --admin-password')
-  .option('--admin-password <password>', 'Password of the first admin user. Needs --admin-email')
+  .option(
+    '--admin-email <email>',
+    'Email of the first admin user. Needs --admin-password or STRAPI_ADMIN_PASSWORD'
+  )
+  .option(
+    '--admin-password <password>',
+    'Password of the first admin user. Needs --admin-email. To keep it out of your shell history, set STRAPI_ADMIN_PASSWORD instead'
+  )
   .option(
     '--admin-firstname <first name>',
     `First name of the first admin user (default: "${DEFAULT_ADMIN_FIRSTNAME}")`

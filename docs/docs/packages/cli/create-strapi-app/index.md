@@ -47,9 +47,20 @@ When you pass `--template`, the CLI does not add `typescript` or `@types/*` depe
 
 The CLI never asks for the admin user. By default, it creates the project with no admin user.
 
-To create a super admin, pass `--admin-email` and `--admin-password`. `--admin-firstname` is optional, and its default value is `Admin`. `utils/admin-command.ts` checks the values before the CLI creates the project, with the same rules as `strapi admin:create-user`. If a value is not correct, or if you pass only one of the two flags, the CLI stops with an error. The admin flags need the dependencies. If you use them with `--no-install`, the CLI also stops.
+To create a super admin, pass `--admin-email` and `--admin-password`. Instead of `--admin-password`, you can set the `STRAPI_ADMIN_PASSWORD` environment variable, which keeps the password out of the shell history and the process list. If you pass both, `--admin-password` wins. `--admin-firstname` is optional, and its default value is `Admin`.
 
-After the install and the seed, the CLI runs `strapi admin:create-user` in the project with all the values as flags and stdin closed. If the command gets a value as a flag, it does not prompt. The CLI does not show the output of the command, because the arguments contain the password. If the command fails, the CLI logs the last line of its output and does not stop: the project exists.
+`utils/admin-command.ts` checks the values before the CLI creates the project folder. It uses the same password rules as `strapi admin:create-user`, and a copy of the `EMAIL_REGEX` pattern from `@strapi/utils`. A test checks that the copy stays identical. The CLI stops with an error in these cases:
+
+- A value is not correct.
+- `--admin-email` has no password, from the flag or from the environment.
+- `--admin-password` or `--admin-firstname` has no `--admin-email`.
+- You use the admin flags with `--no-install`, or you answer "no" to the install prompt. The admin flags need the dependencies.
+
+`STRAPI_ADMIN_PASSWORD` alone does not ask for an admin user. If the variable stays set in a shell, other runs still work.
+
+After the install and the seed, the CLI runs `strapi admin:create-user` in the project, with stdin closed. The email and the first name go as flags, so the command does not prompt. The password goes through `STRAPI_ADMIN_PASSWORD`, so it is never in the command arguments. `admin:create-user` reads this variable when `--password` is missing.
+
+If the command fails, the CLI keeps the project. It logs the first error line of the command output, and the command to run again with the email and first name filled in. It does not log "No admin user yet.", and it does not start the app. The CLI then exits with code 1, because the run did not create the admin user that you asked for.
 
 Without an admin user, the CLI logs "No admin user yet." and the exact `admin:create-user` command, with quoted placeholders. When the invocation is not `human`, it also tells AI agents to ask the developer for the values and not to invent them.
 
