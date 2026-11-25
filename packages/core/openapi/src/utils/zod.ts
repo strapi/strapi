@@ -5,9 +5,10 @@ import type { Core } from '@strapi/types';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 /**
- * OpenAPI 3.1 uses the JSON Schema 2020-12 dialect. Zod 4.4.3 has no `openapi-3.1`
- * target, so `draft-2020-12` preserves valid 3.1 schemas. Explicit output mode preserves
- * the conversion direction used before these defaults were pinned.
+ * OpenAPI 3.1 uses the JSON Schema 2020-12 dialect, so `draft-2020-12` preserves valid 3.1
+ * schemas. Zod has no OpenAPI 3.1 target: its only OpenAPI target is `openapi-3.0`.
+ * Explicit output mode preserves the conversion direction used before these defaults
+ * were pinned.
  */
 export const OPENAPI_SCHEMA_CONVERSION_OPTIONS = {
   target: 'draft-2020-12',
@@ -17,7 +18,7 @@ export const OPENAPI_SCHEMA_CONVERSION_OPTIONS = {
 const ZOD_SHARED_BUCKET = '__shared';
 
 /**
- * Zod 4.4.3 emits `#/components/schemas/__shared#/$defs/<id>` (and close variants)
+ * Zod 4 emits `#/components/schemas/__shared#/$defs/<id>` (and close variants)
  * when an identified nested schema is missing from the conversion registry.
  */
 const ZOD_SHARED_REF_RE = /^#\/components\/schemas\/__shared#?\/(?:\$defs|definitions)\/(.+)$/;
@@ -27,7 +28,7 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> => {
 };
 
 /**
- * Zod 4.4.3 embeds `$id` in registry `toJSONSchema` output when `uri` is configured.
+ * Zod 4 embeds `$id` in registry `toJSONSchema` output when `uri` is configured.
  * Strip it so OpenAPI documents stay stable — inline schemas use random UUIDs
  * as registry IDs.
  */
@@ -92,7 +93,7 @@ const rewriteZodSharedRefs = (value: unknown, seen: WeakSet<object> = new WeakSe
  * Moves Zod's sibling `__shared` bucket into named component schemas and rewrites
  * `$ref`s that targeted that bucket.
  *
- * Zod 4.4.3 emits `#/components/schemas/__shared#/$defs/<id>` when an identified
+ * Zod 4 emits `#/components/schemas/__shared#/$defs/<id>` when an identified
  * nested schema is not in the conversion registry. Those definitions must become
  * first-class `components.schemas` entries; `__shared` is never written out.
  *
