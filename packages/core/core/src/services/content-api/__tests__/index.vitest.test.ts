@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import createContentAPI from '..';
+import { markRoutesRegistered } from '../../server/routes-registration';
 
 const strapiMock = {
   config: {
@@ -31,6 +32,8 @@ describe('Content API - getRoutesMap', () => {
       },
     } as any;
 
+    // The routes below carry `info`, as registered routes do
+    markRoutesRegistered(global.strapi);
     const contentAPI = createContentAPI(global.strapi);
     const routesMap = await contentAPI.getRoutesMap();
 
@@ -54,6 +57,8 @@ describe('Content API - getRoutesMap', () => {
       },
     } as any;
 
+    // The routes below carry `info`, as registered routes do
+    markRoutesRegistered(global.strapi);
     const contentAPI = createContentAPI(global.strapi);
     const routesMap = await contentAPI.getRoutesMap();
 
