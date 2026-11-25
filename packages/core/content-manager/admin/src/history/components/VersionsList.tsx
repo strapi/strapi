@@ -144,7 +144,7 @@ const VersionAuthorName = ({
     <Flex tag="span" gap={1} minWidth={0}>
       <Flex tag="span" shrink={0}>
         <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
-          <Icon />
+          <Icon width="1em" height="1em" />
         </AccessibleIcon>
       </Flex>
       <TruncatedName
