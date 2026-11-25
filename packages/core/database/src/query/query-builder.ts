@@ -211,6 +211,64 @@ const createQueryBuilder = (
     return alias;
   };
 
+  const applyUpdate = (qb: Knex.QueryBuilder) => {
+    // knex keeps one counter per column and drops counters on columns that are also in the
+    // update data, so sum the amounts per column and reject the overlap.
+    const counters = new Map<string, number>();
+    const addCounter = (column: unknown, amount: unknown, sign: 1 | -1) => {
+      // Knex accepts { column: amount } objects, so expand them one counter per key.
+      if (_.isPlainObject(column)) {
+        const entries = Object.entries(column as Record<string, unknown>);
+
+        if (entries.length === 0) {
+          throw new DatabaseError('Counter column object must specify at least one column');
+        }
+
+        entries.forEach(([key, entryAmount]) => addCounter(key, entryAmount, sign));
+        return;
+      }
+
+      if (typeof column !== 'string' || column.length === 0) {
+        throw new DatabaseError('Counter column name must be a non-empty string');
+      }
+
+      // JS callers can pass a numeric string; coerce before summing so it is not concatenated.
+      let value = NaN;
+      if (typeof amount === 'number') {
+        value = amount;
+      } else if (typeof amount === 'string' && amount.trim() !== '') {
+        value = Number(amount);
+      }
+
+      if (!Number.isFinite(value)) {
+        throw new DatabaseError(
+          `Cannot increment or decrement the column "${column}" by a non-numeric amount`
+        );
+      }
+
+      const columnName = helpers.toColumnName(meta, column);
+      counters.set(columnName, (counters.get(columnName) ?? 0) + sign * value);
+    };
+
+    state.increments.forEach((incr) => addCounter(incr.column, incr.amount, 1));
+    state.decrements.forEach((decr) => addCounter(decr.column, decr.amount, -1));
+
+    if (state.data) {
+      const data = state.data as Record<string, unknown>;
+      counters.forEach((_amount, column) => {
+        if (_.has(data, column)) {
+          throw new DatabaseError(
+            `Cannot update and increment or decrement the column "${column}" in the same query`
+          );
+        }
+      });
+
+      qb.update(data);
+    }
+
+    counters.forEach((amount, column) => qb.increment(column, amount));
+  };
+
   return {
     alias: getAlias(),
     getAlias,
@@ -524,12 +582,7 @@ const createQueryBuilder = (
         return qb.delete();
       }
 
-      if (state.data) {
-        qb.update(state.data);
-      }
-
-      state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
-      state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+      applyUpdate(qb);
 
       return qb;
     },
@@ -562,6 +615,7 @@ const createQueryBuilder = (
 
       const scopeType = isScoped() && isScopedType(state.type) ? state.type : null;
 
+      // Copy instead of push: clones share the state.where array, so a push would scope them twice
       if (scopeType) {
         state.where = [...state.where, ...db.unstable_scopes.where({ uid, meta, type: scopeType })];
       }
@@ -754,9 +808,7 @@ const createQueryBuilder = (
           break;
         }
         case 'update': {
-          if (state.data) {
-            qb.update(state.data);
-          }
+          applyUpdate(qb);
           break;
         }
         case 'delete': {
@@ -779,14 +831,6 @@ const createQueryBuilder = (
 
       if (state.forUpdate) {
         qb.forUpdate();
-      }
-
-      if (!_.isEmpty(state.increments)) {
-        state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
-      }
-
-      if (!_.isEmpty(state.decrements)) {
-        state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
       }
 
       if (state.onConflict) {

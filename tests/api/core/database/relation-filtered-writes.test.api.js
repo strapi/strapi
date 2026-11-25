@@ -91,6 +91,17 @@ describe('relation-filtered query builder writes', () => {
     ]);
   });
 
+  test('sums counters on the same column', async () => {
+    await strapi.db
+      .queryBuilder(ARTICLE_UID)
+      .where(inCategoryA)
+      .increment('views', 2)
+      .decrement('views', 1)
+      .execute();
+
+    expect((await readArticles()).map((row) => row.views)).toEqual([11, 11, 10]);
+  });
+
   test('ignores forUpdate and orderBy in the relation subquery', async () => {
     await strapi.db.transaction(async () => {
       await strapi.db
