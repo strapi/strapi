@@ -1,14 +1,17 @@
 /**
  * Follows up on community PRs whose CLA (CLA Assistant, `license/cla` status) is still unsigned.
  *
- *   unsigned ≥ CLA_REMINDER_DAYS → one reminder comment that says exactly what blocks the check
- *   new blockers after that      → at most one follow-up reminder
- *   unsigned ≥ CLA_CLOSE_DAYS    → close the PR (once the latest reminder is CLA_REMINDER_DAYS old)
- *   latest reminder is stale     → one final reminder first (once the latest reminder is
- *                                  CLA_CLOSE_DAYS old), then the close waits for it too
+ *   pending ≥ CLA_REMINDER_DAYS, no active reminder → a reminder that says exactly what blocks
+ *                                                     the check, and the date the PR closes on
+ *   a kind of blocker the reminder didn't name      → a new reminder, with a new date
+ *   still pending on that date                      → close the PR
+ *   the check passes                                → the reminder is marked as resolved
  *
- * The clock starts at the CLA bot's first comment. Commit emails are never written to comments
- * or logs: commits are referred to by SHA.
+ * The reminder is the only state. A PR is closed only on an active reminder whose date has
+ * come, and a reminder stops being active as soon as a run sees the check pass. So a PR is
+ * never closed without a reminder that was about the current pending period.
+ *
+ * Commit emails are never written to comments or logs: commits are referred to by SHA.
  */
 
 import type { getOctokit } from '@actions/github';
@@ -19,15 +22,6 @@ export const CLA_STATUS_CONTEXT = 'license/cla';
 export const CLA_BOT_LOGIN = 'strapi-cla';
 export const ACTIONS_BOT_LOGIN = 'github-actions[bot]';
 export const CLOSED_MARKER = '<!-- community-pr-cla: closed -->';
-
-/**
- * A PR gets its first reminder, and at most one follow-up when something new blocks the check.
- * A final reminder, sent at most once when the latest warning is stale, doesn't count.
- */
-export const MAX_REMINDERS = 2;
-
-/** The blocker token for "the PR author hasn't signed". Every other blocker is a commit SHA. */
-export const AUTHOR_BLOCKER = 'author';
 
 /** Associations that mean the author is part of the org (or has write access). */
 const INTERNAL_ASSOCIATIONS = new Set(['MEMBER', 'OWNER', 'COLLABORATOR']);
@@ -76,25 +70,22 @@ export interface ClaDiagnosis {
   unlinked: Array<{ sha: string; name: string; fakeNoreply: boolean }>;
 }
 
-/** A reminder this workflow posted, and the blockers its marker says it named. */
-export interface SentReminder {
-  at: number;
-  blockers: string[];
-  /** The one reminder sent because the latest warning was stale (outside MAX_REMINDERS). */
-  final: boolean;
-}
+/** The kinds of things that block the check. A reminder's marker records the kinds it named. */
+export type BlockerKind = 'author' | 'unlinked' | 'co-author';
+const BLOCKER_KINDS: readonly string[] = ['author', 'unlinked', 'co-author'];
 
 /**
- * - `first`: the first reminder
- * - `follow-up`: something the latest reminder didn't name blocks the check now
- * - `final`: the latest reminder is older than the close threshold, so its warning is stale
+ * Why a reminder is sent:
+ * - `first`: the PR has no active reminder
+ * - `new-blocker`: a kind of blocker no active reminder named now blocks the check
+ * - `missed-date`: the active reminder's close date passed long ago without a close
  */
-export type ReminderKind = 'first' | 'follow-up' | 'final';
+export type ReminderReason = 'first' | 'new-blocker' | 'missed-date';
 
 export type PlannedAction =
   | { type: 'too-early'; days: number }
-  | { type: 'remind'; days: number; kind: ReminderKind }
-  | { type: 'wait'; days: number; reason: string }
+  | { type: 'remind'; days: number; why: ReminderReason }
+  | { type: 'wait'; days: number; closeOn: number }
   | { type: 'close'; days: number }
   | { type: 'reopened'; days: number };
 
@@ -102,29 +93,56 @@ export type PlannedAction =
 export const hasMarker = (body: string | null | undefined, marker: string) =>
   (body ?? '').startsWith(marker);
 
-const BLOCKER_RE = /^(author|[0-9a-f]{7,40})$/;
+/** `2026-11-30`, in UTC. */
+export const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
 /**
- * The reminder marker records what the reminder named: `author` and commit SHAs only, never a
- * name or an email.
+ * An active reminder: the PR is closed if the check is still pending on this (UTC) date. It
+ * also records the kinds of blockers the reminder named, never a name, a SHA or an email.
  */
-export function reminderMarker(blockers: string[], final = false): string {
-  const safe = blockers.filter((b) => BLOCKER_RE.test(b));
-  return `<!-- community-pr-cla: reminder${final ? ' final' : ''} blockers=${safe.join(',')} -->`;
+export const reminderMarker = (closeOn: Date, named: BlockerKind[]) =>
+  `<!-- community-pr-cla: reminder close-on=${isoDay(closeOn.getTime())} named=${named
+    .filter((k) => BLOCKER_KINDS.includes(k))
+    .join(',')} -->`;
+
+/** A reminder withdrawn on this (UTC) date because the check passed. It no longer closes the PR. */
+export const resolvedMarker = (on: number) =>
+  `<!-- community-pr-cla: reminder resolved=${isoDay(on)} -->`;
+
+const REMINDER_MARKER_RE =
+  /^<!-- community-pr-cla: reminder (close-on|resolved)=(\d{4}-\d{2}-\d{2})(?: named=([a-z,-]{0,40}))? -->/;
+
+export interface ReminderMark {
+  state: 'active' | 'resolved';
+  /** The close date, or the day the reminder was resolved, as the start of that UTC day. */
+  date: number;
+  /** The kinds of blockers the reminder named. */
+  named: BlockerKind[];
 }
 
-const REMINDER_MARKER_RE = /^<!-- community-pr-cla: reminder( final)? blockers=([0-9a-z,]*) -->/;
-
-/** The blockers a reminder named, or null when `body` doesn't start with a reminder marker. */
-export function parseReminderMarker(body: string | null | undefined): string[] | null {
+/** Reads a reminder's marker. Null when `body` doesn't start with one. */
+export function parseReminderMarker(body: string | null | undefined): ReminderMark | null {
   const m = REMINDER_MARKER_RE.exec(body ?? '');
-  if (!m) return null;
-  return m[2].split(',').filter((b) => BLOCKER_RE.test(b));
+  const date = m ? Date.parse(`${m[2]}T00:00:00Z`) : NaN;
+  if (!m || Number.isNaN(date)) return null;
+  const named = (m[3] ?? '').split(',').filter((k) => BLOCKER_KINDS.includes(k));
+  return {
+    state: m[1] === 'close-on' ? 'active' : 'resolved',
+    date,
+    named: named as BlockerKind[],
+  };
 }
 
-/** Whether `body` starts with the marker of a final reminder. */
-export const isFinalReminder = (body: string | null | undefined) =>
-  REMINDER_MARKER_RE.exec(body ?? '')?.[1] === ' final';
+/** Turns an active reminder's body into a resolved one. The original text stays below a note. */
+export function resolveReminderBody(body: string, now: number): string {
+  const rest = body.replace(REMINDER_MARKER_RE, '').replace(/^\n/, '');
+  return [
+    resolvedMarker(now),
+    '> ✅ **Update:** the CLA check has passed since this reminder, so it no longer applies. Thank you!',
+    '',
+    rest,
+  ].join('\n');
+}
 
 // ─── Pure helpers ───────────────────────────────────────────────────────────
 
@@ -149,9 +167,18 @@ export function displayName(name: string): string | null {
 export function parseClaBotComment(body: string, createdAt: string): ClaBotComment {
   const signed: string[] = [];
   const unsigned: string[] = [];
-  const re = /:(white_check_mark|x):\s*([^<\n]+?)\s*(?=<br\s*\/?>|\n|$)/g;
-  for (const m of body.matchAll(re)) {
-    (m[1] === 'x' ? unsigned : signed).push(m[2].trim());
+  // Git author names end up in this comment, so it is split and matched with plain string
+  // checks: no pattern here can backtrack on a crafted name.
+  for (const piece of body.split(/<br\s{0,5}\/?>|\n/)) {
+    const entry = piece.trim();
+    for (const [emoji, list] of [
+      [':white_check_mark:', signed],
+      [':x:', unsigned],
+    ] as const) {
+      if (!entry.startsWith(emoji)) continue;
+      const name = entry.slice(emoji.length).trim();
+      if (name && !name.includes('<')) list.push(name);
+    }
   }
   return { createdAt, signed, unsigned };
 }
@@ -175,8 +202,17 @@ export function diagnose(prAuthor: string, commits: CommitInfo[], bot: ClaBotCom
   // With several committers the bot lists who signed (✅) and who hasn't (❌). Only the ❌
   // entries are trusted: anyone can author a commit with someone else's email, so a linked
   // login alone never gets named or mentioned.
+  //
+  // A ❌ entry is a login for a linked commit, but the git author name for an unlinked one, and
+  // anyone can pick a git name that equals someone's login. So a ❌ name is dropped when the bot
+  // also lists it under ✅, or when it is the git name of an unlinked commit: that entry is
+  // about the unlinked commit, which the reminder already names.
   const hasList = !!bot && bot.signed.length + bot.unsigned.length > 0;
-  const unsignedNames = new Set((bot?.unsigned ?? []).map(lc));
+  const signedNames = new Set((bot?.signed ?? []).map(lc));
+  const unlinkedNames = new Set(nonMerge.filter((c) => !c.login).map((c) => lc(c.name.trim())));
+  const unsignedNames = new Set(
+    (bot?.unsigned ?? []).map(lc).filter((n) => !signedNames.has(n) && !unlinkedNames.has(n))
+  );
 
   // Without a list, the bot has a single committer to ask. That is the author when the
   // author's account is the only linked one and no commit is unlinked. With an unlinked commit,
@@ -195,10 +231,13 @@ export function diagnose(prAuthor: string, commits: CommitInfo[], bot: ClaBotCom
   return { authorUnsigned, otherUnsigned, unlinked } satisfies ClaDiagnosis;
 }
 
-/** What blocks the check: `author`, plus the SHAs of unlinked and unsigned co-author commits. */
-export function blockersOf(d: ClaDiagnosis): string[] {
-  const shas = [...d.unlinked.map((c) => c.sha), ...d.otherUnsigned.flatMap((o) => o.shas)];
-  return [...new Set([...(d.authorUnsigned ? [AUTHOR_BLOCKER] : []), ...shas])];
+/** The kinds of blockers a diagnosis found, which is what a reminder about it names. */
+export function kindsOf(d: ClaDiagnosis): BlockerKind[] {
+  return [
+    ...(d.authorUnsigned ? (['author'] as const) : []),
+    ...(d.unlinked.length ? (['unlinked'] as const) : []),
+    ...(d.otherUnsigned.length ? (['co-author'] as const) : []),
+  ];
 }
 
 /**
@@ -216,56 +255,46 @@ export function parseOnlyPRs(value: string | undefined): number[] | undefined {
 }
 
 export function planAction(opts: {
-  /** The CLA bot's first comment (or the PR's creation, when there is none). */
-  unsignedSince: number;
-  /** Reminders this workflow posted on the PR. */
-  reminders: SentReminder[];
-  /** What blocks the check now (see `blockersOf`). */
-  blockers: string[];
-  /** When this workflow posted its close notice, if it did. */
-  closedNoticeAt: number | null;
+  /** When the check started pending: see `processPR`. */
+  pendingSince: number;
+  /** The close date the active reminder stated, or null when there is no active reminder. */
+  closeOn: number | null;
+  /** A kind of blocker that no active reminder named blocks the check now. */
+  unnamed: boolean;
+  /** This workflow's close notice is on the PR. */
+  closed: boolean;
   now: number;
   reminderDays: number;
-  closeDays: number;
 }): PlannedAction {
-  const days = Math.floor((opts.now - opts.unsignedSince) / DAY_MS);
+  const days = Math.floor((opts.now - opts.pendingSince) / DAY_MS);
   // Our close notice exists but the PR is open: someone reopened it on purpose. Leave it.
-  if (opts.closedNoticeAt) return { type: 'reopened', days };
-  if (days < opts.reminderDays) return { type: 'too-early', days };
-  const latest = [...opts.reminders].sort((a, b) => b.at - a.at)[0];
-  if (!latest) return { type: 'remind', days, kind: 'first' };
-  // Something the latest reminder didn't name blocks the check now (say the author signed, then
-  // a commit with an unlinked email came in): tell the author, once. A force-push that keeps
-  // the same blockers, or fewer, changes nothing.
-  const named = new Set(latest.blockers);
-  const fresh = opts.blockers.filter((b) => !named.has(b));
-  const regular = opts.reminders.filter((r) => !r.final).length;
-  if (fresh.length && regular < MAX_REMINDERS) {
-    return { type: 'remind', days, kind: 'follow-up' };
+  if (opts.closed) return { type: 'reopened', days };
+  if (opts.closeOn === null) {
+    if (days < opts.reminderDays) return { type: 'too-early', days };
+    return { type: 'remind', days, why: 'first' };
   }
-  if (days < opts.closeDays) return { type: 'wait', days, reason: 'reminder sent' };
-  const sinceReminder = Math.floor((opts.now - latest.at) / DAY_MS);
-  // The latest warning is older than a whole close period (say the check was green for months
-  // and went pending again): warn once more before closing, so the close is never a surprise.
-  if (sinceReminder >= opts.closeDays && !opts.reminders.some((r) => r.final)) {
-    return { type: 'remind', days, kind: 'final' };
+  // The stated date is long past and the PR is still open, so something kept us from closing it
+  // then (an exempt label, the PR was closed and reopened, the job was off). The author may no
+  // longer expect a close: warn again instead.
+  if (opts.now - opts.closeOn >= opts.reminderDays * DAY_MS) {
+    return { type: 'remind', days, why: 'missed-date' };
   }
-  if (sinceReminder < opts.reminderDays) {
-    return { type: 'wait', days, reason: `reminder is only ${sinceReminder}d old` };
-  }
+  // Never close on a blocker the author wasn't told about (say they signed, then a commit with
+  // an unlinked email came in). Kinds, not commits, are compared, so a rebase sends nothing, and
+  // with three kinds this can only move the date a couple of times.
+  if (opts.unnamed) return { type: 'remind', days, why: 'new-blocker' };
+  if (opts.now < opts.closeOn) return { type: 'wait', days, closeOn: opts.closeOn };
   return { type: 'close', days };
 }
 
-/** The date we tell the author the PR will be closed on (never sooner than the reminder grace). */
-export function closeDate(opts: {
-  unsignedSince: number;
-  now: number;
-  reminderDays: number;
-  closeDays: number;
-}): Date {
-  return new Date(
-    Math.max(opts.unsignedSince + opts.closeDays * DAY_MS, opts.now + opts.reminderDays * DAY_MS)
-  );
+/**
+ * The date a reminder sent now says the PR will be closed on. Each reminder gives the author
+ * the same time to act: the gap between the two thresholds, and never less than the reminder
+ * threshold. A reminder sent on day 7 closes on day 30.
+ */
+export function closeDate(opts: { now: number; reminderDays: number; closeDays: number }): Date {
+  const grace = Math.max(opts.closeDays - opts.reminderDays, opts.reminderDays);
+  return new Date(opts.now + grace * DAY_MS);
 }
 
 const formatDate = (d: Date) =>
@@ -389,18 +418,19 @@ export function buildReminderComment(opts: {
   diagnosis: ClaDiagnosis;
   claUrl: string;
   recheckUrl: string;
-  days: number;
   closeOn: Date;
   repo: RepoRef;
-  /** Which reminder this is (see `ReminderKind`). Defaults to the first. */
-  kind?: ReminderKind;
+  /** The PR already has an active reminder, with another close date. */
+  replaces?: boolean;
 }): string {
   const { login, diagnosis: d, claUrl, recheckUrl } = opts;
   const sections: string[] = [];
 
   if (d.authorUnsigned) {
     sections.push(
-      `**You haven't signed the CLA yet**\n\nPlease [sign it here](${claUrl}). The check updates on its own once you have.`
+      // The check can also be stale (say an email was just added to the account), so this
+      // doesn't claim the author never signed, and always offers the recheck.
+      `**The CLA isn't signed for your account yet**\n\nPlease [sign it here](${claUrl}). If you already have, click [recheck](${recheckUrl}) to refresh the check.`
     );
   }
 
@@ -413,7 +443,8 @@ export function buildReminderComment(opts: {
         '',
         "Everyone who authored a commit in this PR needs to sign. These authors haven't yet:",
         '',
-        ...d.otherUnsigned.map((o) => `- @${o.login}: ${codeList(o.shas)}`),
+        // No `@`: a commit can carry someone else's email, and they shouldn't be notified.
+        ...d.otherUnsigned.map((o) => `- \`${o.login}\`: ${codeList(o.shas)}`),
         '',
         `Each of them needs to [sign the CLA](${claUrl}). If they can't, drop their commits from this PR (for example with \`git rebase -i\`), then force-push.`,
       ].join('\n')
@@ -426,15 +457,15 @@ export function buildReminderComment(opts: {
     );
   }
 
-  const cla = `[Contributor License Agreement](${claUrl})`;
-  const intro = {
-    first: `Thank you for your contribution! The ${cla} check on this PR has been pending for **${opts.days} days**, and we can't merge it until it passes. Here's what's blocking it:`,
-    'follow-up': `The ${cla} check on this PR is still pending, and something new is blocking it since our last reminder. Here's what's blocking it now:`,
-    final: `The ${cla} check on this PR is pending, and we can't merge it until it passes. Here's what's blocking it:`,
-  }[opts.kind ?? 'first'];
+  // States no duration: the check may have passed in between, so "pending for N days" can be false.
+  const intro = `Thank you for your contribution! The [Contributor License Agreement](${claUrl}) check on this PR is pending, and we can't merge it until it passes. Here's what's blocking it:`;
+
+  const closing = opts.replaces
+    ? 'This replaces our earlier reminder, and the date below is the new one. '
+    : '';
 
   return [
-    reminderMarker(blockersOf(d), opts.kind === 'final'),
+    reminderMarker(opts.closeOn, kindsOf(d)),
     '> This is a templated message',
     '',
     `Hello @${login},`,
@@ -443,7 +474,7 @@ export function buildReminderComment(opts: {
     '',
     sections.join('\n\n'),
     '',
-    `If the check is still pending on **${formatDate(
+    `${closing}If the check is still pending on **${formatDate(
       opts.closeOn
     )}**, this PR will be closed. You can reopen it once the CLA is signed. 💜`,
   ].join('\n');
@@ -542,6 +573,9 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
   return out;
 }
 
+/** GitHub lists at most this many commits of a PR, oldest first. */
+export const MAX_PR_COMMITS = 250;
+
 async function listCommits(github: Octokit, owner: string, repo: string, pull_number: number) {
   const commits = await github.paginate(github.rest.pulls.listCommits, {
     owner,
@@ -585,7 +619,11 @@ export interface ProcessResult {
   pr: number;
   login: string;
   days: number;
-  action: PlannedAction['type'] | 'error';
+  /**
+   * `resolved`: the check passed, and the PR's active reminder was marked as resolved.
+   * `skipped`: the PR has too many commits to diagnose.
+   */
+  action: PlannedAction['type'] | 'resolved' | 'skipped' | 'error';
   detail: string;
   /** Set when processing this PR failed. Later PRs are still processed. */
   error?: string;
@@ -607,7 +645,34 @@ export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<Proce
   for (const pr of prs) {
     if (pr.isBot) continue;
     if (INTERNAL_ASSOCIATIONS.has(pr.association)) continue;
-    if (pr.cla?.state === 'SUCCESS') continue;
+
+    const result: ProcessResult = {
+      pr: pr.number,
+      login: pr.login,
+      days: 0,
+      action: 'error',
+      detail: '',
+    };
+    const attempt = async (work: () => Promise<void>) => {
+      try {
+        await work();
+      } catch (error) {
+        result.action = 'error';
+        result.error = errorMessage(error);
+        log(`PR #${pr.number}: failed: ${result.error}`);
+      }
+    };
+
+    if (pr.cla?.state === 'SUCCESS') {
+      // The check passed: a reminder we sent no longer applies. Withdrawing it means a later
+      // regression starts over with a new reminder, and is never closed on an old one.
+      let resolved = false;
+      await attempt(async () => {
+        resolved = await resolveReminders({ ...opts, pr, now, result, prefix });
+      });
+      if (resolved || result.error) results.push(result);
+      continue;
+    }
     const isCommunity = pr.labels.some((l) => lc(l) === COMMUNITY_LABEL);
     const exemptLabel = pr.labels.find(
       (l) => exempt.has(lc(l)) || (isCommunity && lifecycle.has(lc(l)))
@@ -621,188 +686,158 @@ export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<Proce
       continue;
     }
 
-    const result: ProcessResult = {
-      pr: pr.number,
-      login: pr.login,
-      days: 0,
-      action: 'error',
-      detail: '',
-    };
     results.push(result);
-
-    try {
-      await processPR({ ...opts, pr, now, result, prefix });
-    } catch (error) {
-      result.action = 'error';
-      result.error = errorMessage(error);
-      log(`PR #${pr.number}: failed: ${result.error}`);
-    }
+    await attempt(() => processPR({ ...opts, pr, now, result, prefix }));
   }
 
   return results;
 }
 
-async function processPR(
-  opts: ProcessOptions & { pr: OpenPR; now: number; result: ProcessResult; prefix: string }
-): Promise<void> {
+type PRContext = ProcessOptions & {
+  pr: OpenPR;
+  now: number;
+  result: ProcessResult;
+  prefix: string;
+};
+
+const listComments = (github: Octokit, owner: string, repo: string, issue_number: number) =>
+  github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+
+/** Marks the active reminders of a PR whose check passed as resolved. */
+async function resolveReminders(opts: PRContext): Promise<boolean> {
+  const { github, owner, repo, dryRun, log, pr, now, result, prefix } = opts;
+  const comments = await listComments(github, owner, repo, pr.number);
+  const active = comments.filter(
+    (c) => c.user?.login === ACTIONS_BOT_LOGIN && parseReminderMarker(c.body)?.state === 'active'
+  );
+  if (!active.length) return false;
+
+  result.action = 'resolved';
+  log(`${prefix}PR #${pr.number} (@${pr.login}): check passed → reminder marked as resolved`);
+  if (dryRun) return true;
+  for (const c of active) {
+    await github.rest.issues.updateComment({
+      owner,
+      repo,
+      comment_id: c.id,
+      body: resolveReminderBody(c.body ?? '', now),
+    });
+  }
+  return true;
+}
+
+async function processPR(opts: PRContext): Promise<void> {
   const { github, owner, repo, dryRun, log, pr, now, result, prefix } = opts;
   const cla = pr.cla!;
   const at = (iso: string) => new Date(iso).getTime();
 
-  const comments = await github.paginate(github.rest.issues.listComments, {
-    owner,
-    repo,
-    issue_number: pr.number,
-    per_page: 100,
-  });
+  const comments = await listComments(github, owner, repo, pr.number);
   const botComment = comments.find((c) => c.user?.login === CLA_BOT_LOGIN);
-  const unsignedSince = at(botComment?.created_at ?? pr.createdAt);
 
   // Only our own comments count, and only when the marker is the first thing in the body.
   const ours = comments.filter((c) => c.user?.login === ACTIONS_BOT_LOGIN);
-  const reminders = ours.flatMap((c): SentReminder[] => {
-    const blockers = parseReminderMarker(c.body);
-    return blockers ? [{ at: at(c.created_at), blockers, final: isFinalReminder(c.body) }] : [];
+  const marks = ours.flatMap((c) => {
+    const mark = parseReminderMarker(c.body);
+    return mark ? [{ ...mark, at: at(c.created_at) }] : [];
   });
-  const closedNotice = ours.find((c) => hasMarker(c.body, CLOSED_MARKER));
+  const active = marks.filter((m) => m.state === 'active').sort((a, b) => b.at - a.at);
+  const resolvedOn = marks.filter((m) => m.state === 'resolved').map((m) => m.date);
+  const closed = ours.some((c) => hasMarker(c.body, CLOSED_MARKER));
 
-  // The commits only matter once a reminder is due: to write it, or to see whether something
-  // new blocks the check since the last one.
-  const days = Math.floor((now - unsignedSince) / DAY_MS);
+  // Pending since the CLA bot first asked, or since we last saw the check pass.
+  const pendingSince = Math.max(at(botComment?.created_at ?? pr.createdAt), ...resolvedOn);
+  const days = Math.floor((now - pendingSince) / DAY_MS);
+  result.days = days;
+  const who = `PR #${pr.number} (@${pr.login}): pending for ${days}d`;
+
+  // The commits are needed to write a reminder, and to check that the active one named what
+  // blocks the check now.
   let diagnosis: ClaDiagnosis | null = null;
-  if (!closedNotice && days >= opts.reminderDays) {
+  if (!closed && (active.length || days >= opts.reminderDays)) {
+    const commits = await listCommits(github, owner, repo, pr.number);
+    if (commits.length >= MAX_PR_COMMITS) {
+      // GitHub lists no more than this, so the diagnosis could name the wrong cause.
+      result.action = 'skipped';
+      result.detail = `${MAX_PR_COMMITS}+ commits, GitHub doesn't list them all`;
+      log(`${who} → skipped (${result.detail})`);
+      return;
+    }
     diagnosis = diagnose(
       pr.login,
-      await listCommits(github, owner, repo, pr.number),
+      commits,
       botComment ? parseClaBotComment(botComment.body ?? '', botComment.created_at) : null
     );
   }
 
+  const named = new Set(active.flatMap((m) => m.named));
   const plan = planAction({
-    unsignedSince,
-    reminders,
-    blockers: diagnosis ? blockersOf(diagnosis) : [],
-    closedNoticeAt: closedNotice ? at(closedNotice.created_at) : null,
+    pendingSince,
+    closeOn: active[0]?.date ?? null,
+    unnamed: !!diagnosis && kindsOf(diagnosis).some((k) => !named.has(k)),
+    closed,
     now,
     reminderDays: opts.reminderDays,
-    closeDays: opts.closeDays,
   });
-  result.days = plan.days;
   result.action = plan.type;
 
   const claUrl = cla.targetUrl ?? `https://cla.strapi.io/${owner}/${repo}?pullRequest=${pr.number}`;
   const recheckUrl = `https://cla.strapi.io/check/${owner}/${repo}?pullRequest=${pr.number}`;
 
   if (plan.type === 'remind' && diagnosis) {
-    const label = { first: '', 'follow-up': 'new blockers: ', final: 'stale warning: ' };
-    result.detail = `${label[plan.kind]}${describe(diagnosis)}`;
+    const why = { first: '', 'new-blocker': 'new blocker: ', 'missed-date': 'missed close date: ' };
+    result.detail = `${why[plan.why]}${describe(diagnosis)}`;
     const body = buildReminderComment({
       login: pr.login,
       diagnosis,
       claUrl,
       recheckUrl,
-      days: plan.days,
-      closeOn: closeDate({
-        unsignedSince,
-        now,
-        reminderDays: opts.reminderDays,
-        closeDays: opts.closeDays,
-      }),
+      closeOn: closeDate({ now, reminderDays: opts.reminderDays, closeDays: opts.closeDays }),
       repo: { owner, repo, baseRef: pr.baseRef },
-      kind: plan.kind,
+      replaces: plan.why !== 'first',
     });
-    log(
-      `${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → ${
-        plan.kind === 'first' ? '' : `${plan.kind} `
-      }reminder [${result.detail}]`
-    );
+    log(`${prefix}${who} → reminder [${result.detail}]`);
     if (dryRun) {
       log(body.replace(/^/gm, '    | '));
     } else {
       await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
     }
   } else if (plan.type === 'close') {
-    log(`${prefix}PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → close`);
+    log(`${prefix}${who} → close`);
     if (dryRun) return;
     await closeWithNotice({ ...opts, claUrl });
   } else {
-    result.detail = plan.type === 'wait' ? plan.reason : '';
-    log(
-      `PR #${pr.number} (@${pr.login}): unsigned for ${plan.days}d → ${plan.type}${
-        result.detail ? ` (${result.detail})` : ''
-      }`
-    );
+    result.detail = plan.type === 'wait' ? `closes on ${isoDay(plan.closeOn)}` : '';
+    log(`${who} → ${plan.type}${result.detail ? ` (${result.detail})` : ''}`);
   }
 }
 
 /**
- * Closes the PR, then posts the close notice. A PR this workflow closed always carries the
- * notice, because the notice is how a deliberate reopen is recognised: if posting fails twice,
- * the PR is reopened so the next run closes it again. Only if that reopen also fails can a
- * closed PR lack the notice, and the error says so.
+ * Closes the PR, then posts the close notice and runs `onClosed`. The close comes first: a
+ * notice on a PR that failed to close would read as "reopened", and the PR would be left open
+ * for good.
  *
- * GitHub can store a comment and still answer with an error, so before retrying, and before
- * reopening, the comments are read again: a stored notice means the close is done. Without
- * that, a reopen under a stored notice would leave the PR "reopened" for good.
+ * If the notice can't be posted, the PR stays closed and the run reports it. The reminder
+ * already told the author why and when. Without the notice, a later reopen isn't recognised as
+ * one: the PR follows the usual rules again.
  */
-async function closeWithNotice(
-  opts: ProcessOptions & { pr: OpenPR; claUrl: string }
-): Promise<void> {
+async function closeWithNotice(opts: ProcessOptions & { pr: OpenPR; claUrl: string }) {
   const { github, owner, repo, pr } = opts;
   const body = buildCloseComment({ login: pr.login, claUrl: opts.claUrl });
-  const postNotice = () =>
-    github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
-  const noticeStored = async () => {
-    try {
-      const comments = await github.paginate(github.rest.issues.listComments, {
-        owner,
-        repo,
-        issue_number: pr.number,
-        per_page: 100,
-      });
-      return comments.some(
-        (c) => c.user?.login === ACTIONS_BOT_LOGIN && hasMarker(c.body, CLOSED_MARKER)
-      );
-    } catch {
-      return false;
-    }
-  };
-
-  /** Posts the notice; returns the error if it failed and the notice isn't stored after all. */
-  const tryNotice = async (): Promise<unknown> => {
-    try {
-      await postNotice();
-      return null;
-    } catch (error) {
-      return (await noticeStored()) ? null : error;
-    }
-  };
-
   await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
-  const failed = (await tryNotice()) && (await tryNotice());
-  if (failed) {
-    const noticeError = errorMessage(failed);
-    try {
-      await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'open' });
-    } catch (reopenError) {
-      throw new Error(
-        `closed WITHOUT a close notice (notice failed twice: ${noticeError}; reopen failed: ${errorMessage(
-          reopenError
-        )}). Post the notice by hand, or the PR is closed again if someone reopens it`
-      );
-    }
-    throw new Error(
-      `close notice failed twice (${noticeError}), so the PR was reopened; the next run closes it again`
-    );
-  }
 
+  const problems: string[] = [];
+  try {
+    await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+  } catch (error) {
+    problems.push(`the close notice could not be posted, post it by hand (${errorMessage(error)})`);
+  }
   try {
     await opts.onClosed?.(pr.number);
   } catch (error) {
-    throw new Error(`closed, but after close: ${errorMessage(error)}`);
+    problems.push(errorMessage(error));
   }
+  if (problems.length) throw new Error(`closed, but: ${problems.join('; ')}`);
 }
-
 export function describe(d: ClaDiagnosis): string {
   const parts: string[] = [];
   if (d.authorUnsigned) parts.push('author unsigned');

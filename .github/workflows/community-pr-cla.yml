@@ -3,11 +3,12 @@
 # run: steps only use env vars — no ${{ }} interpolation of user-controlled data.
 #
 # Follows up on open PRs from people outside the org whose CLA (license/cla) is still unsigned:
-#   unsigned ≥ CLA_REMINDER_DAYS → a reminder explaining exactly what blocks the check, plus at
-#                                  most one follow-up if something new blocks it
-#   unsigned ≥ CLA_CLOSE_DAYS    → if the latest reminder is CLA_CLOSE_DAYS old (stale), one final
-#                                  reminder first; then close the PR, at least CLA_REMINDER_DAYS
-#                                  after the latest reminder
+#   pending ≥ CLA_REMINDER_DAYS    → a reminder explaining exactly what blocks the check, and
+#                                    stating the date the PR will be closed on
+#   still pending on that date     → close the PR (CLA_CLOSE_DAYS after the check went pending,
+#                                    for a reminder sent on time)
+#   the check passes               → the reminder is marked as resolved, and no longer closes
+#                                    the PR
 #
 # Scheduled runs are a dry run until the CLA_FOLLOW_UP_ENABLED repository variable is "true".
 # See .github/scripts/README.md.

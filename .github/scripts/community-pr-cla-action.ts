@@ -70,7 +70,7 @@ async function run() {
   const failed = results.filter((r) => r.error);
   core.info(
     `Done: ${count('remind')} reminded, ${count('close')} closed, ${count('wait')} waiting, ` +
-      `${count('too-early')} too early, ${count('reopened')} reopened, ${failed.length} failed${
+      `${count('too-early')} too early, ${count('reopened')} reopened, ${count('resolved')} resolved, ${count('skipped')} skipped, ${failed.length} failed${
         dryRun ? ' (dry run)' : ''
       }`
   );
@@ -82,7 +82,7 @@ async function run() {
         [
           { data: 'PR', header: true },
           { data: 'Author', header: true },
-          { data: 'Unsigned (days)', header: true },
+          { data: 'Pending (days)', header: true },
           { data: 'Action', header: true },
           { data: 'Detail', header: true },
         ],
