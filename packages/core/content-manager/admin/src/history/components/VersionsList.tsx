@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
 import { AccessibleIcon, Box, Flex, Status, Tooltip, Typography } from '@strapi/design-system';
-import { Key, User } from '@strapi/icons';
+import { KeyIcon, UserIcon } from '@strapi/icons/regular';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -95,8 +95,8 @@ const TruncatedName = ({
  * -----------------------------------------------------------------------------------------------*/
 
 const AUTHOR_TYPE_ICONS: Record<HistoryVersions.HistoryVersionAuthorType, React.ElementType> = {
-  person: User,
-  token: Key,
+  person: UserIcon,
+  token: KeyIcon,
 };
 
 const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
