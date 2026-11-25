@@ -323,6 +323,24 @@ export class AssetsPage {
     await this.tableViewButton.click();
   }
 
+  getSearchBox() {
+    return this.page.getByRole('searchbox', { name: 'Search for an asset' });
+  }
+
+  /**
+   * The "Search all media" switch, shown while searching inside a folder.
+   */
+  getSearchAllSwitch() {
+    return this.page.getByRole('switch', { name: 'Search all media' });
+  }
+
+  /**
+   * The "N results" count next to the search field.
+   */
+  getSearchResultCount() {
+    return this.page.getByText(/^\d+ results?$/);
+  }
+
   /**
    * The toolbar "Filter" dropdown trigger (shows the applied-filter count).
    */

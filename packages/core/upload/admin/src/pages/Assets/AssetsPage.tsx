@@ -20,6 +20,13 @@ import {
   useAssetDetailsParam,
 } from './components/AssetDetails/AssetDetailsDrawer';
 import { AssetsSearchInput } from './components/AssetsSearchInput';
+import {
+  AssetsToolbar,
+  SearchGroup,
+  SearchScopeSlot,
+  SearchSlot,
+  ViewGroup,
+} from './components/AssetsToolbar';
 import { AssetsView } from './components/AssetsView';
 import { AssetsDndProvider } from './components/Dnd/AssetsDndProvider';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
@@ -30,6 +37,7 @@ import { FolderFormDialog } from './components/FolderFormDialog';
 import { FOLDER_TREE_ROOT_SELECTOR, FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { MainAreaContextMenu } from './components/MainAreaContextMenu';
+import { SearchScopeControls } from './components/SearchScopeControls';
 import { SortMenu } from './components/SortMenu';
 import { ViewToggle } from './components/ViewToggle';
 import { localStorageKeys, viewOptions } from './constants';
@@ -50,39 +58,11 @@ const ITEM_COUNT_MESSAGE = {
   defaultMessage: '{count, plural, =1 {# item} other {# items}}',
 };
 
-const SEARCH_RESULTS_COUNT_MESSAGES = {
-  both: {
-    id: getTranslationKey('header.search-results.count'),
-    defaultMessage:
-      '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
-  },
-  folders: {
-    id: getTranslationKey('header.search-results.count.folders'),
-    defaultMessage: '{numberFolders, plural, one {1 folder} other {# folders}}',
-  },
-  assets: {
-    id: getTranslationKey('header.search-results.count.assets'),
-    defaultMessage: '{numberAssets, plural, =0 {0 assets} one {1 asset} other {# assets}}',
-  },
-};
-
-const getSearchResultsCountMessage = (numberFolders: number, numberAssets: number) => {
-  if (numberFolders === 0) {
-    return SEARCH_RESULTS_COUNT_MESSAGES.assets;
-  }
-
-  if (numberAssets === 0) {
-    return SEARCH_RESULTS_COUNT_MESSAGES.folders;
-  }
-
-  return SEARCH_RESULTS_COUNT_MESSAGES.both;
-};
-
 /* -------------------------------------------------------------------------------------------------
  * ClearSelectionOnChange
  *
  * Selection is list-scoped: it resets when the user is looking at a different list.
- * The list fingerprint is getListQueryKey() — folder, search, sort, filter.
+ * The list fingerprint is getListQueryKey() — folder, search (term and scope), sort, filter.
  *
  * Hybrid rule: infinite scroll does not change the key (selection persists), and
  * neither does the table/grid toggle — both views render the same list.
@@ -170,14 +150,8 @@ const TitleRow = styled(Flex)`
   }
 `;
 
-// Two groups in source order (Filter, Search / Sort, Toggle). Mobile: stacked —
-// Filter+Search on row 1, Sort+Toggle on row 2. Desktop (large+): one row,
-// Filter+Search on the left, Sort+Toggle pushed right.
-const Toolbar = styled(Flex)<{ $compact: boolean }>`
+const Toolbar = styled(AssetsToolbar)<{ $compact: boolean }>`
   margin-top: ${({ theme }) => theme.spaces[5]};
-  flex-direction: column;
-  align-items: stretch;
-  gap: ${({ theme }) => theme.spaces[3]};
   transition: margin-top 0.2s ease;
 
   /* Tightening the gap to the title belongs to the compact header, so it is
@@ -190,42 +164,6 @@ const Toolbar = styled(Flex)<{ $compact: boolean }>`
         margin-top: ${theme.spaces[2]};
       }
     `}
-
-  ${({ theme }) => theme.breakpoints.large} {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-`;
-
-const ToolbarGroup = styled(Flex)`
-  align-items: center;
-  gap: ${({ theme }) => theme.spaces[3]};
-`;
-
-// Filter + Search. On mobile the group fills the row (search grows into it);
-// on desktop it keeps its intrinsic size and sits at the left edge.
-const FilterSearchGroup = styled(ToolbarGroup)``;
-
-// Sort + Toggle. Mobile: spread across the row (Sort left, Toggle right).
-// Desktop: sit together at the right edge (space-between on the toolbar leaves
-// the empty space between the search and here).
-const SortToggleGroup = styled(ToolbarGroup)`
-  justify-content: space-between;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    justify-content: flex-end;
-    flex: 0 0 auto;
-  }
-`;
-
-// Fills the row on mobile; intrinsic width on desktop.
-const SearchSlot = styled(Box)`
-  flex: 1;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    flex: 0 1 auto;
-  }
 `;
 
 export const AssetsPage = () => {
@@ -238,6 +176,9 @@ export const AssetsPage = () => {
     navigateToFolderId,
     searchQuery,
     isSearching,
+    canSearchAll,
+    isSearchingAll,
+    setSearchingAll,
     clearSearch,
     listSort,
     listFilters,
@@ -255,35 +196,15 @@ export const AssetsPage = () => {
   const { title, itemCount } = useFolderInfo(currentFolderId);
 
   // Both move affordances (drag and the bulk bar) resolve each item's parent
-  // from the rows on screen — while searching, results are global and the
+  // from the rows on screen — while searching, results span subfolders and the
   // folder currently open says nothing about where an item lives.
   const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
 
   const itemCountLabel = formatMessage(ITEM_COUNT_MESSAGE, { count: itemCount });
 
-  const searchResultsTitle = formatMessage(
-    {
-      id: getTranslationKey('header.search-results'),
-      defaultMessage: 'Search results for "{query}"',
-    },
-    { query: searchQuery }
-  );
-  const numberFolders = folders.length;
-  const numberAssets = pagination?.total ?? 0;
-
-  const searchResultsCountLabel = formatMessage(
-    getSearchResultsCountMessage(numberFolders, numberAssets),
-    { numberFolders, numberAssets }
-  );
-
-  let pageHeaderTitle: string;
-  if (isSearching) {
-    pageHeaderTitle = `${searchResultsTitle} (${searchResultsCountLabel})`;
-  } else if (title) {
-    pageHeaderTitle = `${title} (${itemCountLabel})`;
-  } else {
-    pageHeaderTitle = formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
-  }
+  const pageHeaderTitle = title
+    ? `${title} (${itemCountLabel})`
+    : formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
@@ -408,6 +329,7 @@ export const AssetsPage = () => {
   const listQueryKey = getListQueryKey({
     folderId: currentFolderId,
     search: searchQuery,
+    searchAll: isSearchingAll,
     // Folder position changes the render order too — selection must reset.
     sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
     filter: listFilters.serialized || null,
@@ -426,7 +348,7 @@ export const AssetsPage = () => {
                 sideNav={
                   <FolderTree
                     currentFolderId={currentFolderId}
-                    showActiveFolder={!isSearching}
+                    showActiveFolder={!isSearchingAll}
                     onSelectFolder={navigateToFolderId}
                     backgroundContextMenu={
                       <MainAreaContextMenu
@@ -507,20 +429,34 @@ export const AssetsPage = () => {
                       </TitleRow>
 
                       <Toolbar $compact={isHeaderCompact}>
-                        <FilterSearchGroup>
+                        <SearchGroup $isSearching={isSearching}>
                           <Box>
                             <FilterMenu listFilters={listFilters} />
                           </Box>
                           <SearchSlot>
                             <AssetsSearchInput />
                           </SearchSlot>
-                        </FilterSearchGroup>
-                        <SortToggleGroup>
+                          {isSearching && (
+                            <SearchScopeSlot>
+                              <SearchScopeControls
+                                canSearchAll={canSearchAll}
+                                isSearchingAll={isSearchingAll}
+                                onSearchingAllChange={setSearchingAll}
+                                resultCount={
+                                  isLoadingAssets || isLoadingFolders || assetsError
+                                    ? undefined
+                                    : folders.length + (pagination?.total ?? 0)
+                                }
+                              />
+                            </SearchScopeSlot>
+                          )}
+                        </SearchGroup>
+                        <ViewGroup>
                           <Box>
                             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
                           </Box>
                           <ViewToggle view={view} onChange={setView} />
-                        </SortToggleGroup>
+                        </ViewGroup>
                       </Toolbar>
 
                       <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />

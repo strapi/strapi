@@ -60,8 +60,8 @@ describe('useAssetSearch', () => {
     expect(mockSetQuery).toHaveBeenCalledWith({ _q: 'report%2Bfinal' }, 'push', true);
   });
 
-  it('removes _q when set to an empty value', () => {
-    mockUseQueryParams.mockReturnValue([{ query: { _q: 'img' } }, mockSetQuery]);
+  it('removes _q and searchAll when set to an empty value', () => {
+    mockUseQueryParams.mockReturnValue([{ query: { _q: 'img', searchAll: 'true' } }, mockSetQuery]);
 
     const { result } = renderHook(() => useAssetSearch());
 
@@ -69,11 +69,11 @@ describe('useAssetSearch', () => {
       result.current.setSearchQuery('');
     });
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '' }, 'remove', true);
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '', searchAll: '' }, 'remove', true);
   });
 
-  it('clearSearch removes _q', () => {
-    mockUseQueryParams.mockReturnValue([{ query: { _q: 'img' } }, mockSetQuery]);
+  it('clearSearch removes _q and searchAll', () => {
+    mockUseQueryParams.mockReturnValue([{ query: { _q: 'img', searchAll: 'true' } }, mockSetQuery]);
 
     const { result } = renderHook(() => useAssetSearch());
 
@@ -81,6 +81,54 @@ describe('useAssetSearch', () => {
       result.current.clearSearch();
     });
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '' }, 'remove', true);
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '', searchAll: '' }, 'remove', true);
+  });
+
+  describe('Search all media', () => {
+    it('is off when searchAll is absent', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { _q: 'img' } }, mockSetQuery]);
+
+      const { result } = renderHook(() => useAssetSearch());
+
+      expect(result.current.isSearchingAll).toBe(false);
+    });
+
+    it('is on when searchAll is "true"', () => {
+      mockUseQueryParams.mockReturnValue([
+        { query: { _q: 'img', searchAll: 'true' } },
+        mockSetQuery,
+      ]);
+
+      const { result } = renderHook(() => useAssetSearch());
+
+      expect(result.current.isSearchingAll).toBe(true);
+    });
+
+    it('writes searchAll and replaces history when turned on', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { _q: 'img' } }, mockSetQuery]);
+
+      const { result } = renderHook(() => useAssetSearch());
+
+      act(() => {
+        result.current.setSearchingAll(true);
+      });
+
+      expect(mockSetQuery).toHaveBeenCalledWith({ searchAll: 'true' }, 'push', true);
+    });
+
+    it('removes searchAll and keeps the term when turned off', () => {
+      mockUseQueryParams.mockReturnValue([
+        { query: { _q: 'img', searchAll: 'true' } },
+        mockSetQuery,
+      ]);
+
+      const { result } = renderHook(() => useAssetSearch());
+
+      act(() => {
+        result.current.setSearchingAll(false);
+      });
+
+      expect(mockSetQuery).toHaveBeenCalledWith({ searchAll: '' }, 'remove', true);
+    });
   });
 });
