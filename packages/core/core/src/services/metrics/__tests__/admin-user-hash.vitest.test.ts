@@ -1,7 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 import crypto from 'crypto';
-// eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
+import createContext from 'unit-test-utils/create-context';
 import { generateAdminUserHash } from '../admin-user-hash';
 
 describe('user email hash', () => {

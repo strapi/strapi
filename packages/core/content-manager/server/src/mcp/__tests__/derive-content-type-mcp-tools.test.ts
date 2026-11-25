@@ -162,7 +162,7 @@ const makePopulateBuilder = () => {
   return jest.fn(() => builder);
 };
 
-// Minimal strapi-shaped object that satisfies the unit.setup.js global setter.
+// Minimal strapi-shaped object that satisfies the unit-test-utils/jest-setup.js global setter.
 // Used by handlers that reference bare `global.strapi` (singleGetHandler).
 const makeMinimalGlobalStrapi = (dbOverrides?: Record<string, unknown>): Core.Strapi =>
   ({

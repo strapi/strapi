@@ -1,10 +1,8 @@
 import { describe, test, expect, vi } from 'vitest';
-/* eslint-disable import/no-relative-packages */
-// @ts-expect-error - test purposes
-import createContext from '../../../../../../../tests/helpers/create-context';
+import createContext from 'unit-test-utils/create-context';
 import adminAuthStrategy from '../admin';
 
-// Vitest counterpart of tests/helpers/create-session-manager-mock (which relies on the `jest` global)
+// Vitest counterpart of unit-test-utils/create-session-manager-mock (which relies on the `jest` global)
 const createMockSessionManager = (originApiOverrides = {}) => {
   const originApi = {
     generateRefreshToken: vi.fn(),

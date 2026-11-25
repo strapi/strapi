@@ -19,7 +19,7 @@ type I18nMock = { locales: Array<{ code: string; name: string }> } | undefined;
 const createKeyStatisticsStrapi = (i18n: I18nMock) => {
   const count = vi.fn(async () => 0);
 
-  // getService resolves admin services from the global strapi (see tests/setup/unit.setup.js)
+  // getService resolves admin services from the global strapi (see unit-test-utils/jest-setup.js)
   global.strapi = {
     admin: {
       services: {

@@ -73,7 +73,7 @@ describe('redirectWithAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // unit.setup.js rewrites strapi.service('admin::x') → strapi.admin.services.x
+    // unit-test-utils/jest-setup.js rewrites strapi.service('admin::x') → strapi.admin.services.x
     global.strapi = {
       admin: {
         services: {

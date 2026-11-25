@@ -1,8 +1,6 @@
 import { describe, test, expect, afterEach, vi, type Mock } from 'vitest';
 
-// @ts-expect-error - types are not generated for this file
-// eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
+import createContext from 'unit-test-utils/create-context';
 import authenticatedSessionController from '../authenticated-session';
 
 const setStrapi = (value: object) => {

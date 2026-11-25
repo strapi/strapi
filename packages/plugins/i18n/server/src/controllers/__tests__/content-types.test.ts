@@ -8,7 +8,7 @@ const { ApplicationError } = errors;
 
 const constants = { default: { READ_ACTION: 'read', CREATE_ACTION: 'create' } };
 
-// `global.strapi = …` (tests/setup/unit.setup.js) resolves `strapi.service('admin::x')` from
+// `global.strapi = …` (unit-test-utils/jest-setup.js) resolves `strapi.service('admin::x')` from
 // `strapi.admin.services.x`. Assign `strapi.service` afterwards to mock the services registry.
 const mockAdminServices = (services: Record<string, unknown>) =>
   jest.fn((uid: string) =>

@@ -1,6 +1,4 @@
-// @ts-expect-error - test helper
-// eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
+import createContext from 'unit-test-utils/create-context';
 import controller from '../collection-types';
 
 // Helpers to create fresh mocks per test

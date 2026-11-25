@@ -1,8 +1,6 @@
 import { describe, test, expect, beforeEach, vi, type Mock } from 'vitest';
 import { emitAudit, errors } from '@strapi/utils';
-// @ts-expect-error - types are not generated for this file
-// eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
+import createContext from 'unit-test-utils/create-context';
 import webhooksController from '../webhooks';
 
 vi.mock('@strapi/utils', async () => ({
