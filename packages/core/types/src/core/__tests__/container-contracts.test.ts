@@ -9,6 +9,8 @@ declare const policies: Core.PoliciesRegistry;
 declare const customFields: Core.CustomFieldsRegistry;
 declare const modules: Core.ModulesRegistry;
 declare const auditLogsLifecycle: Modules.AuditLogs.AuditLogsLifecycleService;
+declare const adminServices: Core.Strapi['admin']['services'];
+declare const rawServices: Record<string, unknown>;
 
 type ResolvedHandler = ReturnType<Core.PoliciesRegistry['resolve']>[number]['handler'];
 
@@ -59,4 +61,17 @@ export const containerContractCalls = () => {
     (event: { name: string }) => ({ resource: { type: 'lab' }, details: { name: event.name } }),
     { action: 'lab.updated', shouldRecord: (event: { name: string }) => event.name !== '' }
   );
+
+  // `@strapi/core` registers the raw admin services map, whose values are `unknown` with strict
+  // types, under `admin::`. Other namespaces keep the factory or service input check.
+  services.add('admin::', adminServices);
+  services.add('admin::', rawServices);
+  services.add('admin::', undefined);
+  services.add('plugin::lab', { reader: ({ strapi }) => ({ strapi }), writer: { write() {} } });
+  // @ts-expect-error Plugin services are factories or services.
+  services.add('plugin::lab', rawServices);
+  // @ts-expect-error Plugin services are factories or services, not other values.
+  services.add('plugin::lab', { reader: 'reader' });
+  // @ts-expect-error A namespace known only at runtime keeps the input check.
+  services.add(namespace, rawServices);
 };
