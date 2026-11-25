@@ -215,7 +215,18 @@ const createQueryBuilder = (
     state,
 
     clone() {
-      return createQueryBuilder(uid, db, state);
+      const copy = <T>(value: T): T => (Array.isArray(value) ? ([...value] as T) : value);
+
+      return createQueryBuilder(uid, db, {
+        ...state,
+        select: copy(state.select),
+        where: copy(state.where),
+        joins: copy(state.joins),
+        orderBy: copy(state.orderBy),
+        groupBy: copy(state.groupBy),
+        increments: copy(state.increments),
+        decrements: copy(state.decrements),
+      });
     },
 
     select(args) {
@@ -473,12 +484,18 @@ const createQueryBuilder = (
       const originalType = state.type;
 
       // Build the inner SELECT from a clone that stays `select`, so the outer write
-      // state is never mutated. clone() shallow-merges state (shared where/joins,
-      // new alias) — preserve the original alias because joins were already baked
-      // against it. The clone inherits processed: true and must only read shared arrays.
+      // state is never mutated. clone() gets a new alias — preserve the original one
+      // because joins were already baked against it. The clone inherits processed: true.
       const sub = this.clone();
       sub.alias = this.alias;
-      // The clone shares these arrays: on the inner SELECT they would make it an UPDATE
+      // Postgres rejects FOR UPDATE with DISTINCT, and Postgres/MySQL reject ORDER BY on a
+      // column missing from the DISTINCT select list. Ordering only matters when it picks which
+      // rows are written: with a limit, an offset or first().
+      sub.state.forUpdate = false;
+      if (state.limit == null && state.offset == null && !state.first) {
+        sub.state.orderBy = [];
+      }
+      // The inner SELECT must not carry counters meant for the outer write.
       sub.state.increments = [];
       sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
@@ -525,7 +542,6 @@ const createQueryBuilder = (
 
       const scopeType = isScoped() && isScopedType(state.type) ? state.type : null;
 
-      // Copy instead of push: clones share the state.where array, so a push would scope them twice
       if (scopeType) {
         state.where = [...state.where, ...db.unstable_scopes.where({ uid, meta, type: scopeType })];
       }
