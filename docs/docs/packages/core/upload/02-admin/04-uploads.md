@@ -103,7 +103,7 @@ The pool never marks an aborted row. Whoever aborts also dispatches the matching
 | `file:error`      | The row goes to `error`, with `tooLarge` when the details name a size limit.                                                                 |
 | `stream:complete` | Becomes the result of the mutation when its `data` is not empty. Otherwise the mutation returns empty `data` and `errors`.                   |
 
-The rows open with size 0, so `reportsByteProgress` is false and the dialog header uses `selectCountBasedProgress` instead of the byte-weighted `selectAggregateProgress`. The server already throttles `file:progress`, so this flow does not batch it. A failed response or a network error dispatches `setUploadFailed`, which marks every `pending` or `uploading` row as `error`. An abort returns an error and leaves the rows to `cancelUpload`. This flow does not refresh the token on a 401.
+`uploadFromUrls` opens the batch without `fileSizes`, so the rows start at size 0, `reportsByteProgress` is false, and the dialog header uses `selectCountBasedProgress` instead of the byte-weighted `selectAggregateProgress`. The server already throttles `file:progress`, so this flow does not batch it. A failed response or a network error dispatches `setUploadFailed`, which marks every `pending` or `uploading` row as `error`. An abort returns an error and leaves the rows to `cancelUpload`. This flow does not refresh the token on a 401.
 
 ## The progress store
 
