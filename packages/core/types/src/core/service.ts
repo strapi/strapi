@@ -45,7 +45,7 @@ export type ServiceLookupName = SuggestedString<RegisteredServiceUID, UID.Servic
  */
 export type ServiceMap = IsStrict extends false
   ? Record<string, Service>
-  : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, unknown>;
+  : Readonly<RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, unknown>>;
 
 /**
  * A UID accepted by {@link ServiceFactory}. With strict types enabled, only registered UIDs: a
