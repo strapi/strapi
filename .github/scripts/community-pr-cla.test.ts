@@ -950,6 +950,19 @@ describe('processUnsignedClaPRs', () => {
     assert.equal(results[0].error, 'closed, but: linear down');
   });
 
+  it('retries onClosed once, since a closed PR is never seen again', async () => {
+    const { github } = fakeGithub([{ number: 1, comments: [botComment(40), reminded(25)] }]);
+    let attempts = 0;
+    const results = await run(github, {
+      onClosed: async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error('linear down');
+      },
+    });
+    assert.equal(attempts, 2);
+    assert.equal(results[0].error, undefined);
+  });
+
   it('processes nothing when `only` is an empty list', async () => {
     const { github, calls } = fakeGithub([
       { number: 1, comments: [botComment(20)] },

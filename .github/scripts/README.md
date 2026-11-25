@@ -142,7 +142,7 @@ A PR closed by someone else, or by the lifecycle flow, has no CLA close notice, 
 
 A PR with 250 commits or more is skipped and logged: GitHub doesn't list more than that, so the workflow can't tell what blocks the check.
 
-A failure on one PR (for example, a locked conversation, or a Linear error after the close) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed. If `LINEAR_API_KEY` or a team id is missing, the run logs that it didn't sync Linear.
+A failure on one PR (for example, a locked conversation, or a Linear error after the close, which is retried once) is logged and the run moves on to the next PR. The job fails at the end, listing the PRs that failed. If `LINEAR_API_KEY` or a team id is missing, the run logs that it didn't sync Linear.
 
 ### Settings
 

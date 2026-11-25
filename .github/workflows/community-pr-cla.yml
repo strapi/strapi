@@ -29,6 +29,11 @@ on:
         type: string
         required: false
 
+# A manual run never overlaps the cron: both would read the comments before either one posts.
+concurrency:
+  group: community-pr-cla
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:

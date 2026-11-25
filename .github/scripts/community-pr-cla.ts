@@ -831,10 +831,15 @@ async function closeWithNotice(opts: ProcessOptions & { pr: OpenPR; claUrl: stri
   } catch (error) {
     problems.push(`the close notice could not be posted, post it by hand (${errorMessage(error)})`);
   }
+  // A closed PR isn't seen by later runs, so this is the only chance to sync: try twice.
   try {
     await opts.onClosed?.(pr.number);
-  } catch (error) {
-    problems.push(errorMessage(error));
+  } catch {
+    try {
+      await opts.onClosed?.(pr.number);
+    } catch (error) {
+      problems.push(errorMessage(error));
+    }
   }
   if (problems.length) throw new Error(`closed, but: ${problems.join('; ')}`);
 }
