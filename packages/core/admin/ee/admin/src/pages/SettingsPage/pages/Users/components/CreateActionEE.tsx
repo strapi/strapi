@@ -34,7 +34,7 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
           <Tooltip
             label={formatMessage(
               {
-                id: 'Settings.application.admin-seats.at-limit-tooltip',
+                id: 'Settings.application.admin-users.at-limit-tooltip',
                 defaultMessage:
                   'Your license user limit is reached. Remove a user or {isGrowth, select, true {manage your seats} other {contact sales}}.',
               },

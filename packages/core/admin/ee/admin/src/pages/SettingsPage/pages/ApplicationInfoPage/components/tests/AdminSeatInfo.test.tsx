@@ -76,6 +76,17 @@ describe('<AdminSeatInfo />', () => {
     expect(getByText('42')).toBeInTheDocument();
   });
 
+  test("uses this instance's limit when the registry doesn't know the contracted users", () => {
+    mockLicense({
+      adminUsersAcrossInstances: { ...ADMIN_USERS, activeUsers: 12, contractedUsers: null },
+    });
+
+    const { getByText } = render(<AdminSeatInfoEE />);
+
+    expect(getByText('12/10')).toBeInTheDocument();
+    expect(getByText('2 over')).toBeInTheDocument();
+  });
+
   test("shows this instance's count without the caption until the registry has answered", () => {
     mockLicense({ enforcementUserCount: 4, permittedSeats: 3 });
 

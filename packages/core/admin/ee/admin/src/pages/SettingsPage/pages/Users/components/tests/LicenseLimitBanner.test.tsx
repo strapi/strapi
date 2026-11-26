@@ -115,6 +115,30 @@ describe('<LicenseLimitBanner />', () => {
     ).toBeInTheDocument();
   });
 
+  test("uses this instance's limit when the registry doesn't know the contracted users", () => {
+    mockLicense(across(12, null));
+
+    const { getByText } = render(<LicenseLimitBanner />);
+
+    expect(
+      getByText(
+        /^12 unique users are active across your environments, but your license includes 10 users/
+      )
+    ).toBeInTheDocument();
+  });
+
+  test("uses this instance's count when it blocks invites but the registry's count doesn't", () => {
+    // The registry's count is from before a user was invited here
+    mockLicense({ enforcementUserCount: 10, shouldStopCreate: true, ...across(9) });
+
+    const { getByText } = render(<LicenseLimitBanner />);
+
+    expect(getByText("You're using all the users included in your license")).toBeInTheDocument();
+    expect(
+      getByText(/^10 users are active in this environment, which is the number included/)
+    ).toBeInTheDocument();
+  });
+
   test('renders nothing when the license sets no limit', () => {
     mockLicense({ permittedSeats: null, ...across(40, null) });
 

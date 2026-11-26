@@ -57,6 +57,38 @@ const getMessage = ({
   isAcrossInstances: boolean;
 }) => MESSAGES[isAcrossInstances ? 'across' : 'instance'][isOverLimit ? 'over' : 'at'];
 
+type License = NonNullable<ReturnType<typeof useLicenseLimits>['license']>;
+
+/**
+ * The count and limit the banner reports, or `null` when the limit is not reached. The count
+ * across all instances comes first. This instance's count comes next, so a disabled invite button
+ * (`shouldStopCreate`) always has a banner, even when the registry's count is missing or stale.
+ */
+const getReachedLimit = ({
+  adminUsersAcrossInstances,
+  enforcementUserCount,
+  permittedSeats,
+}: License) => {
+  // `permittedSeats` is typed `number` but is null at runtime without a seat limit
+  const instanceLimit: number | null = permittedSeats ?? null;
+
+  if (adminUsersAcrossInstances) {
+    // The registry may not know how many users the license includes: use this instance's limit
+    const limit = adminUsersAcrossInstances.contractedUsers ?? instanceLimit;
+
+    if (limit !== null && adminUsersAcrossInstances.activeUsers >= limit) {
+      return { count: adminUsersAcrossInstances.activeUsers, limit, isAcrossInstances: true };
+    }
+  }
+
+  // `enforcementUserCount` counts at least the users `shouldStopCreate` counts
+  if (instanceLimit !== null && enforcementUserCount >= instanceLimit) {
+    return { count: enforcementUserCount, limit: instanceLimit, isAcrossInstances: false };
+  }
+
+  return null;
+};
+
 /**
  * Shown on the Users page when the license limit is reached or exceeded. Uses the count across
  * all instances when the license registry sent one, otherwise this instance's count.
@@ -70,19 +102,14 @@ export const LicenseLimitBanner = () => {
     return null;
   }
 
-  const { adminUsersAcrossInstances, enforcementUserCount, permittedSeats } = license;
-  const count = adminUsersAcrossInstances?.activeUsers ?? enforcementUserCount;
-  const limit = adminUsersAcrossInstances
-    ? adminUsersAcrossInstances.contractedUsers
-    : permittedSeats;
+  const reachedLimit = getReachedLimit(license);
 
-  if (!limit || count < limit) {
+  if (!reachedLimit) {
     return null;
   }
 
+  const { count, limit, isAcrossInstances } = reachedLimit;
   const isOverLimit = count > limit;
-  // Without a count from the license registry, the banner only knows about this instance
-  const isAcrossInstances = Boolean(adminUsersAcrossInstances);
   const isGrowth =
     getLicensedPlan({
       licenseStatus: license.licenseStatus,

@@ -40,9 +40,10 @@ export const AdminSeatInfoEE = () => {
   const instanceLimit = permittedSeats ?? seats;
 
   // The count across all instances when the license registry sent one, otherwise this instance's.
+  // The registry may not know how many users the license includes: use this instance's limit then.
   const count = adminUsersAcrossInstances?.activeUsers ?? enforcementUserCount;
   const limit = adminUsersAcrossInstances
-    ? adminUsersAcrossInstances.contractedUsers
+    ? (adminUsersAcrossInstances.contractedUsers ?? instanceLimit ?? null)
     : instanceLimit || null;
 
   if (!adminUsersAcrossInstances && !limit) {
@@ -56,13 +57,13 @@ export const AdminSeatInfoEE = () => {
       <Flex gap={2} alignItems="center" tag="dt">
         <Typography variant="sigma" textColor="neutral600">
           {formatMessage({
-            id: 'Settings.application.admin-seats',
+            id: 'Settings.application.admin-users',
             defaultMessage: 'Admin users',
           })}
         </Typography>
         <Tooltip
           label={formatMessage({
-            id: 'Settings.application.admin-seats.tooltip',
+            id: 'Settings.application.admin-users.tooltip',
             defaultMessage:
               'Unique active admin users across every instance using this license. Updated at each license check and when users are added or removed.',
           })}
@@ -79,7 +80,7 @@ export const AdminSeatInfoEE = () => {
             <Badge size="S" variant="danger">
               {formatMessage(
                 {
-                  id: 'Settings.application.admin-seats.over',
+                  id: 'Settings.application.admin-users.over',
                   defaultMessage: '{count} over',
                 },
                 { count: overBy }
@@ -91,7 +92,7 @@ export const AdminSeatInfoEE = () => {
           <Typography variant="pi" textColor="neutral500">
             {formatMessage(
               {
-                id: 'Settings.application.admin-seats.caption',
+                id: 'Settings.application.admin-users.caption',
                 defaultMessage:
                   'Across all environments · {count} in this environment · updated {updatedAt}',
               },

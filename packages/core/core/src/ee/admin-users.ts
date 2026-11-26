@@ -47,12 +47,14 @@ const reportActiveAdminUsers = async (strapi: Core.Strapi, getLicenseKey: GetLic
   }
 };
 
-let isWatchingAdminUsers = false;
+// Per Strapi instance, so another instance in the same process (tests, programmatic use) also
+// subscribes on its own database
+const watchedStrapis = new WeakSet<Core.Strapi>();
 
 /** Reports the admin users again shortly after one is created, (de)activated, renamed or deleted. */
 const watchAdminUsers = (strapi: Core.Strapi, getLicenseKey: GetLicenseKey) => {
-  if (isWatchingAdminUsers) return;
-  isWatchingAdminUsers = true;
+  if (watchedStrapis.has(strapi)) return;
+  watchedStrapis.add(strapi);
 
   let timer: NodeJS.Timeout | undefined;
   const scheduleReport = () => {

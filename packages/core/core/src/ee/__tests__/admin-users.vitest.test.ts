@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { getAdminUsersAcrossInstances } from '../admin-users';
+import { getAdminUsersAcrossInstances, watchAdminUsers } from '../admin-users';
 
 const NOW = '2026-11-13T12:00:00.000Z';
 const HOUR = 60 * 60 * 1000;
@@ -62,5 +62,24 @@ describe('getAdminUsersAcrossInstances', () => {
     });
 
     await expect(getAdminUsersAcrossInstances({ strapi })).resolves.toBeNull();
+  });
+});
+
+describe('watchAdminUsers', () => {
+  const createWatchedStrapi = () => ({ db: { lifecycles: { subscribe: vi.fn() } } }) as any;
+
+  it('subscribes once per Strapi instance', () => {
+    const first = createWatchedStrapi();
+    const second = createWatchedStrapi();
+
+    watchAdminUsers(first, () => 'key');
+    watchAdminUsers(first, () => 'key');
+    watchAdminUsers(second, () => 'key');
+
+    expect(first.db.lifecycles.subscribe).toHaveBeenCalledTimes(1);
+    expect(second.db.lifecycles.subscribe).toHaveBeenCalledTimes(1);
+    expect(second.db.lifecycles.subscribe).toHaveBeenCalledWith(
+      expect.objectContaining({ models: ['admin::user'] })
+    );
   });
 });
