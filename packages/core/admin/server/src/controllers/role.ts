@@ -40,7 +40,10 @@ export default {
 
     const roleService = getService('role');
 
-    const role = await save(() => roleService.create(body));
+    const role = await save(
+      () => roleService.create(body),
+      (created) => roleService.deleteByIds([created.id])
+    );
     const sanitizedRole = roleService.sanitizeRole(role) as Omit<AdminRole, 'users' | 'permission'>;
 
     ctx.created({ data: sanitizedRole } satisfies Create.Response);

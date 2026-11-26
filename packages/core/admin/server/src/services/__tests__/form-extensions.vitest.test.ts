@@ -301,8 +301,9 @@ describe('Form extensions service', () => {
     expect(teamsAfterSave).toHaveBeenCalled();
     // The server log names each failing plugin with its error; clients get a generic 500
     expect(logError).toHaveBeenCalledWith(
-      'admin::form-extensions: the afterSave step of "spaces" failed after core saved entity 7',
-      { error: expect.objectContaining({ message: 'spaces failed' }) }
+      expect.stringMatching(
+        /^admin::form-extensions: the afterSave step of "spaces" failed after core saved entity 7: Error: spaces failed\n\s+at /
+      )
     );
     expect(logError).toHaveBeenCalledTimes(2);
     expect(error.message).toBe(
@@ -313,6 +314,61 @@ describe('Form extensions service', () => {
       'spaces failed',
       'labels failed',
     ]);
+  });
+
+  test('deletes a created entity when an afterSave fails, and still answers a server error', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        afterSave() {
+          throw new Error('spaces failed');
+        },
+      },
+    });
+    const undo = vi.fn();
+
+    const { save } = await formExtensions.internal_prepare('role', { body: {} });
+
+    await expect(save(() => saveRole({}), undo)).rejects.toThrow(
+      'the afterSave step of "spaces" failed after core saved entity 7, which core deleted'
+    );
+    expect(undo).toHaveBeenCalledWith({ id: 7 });
+  });
+
+  test('logs a failed delete and answers the afterSave error', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', {
+      spaces: {
+        afterSave() {
+          throw new Error('spaces failed');
+        },
+      },
+    });
+    const undo = vi.fn().mockRejectedValue(new Error('delete failed'));
+
+    const { save } = await formExtensions.internal_prepare('role', { body: {} });
+    const error = await save(() => saveRole({}), undo).catch((e) => e);
+
+    expect(error.message).toBe(
+      'admin::form-extensions: the afterSave step of "spaces" failed after core saved entity 7'
+    );
+    expect(error.cause).toEqual(expect.objectContaining({ message: 'spaces failed' }));
+    expect(logError).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'admin::form-extensions: could not delete entity 7 after its afterSave failed: Error: delete failed'
+      )
+    );
+  });
+
+  test('does not delete the entity when every afterSave succeeds', async () => {
+    const formExtensions = formExtensionsService();
+    formExtensions.unstable_addInputParams('role', { spaces: { afterSave: vi.fn() } });
+    const undo = vi.fn();
+
+    const { save } = await formExtensions.internal_prepare('role', { body: {} });
+
+    await expect(save(() => saveRole({}), undo)).resolves.toEqual({ id: 7 });
+    expect(undo).not.toHaveBeenCalled();
   });
 
   test('refuses a validate step that returns a value instead of throwing', async () => {
@@ -334,6 +390,21 @@ describe('Form extensions service', () => {
       formExtensions.unstable_addInputParams('role', {
         // @ts-expect-error - a yup schema
         spaces: { schema: { validate: () => true } },
+      })
+    ).toThrow('the schema of "spaces" must be a Zod schema');
+  });
+
+  test.each([
+    ['a factory that returns nothing', () => undefined],
+    ['null', null],
+    ['false', false],
+  ])('refuses %s as a schema', (_, schema) => {
+    const formExtensions = formExtensionsService();
+
+    expect(() =>
+      formExtensions.unstable_addInputParams('role', {
+        // @ts-expect-error - not a Zod schema
+        spaces: { schema },
       })
     ).toThrow('the schema of "spaces" must be a Zod schema');
   });

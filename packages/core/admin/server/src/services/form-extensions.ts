@@ -38,9 +38,18 @@ interface FormInputParam<TSchema extends z.ZodType = z.ZodType> {
 
 type ResolvedInputParam = Omit<FormInputParam, 'schema'> & { schema?: z.ZodType };
 
+/**
+ * `undo` (create only) removes the entity core just created when an `afterSave` fails, so the
+ * request can be sent again: a kept entity would make it fail as a duplicate name or email.
+ */
 type Save = <TEntity extends { id: Data.ID } | null>(
-  saveEntity: () => Promise<TEntity>
+  saveEntity: () => Promise<TEntity>,
+  undo?: (entity: NonNullable<TEntity>) => Promise<unknown>
 ) => Promise<TEntity>;
+
+// The stack starts with the message
+const describeError = (error: unknown) =>
+  error instanceof Error ? (error.stack ?? error.message) : String(error);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -99,7 +108,7 @@ const formExtensionsService = () => {
 
       const resolvedSchema = typeof schema === 'function' ? schema(z) : schema;
 
-      if (resolvedSchema && typeof resolvedSchema.safeParseAsync !== 'function') {
+      if (schema !== undefined && typeof resolvedSchema?.safeParseAsync !== 'function') {
         throw new Error(
           `unstable_addInputParams: the schema of "${pluginId}" must be a Zod schema, from \`z\` in @strapi/utils or the factory argument`
         );
@@ -198,7 +207,7 @@ const formExtensionsService = () => {
 
     // Not one transaction with core's save: inside one, the entity manager could no longer retry
     // a deadlock, for example between two admins changing the roles of users who share one
-    const save: Save = async (saveEntity) => {
+    const save: Save = async (saveEntity, undo) => {
       const entity = await saveEntity();
 
       if (entity) {
@@ -212,27 +221,44 @@ const formExtensionsService = () => {
           }
         }
 
+        if (failures.length === 0) {
+          return entity;
+        }
+
+        // The logger prints the message only, so each plugin's reason goes in it
         for (const { pluginId, error } of failures) {
           strapi.log.error(
-            `admin::form-extensions: the afterSave step of "${pluginId}" failed after core saved entity ${entity.id}`,
-            { error }
+            `admin::form-extensions: the afterSave step of "${pluginId}" failed after core saved entity ${entity.id}: ${describeError(error)}`
           );
         }
 
-        if (failures.length > 0) {
-          // Never a 4xx: the entity is saved, and a client retrying a 400 would save it twice
-          throw new Error(
-            `admin::form-extensions: the afterSave step of ${failures
-              .map(({ pluginId }) => `"${pluginId}"`)
-              .join(', ')} failed after core saved entity ${entity.id}`,
-            {
-              cause:
-                failures.length === 1
-                  ? failures[0].error
-                  : new AggregateError(failures.map(({ error }) => error)),
-            }
-          );
+        let deleted = false;
+
+        if (undo) {
+          try {
+            await undo(entity as NonNullable<typeof entity>);
+            deleted = true;
+          } catch (error) {
+            strapi.log.error(
+              `admin::form-extensions: could not delete entity ${entity.id} after its afterSave failed: ${describeError(error)}`
+            );
+          }
         }
+
+        // Never a 4xx: every check passed before the save, and on update the entity stays saved
+        throw new Error(
+          `admin::form-extensions: the afterSave step of ${failures
+            .map(({ pluginId }) => `"${pluginId}"`)
+            .join(
+              ', '
+            )} failed after core saved entity ${entity.id}${deleted ? ', which core deleted' : ''}`,
+          {
+            cause:
+              failures.length === 1
+                ? failures[0].error
+                : new AggregateError(failures.map(({ error }) => error)),
+          }
+        );
       }
 
       return entity;

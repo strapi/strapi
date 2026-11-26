@@ -3,6 +3,7 @@ import { createAuthRequest } from 'api-tests/request';
 import { createUtils } from 'api-tests/utils';
 import { errors, z as zod } from '@strapi/utils';
 import type { Core } from '@strapi/types';
+import { formRouteIds, matchesEntity, type FormRouteIdKind } from './utils/form-route-ids';
 
 /**
  * Plugins send their own values with the role, user and API token forms, under
@@ -40,6 +41,13 @@ describe('Admin form extensions (api)', () => {
     afterSave,
   };
 
+  // Every form's beforeSave refuses this value with a ValidationError without field errors
+  const refuseBeforeSave = (values?: { space?: string }) => {
+    if (values?.space === 'refused-before-save') {
+      throw new errors.ValidationError('Refused before save');
+    }
+  };
+
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -50,9 +58,7 @@ describe('Admin form extensions (api)', () => {
       spaces: {
         ...spacesParam,
         beforeSave: ({ values, data }) => {
-          if (values?.space === 'refused-before-save') {
-            throw new errors.ValidationError('Refused before save');
-          }
+          refuseBeforeSave(values);
 
           return values?.space === 'bad-name' ? { ...data, name: '' } : data;
         },
@@ -63,6 +69,8 @@ describe('Admin form extensions (api)', () => {
         ...spacesParam,
         // A plugin can change the core values before core checks and saves them
         beforeSave: ({ values, data }) => {
+          refuseBeforeSave(values);
+
           if (values?.space === 'bad-email') {
             return { ...data, email: 'not an email' };
           }
@@ -75,6 +83,8 @@ describe('Admin form extensions (api)', () => {
       spaces: {
         ...spacesParam,
         beforeSave: ({ values, data }) => {
+          refuseBeforeSave(values);
+
           if (values?.space === 'padded') {
             return { ...data, name: `  ${prefix}_padded_token  ` };
           }
@@ -145,50 +155,6 @@ describe('Admin form extensions (api)', () => {
       );
     });
 
-    test('refuses values that fail the plugin schema or check, and saves nothing', async () => {
-      const invalid = await createRole({
-        name: `${prefix}_invalid`,
-        plugins: { spaces: { space: '' } },
-      });
-      const refused = await createRole({
-        name: `${prefix}_refused`,
-        plugins: { spaces: { space: 'forbidden' } },
-      });
-
-      expect(invalid.statusCode).toBe(400);
-      expect(invalid.body.error.details.errors[0].path).toEqual(['plugins', 'spaces', 'space']);
-      expect(refused.statusCode).toBe(400);
-      // A ValidationError without field errors is reported on the plugin's field
-      expect(refused.body.error.details.errors[0].path).toEqual(['plugins', 'spaces']);
-      expect(afterSave).not.toHaveBeenCalled();
-    });
-
-    test('answers the afterSave error, with the entity saved', async () => {
-      afterSave.mockRejectedValue(new Error('Plugin save failed'));
-
-      const res = await createRole({
-        name: `${prefix}_after_save_failed`,
-        plugins: { spaces: { space: 'france' } },
-      });
-
-      expect(res.statusCode).toBe(500);
-      // Core does not wrap the save in a transaction, so its deadlock retry keeps working
-      const saved = await strapi.db
-        .query('admin::role')
-        .findOne({ where: { name: `${prefix}_after_save_failed` } });
-
-      expect(saved).not.toBeNull();
-      roleIds.push(saved.id);
-    });
-
-    test('refuses the values of a plugin that added no params', async () => {
-      const res = await createRole({ name: `${prefix}_unknown`, plugins: { other: {} } });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe('Invalid key plugins.other');
-      expect(res.body.error.details.errors[0].path).toEqual(['plugins', 'other']);
-    });
-
     test('takes plugins {} and null as no values, and refuses a value that is not an object', async () => {
       const empty = await createRole({ name: `${prefix}_empty`, plugins: {} });
       const nullValue = await createRole({ name: `${prefix}_null`, plugins: null });
@@ -200,17 +166,6 @@ describe('Admin form extensions (api)', () => {
       expect(notAnObject.body.error.details.errors[0].path).toEqual(['plugins']);
     });
 
-    test('reports a beforeSave ValidationError without field errors on the plugin field', async () => {
-      const res = await createRole({
-        name: `${prefix}_refused_before_save`,
-        plugins: { spaces: { space: 'refused-before-save' } },
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.details.errors[0].path).toEqual(['plugins', 'spaces']);
-      expect(afterSave).not.toHaveBeenCalled();
-    });
-
     test('core checks the role values beforeSave returns', async () => {
       const res = await createRole({
         name: `${prefix}_renamed_by_plugin`,
@@ -219,24 +174,6 @@ describe('Admin form extensions (api)', () => {
 
       expect(res.statusCode).toBe(400);
       expect(afterSave).not.toHaveBeenCalled();
-    });
-
-    test('answers 500 when afterSave refuses with a ValidationError, the role being saved', async () => {
-      afterSave.mockRejectedValue(new errors.ValidationError('Too late to refuse'));
-
-      const res = await createRole({
-        name: `${prefix}_late_refusal`,
-        plugins: { spaces: { space: 'france' } },
-      });
-
-      expect(res.statusCode).toBe(500);
-
-      const saved = await strapi.db
-        .query('admin::role')
-        .findOne({ where: { name: `${prefix}_late_refusal` } });
-
-      expect(saved).not.toBeNull();
-      roleIds.push(saved.id);
     });
   });
 
@@ -288,24 +225,21 @@ describe('Admin form extensions (api)', () => {
     });
 
     test('refuses core values from beforeSave that core would refuse', async () => {
+      const invited = await rq({
+        method: 'POST',
+        url: '/admin/users',
+        body: { firstname: 'Ana', email: `ana@${prefix}.test`, roles: [keptRoleId] },
+      });
+      afterSave.mockReset();
+
       const res = await rq({
         method: 'PUT',
-        url: '/admin/users/1',
+        url: `/admin/users/${invited.body.data.id}`,
         body: { firstname: 'Renamed', plugins: { spaces: { space: 'bad-email' } } },
       });
 
       expect(res.statusCode).toBe(400);
       expect(afterSave).not.toHaveBeenCalled();
-    });
-
-    test('refuses an unknown plugin key', async () => {
-      const res = await rq({
-        method: 'PUT',
-        url: '/admin/users/1',
-        body: { plugins: { other: {} } },
-      });
-
-      expect(res.statusCode).toBe(400);
     });
 
     // Same scenario as the concurrent role removals test in admin-user, which deadlocks on
@@ -452,28 +386,9 @@ describe('Admin form extensions (api)', () => {
 
       expect(badType.statusCode).toBe(400);
     });
-
-    test('refuses an unknown plugin key', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/admin/api-tokens',
-        body: { name: `${prefix}_unknown_token`, type: 'read-only', plugins: { other: {} } },
-      });
-
-      expect(res.statusCode).toBe(400);
-    });
   });
 
   describe('what plugins see on each form route', () => {
-    const routeIds = (id: number) => ({
-      id: `${id}`,
-      zeroPadded: `0${id}`,
-      missing: '999999',
-      exponent: `${id}e0`,
-      hex: '0x0A',
-      letters: 'abc',
-    });
-
     const withPlugins = (body: Record<string, unknown>) => ({
       ...body,
       plugins: { spaces: { space: 'france' } },
@@ -513,12 +428,15 @@ describe('Admin form extensions (api)', () => {
     test.each(routes)('$name update: plugins only see the id core matched', async (route) => {
       const targetId = (await route.create()).body.data.id;
 
-      for (const [kind, id] of Object.entries(routeIds(targetId))) {
+      for (const [kind, id] of Object.entries(formRouteIds(targetId)) as [
+        FormRouteIdKind,
+        string,
+      ][]) {
         validatedIds.mockReset();
         afterSave.mockReset();
 
         const res = await rq({ method: 'PUT', url: route.path(id), body: withPlugins(route.body) });
-        const matched = kind === 'id' || kind === 'zeroPadded';
+        const matched = matchesEntity(kind);
 
         expect({ kind, status: res.statusCode }).toEqual({ kind, status: matched ? 200 : 404 });
 
@@ -563,34 +481,185 @@ describe('Admin form extensions (api)', () => {
       expect(res.statusCode).toBe(400);
       expect(validatedIds).not.toHaveBeenCalled();
     });
+  });
 
-    test('an afterSave failure on user and token create answers 500, the entity being saved', async () => {
-      afterSave.mockRejectedValue(new Error('Plugin save failed'));
+  describe('every form route', () => {
+    const target = { roleId: 0, userId: 0, tokenId: 0 };
+    let count = 0;
+    const unique = () => {
+      count += 1;
+      return `${prefix}_route_${count}`;
+    };
 
-      const user = await rq({
+    type Body = Record<string, unknown>;
+
+    const routes: Array<{
+      name: string;
+      method: 'POST' | 'PUT';
+      url: () => string;
+      body: () => Body;
+      // Whether the change `body` asks for is in the database
+      isSaved: (body: Body) => Promise<boolean>;
+    }> = [
+      {
+        name: 'POST /admin/roles',
         method: 'POST',
-        url: '/admin/users',
-        body: withPlugins({
-          firstname: 'Late',
-          email: `late@${prefix}.test`,
+        url: () => '/admin/roles',
+        body: () => ({ name: unique() }),
+        isSaved: async ({ name }) =>
+          (await strapi.db.query('admin::role').findOne({ where: { name } })) !== null,
+      },
+      {
+        name: 'PUT /admin/roles/:id',
+        method: 'PUT',
+        url: () => `/admin/roles/${target.roleId}`,
+        body: () => ({ description: unique() }),
+        isSaved: async ({ description }) =>
+          (await strapi.db
+            .query('admin::role')
+            .findOne({ where: { id: target.roleId, description } })) !== null,
+      },
+      {
+        name: 'POST /admin/users',
+        method: 'POST',
+        url: () => '/admin/users',
+        body: () => ({
+          firstname: 'Route',
+          email: `${unique()}@${prefix}.test`,
           roles: [keptRoleId],
         }),
-      });
-      const token = await rq({
+        isSaved: async ({ email }) =>
+          (await strapi.db.query('admin::user').findOne({ where: { email } })) !== null,
+      },
+      {
+        name: 'PUT /admin/users/:id',
+        method: 'PUT',
+        url: () => `/admin/users/${target.userId}`,
+        body: () => ({ firstname: unique() }),
+        isSaved: async ({ firstname }) =>
+          (await strapi.db
+            .query('admin::user')
+            .findOne({ where: { id: target.userId, firstname } })) !== null,
+      },
+      {
+        name: 'POST /admin/api-tokens',
         method: 'POST',
-        url: '/admin/api-tokens',
-        body: withPlugins({ name: `${prefix}_late_token`, type: 'read-only' }),
-      });
+        url: () => '/admin/api-tokens',
+        body: () => ({ name: unique(), type: 'read-only' }),
+        isSaved: async ({ name }) =>
+          (await strapi.db.query('admin::api-token').findOne({ where: { name } })) !== null,
+      },
+      {
+        name: 'PUT /admin/api-tokens/:id',
+        method: 'PUT',
+        url: () => `/admin/api-tokens/${target.tokenId}`,
+        body: () => ({ description: unique() }),
+        isSaved: async ({ description }) =>
+          (await strapi.db
+            .query('admin::api-token')
+            .findOne({ where: { id: target.tokenId, description } })) !== null,
+      },
+    ];
 
-      expect([user.statusCode, token.statusCode]).toEqual([500, 500]);
-      expect(
-        await strapi.db.query('admin::user').findOne({ where: { email: `late@${prefix}.test` } })
-      ).not.toBeNull();
-      expect(
-        await strapi.db
-          .query('admin::api-token')
-          .findOne({ where: { name: `${prefix}_late_token` } })
-      ).not.toBeNull();
+    const send = async (route: (typeof routes)[number], body: Body) => {
+      const res = await rq({ method: route.method, url: route.url(), body });
+
+      if (route.url() === '/admin/roles' && res.body.data?.id) {
+        roleIds.push(res.body.data.id);
+      }
+
+      return res;
+    };
+
+    beforeAll(async () => {
+      target.roleId = (await createRole({ name: unique() })).body.data.id;
+      target.userId = (
+        await rq({
+          method: 'POST',
+          url: '/admin/users',
+          body: { firstname: 'Route', email: `${unique()}@${prefix}.test`, roles: [keptRoleId] },
+        })
+      ).body.data.id;
+      target.tokenId = (
+        await rq({
+          method: 'POST',
+          url: '/admin/api-tokens',
+          body: { name: unique(), type: 'read-only' },
+        })
+      ).body.data.id;
     });
+
+    test.each(routes)(
+      '$name refuses values the schema, validate or beforeSave refuse, and saves nothing',
+      async (route) => {
+        const refusals = [
+          { space: '', path: ['plugins', 'spaces', 'space'] },
+          // A ValidationError without field errors is reported on the plugin's field
+          { space: 'forbidden', path: ['plugins', 'spaces'] },
+          { space: 'refused-before-save', path: ['plugins', 'spaces'] },
+        ];
+
+        for (const { space, path } of refusals) {
+          const body = { ...route.body(), plugins: { spaces: { space } } };
+          const res = await send(route, body);
+
+          expect({
+            space,
+            status: res.statusCode,
+            path: res.body.error?.details?.errors?.[0]?.path,
+          }).toEqual({
+            space,
+            status: 400,
+            path,
+          });
+          expect(await route.isSaved(body)).toBe(false);
+        }
+
+        expect(afterSave).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each(routes)(
+      '$name refuses the values of a plugin that added no params',
+      async (route) => {
+        const body = { ...route.body(), plugins: { spaces: { space: 'france' }, other: {} } };
+        const res = await send(route, body);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toBe('Invalid key plugins.other');
+        expect(res.body.error.details.errors[0].path).toEqual(['plugins', 'other']);
+        expect(await route.isSaved(body)).toBe(false);
+        expect(afterSave).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each(routes)(
+      '$name answers 500 when an afterSave fails, and deletes the entity it created',
+      async (route) => {
+        for (const error of [
+          new Error('Plugin save failed'),
+          new errors.ValidationError('Too late to refuse'),
+        ]) {
+          afterSave.mockReset();
+          afterSave.mockRejectedValueOnce(error);
+          const body = { ...route.body(), plugins: { spaces: { space: 'france' } } };
+
+          const res = await send(route, body);
+
+          expect({ error: error.name, status: res.statusCode }).toEqual({
+            error: error.name,
+            status: 500,
+          });
+          // No transaction, so an update stays saved; a create is deleted, so the client can retry
+          expect(await route.isSaved(body)).toBe(route.method === 'PUT');
+
+          if (route.method === 'POST') {
+            const retried = await send(route, body);
+
+            expect(retried.statusCode).toBe(201);
+          }
+        }
+      }
+    );
   });
 });

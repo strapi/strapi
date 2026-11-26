@@ -1,5 +1,6 @@
 import _, { pick } from 'lodash';
 import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
@@ -58,7 +59,10 @@ export default {
       Object.assign(attributes, { registrationToken: null, isActive: true });
     }
 
-    const createdUser = await save(() => getService('user').create(attributes));
+    const createdUser = await save(
+      () => getService('user').create(attributes),
+      (created: { id: Data.ID }) => getService('user').deleteById(created.id)
+    );
     const userInfo = getService('user').sanitizeUser(createdUser);
 
     // Note: We need to assign manually the registrationToken to the

@@ -41,7 +41,10 @@ export default {
       throw new ApplicationError('Name already taken');
     }
 
-    const apiToken = await save(() => apiTokenService.create(attributes, ctx.state.user));
+    const apiToken = await save(
+      () => apiTokenService.create(attributes, ctx.state.user),
+      (created) => apiTokenService.revoke(created.id)
+    );
     ctx.created({ data: apiToken } satisfies Create.Response);
   },
 

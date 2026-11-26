@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
 import {
   validateRoleCreateInput,
@@ -21,7 +22,10 @@ export default {
 
     const roleService = getService('role');
 
-    const role = await save(() => roleService.create(body));
+    const role = await save(
+      () => roleService.create(body),
+      (created: { id: Data.ID }) => roleService.deleteByIds([created.id])
+    );
     const sanitizedRole = roleService.sanitizeRole(role);
 
     ctx.created({ data: sanitizedRole });

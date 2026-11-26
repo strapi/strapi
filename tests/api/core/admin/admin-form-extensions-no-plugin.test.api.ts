@@ -2,10 +2,11 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
 import { createUtils } from 'api-tests/utils';
 import type { Core } from '@strapi/types';
+import { formRouteIds, matchesEntity, type FormRouteIdKind } from './utils/form-route-ids';
 
 /**
  * The role, user and content API token form routes without any form extension: every answer must
- * match `develop`, except for the changes listed in `expectedStatus`.
+ * match `develop`, except for the changes listed in `expectedFromDevelop`.
  */
 describe('Admin form routes without a plugin (api)', () => {
   let strapi: Core.Strapi;
@@ -21,22 +22,24 @@ describe('Admin form routes without a plugin (api)', () => {
 
   const target = { roleId: 0, userId: 0, tokenId: 0, superAdminRoleId: 0 };
 
-  const ids = (id: number) =>
-    ({
-      id: `${id}`,
-      zeroPadded: `0${id}`,
-      missing: '999999',
-      exponent: `${id}e0`,
-      decimalPoint: `${id}.0`,
-      leadingSpace: ` ${id}`,
-      hex: '0x0A',
-      letters: 'abc',
-    }) as const;
+  type BodyKind =
+    | 'valid'
+    | 'array'
+    | 'unknownKey'
+    | 'emptyPlugins'
+    | 'nullPlugins'
+    | 'stringPlugins'
+    | 'unknownPlugin';
 
-  type IdKind = keyof ReturnType<typeof ids>;
-  type BodyKind = 'valid' | 'array' | 'unknownKey' | 'emptyPlugins';
-
-  const BODY_KINDS: BodyKind[] = ['valid', 'array', 'unknownKey', 'emptyPlugins'];
+  const BODY_KINDS: BodyKind[] = [
+    'valid',
+    'array',
+    'unknownKey',
+    'emptyPlugins',
+    'nullPlugins',
+    'stringPlugins',
+    'unknownPlugin',
+  ];
 
   const withKind = (valid: Record<string, unknown>, kind: BodyKind): unknown => {
     switch (kind) {
@@ -46,6 +49,12 @@ describe('Admin form routes without a plugin (api)', () => {
         return { ...valid, foo: 1 };
       case 'emptyPlugins':
         return { ...valid, plugins: {} };
+      case 'nullPlugins':
+        return { ...valid, plugins: null };
+      case 'stringPlugins':
+        return { ...valid, plugins: 'x' };
+      case 'unknownPlugin':
+        return { ...valid, plugins: { other: {} } };
       default:
         return valid;
     }
@@ -89,26 +98,32 @@ describe('Admin form routes without a plugin (api)', () => {
   type CreateRoute = keyof typeof CREATE_ROUTES;
 
   /**
-   * What `develop` (e5b1020b4e) answers on SQLite, recorded with this matrix. The three update
-   * routes answer the same: core validates the body first, then looks the id up. Only the `id`
-   * and `zeroPadded` rows are compared: the others show what the 404 of `expectedStatus` replaces.
+   * What `develop` (e5b1020b4e) answers on SQLite, recorded with these bodies on the id of an
+   * existing entity. The three update routes answer the same.
    */
-  const DEVELOP_UPDATE: Record<IdKind, Record<BodyKind, number>> = {
-    id: { valid: 200, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    zeroPadded: { valid: 200, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    missing: { valid: 404, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    exponent: { valid: 200, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    decimalPoint: { valid: 200, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    leadingSpace: { valid: 200, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    hex: { valid: 404, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    letters: { valid: 404, array: 400, unknownKey: 400, emptyPlugins: 400 },
+  const DEVELOP_UPDATE: Record<BodyKind, number> = {
+    valid: 200,
+    array: 400,
+    unknownKey: 400,
+    emptyPlugins: 400,
+    nullPlugins: 400,
+    stringPlugins: 400,
+    unknownPlugin: 400,
   };
 
-  // Token create keeps only its own fields, so it ignored unknown keys and `plugins`
   const DEVELOP_CREATE: Record<CreateRoute, Record<BodyKind, number>> = {
-    'POST /admin/roles': { valid: 201, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    'POST /admin/users': { valid: 201, array: 400, unknownKey: 400, emptyPlugins: 400 },
-    'POST /admin/api-tokens': { valid: 201, array: 400, unknownKey: 201, emptyPlugins: 201 },
+    'POST /admin/roles': { ...DEVELOP_UPDATE, valid: 201 },
+    'POST /admin/users': { ...DEVELOP_UPDATE, valid: 201 },
+    // Token create kept only its own fields, so it ignored unknown keys and `plugins`
+    'POST /admin/api-tokens': {
+      valid: 201,
+      array: 400,
+      unknownKey: 201,
+      emptyPlugins: 201,
+      nullPlugins: 201,
+      stringPlugins: 201,
+      unknownPlugin: 201,
+    },
   };
 
   /**
@@ -117,18 +132,27 @@ describe('Admin form routes without a plugin (api)', () => {
    *    SQLite and MySQL matched `7e0`, `7.0` or ` 7` to row 7, and Postgres 16 matched `0x0A`.
    * 2. Checks that need only the id (the entity exists) run before the body is validated, so a
    *    missing id answers 404 whatever the body.
-   * 3. `plugins: {}` means no plugin values: the body is then checked as without it.
+   * 3. `plugins: {}` and `plugins: null` mean no plugin values: the body is checked as without it.
+   * 4. Any other `plugins` value is refused (400), also on token create, which ignored it.
    */
-  const expectedStatus = (idKind: IdKind, bodyKind: BodyKind) => {
-    if (idKind !== 'id' && idKind !== 'zeroPadded') {
-      return 404;
+  const expectedFromDevelop = (develop: Record<BodyKind, number>, bodyKind: BodyKind) => {
+    switch (bodyKind) {
+      case 'emptyPlugins':
+      case 'nullPlugins':
+        return develop.valid;
+      case 'stringPlugins':
+      case 'unknownPlugin':
+        return 400;
+      default:
+        return develop[bodyKind];
     }
-
-    return DEVELOP_UPDATE[idKind][bodyKind === 'emptyPlugins' ? 'valid' : bodyKind];
   };
 
+  const expectedStatus = (idKind: FormRouteIdKind, bodyKind: BodyKind) =>
+    matchesEntity(idKind) ? expectedFromDevelop(DEVELOP_UPDATE, bodyKind) : 404;
+
   const expectedCreateStatus = (route: CreateRoute, bodyKind: BodyKind) =>
-    DEVELOP_CREATE[route][bodyKind === 'emptyPlugins' ? 'valid' : bodyKind];
+    expectedFromDevelop(DEVELOP_CREATE[route], bodyKind);
 
   beforeAll(async () => {
     strapi = await createStrapiInstance();
@@ -167,8 +191,11 @@ describe('Admin form routes without a plugin (api)', () => {
   describe.each(Object.keys(UPDATE_ROUTES) as UpdateRoute[])('%s', (route) => {
     const { path, targetId, body } = UPDATE_ROUTES[route];
 
-    test.each(BODY_KINDS)('answers as develop for each id, with a %s body', async (bodyKind) => {
-      for (const [idKind, id] of Object.entries(ids(targetId())) as [IdKind, string][]) {
+    test.each(BODY_KINDS)('answers each id as expected, with a %s body', async (bodyKind) => {
+      for (const [idKind, id] of Object.entries(formRouteIds(targetId())) as [
+        FormRouteIdKind,
+        string,
+      ][]) {
         const res = await rq({ method: 'PUT', url: path(id), body: withKind(body(), bodyKind) });
 
         expect({ idKind, status: res.statusCode }).toEqual({
@@ -182,20 +209,35 @@ describe('Admin form routes without a plugin (api)', () => {
   describe.each(Object.keys(CREATE_ROUTES) as CreateRoute[])('%s', (route) => {
     const { path, body } = CREATE_ROUTES[route];
 
-    test.each(BODY_KINDS)('answers as develop with a %s body', async (bodyKind) => {
+    test.each(BODY_KINDS)('answers as expected with a %s body', async (bodyKind) => {
       const res = await rq({ method: 'POST', url: path, body: withKind(body(), bodyKind) });
 
       expect(res.statusCode).toBe(expectedCreateStatus(route, bodyKind));
     });
   });
 
-  test('still refuses to edit the Super Admin role', async () => {
+  test.each([
+    { name: 'valid', body: { description: 'matrix' } },
+    // `develop` answered the validation error: "name must be at least 1 characters"
+    { name: 'invalid', body: { name: '' } },
+  ])('still refuses to edit the Super Admin role, with a $name body', async ({ body }) => {
+    const res = await rq({ method: 'PUT', url: `/admin/roles/${target.superAdminRoleId}`, body });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error.message).toBe("Super admin can't be edited.");
+  });
+
+  test.each([
+    { name: 'a value that is not an object', plugins: 'x', path: ['plugins'] },
+    { name: 'an unknown plugin', plugins: { other: {} }, path: ['plugins', 'other'] },
+  ])('refuses $name under plugins with its path', async ({ plugins, path }) => {
     const res = await rq({
-      method: 'PUT',
-      url: `/admin/roles/${target.superAdminRoleId}`,
-      body: { description: 'matrix' },
+      method: 'POST',
+      url: '/admin/api-tokens',
+      body: { name: unique(), type: 'read-only', plugins },
     });
 
     expect(res.statusCode).toBe(400);
+    expect(res.body.error.details.errors[0].path).toEqual(path);
   });
 });

@@ -48,7 +48,10 @@ export default {
       throw new ApplicationError('Email already taken');
     }
 
-    const createdUser = await save(() => getService('user').create(attributes));
+    const createdUser = await save(
+      () => getService('user').create(attributes),
+      (created) => getService('user').deleteById(created.id)
+    );
 
     const userInfo = getService('user').sanitizeUser(createdUser);
 
