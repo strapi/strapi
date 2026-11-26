@@ -71,6 +71,59 @@ not a join table: read relation state through `populate`.
 Check what a test is about through the API it tests. Server errors come back as `TestDataError`
 with Strapi's error name.
 
+### Server scripts
+
+What no route reaches and `queryDb` / `documents` don't cover (transactions, the knex
+connection, the schema inspector, query scopes, lifecycles, document service middlewares, log
+calls) runs in the server, in a **server script**: a CommonJS file next to the test, in a
+`server/` folder, copied into the app before boot.
+
+```js
+// tests/core/database/server/transactions.js
+module.exports = {
+  bootstrap({ strapi }) {}, // optional: runs in the test plugin's bootstrap (lifecycle subscribers)
+  actions: {
+    async getKey({ strapi }) {
+      const [row] = await strapi.db
+        .queryBuilder('strapi::core-store')
+        .select(['key'])
+        .where({ id: 1 })
+        .execute();
+      return row.key;
+    },
+  },
+};
+```
+
+```ts
+scaffold(app) {
+  scaffoldServerScript(app, path.join(__dirname, 'server/transactions.js')); // name: 'transactions'
+},
+// ...
+expect(await runInServer(ctx.server, 'transactions', 'getKey')).toBe('…');
+```
+
+- An action gets `({ strapi, serializeError }, args)` and returns JSON. The module stays loaded
+  for the life of the server, so module variables keep state between actions (a registered scope,
+  captured log calls).
+- An error it throws comes back as a `ServerScriptError` with the same `name`, `message` and
+  `details` (and `serverStack`): `rejects.toMatchObject({ name: 'SavepointError' })` works.
+- A `register({ strapi })` hook runs in the test plugin's register, **after** Strapi has created
+  its database: set database config (`acquireConnectionTimeout`…) with
+  `scaffoldConfig(app, 'database', …)` instead.
+- The copy can't require files next to the original: require packages only, listed in this
+  workspace's `devDependencies` (they resolve from the repo root).
+- Keep the assertions in the test. An action does what the old test did with `strapi` and
+  returns what it saw, including the outcome of a call expected to throw.
+
+### Scaffolders added for the API suite
+
+- `scaffoldDependency(app, '@strapi/plugin-graphql')`: adds a repo package to the app's
+  `package.json`, so Strapi loads the plugin. The test apps only have Users & Permissions.
+- `scaffoldContentType` refuses a content type routed at `/api/tests` (`pluralName: 'tests'`):
+  its `GET /api/tests/:id` would answer instead of the test plugin, and the server fails its
+  edition check with a 403.
+
 ## Coming from `tests/api`
 
 | Old suite (`api-tests/*`)                       | Here                                                                                                                                                                                  |
@@ -83,15 +136,67 @@ with Strapi's error name.
 | `createRequest()`                               | `createClient(server)` or `request()`                                                                                                                                                 |
 | `createUtils(strapi).createRole/createUser…`    | `adminRoles` and `adminUsers` of the seed plan, or the admin API                                                                                                                      |
 | `strapi.db.query()`, `strapi.documents()`       | `queryDb()`, `documents()`                                                                                                                                                            |
+| any other `strapi.*` (transactions, knex, logs) | an action of a [server script](#server-scripts), `runInServer()`                                                                                                                      |
+| `createStrapiInstance({ bootstrap })`           | `bootstrap` of a server script                                                                                                                                                        |
+| `createStrapiInstance({ register })` on config  | `scaffoldConfig()` (database config is read before any plugin registers)                                                                                                              |
+| `jest.spyOn(strapi.log, 'error')`               | a server script action that wraps `strapi.log.error` and returns the calls                                                                                                            |
+| `dotenv` + `DATABASE_CLIENT` for DB conditions  | `databaseFromEnv().client` with `describe.skipIf` / `test.skipIf`                                                                                                                     |
 | `strapi.eventHub.on()`, webhook events          | `createWebhookReceiver()` and a webhook created through the admin API, for the events webhooks accept (`entry.*`, `media.*`, `releases.publish`, `review-workflows.updateEntryStage`) |
 | `describeOnCondition(edition === 'EE')`         | `describeEE()` / `describeIfFeature()` from `@strapi/tests-shared/vitest`                                                                                                             |
 | `rq.asHTTPS()`                                  | `headers: { 'x-forwarded-proto': 'https' }`, with Koa's proxy trust on in the app's server config                                                                                     |
 
 What has no equivalent yet:
 
-- hooks into Strapi's own `register` or `bootstrap` (the old
-  `createStrapiInstance({ register, bootstrap })`), for example faking license feature options;
+- code that must run before Strapi creates its database or its services, for example shadowing
+  `strapi.ee` to fake license feature options;
 - `strapi.eventHub.on()` for the events webhooks don't accept (`POST /admin/webhooks` answers 400
   `Webhook event <name> is not supported`, see `allowedEvents` in
   `packages/core/core/src/services/webhook-store.ts`): for example `admin.auth.success`,
   `user.update`, `role.*` or `content-type.update`, which the audit-logs tests listen to.
+
+## Migrating a domain
+
+The legacy suite (`tests/api`) moves here domain by domain (`core/database` first, CMS-1958). A
+domain lives in one suite at a time: a migration PR moves its tests and deletes the old files.
+
+- **Same place, new suffix**: `tests/api/<path>/<name>.test.api.(js|ts)` becomes
+  `tests/<path>/<name>.api-test.ts`, in TypeScript (`core/database/db.test.api.js` →
+  `tests/core/database/db.api-test.ts`). Server scripts go in a `server/` folder next to it.
+- **Moved, not rewritten**: a migrated test keeps its name, intent and assertions. What changes
+  is how it reaches Strapi: the app from `setupApp`, the schema from scaffolders, data from the
+  seed plan or `queryDb`, requests through the clients, everything else through a server
+  script. A test file that reset rows between tests keeps doing it, on one app per file.
+- **Public API first**: use the clients for what the test checks when a route exists. When the
+  internal API is what the domain is (the database layer: `strapi.db.query`, transactions), call
+  it through `queryDb` or a server script, and say so at the top of the file.
+- **No auth bypass**: the old `createContentAPIRequest` skipped the content API auth. Seed a
+  `full-access` API token and use it for content API and `/graphql` requests.
+- **Check what the test relied on**: the old test app was not this one.
+  - Its plugins (GraphQL, documentation, cloud) are not here: add them with
+    `scaffoldDependency`.
+  - The old content API agent ran with `STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE=true`; this app
+    doesn't.
+  - Content types named `test` (route `/api/tests`) collide with the test plugin: rename them,
+    and the tables or assertions that follow from the name.
+- **Look for assertions that never ran**: an `expect` inside a `try` whose `catch` swallows
+  everything (`expect('this should not be reached').toBe(false)`, or a check in the middle of a
+  transaction callback) passes whatever happens. Move the observed value out (the action returns
+  it) and assert it in the test: `core/database` had one such assertion that was wrong.
+- **DB-specific tests keep their condition**: `describe.skipIf(databaseFromEnv().client !==
+'postgres')`. They run in the CI job of that database.
+
+Checklist for each migration PR:
+
+1. **Inventory**: every legacy test of the migrated files, and where it went (file and test
+   name), or why it was dropped. List the skipped tests and `test.todo` with what you did
+   (kept, fixed, dropped).
+2. **Delete the legacy files** in the same PR, and the legacy helpers only they used. Update
+   the references to their paths (contributor docs, comments). The legacy runner finds its files
+   by pattern, so no list needs editing; check it still runs another area
+   (`yarn test:api --db=sqlite tests/api/core/email`).
+3. **Runtime**: give the runtime of the migrated files next to the legacy baseline (one local
+   run of `yarn test:api --db=sqlite tests/api/<domain>`).
+4. **Check that each migrated test can fail**: break what it checks (a fixture row, the scope it
+   tests, a step of the transaction) and see it fail on the assertion it exists for.
+5. **Run it on SQLite, Postgres and MySQL** (`TESTS_DATABASE`, with
+   `docker-compose -f docker-compose.dev.yml up -d`), or say which ones only CI ran.

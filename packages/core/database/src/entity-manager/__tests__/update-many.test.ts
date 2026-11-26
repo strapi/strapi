@@ -5,7 +5,7 @@ jest.mock('../../query', () => ({
   createQueryBuilder: jest.fn(),
 }));
 
-// Call-shape lock. Behavior: tests/api/core/database/db.test.api.js (count === 1, was 3).
+// Call-shape lock. Behavior: tests-next/api/tests/core/database/db.api-test.ts (count === 1, was 3).
 describe('entity-manager updateMany', () => {
   beforeEach(() => {
     jest.clearAllMocks();

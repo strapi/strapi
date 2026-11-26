@@ -22,6 +22,9 @@ export const TEST_AI_PROVIDER_ENV_VAR = constants.aiProviderEnvVar;
 /** The snapshot file, next to a SQLite database (test-plugin/lib/sqlite-snapshot.js). */
 export const SQLITE_SNAPSHOT_FILE = constants.sqliteSnapshotFile;
 
+/** Folder of the app the test plugin loads server scripts from (see scripts.ts). */
+export const SERVER_SCRIPTS_DIR = constants.serverScriptsDir;
+
 /** Access key of the transfer token that POST /api/tests/transfer-token creates. */
 export const TEST_TRANSFER_TOKEN_ACCESS_KEY = constants.transferTokenAccessKey;
 

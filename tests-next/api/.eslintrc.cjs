@@ -15,6 +15,18 @@ const config = {
     'node/no-unsupported-features/node-builtins': 'off',
   },
   ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'lint-staged.config.mjs'],
+  overrides: [
+    {
+      // Server scripts: CommonJS copied into the test apps and loaded by Strapi as is
+      // (scaffoldServerScript in @strapi/tests-shared).
+      files: ['tests/**/server/*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+        strict: 'off',
+        'node/no-unsupported-features/es-builtins': 'off',
+      },
+    },
+  ],
 };
 
 module.exports = config;

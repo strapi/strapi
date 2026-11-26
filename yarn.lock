@@ -9989,7 +9989,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/database@npm:5.64.0, @strapi/database@workspace:packages/core/database":
+"@strapi/database@npm:5.64.0, @strapi/database@workspace:*, @strapi/database@workspace:packages/core/database":
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
@@ -10765,6 +10765,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/tests-api@workspace:tests-next/api"
   dependencies:
+    "@strapi/database": "workspace:*"
     "@strapi/tests-shared": "workspace:*"
     "@strapi/types": "workspace:*"
     "@types/node": "npm:22.20.0"
