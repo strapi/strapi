@@ -121,7 +121,7 @@ yarn nx build @strapi/admin   # single package
 
 ## Testing
 
-Migration is per suite (api, ui, cli): a new test goes to `tests-next/` once its domain is migrated in that suite, and to `tests/` before. To write, migrate or review a `tests-next/` test, or to decide where a new test goes, use the `test-suites` skill.
+Migration is per suite (api, ui, cli): a new test goes to `tests-next/` once its domain is migrated in that suite, and to `tests/` before, including for a domain with no tests yet. To write, migrate or review a `tests-next/` test, or to decide where a new test goes, use the `test-suites` skill.
 
 ### Unit tests (fastest — run first)
 
