@@ -12,7 +12,7 @@ const createMockStrapi = () =>
       info: vi.fn(),
       debug: vi.fn(),
     },
-  }) as any;
+  } as any);
 
 describe('createSafeCapabilityRegistration', () => {
   describe('when all handlers succeed', () => {
@@ -176,6 +176,28 @@ describe('createSafeCapabilityRegistration', () => {
       expect(() => result.disable()).not.toThrow();
       expect(() => result.remove()).not.toThrow();
       expect(result.enabled).toBe(false);
+    });
+
+    test('reports the error through reportRegistrationError instead of logging it', () => {
+      const strapi = createMockStrapi();
+      const reportRegistrationError = vi.fn();
+
+      const result = createSafeCapabilityRegistration({
+        strapi,
+        capabilityType: 'Tool',
+        name: 'rejected-tool',
+        createHandler: vi.fn().mockReturnValue(vi.fn()),
+        createFallbackHandler: vi.fn(),
+        createErrorResult: vi.fn(),
+        registerWithSdk() {
+          throw new Error('SDK rejected registration');
+        },
+        reportRegistrationError,
+      });
+
+      expect(result).toBe(FAILED_REGISTERED_CAPABILITY);
+      expect(reportRegistrationError).toHaveBeenCalledWith('SDK rejected registration');
+      expect(strapi.log.error).not.toHaveBeenCalled();
     });
   });
 

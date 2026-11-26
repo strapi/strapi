@@ -6,7 +6,9 @@ import {
   McpCapabilityRegistryBase,
 } from './internal/McpCapabilityRegistry';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
+import { assertSchemaConvertsToJsonSchema } from './utils/assertSchemaConvertsToJsonSchema';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
+import { isStandardSchema, toListedSchema } from './utils/toListedSchema';
 import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
 import { toSdkToolResult } from './utils/toSdkMcpCapabilityResult';
 import type { McpAdminTokenAbility } from './authentication';
@@ -146,10 +148,19 @@ export class McpToolRegistry
             isError: true,
           };
         },
+        reportRegistrationError: (message) =>
+          reportToolRegistrationError(strapi, definition, message),
         registerWithSdk(safeHandler) {
-          const inputSchema =
-            resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined;
-          const outputSchema = resolveOutputSchema(context);
+          const inputSchema = toListedSchema(
+            resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined
+          );
+          const outputSchema = toListedSchema(resolveOutputSchema(context));
+
+          // The SDK accepts any schema at registration and only converts it while serving
+          // tools/list, where one failure fails the whole list. Probe both schemas first so an
+          // unconvertible one fails this registration alone and never reaches the SDK.
+          probeToolSchema('inputSchema', inputSchema, 'input');
+          probeToolSchema('outputSchema', outputSchema, 'output');
 
           if (inputSchema !== undefined) {
             // Adapt from Strapi's object parameter to the SDK's positional callback.
@@ -193,3 +204,44 @@ export class McpToolRegistry
     });
   }
 }
+
+const probeToolSchema = (field: string, schema: unknown, io: 'input' | 'output') => {
+  if (!isStandardSchema(schema)) {
+    return;
+  }
+
+  try {
+    assertSchemaConvertsToJsonSchema(schema, io);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`${field} cannot be converted to JSON Schema: ${reason}`);
+  }
+};
+
+/**
+ * Failures already logged per tool definition. A new MCP server, and so a new registration, is
+ * built for every request, so a broken schema would otherwise log on every request. Schemas are
+ * resolved per request and can differ per token, so each distinct failure is logged once.
+ */
+const reportedToolRegistrationErrors = new WeakMap<Modules.MCP.McpToolDefinition, Set<string>>();
+
+const reportToolRegistrationError = (
+  strapi: Core.Strapi,
+  definition: Modules.MCP.McpToolDefinition,
+  message: string
+) => {
+  let reported = reportedToolRegistrationErrors.get(definition);
+  if (reported === undefined) {
+    reported = new Set();
+    reportedToolRegistrationErrors.set(definition, reported);
+  }
+
+  if (reported.has(message)) {
+    return;
+  }
+
+  reported.add(message);
+  strapi.log.error(
+    `[MCP] Failed to register tool "${definition.name}" with MCP server: ${message}`
+  );
+};
