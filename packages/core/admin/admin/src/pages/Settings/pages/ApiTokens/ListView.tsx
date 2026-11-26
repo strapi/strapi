@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { Box, Button, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import * as qs from 'qs';
@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
-import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
+import { SettingsListToolbarFilters } from '../../../../components/SettingsListToolbarFilters';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -81,7 +81,7 @@ export const ListView = () => {
 
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const [{ query }] = useQueryParams<{ plugins?: unknown }>();
+  const [{ query }, setQuery] = useQueryParams<{ plugins?: unknown }>();
 
   useOnce(() => {
     navigate(
@@ -98,8 +98,8 @@ export const ListView = () => {
 
   const headers = useSettingsListHeaders('api-tokens', TABLE_HEADERS);
   // The server lists every API token, so only plugin dropdowns apply here, not the Filters popover
-  const { selects } = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
-  const { plugins } = useSettingsListPluginParams(selects);
+  const { toolbarFilters } = useSettingsListFilters('api-tokens', NO_CORE_FILTERS);
+  const { plugins } = useSettingsListPluginParams(toolbarFilters);
   const isFiltered = plugins !== undefined;
 
   useOnce(() => {
@@ -192,11 +192,11 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          {selects.length > 0 && (
-            <Layouts.Action endActions={<PluginFilterSelects selects={selects} />} />
+          {toolbarFilters.length > 0 && (
+            <Layouts.Action endActions={<SettingsListToolbarFilters filters={toolbarFilters} />} />
           )}
           <Layouts.Content>
-            {(apiTokens.length > 0 || isFiltered) && (
+            {apiTokens.length > 0 && (
               <Table
                 permissions={{ canRead, canDelete, canUpdate }}
                 // The shared table also lists transfer tokens; these headers only get API tokens
@@ -207,6 +207,23 @@ export const ListView = () => {
                 tokenType={API_TOKEN_TYPE}
               />
             )}
+            {isFiltered && !isLoading && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="16rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.emptyStateLayout.filtered',
+                  defaultMessage: 'No API token matches the selected filters',
+                })}
+                action={
+                  <Button variant="secondary" onClick={() => setQuery({ plugins: {} }, 'remove')}>
+                    {formatMessage({
+                      id: 'Settings.apiTokens.clearFilters',
+                      defaultMessage: 'Clear filters',
+                    })}
+                  </Button>
+                }
+              />
+            ) : null}
             {canCreate && apiTokens.length === 0 && !isFiltered ? (
               <EmptyStateLayout
                 icon={<EmptyDocuments width="16rem" />}

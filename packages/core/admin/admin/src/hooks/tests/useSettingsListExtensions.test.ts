@@ -45,9 +45,9 @@ describe('useSettingsListHeaders', () => {
 });
 
 describe('useSettingsListFilters', () => {
-  const useOptions = () => [{ value: 'fr', label: 'France' }];
+  const SpaceFilter = () => null;
 
-  it('keeps popover filters for the filter bar and turns dropdown filters into selects', () => {
+  it('keeps popover filters for the filter bar and toolbar filters for the toolbar', () => {
     const runHookWaterfall = (_name: string, value: unknown) => {
       const args = value as InjectSettingsListFiltersArgs;
 
@@ -56,12 +56,10 @@ describe('useSettingsListFilters', () => {
         displayedFilters: [
           ...args.displayedFilters,
           {
-            unstable_display: 'select' as const,
+            placement: 'toolbar' as const,
             pluginId: 'spaces',
             name: 'space',
-            label: { id: 'space', defaultMessage: 'Space' },
-            placeholder: { id: 'all', defaultMessage: 'All spaces' },
-            useOptions,
+            Component: SpaceFilter,
           },
         ],
       };
@@ -77,32 +75,16 @@ describe('useSettingsListFilters', () => {
 
     expect(result.current).toEqual({
       filters: [{ name: 'email', label: 'Email', type: 'email', operators: undefined }],
-      selects: [
-        {
-          pluginId: 'spaces',
-          name: 'space',
-          label: 'Space',
-          placeholder: 'All spaces',
-          useOptions,
-        },
-      ],
+      toolbarFilters: [{ pluginId: 'spaces', name: 'space', Component: SpaceFilter }],
     });
   });
 });
 
 describe('useSettingsListPluginParams', () => {
-  const selects = [
-    {
-      pluginId: 'spaces',
-      name: 'space',
-      label: 'Space',
-      placeholder: 'All spaces',
-      useOptions: () => [],
-    },
-  ];
+  const toolbarFilters = [{ pluginId: 'spaces', name: 'space', Component: () => null }];
 
   it('sends the plugin values of the URL, encoded', () => {
-    const { result } = renderHook(() => useSettingsListPluginParams(selects), {
+    const { result } = renderHook(() => useSettingsListPluginParams(toolbarFilters), {
       initialEntries: ['/?plugins[spaces][space]=fr%20%26%20es&filters[$and][0][a][$eq]=b'],
     });
 
@@ -110,13 +92,13 @@ describe('useSettingsListPluginParams', () => {
   });
 
   it('sends nothing without plugin values', () => {
-    const { result } = renderHook(() => useSettingsListPluginParams(selects));
+    const { result } = renderHook(() => useSettingsListPluginParams(toolbarFilters));
 
     expect(result.current).toEqual({});
   });
 
   it('leaves out the values of dropdowns no plugin registered', () => {
-    const { result } = renderHook(() => useSettingsListPluginParams(selects), {
+    const { result } = renderHook(() => useSettingsListPluginParams(toolbarFilters), {
       initialEntries: [
         '/?plugins[spaces][space]=france&plugins[spaces][team]=blue&plugins[old][x]=y',
       ],

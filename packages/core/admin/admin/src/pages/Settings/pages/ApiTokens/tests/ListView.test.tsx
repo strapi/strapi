@@ -56,13 +56,19 @@ describe('API tokens | ListView | plugin columns and filters', () => {
   it('says that no token matches the filter instead of inviting to create the first one', async () => {
     server.use(http.get('/admin/api-tokens', () => HttpResponse.json({ data: [] })));
 
-    render(<ListView />, {
+    const { user } = render(<ListView />, {
       providerOptions,
       initialEntries: ['/?plugins[spaces][space]=france'],
     });
 
-    expect(await screen.findByText('No content found')).toBeInTheDocument();
+    expect(
+      await screen.findByText('No API token matches the selected filters')
+    ).toBeInTheDocument();
     expect(screen.queryByText('Add your first API Token')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+
+    expect(await screen.findByText('Add your first API Token')).toBeInTheDocument();
   });
 
   it('ignores the plugin values of a stale link that no dropdown reads', async () => {

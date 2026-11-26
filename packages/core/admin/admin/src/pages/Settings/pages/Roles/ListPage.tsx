@@ -21,8 +21,8 @@ import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Filters, toApiFilters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
-import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { SearchInput } from '../../../../components/SearchInput';
+import { SettingsListToolbarFilters } from '../../../../components/SettingsListToolbarFilters';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
@@ -57,8 +57,11 @@ const ListPage = () => {
   } = useRBAC(permissions.settings?.roles);
 
   const headers = useSettingsListHeaders('roles', TABLE_HEADERS);
-  const { filters: filterOptions, selects } = useSettingsListFilters('roles', NO_CORE_FILTERS);
-  const { plugins } = useSettingsListPluginParams(selects);
+  const { filters: filterOptions, toolbarFilters } = useSettingsListFilters(
+    'roles',
+    NO_CORE_FILTERS
+  );
+  const { plugins } = useSettingsListPluginParams(toolbarFilters);
   const searchFilter = query?._q ? { name: { $containsi: query._q } } : undefined;
   // Without a popover the page ignores URL filters, as it did before plugins could add one
   const urlFilters =
@@ -178,7 +181,11 @@ const ListPage = () => {
       />
       {canRead && (
         <Layouts.Action
-          endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
+          endActions={
+            toolbarFilters.length > 0 ? (
+              <SettingsListToolbarFilters filters={toolbarFilters} />
+            ) : undefined
+          }
           startActions={
             <>
               <SearchInput

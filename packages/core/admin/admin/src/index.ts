@@ -29,6 +29,7 @@ export * from './components/Table';
 export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
+export { SettingsListToolbarSelect as unstable_SettingsListToolbarSelect } from './components/SettingsListToolbarFilters';
 
 /** @internal */
 export { tours } from './components/GuidedTour/Tours';
@@ -97,11 +98,15 @@ export type {
   InjectSettingsListFiltersArgs as unstable_InjectSettingsListFiltersArgs,
   InjectableSettingsListFilter as unstable_InjectableSettingsListFilter,
   InjectableSettingsListHeader as unstable_InjectableSettingsListHeader,
-  InjectableSettingsListSelectFilter as unstable_InjectableSettingsListSelectFilter,
-  SettingsListSelectFilterOption as unstable_SettingsListSelectFilterOption,
+  InjectableSettingsListToolbarFilter as unstable_InjectableSettingsListToolbarFilter,
   SettingsList as unstable_SettingsList,
   SettingsListRows as unstable_SettingsListRows,
+  SettingsListToolbarFilterProps as unstable_SettingsListToolbarFilterProps,
 } from './hooks/useSettingsListExtensions';
+export type {
+  SettingsListToolbarSelectOption as unstable_SettingsListToolbarSelectOption,
+  SettingsListToolbarSelectProps as unstable_SettingsListToolbarSelectProps,
+} from './components/SettingsListToolbarFilters';
 export type {
   SanitizedAdminUser,
   AdminUser,

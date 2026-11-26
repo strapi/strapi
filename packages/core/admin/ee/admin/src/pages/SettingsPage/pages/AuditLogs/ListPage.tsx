@@ -8,7 +8,7 @@ import { Filters, toApiFilters } from '../../../../../../../admin/src/components
 import { Layouts } from '../../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
-import { PluginFilterSelects } from '../../../../../../../admin/src/components/PluginFilterSelects';
+import { SettingsListToolbarFilters } from '../../../../../../../admin/src/components/SettingsListToolbarFilters';
 import { Table } from '../../../../../../../admin/src/components/Table';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import {
@@ -100,11 +100,11 @@ const ListPage = () => {
       }),
     [formatMessage, users, isLoadingUsers, hasMoreUsers, handleLoadMoreUsers]
   );
-  const { filters: filterOptions, selects } = useSettingsListFilters(
+  const { filters: filterOptions, toolbarFilters } = useSettingsListFilters(
     'audit-logs',
     displayedFilters
   );
-  const { plugins } = useSettingsListPluginParams(selects);
+  const { plugins } = useSettingsListPluginParams(toolbarFilters);
   // A date filter stores a day or a minute: the API reads it as the instants it covers
   const apiFilters = toApiFilters(query?.filters, filterOptions);
   const {
@@ -177,7 +177,11 @@ const ListPage = () => {
             <Filters.List />
           </Filters.Root>
         }
-        endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
+        endActions={
+          toolbarFilters.length > 0 ? (
+            <SettingsListToolbarFilters filters={toolbarFilters} />
+          ) : undefined
+        }
       />
       <Layouts.Content>
         <Table.Root rows={results} headers={headers} isLoading={isLoading}>

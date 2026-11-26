@@ -12,8 +12,8 @@ import { Filters, toApiFilters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
-import { PluginFilterSelects } from '../../../../components/PluginFilterSelects';
 import { SearchInput } from '../../../../components/SearchInput';
+import { SettingsListToolbarFilters } from '../../../../components/SettingsListToolbarFilters';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAuth } from '../../../../features/Auth';
@@ -51,8 +51,8 @@ const ListPageCE = () => {
   const { search } = useLocation();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
-  const { filters: filterOptions, selects } = useSettingsListFilters('users', FILTERS);
-  const pluginParams = useSettingsListPluginParams(selects);
+  const { filters: filterOptions, toolbarFilters } = useSettingsListFilters('users', FILTERS);
+  const pluginParams = useSettingsListPluginParams(toolbarFilters);
   const { plugins: _plugins, ...urlParams } = qs.parse(search, { ignoreQueryPrefix: true });
   const { data, isError, isLoading } = useAdminUsers({
     ...urlParams,
@@ -165,7 +165,11 @@ const ListPageCE = () => {
             </Filters.Root>
           </>
         }
-        endActions={selects.length > 0 ? <PluginFilterSelects selects={selects} /> : undefined}
+        endActions={
+          toolbarFilters.length > 0 ? (
+            <SettingsListToolbarFilters filters={toolbarFilters} />
+          ) : undefined
+        }
       />
       <Layouts.Content>
         <Table.Root rows={users} headers={headers}>

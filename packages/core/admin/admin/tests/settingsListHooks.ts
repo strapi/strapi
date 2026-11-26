@@ -1,3 +1,6 @@
+import * as React from 'react';
+
+import { SettingsListToolbarSelect } from '../src/components/SettingsListToolbarFilters';
 import { HOOKS } from '../src/constants';
 
 import type {
@@ -5,6 +8,7 @@ import type {
   InjectSettingsListFiltersArgs,
   InjectableSettingsListFilter,
   InjectableSettingsListHeader,
+  SettingsListToolbarFilterProps,
 } from '../src/hooks/useSettingsListExtensions';
 
 /**
@@ -44,13 +48,19 @@ const settingsListHooks =
     return value;
   };
 
+const SpaceFilter = (props: SettingsListToolbarFilterProps) =>
+  React.createElement(SettingsListToolbarSelect, {
+    ...props,
+    label: 'Space',
+    placeholder: 'All spaces',
+    options: [{ label: 'France', value: 'france' }],
+  });
+
 const SPACE_FILTER: InjectableSettingsListFilter = {
-  unstable_display: 'select',
+  placement: 'toolbar',
   pluginId: 'spaces',
   name: 'space',
-  label: 'Space',
-  placeholder: 'All spaces',
-  useOptions: () => [{ label: 'France', value: 'france' }],
+  Component: SpaceFilter,
 };
 
 const DATE_FILTER: InjectableSettingsListFilter = {

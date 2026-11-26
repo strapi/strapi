@@ -29,44 +29,33 @@ type InjectableSettingsListHeader<TRow = unknown> = Omit<Table.Header<TRow, obje
 };
 
 type InjectableSettingsListPopoverFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
-  unstable_display?: 'popover';
+  placement?: 'popover';
   label: string | MessageDescriptor;
   operators?: Array<{ value: string; label: string | MessageDescriptor }>;
 };
 
 /**
- * Renders as its own dropdown on the right of the list toolbar. Its value goes to
- * `plugins[<pluginId>][<name>]`, apart from the core filters
+ * Renders on the right of the list toolbar. Its value goes to `plugins[<pluginId>][<name>]`,
+ * apart from the core filters
  */
-interface InjectableSettingsListSelectFilter {
-  unstable_display: 'select';
+interface InjectableSettingsListToolbarFilter {
+  placement: 'toolbar';
   pluginId: string;
   name: string;
-  label: string | MessageDescriptor;
-  /** The option that clears the filter, e.g. "All spaces" */
-  placeholder: string | MessageDescriptor;
-  /**
-   * A hook that returns the options. It runs inside the dropdown, so it can load them and the
-   * dropdown follows when they change
-   */
-  useOptions: () => SettingsListSelectFilterOption[];
+  /** Renders the filter, usually with `unstable_SettingsListToolbarSelect`. It can load its options with hooks */
+  Component: React.ComponentType<SettingsListToolbarFilterProps>;
 }
 
-interface SettingsListSelectFilterOption {
+interface SettingsListToolbarFilterProps {
   value: string;
-  label: string | MessageDescriptor;
+  /** `replace` changes the URL without adding a history entry */
+  onChange: (value: string, options?: { replace?: boolean }) => void;
 }
 
 type InjectableSettingsListFilter =
-  InjectableSettingsListPopoverFilter | InjectableSettingsListSelectFilter;
+  InjectableSettingsListPopoverFilter | InjectableSettingsListToolbarFilter;
 
-interface SettingsListSelectFilter {
-  pluginId: string;
-  name: string;
-  label: string;
-  placeholder: string;
-  useOptions: InjectableSettingsListSelectFilter['useOptions'];
-}
+type SettingsListToolbarFilter = Omit<InjectableSettingsListToolbarFilter, 'placement'>;
 
 /**
  * Arguments of the `INJECT_COLUMN_IN_SETTINGS_TABLE` hook. Narrow on `list` to type the rows.
@@ -118,7 +107,7 @@ const useSettingsListHeaders = <TList extends SettingsList>(
 const useSettingsListFilters = (
   list: SettingsList,
   coreFilters: InjectableSettingsListFilter[]
-): { filters: Filters.Filter[]; selects: SettingsListSelectFilter[] } => {
+): { filters: Filters.Filter[]; toolbarFilters: SettingsListToolbarFilter[] } => {
   const runHookWaterfall = useStrapiApp(
     'useSettingsListFilters',
     (state) => state.runHookWaterfall
@@ -132,19 +121,15 @@ const useSettingsListFilters = (
     );
 
     const filters: Filters.Filter[] = [];
-    const selects: SettingsListSelectFilter[] = [];
+    const toolbarFilters: SettingsListToolbarFilter[] = [];
 
     for (const filter of displayedFilters) {
-      if (filter.unstable_display === 'select') {
-        selects.push({
-          pluginId: filter.pluginId,
-          name: filter.name,
-          label: resolveLabel(filter.label, formatMessage),
-          placeholder: resolveLabel(filter.placeholder, formatMessage),
-          useOptions: filter.useOptions,
-        });
+      if (filter.placement === 'toolbar') {
+        const { placement: _placement, ...toolbarFilter } = filter;
+
+        toolbarFilters.push(toolbarFilter);
       } else {
-        const { unstable_display: _display, ...popoverFilter } = filter;
+        const { placement: _placement, ...popoverFilter } = filter;
 
         filters.push({
           ...popoverFilter,
@@ -157,7 +142,7 @@ const useSettingsListFilters = (
       }
     }
 
-    return { filters, selects };
+    return { filters, toolbarFilters };
   }, [runHookWaterfall, list, coreFilters, formatMessage]);
 };
 
@@ -165,19 +150,19 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
 /**
- * The values of the dropdown filters, to send with the list request. The fetch client does not
+ * The values of the toolbar filters, to send with the list request. The fetch client does not
  * encode params, so they are encoded here
  */
 const useSettingsListPluginParams = (
-  selects: SettingsListSelectFilter[]
+  toolbarFilters: SettingsListToolbarFilter[]
 ): { plugins?: Record<string, Record<string, string>> } => {
   const [{ query }] = useQueryParams<{ plugins?: unknown }>();
 
   return React.useMemo(() => {
     const plugins: Record<string, Record<string, string>> = {};
 
-    // Only the values of registered dropdowns: a stale link filters nothing
-    for (const { pluginId, name } of selects) {
+    // Only the values of registered filters: a stale link filters nothing
+    for (const { pluginId, name } of toolbarFilters) {
       const values = isRecord(query.plugins) ? query.plugins[pluginId] : undefined;
       const value = isRecord(values) ? values[name] : undefined;
 
@@ -187,7 +172,7 @@ const useSettingsListPluginParams = (
     }
 
     return Object.keys(plugins).length > 0 ? { plugins: deepEncodeQueryValues(plugins) } : {};
-  }, [query.plugins, selects]);
+  }, [query.plugins, toolbarFilters]);
 };
 
 export {
@@ -201,9 +186,9 @@ export type {
   InjectSettingsListFiltersArgs,
   InjectableSettingsListFilter,
   InjectableSettingsListHeader,
-  InjectableSettingsListSelectFilter,
+  InjectableSettingsListToolbarFilter,
   SettingsList,
   SettingsListRows,
-  SettingsListSelectFilter,
-  SettingsListSelectFilterOption,
+  SettingsListToolbarFilter,
+  SettingsListToolbarFilterProps,
 };
