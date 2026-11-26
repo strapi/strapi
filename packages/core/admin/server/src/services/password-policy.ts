@@ -178,7 +178,13 @@ const parseFloor = (config: unknown): PasswordPolicy => {
     }
   }
 
-  return { ...DEFAULT_PASSWORD_POLICY, ...(candidate as Partial<PasswordPolicy>) };
+  // A key set to `undefined` is left out, like an omitted one: `env.bool('X')` returns undefined
+  // while X is unset, and spreading it would turn a default rule off or make minLength NaN
+  const defined = Object.fromEntries(
+    Object.entries(candidate).filter(([, value]) => value !== undefined)
+  ) as Partial<PasswordPolicy>;
+
+  return { ...DEFAULT_PASSWORD_POLICY, ...defined };
 };
 
 /** How the rules read in error messages. */

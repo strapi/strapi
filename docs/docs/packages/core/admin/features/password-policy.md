@@ -57,8 +57,9 @@ from that, an existing project behaves as before until an administrator changes 
 `config/admin` can set a `passwordPolicy` object with the same keys as the policy. It is the
 minimum the settings can only make stricter: the effective policy takes, rule by rule, the higher
 `minLength` and every rule either side requires. In the floor, `false` means "not imposed": the
-settings may still turn the rule on. Keys left out keep the default policy, so a project without
-`passwordPolicy` has the default policy as its floor. Out of the box, the settings page can only
+settings may still turn the rule on. Keys left out, or set to `undefined` (what `env.bool('X')`
+returns while `X` is unset), keep the default policy, so a project without `passwordPolicy` has
+the default policy as its floor. Out of the box, the settings page can only
 raise the minimum length and require a special character; loosening the other rules takes a
 deploy:
 

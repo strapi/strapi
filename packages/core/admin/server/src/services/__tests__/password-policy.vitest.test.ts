@@ -190,6 +190,18 @@ describe('Password policy service', () => {
       });
     });
 
+    test('treats a key set to undefined like an omitted one, as env.bool() gives when unset', () => {
+      floorConfig = {
+        minLength: undefined,
+        requireLowercase: undefined,
+        requireUppercase: undefined,
+        requireNumber: undefined,
+        requireSpecialCharacter: true,
+      };
+
+      expect(getFloor()).toEqual({ ...DEFAULT_PASSWORD_POLICY, requireSpecialCharacter: true });
+    });
+
     test.each([
       ['a minLength below the bounds', { minLength: 4 }, 'admin.passwordPolicy.minLength'],
       ['a minLength above the bounds', { minLength: 100 }, 'admin.passwordPolicy.minLength'],
