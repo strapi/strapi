@@ -207,10 +207,7 @@ const fetchLicense = async (
   }
 };
 
-/**
- * Sends this instance's active admin users, and returns the count the registry has across all
- * instances. `null` on any failure.
- */
+/** Sends this instance's active admin users and returns the count across instances, or `null`. */
 const reportAdminUsers = async (
   { strapi }: { strapi: Core.Strapi },
   key: string,

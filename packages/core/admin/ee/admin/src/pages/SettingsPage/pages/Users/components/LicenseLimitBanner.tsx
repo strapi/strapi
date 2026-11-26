@@ -8,14 +8,9 @@ import { RESPONSIVE_DEFAULT_SPACING } from '../../../../../../../../admin/src/co
 import { getLicensedPlan } from '../../../../../../../../shared/utils/get-project-type';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
-// Growth customers manage their seats in the billing portal. Other plans go through sales.
 const MANAGE_SEATS_URL = 'https://billing.strapi.io';
 const CONTACT_SALES_URL = 'mailto:sales@strapi.io';
 
-/**
- * `Alert` colors every link inside `action` with its variant color, which breaks a Button rendered
- * as a link. Restore the Button's own colors (same fix as the upgrade banner).
- */
 const AlertAction = styled(Box)`
   && a > span {
     color: inherit;
@@ -59,21 +54,14 @@ const getMessage = ({
 
 type License = NonNullable<ReturnType<typeof useLicenseLimits>['license']>;
 
-/**
- * The count and limit the banner reports, or `null` when the limit is not reached. The count
- * across all instances comes first. This instance's count comes next, so a disabled invite button
- * (`shouldStopCreate`) always has a banner, even when the registry's count is missing or stale.
- */
 const getReachedLimit = ({
   adminUsersAcrossInstances,
   enforcementUserCount,
   permittedSeats,
 }: License) => {
-  // `permittedSeats` is typed `number` but is null at runtime without a seat limit
   const instanceLimit: number | null = permittedSeats ?? null;
 
   if (adminUsersAcrossInstances) {
-    // The registry may not know how many users the license includes: use this instance's limit
     const limit = adminUsersAcrossInstances.contractedUsers ?? instanceLimit;
 
     if (limit !== null && adminUsersAcrossInstances.activeUsers >= limit) {
@@ -81,7 +69,6 @@ const getReachedLimit = ({
     }
   }
 
-  // `enforcementUserCount` counts at least the users `shouldStopCreate` counts
   if (instanceLimit !== null && enforcementUserCount >= instanceLimit) {
     return { count: enforcementUserCount, limit: instanceLimit, isAcrossInstances: false };
   }
@@ -89,10 +76,6 @@ const getReachedLimit = ({
   return null;
 };
 
-/**
- * Shown on the Users page when the license limit is reached or exceeded. Uses the count across
- * all instances when the license registry sent one, otherwise this instance's count.
- */
 export const LicenseLimitBanner = () => {
   const { formatMessage } = useIntl();
   const { license, isError, isLoading } = useLicenseLimits();

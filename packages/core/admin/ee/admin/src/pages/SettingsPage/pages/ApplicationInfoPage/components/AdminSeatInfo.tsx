@@ -39,8 +39,8 @@ export const AdminSeatInfoEE = () => {
   // `seats` to keep showing the limit on an expired licence. Enforcement is unchanged.
   const instanceLimit = permittedSeats ?? seats;
 
-  // The count across all instances when the license registry sent one, otherwise this instance's.
-  // The registry may not know how many users the license includes: use this instance's limit then.
+  // The count across instances when the registry sent one, otherwise this instance's.
+  // Without `contractedUsers` from the registry, use this instance's limit.
   const count = adminUsersAcrossInstances?.activeUsers ?? enforcementUserCount;
   const limit = adminUsersAcrossInstances
     ? (adminUsersAcrossInstances.contractedUsers ?? instanceLimit ?? null)

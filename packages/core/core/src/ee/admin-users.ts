@@ -1,8 +1,5 @@
-/**
- * Active admin users across all instances of a license: reports this instance's users to the
- * license registry, stores the count it sends back, and reads that count for the admin panel.
- * Only this module knows where and how the count is stored.
- */
+// Active admin users across all instances of a license: reports them to the license registry,
+// stores the count it sends back, and reads it for the admin panel.
 import type { Core } from '@strapi/types';
 import {
   adminUsersAcrossInstancesSchema,
@@ -23,10 +20,7 @@ const MAX_AGE_MS = 48 * 60 * 60 * 1000;
 /** The license key to report with, or nothing when the license is not active. */
 type GetLicenseKey = () => string | undefined;
 
-/**
- * Reports this instance's active admin users to the license registry and stores the count it
- * returns. Keeps the previous count on failure. Never throws.
- */
+/** Reports this instance's active admin users and stores the count. Never throws. */
 const reportActiveAdminUsers = async (strapi: Core.Strapi, getLicenseKey: GetLicenseKey) => {
   try {
     const licenseKey = getLicenseKey();
@@ -47,11 +41,10 @@ const reportActiveAdminUsers = async (strapi: Core.Strapi, getLicenseKey: GetLic
   }
 };
 
-// Per Strapi instance, so another instance in the same process (tests, programmatic use) also
-// subscribes on its own database
+// Per Strapi instance, so another instance in the same process subscribes on its own database
 const watchedStrapis = new WeakSet<Core.Strapi>();
 
-/** Reports the admin users again shortly after one is created, (de)activated, renamed or deleted. */
+/** Reports the admin users again shortly after a user is created, deleted or changed. */
 const watchAdminUsers = (strapi: Core.Strapi, getLicenseKey: GetLicenseKey) => {
   if (watchedStrapis.has(strapi)) return;
   watchedStrapis.add(strapi);
@@ -80,10 +73,7 @@ const watchAdminUsers = (strapi: Core.Strapi, getLicenseKey: GetLicenseKey) => {
   });
 };
 
-/**
- * The last count the registry sent, or `null` when there is none, it is malformed, or it is
- * older than 48 hours. Whether to show it (license mode and status) is the caller's decision.
- */
+/** The last count the registry sent, or `null` when missing, malformed or older than 48 hours. */
 const getAdminUsersAcrossInstances = async ({
   strapi,
 }: {

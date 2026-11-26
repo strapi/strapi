@@ -128,7 +128,6 @@ describe('<LicenseLimitBanner />', () => {
   });
 
   test("uses this instance's count when it blocks invites but the registry's count doesn't", () => {
-    // The registry's count is from before a user was invited here
     mockLicense({ enforcementUserCount: 10, shouldStopCreate: true, ...across(9) });
 
     const { getByText } = render(<LicenseLimitBanner />);

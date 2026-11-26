@@ -42,7 +42,6 @@ describe('<CreateActionEE />', () => {
 
     const { getAllByText, user, findByRole } = render(<CreateActionEE />);
 
-    // The warning icon, the tooltip trigger, comes before the button's mail icon
     const [warningIcon] = getAllByText((_, element) => element?.tagName.toLowerCase() === 'svg');
     await user.hover(warningIcon);
 

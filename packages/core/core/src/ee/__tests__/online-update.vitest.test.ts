@@ -1,7 +1,5 @@
-/**
- * Covers the admin users report that follows the license check. Same module-reset dance as license-retention.vitest.test.ts: the license state is a
- * closure singleton, so each test re-imports the module fresh.
- */
+// The admin users report after the license check. The license state is a closure singleton,
+// so each test re-imports the module (like license-retention.vitest.test.ts).
 
 import { describe, it, expect, vi, afterEach, type Mock } from 'vitest';
 

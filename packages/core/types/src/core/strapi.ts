@@ -75,10 +75,7 @@ export interface Strapi extends Container {
     }: {
       strapi: Core.Strapi;
     }) => Promise<{ trialEndsAt: string } | null>;
-    /**
-     * Active admin users across all instances of the license, as last reported by the license
-     * registry. `null` when there is none yet or it is older than 48 hours.
-     */
+    /** Active admin users across all instances, or `null` when missing or older than 48 hours. */
     getAdminUsersAcrossInstances: ({ strapi }: { strapi: Core.Strapi }) => Promise<{
       activeUsers: number;
       contractedUsers: number | null;
