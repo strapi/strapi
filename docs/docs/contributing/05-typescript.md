@@ -667,10 +667,9 @@ declare global {
   actions inline or as an `as const` list: a list without `as const` widens `section` to `string`,
   which matches no section, and fails to compile. They also check the computed ID of each action
   from its literal fields. A key the action's section does not have fails to compile, as the
-  strict validation schema rejects it at boot. The check reads the keys of the action's type, and
-  a union type has only the keys all its members share: an action typed with an explicit union,
-  e.g. the result of a function annotated `SettingsAction | PluginsAction`, hides a key that only
-  one member has. It compiles, and the boot fails.
+  strict validation schema rejects it at boot. The check reads each member of a union type on its
+  own: an action typed with an explicit union, e.g. the result of a function annotated
+  `SettingsAction | PluginsAction`, fails to compile when one member has such a key.
 - With strict types, the action provider hooks (`willRegister`, `didRegister`, `willDelete`,
   `didDelete` and `appliesPropertyToSubject`), the section handlers and matchers receive the
   action as the provider stores it (`StoredAction`), one member per section, and `get` and `values`
