@@ -4,9 +4,9 @@
  * The upload plugin `require`s the configured provider module, calls its `init` with the
  * `providerOptions` of the upload config, and checks the result: it throws without `delete`, or
  * without both `upload` and `uploadStream`. It then wraps the contract methods in async functions
- * that default their options argument to the method's `actionOptions` entry, so
- * `strapi.plugin('upload').provider` is not the object `init` returns. Members outside the contract
- * keep their signature.
+ * that default their options argument to the method's `actionOptions` entry (`isPrivate` takes no
+ * arguments), so `strapi.plugin('upload').provider` is not the object `init` returns. Members
+ * outside the contract keep their signature.
  *
  * The members use method syntax, so their parameters are checked bivariantly: a provider can
  * declare its own, narrower file and options types, as the published providers do.
@@ -95,14 +95,15 @@ type UploadMethods =
  *
  * A contract member that is not a function, such as `undefined`, `null` or `false`, counts as
  * omitted: the plugin falls back on `upload`, or on its own default. Provider-specific members must
- * be own enumerable properties of this object: the plugin does not copy prototype members.
+ * be enumerable properties of this object: the plugin does not copy non-enumerable members, such
+ * as the methods of a class.
  */
 export type Provider = UploadMethods & {
   /**
    * Replaces a stored file, used over `delete` then `upload`. The new file carries a `buffer`.
    *
    * The options are the `actionOptions.replace` entry. The plugin prefers `replaceStream`, which
-   * gets `actionOptions.replaceStream`, so set both entries when the provider implements both.
+   * gets `actionOptions.replaceStream`, so this entry is not read when the provider implements both.
    */
   replace?(
     newFile: ProviderFile,
