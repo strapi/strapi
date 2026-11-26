@@ -63,8 +63,11 @@ export interface AuthOptions {
 export interface AppWorkerFixtures {
   /** The Strapi server of this worker, started once per worker. */
   server: Server;
-  /** The spec file whose data is in the database, so file scope knows when to reset. */
-  databaseOwner: { file?: string };
+  /**
+   * The spec file whose data is in the database, so file scope knows when to reset, and how many
+   * restores ran in this worker, so the seeding fixtures know when what they seeded is gone.
+   */
+  databaseOwner: { file?: string; restores: number };
   /** Edition, EE features and future flags of the worker's instance. */
   features: InstanceFeatures;
   /** The storage state file of each role, saved by `server` (see fixtures/auth.ts). */
@@ -83,7 +86,7 @@ export interface ResetFixtures {
  * Playwright doesn't expose it: this reads the same internal method its own fixtures use.
  * `reset-test-scope.ui-test.ts` fails if it stops working.
  */
-const currentHookType = (testInfo: TestInfo) =>
+export const currentHookType = (testInfo: TestInfo) =>
   (testInfo as TestInfo & { _currentHookType?: () => string | undefined })._currentHookType?.();
 
 export const test = base.extend<
@@ -157,7 +160,7 @@ export const test = base.extend<
   databaseOwner: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
-      await use({});
+      await use({ restores: 0 });
     },
     { scope: 'worker' },
   ],
@@ -182,6 +185,7 @@ export const test = base.extend<
       const newFile = databaseOwner.file !== testInfo.file;
       if (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll')) {
         await restoreDatabase(server);
+        databaseOwner.restores += 1;
       }
       databaseOwner.file = testInfo.file;
 

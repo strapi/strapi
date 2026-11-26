@@ -36,6 +36,68 @@ npx playwright test --ui                    # UI mode
 Run `npx playwright` from `tests-next/ui`, or pass `--config tests-next/ui/playwright.config.ts`:
 from another folder, it doesn't use this config.
 
+## Writing a test
+
+Import `test` and `expect` from [`fixtures`](./fixtures/index.ts) (`@strapi/tests-e2e/fixtures`),
+never from `@playwright/test`: tests in this folder use the relative path, `../../fixtures`.
+
+```ts
+import { expect, test } from '../../fixtures';
+
+// Data the tests of this file share, seeded once after the file's reset.
+test.use({ seedPlan: { adminRoles: [{ name: 'Reviewer' }] } });
+
+// The page starts logged in as the Super Admin (`role: 'admin'`, default).
+test('opens the seeded role', async ({ page, seeded }) => {
+  const [reviewer] = seeded.adminRoles; // { id, name, code }
+  await page.goto(`/admin/settings/roles/${reviewer.id}`); // baseURL is the worker's server
+  await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue('Reviewer');
+});
+
+test.describe('as an editor', () => {
+  test.use({ role: 'editor' });
+
+  test('cannot open the seeded role', async ({ page, seeded }) => {
+    await page.goto(`/admin/settings/roles/${seeded.adminRoles[0].id}`);
+    // ...
+  });
+});
+
+test('blocks an end user', async ({ seed, unique }) => {
+  const username = unique('reader');
+  // Data for this test only, typed after the plan: `users` is there, `locales` is not.
+  const { users } = await seed({
+    users: [{ username, email: `${username}@example.com`, password: 'Testing123!' }],
+  });
+  // ...
+});
+```
+
+- **`role`**: the page starts logged in as `'admin'` (default, Super Admin), `'editor'` or
+  `'author'` with `test.use({ role })`, or logged out with `null`. `ROLES` and `CREDENTIALS`
+  come from the entry too. See [Roles](#roles).
+- **`resetScope`**: the database goes back to the worker's snapshot before each file (`'file'`,
+  default), so a file's `beforeAll` and tests share data, or before each test
+  (`test.use({ resetScope: 'test' })`). See [Resets](../README.md).
+- **Seeding**: a `SeedPlan` (locales, admin roles and users, end users, media, entries, API
+  tokens; see [Set up an app](../README.md#set-up-an-app)) goes through the running server.
+  - `test.use({ seedPlan })` + `seeded`: seeded on the first use after a reset, then reused:
+    once per file with `file` scope, once per test with `test` scope.
+  - `seed(plan)`: in a test, `beforeEach` or a file-scope `beforeAll`. It returns the created ids,
+    documentIds and access keys. With `test` scope it throws in `beforeAll`, whose data the reset
+    would wipe before the first test.
+  - `unique(label)`: a name no other call returns in the worker, for names and emails a file
+    creates more than once. Plans in `test.use` are static: give their names by hand, different
+    in each `describe` of a file (API token names and admin emails are unique).
+- **Edition and features**: tag EE-only tests `@ee` (CE runs leave them out); declare what a
+  test needs with `test.use({ requires: { ee: [...], future: [...] } })`, which fails the test
+  when the instance lacks it; read the instance with the `features` fixture. See
+  [Edition](../README.md#edition).
+- **Server**: the `server` fixture is the worker's Strapi server (`server.url`, `server.app`).
+
+There is no `sharedSetup`: the per-file reset and `seedPlan` give each file its own data, and
+`role` its login, with no module-level registry of setup ids that two files could share.
+
 ## The app
 
 Global setup prepares one app, `test-apps/next/ui`, and builds its admin panel. The next runs
@@ -99,10 +161,10 @@ no sharding. One app per worker and sharding come with CMS-2483.
 ## Roles
 
 A test starts logged in as a role, with no login form. Pick it with the `role` option of
-[`fixtures/app.ts`](./fixtures/app.ts):
+[`fixtures/app.ts`](./fixtures/app.ts), exported by the [entry](#writing-a-test):
 
 ```ts
-import { test } from '../../fixtures/app';
+import { test } from '../../fixtures';
 
 test.use({ role: 'editor' }); // 'admin' (default, Super Admin), 'editor', 'author', or null
 ```

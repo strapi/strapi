@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { expect, test } from '../../fixtures/app';
+import { expect, test } from '../../fixtures';
 
 test('generates an app without content types', ({ server }) => {
   // Ignore dotfiles such as the .gitkeep create-strapi-app leaves.
