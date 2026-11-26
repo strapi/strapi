@@ -704,7 +704,9 @@ describe('AssetsPage search', () => {
     it('does not offer "Search all media" inside a folder without a search term', async () => {
       renderPage('?folder=1');
 
-      expect(await findHeading()).toHaveTextContent('test');
+      // On mobile the loaded folder title replaces the "Loading..." heading with a
+      // new element, so wait for the heading by name instead of holding the first one.
+      expect(await screen.findByRole('heading', { level: 1, name: /test/ })).toBeInTheDocument();
       expect(screen.queryByRole('switch', { name: 'Search all media' })).not.toBeInTheDocument();
     });
 
@@ -883,13 +885,15 @@ describe('AssetsPage mobile folder breadcrumb', () => {
     });
   });
 
-  it('keeps the search title while searching inside a folder', async () => {
+  it('keeps the plain folder title while searching inside a folder', async () => {
     renderPage('?folder=3&_q=x');
 
     // The sidebar row proves the folder structure has loaded.
     await screen.findByText('Paris');
 
-    expect(await findHeading()).toHaveTextContent('Search results for "x"');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Paris (2 items)' })
+    ).toBeInTheDocument();
     expect(queryBreadcrumb()).not.toBeInTheDocument();
   });
 
