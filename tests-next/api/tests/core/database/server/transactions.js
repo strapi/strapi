@@ -84,7 +84,7 @@ module.exports = {
                 // this should throw and roll back
                 await invalidUpdate(strapi, { invalid_key: 'error' });
               });
-            } catch (e) {
+            } catch {
               // do nothing
             }
 
@@ -111,7 +111,7 @@ module.exports = {
               await strapi.db.transaction(async () => {
                 await setKey(strapi, 'changed key - nested');
               });
-            } catch (e) {
+            } catch {
               // do nothing
             }
 
@@ -161,7 +161,7 @@ module.exports = {
           });
           throw new Error('test');
         });
-      } catch (e) {
+      } catch {
         // do nothing
       }
       await strapi.db.settleTransactionHooks();
@@ -182,7 +182,7 @@ module.exports = {
             throw new Error('test');
           });
         });
-      } catch (e) {
+      } catch {
         // do nothing
       }
       await strapi.db.settleTransactionHooks();
