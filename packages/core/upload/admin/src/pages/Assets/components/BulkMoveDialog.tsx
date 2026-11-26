@@ -50,8 +50,9 @@ interface BulkMoveDialogProps {
  * folder-structure, so both panes refresh on success. On failure the modal stays
  * open so the user can retry or cancel.
  *
- * Used both by the bulk actions bar (the whole selection) and by a folder's
- * actions menu (that one folder).
+ * Used by the bulk actions bar and the selection menu (the whole selection), and
+ * by the actions menu of one asset or folder (that one item). It checks no
+ * permission: its callers do.
  */
 export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDialogProps) => {
   const { formatMessage } = useIntl();

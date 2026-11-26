@@ -81,6 +81,7 @@ const createMockStrapi = (storedRow: StoredInfo | null) => {
         rollback: vi.fn().mockResolvedValue(undefined),
       }),
       queryBuilder,
+      lifecycles: { subscribe: vi.fn() },
     },
     config: { get: vi.fn().mockReturnValue('project-uuid') },
     cron: { add: vi.fn() },

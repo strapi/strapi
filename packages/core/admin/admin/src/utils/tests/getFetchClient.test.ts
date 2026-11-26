@@ -1,3 +1,4 @@
+import { AUTH_COOKIE_NAME, deleteCookie } from '../cookies';
 import {
   ADMIN_REFRESH_LOCK,
   attemptTokenRefresh,
@@ -9,7 +10,10 @@ import {
   setOnSessionExpired,
   setOnTokenUpdate,
   triggerSessionExpired,
+  unstable_addRequestHeaders,
 } from '../getFetchClient';
+
+import type { FetchClient, FetchOptions, RequestHeadersProvider } from '../getFetchClient';
 
 const buildJwt = (expSeconds: number): string => {
   const json = JSON.stringify({ exp: expSeconds });
@@ -1073,6 +1077,281 @@ describe('getFetchClient', () => {
       triggerSessionExpired();
 
       expect(callback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('request headers', () => {
+    type Send = (client: FetchClient, url: string, options?: FetchOptions) => Promise<unknown>;
+
+    const methods: Array<[string, Send]> = [
+      ['get', (client, url, options) => client.get(url, options)],
+      ['post', (client, url, options) => client.post(url, {}, options)],
+      ['put', (client, url, options) => client.put(url, {}, options)],
+      ['del', (client, url, options) => client.del(url, options)],
+    ];
+
+    let removers: Array<() => void> = [];
+    const register = (provider: RequestHeadersProvider) => {
+      removers.push(unstable_addRequestHeaders(provider));
+    };
+
+    const sentHeaders = (call = 0): Headers =>
+      (window.fetch as jest.Mock).mock.calls[call][1].headers;
+
+    beforeEach(() => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('stored-token'));
+      (window.fetch as jest.Mock).mockImplementation(() =>
+        Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+      );
+    });
+
+    afterEach(() => {
+      removers.forEach((remove) => remove());
+      removers = [];
+    });
+
+    it.each(methods)(
+      '%s: a caller header replaces the default whatever its casing',
+      async (_method, send) => {
+        await send(getFetchClient(), '/x', { headers: { authorization: 'Bearer caller-token' } });
+
+        expect(sentHeaders().get('Authorization')).toBe('Bearer caller-token');
+      }
+    );
+
+    it.each(methods)('%s: sends the headers a plugin registered', async (_method, send) => {
+      register(() => ({ 'x-strapi-space': 'france' }));
+
+      await send(getFetchClient(), '/x');
+
+      expect(sentHeaders().get('x-strapi-space')).toBe('france');
+    });
+
+    it.each(methods)(
+      '%s: a 401 retry sends the headers read when the call started',
+      async (_method, send) => {
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        let storageReads = 0;
+        (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+          if (key !== 'jwtToken') {
+            return null;
+          }
+          storageReads += 1;
+          return JSON.stringify(buildJwt(nowSeconds + (storageReads === 1 ? -60 : 3600)));
+        });
+
+        let space = 'france';
+        register(() => ({ 'x-strapi-space': space }));
+
+        (window.fetch as jest.Mock)
+          .mockImplementationOnce(() => {
+            // The tab switches space while the first attempt is in flight.
+            space = 'spain';
+            return Promise.resolve({
+              status: 401,
+              ok: false,
+              json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+            });
+          })
+          .mockImplementationOnce(() =>
+            Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+          );
+
+        await send(getFetchClient(), '/x');
+
+        expect(window.fetch).toHaveBeenCalledTimes(2);
+        expect(sentHeaders(1).get('x-strapi-space')).toBe('france');
+      }
+    );
+
+    it.each(methods)(
+      '%s: a caller header replaces a registered header with the same name',
+      async (_method, send) => {
+        register(() => ({ 'x-strapi-space': 'france' }));
+
+        await send(getFetchClient(), '/x', { headers: { 'X-Strapi-Space': 'spain' } });
+
+        expect(sentHeaders().get('x-strapi-space')).toBe('spain');
+      }
+    );
+
+    it.each([
+      [
+        'post',
+        (client: FetchClient, body: FormData, options: FetchOptions) =>
+          client.post('/x', body, options),
+      ],
+      [
+        'put',
+        (client: FetchClient, body: FormData, options: FetchOptions) =>
+          client.put('/x', body, options),
+      ],
+    ])('%s: sends a FormData body without a caller Content-Type', async (_method, send) => {
+      await send(getFetchClient(), new FormData(), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      expect(sentHeaders().has('Content-Type')).toBe(false);
+    });
+
+    it('sends the headers on the retry of a request sent without a stored token', async () => {
+      const freshToken = buildJwt(Math.floor(Date.now() / 1000) + 3600);
+      let storageReads = 0;
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+        storageReads += 1;
+        return storageReads === 1 ? null : JSON.stringify(freshToken);
+      });
+      deleteCookie(AUTH_COOKIE_NAME);
+      register(() => ({ 'x-strapi-space': 'france' }));
+
+      let attempts = 0;
+      (window.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (url.endsWith('/admin/access-token')) {
+          return Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: freshToken } }),
+          });
+        }
+        attempts += 1;
+        return Promise.resolve(
+          attempts === 1
+            ? {
+                status: 401,
+                ok: false,
+                json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+              }
+            : { status: 200, ok: true, json: () => Promise.resolve({}) }
+        );
+      });
+
+      await getFetchClient().get('/x');
+
+      const retry = (window.fetch as jest.Mock).mock.calls.at(-1);
+      expect(retry[0]).toMatch(/\/x$/);
+      expect(retry[1].headers.get('x-strapi-space')).toBe('france');
+    });
+
+    it('leaves out a registered header whose value is undefined', async () => {
+      register(() => ({ 'x-strapi-space': undefined }));
+
+      await getFetchClient().get('/x');
+
+      expect(sentHeaders().has('x-strapi-space')).toBe(false);
+    });
+
+    it('stops sending a header once its provider is removed', async () => {
+      const remove = unstable_addRequestHeaders(() => ({ 'x-strapi-space': 'france' }));
+      remove();
+
+      await getFetchClient().get('/x');
+
+      expect(sentHeaders().has('x-strapi-space')).toBe(false);
+    });
+
+    it.each([
+      ['Authorization', 'Bearer stored-token'],
+      ['Content-Type', 'application/json'],
+      ['Accept', 'application/json'],
+    ])('keeps the value core sends when a registered header names %s', async (name, expected) => {
+      register(() => ({ [name.toLowerCase()]: 'from-plugin' }));
+
+      await getFetchClient().post('/x', {});
+
+      expect(sentHeaders().get(name)).toBe(expected);
+    });
+
+    describe('when a provider fails', () => {
+      it.each(methods)('%s: does not send the request when a provider throws', async (_m, send) => {
+        const failure = new Error('provider failed');
+        register(() => {
+          throw failure;
+        });
+        register(() => ({ 'x-strapi-space': 'france' }));
+
+        await expect(send(getFetchClient(), '/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          cause: failure,
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['a promise', async () => ({ 'x-strapi-space': 'france' })],
+        ['null', () => null],
+      ])('does not send the request when a provider returns %s', async (_name, provider) => {
+        // Plain JavaScript plugins can return anything, which the type does not allow
+        register(provider as unknown as RequestHeadersProvider);
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        '/admin/login',
+        '/admin/logout',
+        '/admin/access-token',
+        '/admin/init',
+        '/admin/registration-info',
+        '/admin/register',
+        '/admin/register-admin',
+        '/admin/forgot-password',
+        '/admin/reset-password',
+        '/admin/providers',
+        '/admin/providers?mode=sso',
+        'admin/logout',
+      ])('still sends %s', async (url) => {
+        register(() => {
+          throw new Error('provider failed');
+        });
+
+        await getFetchClient().post(url, {});
+
+        expect(window.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      it.each(['/admin/login-history', '/admin/providers/isSSOLocked'])(
+        'does not send %s',
+        async (url) => {
+          register(() => {
+            throw new Error('provider failed');
+          });
+
+          await expect(getFetchClient().get(url)).rejects.toMatchObject({
+            name: 'RequestHeadersError',
+          });
+          expect(window.fetch).not.toHaveBeenCalled();
+        }
+      );
+
+      it('does not send the request when a header value is not a string', async () => {
+        // Plain JavaScript plugins can return any value, which the type does not allow
+        register(
+          () =>
+            ({ 'x-strapi-space': Promise.resolve('france') }) as unknown as Record<string, string>
+        );
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          message: expect.stringContaining('"x-strapi-space"'),
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it('does not send the request when a header cannot be sent by the browser', async () => {
+        register(() => ({ 'x-strapi-space': '日本' }));
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          message: expect.stringContaining('"x-strapi-space"'),
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
     });
   });
 });
