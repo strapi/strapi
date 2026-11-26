@@ -96,6 +96,34 @@ The server mode (`serverMode`) is a project option, read by the worker fixture i
 CI runs each project in its own `tests-next ui` job (`--project=<name>`), with one worker and
 no sharding. One app per worker and sharding come with CMS-2483.
 
+## Roles
+
+A test starts logged in as a role, with no login form. Pick it with the `role` option of
+[`fixtures/app.ts`](./fixtures/app.ts):
+
+```ts
+import { test } from '../../fixtures/app';
+
+test.use({ role: 'editor' }); // 'admin' (default, Super Admin), 'editor', 'author', or null
+```
+
+| `role`   | Admin user (`CREDENTIALS` in [`fixtures/auth.ts`](./fixtures/auth.ts)) | Strapi role |
+| -------- | ---------------------------------------------------------------------- | ----------- |
+| `admin`  | `admin@tests.strapi.io`                                                | Super Admin |
+| `editor` | `editor@tests.strapi.io`                                               | Editor      |
+| `author` | `author@tests.strapi.io`                                               | Author      |
+| `null`   | none: the page starts logged out                                       |             |
+
+Once per worker, before the database snapshot, the `server` fixture creates the three users and
+logs each one in through `POST /admin/login`. It saves one storage state per role (refresh
+cookie, the access token in localStorage, and the guided tour turned off, `GUIDED_TOUR_OFF`) under
+`test-results/.auth/<project>-<port>/<role>.json`. The users and their sessions are in the
+snapshot, so every reset keeps them. A test that logs out or logs in again only changes the
+database until the next reset.
+
+Only [`tests/auth/login.ui-test.ts`](./tests/auth/login.ui-test.ts) drives the login form
+(`role: null`). Use the `baseURL` (the worker's server) for navigation: `page.goto('/admin')`.
+
 ## Environment variables
 
 | Variable              | Default | Effect                                                         |
