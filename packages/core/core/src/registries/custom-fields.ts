@@ -2,6 +2,9 @@ import { has, isPlainObject } from 'lodash';
 
 import type { Core, Modules } from '@strapi/types';
 
+import { areCustomFieldTypesConverted } from '../utils/convert-custom-field-type';
+import { warnLateRegistration } from '../utils/late-registration';
+
 const ALLOWED_TYPES = [
   'biginteger',
   'boolean',
@@ -86,6 +89,18 @@ const customFieldsRegistry = (strapi: Core.Strapi) => {
         }
 
         customFields[uid] = cf;
+
+        if (areCustomFieldTypesConverted(strapi) === true) {
+          warnLateRegistration(strapi, {
+            surface: 'custom-fields',
+            key: uid,
+            subject: `Custom field "${uid}"`,
+            closedBy:
+              'Strapi converted the custom field attributes at the end of the register phase',
+            effect: `a content type or component that uses it stops the next start with "Could not find Custom Field: ${uid}"`,
+            registerIn: 'from a register function',
+          });
+        }
       }
     },
   };
