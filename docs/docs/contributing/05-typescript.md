@@ -241,6 +241,22 @@ registered schema. A subscriber on several models receives the union of their ev
 the caller passes, in `params.data` and `params.where`, stay `unknown`. Read
 [Lifecycles](../packages/core/database/04-lifecycles.md#with-strict-types).
 
+### Request input is not covered by strict types
+
+Strict types check the contracts that code calls, not the request data that it passes. The Koa
+context keeps its types in both modes:
+
+- `ctx.request.body`, `ctx.params` and `ctx.state.user` are `any`. Request data passes every strict
+  contract unchecked: `service.create({ data: ctx.request.body.data })` compiles, while a wrong
+  literal, such as `{ data: { title: 1 } }`, is a type error.
+- `ctx.query` is the index signature of the `qs` parse result. A result type computed from it, as in
+  `findMany(ctx.query)`, does not follow the `status` or `populate` that the client sends.
+
+Parse or validate request input before passing it on, and sanitize it: with strict types,
+`sanitizeInput` returns the type of its data, so its result passes on where the raw body does. Typed
+request input will come through opt-in helpers in a later release. Strict contracts are beta, and a
+minor release can tighten them.
+
 ## Strict mode in the monorepo
 
 Strapi's server packages type-check in strict mode. The shared `tsconfig/server.json` preset
