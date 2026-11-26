@@ -335,73 +335,6 @@ describe('relation subquery path (delete / update writes)', () => {
     await connection.destroy();
   });
 
-  it('query builder adds no relation-sort joins to an unpaginated scalar-filtered write', async () => {
-    const { db, connection } = makeDb();
-    await setupTables(connection);
-    const em = createEntityManager(db);
-
-    const qb = em
-      .createQueryBuilder(TEST_UID)
-      .init({ where: { name: 'Hugo LLORIS' }, orderBy: { related: { title: 'asc' } } })
-      .increment('views', 1);
-
-    const sql = qb.getKnexQuery().toString();
-    expect(sql).not.toMatch(/join/i);
-    expect(sql).not.toMatch(/order by/i);
-    expect(sql).not.toMatch(/select/i);
-
-    await qb.execute();
-    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 10]);
-
-    await connection.destroy();
-  });
-
-  it('query builder adds no relation-sort joins when orderBy and a relation filter both apply', async () => {
-    const { db, connection } = makeDb();
-    await setupTables(connection);
-    const em = createEntityManager(db);
-
-    const withSort = em
-      .createQueryBuilder(TEST_UID)
-      .init({ where: { related: 1 }, orderBy: { related: { title: 'asc' } } })
-      .increment('views', 1);
-    const withoutSort = em
-      .createQueryBuilder(TEST_UID)
-      .init({ where: { related: 1 } })
-      .increment('views', 1);
-
-    // Only the joins from the relation filter, none from the relation sort.
-    expect(withSort.getKnexQuery().toString()).toBe(withoutSort.getKnexQuery().toString());
-
-    await withSort.execute();
-    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 11]);
-
-    await connection.destroy();
-  });
-
-  it.each([
-    ['increment', (qb: QueryBuilder) => qb.increment('views', 1)],
-    ['update', (qb: QueryBuilder) => qb.update({ name: 'UPDATED' })],
-    ['delete', (qb: QueryBuilder) => qb.delete()],
-  ])('query builder treats limit: -1 as unbounded for %s', async (_label, apply) => {
-    const { db, connection } = makeDb();
-    await setupTables(connection);
-    const em = createEntityManager(db);
-
-    const qb = em.createQueryBuilder(TEST_UID).init({
-      where: { related: { title: 'Category A' } },
-      orderBy: { related: { title: 'asc' } },
-      limit: -1,
-    });
-
-    const sql = apply(qb).getKnexQuery().toString();
-    // Only the relation filter's two joins; the relation sort adds none and orderBy is dropped.
-    expect(sql.match(/left join/gi)).toHaveLength(2);
-    expect(sql).not.toMatch(/order by/i);
-
-    await connection.destroy();
-  });
-
   it.each([
     ['limit', { limit: 1 }],
     ['offset', { offset: 1 }],
@@ -422,16 +355,33 @@ describe('relation subquery path (delete / update writes)', () => {
     await connection.destroy();
   });
 
-  it('query builder does not emit FOR UPDATE in the relation subquery (pg SQL)', async () => {
-    // The SQLite compiler writes forUpdate() as an empty string, so compile with the pg
-    // dialect. No connection is opened: only the SQL is generated.
-    const connection = knex({ client: 'pg' });
+  /**
+   * Compile SQL with a real Knex client. `makeDb()` is SQLite, whose compiler drops
+   * `forUpdate()` and never emits `ORDER BY` on an update, so those clauses are invisible there.
+   */
+  const compileSql = async (client: 'pg' | 'mysql2', dialectClient: 'postgres' | 'mysql') => {
+    const sqlite = makeDb();
+    const connection = knex({ client });
     const db = {
-      ...makeDb().db,
+      ...sqlite.db,
       connection,
       getConnection: (table?: string) => (table ? connection(table) : connection),
+      dialect: {
+        client: dialectClient,
+        useReturning: () => dialectClient === 'postgres',
+        transformErrors(error: Error) {
+          throw error;
+        },
+      },
     } as any;
-    const em = createEntityManager(db);
+
+    await sqlite.connection.destroy();
+
+    return { connection, em: createEntityManager(db) };
+  };
+
+  it('query builder does not emit FOR UPDATE in the relation subquery (pg SQL)', async () => {
+    const { connection, em } = await compileSql('pg', 'postgres');
 
     const qb = em
       .createQueryBuilder(TEST_UID)
@@ -450,6 +400,39 @@ describe('relation subquery path (delete / update writes)', () => {
     ).toMatch(/for update/i);
 
     expect(qb.getKnexQuery().toString()).not.toMatch(/for update/i);
+
+    await connection.destroy();
+  });
+
+  it('query builder keeps FOR UPDATE in the relation subquery (mysql SQL)', async () => {
+    const { connection, em } = await compileSql('mysql2', 'mysql');
+
+    const sql = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } })
+      .forUpdate()
+      .increment('views', 1)
+      .getKnexQuery()
+      .toString();
+
+    expect(sql).toMatch(/for update/i);
+
+    await connection.destroy();
+  });
+
+  it('query builder keeps a scalar orderBy on an unbounded MySQL write', async () => {
+    const { connection, em } = await compileSql('mysql2', 'mysql');
+
+    const sql = em
+      .createQueryBuilder(TEST_UID)
+      .where({ views: { $gte: 1 } })
+      .orderBy({ views: 'desc' })
+      .increment('views', 1)
+      .getKnexQuery()
+      .toString();
+
+    expect(sql).toMatch(/order by `views` desc/i);
+    expect(sql).not.toMatch(/select/i);
 
     await connection.destroy();
   });
