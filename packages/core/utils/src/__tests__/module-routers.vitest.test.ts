@@ -72,6 +72,13 @@ describe('module routers', () => {
       expect(routesOf(router)).toBe(routes);
     });
 
+    it('returns no routes for a router object without routes', () => {
+      // e.g. an API router file that exports `{}`
+      const router = {} as RouterObjectLike<TestRoute>;
+
+      expect(routesOf(router)).toEqual([]);
+    });
+
     it('returns the routes of the router built from a factory', () => {
       const factory = createContentApiRoutesFactory(() => [route]);
       const built = factory();
@@ -127,6 +134,7 @@ describe('module routers', () => {
         'content-api': createContentApiRoutesFactory(() => [{ method: 'POST', path: '/items' }]),
         custom: () => ({ type: 'content-api', routes: [route] }),
         array: [{ method: 'PUT', path: '/items' }],
+        empty: {} as RouterObjectLike<TestRoute>,
       };
 
       expect(Object.values(declared).flatMap(routesOf)).toEqual([
