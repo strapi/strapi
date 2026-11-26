@@ -115,6 +115,11 @@ const Providers = ({
   const queryClientRef = React.useRef<QueryClient | null>(null);
   const storeRef = React.useRef<ReturnType<typeof configureStore> | null>(null);
   const routerRef = React.useRef<ReturnType<typeof createMemoryRouter> | null>(null);
+  const mainNavRef = React.useRef<MainNav | null>(null);
+
+  if (mainNavRef.current === null) {
+    mainNavRef.current = mainNav ?? new MainNav();
+  }
 
   if (queryClientRef.current === null) {
     queryClientRef.current = new QueryClient({
@@ -161,7 +166,7 @@ const Providers = ({
                   register: jest.fn(),
                 } as unknown as React.ComponentProps<typeof StrapiAppProvider>['widgets']
               }
-              mainNav={mainNav ?? new MainNav()}
+              mainNav={mainNavRef.current}
               customFields={{
                 customFields: {},
                 get: jest.fn().mockReturnValue({

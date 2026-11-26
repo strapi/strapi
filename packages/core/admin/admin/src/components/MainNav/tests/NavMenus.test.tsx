@@ -63,11 +63,11 @@ describe('NavMenus', () => {
     const trigger = await screen.findByRole('button', { name: 'Space: Control center' });
     const icon = screen.getByText('CC').parentElement!;
 
-    expect(getComputedStyle(icon).boxShadow).toBe('');
+    expect(getComputedStyle(icon).outlineOffset).toBe('');
 
     await user.click(trigger);
 
-    expect(getComputedStyle(icon).boxShadow).not.toBe('');
+    expect(getComputedStyle(icon).outlineOffset).toBe('2px');
   });
 
   it('shows the current value in the trigger and its accessible name', async () => {

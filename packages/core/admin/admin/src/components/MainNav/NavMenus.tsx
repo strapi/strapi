@@ -25,10 +25,10 @@ const MenuTrigger = styled(Menu.Trigger)`
     justify-content: center;
   }
 
+  /* An outline with an offset leaves a see-through gap, whatever the navigation background */
   &[data-state='open'] ${MenuIcon} {
-    box-shadow:
-      0 0 0 2px ${({ theme }) => theme.colors.neutral0},
-      0 0 0 4px ${({ theme }) => theme.colors.primary600};
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: 2px;
   }
 `;
 
