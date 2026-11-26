@@ -60,7 +60,10 @@ describe('ApiRoutesProvider', () => {
       expect(routes[1].path).toBe('/api/api/articles');
     });
 
-    it.each(['/rest', '/rest/'])('should support the custom content API prefix %s', (prefix) => {
+    it.each([
+      ['/rest', '/rest/v2/articles', '/rest/rest/articles'],
+      ['/rest/', '/rest//v2/articles', '/rest//rest/articles'],
+    ])('should match mounted paths for the content API prefix %s', (prefix, nested, direct) => {
       const strapiMock = {
         config: {
           get: jest.fn((key: string, defaultValue?: unknown) => {
@@ -100,7 +103,7 @@ describe('ApiRoutesProvider', () => {
       const provider = new ApiRoutesProvider(strapiMock);
       const { routes } = provider;
 
-      expect(routes.map(({ path }) => path)).toEqual(['/rest/v2/articles', '/rest/rest/articles']);
+      expect(routes.map(({ path }) => path)).toEqual([nested, direct]);
     });
   });
 

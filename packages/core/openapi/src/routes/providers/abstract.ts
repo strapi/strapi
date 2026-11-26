@@ -40,8 +40,14 @@ export abstract class AbstractRoutesProvider implements RoutesProvider {
     const prefix = Object.prototype.hasOwnProperty.call(route.config ?? {}, 'prefix')
       ? ''
       : routerPrefix;
-    const path =
-      `/${apiPrefix}/${prefix}/${route.path}`.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+    // Koa prefixes nested paths as registered, preserving any slash in the prefix.
+    const path = [prefix, apiPrefix].reduce((path, prefix) => {
+      if (!prefix) {
+        return path;
+      }
+
+      return path === '/' ? prefix : `${prefix}${path}`;
+    }, route.path);
 
     return { ...route, path };
   }
