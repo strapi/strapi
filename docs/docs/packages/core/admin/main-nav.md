@@ -61,7 +61,7 @@ app.unstable_addMainNavTint(() => {
 ```
 
 - The argument is a hook: it can call other hooks, and returns a CSS colour value, such as `#2e5e3a` or `rgb(46 94 58)`, or `null`. Add tints in the admin `register`: once the admin renders, adding one throws.
-- Every tint runs on every render, in the order plugins added them. The first one that returns a valid CSS colour wins. Other values are skipped, including `var()` and keywords like `inherit`, which `color-mix()` cannot use. With none, the navigation keeps its colours. The mobile burger panel renders outside the navigation, so it is not tinted.
+- Every tint runs on every render, in the order plugins added them. The first one that returns a valid CSS colour wins. Other values are skipped, including keywords like `inherit`, which `color-mix()` cannot use, and `var()` or `env()`: they cannot be checked before render, and one that does not resolve would make the navigation transparent. With none, the navigation keeps its colours. The mobile burger panel renders outside the navigation, so it is not tinted.
 - Core sets the colour as `--main-nav-tint` on the navigation, and mixes it with the theme's colours with `color-mix()`: a light wash of it on the background and the border, and on the hover and active links. Icons turn a shade darker, and the active link icon is half the colour, half the theme's text colour, so icons keep a 3:1 contrast on the wash with light colours too. Badges on links, like the license lightning, keep their own colour. Text keeps the theme's colours, so it stays readable in light and dark mode.
 
 ## Related

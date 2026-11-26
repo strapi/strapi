@@ -45,10 +45,11 @@ const MainNavWrapper = styled(Flex)`
 
     /*
      * The theme hover colour under the same wash, so hover shows as much as without a tint. Menu
-     * triggers, like the profile menu, hover like the links
+     * triggers, like the profile menu, and the mobile burger button hover like the links
      */
     a:hover,
-    button[aria-haspopup='menu']:hover {
+    button[aria-haspopup='menu']:hover,
+    button[aria-controls='burger-menu']:hover {
       background: color-mix(
         in srgb,
         var(--main-nav-tint) 12%,
@@ -75,16 +76,19 @@ const MainNavWrapper = styled(Flex)`
 `;
 
 /**
- * `CSS.supports` accepts these as a colour, but `color-mix()` cannot use them
+ * `CSS.supports` accepts these as a colour. `color-mix()` cannot use CSS-wide keywords. It can use
+ * `var()` and `env()`, but they cannot be checked before render, and one that does not resolve
+ * makes every tinted rule invalid, and the navigation transparent
  */
 const NOT_A_COLOUR = /^(inherit|initial|unset|revert|revert-layer)$|\b(var|env)\(/i;
 
 /**
  * A value that is not a colour would make every `color-mix()` rule invalid, and the navigation
- * transparent. Accepted where the browser cannot check it
+ * transparent. Checks the type too, as JS plugins can return `false`, as in `tinted && color`.
+ * Accepted where the browser cannot check it
  */
-const isColor = (value: string | null): value is string =>
-  value != null &&
+const isColor = (value: unknown): value is string =>
+  typeof value === 'string' &&
   !NOT_A_COLOUR.test(value.trim()) &&
   (typeof CSS === 'undefined' ||
     typeof CSS.supports !== 'function' ||

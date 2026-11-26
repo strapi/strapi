@@ -38,6 +38,21 @@ describe('LeftMenu', () => {
     expect(screen.getByRole('link', { name: 'Content Manager' })).toBeInTheDocument();
   });
 
+  it('gives the burger button no background of its own, so a tint shows through', () => {
+    renderRTL(
+      <LeftMenu
+        generalSectionLinks={[]}
+        pluginsSectionLinks={[]}
+        topMobileNavigation={[]}
+        burgerMobileNavigation={[]}
+      />
+    );
+
+    const burger = screen.getByRole('button', { name: 'Menu', hidden: true });
+
+    expect(getComputedStyle(burger).backgroundColor).toBe('transparent');
+  });
+
   it('renders plugin menus at the bottom, right before the profile menu', async () => {
     const mainNav = new MainNav();
     mainNav.addMenu({

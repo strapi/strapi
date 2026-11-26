@@ -196,6 +196,8 @@ const LeftMenu = ({
           }}
         >
           <IconButton
+            // Transparent, so it takes the navigation background, tinted or not
+            variant="ghost"
             onClick={() => setIsBurgerMenuShown((prev) => !prev)}
             style={{ border: 'none' }}
             label="Menu"

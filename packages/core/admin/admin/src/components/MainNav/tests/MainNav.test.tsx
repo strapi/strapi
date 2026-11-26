@@ -46,6 +46,8 @@ describe('MainNav', () => {
 
     try {
       renderTinted(
+        // A JS plugin returning `tinted && color`
+        () => false as unknown as null,
         () => 'space-green',
         () => 'inherit',
         () => 'var(--space-color)',
