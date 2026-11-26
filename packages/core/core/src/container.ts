@@ -5,7 +5,10 @@ export class Container implements Pick<Core.Strapi, 'add' | 'get' | 'has'> {
 
   private serviceMap = new Map();
 
-  add(name: string, resolver: unknown) {
+  add<TName extends Core.ContainerLookupName>(
+    name: TName,
+    resolver: Core.IsStrict extends false ? unknown : NoInfer<Core.ContainerResolver<TName>>
+  ) {
     if (this.registerMap.has(name)) {
       throw new Error(`Cannot register already registered service ${name}`);
     }

@@ -1,3 +1,4 @@
+import type { Database } from '@strapi/database';
 import type { Logger } from '@strapi/logger';
 
 import type * as Modules from '../modules';
@@ -6,7 +7,13 @@ import type { ContentAPISchemaRegistry } from './content-api-schema-registry';
 import type * as Contracts from './container-contracts';
 import type { StrictHooksRegistry } from './hook';
 import type { AdminModule } from './module';
-import type { ConfigProvider, Reloader, StartupLogger, StrapiFS } from './strapi';
+import type {
+  ConfigProvider,
+  Reloader,
+  StartupLogger,
+  Strapi as StrapiInstance,
+  StrapiFS,
+} from './strapi';
 
 export interface Container {
   add<T, U extends string>(name: U, resolver: T): Container;
@@ -37,6 +44,62 @@ export type ContainerLookup<
   TName extends ContainerLookupName,
   T,
 > = ContainerLookupName extends TName ? T : ContainerFor<TName>;
+
+/**
+ * What `strapi.add(name, resolver)` accepts with strict types. A registered name takes a factory
+ * that returns its value, or the value itself unless it is a function: the container calls a
+ * function resolver as a factory. An unregistered name, or a name known only at runtime, takes any
+ * resolver. The value is the name's {@link Strapi.Registries.ContainerEntries} entry, or the
+ * implementation's contract for the names of {@link StrictContainerOverlays}.
+ */
+export type ContainerResolver<TName extends string> = TName extends RegisteredContainerName
+  ? ContainerResolverOf<ContainerAddValue<TName>>
+  : unknown;
+
+/**
+ * A resolver of `TValue`: a factory, called once with the container and the `args` of the first
+ * `get`, or `TValue` itself when it is not a function.
+ */
+type ContainerResolverOf<TValue> =
+  | ((container: StrapiInstance, args?: unknown) => TValue)
+  | (TValue extends (...args: never[]) => unknown ? never : TValue);
+
+/**
+ * Registry trust boundary of `add`. Each of these names registers a strict view, which `get` and
+ * the matching `strapi.*` getter return: the implementation's contract refined by a registry that
+ * the implementation cannot check. `add` checks the implementation's contract instead.
+ *
+ * - `coreStore`: `StrictCoreStore` types a read by the {@link Strapi.Registries.Stores} entry of its
+ *   key, but the value is a database row, which any code can write.
+ * - `hooks`: `StrictHooksRegistry` types a hook by its {@link Strapi.Registries.Hooks} entry, but
+ *   the registry stores any hook under any UID, and a plugin can replace it.
+ * - `db`: `StrictDatabase` types the events of a lifecycle subscriber by the registered schemas of
+ *   its `models`, but `@strapi/database` passes it the event of whatever query runs.
+ *
+ * Closed on purpose: the container refuses a second `add` of a name, so only the package that adds
+ * a name needs an overlay, and today only `@strapi/core` adds a name with a strict view.
+ */
+type StrictContainerOverlays = {
+  coreStore: Modules.CoreStore.CoreStore;
+  hooks: HooksRegistry;
+  db: Database;
+};
+
+/** The value `add` checks for `TName`: its overlay, or its registered value. */
+type ContainerAddValue<TName extends RegisteredContainerName> =
+  TName extends keyof StrictContainerOverlays
+    ? StrictContainerOverlays[TName]
+    : Strapi.Registries.ContainerEntries[TName];
+
+/** The hooks registry as `@strapi/core` implements it: any hook under any UID. */
+interface HooksRegistry {
+  keys(): string[];
+  get(uid: string): unknown;
+  getAll(namespace?: string): Record<string, unknown>;
+  set(uid: string, hook: unknown): HooksRegistry;
+  add(namespace: string, hooks: Record<string, unknown>): HooksRegistry;
+  extend(uid: string, extendFn: (hook: unknown) => unknown): HooksRegistry;
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

@@ -185,10 +185,14 @@ const createContentAPI = (strapi: Core.Strapi) => {
   /**
    * Register extra query params. Keys = param names; values = { schema, matchRoute? }.
    * Schemas must be Zod scalar or array-of-scalars (enforced at runtime via assertQueryParamSchema).
+   * The overload is the published signature, which also checks that each schema accepts a string.
    */
-  const addQueryParams = (options: Modules.ContentAPI.AddQueryParamsOptions) => {
+  function addQueryParams<TSchemas extends Modules.ContentAPI.QueryParamSchemas>(
+    options: Modules.ContentAPI.QueryStringParams<TSchemas>
+  ): void;
+  function addQueryParams(options: Modules.ContentAPI.AddQueryParamsOptions) {
     Object.entries(options).forEach(([param, rest]) => addQueryParam({ param, ...rest }));
-  };
+  }
 
   /**
    * Register extra input params (root-level body.data). Keys = param names; values = { schema, matchRoute? }.

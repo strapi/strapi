@@ -1,11 +1,14 @@
+import type { Database } from '@strapi/database';
 import type * as Modules from '../../modules';
-import type { ContainerFor, ContainerLookupName } from '../container';
+
+import type { ContainerFor, ContainerLookupName, ContainerResolver } from '../container';
 import type { ContentTypesRegistry, QueryParamsService } from '../container-contracts';
 import type { StrictHooksRegistry } from '../hook';
 import type { Strapi as StrapiInstance } from '../strapi';
 import type { Equal, Expect } from '../../../tests/helpers/assert';
 
 type Greeter = { greet(name: string): string };
+type Formatter = (value: string) => string;
 
 // An application, or a plugin, registers the names it adds to the container.
 declare global {
@@ -15,6 +18,7 @@ declare global {
     namespace Registries {
       interface ContainerEntries {
         'container-lab.greeter': Greeter;
+        'container-lab.formatter': Formatter;
       }
     }
   }
@@ -135,8 +139,9 @@ declare const names: [
 ];
 names satisfies unknown;
 
-// `add` does not check the resolver, and returns the container with strict types, so a chain keeps
-// resolving registered names.
+// `add` checks the resolver of a registered name against its value, and returns the container with
+// strict types, so a chain keeps resolving registered names. Unregistered and dynamic names take any
+// resolver.
 const chained = strapi
   .add('container-lab.greeter', () => ({ greet: (name: string) => `Hello ${name}` }))
   .add('container-lab.unregistered', { run() {} })
@@ -144,3 +149,53 @@ const chained = strapi
   .get('container-lab.greeter');
 declare const chainedLookups: [Expect<Equal<typeof chained, Greeter>>];
 chainedLookups satisfies unknown;
+
+// A resolver is a factory, called once with the container and the `args` of the first `get`, or the
+// value itself. A function value is not a resolver: the container would call it as a factory.
+type ContainerFactory<TValue> = (container: StrapiInstance, args?: unknown) => TValue;
+declare const resolvers: [
+  Expect<Equal<ContainerResolver<'container-lab.greeter'>, ContainerFactory<Greeter> | Greeter>>,
+  Expect<Equal<ContainerResolver<'container-lab.formatter'>, ContainerFactory<Formatter>>>,
+  Expect<Equal<ContainerResolver<'container-lab.unregistered'>, unknown>>,
+  Expect<Equal<ContainerResolver<string>, unknown>>,
+];
+resolvers satisfies unknown;
+
+const formatter: Formatter = (value) => value.trim();
+strapi.add('container-lab.greeter', { greet: (name: string) => name });
+strapi.add('container-lab.formatter', () => formatter);
+// The factory's parameters are typed: `container` is the strict `Strapi`.
+strapi.add('container-lab.greeter', (container) => ({
+  greet: (name: string) => container.get('container-lab.formatter')(name),
+}));
+strapi.add('container-lab.unregistered', 42);
+strapi.add(dynamicName, 42);
+
+// @ts-expect-error The factory returns a value that is not the registered `Greeter`.
+strapi.add('container-lab.greeter', () => ({ greet: (name: number) => name }));
+// @ts-expect-error A function value would be called as a factory: wrap it, `() => formatter`.
+strapi.add('container-lab.formatter', formatter);
+// @ts-expect-error A core name is checked against its registered value.
+strapi.add('webhookStore', () => ({}));
+
+// `coreStore`, `hooks` and `db` register a strict view, which refines the implementation with
+// registries it cannot check (store rows, hooks, lifecycle events). `add` checks the implementation's
+// contract; `get` returns the strict view.
+declare const coreStore: Modules.CoreStore.CoreStore;
+declare const database: Database;
+strapi.add('coreStore', () => coreStore);
+strapi.add('db', () => database);
+declare const overlays: [
+  // The core store is callable: only a factory adds it.
+  Expect<Equal<ContainerResolver<'coreStore'>, ContainerFactory<Modules.CoreStore.CoreStore>>>,
+  Expect<Equal<ContainerResolver<'db'>, ContainerFactory<Database> | Database>>,
+  Expect<
+    Equal<ReturnType<typeof strapi.get<unknown, 'coreStore'>>, Modules.CoreStore.StrictCoreStore>
+  >,
+  Expect<Equal<ReturnType<typeof strapi.get<unknown, 'db'>>, Modules.Lifecycles.StrictDatabase>>,
+];
+overlays satisfies unknown;
+// @ts-expect-error The core store implementation is checked.
+strapi.add('coreStore', () => ({ get: () => 1 }));
+// @ts-expect-error The hooks registry implementation is checked.
+strapi.add('hooks', () => ({ keys: () => [] }));

@@ -1,6 +1,7 @@
 import _, { PropertyName } from 'lodash';
+import type { sanitize } from '@strapi/utils';
 
-type Sanitizer = (value: unknown) => unknown;
+type Sanitizer = sanitize.Sanitizer;
 
 const sanitizersRegistry = () => {
   const sanitizers: Record<string, Sanitizer[]> = {};

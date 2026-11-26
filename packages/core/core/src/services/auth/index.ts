@@ -2,33 +2,11 @@ import assert from 'assert/strict';
 import { has } from 'lodash';
 
 import { errors } from '@strapi/utils';
-import type { Core } from '@strapi/types';
-import type { ParameterizedContext } from 'koa';
+import type { Core, Modules } from '@strapi/types';
 
-interface AuthenticationResponse {
-  authenticated?: boolean;
-  credentials?: unknown;
-  ability?: unknown;
-  error?: Error | null;
-}
-
-interface AuthenticationInfo {
-  strategy: Strategy;
-  credentials: unknown;
-  ability: unknown;
-}
-
-interface Strategy {
-  name: string;
-  authenticate: (ctx: ParameterizedContext) => Promise<AuthenticationResponse>;
-  verify?: (auth: AuthenticationInfo, config: Core.RouteConfig['auth']) => Promise<any>;
-}
-
-interface Authentication {
-  register: (type: string, strategy: Strategy) => Authentication;
-  authenticate: Core.MiddlewareHandler;
-  verify: (auth: AuthenticationInfo, config?: Core.RouteConfig['auth']) => Promise<any>;
-}
+// The service implements the published contract, which `strapi.add('auth', …)` checks.
+type Authentication = Modules.Auth.AuthenticationService;
+type Strategy = Parameters<Authentication['register']>[1];
 
 const INVALID_STRATEGY_MSG =
   'Invalid auth strategy. Expecting an object with properties {name: string, authenticate: function, verify: function}';

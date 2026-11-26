@@ -8,7 +8,12 @@ import type * as Schema from '../schema';
 
 import type * as UID from '../uid';
 
-import type { Container, ContainerLookup, ContainerLookupName } from './container';
+import type {
+  Container,
+  ContainerLookup,
+  ContainerLookupName,
+  ContainerResolver,
+} from './container';
 import type { ControllerLookup, ControllerLookupName, ControllerMap } from './controller';
 import type { MiddlewareLookup, MiddlewareLookupName, MiddlewareMap } from './middleware';
 import type { HookLookup, HookLookupName, HookMap } from './hook';
@@ -104,9 +109,13 @@ type StrictContainer = Omit<Container, 'get' | 'add'> & {
   /**
    * Adds `name`, which `get` then resolves: a function resolver is called once, with the container
    * and the `args` of the first `get`. Throws when the name is already added. Registered names are
-   * listed for completion; the resolver is not checked against the registered value.
+   * listed for completion, and their resolver is checked against the registered value (see
+   * {@link ContainerResolver}). An unregistered or dynamic name takes any resolver.
    */
-  add<T, TName extends ContainerLookupName>(name: TName, resolver: T): StrictContainer;
+  add<TName extends ContainerLookupName>(
+    name: TName,
+    resolver: NoInfer<ContainerResolver<TName>>
+  ): StrictContainer;
 };
 
 type StrapiContainer = IsStrict extends false ? Container : StrictContainer;

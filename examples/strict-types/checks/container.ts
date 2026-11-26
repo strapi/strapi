@@ -39,8 +39,12 @@ strapi.get('auth').register('content-api', {
   authenticate: () => ({ authenticated: false }),
 });
 
-// A name the application registers resolves to its contract. `add` does not check the resolver.
+// A name the application registers resolves to its contract, and `add` checks its resolver: a
+// factory, whose `container` is typed, or the value itself.
 strapi.add('app.greeter', () => ({ greet: (name: string) => `Hello ${name}` }));
+strapi.add('app.greeter', (container) => container.get('app.greeter'));
+// @ts-expect-error The factory returns a value that is not the registered contract.
+strapi.add('app.greeter', () => ({ greet: (name: number) => name }));
 const greeter = strapi.get('app.greeter');
 export type AppNames = [Core.Assert<Equal<typeof greeter, GreeterService>>];
 greeter.greet('Ada') satisfies string;
