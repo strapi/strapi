@@ -285,6 +285,29 @@ describe('AssetPickerDialog', () => {
       expect(screen.getByText('Blog content')).toBeInTheDocument();
     });
 
+    it('stay while a search is limited to the folder, and hide when searching all media', async () => {
+      renderDialog();
+
+      fireEvent.click(await screen.findByText('Blog content'));
+      await findTrail();
+
+      fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'hero' } });
+
+      const searchAll = await screen.findByRole('switch', { name: 'Search all media' });
+
+      expect(searchAll).not.toBeChecked();
+      expect(screen.getByRole('navigation', { name: 'Folder navigation' })).toBeInTheDocument();
+
+      fireEvent.click(searchAll);
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole('navigation', { name: 'Folder navigation' })
+        ).not.toBeInTheDocument()
+      );
+      expect(screen.getByTestId('location')).toHaveTextContent(ENTRY_URL);
+    });
+
     it('collapse the middle of a deep trail into a menu', async () => {
       server.use(
         http.get('*/upload/folders', () =>
