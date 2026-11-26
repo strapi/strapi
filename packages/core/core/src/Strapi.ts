@@ -53,9 +53,8 @@ const tsUtils = (): typeof import('@strapi/typescript-utils') => {
 /**
  * A loaded module (`strapi.plugin(name)`, `strapi.api(name)`) as the plugins and APIs registries
  * hold it, without the members its public strict type does not check against it: the lifecycles,
- * which only `@strapi/core` calls and the public type leaves out; the lookups and the `services`
- * map, whose registered contracts are the registries' claim; and `routes`, typed as built routers
- * although a module holds its declared routers until `server.initRouting()`. Without strict types,
+ * which only `@strapi/core` calls and the public type leaves out; and the lookups and the
+ * `services` map, whose registered contracts are the registries' claim. Without strict types,
  * `unknown`: develop's plugin and module types are not checked against the runtime module.
  */
 type CheckedLoadedModule = Core.IsStrict extends false
@@ -72,7 +71,6 @@ type CheckedLoadedModule = Core.IsStrict extends false
       | 'policy'
       | 'middleware'
       | 'services'
-      | 'routes'
     >;
 
 class Strapi extends Container implements Core.Strapi {
@@ -296,7 +294,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   // Registry trust boundary: the plugins registry holds `Core.RegisteredModule`. The overload's
-  // registered lookups, `services` and `routes` are the registries' claim; the implementation's
+  // registered lookups and `services` are the registries' claim; the implementation's
   // return type checks the other members against the runtime module (see `CheckedLoadedModule`).
   plugin<TName extends string>(name: TName): Core.PluginOf<TName>;
   plugin(name: string): CheckedLoadedModule {

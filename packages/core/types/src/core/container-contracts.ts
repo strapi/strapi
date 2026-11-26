@@ -10,7 +10,8 @@ import type { Controller } from './controller';
 import type { Middleware } from './middleware';
 import type { Module } from './module';
 import type { Policy } from './policy';
-import type { RouterConfig } from './router';
+import type { RouteInput } from './route';
+import type { ModuleRoutes } from './router';
 import type { Service } from './service';
 import type { Strapi } from './strapi';
 
@@ -213,8 +214,12 @@ export interface RegisteredModule {
   isDestroyed(): boolean;
   /** Registers the module's content types, services, policies, middlewares, controllers and config. */
   load(): void;
-  /** Routers, or factories called with `{ strapi }` when the routes are registered. */
-  routes: Record<string, RouterConfig>;
+  /**
+   * The routers as the module declared them until the routes are registered: router objects, or
+   * factories called with `{ strapi }` then; the routers built from them after. A plugin may declare
+   * one array of routes, and an API router file an array of routes: arrays stay arrays.
+   */
+  routes: ModuleRoutes | RouteInput[];
   /** Reads a key or path of the module's config, under its namespace. */
   config(key: PropertyPath, defaultValue?: unknown): unknown;
   contentType(name: string): Struct.ContentTypeSchema;
@@ -237,7 +242,8 @@ export interface RegisteredModule {
  */
 export interface RawModuleInput {
   config?: Record<string, unknown>;
-  routes?: Record<string, RouterConfig>;
+  /** A plugin may declare one array of routes, and an API router file an array of routes. */
+  routes?: ModuleRoutes | RouteInput[];
   controllers?: Record<string, ControllerFactoryInput>;
   services?: Record<string, ServiceFactoryInput>;
   contentTypes?: Record<string, { schema: ContentType }>;

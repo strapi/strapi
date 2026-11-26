@@ -15,15 +15,17 @@ import { areRoutesRegistered } from '../server/routes-registration';
 
 import instantiatePermissionsUtilities from './permissions';
 
-const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
-  const prefix = route.config && route.config.prefix;
-  const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
+const transformRoutePrefixFor =
+  (pluginName: string) =>
+  <TRoute extends Core.RouteInput>(route: TRoute) => {
+    const prefix = route.config && route.config.prefix;
+    const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
 
-  return {
-    ...route,
-    path,
+    return {
+      ...route,
+      path,
+    };
   };
-};
 
 // A route without `info` was added to its router after the routes were registered: Strapi never
 // serves it, so the routes map does not list it.

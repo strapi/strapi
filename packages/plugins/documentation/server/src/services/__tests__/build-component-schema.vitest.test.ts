@@ -131,9 +131,9 @@ describe('Documentation plugin | Build component schema', () => {
     (global.strapi.plugins['users-permissions'].routes as any)['content-api'].routes = [
       { method: 'GET', path: '/test', handler: 'test.find' },
     ];
-    global.strapi.apis.restaurant.routes.restaurant.routes = [
-      { method: 'GET', path: '/test', handler: 'test.find' },
-    ] as any;
+    global.strapi.apis.restaurant.routes.restaurant = {
+      routes: [{ method: 'GET', path: '/test', handler: 'test.find' }],
+    };
 
     const apiMocks = [
       {
@@ -278,9 +278,9 @@ describe('Documentation plugin | Build component schema', () => {
     (global.strapi.plugins['users-permissions'].routes as any)['content-api'].routes = [
       { method: 'POST', path: '/test', handler: 'test.create' },
     ];
-    global.strapi.apis.restaurant.routes.restaurant.routes = [
-      { method: 'POST', path: '/test', handler: 'test.create' },
-    ] as any;
+    global.strapi.apis.restaurant.routes.restaurant = {
+      routes: [{ method: 'POST', path: '/test', handler: 'test.create' }],
+    };
 
     const apiMocks = [
       {
@@ -355,9 +355,9 @@ describe('Documentation plugin | Build component schema', () => {
         secret: { type: 'string', private: true },
       },
     })) as any;
-    global.strapi.apis.restaurant.routes.restaurant.routes = [
-      { method: 'POST', path: '/test', handler: 'test.create' },
-    ] as any;
+    global.strapi.apis.restaurant.routes.restaurant = {
+      routes: [{ method: 'POST', path: '/test', handler: 'test.create' }],
+    };
 
     const schemas = buildComponentSchema({
       name: 'restaurant',

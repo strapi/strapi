@@ -130,6 +130,17 @@ describe('getRoutesMap and route registration', () => {
     expect(routesMap['api::article'].map((r) => r.path)).toEqual(['/api/articles']);
   });
 
+  test('keeps an API router declared as an array: same array, content API type, routes without API info', () => {
+    const custom = [route('/custom-articles')];
+    const app = createApp({ apis: { article: { routes: { custom } } } });
+
+    app.server.initRouting();
+
+    expect(Reflect.get(Object(app.apis.article.routes), 'custom')).toBe(custom);
+    expect(Reflect.get(custom, 'type')).toBe('content-api');
+    expect(custom.map((r) => Reflect.get(r, 'info'))).toEqual([{ type: 'api' }]);
+  });
+
   test('returns an empty map for an app without content API routes, after initRouting', async () => {
     const app = createApp();
 

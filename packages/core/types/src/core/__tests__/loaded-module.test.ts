@@ -1,8 +1,7 @@
 import type * as Struct from '../../struct';
 import type { ContentType } from '../../schema';
 import type { Controller } from '../controller';
-import type { Route } from '../route';
-import type { Router } from '../router';
+import type { ModuleRoutes, PluginRoutes, Router } from '../router';
 import type { Strapi as StrapiInstance } from '../strapi';
 import type { Equal, Expect } from '../../../tests/helpers/assert';
 
@@ -46,10 +45,10 @@ declare const loadedLifecycles: [
 ];
 loadedLifecycles satisfies unknown;
 
-// The routes keep their type until the routes union lands.
+// The routes are what the module declared until Strapi registers them: see `module-routes.test.ts`.
 declare const loadedRoutes: [
-  Expect<Equal<(typeof api)['routes'], Record<string, Router>>>,
-  Expect<Equal<(typeof plugin)['routes'], Route[] | Record<string, Router>>>,
+  Expect<Equal<(typeof api)['routes'], ModuleRoutes>>,
+  Expect<Equal<(typeof plugin)['routes'], PluginRoutes>>,
 ];
 loadedRoutes satisfies unknown;
 
