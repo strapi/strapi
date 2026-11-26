@@ -1,4 +1,4 @@
-import { keyBy, omit } from 'lodash';
+import { castArray, keyBy, omit } from 'lodash';
 import type { Data, UID } from '@strapi/types';
 import type { Database, JoinTable } from '@strapi/database';
 
@@ -7,6 +7,9 @@ interface VersionEntry {
   locale: string;
 }
 
+type PopulatedEntry = VersionEntry & Record<string, unknown>;
+type ComponentInstance = { id?: Data.ID; __component?: UID.Component } & Record<string, unknown>;
+
 interface RelationData {
   joinTable: JoinTable;
   relations: Record<string, unknown>[];
@@ -14,6 +17,18 @@ interface RelationData {
     source: boolean;
     target: boolean;
   };
+  /**
+   * Set when the source of the relations is a component instance of the copied entries
+   */
+  sourceComponent?: UID.Component;
+}
+
+interface SyncOptions {
+  uid: UID.ContentType;
+  /**
+   * The populated data each target entry was created from
+   */
+  copiedEntries: PopulatedEntry[];
 }
 
 type TargetStatus = 'draft' | 'published';
@@ -22,6 +37,108 @@ type DatabaseTransaction = Parameters<DatabaseQueryBuilder['transacting']>[0];
 
 const entryKey = (entry: { document_id: unknown; locale: unknown }) =>
   `${String(entry.document_id)}:${String(entry.locale)}`;
+
+const componentKey = (componentUid: UID.Component, id: unknown) => `${componentUid}:${String(id)}`;
+
+/**
+ * Calls `onComponent` for each component instance of `source`, nested ones included, with the
+ * instance stored at the same place in `target`.
+ */
+const walkComponents = (
+  schemaUid: UID.Schema,
+  source: Record<string, unknown>,
+  target: Record<string, unknown> | undefined,
+  onComponent: (
+    componentUid: UID.Component,
+    sourceInstance: ComponentInstance,
+    targetInstance?: ComponentInstance
+  ) => void
+) => {
+  for (const [name, attribute] of Object.entries(strapi.getModel(schemaUid).attributes)) {
+    if (attribute.type !== 'component' && attribute.type !== 'dynamiczone') {
+      continue;
+    }
+
+    const sourceInstances = castArray(source[name] ?? []) as ComponentInstance[];
+    const targetInstances = castArray(target?.[name] ?? []) as ComponentInstance[];
+
+    sourceInstances.forEach((sourceInstance, index) => {
+      const componentUid =
+        attribute.type === 'component' ? attribute.component : sourceInstance?.__component;
+
+      // A dynamic zone can still hold components of a type that is no longer registered
+      if (!componentUid || sourceInstance?.id == null || !strapi.getModel(componentUid)) {
+        return;
+      }
+
+      const candidate = targetInstances[index];
+      const targetInstance =
+        candidate && (attribute.type === 'component' || candidate.__component === componentUid)
+          ? candidate
+          : undefined;
+
+      onComponent(componentUid, sourceInstance, targetInstance);
+      walkComponents(componentUid, sourceInstance, targetInstance, onComponent);
+    });
+  }
+};
+
+const getComponentsPopulate = (uid: UID.Schema): Record<string, unknown> => {
+  return Object.entries(strapi.getModel(uid).attributes).reduce(
+    (acc: Record<string, unknown>, [name, attribute]) => {
+      if (attribute.type === 'component') {
+        acc[name] = { populate: getComponentsPopulate(attribute.component) };
+      }
+
+      if (attribute.type === 'dynamiczone') {
+        acc[name] = {
+          on: Object.fromEntries(
+            attribute.components.map((componentUid) => [
+              componentUid,
+              { populate: getComponentsPopulate(componentUid) },
+            ])
+          ),
+        };
+      }
+
+      return acc;
+    },
+    {}
+  );
+};
+
+/**
+ * Maps the component instances of the copied entries to the ones created for the target entries.
+ * Publish and discard copy the components in order, so instances are matched by position.
+ */
+const getComponentIdMapping = async (
+  uid: UID.ContentType,
+  copiedEntries: PopulatedEntry[],
+  targetEntries: VersionEntry[]
+) => {
+  const targets = await strapi.db.query(uid).findMany({
+    where: { id: { $in: targetEntries.map((entry) => entry.id) } },
+    populate: getComponentsPopulate(uid),
+  });
+  const targetsByLocale = keyBy(targets, 'locale');
+  const mapping = new Map<string, Data.ID>();
+
+  for (const copiedEntry of copiedEntries) {
+    const target = targetsByLocale[copiedEntry.locale];
+
+    if (!target) {
+      continue;
+    }
+
+    walkComponents(uid, copiedEntry, target, (componentUid, sourceInstance, targetInstance) => {
+      if (targetInstance?.id != null) {
+        mapping.set(componentKey(componentUid, sourceInstance.id), targetInstance.id);
+      }
+    });
+  }
+
+  return mapping;
+};
 
 const getCounterparts = async (
   trx: DatabaseTransaction,
@@ -92,6 +209,9 @@ const getCounterparts = async (
  * 3. At mapping time, the old entity is already deleted and the new one doesn't exist yet
  * 4. The relation is silently dropped
  *
+ * The same happens to a relation of the entry's own components (or dynamic zone components)
+ * that targets the entry.
+ *
  * This utility:
  * 1. Captures self-referential join table rows before deletion
  * 2. Remaps old entity IDs to new entity IDs after creation
@@ -103,7 +223,7 @@ const getCounterparts = async (
  */
 const load = async (
   uid: UID.ContentType,
-  sourceEntries: VersionEntry[],
+  sourceEntries: PopulatedEntry[],
   targetStatus: TargetStatus
 ): Promise<RelationData[]> => {
   const updates: RelationData[] = [];
@@ -232,7 +352,109 @@ const load = async (
       // captured above represent the current logical relation set; restoring stale old rows can
       // resurrect relations that were removed before publishing or discarding.
     }
+
+    updates.push(...(await loadComponentRelations(trx, uid, sourceEntries, targetStatus)));
   });
+
+  return updates;
+};
+
+/**
+ * Loads the relations of the source entries' components that target the source entries
+ * themselves (e.g. a `link` component of a page pointing to that page).
+ *
+ * All the relations of such an instance are kept, not only the ones to the source entries, so
+ * that sync can restore the order of the whole list.
+ */
+const loadComponentRelations = async (
+  trx: DatabaseTransaction,
+  uid: UID.ContentType,
+  sourceEntries: PopulatedEntry[],
+  targetStatus: TargetStatus
+): Promise<RelationData[]> => {
+  const updates: RelationData[] = [];
+  const sourceIds = new Set(sourceEntries.map((entry) => String(entry.id)));
+  const instancesByComponent = new Map<UID.Component, string[]>();
+
+  for (const entry of sourceEntries) {
+    walkComponents(uid, entry, undefined, (componentUid, instance) => {
+      const instanceIds = instancesByComponent.get(componentUid) ?? [];
+      instanceIds.push(String(instance.id));
+      instancesByComponent.set(componentUid, instanceIds);
+    });
+  }
+
+  for (const [componentUid, instanceIds] of instancesByComponent) {
+    const componentModel = strapi.db.metadata.get(componentUid);
+
+    for (const attribute of Object.values(componentModel.attributes) as any) {
+      if (
+        attribute.type !== 'relation' ||
+        attribute.target !== uid ||
+        attribute.mappedBy ||
+        !attribute.joinTable
+      ) {
+        continue;
+      }
+
+      const joinTable: JoinTable = attribute.joinTable;
+      const { name: sourceColumnName } = joinTable.joinColumn;
+      const { name: targetColumnName } = joinTable.inverseJoinColumn;
+
+      const rows: Record<string, unknown>[] = await strapi.db
+        .getConnection()
+        .select('*')
+        .from(joinTable.name)
+        .whereIn(sourceColumnName, instanceIds)
+        .transacting(trx);
+
+      const isSelfRelation = (row: Record<string, unknown>) =>
+        sourceIds.has(String(row[targetColumnName]));
+
+      // Publish and discard copy the other instances as they are
+      const linkedInstances = new Set(
+        rows.filter(isSelfRelation).map((row) => String(row[sourceColumnName]))
+      );
+
+      if (linkedInstances.size === 0) {
+        continue;
+      }
+
+      const instanceRows = rows.filter((row) => linkedInstances.has(String(row[sourceColumnName])));
+      const selfRows = instanceRows.filter(isSelfRelation);
+      const otherRows = instanceRows.filter((row) => !isSelfRelation(row));
+
+      updates.push({
+        joinTable,
+        relations: selfRows,
+        remap: { source: true, target: true },
+        sourceComponent: componentUid,
+      });
+
+      const counterparts = await getCounterparts(
+        trx,
+        strapi.db.metadata.get(uid).tableName,
+        otherRows.map((row) => row[targetColumnName]),
+        targetStatus
+      );
+
+      const otherRelations = otherRows
+        .filter((row) => counterparts[String(row[targetColumnName])] != null)
+        .map((row) => ({
+          ...row,
+          [targetColumnName]: counterparts[String(row[targetColumnName])],
+        }));
+
+      if (otherRelations.length > 0) {
+        updates.push({
+          joinTable,
+          relations: otherRelations,
+          remap: { source: true, target: false },
+          sourceComponent: componentUid,
+        });
+      }
+    }
+  }
 
   return updates;
 };
@@ -244,9 +466,15 @@ const load = async (
 const sync = async (
   sourceEntries: VersionEntry[],
   targetEntries: VersionEntry[],
-  relationData: RelationData[]
+  relationData: RelationData[],
+  options?: SyncOptions
 ) => {
   if (relationData.length === 0) return;
+
+  const componentIdMapping =
+    options && relationData.some((data) => data.sourceComponent)
+      ? await getComponentIdMapping(options.uid, options.copiedEntries, targetEntries)
+      : new Map<string, Data.ID>();
 
   const targetEntriesByLocale = keyBy(targetEntries, 'locale');
 
@@ -264,15 +492,26 @@ const sync = async (
   const batchSize = strapi.db.dialect.getBatchInsertSize();
 
   await strapi.db.transaction(async ({ trx }) => {
-    for (const { joinTable, relations, remap = { source: true, target: true } } of relationData) {
+    for (const {
+      joinTable,
+      relations,
+      remap = { source: true, target: true },
+      sourceComponent,
+    } of relationData) {
       const sourceColumn = joinTable.joinColumn.name;
       const targetColumn = joinTable.inverseJoinColumn.name;
 
+      const mapSourceId = (id: unknown) =>
+        sourceComponent
+          ? componentIdMapping.get(componentKey(sourceComponent, id))
+          : idMapping[String(id)];
+
       const newRelations = relations
         .map((relation) => {
-          const oldSourceId = String(relation[sourceColumn]);
           const oldTargetId = String(relation[targetColumn]);
-          const newSourceId = remap.source ? idMapping[oldSourceId] : relation[sourceColumn];
+          const newSourceId = remap.source
+            ? mapSourceId(relation[sourceColumn])
+            : relation[sourceColumn];
           const newTargetId = remap.target ? idMapping[oldTargetId] : relation[targetColumn];
 
           // Any side being remapped must resolve to a new entry.
