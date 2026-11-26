@@ -855,9 +855,19 @@ declare global {
   `strapi.service<T>(uid)`: `strapi.get<MyValue>('plugin-x.thing')`. It is never inferred from the
   expected type, so `const x: Foo = strapi.get('plugin-x.thing')` fails instead of compiling as an
   unchecked cast.
-- `strapi.add(name, resolver)` lists registered names for completion and does not check the
-  resolver against the registered value. It returns the strict container, so a chain keeps
-  resolving registered names.
+- `strapi.add(name, resolver)` lists registered names for completion and checks the resolver of a
+  registered name against its value: a factory that returns the value, whose `container` parameter
+  is the strict `Strapi`, or the value itself. A function value is rejected, because the container
+  would call it as a factory: wrap it, `strapi.add('plugin-x.format', () => format)`. An
+  unregistered name, or a name known only at runtime, takes any resolver. `add` returns the strict
+  container, so a chain keeps resolving registered names.
+- `coreStore`, `hooks` and `db` register a strict view, which refines the implementation with a
+  registry the implementation cannot check: store rows read from the database, hooks any plugin
+  can replace, and lifecycle events of whatever query runs. `add` checks these names against the
+  implementation's contract (`Modules.CoreStore.CoreStore`, the untyped hooks registry,
+  `Database`), and `get` returns the strict view. This closed list (`StrictContainerOverlays` in
+  `packages/core/types/src/core/container.ts`) is a trust boundary: only `@strapi/core` adds a
+  name with a strict view, and a second `add` of a name throws, so other packages do not need one.
 - `@strapi/types` registers the names `@strapi/core` adds, and `ai.admin` and
   `audit-logs-lifecycle`, which `@strapi/admin` adds and other packages read
   (`packages/core/types/src/core/container.ts`). A name a `strapi.*` getter reads has the getter's
