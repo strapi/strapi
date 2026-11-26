@@ -6,17 +6,11 @@ export type McpAdminTokenAbility = Ability;
 
 export type McpAuthFailureReason = 'missing_token' | 'invalid_token';
 
-export type McpAdminTokenCredentials = {
-  id: Data.ID;
-  adminUserOwner?: { id: Data.ID } | Data.ID | null;
-  [key: string]: unknown;
-};
-
 export type McpAdminTokenAuthResult =
   | { authenticated: false; reason: McpAuthFailureReason; error?: Error }
   | {
       authenticated: true;
-      credentials: McpAdminTokenCredentials;
+      credentials: { id: Data.ID };
       user: { id: Data.ID };
       ability: McpAdminTokenAbility;
     };
@@ -60,7 +54,7 @@ export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
 
     return {
       authenticated: true,
-      credentials: authResult.credentials,
+      credentials: { id: authResult.credentials.id },
       user: { id: authResult.user.id },
       ability: authResult.ability,
     };

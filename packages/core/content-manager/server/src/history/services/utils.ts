@@ -5,7 +5,6 @@ import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
 import { FIELDS_TO_IGNORE } from '../constants';
 import { getService } from '../utils';
-import type { HistoryAuthorProvider } from './authors';
 import type {
   CreateHistoryVersion,
   HistoryVersionAuthor,
@@ -93,20 +92,6 @@ export const toAuthor = (
   const name = author.id ? authorNameDictionary[author.model]?.[author.id] : undefined;
 
   return name === undefined ? { ...author, id: null, name: null } : { ...author, name };
-};
-
-export const resolveAdminTokenOwnerId: HistoryAuthorProvider['getRecordId'] = (credentials) => {
-  const owner = credentials?.adminUserOwner;
-
-  if (owner === null || owner === undefined) {
-    return null;
-  }
-
-  if (typeof owner === 'object') {
-    return owner.id;
-  }
-
-  return owner;
 };
 
 interface AdminUserNames {
@@ -564,9 +549,11 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     // An admin panel write is authored by the logged-in admin, whatever the admin strategy
     const isAdminPanel = source === 'admin-panel';
     const strategyName = isAdminPanel ? 'admin' : state.auth?.strategy?.name;
-    const credentials = isAdminPanel ? state.user : state.auth?.credentials;
     const provider = strategyName ? historyAuthors.findProviderByStrategy(strategyName) : undefined;
-    const recordId = provider?.getRecordId(credentials);
+    const recordId = provider?.getRecordId({
+      credentials: state.auth?.credentials,
+      user: state.user,
+    });
 
     if (!provider || recordId === null || recordId === undefined) {
       return null;

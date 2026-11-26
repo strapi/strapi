@@ -1,24 +1,19 @@
 import type { Core, Schema } from '@strapi/types';
 
-import {
-  createServiceUtils,
-  resolveAdminTokenOwnerId,
-  toAuthor,
-  type RequestContext,
-} from '../utils';
+import { createServiceUtils, toAuthor, type RequestContext } from '../utils';
 
 const mockFindNames = jest.fn();
 
 const mockKnownProvider = {
   type: 'person',
   model: 'plugin::fake.user',
-  getRecordId: (credentials: { id?: number } | null) => credentials?.id,
+  getRecordId: ({ credentials }: { credentials?: { id?: number } | null }) => credentials?.id,
 };
 
 const mockAdminProvider = {
   type: 'person',
   model: 'admin::user',
-  getRecordId: (credentials: { id?: number } | null) => credentials?.id,
+  getRecordId: ({ user }: { user?: { id?: number } | null }) => user?.id,
 };
 
 jest.mock('../../utils', () => ({
@@ -344,20 +339,6 @@ describe('History utils', () => {
         ...adminUser(null),
         name: null,
       });
-    });
-  });
-
-  describe('resolveAdminTokenOwnerId', () => {
-    it.each([
-      ['a populated owner', { adminUserOwner: { id: 3 } }, 3],
-      ['a raw owner id', { adminUserOwner: 3 }, 3],
-      ['a null owner', { adminUserOwner: null }, null],
-      ['a token without an owner', { id: 7 }, null],
-      ['no credentials', undefined, null],
-    ])('resolves %s', (_label, credentials, expected) => {
-      expect(
-        resolveAdminTokenOwnerId(credentials as Parameters<typeof resolveAdminTokenOwnerId>[0])
-      ).toBe(expected);
     });
   });
 

@@ -1,26 +1,18 @@
 import type { Core } from '@strapi/types';
 
 import { getService } from './utils';
-import { createServiceUtils, resolveAdminTokenOwnerId } from './services/utils';
+import { createServiceUtils } from './services/utils';
 
 export const registerHistoryAuthors = (strapi: Core.Strapi) => {
   const authors = getService(strapi, 'history-authors');
   const { findAdminUserNames, findApiTokenNames } = createServiceUtils({ strapi });
 
-  authors.unstable_registerProvider({
-    strategy: 'admin',
-    type: 'person',
-    model: 'admin::user',
-    getRecordId: (credentials) => credentials?.id,
-    findNames: findAdminUserNames,
-  });
-
-  (['admin-token', 'mcp'] as const).forEach((strategy) => {
+  (['admin', 'admin-token', 'mcp'] as const).forEach((strategy) => {
     authors.unstable_registerProvider({
       strategy,
       type: 'person',
       model: 'admin::user',
-      getRecordId: resolveAdminTokenOwnerId,
+      getRecordId: ({ user }) => user?.id,
       findNames: findAdminUserNames,
     });
   });
@@ -29,7 +21,7 @@ export const registerHistoryAuthors = (strapi: Core.Strapi) => {
     strategy: 'content-api-token',
     type: 'token',
     model: 'admin::api-token',
-    getRecordId: (credentials) => credentials?.id,
+    getRecordId: ({ credentials }) => credentials?.id,
     findNames: findApiTokenNames,
   });
 };

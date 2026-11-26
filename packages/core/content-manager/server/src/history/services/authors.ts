@@ -2,18 +2,20 @@ import type { Data } from '@strapi/types';
 
 import type { HistoryVersionAuthorType } from '../../../../shared/contracts/history-versions';
 
-export interface HistoryAuthorCredentials {
+interface HistoryAuthorIdentity {
   id?: Data.ID;
-  adminUserOwner?: Data.ID | { id: Data.ID } | null;
+}
+
+export interface HistoryAuthorInput {
+  credentials: HistoryAuthorIdentity | null | undefined;
+  user: HistoryAuthorIdentity | null | undefined;
 }
 
 export interface HistoryAuthorProvider {
   strategy: string;
   type: HistoryVersionAuthorType;
   model: string;
-  getRecordId: (
-    credentials: HistoryAuthorCredentials | null | undefined
-  ) => Data.ID | null | undefined;
+  getRecordId: (input: HistoryAuthorInput) => Data.ID | null | undefined;
   findNames: (documentIds: string[]) => Promise<Record<string, string>>;
 }
 

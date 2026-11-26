@@ -86,7 +86,7 @@ describe('createMcpAdminTokenAuthenticator', () => {
     const ability = { can: vi.fn() };
     authenticateAdminToken.mockResolvedValue({
       authenticated: true,
-      credentials: { id: 7, adminUserOwner: { id: 42 } },
+      credentials: { id: 42 },
       user: { id: 42 },
       ability,
     });
@@ -95,7 +95,7 @@ describe('createMcpAdminTokenAuthenticator', () => {
 
     expect(result).toEqual({
       authenticated: true,
-      credentials: { id: 7, adminUserOwner: { id: 42 } },
+      credentials: { id: 42 },
       user: { id: 42 },
       ability,
     });
