@@ -78,20 +78,21 @@ The server has one root router and two API routers. `listen()` calls `mount()`, 
 
 - The content API router has the prefix `api.rest.prefix` (default `/api`).
 - The admin API router has no prefix. Each admin router sets its own prefix.
-- The root router holds `/_health` (always 204) and routes passed as an array to `strapi.server.routes()`, such as the `strapi::public` routes.
+- The root router holds `/_health` (always 204) and routes passed as an array to `strapi.server.routes()`, such as the `strapi::public` routes and the routes of an API router declared as an array.
 
-In the bootstrap phase, `server.initRouting()` calls [`register-routes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/register-routes.ts). It registers admin routes, then API routes, then plugin routes, then the OpenAPI route. A router can be an object or a factory. Strapi calls a factory with `{ strapi }` and writes the result back on the module. Then `strapi.server.routes(router)` sends the router to the API router that matches `router.type`.
+In the bootstrap phase, `server.initRouting()` calls [`register-routes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/register-routes.ts). It registers admin routes, then API routes, then plugin routes, then the OpenAPI route. A router can be an object or a factory. Strapi calls a factory with `{ strapi }` and writes the result back on the module. Then `strapi.server.routes(router)` sends a router object to the API router that matches `router.type`, and an array of routes to the root router.
 
-| Source                                   | `type`               | Router prefix               | Example                                        |
-| ---------------------------------------- | -------------------- | --------------------------- | ---------------------------------------------- |
-| Admin package (`strapi.admin.routes`)    | `admin` if not set   | `/admin` if not set         | `POST /admin/login`                            |
-| App API (`src/api/<name>/routes`)        | always `content-api` | the router `prefix`, if any | `GET /api/articles`                            |
-| Plugin router with `type: 'content-api'` | `content-api`        | `/<pluginName>` if not set  | `GET /api/upload/files`                        |
-| Plugin router without `type`             | `admin`              | `/<pluginName>` if not set  | `GET /content-manager/collection-types/:model` |
+| Source                                          | `type`                                               | Router prefix               | Example                                        |
+| ----------------------------------------------- | ---------------------------------------------------- | --------------------------- | ---------------------------------------------- |
+| Admin package (`strapi.admin.routes`)           | `admin` if not set                                   | `/admin` if not set         | `POST /admin/login`                            |
+| App API router object (`src/api/<name>/routes`) | always `content-api`, even if it sets another `type` | the router `prefix`, if any | `GET /api/articles`                            |
+| App API router declared as an array             | `api`: the routes go on the root router              | none                        | `GET /<route path>`                            |
+| Plugin router with `type: 'content-api'`        | `content-api`                                        | `/<pluginName>` if not set  | `GET /api/upload/files`                        |
+| Plugin router without `type`                    | `admin`                                              | `/<pluginName>` if not set  | `GET /content-manager/collection-types/:model` |
 
 Plugin routes given as a plain array get the type `admin` and the prefix `/<pluginName>`. A route that has a `config.prefix` key skips the router prefix and goes on the API router directly. The users-permissions plugin sets `prefix: ''` on its auth routes, so the login route is `POST /api/auth/local`, not `/api/users-permissions/auth/local`.
 
-For each route, the registration step also:
+For each route, except the routes of an API router declared as an array, the registration step also:
 
 - sets `route.info` to `{ apiName }` or `{ pluginName }` (`pluginName: 'admin'` for the admin package);
 - generates `config.auth.scope` when the handler is a string (see [Route config](#route-config));
