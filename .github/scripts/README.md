@@ -105,8 +105,9 @@ CLA Assistant comments "please sign the CLA"
         │
         │  (daily cron, still pending on the date the reminder stated)
         ▼
-[GitHub Action] Posts a short close notice (the PR can be reopened once the CLA is signed)
-                Closes the PR
+[GitHub Action] Reads the check again, and marks the reminder as resolved if it has passed
+                Otherwise closes the PR
+                Posts a short close notice (the PR can be reopened once the CLA is signed)
                 Syncs the Linear ticket → "Canceled" (looks in CPR first, then CMS, and uses
                 that team's Canceled state)
 ```
@@ -134,9 +135,11 @@ Commit email addresses are never written to comments, markers or logs. Markers a
 
 A PR that the workflow closed and someone reopened is left alone for good. The workflow recognises it from its close notice (`<!-- community-pr-cla: closed -->`).
 
+The open PRs and their checks are listed once, at the start of a run. So just before a close, the workflow reads the check again: if it has passed in the meantime, the reminder is marked as resolved and the PR stays open.
+
 The PR is closed first, then the notice is posted. If the close fails, nothing else happens and the next run tries again. If the notice fails, the PR stays closed (the reminder already told the author why and when), the Linear ticket is still canceled, and the run fails and names the PR so someone can post the notice by hand. Without the notice, the PR is treated like one closed by someone else.
 
-A PR closed by someone else, or by the lifecycle flow, has no CLA close notice, so after a reopen the usual rules apply: it is closed if its active reminder's date came less than 7 days ago, and gets a new reminder otherwise.
+A PR closed by someone else, or by the lifecycle flow, has no CLA close notice, so after a reopen the usual rules apply to its active reminder. If the date hasn't come yet, the workflow waits for it. If it came less than 7 days ago, the PR is closed again. If it came 7 days ago or more, the PR gets a new reminder.
 
 ### Failures
 

@@ -573,6 +573,32 @@ async function listOpenPRs(github: Octokit, owner: string, repo: string): Promis
   return out;
 }
 
+/**
+ * Reads the state of the PR's CLA check now. The open-PR listing is read once at the start of
+ * the run, so it can be minutes old by the time a PR is closed.
+ */
+async function readClaState(github: Octokit, owner: string, repo: string, number: number) {
+  const res: {
+    repository: {
+      pullRequest: {
+        commits: {
+          nodes: Array<{ commit: { status: { context: { state: string } | null } | null } }>;
+        };
+      } | null;
+    };
+  } = await github.graphql(
+    `query ($owner: String!, $repo: String!, $number: Int!, $context: String!) {
+      repository(owner: $owner, name: $repo) {
+        pullRequest(number: $number) {
+          commits(last: 1) { nodes { commit { status { context(name: $context) { state } } } } }
+        }
+      }
+    }`,
+    { owner, repo, number, context: CLA_STATUS_CONTEXT }
+  );
+  return res.repository.pullRequest?.commits.nodes[0]?.commit.status?.context?.state ?? null;
+}
+
 /** GitHub lists at most this many commits of a PR, oldest first. */
 export const MAX_PR_COMMITS = 250;
 
@@ -705,8 +731,15 @@ const listComments = (github: Octokit, owner: string, repo: string, issue_number
 
 /** Marks the active reminders of a PR whose check passed as resolved. */
 async function resolveReminders(opts: PRContext): Promise<boolean> {
+  const comments = await listComments(opts.github, opts.owner, opts.repo, opts.pr.number);
+  return resolveActive(opts, comments);
+}
+
+async function resolveActive(
+  opts: PRContext,
+  comments: Array<{ id: number; body?: string | null; user?: { login: string } | null }>
+): Promise<boolean> {
   const { github, owner, repo, dryRun, log, pr, now, result, prefix } = opts;
-  const comments = await listComments(github, owner, repo, pr.number);
   const active = comments.filter(
     (c) => c.user?.login === ACTIONS_BOT_LOGIN && parseReminderMarker(c.body)?.state === 'active'
   );
@@ -715,14 +748,22 @@ async function resolveReminders(opts: PRContext): Promise<boolean> {
   result.action = 'resolved';
   log(`${prefix}PR #${pr.number} (@${pr.login}): check passed → reminder marked as resolved`);
   if (dryRun) return true;
+  // Try every reminder before reporting a failure. One left active would be retried by the
+  // next run, but only while the check still passes.
+  const failed: string[] = [];
   for (const c of active) {
-    await github.rest.issues.updateComment({
-      owner,
-      repo,
-      comment_id: c.id,
-      body: resolveReminderBody(c.body ?? '', now),
-    });
+    try {
+      await github.rest.issues.updateComment({
+        owner,
+        repo,
+        comment_id: c.id,
+        body: resolveReminderBody(c.body ?? '', now),
+      });
+    } catch (error) {
+      failed.push(errorMessage(error));
+    }
   }
+  if (failed.length) throw new Error(`reminder not marked as resolved: ${failed.join('; ')}`);
   return true;
 }
 
@@ -802,6 +843,11 @@ async function processPR(opts: PRContext): Promise<void> {
       await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
     }
   } else if (plan.type === 'close') {
+    if (!dryRun && (await readClaState(github, owner, repo, pr.number)) === 'SUCCESS') {
+      // The check passed after the run listed the open PRs.
+      await resolveActive(opts, comments);
+      return;
+    }
     log(`${prefix}${who} → close`);
     if (dryRun) return;
     await closeWithNotice({ ...opts, claUrl });

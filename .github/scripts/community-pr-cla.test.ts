@@ -167,7 +167,7 @@ describe('diagnose', () => {
   });
 
   it('names no co-author when the CLA bot has no list', () => {
-    // Anyone can author a commit with someone else's email: without the bot's ❌, don't ping them.
+    // Anyone can author a commit with someone else's email: unless the bot marks them unsigned, don't ping them.
     for (const bot of [null, parseClaBotComment(SINGLE_COMMITTER_BODY, 'x')]) {
       const d = diagnose(
         'author',
@@ -200,7 +200,7 @@ describe('diagnose', () => {
     assert.equal(d.authorUnsigned, false);
   });
 
-  it('does not trust a ❌ name that is the git name of an unlinked commit', () => {
+  it('does not trust a name marked unsigned that is the git name of an unlinked commit', () => {
     // The CLA bot writes the git author name for an unlinked commit, and anyone can pick a git
     // name that equals someone's login.
     const d = diagnose(
@@ -219,7 +219,7 @@ describe('diagnose', () => {
     assert.doesNotMatch(reminder(d), /@victim|isn't signed for your account/);
   });
 
-  it('does not trust a ❌ name the CLA bot also lists as signed', () => {
+  it('does not trust a name marked unsigned that the CLA bot also lists as signed', () => {
     const d = diagnose(
       'author',
       [commit('a1', 'author', 'a@example.com'), commit('a2', 'victim', 'v@example.com')],
@@ -513,6 +513,8 @@ interface FakePR {
   association?: string;
   labels?: string[];
   claState?: string | null;
+  /** What the check reads just before a close, when it changed since the listing. */
+  claStateAtClose?: string;
   closed?: boolean;
   comments?: FakeComment[];
   commits?: Array<{ sha: string; login: string | null; email: string }>;
@@ -525,6 +527,8 @@ interface FakeFailures {
   comment?: number[];
   /** PRs where editing a comment fails. */
   edit?: number[];
+  /** Ids of the comments that fail to edit. */
+  editComment?: number[];
 }
 
 const iso = (daysAgo: number) => new Date(NOW - daysAgo * DAY).toISOString();
@@ -557,8 +561,22 @@ function fakeGithub(prs: FakePR[], fail: FakeFailures = {}, clock = { now: NOW }
   const byNumber = new Map(prs.map((p) => [p.number, p]));
   let nextId = 1;
   const github = {
-    graphql: async () => ({
+    graphql: async (_query: string, vars: { number?: number }) => ({
       repository: {
+        // The re-read just before a close.
+        pullRequest: vars.number
+          ? ((p: FakePR) => ({
+              commits: {
+                nodes: [
+                  {
+                    commit: {
+                      status: { context: { state: p.claStateAtClose ?? p.claState ?? 'PENDING' } },
+                    },
+                  },
+                ],
+              },
+            }))(byNumber.get(vars.number)!)
+          : null,
         pullRequests: {
           pageInfo: { hasNextPage: false, endCursor: null },
           nodes: prs
@@ -618,6 +636,7 @@ function fakeGithub(prs: FakePR[], fail: FakeFailures = {}, clock = { now: NOW }
           const p = prs.find((pr) => pr.comments?.some((c) => c.id === comment_id))!;
           calls.push(`edit #${p.number} ${kind(body)}`);
           if (fail.edit?.includes(p.number)) throw new Error('502');
+          if (fail.editComment?.includes(comment_id)) throw new Error('502');
           p.comments!.find((c) => c.id === comment_id)!.body = body;
           return {};
         },
@@ -759,6 +778,20 @@ describe('processUnsignedClaPRs', () => {
     assert.deepEqual(writes(), ['edit #1 resolved']);
   });
 
+  it('tries every reminder before it reports that one could not be resolved', async () => {
+    const pr: FakePR = {
+      number: 1,
+      claState: 'SUCCESS',
+      comments: [botComment(20), reminded(10), reminded(5, ['unlinked'])],
+    };
+    // Comment ids follow the list order: the first reminder is comment 2.
+    const { github, writes } = fakeGithub([pr], { editComment: [2] });
+    const results = await run(github);
+    assert.equal(results[0].error, 'reminder not marked as resolved: 502');
+    assert.deepEqual(writes(), ['edit #1 resolved', 'edit #1 resolved']);
+    assert.equal(parseReminderMarker(pr.comments![2].body)?.state, 'resolved');
+  });
+
   it('starts over when the check goes pending again after it passed', async () => {
     const resolved = (daysAgo: number) => ours(resolvedMarker(NOW - daysAgo * DAY), 60);
     const { github } = fakeGithub([
@@ -772,7 +805,7 @@ describe('processUnsignedClaPRs', () => {
   it('reports a reminder it could not mark as resolved, and tries again', async () => {
     const pr: FakePR = { number: 1, claState: 'SUCCESS', comments: [botComment(20), reminded(10)] };
     const results = await run(fakeGithub([pr], { edit: [1] }).github);
-    assert.equal(results[0].error, '502');
+    assert.equal(results[0].error, 'reminder not marked as resolved: 502');
     assert.deepEqual(actions(await run(fakeGithub([pr]).github)), { 1: 'resolved' });
   });
 
@@ -889,6 +922,21 @@ describe('processUnsignedClaPRs', () => {
     await run(github, { onClosed: async (n) => void closed.push(n) });
     assert.deepEqual(writes(), ['close #1', 'comment #1 closed']);
     assert.deepEqual(closed, [1]);
+  });
+
+  it('does not close when the check passed after the open PRs were listed', async () => {
+    const pr: FakePR = {
+      number: 1,
+      claStateAtClose: 'SUCCESS',
+      comments: [botComment(40), reminded(25)],
+    };
+    const { github, writes } = fakeGithub([pr]);
+    const closed: number[] = [];
+    const results = await run(github, { onClosed: async (n) => void closed.push(n) });
+    assert.deepEqual(actions(results), { 1: 'resolved' });
+    assert.deepEqual(writes(), ['edit #1 resolved']);
+    assert.ok(!pr.closed);
+    assert.deepEqual(closed, []);
   });
 
   it('posts no close notice when closing fails, so the next run still closes', async () => {
