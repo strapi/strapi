@@ -1,5 +1,7 @@
-import { render, screen, waitFor } from '@tests/utils';
+import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
+import { createTeamsFormFields, teamsFieldMounted } from '../../../../../../tests/formFields';
 import { EditPage } from '../EditPage';
 
 describe('Users | EditPage', () => {
@@ -28,5 +30,51 @@ describe('Users | EditPage', () => {
     await user.click(screen.getByRole('combobox', { name: "User's roles" }));
 
     await screen.findByRole('option', { name: 'Editor' });
+  });
+
+  it('lets a plugin replace the roles field and sends its values with the user', async () => {
+    const bodies: unknown[] = [];
+
+    server.use(
+      http.get('/admin/users/1', () =>
+        HttpResponse.json({
+          data: {
+            id: 1,
+            firstname: 'John',
+            lastname: 'Doe',
+            email: 'john@doe.com',
+            isActive: true,
+            roles: [{ id: 1, code: 'strapi-editor', name: 'Editor' }],
+          },
+        })
+      ),
+      http.put('/admin/users/1', async ({ request }) => {
+        bodies.push(await request.json());
+
+        return HttpResponse.json({ data: { id: 1 } });
+      })
+    );
+
+    teamsFieldMounted.mockClear();
+    const { user } = render(<EditPage />, {
+      initialEntries: ['/settings/users/1'],
+      providerOptions: {
+        formFields: createTeamsFormFields('user', { replaces: ['roles'] }),
+      },
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Teams of 1: null' }));
+
+    expect(screen.queryByRole('combobox', { name: "User's roles" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(bodies).toEqual([
+        expect.objectContaining({ roles: [], plugins: { teams: { teams: ['blue'] } } }),
+      ])
+    );
+    // After the save, the field remounts with no value, to load its saved values again
+    expect(await screen.findByRole('button', { name: 'Teams of 1: null' })).toBeInTheDocument();
+    expect(teamsFieldMounted).toHaveBeenCalledTimes(2);
   });
 });

@@ -4,8 +4,11 @@ import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { SUPER_ADMIN_CODE } from '../../../../../../../shared/utils/super-admin';
+import { createTeamsFormFields, pluginValidationError } from '../../../../../../tests/formFields';
 import { initialState } from '../../../../../../tests/store';
 import { CreatePage } from '../CreatePage';
+
+import type { FormFields } from '../../../../../core/apis/FormFields';
 
 const EMAIL_SETTINGS = 'plugin::email.settings.read';
 const READ_LOCALES = 'plugin::i18n.locale.read';
@@ -21,12 +24,20 @@ const settingsPermission = (id: number, action: string, conditions: string[] = [
 
 /**
  * Logs in a user with the given role code who holds every permission except the email settings
- * one, and duplicates role 1, which has both the email settings and the read locales
- * permissions. Returns the permissions sent for the new role (`undefined` when none are sent).
- * `readLocalesConditions` puts the read locales permission, held and copied, under conditions.
+ * one, and by default duplicates role 1, which has both the email settings and the read locales
+ * permissions. Returns the role and permissions sent for the new role (`undefined` when none are
+ * sent). `readLocalesConditions` puts the read locales permission, held and copied, under
+ * conditions.
  */
-const renderDuplicatePage = (roleCode: string, readLocalesConditions: string[] = []) => {
-  const sent: { permissions?: unknown[] } = {};
+const renderCreatePage = (
+  roleCode: string,
+  readLocalesConditions: string[] = [],
+  {
+    path = '/settings/roles/duplicate/1',
+    formFields,
+  }: { path?: string; formFields?: FormFields } = {}
+) => {
+  const sent: { role?: unknown; permissions?: unknown[] } = {};
   let createdRoles = 0;
 
   server.use(
@@ -88,8 +99,9 @@ const renderDuplicatePage = (roleCode: string, readLocalesConditions: string[] =
         ],
       })
     ),
-    http.post('/admin/roles', () => {
+    http.post('/admin/roles', async ({ request }) => {
       createdRoles += 1;
+      sent.role = await request.json();
 
       return HttpResponse.json({ data: { id: 3, name: 'Copy', description: 'Copy' } });
     }),
@@ -106,12 +118,13 @@ const renderDuplicatePage = (roleCode: string, readLocalesConditions: string[] =
 
   const rendered = render(
     <Routes>
+      <Route path="/settings/roles/new" element={<CreatePage />} />
       <Route path="/settings/roles/duplicate/:id" element={<CreatePage />} />
       <Route path="*" element={null} />
     </Routes>,
     {
-      initialEntries: ['/settings/roles/duplicate/1'],
-      providerOptions: { storeConfig: { preloadedState } },
+      initialEntries: [path],
+      providerOptions: { storeConfig: { preloadedState }, formFields },
     }
   );
 
@@ -136,7 +149,7 @@ const save = async (user: ReturnType<typeof render>['user']) => {
 describe('Roles | CreatePage', () => {
   describe('duplicate', () => {
     it('only copies the permissions the user may grant', async () => {
-      const { user, sent, getCreatedRoles } = renderDuplicatePage('strapi-editor');
+      const { user, sent, getCreatedRoles } = renderCreatePage('strapi-editor');
 
       await openEmailSettings(user);
 
@@ -156,7 +169,7 @@ describe('Roles | CreatePage', () => {
 
     it('does not copy a permission the user holds only under an unregistered condition', async () => {
       // The layout lists no condition, so `admin::does-not-exist` is not registered
-      const { user } = renderDuplicatePage('strapi-editor', ['admin::does-not-exist']);
+      const { user } = renderCreatePage('strapi-editor', ['admin::does-not-exist']);
 
       await openEmailSettings(user);
 
@@ -165,7 +178,7 @@ describe('Roles | CreatePage', () => {
     });
 
     it('copies every permission for a super admin', async () => {
-      const { user, sent } = renderDuplicatePage(SUPER_ADMIN_CODE);
+      const { user, sent } = renderCreatePage(SUPER_ADMIN_CODE);
 
       await openEmailSettings(user);
 
@@ -182,6 +195,45 @@ describe('Roles | CreatePage', () => {
         ])
       );
       expect(sent.permissions).toHaveLength(2);
+    });
+  });
+
+  describe('plugin fields', () => {
+    it.each([
+      ['creates', '/settings/roles/new'],
+      ['duplicates', '/settings/roles/duplicate/1'],
+    ])('sends the values of plugin fields when it %s a role', async (_, path) => {
+      const { user, sent } = renderCreatePage('strapi-editor', [], {
+        path,
+        formFields: createTeamsFormFields('role'),
+      });
+
+      await user.click(await screen.findByRole('button', { name: 'Teams of new: null' }));
+      await save(user);
+
+      await waitFor(() =>
+        expect(sent.role).toEqual(
+          expect.objectContaining({ name: 'Copy', plugins: { teams: { teams: ['blue'] } } })
+        )
+      );
+    });
+
+    it('shows a plugin error from the server on the plugin field only', async () => {
+      const { user } = renderCreatePage('strapi-editor', [], {
+        path: '/settings/roles/new',
+        formFields: createTeamsFormFields('role'),
+      });
+      server.use(
+        http.post('/admin/roles', () =>
+          HttpResponse.json(pluginValidationError('teams', 'Pick a team'), { status: 400 })
+        )
+      );
+
+      await user.click(await screen.findByRole('button', { name: 'Teams of new: null' }));
+      await save(user);
+
+      expect(await screen.findByText('Teams error: Pick a team')).toBeInTheDocument();
+      expect(screen.getAllByText(/Pick a team/)).toHaveLength(1);
     });
   });
 });
