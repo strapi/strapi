@@ -91,7 +91,7 @@ type DraftAndPublishUID = {
  * follows the same rule. Without generated schemas, no UID enables draft and publish, and every
  * status stays accepted. A single UID resolves as {@link DeleteStatus}.
  */
-type StrictDeleteStatus<TContentTypeUID extends UID.ContentType> = [
+export type StrictDeleteStatus<TContentTypeUID extends UID.ContentType> = [
   Extract<TContentTypeUID, DraftAndPublishUID>,
 ] extends [never]
   ? PublicationStatus.Kind
