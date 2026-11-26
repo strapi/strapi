@@ -81,8 +81,9 @@ const endOfDay = (date: Date): Date => {
 /**
  * Parses `YYYY-MM-DD` as a local calendar date — NOT `new Date(value)`, which
  * treats date-only strings as UTC midnight and shifts the day in every
- * timezone west of UTC. Shared by the query builder, the badge labels and the
- * range calendar so all three agree on which day a range endpoint means.
+ * timezone west of UTC. Shared by the query builder and the badge labels so
+ * both agree on which day a range endpoint means. `DateRangeCalendar` parses
+ * its day keys the same way with its own `fromKey`.
  */
 export const parseCalendarDate = (value: string): Date => {
   const [year, month, day] = value.split('-').map(Number);

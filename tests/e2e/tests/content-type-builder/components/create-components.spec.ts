@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from '../../../../fixtures';
 import { resetFiles } from '../../../../utils/file-reset';
 import { sharedSetup } from '../../../../utils/setup';
 import { createComponent, type AddAttribute } from '../../../../utils/content-types';

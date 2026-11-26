@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../fixtures';
 import { resetFiles } from '../../../../utils/file-reset';
 import { sharedSetup } from '../../../../utils/setup';
 import { clickAndWait } from '../../../../utils/shared';

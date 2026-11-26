@@ -272,7 +272,8 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
 
     const permissionsIdToRemove = pageRemovedPermissions.map(({ permission }) => permission.id);
 
-    // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
+    // 2. Clean permissions' fields (remove the ones that left the schema, replace a stored parent
+    // path with its nested fields)
     const remainingPermissions = permissions.filter(
       (permission: Permission) => !permissionsIdToRemove.includes(permission.id)
     );

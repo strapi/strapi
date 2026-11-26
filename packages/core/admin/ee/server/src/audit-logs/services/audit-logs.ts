@@ -46,14 +46,6 @@ const getSanitizedUser = (user: any) => {
   };
 };
 
-const serializeCsvPayload = (payload: unknown) => {
-  if (payload === null || payload === undefined) {
-    return null;
-  }
-
-  return typeof payload === 'string' ? payload : JSON.stringify(payload);
-};
-
 const parseCsvPayload = (payload: unknown): Record<string, unknown> | null => {
   if (typeof payload === 'string') {
     try {
@@ -109,12 +101,12 @@ const toCsvLine = (row: any) => {
   return serializeCsvLine([
     row.id,
     row.action,
-    row.date instanceof Date ? row.date.toISOString() : row.date,
+    row.date,
     user?.id ?? null,
     user?.email ?? null,
     user?.displayName ?? null,
     parseCsvPayload(payload)?.origin ?? null,
-    serializeCsvPayload(payload),
+    payload,
   ]);
 };
 

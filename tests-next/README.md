@@ -17,14 +17,20 @@ yarn install
 yarn build                              # once, and again after changing anything under packages/
 yarn nx run @strapi/tests-api:test
 yarn nx run @strapi/tests-cli:test
-yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, about 10 s
+yarn nx run @strapi/tests-e2e:test      # builds the admin of its app when it changed, about 10 s
 ```
+
+The ui suite also runs with `npx playwright test`, UI mode (`--ui`) and the VS Code extension,
+on Chromium locally and on Chromium and WebKit in CI. See the [ui README](ui/README.md).
 
 - **Build first.** The apps run the workspace packages from their `dist`. Without a build, app
   generation fails with `Cannot find module '…/create-strapi-app/dist/index.js'`. With a stale
   build, the suites run against the old code. CI builds before these jobs.
 - **Generated apps** live in `test-apps/next/<name>` (git-ignored). They have no dependency
   installed: `@strapi/*` resolves from the root `node_modules`. Deleting the folder is safe.
+  The api and cli suites generate theirs on every run. The ui suite reuses its app and admin
+  build while nothing that shapes them changed (`prepareApp`, see
+  [The app](ui/README.md#the-app)).
 - **Ports**: from `TESTS_PORT_BASE` (default 8600), with one range per suite (ui `+0`, api `+20`,
   cli `+40`), so suites can run side by side.
 - **Database**: SQLite by default. `TESTS_DATABASE=postgres` or `mysql` runs the api and cli
@@ -57,7 +63,7 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
   (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
   Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run
   removes any license from the app env. See [Edition](#edition).
-- **One ui worker** for now: each worker will need its own app and database first.
+- **One ui worker** for now: each worker will need its own app and database first (CMS-2483).
 - **Windows** is not supported yet: stopping a server signals its process group.
 
 ## Postgres and MySQL

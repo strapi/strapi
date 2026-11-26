@@ -15,7 +15,7 @@ import { styled, css } from 'styled-components';
 import { TruncatedText } from '../../../components/TruncatedText';
 import { ASSET_TYPES } from '../../../enums';
 import { useTracking } from '../../../hooks/useTracking';
-import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { getAssetSubtitle, prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
@@ -461,6 +461,7 @@ interface AssetCardProps {
 const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
+  const subtitle = getAssetSubtitle(asset);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging, dragData, dragStyle, dragHandle } =
     useFileDraggable(asset);
@@ -595,9 +596,18 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
               <TypeIcon width={20} height={20} />
             </FileTypeIcon>
           )}
-          <NameButton type="button" onClick={handleNameClick}>
-            <FileName textColor="primary800">{asset.name}</FileName>
-          </NameButton>
+          {/* The subtitle sits outside the button so the button's name stays the
+              asset's name alone. */}
+          <Flex direction="column" alignItems="stretch" flex={1} minWidth={0}>
+            <NameButton type="button" onClick={handleNameClick}>
+              <FileName textColor="primary800">{asset.name}</FileName>
+            </NameButton>
+            {subtitle && (
+              <Typography variant="pi" textColor="neutral600" ellipsis>
+                {subtitle}
+              </Typography>
+            )}
+          </Flex>
           {showItemActions && (
             <Flex
               {...ASSET_ITEM_CONTROL_PROPS}

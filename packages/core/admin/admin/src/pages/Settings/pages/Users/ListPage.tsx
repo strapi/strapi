@@ -73,6 +73,14 @@ const ListPageCE = () => {
       ).CreateActionEE
   );
 
+  const LicenseLimitBanner = useEnterprise(
+    null,
+    async () =>
+      (
+        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/LicenseLimitBanner')
+      ).LicenseLimitBanner
+  );
+
   const headers = useSettingsListHeaders('users', TABLE_HEADERS);
 
   const title = formatMessage({
@@ -149,6 +157,7 @@ const ListPageCE = () => {
           defaultMessage: 'All the users who have access to the Strapi admin panel',
         })}
       />
+      {LicenseLimitBanner && <LicenseLimitBanner />}
       <Layouts.Action
         startActions={
           <>
@@ -346,26 +355,7 @@ const FILTERS = [
   },
 ] satisfies Filters.Filter[];
 
-/* -------------------------------------------------------------------------------------------------
- * ListPage
- * -----------------------------------------------------------------------------------------------*/
-
-// component which determines whether this page should render the CE or EE page
-const ListPage = () => {
-  const UsersListPage = useEnterprise(
-    ListPageCE,
-    async () =>
-      (await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
-        .UserListPageEE
-  );
-
-  // block rendering until the EE component is fully loaded
-  if (!UsersListPage) {
-    return null;
-  }
-
-  return <UsersListPage />;
-};
+const ListPage = ListPageCE;
 
 /* -------------------------------------------------------------------------------------------------
  * ProtectedListPage

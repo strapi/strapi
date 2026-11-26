@@ -488,6 +488,35 @@ describe('AssetsGrid', () => {
       });
     });
 
+    describe('Subtitle', () => {
+      it('shows the type, dimensions and size of an image under its name', () => {
+        setup({
+          assets: [{ ...createMockAsset(1, 'photo.png'), width: 2500, height: 3209, size: 2300 }],
+        });
+        expect(screen.getByText('PNG - 2500×3209 - 2.3MB')).toBeInTheDocument();
+      });
+
+      it('shows the type and size of an asset without dimensions', () => {
+        setup({
+          assets: [{ ...createMockAsset(1, 'doc.pdf', 'application/pdf', '.pdf'), size: 120 }],
+        });
+        expect(screen.getByText('PDF - 120.0KB')).toBeInTheDocument();
+      });
+
+      it('keeps the subtitle out of the name button', () => {
+        setup({ assets: [{ ...createMockAsset(1, 'photo.png'), size: 2300 }] });
+        expect(screen.getByRole('button', { name: 'photo.png' })).toBeInTheDocument();
+        expect(screen.getByText('PNG - 2.3MB')).toBeInTheDocument();
+      });
+
+      it('renders no subtitle when nothing is known about the file', () => {
+        const asset = createMockAsset(1, 'file', 'application/octet-stream', '');
+        asset.ext = undefined;
+        setup({ assets: [asset] });
+        expect(screen.queryByText(/ - |KB|×/)).not.toBeInTheDocument();
+      });
+    });
+
     describe('Edge cases', () => {
       it('handles missing mime type', () => {
         const asset = createMockAsset(1, 'file.txt', '', '.txt');

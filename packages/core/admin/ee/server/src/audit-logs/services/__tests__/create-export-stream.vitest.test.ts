@@ -417,5 +417,32 @@ describe('Audit logs export stream', () => {
 
       expect(line).toBe('2,audit-log.export,2026-08-25T10:00:00.000Z,,,,,\r\n');
     });
+
+    it('leaves the payload cell empty for a payload JSON cannot represent', () => {
+      const payload: Record<string, unknown> = { origin: 'admin' };
+      payload.self = payload;
+
+      const line = toCsvLine({
+        id: 3,
+        action: 'entry.update',
+        date: '2026-08-25T10:00:00.000Z',
+        payload,
+        user: null,
+      });
+
+      expect(line).toBe('3,entry.update,2026-08-25T10:00:00.000Z,,,,admin,\r\n');
+    });
+
+    it('leaves the date cell empty for an invalid date', () => {
+      const line = toCsvLine({
+        id: 4,
+        action: 'entry.update',
+        date: new Date('not-a-date'),
+        payload: null,
+        user: null,
+      });
+
+      expect(line).toBe('4,entry.update,,,,,,\r\n');
+    });
   });
 });

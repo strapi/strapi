@@ -1,6 +1,9 @@
 # This file determines when jobs should run or skipped based on which files were modified
 
 backend:
+  # shared/ code (contracts, utils, constants) is imported by both server and admin code,
+  # so it also sits in `frontend` below: `unit_front` runs only on frontend or global
+  - 'packages/**/shared/**'
   - 'packages/**/server/**/*.(js|ts|json)'
   - 'packages/**/strapi-server.js'
   - 'packages/{utils,generators,cli,providers}/**'
@@ -11,6 +14,7 @@ backend:
   - 'tests/setup/unit.setup.js'
   - 'tests/setup/timezone-environment.js'
 frontend:
+  - 'packages/**/shared/**'
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
   - 'packages/**/strapi-admin.js'
@@ -35,6 +39,7 @@ e2e:
   - 'tests/scripts/run-tests.js'
   - 'tests/e2e/**'
   - 'playwright.base.config.js'
+  - 'tests/fixtures.ts'
   - 'tests/utils/**'
   - 'tests/helpers/**'
   - 'tests/app-template/**'
