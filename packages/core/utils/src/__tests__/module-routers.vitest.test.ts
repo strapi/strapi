@@ -73,16 +73,24 @@ describe('module routers', () => {
       expect(called).toBe(false);
     });
 
+    it('returns an array of routes as is, the same array', () => {
+      const routes = [route];
+
+      expect(routesOf(routes)).toBe(routes);
+    });
+
     it('reads every router of a module, declared or built', () => {
       const declared = {
         admin: { type: 'admin', routes: [route] },
         'content-api': createContentApiRoutesFactory(() => [{ method: 'POST', path: '/items' }]),
         custom: () => ({ type: 'content-api', routes: [route] }),
+        array: [{ method: 'PUT', path: '/items' }],
       };
 
       expect(Object.values(declared).flatMap(routesOf)).toEqual([
         route,
         { method: 'POST', path: '/items' },
+        { method: 'PUT', path: '/items' },
       ]);
     });
   });

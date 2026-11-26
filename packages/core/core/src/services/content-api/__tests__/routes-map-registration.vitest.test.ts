@@ -109,6 +109,27 @@ describe('getRoutesMap and route registration', () => {
     expect(routesMap['api::article'].map((r) => r.path)).toEqual(['/api/articles']);
   });
 
+  test('reads an API router declared as an array of routes, which is served on the root router', async () => {
+    const app = createApp({
+      apis: {
+        article: {
+          routes: {
+            article: { type: 'content-api', routes: [route('/articles')] },
+            custom: [route('/custom-articles')],
+          },
+        },
+      },
+    });
+
+    app.server.initRouting();
+
+    const routesMap = await app.contentAPI.getRoutesMap();
+
+    // The array is registered as-is on the root router (`info.type: 'api'`), not on the content API
+    expect(app.server.listRoutes().map((layer) => layer.path)).toContain('/custom-articles');
+    expect(routesMap['api::article'].map((r) => r.path)).toEqual(['/api/articles']);
+  });
+
   test('returns an empty map for an app without content API routes, after initRouting', async () => {
     const app = createApp();
 
