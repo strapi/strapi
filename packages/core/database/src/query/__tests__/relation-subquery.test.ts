@@ -509,6 +509,30 @@ describe('relation subquery and deep sort paths', () => {
   });
 
   it.each([
+    ['first()', (qb: any) => qb.first(), [10, 11, 10]],
+    ['limit 1', (qb: any) => qb.limit(1), [10, 11, 10]],
+    ['offset 1', (qb: any) => qb.offset(1), [11, 10, 11]],
+  ])(
+    'query builder %s with a relation orderBy writes only the rows it picks',
+    async (_label, page, expected) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      // Every row matches; related.title desc puts row 2 (Category B) first, then rows 1 and 3.
+      const qb = em.createQueryBuilder(TEST_UID).init({
+        where: { related: { title: { $startsWith: 'Category' } } },
+        orderBy: { related: { title: 'desc' } },
+      });
+      await page(qb).increment('views', 1).execute();
+
+      expect(await connection('tests').orderBy('id').pluck('views')).toEqual(expected);
+
+      await connection.destroy();
+    }
+  );
+
+  it.each([
     ['numeric string increment', (qb: any) => qb.increment('views', '2'), [12, 10, 12]],
     ['numeric string decrement', (qb: any) => qb.decrement('views', '3'), [7, 10, 7]],
     ['negative numeric string', (qb: any) => qb.increment('views', '-2'), [8, 10, 8]],

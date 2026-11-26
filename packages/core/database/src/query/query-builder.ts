@@ -595,7 +595,8 @@ const createQueryBuilder = (
         });
       }
 
-      const subQB = sub.select(selected).getKnexQuery();
+      // wrapWithDeepSort prefixes the select with its own alias, so it needs the bare id.
+      const subQB = sub.select(sub.shouldUseDeepSort() ? ['id'] : selected).getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);

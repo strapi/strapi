@@ -160,6 +160,21 @@ describe('relation-filtered query builder writes', () => {
   });
 
   test.each([
+    ['first()', (qb) => qb.first(), [10, 10, 11]],
+    ['limit 1', (qb) => qb.limit(1), [10, 10, 11]],
+    ['offset 1', (qb) => qb.offset(1), [11, 11, 10]],
+  ])('category name desc with %s writes only the rows it picks', async (_label, page, views) => {
+    const qb = strapi.db.queryBuilder(ARTICLE_UID).init({
+      where: { category: { name: { $in: ['A', 'B'] } } },
+      orderBy: { category: { name: 'desc' } },
+    });
+
+    await page(qb).increment('views', 1).execute();
+
+    expect((await readArticles()).map((row) => row.views)).toEqual(views);
+  });
+
+  test.each([
     ['increment', (qb) => qb.increment('views', 5)],
     ['update', (qb) => qb.update({ title: 'changed' })],
     ['delete', (qb) => qb.delete()],
