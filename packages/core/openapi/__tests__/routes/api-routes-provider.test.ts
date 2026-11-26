@@ -18,7 +18,7 @@ describe('ApiRoutesProvider', () => {
       expect(routes).toHaveLength(routesFixtures.test.length + routesFixtures.foobar.length);
     });
 
-    it('should prepend the content API prefix to API route paths', () => {
+    it('should document distinct routes even when a declared path starts with the API prefix', () => {
       const strapiMock = {
         config: {
           get: jest.fn((key: string, defaultValue?: unknown) => {
@@ -43,7 +43,7 @@ describe('ApiRoutesProvider', () => {
                   {
                     info: { type: 'content-api' },
                     method: 'GET',
-                    path: '/api/prefixed',
+                    path: '/api/articles',
                     handler: 'api::article.article.findPrefixed',
                   },
                 ],
@@ -57,15 +57,15 @@ describe('ApiRoutesProvider', () => {
       const { routes } = provider;
 
       expect(routes[0].path).toBe('/api/articles');
-      expect(routes[1].path).toBe('/api/prefixed');
+      expect(routes[1].path).toBe('/api/api/articles');
     });
 
-    it('should support custom content API prefixes', () => {
+    it.each(['/rest', '/rest/'])('should support the custom content API prefix %s', (prefix) => {
       const strapiMock = {
         config: {
           get: jest.fn((key: string, defaultValue?: unknown) => {
             if (key === 'api.rest.prefix') {
-              return '/rest';
+              return prefix;
             }
 
             return defaultValue;
@@ -82,6 +82,12 @@ describe('ApiRoutesProvider', () => {
                     path: '/articles',
                     handler: 'api::article.article.find',
                   },
+                  {
+                    info: { type: 'content-api' },
+                    method: 'GET',
+                    path: '/rest/articles',
+                    handler: 'api::article.article.findPrefixed',
+                  },
                 ],
               },
             },
@@ -92,7 +98,7 @@ describe('ApiRoutesProvider', () => {
       const provider = new ApiRoutesProvider(strapiMock);
       const { routes } = provider;
 
-      expect(routes[0].path).toBe('/rest/articles');
+      expect(routes.map(({ path }) => path)).toEqual(['/rest/articles', '/rest/rest/articles']);
     });
   });
 

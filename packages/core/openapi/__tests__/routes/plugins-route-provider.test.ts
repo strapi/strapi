@@ -20,6 +20,7 @@ describe('PluginRoutesProvider', () => {
 
     it('should prepend router prefix to route paths', () => {
       const strapiMock = {
+        config: new StrapiMock().config,
         plugins: {
           upload: {
             routes: {
@@ -56,6 +57,7 @@ describe('PluginRoutesProvider', () => {
 
     it('should use route config.prefix instead of router prefix when present', () => {
       const strapiMock = {
+        config: new StrapiMock().config,
         plugins: {
           'users-permissions': {
             routes: {
@@ -95,6 +97,7 @@ describe('PluginRoutesProvider', () => {
 
     it('should handle mix of routes with and without config.prefix', () => {
       const strapiMock = {
+        config: new StrapiMock().config,
         plugins: {
           'users-permissions': {
             routes: {
@@ -134,6 +137,7 @@ describe('PluginRoutesProvider', () => {
 
     it('should handle routes with no router prefix', () => {
       const strapiMock = {
+        config: new StrapiMock().config,
         plugins: {
           test: {
             routes: {

@@ -31,27 +31,19 @@ export abstract class AbstractRoutesProvider implements RoutesProvider {
    */
   public abstract get routes(): Core.Route[];
 
-  protected withContentApiPrefix(route: Core.Route): Core.Route {
+  protected withContentApiPrefix(route: Core.Route, routerPrefix = ''): Core.Route {
     if (route.info.type !== 'content-api') {
       return route;
     }
 
-    const apiPrefix = this._strapi.config?.get<string>('api.rest.prefix', '/api') ?? '/api';
-    const normalizedPrefix = apiPrefix.startsWith('/') ? apiPrefix : `/${apiPrefix}`;
-    const normalizedPath = route.path.startsWith('/') ? route.path : `/${route.path}`;
-
-    if (normalizedPath === normalizedPrefix || normalizedPath.startsWith(`${normalizedPrefix}/`)) {
-      return route;
-    }
-
+    const apiPrefix = this._strapi.config.get<string>('api.rest.prefix', '/api');
+    const prefix = Object.prototype.hasOwnProperty.call(route.config ?? {}, 'prefix')
+      ? ''
+      : routerPrefix;
     const path =
-      (`${normalizedPrefix}${normalizedPath}` || '/').replace(/\/+/g, '/').replace(/\/$/, '') ||
-      '/';
+      `/${apiPrefix}/${prefix}/${route.path}`.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
 
-    return {
-      ...route,
-      path,
-    };
+    return { ...route, path };
   }
 
   /**
