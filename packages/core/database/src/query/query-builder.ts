@@ -134,6 +134,8 @@ export interface QueryBuilder {
 const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
   ['select', 'count', 'update', 'delete'].includes(type);
 
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+
 /**
  * An update or delete that does not use ORDER BY to choose rows. `limit: -1` counts as no page,
  * as `ensurePaginationOrderStability` does. The query still emits `LIMIT -1`.
@@ -168,7 +170,7 @@ const createQueryBuilder = (
       return orderBy.flatMap((entry) => {
         const next = omitRelationOrder(entry);
 
-        if (_.isPlainObject(next) && _.isEmpty(next)) {
+        if (isPlainRecord(next) && _.isEmpty(next)) {
           return [];
         }
 
@@ -176,7 +178,7 @@ const createQueryBuilder = (
       });
     }
 
-    if (_.isPlainObject(orderBy)) {
+    if (isPlainRecord(orderBy)) {
       return Object.fromEntries(
         Object.entries(orderBy).filter(([key]) => attributes[key]?.type !== 'relation')
       );
