@@ -58,7 +58,7 @@ Some getters read a registry instead: `strapi.services`, `strapi.controllers`, `
 
 `Strapi.Registries.ContainerEntries` maps a container key to the value `get` returns. `@strapi/types` registers the keys above in `core/container.ts`, except `audit-logs`, which `@strapi/admin` registers. A key a getter reads has the getter's type. The registries are marked `@internal`.
 
-With strict types, `strapi.get(name)` resolves a registered key to its value and any other key to `unknown`, and `strapi.add(name, resolver)` does not check the resolver. Without strict types, `get` returns `any`. Read [Container contracts](../contributing/05-typescript.md#container-contracts).
+With strict types, `strapi.get(name)` resolves a registered key to its value and any other key to `unknown`, and `strapi.add(name, resolver)` checks the resolver of a registered key: a factory that returns the value, or the value itself when it is not a function. For `coreStore`, `hooks` and `db`, `add` checks the implementation's contract, and `get` returns the strict view. Without strict types, `get` returns `any` and `add` takes any resolver. Read [Container contracts](../contributing/05-typescript.md#container-contracts).
 
 ## Registries
 
