@@ -33,8 +33,10 @@ const joinBy = (joint: string, ...args: string[]) => {
   const start = new RegExp(`^${jointPattern(joint)}`);
   const end = new RegExp(`${jointPattern(joint)}$`);
 
-  return args.reduce((url, path, index) => {
-    if (args.length === 1) return path;
+  return args.reduce((url, value, index) => {
+    if (args.length === 1) return value;
+    // Like lodash trim: a nullish segment becomes ''
+    const path = String(value ?? '');
     if (index === 0) return path.replace(end, '');
     if (index === args.length - 1) return url + joint + path.replace(start, '');
     return url + joint + path.replace(start, '').replace(end, '');

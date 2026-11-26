@@ -6,11 +6,11 @@ import { verify } from '../data-transfer';
 describe('Data transfer strategy', () => {
   describe('verify', () => {
     const credentials = { id: 1, name: 'transfer-token', expiresAt: null };
-    // Like CASL's can, which throws a TypeError when the action is not a string
+    // Like Strapi's ability.can, which throws a TypeError on a nullish action
     const ability = {
       can(scope: unknown) {
-        if (typeof scope !== 'string') {
-          throw new TypeError(`Cannot check a non-string action: ${String(scope)}`);
+        if (scope === undefined || scope === null) {
+          throw new TypeError(`Cannot check a nullish action: ${String(scope)}`);
         }
 
         return scope === 'push';

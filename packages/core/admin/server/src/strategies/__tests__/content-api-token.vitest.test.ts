@@ -270,14 +270,16 @@ describe('Content-API Token Auth Strategy', () => {
       },
     };
 
-    // Like CASL's can, which throws a TypeError when the action is not a string
+    // Like Strapi's ability.can: a string or a { name, params } action, and a TypeError on a nullish one
     const ability = {
       can: vi.fn((action: unknown) => {
-        if (typeof action !== 'string') {
-          throw new TypeError(`Cannot check a non-string action: ${String(action)}`);
+        if (action === undefined || action === null) {
+          throw new TypeError(`Cannot check a nullish action: ${String(action)}`);
         }
 
-        return customApiToken.permissions.includes(action);
+        const name = typeof action === 'string' ? action : (action as { name: string }).name;
+
+        return customApiToken.permissions.includes(name);
       }),
     };
 
@@ -396,6 +398,16 @@ describe('Content-API Token Auth Strategy', () => {
       expect(() =>
         contentApiTokenStrategy.verify({ credentials: customApiToken, ability }, { scope })
       ).toThrow(errors.ForbiddenError);
+    });
+
+    test('Allows a parametrized action from a custom key', () => {
+      global.strapi = strapiMock as any;
+
+      const scope = [{ name: 'api::model.model.update', params: {} }];
+
+      expect(
+        contentApiTokenStrategy.verify({ credentials: customApiToken, ability }, { scope })
+      ).toBeUndefined();
     });
 
     test('Throws if the credentials are not passed in the auth object', () => {

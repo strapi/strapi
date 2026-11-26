@@ -1,4 +1,5 @@
 import Router from '@koa/router';
+import type { Core, UID } from '@strapi/types';
 import { describe, expect, test } from 'vitest';
 
 import { createAPI } from '../api';
@@ -50,18 +51,20 @@ describe('server route registration', () => {
 
   test('trims a string handler before resolving its controller', () => {
     const router = new Router();
-    const controllers: Record<string, unknown> = {
+    const controllers: Partial<Record<UID.Controller, unknown>> = {
       'api::article.article': { find: () => undefined },
     };
+    const route: Core.Route = {
+      method: 'GET',
+      path: '/articles',
+      // Padded on purpose: route files are user config, so the handler can arrive untrimmed
+      handler: '  api::article.article.find  ' as Core.Route['handler'],
+      info: { type: 'content-api' },
+    };
 
-    composeEndpoint({ ...strapi, controller: (uid: string) => controllers[uid] })(
-      {
-        method: 'GET',
-        path: '/articles',
-        handler: '  api::article.article.find  ',
-      } as any,
-      { router }
-    );
+    composeEndpoint({ ...strapi, controller: (uid: UID.Controller) => controllers[uid] })(route, {
+      router,
+    });
 
     expect(router.stack.map((layer) => layer.path)).toContain('/articles');
   });

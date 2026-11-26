@@ -92,9 +92,11 @@ export const verify = (auth: any, config: any) => {
     }
 
     // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
-    // A hole becomes undefined, and CASL's can throws a TypeError on a non-string, so reject it first.
+    // A hole becomes undefined, and Strapi's ability.can throws a TypeError on a nullish action, so reject it first.
     const scopes: unknown[] = Array.from(castArray(config.scope));
-    const isAllowed = scopes.every((scope) => typeof scope === 'string' && ability.can(scope));
+    const isAllowed = scopes.every(
+      (scope) => scope !== undefined && scope !== null && ability.can(scope)
+    );
 
     if (isAllowed === true) {
       return;

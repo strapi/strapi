@@ -82,5 +82,10 @@ describe('string-formatting', () => {
       const [joint, ...rest] = args;
       expect(joinBy(joint, ...rest)).toBe(expectedResult);
     });
+
+    test('treats a nullish segment as empty, like lodash trim', () => {
+      expect(joinBy('/', null as unknown as string, 'b')).toBe('/b');
+      expect(joinBy('/', 'a', undefined as unknown as string)).toBe('a/');
+    });
   });
 });
