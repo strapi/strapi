@@ -1186,6 +1186,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['settings.d.ts', 'schemas.ts'],
       ['settings.d.ts', 'document-write.ts'],
       ['strapi-strict.d.ts', 'media.ts'],
+      ['strapi-strict.d.ts', 'define-route.ts'],
       ['settings.d.ts', 'package-schemas.d.ts', 'package-schemas-open.ts'],
       [
         'settings.d.ts',
@@ -1274,6 +1275,17 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   test(`${resolution}: media values and inputs follow the upload file only in strict mode`, () => {
     assertClean(compile(['strapi-strict.d.ts', 'media.ts']), `${resolution}, media in strict mode`);
     assertClean(compile(['media-permissive.ts']), `${resolution}, media without strict types`);
+  });
+
+  test(`${resolution}: a user-land defineRoute with typed input fits the router types`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'define-route.ts']),
+      `${resolution}, defineRoute in strict mode`
+    );
+    assertClean(
+      compile(['define-route-permissive.ts']),
+      `${resolution}, defineRoute without strict types`
+    );
   });
 
   test(`${resolution}: package schemas are precise without generated schemas, other UIDs stay generic`, () => {
