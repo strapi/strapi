@@ -2,6 +2,7 @@ import knex from 'knex';
 import { createEntityManager } from '../../entity-manager';
 import { createMetadata } from '../../metadata';
 import { createScopeRegistry } from '../scopes';
+import type { QueryBuilder } from '../query-builder';
 
 const TEST_UID = 'api::test.test';
 const RELATED_UID = 'api::related.related';
@@ -36,7 +37,6 @@ const models = [
       publishedAt: { type: 'string' },
       views: { type: 'integer' },
       likes: { type: 'integer' },
-      viewCount: { type: 'integer' },
       related: {
         type: 'relation',
         relation: 'manyToOne',
@@ -93,7 +93,6 @@ const setupTables = async (connection: knex.Knex) => {
     t.string('published_at');
     t.integer('views').defaultTo(10);
     t.integer('likes').defaultTo(10);
-    t.integer('view_count').defaultTo(10);
   });
   await connection.schema.createTable('tests_related_lnk', (t) => {
     t.increments('id');
@@ -232,17 +231,17 @@ describe('relation subquery path (delete / update writes)', () => {
   it.each([
     [
       'increment',
-      (qb: any) => qb.increment('views', 2),
+      (qb: QueryBuilder) => qb.increment('views', 2),
       { views: [12, 10, 12], likes: [10, 10, 10] },
     ],
     [
       'decrement',
-      (qb: any) => qb.decrement('views', 3),
+      (qb: QueryBuilder) => qb.decrement('views', 3),
       { views: [7, 10, 7], likes: [10, 10, 10] },
     ],
     [
       'increment + decrement on different columns',
-      (qb: any) => qb.increment('views', 1).decrement('likes', 2),
+      (qb: QueryBuilder) => qb.increment('views', 1).decrement('likes', 2),
       { views: [11, 10, 11], likes: [8, 10, 8] },
     ],
   ])('query builder %s: nested relation where', async (_label, apply, expected) => {
@@ -281,6 +280,93 @@ describe('relation subquery path (delete / update writes)', () => {
     await connection.destroy();
   });
 
+  it('query builder adds no relation-sort joins to an unpaginated scalar-filtered write', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { name: 'Hugo LLORIS' }, orderBy: { related: { title: 'asc' } } })
+      .increment('views', 1);
+
+    const sql = qb.getKnexQuery().toString();
+    expect(sql).not.toMatch(/join/i);
+    expect(sql).not.toMatch(/order by/i);
+    expect(sql).not.toMatch(/select/i);
+
+    await qb.execute();
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 10]);
+
+    await connection.destroy();
+  });
+
+  it('query builder adds no relation-sort joins when orderBy and a relation filter both apply', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const withSort = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: 1 }, orderBy: { related: { title: 'asc' } } })
+      .increment('views', 1);
+    const withoutSort = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: 1 } })
+      .increment('views', 1);
+
+    // Only the joins from the relation filter, none from the relation sort.
+    expect(withSort.getKnexQuery().toString()).toBe(withoutSort.getKnexQuery().toString());
+
+    await withSort.execute();
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 11]);
+
+    await connection.destroy();
+  });
+
+  it.each([
+    ['increment', (qb: QueryBuilder) => qb.increment('views', 1)],
+    ['update', (qb: QueryBuilder) => qb.update({ name: 'UPDATED' })],
+    ['delete', (qb: QueryBuilder) => qb.delete()],
+  ])('query builder treats limit: -1 as unbounded for %s', async (_label, apply) => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em.createQueryBuilder(TEST_UID).init({
+      where: { related: { title: 'Category A' } },
+      orderBy: { related: { title: 'asc' } },
+      limit: -1,
+    });
+
+    const sql = apply(qb).getKnexQuery().toString();
+    // Only the relation filter's two joins; the relation sort adds none and orderBy is dropped.
+    expect(sql.match(/left join/gi)).toHaveLength(2);
+    expect(sql).not.toMatch(/order by/i);
+
+    await connection.destroy();
+  });
+
+  it.each([
+    ['limit', { limit: 1 }],
+    ['offset', { offset: 1 }],
+  ])('query builder keeps relation-sort orderBy for a write with %s', async (_label, page) => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { name: 'Hugo LLORIS' }, orderBy: { related: { title: 'asc' } }, ...page })
+      .increment('views', 1);
+
+    const sql = qb.getKnexQuery().toString();
+    expect(sql).toMatch(/left join/i);
+    expect(sql).toMatch(/order by/i);
+
+    await connection.destroy();
+  });
+
   it('query builder does not emit FOR UPDATE in the relation subquery (pg SQL)', async () => {
     // The SQLite compiler writes forUpdate() as an empty string, so compile with the pg
     // dialect. No connection is opened: only the SQL is generated.
@@ -314,14 +400,14 @@ describe('relation subquery path (delete / update writes)', () => {
   });
 
   it.each([
-    ['increment', (qb: any) => qb.increment('views', 1), 'views', [10, 10, 11]],
+    ['increment', (qb: QueryBuilder) => qb.increment('views', 1), 'views', [10, 10, 11]],
     [
       'update',
-      (qb: any) => qb.update({ name: 'UPDATED' }),
+      (qb: QueryBuilder) => qb.update({ name: 'UPDATED' }),
       'name',
       ['Hugo LLORIS', 'Samuel UMTITI', 'UPDATED'],
     ],
-    ['delete', (qb: any) => qb.delete(), 'name', ['Hugo LLORIS', 'Samuel UMTITI']],
+    ['delete', (qb: QueryBuilder) => qb.delete(), 'name', ['Hugo LLORIS', 'Samuel UMTITI']],
   ])(
     'query builder first() keeps orderBy to pick the row for %s',
     async (_label, apply, column, expected) => {
@@ -404,19 +490,19 @@ describe('relation subquery path (delete / update writes)', () => {
   it.each([
     [
       'increment',
-      (qb: any) => qb.increment('views', 5),
+      (qb: QueryBuilder) => qb.increment('views', 5),
       (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('views'),
       [15, 10, 15],
     ],
     [
       'update',
-      (qb: any) => qb.update({ name: 'UPDATED' }),
+      (qb: QueryBuilder) => qb.update({ name: 'UPDATED' }),
       (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('name'),
       ['UPDATED', 'Samuel UMTITI', 'UPDATED'],
     ],
     [
       'delete',
-      (qb: any) => qb.delete(),
+      (qb: QueryBuilder) => qb.delete(),
       (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('name'),
       ['Samuel UMTITI'],
     ],
