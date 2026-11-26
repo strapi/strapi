@@ -81,7 +81,9 @@ export const request = async (
   { method = 'GET', token, body, formData, query, headers = {} }: RequestOptions = {}
 ): Promise<Response> => {
   const search = query ? toQueryString(query) : '';
-  const res = await fetch(`${server.url}${path}${search ? `?${search}` : ''}`, {
+  // A path can carry its own query string: `query` is appended to it, not a second `?`.
+  const separator = path.includes('?') ? '&' : '?';
+  const res = await fetch(`${server.url}${path}${search ? `${separator}${search}` : ''}`, {
     method,
     headers: {
       ...(token ? { authorization: `Bearer ${token}` } : {}),

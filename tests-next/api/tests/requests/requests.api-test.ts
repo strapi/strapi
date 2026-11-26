@@ -144,6 +144,17 @@ describe('content API client', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.map((article: { title: string }) => article.title)).toEqual(['Beta']);
   });
+
+  test('query is appended to a query string the path already has', async () => {
+    const api = createContentAPIClient(server, { token: token('read-only') });
+
+    const res = await api.get('/articles?pagination[pageSize]=10', {
+      query: { filters: { title: { $eq: 'Beta' } } },
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((article: { title: string }) => article.title)).toEqual(['Beta']);
+    expect(res.body.meta.pagination.pageSize).toBe(10);
+  });
 });
 
 describe('toQueryString', () => {
