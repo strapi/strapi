@@ -399,7 +399,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     if (hasDraftAndPublish && params.status === 'draft') {
-      throw new Error('Cannot delete a draft document');
+      throw new errors.ValidationError(
+        'Cannot delete only the draft of a document. delete() removes every version: use unpublish() to remove the published version or discardDraft() to reset the draft.'
+      );
     }
 
     const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);

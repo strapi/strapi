@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils';
@@ -129,6 +130,26 @@ describe('Document Service', () => {
       const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
       expect(articles.length).toBe(0);
+    });
+
+    testInTransaction('Cannot delete only the draft of a document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
+      // Publish so draft and published versions exist, and a partial delete would be visible
+      await strapi.documents(ARTICLE_UID).publish({ documentId: articleDb.documentId });
+      const articlesBefore = await findArticlesDb({ documentId: articleDb.documentId });
+      expect(articlesBefore).toHaveLength(2);
+
+      const deletion = strapi.documents(ARTICLE_UID).delete({
+        documentId: articleDb.documentId,
+        status: 'draft',
+      });
+
+      await expect(deletion).rejects.toThrow(errors.ValidationError);
+      await expect(deletion).rejects.toThrow('Cannot delete only the draft of a document');
+
+      const articlesAfter = await findArticlesDb({ documentId: articleDb.documentId });
+
+      expect(articlesAfter).toHaveLength(articlesBefore.length);
     });
   });
 });
