@@ -5,8 +5,6 @@ import { loginWithApi } from '../../../utils/login';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Bulk locale actions', () => {
-  test.describe.configure({ timeout: 500000 });
-
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await loginWithApi({ page });

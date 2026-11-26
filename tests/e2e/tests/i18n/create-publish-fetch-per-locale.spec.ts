@@ -12,9 +12,6 @@ import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 // Article is used because it is localized, has no required fields, and (unlike U&P state) is covered
 // by the e2e DB reset, so entries do not accumulate across runs.
 test.describe('i18n - create, publish and fetch per locale', { tag: ['@extended'] }, () => {
-  // Long timeout — several publishes across locales
-  test.describe.configure({ timeout: 500000 });
-
   const titles = {
     en: 'i18n locale article EN',
     fr: 'i18n locale article FR',

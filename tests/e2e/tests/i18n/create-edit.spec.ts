@@ -7,8 +7,6 @@ import { resetFiles } from '../../../utils/file-reset';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
 test.describe('Create and Edit Operations', () => {
-  test.describe.configure({ timeout: 500000 });
-
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await loginWithApi({ page });
