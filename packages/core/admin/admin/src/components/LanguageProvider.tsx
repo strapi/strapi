@@ -16,7 +16,13 @@ interface LanguageProviderProps {
 
 const LanguageProvider = ({ children, messages }: LanguageProviderProps) => {
   const locale = useTypedSelector((state) => state.admin_app.language.locale);
+  // The legacy catalog key 'zh' stores Traditional Chinese translations.
+  const formattingLocale = locale === 'zh' ? 'zh-Hant' : locale;
   const appMessages = defaultsDeep(messages[locale], messages.en);
+
+  React.useEffect(() => {
+    document.documentElement.lang = formattingLocale;
+  }, [formattingLocale]);
 
   const warnedKeysRef = React.useRef(new Set<string>());
 
@@ -45,7 +51,7 @@ const LanguageProvider = ({ children, messages }: LanguageProviderProps) => {
 
   return (
     <IntlProvider
-      locale={locale}
+      locale={formattingLocale}
       defaultLocale="en"
       messages={appMessages}
       textComponent="span"
