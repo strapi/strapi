@@ -59,6 +59,11 @@ export default {
       Object.assign(attributes, { registrationToken: null, isActive: true });
     }
 
+    // Checked again after the plugin steps: another user may have taken the last seat meanwhile
+    if (!(await hasAdminSeatsAvaialble())) {
+      throw new ForbiddenError('License seat limit reached. You cannot create a new user');
+    }
+
     const createdUser = await save(
       () => getService('user').create(attributes),
       (created: { id: Data.ID }) => getService('user').deleteById(created.id)
@@ -74,9 +79,8 @@ export default {
 
   async update(ctx: Context) {
     const id = parseRouteId(ctx.params.id);
-    const user = id === null ? null : await getService('user').findOne(id, null);
 
-    if (id === null || user === null) {
+    if (id === null || !(await getService('user').exists({ id }))) {
       return ctx.notFound('User does not exist');
     }
 
@@ -98,6 +102,13 @@ export default {
       if (uniqueEmailCheck) {
         throw new ApplicationError('A user with this email address already exists');
       }
+    }
+
+    // Read after the plugin steps: the user may have been deactivated meanwhile
+    const user = await getService('user').findOne(id, null);
+
+    if (user === null) {
+      return ctx.notFound('User does not exist');
     }
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {

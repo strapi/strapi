@@ -53,7 +53,7 @@ formExtensions.unstable_addInputParams('role', {
 3. Refuses a `plugins` value that is not an object (400, path `plugins`) and a key that no plugin added to the form (400, path `plugins.<key>`). `plugins: {}` and `plugins: null` mean no values.
 4. For each plugin of the form, in the order they were added: `schema`, then `validate`.
 5. Runs every `beforeSave`.
-6. Runs its own checks on the values `beforeSave` returned, as without plugins: validation, trimming on API tokens, lowercasing of user emails, unique names and emails, and on EE user update the seat limit when the user is activated. On EE user create, the seat limit is checked first, before the plugin steps. Plugin steps get the values before this step, so with the email or token name as sent. On API token create, plugins get the body as sent, and core keeps only its own fields afterwards.
+6. Runs its own checks on the values `beforeSave` returned, as without plugins: validation, trimming on API tokens, lowercasing of user emails, unique names and emails, and on EE user update the seat limit when the user is activated, read from the user as it is after the plugin steps. On EE user create, the seat limit is checked first, before the plugin steps, and again here. Plugin steps get the values before this step, so with the email or token name as sent. On API token create, plugins get the body as sent, and core keeps only its own fields afterwards.
 7. Saves, then runs every `afterSave`. On create, when one fails, deletes the new entity.
 
 A plugin's `validate` runs on every request of its form that passes the checks of step 1, also without values, and can refuse it.
