@@ -1,6 +1,6 @@
 import { Flex, Menu, Typography, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useIsDesktop } from '../../hooks/useMediaQuery';
@@ -10,29 +10,9 @@ import { NavLink } from './NavLink';
 
 import type { MainNavMenuArgs } from '../../core/apis/MainNav';
 
-const MenuIcon = styled(Flex)`
-  height: ${({ theme }) => theme.spaces[7]};
-  width: ${({ theme }) => theme.spaces[7]};
-  border-radius: 50%;
-`;
-
 const MenuTrigger = styled(Menu.Trigger)`
   padding: 0;
 
-  ${({ theme }) => theme.breakpoints.large} {
-    width: 4rem;
-    height: 4rem;
-    justify-content: center;
-  }
-
-  /* An outline with an offset leaves a see-through gap, whatever the navigation background */
-  &[data-state='open'] ${MenuIcon} {
-    outline: 2px solid ${({ theme }) => theme.colors.primary600};
-    outline-offset: 2px;
-  }
-`;
-
-const ReadOnlyValue = styled(Flex)`
   ${({ theme }) => theme.breakpoints.large} {
     width: 4rem;
     height: 4rem;
@@ -67,6 +47,7 @@ const NavMenu = ({ menu, showLabel }: NavMenuProps) => {
 const NavMenuImpl = ({ menu: { intlLabel, useCurrent, Content }, showLabel }: NavMenuProps) => {
   const { formatMessage } = useIntl();
   const isDesktop = useIsDesktop();
+  const theme = useTheme();
   const current = useCurrent();
 
   if (!current) {
@@ -80,9 +61,17 @@ const NavMenuImpl = ({ menu: { intlLabel, useCurrent, Content }, showLabel }: Na
 
   const value = (
     <Flex alignItems="center" gap={3}>
-      <MenuIcon justifyContent="center" aria-hidden>
+      {/* The ring shows while the trigger, the `nav-menu` group, is open, and not under any open
+          ancestor like the mobile menu. An outline with an offset leaves a gap that shows the
+          navigation background, tinted or not. Its colour comes from the admin theme, which apps
+          can customise */}
+      <span
+        aria-hidden
+        className="flex size-8 items-center justify-center rounded-full group-data-[state=open]/nav-menu:outline-2 group-data-[state=open]/nav-menu:outline-offset-2"
+        style={{ outlineColor: theme.colors.primary600 }}
+      >
         {current.icon}
-      </MenuIcon>
+      </span>
       {showLabel ? (
         <Typography variant="omega">{name}</Typography>
       ) : (
@@ -96,13 +85,23 @@ const NavMenuImpl = ({ menu: { intlLabel, useCurrent, Content }, showLabel }: Na
     showLabel ? node : <NavLink.Tooltip label={name}>{node}</NavLink.Tooltip>;
 
   if (current.readOnly) {
-    return withTooltip(<ReadOnlyValue>{value}</ReadOnlyValue>);
+    // 1080px is `theme.breakpoints.large`, where the trigger is a 4rem square too
+    return withTooltip(
+      <div className="flex items-center min-[1080px]:size-10 min-[1080px]:justify-center">
+        {value}
+      </div>
+    );
   }
 
   return (
     <Menu.Root>
       {withTooltip(
-        <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
+        <MenuTrigger
+          className="group/nav-menu"
+          endIcon={null}
+          fullWidth
+          justifyContent="flex-start"
+        >
           {value}
         </MenuTrigger>
       )}

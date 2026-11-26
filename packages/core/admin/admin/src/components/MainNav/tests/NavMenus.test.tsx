@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Menu } from '@strapi/design-system';
+import { Menu, lightTheme } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
 import { act, render, screen } from '@tests/utils';
 
@@ -63,11 +63,20 @@ describe('NavMenus', () => {
     const trigger = await screen.findByRole('button', { name: 'Space: Control center' });
     const icon = screen.getByText('CC').parentElement!;
 
-    expect(getComputedStyle(icon).outlineOffset).toBe('');
+    // Jest does not compile Tailwind, so this checks the classes, and the browser the outline
+    expect(trigger).toHaveClass('group/nav-menu');
+    expect(icon).toHaveClass(
+      'rounded-full',
+      'group-data-[state=open]/nav-menu:outline-2',
+      'group-data-[state=open]/nav-menu:outline-offset-2'
+    );
+    // Not the design system default, so an app's custom theme colours the ring
+    expect(icon).toHaveStyle({ outlineColor: lightTheme.colors.primary600 });
+    expect(trigger).toHaveAttribute('data-state', 'closed');
 
     await user.click(trigger);
 
-    expect(getComputedStyle(icon).outlineOffset).toBe('2px');
+    expect(trigger).toHaveAttribute('data-state', 'open');
   });
 
   it('shows the current value in the trigger and its accessible name', async () => {
