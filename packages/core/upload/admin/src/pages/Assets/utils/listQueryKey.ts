@@ -8,9 +8,6 @@
  * - Switching table/grid view does NOT change the key — both views render the
  *   same list, so the selection survives the toggle.
  * - Infinite scroll (load more) does NOT change any segment → selection persists.
- *
- * Filter uses a stable default until its header control is wired; that follow-up
- * only passes a real value — no selection logic changes needed.
  */
 export interface ListQueryKeyInput {
   folderId: number | null;
@@ -19,7 +16,7 @@ export interface ListQueryKeyInput {
   searchAll: boolean;
   /** Composite of asset sort and folder position — both change the render order. */
   sort: string | null;
-  /** Null until filter UI ships. */
+  /** Serialized list filters (`?filters=`), or null when none are set. */
   filter: string | null;
 }
 

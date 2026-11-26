@@ -49,6 +49,7 @@ export {
 
 export * from './primitives';
 export * from './content-api-router';
+export * from './module-routers';
 export * from './security';
 export * from './blocks-link';
 export * from './publication-filter';

@@ -23,7 +23,7 @@ The `-c X` option can be used to limit the number of concurrent test apps, where
 
 If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:e2e:clean` before running the tests.
 
-Options meant for Playwright (for example `--grep`) are forwarded by the unified runner after the runner-only flags (`-d`, `-c`, `-f`). With **npm**, pass them after `--`: `npm run test:e2e -- -d settings --grep "My test"`. See `tests/cli/README.md` for the same pattern on CLI/Jest.
+Options meant for Playwright (for example `--grep`) are forwarded by the unified runner after the runner-only flags (`-d`, `-c`, `-f`). With **npm**, pass them after `--`: `npm run test:e2e -- -d admin --grep "My test"`. See `tests/cli/README.md` for the same pattern on CLI/Jest.
 
 ### Environment variables
 

@@ -21,12 +21,12 @@ import type { ItemLocations } from '../../../utils/itemLocations';
 const SCROLL_ROOT_SELECTOR = '[data-strapi-main-content]';
 
 /**
- * Subtrees that keep the browser's own context menu instead of opening the
- * create menu.
+ * Subtrees where this background menu must not open.
  *
  * `data-native-context-menu` is the explicit opt-out carried by the list items
  * themselves (asset cards, folder cards, table rows) and by the bulk actions
- * bar — right-clicking one of those must behave exactly as it does today. The
+ * bar. Items open their own menu through `ItemContextMenuProvider` when item
+ * actions are on, and the browser's menu otherwise. The
  * rest are the generic cases where the native menu is the useful one: links,
  * buttons and anything the user can type into or select text in.
  *
@@ -110,8 +110,8 @@ interface MainAreaContextMenuProps {
  * hit area is the whole column including the padding below the list.
  *
  * Deliberately background-only. Right-clicking an asset, a folder or a table
- * row is left alone — those carry `data-native-context-menu` and keep the
- * browser's menu (which is what you want over a thumbnail or a filename).
+ * row is left alone here: those carry `data-native-context-menu`, and
+ * `ItemContextMenuProvider` handles them.
  */
 export const MainAreaContextMenu = ({
   onCreateFolder,

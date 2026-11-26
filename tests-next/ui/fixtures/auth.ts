@@ -72,25 +72,33 @@ export const GUIDED_TOUR_OFF = {
 };
 
 /**
- * Log one role in through the admin API and save its storage state: the refresh cookie the login
- * sets, and the access token where the panel keeps it after a "Remember me" login (`jwtToken` in
- * localStorage, see packages/core/admin/admin/src/reducer.ts), plus the guided tour turned off. A
- * page that loads this state opens the panel logged in.
+ * Log an admin user in through the admin API, the way the panel does after a "Remember me" login:
+ * the refresh cookie the login sets, and the access token where the panel keeps it (`jwtToken` in
+ * localStorage, see packages/core/admin/admin/src/reducer.ts), plus the guided tour turned off.
+ * A context opened with the returned `storageState` starts in the panel logged in, and `token` is
+ * the user's bearer token for admin API calls.
+ *
+ * For a user a test seeds (a custom role): `browser.newContext({ storageState })`. The built-in
+ * roles already have theirs (`role`, `storageStates`). Each call is a login attempt:
+ * `admin::rateLimit` allows 5 per email and IP in 5 minutes, so give the user a `unique` email
+ * when a test can run more than that against the same server (`--repeat-each`).
  */
-const saveStorageState = async (server: Server, role: Role, file: string) => {
-  const { email, password } = CREDENTIALS[role];
+export const logIn = async (
+  server: Server,
+  { email, password }: Pick<Credentials, 'email' | 'password'>
+) => {
   const context = await request.newContext({ baseURL: server.url });
   try {
     const res = await context.post('/admin/login', {
       data: { email, password, rememberMe: true },
     });
     if (!res.ok()) {
-      throw new Error(`API login as ${role} failed (${res.status()}): ${await res.text()}`);
+      throw new Error(`API login as ${email} failed (${res.status()}): ${await res.text()}`);
     }
     const { data } = (await res.json()) as { data: { token: string } };
 
-    const state = await context.storageState();
-    state.origins = [
+    const storageState = await context.storageState();
+    storageState.origins = [
       {
         origin: server.url,
         localStorage: [
@@ -100,11 +108,34 @@ const saveStorageState = async (server: Server, role: Role, file: string) => {
         ],
       },
     ];
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, JSON.stringify(state, null, 2));
+    return { token: data.token, storageState };
   } finally {
     await context.dispose();
   }
+};
+
+/** Log one role in and save its storage state (see `logIn`). */
+const saveStorageState = async (server: Server, role: Role, file: string) => {
+  const { storageState } = await logIn(server, CREDENTIALS[role]);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(storageState, null, 2));
+};
+
+/**
+ * The admin API bearer token saved in a storage state (`storageStates[role]` or `logIn`'s), for
+ * API calls a test makes as that user without logging in again.
+ */
+export const accessToken = (storageStateFile: string): string => {
+  const state = JSON.parse(fs.readFileSync(storageStateFile, 'utf8')) as {
+    origins: Array<{ localStorage: Array<{ name: string; value: string }> }>;
+  };
+  const jwt = state.origins
+    .flatMap((origin) => origin.localStorage)
+    .find((item) => item.name === 'jwtToken');
+  if (!jwt) {
+    throw new Error(`No admin access token in ${storageStateFile}.`);
+  }
+  return JSON.parse(jwt.value) as string;
 };
 
 /**
