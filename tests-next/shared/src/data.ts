@@ -8,7 +8,7 @@ import type { Server } from './app/server';
  * `strapi.documents()`.
  *
  * Check what a test is about through the public API it tests. Use these for setup, cleanup and
- * state no route exposes (internal content types, join tables).
+ * state no route exposes (internal content types, relation state through `populate`).
  */
 
 export type QueryMethod =
@@ -48,7 +48,7 @@ export class TestDataError extends Error {
 const call = async <T>(
   server: Server,
   route: string,
-  body: { uid: string; method: string; params: Record<string, unknown> }
+  body: { uid: UID.Schema; method: string; params: Record<string, unknown> }
 ): Promise<T> => {
   const res = await fetch(`${server.url}/api/tests${route}`, {
     method: 'POST',

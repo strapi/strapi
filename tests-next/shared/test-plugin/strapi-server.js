@@ -58,7 +58,8 @@ const route = (method, path, handler) => ({
  */
 const answerData = async (ctx, run) => {
   try {
-    // `null` for findOne misses: an undefined body would answer 204.
+    // JSON drops an `undefined` value: `null` keeps `result` in the body when a method returns
+    // nothing.
     ctx.body = { result: (await run()) ?? null };
   } catch (error) {
     ctx.status = 400;

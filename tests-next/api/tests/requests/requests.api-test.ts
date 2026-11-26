@@ -14,6 +14,7 @@ import {
   createAdminClient,
   createContentAPIClient,
   createWebhookReceiver,
+  request,
   setupApp,
   SUPER_ADMIN,
   toQueryString,
@@ -37,6 +38,8 @@ const EDITOR = {
   roles: ['strapi-editor'],
 };
 const READER = { username: 'reader', email: 'reader@test.io', password: 'Testing123!' };
+// Plain text: Strapi stores it as sent (images get optimized).
+const TEXT_FILE = Buffer.from('Uploaded by a test.\n');
 
 let ctx: TestApp;
 let server: Server;
@@ -112,10 +115,10 @@ describe('content API client', () => {
     const api = createContentAPIClient(server, { token: token('full-access') });
 
     const create = await api.post('/articles', { body: { data: { title: 'Gamma' } } });
-    expect([200, 201]).toContain(create.status);
+    expect(create.status).toBe(201);
     expect(create.body.data.title).toBe('Gamma');
 
-    await api.delete(`/articles/${create.body.data.documentId}`);
+    expect((await api.delete(`/articles/${create.body.data.documentId}`)).status).toBe(204);
   });
 
   test('nothing bypasses the auth: no token is the public role, which has no permission', async () => {
@@ -157,6 +160,84 @@ describe('content API client', () => {
   });
 });
 
+describe('request options', () => {
+  // An HTTP server that records what it receives: `request()` only reads `url`.
+  let echo: WebhookReceiver;
+
+  beforeAll(async () => {
+    echo = await createWebhookReceiver();
+  });
+
+  afterAll(async () => {
+    await echo?.close();
+  });
+
+  test('a per-call Authorization replaces the token, whatever its case', async () => {
+    await request(echo, '/', {
+      token: 'client-token',
+      headers: { Authorization: 'Bearer per-call' },
+    });
+    expect(echo.calls.at(-1)!.headers.authorization).toBe('Bearer per-call');
+
+    const admin = await createAdminClient(server, SUPER_ADMIN);
+    const same = await admin.get('/admin/users/me', {
+      headers: { Authorization: `Bearer ${admin.token}` },
+    });
+    expect(same.status).toBe(200);
+
+    // 401 for the per-call token, not for two joined tokens.
+    const other = await admin.get('/admin/users/me', {
+      headers: { Authorization: 'Bearer not-a-token' },
+    });
+    expect(other.status).toBe(401);
+  });
+
+  test('a per-call Content-Type replaces the JSON default, whatever its case', async () => {
+    await request(echo, '/', {
+      method: 'POST',
+      body: {},
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(echo.calls.at(-1)!.headers['content-type']).toBe('application/json');
+
+    const api = createContentAPIClient(server, { token: token('full-access') });
+    const create = await api.post('/articles', {
+      body: { data: { title: 'Typed' } },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(create.status).toBe(201);
+    expect((await api.delete(`/articles/${create.body.data.documentId}`)).status).toBe(204);
+  });
+
+  test('custom headers reach the server', async () => {
+    await request(echo, '/', { headers: { 'X-Test-Header': 'hello' } });
+    expect(echo.calls.at(-1)!.headers['x-test-header']).toBe('hello');
+  });
+
+  test('the response headers come back', async () => {
+    const res = await createContentAPIClient(server, { token: token('read-only') }).get(
+      '/articles'
+    );
+    expect(res.headers.get('content-type')).toMatch(/^application\/json/);
+  });
+
+  test('formData sends a multipart upload', async () => {
+    const api = createContentAPIClient(server, { token: token('full-access') });
+    const formData = new FormData();
+    formData.append('files', new Blob([TEXT_FILE], { type: 'text/plain' }), 'note.txt');
+
+    const upload = await api.post('/upload', { formData });
+    expect(upload.status).toBe(201);
+    const [file] = upload.body;
+    expect(file).toMatchObject({ name: 'note.txt', mime: 'text/plain' });
+
+    // The file is stored and served.
+    const served = await fetch(`${server.url}${file.url}`);
+    expect(served.status).toBe(200);
+    expect(Buffer.from(await served.arrayBuffer()).equals(TEXT_FILE)).toBe(true);
+  });
+});
+
 describe('toQueryString', () => {
   test('nested objects and arrays', () => {
     expect(
@@ -184,6 +265,8 @@ describe('toQueryString', () => {
 
 describe('data access in the server', () => {
   test('documents() and queryDb() run in the server', async () => {
+    // Counts relative to this test's own data: other tests may leave articles behind.
+    const before = await documents<number>(server, ARTICLE, 'count');
     const created = await documents<{ documentId: string; title: string }>(
       server,
       ARTICLE,
@@ -199,7 +282,9 @@ describe('data access in the server', () => {
     );
     expect(read.body.data.title).toBe('From documents()');
 
-    expect(await queryDb<number>(server, ARTICLE, 'count', { where: { title: 'Alpha' } })).toBe(1);
+    expect(
+      await queryDb<number>(server, ARTICLE, 'count', { where: { title: 'From documents()' } })
+    ).toBe(1);
     // An internal content type no route lists.
     const users = await queryDb<Array<{ email: string }>>(server, 'admin::user', 'findMany', {
       select: ['email'],
@@ -211,11 +296,11 @@ describe('data access in the server', () => {
     expect(await queryDb(server, ARTICLE, 'findOne', { where: { title: 'none' } })).toBeNull();
 
     await documents(server, ARTICLE, 'delete', { documentId: created.documentId });
-    expect(await documents(server, ARTICLE, 'count')).toBe(2);
+    expect(await documents(server, ARTICLE, 'count')).toBe(before);
   });
 
   test('errors come back with their name', async () => {
-    await expect(queryDb(server, 'api::missing.missing' as UID.Schema, 'findMany')).rejects.toThrow(
+    await expect(queryDb(server, 'api::missing.missing', 'findMany')).rejects.toThrow(
       /Unknown model "api::missing.missing"/
     );
 

@@ -8,7 +8,7 @@
  * it here.
  *
  * Prefer the public API under test for what a test checks. This is for setup, cleanup, and state
- * no route exposes (rows of internal content types, join tables).
+ * no route exposes (rows of internal content types, relation state through `populate`).
  */
 
 const QUERY_METHODS = [

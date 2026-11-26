@@ -1,6 +1,8 @@
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 
+import type { Data } from '@strapi/types';
+
 import {
   appPort,
   databaseFromEnv,
@@ -43,6 +45,10 @@ export interface RequestOptions {
   formData?: FormData;
   /** Query string, in Strapi's bracket format: `{ filters: { title: { $eq: 'a' } } }`. */
   query?: Record<string, unknown>;
+  /**
+   * Extra headers. They replace the defaults whatever their case: an `Authorization` here wins
+   * over `token`, a `Content-Type` over the JSON default.
+   */
   headers?: Record<string, string>;
 }
 
@@ -74,22 +80,33 @@ export const toQueryString = (query: Record<string, unknown>) => {
   return params.toString();
 };
 
-/** A request to a test server. The body is parsed as JSON when it is JSON. */
+/**
+ * A request to a test server. The body is parsed as JSON when it is JSON. Only `server.url` is
+ * read, so any HTTP server works, for example a `createWebhookReceiver()` to see what was sent.
+ */
 export const request = async (
-  server: Server,
+  server: Pick<Server, 'url'>,
   path: string,
   { method = 'GET', token, body, formData, query, headers = {} }: RequestOptions = {}
 ): Promise<Response> => {
   const search = query ? toQueryString(query) : '';
   // A path can carry its own query string: `query` is appended to it, not a second `?`.
   const separator = path.includes('?') ? '&' : '?';
+  // `Headers` names are case-insensitive: `set` replaces a default instead of adding a second
+  // value that fetch would join with a comma.
+  const requestHeaders = new Headers();
+  if (token) {
+    requestHeaders.set('authorization', `Bearer ${token}`);
+  }
+  if (body !== undefined && !formData) {
+    requestHeaders.set('content-type', 'application/json');
+  }
+  for (const [name, value] of Object.entries(headers)) {
+    requestHeaders.set(name, value);
+  }
   const res = await fetch(`${server.url}${path}${search ? `${separator}${search}` : ''}`, {
     method,
-    headers: {
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-      ...(body === undefined || formData ? {} : { 'content-type': 'application/json' }),
-      ...headers,
-    },
+    headers: requestHeaders,
     body: formData ?? (body === undefined ? undefined : JSON.stringify(body)),
   });
   const text = await res.text();
@@ -159,7 +176,7 @@ export const adminLoginWithUser = async (server: Server, { email, password }: Cr
   if (res.status !== 200) {
     throw new Error(`Admin login of ${email} failed: ${res.status} ${JSON.stringify(res.body)}`);
   }
-  return res.body.data as { token: string; user: { id: number; email: string } };
+  return res.body.data as { token: string; user: { id: Data.ID; email: string } };
 };
 
 /** Log an admin user in through the API. Returns the access token. */
@@ -197,14 +214,20 @@ export const userLogin = async (
   if (res.status !== 200) {
     throw new Error(`Login of ${identifier} failed: ${res.status} ${JSON.stringify(res.body)}`);
   }
-  return res.body as { jwt: string; user: { id: number; documentId: string; email: string } };
+  return res.body as {
+    jwt: string;
+    user: { id: Data.ID; documentId: Data.DocumentID; email: string };
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Per-file app
  * -----------------------------------------------------------------------------------------------*/
 
-/** The super admin most files seed, as `SUPER_ADMIN` in their `adminUsers`. */
+/**
+ * The super admin most files seed. `setupApp` seeds it only when `seed` is omitted: a file that
+ * passes a seed plan lists it in its `adminUsers`.
+ */
 export const SUPER_ADMIN = {
   email: 'admin@test.io',
   password: 'Testing123!',
@@ -218,7 +241,10 @@ export interface SetupAppOptions {
   name: string;
   /** Write content types, components, config and plugins, before boot (scaffolders). */
   scaffold?: (app: App) => void | Promise<void>;
-  /** Data seeded before boot, in one Strapi load. Default: `{ adminUsers: [SUPER_ADMIN] }`. */
+  /**
+   * Data seeded before boot, in one Strapi load. Default: `{ adminUsers: [SUPER_ADMIN] }`. A plan
+   * replaces the default: add `SUPER_ADMIN` to its `adminUsers` when the file needs it.
+   */
   seed?: SeedPlan;
   /** Env of the seed process and the server. */
   env?: NodeJS.ProcessEnv;
@@ -270,7 +296,8 @@ export const setupApp = async ({
 
 export interface WebhookCall {
   headers: http.IncomingHttpHeaders;
-  body: any;
+  /** Parsed as JSON when it is JSON. */
+  body: unknown;
 }
 
 export interface WebhookReceiver {
@@ -314,7 +341,8 @@ export const createWebhookReceiver = async (): Promise<WebhookReceiver> => {
   return {
     url: `http://127.0.0.1:${receiverPort}`,
     calls,
-    callsFor: (event) => calls.filter((call) => call.body?.event === event),
+    callsFor: (event) =>
+      calls.filter((call) => (call.body as { event?: unknown } | null)?.event === event),
     close: () =>
       new Promise<void>((resolve, reject) => {
         receiver.closeAllConnections();
