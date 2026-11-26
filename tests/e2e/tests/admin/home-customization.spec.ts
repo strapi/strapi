@@ -48,43 +48,40 @@ test.describe('Homepage Widget Customization', () => {
 
     // Look for delete button (it has text "Delete" but aria-label is null)
     const deleteButton = profileWidget.locator('button').first();
+    await expect(deleteButton).toBeVisible();
 
-    if ((await deleteButton.count()) > 0) {
-      // Click delete button
-      await clickAndWait(page, deleteButton);
+    // Click delete button
+    await clickAndWait(page, deleteButton);
 
-      // Verify widget is removed
-      await expect(profileWidget).not.toBeVisible();
+    // Verify widget is removed, and still removed after a reload (the layout was saved)
+    await expect(profileWidget).not.toBeVisible();
+    await page.reload();
+    await expect(page.getByText('Hello test')).toBeVisible();
+    await expect(profileWidget).not.toBeVisible();
 
-      // Now try to add it back through the modal
-      const addWidgetButton = page.locator('button:has-text("Add Widget")').first();
-      await expect(addWidgetButton).toBeVisible();
-      await clickAndWait(page, addWidgetButton);
+    // Now add it back through the modal
+    const addWidgetButton = page.locator('button:has-text("Add Widget")').first();
+    await expect(addWidgetButton).toBeVisible();
+    await clickAndWait(page, addWidgetButton);
 
-      // Look for widget selection modal
-      const widgetModal = page.locator('[role="dialog"]').first();
-      await expect(widgetModal).toBeVisible();
+    // Look for widget selection modal
+    const widgetModal = page.locator('[role="dialog"]').first();
+    await expect(widgetModal).toBeVisible();
 
-      // Look for the Profile widget preview in the modal (it should now be available to add)
-      const profileWidgetInModal = widgetModal.locator('h2:has-text("Profile")').first();
+    // The Profile widget preview should now be available to add
+    const profileWidgetInModal = widgetModal.locator('h2:has-text("Profile")').first();
+    await expect(profileWidgetInModal).toBeVisible();
 
-      if ((await profileWidgetInModal.count()) > 0) {
-        // Click to add the widget back
-        await clickAndWait(page, profileWidgetInModal);
+    // Click to add the widget back
+    await clickAndWait(page, profileWidgetInModal);
 
-        // Verify the modal is closed
-        await expect(widgetModal).not.toBeVisible();
+    // Verify the modal is closed
+    await expect(widgetModal).not.toBeVisible();
 
-        // Verify the Profile widget is visible again
-        await expect(profileWidget).toBeVisible();
-      } else {
-        // Close the modal
-        const cancelButton = widgetModal.locator('button:has-text("Cancel")').first();
-        await cancelButton.click();
-      }
-    } else {
-      // Verify widget is still visible (no deletion occurred)
-      await expect(profileWidget).toBeVisible();
-    }
+    // Verify the Profile widget is visible again, and still there after a reload
+    await expect(profileWidget).toBeVisible();
+    await page.reload();
+    await expect(page.getByText('Hello test')).toBeVisible();
+    await expect(profileWidget).toBeVisible();
   });
 });
