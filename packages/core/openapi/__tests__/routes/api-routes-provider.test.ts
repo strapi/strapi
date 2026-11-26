@@ -75,6 +75,7 @@ describe('ApiRoutesProvider', () => {
           article: {
             routes: {
               article: {
+                prefix: '/v2',
                 routes: [
                   {
                     info: { type: 'content-api' },
@@ -86,6 +87,7 @@ describe('ApiRoutesProvider', () => {
                     info: { type: 'content-api' },
                     method: 'GET',
                     path: '/rest/articles',
+                    config: { prefix: '' },
                     handler: 'api::article.article.findPrefixed',
                   },
                 ],
@@ -98,7 +100,7 @@ describe('ApiRoutesProvider', () => {
       const provider = new ApiRoutesProvider(strapiMock);
       const { routes } = provider;
 
-      expect(routes.map(({ path }) => path)).toEqual(['/rest/articles', '/rest/rest/articles']);
+      expect(routes.map(({ path }) => path)).toEqual(['/rest/v2/articles', '/rest/rest/articles']);
     });
   });
 

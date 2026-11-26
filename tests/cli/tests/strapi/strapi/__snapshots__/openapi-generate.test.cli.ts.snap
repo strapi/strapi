@@ -1555,9 +1555,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
   },
   "openapi": "3.1.0",
   "paths": {
-    "/articles": {
+    "/api/articles": {
       "get": {
-        "operationId": "article/get/articles",
+        "operationId": "article/get/api_articles",
         "parameters": [
           {
             "in": "query",
@@ -2054,7 +2054,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "article/post/articles",
+        "operationId": "article/post/api_articles",
         "parameters": [
           {
             "in": "query",
@@ -2363,9 +2363,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/articles/{id}": {
+    "/api/articles/{id}": {
       "delete": {
-        "operationId": "article/delete/articles_by_id",
+        "operationId": "article/delete/api_articles_by_id",
         "parameters": [
           {
             "in": "path",
@@ -2652,7 +2652,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "article/get/articles_by_id",
+        "operationId": "article/get/api_articles_by_id",
         "parameters": [
           {
             "in": "path",
@@ -3025,7 +3025,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "article/put/articles_by_id",
+        "operationId": "article/put/api_articles_by_id",
         "parameters": [
           {
             "in": "path",
@@ -3340,9 +3340,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/change-password": {
+    "/api/auth/change-password": {
       "post": {
-        "operationId": "users-permissions/post/auth_change_password",
+        "operationId": "users-permissions/post/api_auth_change_password",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -3507,9 +3507,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/email-confirmation": {
+    "/api/auth/email-confirmation": {
       "get": {
-        "operationId": "users-permissions/get/auth_email_confirmation",
+        "operationId": "users-permissions/get/api_auth_email_confirmation",
         "parameters": [],
         "responses": {
           "400": {
@@ -3533,9 +3533,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/forgot-password": {
+    "/api/auth/forgot-password": {
       "post": {
-        "operationId": "users-permissions/post/auth_forgot_password",
+        "operationId": "users-permissions/post/api_auth_forgot_password",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -3600,9 +3600,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/local": {
+    "/api/auth/local": {
       "post": {
-        "operationId": "users-permissions/post/auth_local",
+        "operationId": "users-permissions/post/api_auth_local",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -3763,9 +3763,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/local/register": {
+    "/api/auth/local/register": {
       "post": {
-        "operationId": "users-permissions/post/auth_local_register",
+        "operationId": "users-permissions/post/api_auth_local_register",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -4035,9 +4035,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/logout": {
+    "/api/auth/logout": {
       "post": {
-        "operationId": "users-permissions/post/auth_logout",
+        "operationId": "users-permissions/post/api_auth_logout",
         "parameters": [],
         "responses": {
           "400": {
@@ -4061,9 +4061,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/refresh": {
+    "/api/auth/refresh": {
       "post": {
-        "operationId": "users-permissions/post/auth_refresh",
+        "operationId": "users-permissions/post/api_auth_refresh",
         "parameters": [],
         "responses": {
           "400": {
@@ -4087,9 +4087,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/reset-password": {
+    "/api/auth/reset-password": {
       "post": {
-        "operationId": "users-permissions/post/auth_reset_password",
+        "operationId": "users-permissions/post/api_auth_reset_password",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -4254,9 +4254,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/send-email-confirmation": {
+    "/api/auth/send-email-confirmation": {
       "post": {
-        "operationId": "users-permissions/post/auth_send_email_confirmation",
+        "operationId": "users-permissions/post/api_auth_send_email_confirmation",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -4325,9 +4325,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/sessions": {
+    "/api/auth/sessions": {
       "get": {
-        "operationId": "users-permissions/get/auth_sessions",
+        "operationId": "users-permissions/get/api_auth_sessions",
         "parameters": [],
         "responses": {
           "400": {
@@ -4351,9 +4351,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/sessions/{sessionId}": {
+    "/api/auth/sessions/{sessionId}": {
       "delete": {
-        "operationId": "users-permissions/delete/auth_sessions_by_sessionId",
+        "operationId": "users-permissions/delete/api_auth_sessions_by_sessionId",
         "parameters": [],
         "responses": {
           "400": {
@@ -4377,9 +4377,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/auth/{provider}/callback": {
+    "/api/auth/{provider}/callback": {
       "get": {
-        "operationId": "users-permissions/get/auth_by_provider_callback",
+        "operationId": "users-permissions/get/api_auth_by_provider_callback",
         "parameters": [
           {
             "in": "path",
@@ -4527,9 +4527,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/authors": {
+    "/api/authors": {
       "get": {
-        "operationId": "author/get/authors",
+        "operationId": "author/get/api_authors",
         "parameters": [
           {
             "in": "query",
@@ -4973,7 +4973,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "author/post/authors",
+        "operationId": "author/post/api_authors",
         "parameters": [
           {
             "in": "query",
@@ -5230,9 +5230,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/authors/{id}": {
+    "/api/authors/{id}": {
       "delete": {
-        "operationId": "author/delete/authors_by_id",
+        "operationId": "author/delete/api_authors_by_id",
         "parameters": [
           {
             "in": "path",
@@ -5478,7 +5478,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "author/get/authors_by_id",
+        "operationId": "author/get/api_authors_by_id",
         "parameters": [
           {
             "in": "path",
@@ -5798,7 +5798,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "author/put/authors_by_id",
+        "operationId": "author/put/api_authors_by_id",
         "parameters": [
           {
             "in": "path",
@@ -6062,9 +6062,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/categories": {
+    "/api/categories": {
       "get": {
-        "operationId": "category/get/categories",
+        "operationId": "category/get/api_categories",
         "parameters": [
           {
             "in": "query",
@@ -6475,7 +6475,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "category/post/categories",
+        "operationId": "category/post/api_categories",
         "parameters": [
           {
             "in": "query",
@@ -6695,9 +6695,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/categories/{id}": {
+    "/api/categories/{id}": {
       "delete": {
-        "operationId": "category/delete/categories_by_id",
+        "operationId": "category/delete/api_categories_by_id",
         "parameters": [
           {
             "in": "path",
@@ -6906,7 +6906,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "category/get/categories_by_id",
+        "operationId": "category/get/api_categories_by_id",
         "parameters": [
           {
             "in": "path",
@@ -7193,7 +7193,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "category/put/categories_by_id",
+        "operationId": "category/put/api_categories_by_id",
         "parameters": [
           {
             "in": "path",
@@ -7420,9 +7420,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/complexes": {
+    "/api/complexes": {
       "get": {
-        "operationId": "complex/get/complexes",
+        "operationId": "complex/get/api_complexes",
         "parameters": [
           {
             "in": "query",
@@ -8104,7 +8104,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "complex/post/complexes",
+        "operationId": "complex/post/api_complexes",
         "parameters": [
           {
             "in": "query",
@@ -8642,9 +8642,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/complexes/{id}": {
+    "/api/complexes/{id}": {
       "delete": {
-        "operationId": "complex/delete/complexes_by_id",
+        "operationId": "complex/delete/api_complexes_by_id",
         "parameters": [
           {
             "in": "path",
@@ -9044,7 +9044,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "complex/get/complexes_by_id",
+        "operationId": "complex/get/api_complexes_by_id",
         "parameters": [
           {
             "in": "path",
@@ -9602,7 +9602,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "complex/put/complexes_by_id",
+        "operationId": "complex/put/api_complexes_by_id",
         "parameters": [
           {
             "in": "path",
@@ -10145,9 +10145,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/conditions": {
+    "/api/conditions": {
       "get": {
-        "operationId": "condition/get/conditions",
+        "operationId": "condition/get/api_conditions",
         "parameters": [
           {
             "in": "query",
@@ -10600,7 +10600,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "condition/post/conditions",
+        "operationId": "condition/post/api_conditions",
         "parameters": [
           {
             "in": "query",
@@ -10879,9 +10879,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/conditions/{id}": {
+    "/api/conditions/{id}": {
       "delete": {
-        "operationId": "condition/delete/conditions_by_id",
+        "operationId": "condition/delete/api_conditions_by_id",
         "parameters": [
           {
             "in": "path",
@@ -11132,7 +11132,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "condition/get/conditions_by_id",
+        "operationId": "condition/get/api_conditions_by_id",
         "parameters": [
           {
             "in": "path",
@@ -11461,7 +11461,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "condition/put/conditions_by_id",
+        "operationId": "condition/put/api_conditions_by_id",
         "parameters": [
           {
             "in": "path",
@@ -11747,9 +11747,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/config/permissions/prune": {
+    "/api/config/permissions/prune": {
       "post": {
-        "operationId": "config/post/config_permissions_prune",
+        "operationId": "config/post/api_config_permissions_prune",
         "parameters": [],
         "responses": {
           "400": {
@@ -11773,9 +11773,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/config/permissions/resync-super-admin": {
+    "/api/config/permissions/resync-super-admin": {
       "post": {
-        "operationId": "config/post/config_permissions_resync_super_admin",
+        "operationId": "config/post/api_config_permissions_resync_super_admin",
         "parameters": [],
         "responses": {
           "400": {
@@ -11799,9 +11799,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/config/ratelimit/enable": {
+    "/api/config/ratelimit/enable": {
       "post": {
-        "operationId": "config/post/config_ratelimit_enable",
+        "operationId": "config/post/api_config_ratelimit_enable",
         "parameters": [],
         "responses": {
           "400": {
@@ -11825,9 +11825,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/config/reset-admin-fixture": {
+    "/api/config/reset-admin-fixture": {
       "post": {
-        "operationId": "config/post/config_reset_admin_fixture",
+        "operationId": "config/post/api_config_reset_admin_fixture",
         "parameters": [],
         "responses": {
           "400": {
@@ -11851,9 +11851,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/config/reset-fixture": {
+    "/api/config/reset-fixture": {
       "post": {
-        "operationId": "config/post/config_reset_fixture",
+        "operationId": "config/post/api_config_reset_fixture",
         "parameters": [],
         "responses": {
           "400": {
@@ -11877,9 +11877,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/config/resettransfertoken": {
+    "/api/config/resettransfertoken": {
       "post": {
-        "operationId": "config/post/config_resettransfertoken",
+        "operationId": "config/post/api_config_resettransfertoken",
         "parameters": [],
         "responses": {
           "400": {
@@ -11903,9 +11903,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/connect/(.*)": {
+    "/api/connect/(.*)": {
       "get": {
-        "operationId": "users-permissions/get/connect_____",
+        "operationId": "users-permissions/get/api_connect_____",
         "parameters": [],
         "responses": {
           "400": {
@@ -11929,9 +11929,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/content-type-builder/components": {
+    "/api/content-type-builder/components": {
       "get": {
-        "operationId": "content-type-builder/get/content_type_builder_components",
+        "operationId": "content-type-builder/get/api_content_type_builder_components",
         "parameters": [],
         "responses": {
           "200": {
@@ -12309,9 +12309,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/content-type-builder/components/{uid}": {
+    "/api/content-type-builder/components/{uid}": {
       "get": {
-        "operationId": "content-type-builder/get/content_type_builder_components_by_uid",
+        "operationId": "content-type-builder/get/api_content_type_builder_components_by_uid",
         "parameters": [
           {
             "in": "path",
@@ -12697,9 +12697,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/content-type-builder/content-types": {
+    "/api/content-type-builder/content-types": {
       "get": {
-        "operationId": "content-type-builder/get/content_type_builder_content_types",
+        "operationId": "content-type-builder/get/api_content_type_builder_content_types",
         "parameters": [
           {
             "in": "query",
@@ -13142,9 +13142,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/content-type-builder/content-types/{uid}": {
+    "/api/content-type-builder/content-types/{uid}": {
       "get": {
-        "operationId": "content-type-builder/get/content_type_builder_content_types_by_uid",
+        "operationId": "content-type-builder/get/api_content_type_builder_content_types_by_uid",
         "parameters": [
           {
             "in": "path",
@@ -13580,9 +13580,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/countries": {
+    "/api/countries": {
       "get": {
-        "operationId": "country/get/countries",
+        "operationId": "country/get/api_countries",
         "parameters": [
           {
             "in": "query",
@@ -14017,7 +14017,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "country/post/countries",
+        "operationId": "country/post/api_countries",
         "parameters": [
           {
             "in": "query",
@@ -14275,9 +14275,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/countries/{id}": {
+    "/api/countries/{id}": {
       "delete": {
-        "operationId": "country/delete/countries_by_id",
+        "operationId": "country/delete/api_countries_by_id",
         "parameters": [
           {
             "in": "path",
@@ -14502,7 +14502,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "country/get/countries_by_id",
+        "operationId": "country/get/api_countries_by_id",
         "parameters": [
           {
             "in": "path",
@@ -14813,7 +14813,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "country/put/countries_by_id",
+        "operationId": "country/put/api_countries_by_id",
         "parameters": [
           {
             "in": "path",
@@ -15076,9 +15076,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/email": {
+    "/api/email": {
       "post": {
-        "operationId": "email/post/email",
+        "operationId": "email/post/api_email",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -15157,9 +15157,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/homepage": {
+    "/api/homepage": {
       "delete": {
-        "operationId": "homepage/delete/homepage",
+        "operationId": "homepage/delete/api_homepage",
         "parameters": [
           {
             "in": "query",
@@ -15402,7 +15402,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "homepage/get/homepage",
+        "operationId": "homepage/get/api_homepage",
         "parameters": [
           {
             "in": "query",
@@ -15670,7 +15670,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "homepage/put/homepage",
+        "operationId": "homepage/put/api_homepage",
         "parameters": [
           {
             "in": "query",
@@ -15960,9 +15960,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/i18n/locales": {
+    "/api/i18n/locales": {
       "get": {
-        "operationId": "i18n/get/i18n_locales",
+        "operationId": "i18n/get/api_i18n_locales",
         "parameters": [],
         "responses": {
           "200": {
@@ -16042,9 +16042,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/products": {
+    "/api/products": {
       "get": {
-        "operationId": "product/get/products",
+        "operationId": "product/get/api_products",
         "parameters": [
           {
             "in": "query",
@@ -16611,7 +16611,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "product/post/products",
+        "operationId": "product/post/api_products",
         "parameters": [
           {
             "in": "query",
@@ -17029,9 +17029,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/products/{id}": {
+    "/api/products/{id}": {
       "delete": {
-        "operationId": "product/delete/products_by_id",
+        "operationId": "product/delete/api_products_by_id",
         "parameters": [
           {
             "in": "path",
@@ -17376,7 +17376,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "product/get/products_by_id",
+        "operationId": "product/get/api_products_by_id",
         "parameters": [
           {
             "in": "path",
@@ -17819,7 +17819,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "product/put/products_by_id",
+        "operationId": "product/put/api_products_by_id",
         "parameters": [
           {
             "in": "path",
@@ -18240,9 +18240,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/relation-labs": {
+    "/api/relation-labs": {
       "get": {
-        "operationId": "relation-lab/get/relation_labs",
+        "operationId": "relation-lab/get/api_relation_labs",
         "parameters": [
           {
             "in": "query",
@@ -18711,7 +18711,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "relation-lab/post/relation_labs",
+        "operationId": "relation-lab/post/api_relation_labs",
         "parameters": [
           {
             "in": "query",
@@ -19013,9 +19013,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/relation-labs/{id}": {
+    "/api/relation-labs/{id}": {
       "delete": {
-        "operationId": "relation-lab/delete/relation_labs_by_id",
+        "operationId": "relation-lab/delete/api_relation_labs_by_id",
         "parameters": [
           {
             "in": "path",
@@ -19286,7 +19286,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "relation-lab/get/relation_labs_by_id",
+        "operationId": "relation-lab/get/api_relation_labs_by_id",
         "parameters": [
           {
             "in": "path",
@@ -19631,7 +19631,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "relation-lab/put/relation_labs_by_id",
+        "operationId": "relation-lab/put/api_relation_labs_by_id",
         "parameters": [
           {
             "in": "path",
@@ -19939,9 +19939,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/relation-targets": {
+    "/api/relation-targets": {
       "get": {
-        "operationId": "relation-target/get/relation_targets",
+        "operationId": "relation-target/get/api_relation_targets",
         "parameters": [
           {
             "in": "query",
@@ -20380,7 +20380,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "relation-target/post/relation_targets",
+        "operationId": "relation-target/post/api_relation_targets",
         "parameters": [
           {
             "in": "query",
@@ -20630,9 +20630,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/relation-targets/{id}": {
+    "/api/relation-targets/{id}": {
       "delete": {
-        "operationId": "relation-target/delete/relation_targets_by_id",
+        "operationId": "relation-target/delete/api_relation_targets_by_id",
         "parameters": [
           {
             "in": "path",
@@ -20873,7 +20873,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "relation-target/get/relation_targets_by_id",
+        "operationId": "relation-target/get/api_relation_targets_by_id",
         "parameters": [
           {
             "in": "path",
@@ -21188,7 +21188,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "relation-target/put/relation_targets_by_id",
+        "operationId": "relation-target/put/api_relation_targets_by_id",
         "parameters": [
           {
             "in": "path",
@@ -21444,9 +21444,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/shop": {
+    "/api/shop": {
       "delete": {
-        "operationId": "shop/delete/shop",
+        "operationId": "shop/delete/api_shop",
         "parameters": [
           {
             "in": "query",
@@ -21685,7 +21685,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "shop/get/shop",
+        "operationId": "shop/get/api_shop",
         "parameters": [
           {
             "in": "query",
@@ -21948,7 +21948,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "shop/put/shop",
+        "operationId": "shop/put/api_shop",
         "parameters": [
           {
             "in": "query",
@@ -22230,9 +22230,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/single-type-localized": {
+    "/api/single-type-localized": {
       "delete": {
-        "operationId": "single-type-localized/delete/single_type_localized",
+        "operationId": "single-type-localized/delete/api_single_type_localized",
         "parameters": [
           {
             "in": "query",
@@ -22398,7 +22398,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "single-type-localized/get/single_type_localized",
+        "operationId": "single-type-localized/get/api_single_type_localized",
         "parameters": [
           {
             "in": "query",
@@ -22588,7 +22588,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "single-type-localized/put/single_type_localized",
+        "operationId": "single-type-localized/put/api_single_type_localized",
         "parameters": [
           {
             "in": "query",
@@ -22789,9 +22789,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/single-type-non-local": {
+    "/api/single-type-non-local": {
       "delete": {
-        "operationId": "single-type-non-local/delete/single_type_non_local",
+        "operationId": "single-type-non-local/delete/api_single_type_non_local",
         "parameters": [
           {
             "in": "query",
@@ -22940,7 +22940,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "single-type-non-local/get/single_type_non_local",
+        "operationId": "single-type-non-local/get/api_single_type_non_local",
         "parameters": [
           {
             "in": "query",
@@ -23112,7 +23112,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "single-type-non-local/put/single_type_non_local",
+        "operationId": "single-type-non-local/put/api_single_type_non_local",
         "parameters": [
           {
             "in": "query",
@@ -23299,9 +23299,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/single-type-unpublished": {
+    "/api/single-type-unpublished": {
       "delete": {
-        "operationId": "single-type-unpublished/delete/single_type_unpublished",
+        "operationId": "single-type-unpublished/delete/api_single_type_unpublished",
         "parameters": [
           {
             "in": "query",
@@ -23437,7 +23437,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "single-type-unpublished/get/single_type_unpublished",
+        "operationId": "single-type-unpublished/get/api_single_type_unpublished",
         "parameters": [
           {
             "in": "query",
@@ -23596,7 +23596,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "single-type-unpublished/put/single_type_unpublished",
+        "operationId": "single-type-unpublished/put/api_single_type_unpublished",
         "parameters": [
           {
             "in": "query",
@@ -23763,9 +23763,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/teams": {
+    "/api/teams": {
       "get": {
-        "operationId": "team/get/teams",
+        "operationId": "team/get/api_teams",
         "parameters": [
           {
             "in": "query",
@@ -24237,7 +24237,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "team/post/teams",
+        "operationId": "team/post/api_teams",
         "parameters": [
           {
             "in": "query",
@@ -24512,9 +24512,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/teams/{id}": {
+    "/api/teams/{id}": {
       "delete": {
-        "operationId": "team/delete/teams_by_id",
+        "operationId": "team/delete/api_teams_by_id",
         "parameters": [
           {
             "in": "path",
@@ -24780,7 +24780,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "team/get/teams_by_id",
+        "operationId": "team/get/api_teams_by_id",
         "parameters": [
           {
             "in": "path",
@@ -25128,7 +25128,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "team/put/teams_by_id",
+        "operationId": "team/put/api_teams_by_id",
         "parameters": [
           {
             "in": "path",
@@ -25410,9 +25410,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/uniques": {
+    "/api/uniques": {
       "get": {
-        "operationId": "unique/get/uniques",
+        "operationId": "unique/get/api_uniques",
         "parameters": [
           {
             "in": "query",
@@ -25931,7 +25931,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "unique/post/uniques",
+        "operationId": "unique/post/api_uniques",
         "parameters": [
           {
             "in": "query",
@@ -26260,9 +26260,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/uniques/{id}": {
+    "/api/uniques/{id}": {
       "delete": {
-        "operationId": "unique/delete/uniques_by_id",
+        "operationId": "unique/delete/api_uniques_by_id",
         "parameters": [
           {
             "in": "path",
@@ -26563,7 +26563,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "unique/get/uniques_by_id",
+        "operationId": "unique/get/api_uniques_by_id",
         "parameters": [
           {
             "in": "path",
@@ -26958,7 +26958,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "unique/put/uniques_by_id",
+        "operationId": "unique/put/api_uniques_by_id",
         "parameters": [
           {
             "in": "path",
@@ -27294,9 +27294,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upcoming-match": {
+    "/api/upcoming-match": {
       "delete": {
-        "operationId": "upcoming-match/delete/upcoming_match",
+        "operationId": "upcoming-match/delete/api_upcoming_match",
         "parameters": [
           {
             "in": "query",
@@ -27502,7 +27502,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "upcoming-match/get/upcoming_match",
+        "operationId": "upcoming-match/get/api_upcoming_match",
         "parameters": [
           {
             "in": "query",
@@ -27733,7 +27733,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "upcoming-match/put/upcoming_match",
+        "operationId": "upcoming-match/put/api_upcoming_match",
         "parameters": [
           {
             "in": "query",
@@ -27980,9 +27980,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upload": {
+    "/api/upload": {
       "post": {
-        "operationId": "upload/post/upload",
+        "operationId": "upload/post/api_upload",
         "parameters": [
           {
             "in": "query",
@@ -28271,9 +28271,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upload/files": {
+    "/api/upload/files": {
       "get": {
-        "operationId": "upload/get/upload_files",
+        "operationId": "upload/get/api_upload_files",
         "parameters": [
           {
             "in": "query",
@@ -28602,9 +28602,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upload/files/page": {
+    "/api/upload/files/page": {
       "get": {
-        "operationId": "upload/get/upload_files_page",
+        "operationId": "upload/get/api_upload_files_page",
         "parameters": [
           {
             "in": "query",
@@ -29011,9 +29011,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upload/files/{id}": {
+    "/api/upload/files/{id}": {
       "delete": {
-        "operationId": "upload/delete/upload_files_by_id",
+        "operationId": "upload/delete/api_upload_files_by_id",
         "parameters": [
           {
             "in": "path",
@@ -29179,7 +29179,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "upload/get/upload_files_by_id",
+        "operationId": "upload/get/api_upload_files_by_id",
         "parameters": [
           {
             "in": "path",
@@ -29398,9 +29398,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upload/folders": {
+    "/api/upload/folders": {
       "get": {
-        "operationId": "upload/get/upload_folders",
+        "operationId": "upload/get/api_upload_folders",
         "parameters": [
           {
             "in": "query",
@@ -29704,9 +29704,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/upload/folders/{id}": {
+    "/api/upload/folders/{id}": {
       "get": {
-        "operationId": "upload/get/upload_folders_by_id",
+        "operationId": "upload/get/api_upload_folders_by_id",
         "parameters": [
           {
             "in": "path",
@@ -29831,9 +29831,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users": {
+    "/api/users": {
       "get": {
-        "operationId": "users-permissions/get/users",
+        "operationId": "users-permissions/get/api_users",
         "parameters": [
           {
             "in": "query",
@@ -30137,7 +30137,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "users-permissions/post/users",
+        "operationId": "users-permissions/post/api_users",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -30340,9 +30340,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users-permissions/permissions": {
+    "/api/users-permissions/permissions": {
       "get": {
-        "operationId": "users-permissions/get/users_permissions_permissions",
+        "operationId": "users-permissions/get/api_users_permissions_permissions",
         "parameters": [],
         "responses": {
           "200": {
@@ -30426,9 +30426,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users-permissions/roles": {
+    "/api/users-permissions/roles": {
       "get": {
-        "operationId": "users-permissions/get/users_permissions_roles",
+        "operationId": "users-permissions/get/api_users_permissions_roles",
         "parameters": [],
         "responses": {
           "200": {
@@ -30565,7 +30565,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "post": {
-        "operationId": "users-permissions/post/users_permissions_roles",
+        "operationId": "users-permissions/post/api_users_permissions_roles",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -30642,9 +30642,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users-permissions/roles/{id}": {
+    "/api/users-permissions/roles/{id}": {
       "get": {
-        "operationId": "users-permissions/get/users_permissions_roles_by_id",
+        "operationId": "users-permissions/get/api_users_permissions_roles_by_id",
         "parameters": [
           {
             "in": "path",
@@ -30788,9 +30788,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users-permissions/roles/{role}": {
+    "/api/users-permissions/roles/{role}": {
       "delete": {
-        "operationId": "users-permissions/delete/users_permissions_roles_by_role",
+        "operationId": "users-permissions/delete/api_users_permissions_roles_by_role",
         "parameters": [
           {
             "in": "path",
@@ -30844,7 +30844,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "users-permissions/put/users_permissions_roles_by_role",
+        "operationId": "users-permissions/put/api_users_permissions_roles_by_role",
         "parameters": [
           {
             "in": "path",
@@ -30927,9 +30927,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users/count": {
+    "/api/users/count": {
       "get": {
-        "operationId": "users-permissions/get/users_count",
+        "operationId": "users-permissions/get/api_users_count",
         "parameters": [
           {
             "explode": true,
@@ -30982,9 +30982,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users/me": {
+    "/api/users/me": {
       "get": {
-        "operationId": "users-permissions/get/users_me",
+        "operationId": "users-permissions/get/api_users_me",
         "parameters": [
           {
             "in": "query",
@@ -31160,9 +31160,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/users/{id}": {
+    "/api/users/{id}": {
       "delete": {
-        "operationId": "users-permissions/delete/users_by_id",
+        "operationId": "users-permissions/delete/api_users_by_id",
         "parameters": [
           {
             "in": "path",
@@ -31294,7 +31294,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "get": {
-        "operationId": "users-permissions/get/users_by_id",
+        "operationId": "users-permissions/get/api_users_by_id",
         "parameters": [
           {
             "in": "path",
@@ -31479,7 +31479,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
       "put": {
-        "operationId": "users-permissions/put/users_by_id",
+        "operationId": "users-permissions/put/api_users_by_id",
         "parameters": [
           {
             "in": "path",
