@@ -30,7 +30,10 @@ interface FormInputParam<TSchema extends z.ZodType = z.ZodType> {
   beforeSave?: (
     args: FormContext & { values: z.output<TSchema> | undefined; data: FormData }
   ) => FormData | Promise<FormData>;
-  /** Runs once core has saved the entity. A failure answers 500: the entity stays saved */
+  /**
+   * Runs once core has saved the entity. A failure answers 500: on create, core deletes the
+   * entity; on update, it stays saved
+   */
   afterSave?: (
     args: FormContext & { values: z.output<TSchema> | undefined; entityId: Data.ID }
   ) => void | Promise<void>;
@@ -270,7 +273,8 @@ const formExtensionsService = () => {
   return { unstable_addInputParams: addInputParams, internal_prepare: prepare };
 };
 
-type FormExtensionsService = ReturnType<typeof formExtensionsService>;
+// What plugins use: `internal_prepare` is for core's controllers only
+type FormExtensionsService = Omit<ReturnType<typeof formExtensionsService>, 'internal_prepare'>;
 
 export default formExtensionsService;
 export type { ExtensibleForm, FormContext, FormExtensionsService, FormInputParam };
