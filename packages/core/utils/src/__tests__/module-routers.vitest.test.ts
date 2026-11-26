@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, expectTypeOf } from 'vitest';
 
 import { createContentApiRoutesFactory } from '../content-api-router';
+import type { ContentApiRoutesFactory } from '../content-api-router';
 import { isBuiltRouter, routesOf } from '../module-routers';
+import type { RouterFactoryLike, RouterObjectLike } from '../module-routers';
 
 type TestRoute = { method: string; path: string };
 
@@ -25,11 +27,49 @@ describe('module routers', () => {
     });
   });
 
+  describe('isBuiltRouter types', () => {
+    type ContentApiFactory = ContentApiRoutesFactory<TestRoute[]>;
+    type TypedRouter = { type: 'admin' | 'content-api'; routes: TestRoute[] };
+
+    it('narrows a factory that declares required routes to itself in the false branch', () => {
+      const factory = createContentApiRoutesFactory(() => [route]) as ContentApiFactory;
+
+      if (isBuiltRouter(factory) === false) {
+        expectTypeOf(factory).toEqualTypeOf<ContentApiFactory>();
+      } else {
+        expectTypeOf(factory).toBeNever();
+      }
+    });
+
+    it('splits a union of a typed router and a factory between both branches', () => {
+      const router = createContentApiRoutesFactory(() => [route]) as
+        TypedRouter | ContentApiFactory;
+
+      if (isBuiltRouter(router) === true) {
+        expectTypeOf(router).toEqualTypeOf<TypedRouter>();
+      } else {
+        expectTypeOf(router).toEqualTypeOf<ContentApiFactory>();
+      }
+    });
+
+    it('splits the router object and factory shapes between both branches', () => {
+      const router = { routes: [route] } as
+        RouterObjectLike<TestRoute> | RouterFactoryLike<TestRoute>;
+
+      if (isBuiltRouter(router) === true) {
+        expectTypeOf(router).toEqualTypeOf<RouterObjectLike<TestRoute>>();
+      } else {
+        expectTypeOf(router).toEqualTypeOf<RouterFactoryLike<TestRoute>>();
+      }
+    });
+  });
+
   describe('routesOf', () => {
     it('returns the routes of a router object, the same array', () => {
       const routes = [route];
+      const router = { type: 'admin', prefix: '/admin', routes };
 
-      expect(routesOf({ type: 'admin', prefix: '/admin', routes })).toBe(routes);
+      expect(routesOf(router)).toBe(routes);
     });
 
     it('returns the routes of the router built from a factory', () => {
@@ -41,7 +81,9 @@ describe('module routers', () => {
     });
 
     it('returns the routes a content-api factory exposes', () => {
-      const factory = createContentApiRoutesFactory(() => [route]);
+      const factory = createContentApiRoutesFactory(() => [route]) as ContentApiRoutesFactory<
+        TestRoute[]
+      >;
 
       expect(routesOf(factory)).toBe(factory.routes);
       expect(routesOf(factory)).toEqual([route]);

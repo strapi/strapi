@@ -25,16 +25,29 @@ export type RouterObjectLike<TRoute> = { routes: TRoute[] };
  */
 export type RouterFactoryLike<TRoute> = ((...args: never[]) => unknown) & { routes?: TRoute[] };
 
-/** A router of a loaded API or plugin module, in any lifecycle phase. */
-export type ModuleRouterLike<TRoute> = RouterObjectLike<TRoute> | RouterFactoryLike<TRoute>;
+/**
+ * A router of a loaded API or plugin module, in any lifecycle phase: a router object, a factory,
+ * or an array of routes.
+ */
+export type ModuleRouterLike<TRoute> =
+  RouterObjectLike<TRoute> | RouterFactoryLike<TRoute> | TRoute[];
+
+type AnyFunction = (...args: never[]) => unknown;
 
 /**
  * Whether `router` is a router object, which holds its routes, rather than a factory that Strapi
  * has not called yet. After the routes are registered, every router of a module is a router object.
+ *
+ * The `true` branch keeps the router types of `TRouter` that are not functions, and the `false`
+ * branch keeps its factory types, even when a factory type declares a required `routes`
+ * property (as `createContentApiRoutesFactory` does). Check `Array.isArray` first for an array of
+ * routes.
  */
-export const isBuiltRouter = <TRoute>(
-  router: ModuleRouterLike<TRoute>
-): router is RouterObjectLike<TRoute> => typeof router !== 'function';
+export const isBuiltRouter = <
+  TRouter extends RouterObjectLike<unknown> | RouterFactoryLike<unknown>,
+>(
+  router: TRouter
+): router is Exclude<TRouter, AnyFunction> => typeof router !== 'function';
 
 /**
  * The routes of a module router.
@@ -45,14 +58,14 @@ export const isBuiltRouter = <TRoute>(
  * A router file may also export an array of routes. It stays an array in every phase, and is
  * returned as is.
  */
-export const routesOf = <TRoute>(router: ModuleRouterLike<TRoute> | TRoute[]): TRoute[] => {
+export const routesOf = <TRoute>(router: ModuleRouterLike<TRoute>): TRoute[] => {
   if (Array.isArray(router) === true) {
     return router;
   }
 
-  if (typeof router === 'function') {
-    return router.routes ?? [];
+  if (isBuiltRouter(router) === true) {
+    return router.routes;
   }
 
-  return router.routes;
+  return router.routes ?? [];
 };
