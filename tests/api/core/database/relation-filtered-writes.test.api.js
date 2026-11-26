@@ -1,13 +1,20 @@
 'use strict';
 
+const dotenv = require('dotenv');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
+
+// DATABASE_CLIENT lives in the generated app's env. The runner passes ENV_PATH, not the variable.
+dotenv.config({ path: process.env.ENV_PATH });
+
+const isMysql = process.env.DATABASE_CLIENT === 'mysql';
 
 const builder = createTestBuilder();
 let strapi;
 
 const ARTICLE_UID = 'api::article.article';
 const CATEGORY_UID = 'api::category.category';
+const SLOT_UID = 'api::slot.slot';
 
 const categoryCT = {
   displayName: 'category',
@@ -38,6 +45,17 @@ const articleCT = {
   },
 };
 
+const slotCT = {
+  displayName: 'slot',
+  singularName: 'slot',
+  pluralName: 'slots',
+  kind: 'collectionType',
+  options: { draftAndPublish: false },
+  attributes: {
+    position: { type: 'integer', unique: true },
+  },
+};
+
 const inCategoryA = { category: { name: 'A' } };
 
 const readArticles = () =>
@@ -48,7 +66,7 @@ const readArticles = () =>
 
 describe('relation-filtered query builder writes', () => {
   beforeAll(async () => {
-    await builder.addContentTypes([categoryCT, articleCT]).build();
+    await builder.addContentTypes([categoryCT, articleCT, slotCT]).build();
 
     strapi = await createStrapiInstance();
   });
@@ -61,6 +79,7 @@ describe('relation-filtered query builder writes', () => {
   beforeEach(async () => {
     await strapi.db.query(ARTICLE_UID).deleteMany({});
     await strapi.db.query(CATEGORY_UID).deleteMany({});
+    await strapi.db.query(SLOT_UID).deleteMany({});
 
     const a = await strapi.db.query(CATEGORY_UID).create({ data: { name: 'A' } });
     const b = await strapi.db.query(CATEGORY_UID).create({ data: { name: 'B' } });
@@ -102,6 +121,28 @@ describe('relation-filtered query builder writes', () => {
     });
 
     expect((await readArticles()).map((row) => row.views)).toEqual([11, 11, 10]);
+  });
+
+  // MySQL applies UPDATE ... ORDER BY. Descending order is what lets a unique column
+  // shift without a duplicate-key error. Postgres and SQLite never emit that clause.
+  (isMysql ? test : test.skip)('keeps ORDER BY on an unbounded MySQL increment', async () => {
+    for (const position of [1, 2, 3]) {
+      await strapi.db.query(SLOT_UID).create({ data: { position } });
+    }
+
+    await strapi.db
+      .queryBuilder(SLOT_UID)
+      .where({ position: { $gte: 1 } })
+      .orderBy({ position: 'desc' })
+      .increment('position', 1)
+      .execute();
+
+    const positions = await strapi.db.query(SLOT_UID).findMany({
+      select: ['position'],
+      orderBy: { position: 'asc' },
+    });
+
+    expect(positions.map((row) => row.position)).toEqual([2, 3, 4]);
   });
 
   test.each([
