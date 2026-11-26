@@ -382,6 +382,88 @@ describe('Upload service - multi-file rollback', () => {
     expect(meta.error).toBe(cleanupError);
   });
 
+  test('rollback setup failure: the original upload error is rethrown and the rollback error is logged', async () => {
+    const rollbackError = new Error('config unavailable');
+    const configGetSpy = jest.spyOn(global.strapi.config, 'get');
+
+    try {
+      providerMethods.upload.mockImplementation(async (file: File) => {
+        if (file.name === 'second.txt') {
+          // From here on, only the rollback reads the config, so only the rollback throws.
+          configGetSpy.mockImplementation(() => {
+            throw rollbackError;
+          });
+          throw providerError;
+        }
+      });
+
+      const files = [
+        inputFile(firstFilePath, 'first.txt'),
+        inputFile(secondFilePath, 'second.txt'),
+      ];
+
+      await expect(runUpload(files)).rejects.toBe(providerError);
+
+      // The rollback failed before it removed anything.
+      expect(providerMethods.delete).not.toHaveBeenCalled();
+      expect(dbDelete).not.toHaveBeenCalled();
+
+      expect(logError).toHaveBeenCalledTimes(1);
+      const [message, meta] = logError.mock.calls[0];
+      expect(message).toBe('Failed to roll back uploaded files');
+      expect(meta.error).toBe(rollbackError);
+    } finally {
+      configGetSpy.mockRestore();
+    }
+  });
+
+  // Pins CURRENT behaviour, see https://github.com/strapi/strapi/issues/28012. A file whose own
+  // add() fails after the provider write never reaches the rollback list, so the provider keeps
+  // its bytes. If #28012 is fixed, this test should change to expect a delete for the second file.
+  test('known limitation (#28012): a DB failure after a successful provider upload rolls back earlier files but not the failing one', async () => {
+    const dbCreateError = new Error('DB create failed');
+    dbCreate.mockImplementation(async ({ data }: { data: Omit<DbRow, 'id'> }) => {
+      if (data.name === 'second.txt') {
+        throw dbCreateError;
+      }
+      const row: DbRow = { id: createdRows.length + 1, ...data };
+      createdRows.push(row);
+      return row;
+    });
+
+    try {
+      const files = [
+        inputFile(firstFilePath, 'first.txt'),
+        inputFile(secondFilePath, 'second.txt'),
+      ];
+
+      await expect(runUpload(files)).rejects.toBe(dbCreateError);
+
+      // The provider accepted both files.
+      expect(providerMethods.upload).toHaveBeenCalledTimes(2);
+
+      // The first file was saved, so it is rolled back from the provider and the database.
+      expect(createdRows.map((row) => row.name)).toEqual(['first.txt']);
+      expect(providerMethods.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'first.txt' })
+      );
+      expect(dbDelete).toHaveBeenCalledWith({ where: { id: createdRows[0].id } });
+
+      // The second file is on the provider but not in the rollback list, so it is not deleted.
+      expect(providerMethods.delete).toHaveBeenCalledTimes(1);
+      expect(providerMethods.delete).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'second.txt' })
+      );
+    } finally {
+      // Restore the default implementation for the tests that follow.
+      dbCreate.mockImplementation(async ({ data }: { data: Omit<DbRow, 'id'> }) => {
+        const row: DbRow = { id: createdRows.length + 1, ...data };
+        createdRows.push(row);
+        return row;
+      });
+    }
+  });
+
   test('happy path: when every file succeeds, nothing is rolled back and the result is unchanged', async () => {
     const files = [inputFile(firstFilePath, 'first.txt'), inputFile(secondFilePath, 'second.txt')];
 

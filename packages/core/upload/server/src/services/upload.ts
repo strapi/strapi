@@ -360,7 +360,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
     } catch (error) {
-      await rollbackUploadedFiles(uploadedFiles);
+      try {
+        await rollbackUploadedFiles(uploadedFiles);
+      } catch (rollbackError) {
+        // A failure while setting up the rollback must not replace the original error
+        strapi.log.error('Failed to roll back uploaded files', { error: rollbackError });
+      }
       throw error;
     } finally {
       // delete temporary folder
