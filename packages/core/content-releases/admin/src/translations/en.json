@@ -142,6 +142,7 @@
   "skipped-drawer.entries.publish": "Publish",
   "skipped-drawer.entries.unpublish": "Unpublish",
   "skipped-drawer.entries.remove": "Remove {entry}",
+  "skipped-drawer.entries.not-all-listed": "Not every entry could be listed, so entries can't be removed.",
   "skipped-drawer.form.name.default": "{name} - skipped entries",
   "release-condition.allow_partial.label": "Release all ready items",
   "release-condition.allow_partial.description": "Releases entries that are ready and skips the rest at the scheduled time.",

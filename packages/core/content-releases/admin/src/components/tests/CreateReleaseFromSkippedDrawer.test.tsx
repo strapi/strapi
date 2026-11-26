@@ -5,6 +5,7 @@ import { http, HttpResponse } from 'msw';
 
 import {
   COLLAPSED_ENTRIES_COUNT,
+  MAX_LOADED_SKIPPED_ENTRIES,
   CreateReleaseFromSkippedDrawer,
 } from '../CreateReleaseFromSkippedDrawer';
 
@@ -43,6 +44,44 @@ const mockSkippedEntries = (
     )
   );
 };
+
+// Answers each page like the API, and records the page sizes asked for. `failFullList` fails any
+// request past the first page.
+const mockPagedSkippedEntries = (count: number, { failFullList = false } = {}) => {
+  const actions = Array.from({ length: count }, (_, index) =>
+    skippedAction(index + 1, `Entry ${index + 1}`)
+  );
+  const pageSizes: number[] = [];
+  server.use(
+    http.get('/content-releases/:releaseId/actions', ({ request }) => {
+      const pageSize = Number(new URL(request.url).searchParams.get('pageSize'));
+      pageSizes.push(pageSize);
+
+      if (failFullList && pageSize > 100) {
+        return HttpResponse.json(
+          { data: null, error: { status: 500, name: 'ApplicationError', message: 'Server error' } },
+          { status: 500 }
+        );
+      }
+
+      return HttpResponse.json({
+        data: { Article: actions.slice(0, pageSize) },
+        meta: {
+          pagination: { page: 1, pageSize, total: count, pageCount: Math.ceil(count / pageSize) },
+          contentTypes: {},
+          components: {},
+        },
+      });
+    }),
+    http.get('/content-releases/settings', () =>
+      HttpResponse.json({ data: { defaultTimezone: null } })
+    )
+  );
+
+  return { actions, pageSizes };
+};
+
+const NOT_ALL_LISTED = "Not every entry could be listed, so entries can't be removed.";
 
 const captureCreateRequest = () => {
   const requestBody = jest.fn();
@@ -195,38 +234,19 @@ describe('CreateReleaseFromSkippedDrawer', () => {
       'aria-disabled',
       'true'
     );
+    expect(screen.getByText(NOT_ALL_LISTED)).toBeInTheDocument();
   });
 
   it('loads, lists and lets remove every skipped entry past the first page', async () => {
     const count = 109;
-    const actions = Array.from({ length: count }, (_, index) =>
-      skippedAction(index + 1, `Entry ${index + 1}`)
-    );
-    const pageSizes: string[] = [];
-    server.use(
-      http.get('/content-releases/:releaseId/actions', ({ request }) => {
-        const pageSize = Number(new URL(request.url).searchParams.get('pageSize'));
-        pageSizes.push(String(pageSize));
-
-        return HttpResponse.json({
-          data: { Article: actions.slice(0, pageSize) },
-          meta: {
-            pagination: { page: 1, pageSize, total: count, pageCount: Math.ceil(count / pageSize) },
-            contentTypes: {},
-            components: {},
-          },
-        });
-      }),
-      http.get('/content-releases/settings', () =>
-        HttpResponse.json({ data: { defaultTimezone: null } })
-      )
-    );
+    const { actions, pageSizes } = mockPagedSkippedEntries(count);
     const requestBody = captureCreateRequest();
 
     const { user } = renderDrawer();
 
     await screen.findByText(`${count} entries carried over`);
-    expect(pageSizes).toEqual(['100', String(count)]);
+    expect(pageSizes).toEqual([100, count]);
+    expect(screen.queryByText(NOT_ALL_LISTED)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Show more' }));
     expect(screen.getByText(`Entry ${count}`)).toBeInTheDocument();
@@ -244,6 +264,38 @@ describe('CreateReleaseFromSkippedDrawer', () => {
       })
     );
   });
+
+  it.each([
+    ['the full list fails to load', 109, { failFullList: true }, [100, 109]],
+    ['there are too many to load', MAX_LOADED_SKIPPED_ENTRIES + 1, {}, [100]],
+  ])(
+    'still creates the release from every skipped entry when %s',
+    async (_, count, options, expectedPageSizes) => {
+      const { pageSizes } = mockPagedSkippedEntries(count, options);
+      const requestBody = captureCreateRequest();
+
+      const { user } = renderDrawer();
+
+      await screen.findByText(`${count.toLocaleString('en')} entries carried over`);
+      await waitFor(() => expect(pageSizes).toEqual(expectedPageSizes));
+      expect(screen.queryByText('Server error')).not.toBeInTheDocument();
+      expect(screen.getByText(NOT_ALL_LISTED)).toBeInTheDocument();
+      expect(screen.getByText('Entry 1')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove Entry 1' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+
+      await user.click(screen.getByRole('checkbox', { name: "I don't have a release date yet" }));
+      const createButton = screen.getByRole('button', { name: 'Create release' });
+      expect(createButton).toBeEnabled();
+      fireEvent.click(createButton);
+
+      // No ids: the server carries over every skipped entry
+      await waitFor(() => expect(requestBody).toHaveBeenCalled());
+      expect(requestBody.mock.calls[0][0]).not.toHaveProperty('actionIds');
+    }
+  );
 
   it("explains that the skipped entries couldn't be loaded", async () => {
     server.use(
