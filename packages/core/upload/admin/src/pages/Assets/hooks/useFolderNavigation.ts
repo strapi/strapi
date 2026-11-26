@@ -57,7 +57,7 @@ export const useFolderNavigation = () => {
   }, [query, setQuery]);
 
   // Malformed ?folder= values (e.g. abc) parse as null; strip the param from the URL.
-  // Deleted/missing folders (404) are handled in AssetsPage — that needs a fetch.
+  // Deleted/missing folders (404) are handled in useAssetsList — that needs a fetch.
   useEffect(() => {
     if (query?.folder && currentFolderId === null) {
       stripFolderParam();
