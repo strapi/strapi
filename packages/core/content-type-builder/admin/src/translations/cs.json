@@ -246,7 +246,7 @@
   "chat.input.defaults.generate": "Vygenerovat schéma produktu",
   "chat.input.defaults.ctb": "Řekni mi o Content-Type Builderu",
   "chat.input.defaults.strapi": "Řekni mi o Strapi",
-  "chat.input.thinking": "Strapi AI přemýšlí...",
+  "chat.input.thinking": "Strapi AI přemýšlí",
   "chat.input.placeholder": "Zeptejte se Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI může dělat chyby.",
   "chat.messages.error": "Něco se pokazilo.",

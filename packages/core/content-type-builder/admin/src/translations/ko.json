@@ -216,7 +216,7 @@
   "chat.input.defaults.generate": "제품 스키마 생성",
   "chat.input.defaults.ctb": "콘텐츠 타입 빌더에 대해 알려주세요",
   "chat.input.defaults.strapi": "Strapi에 대해 알려주세요",
-  "chat.input.thinking": "Strapi AI가 생각 중입니다...",
+  "chat.input.thinking": "Strapi AI가 생각 중입니다",
   "chat.input.placeholder": "Strapi AI에게 물어보세요...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI는 오류를 만들 수 있습니다.",
   "chat.messages.error": "문제가 발생했습니다.",

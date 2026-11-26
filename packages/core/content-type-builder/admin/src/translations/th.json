@@ -164,7 +164,7 @@
   "chat.input.defaults.generate": "สร้าง schema ผลิตภัณฑ์",
   "chat.input.defaults.ctb": "บอกฉันเกี่ยวกับ Content-Type Builder",
   "chat.input.defaults.strapi": "บอกฉันเกี่ยวกับ Strapi",
-  "chat.input.thinking": "Strapi AI กำลังคิด...",
+  "chat.input.thinking": "Strapi AI กำลังคิด",
   "chat.input.placeholder": "ถาม Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI อาจทำผิดพลาดได้",
   "chat.messages.error": "มีบางอย่างผิดพลาด",

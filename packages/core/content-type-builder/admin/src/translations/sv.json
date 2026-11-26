@@ -201,7 +201,7 @@
   "chat.input.defaults.generate": "Generera en produktschema",
   "chat.input.defaults.ctb": "Berätta om Content-Type Builder",
   "chat.input.defaults.strapi": "Berätta om Strapi",
-  "chat.input.thinking": "Strapi AI tänker...",
+  "chat.input.thinking": "Strapi AI tänker",
   "chat.input.placeholder": "Fråga Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI kan göra fel.",
   "chat.messages.error": "Något gick fel.",

@@ -72,7 +72,7 @@
   "chat.input.defaults.title": "どのようにお手伝いできますか？",
   "chat.input.placeholder": "Strapi AIに質問...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AIは間違えることがあります。",
-  "chat.input.thinking": "Strapi AIが考えています...",
+  "chat.input.thinking": "Strapi AIが考えています",
   "chat.messages.error": "問題が発生しました。",
   "chat.messages.license-limit-exceeded": "AIクレジットの上限を超えました。",
   "chat.messages.license-limit-reached": "ライセンス上限に達しました。明日もう一度お試しください。",
