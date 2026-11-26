@@ -270,10 +270,14 @@ describe('Content-API Token Auth Strategy', () => {
       },
     };
 
+    // Like CASL's can, which throws a TypeError when the action is not a string
     const ability = {
-      can: vi.fn((action) => {
-        if (customApiToken.permissions.includes(action)) return true;
-        return false;
+      can: vi.fn((action: unknown) => {
+        if (typeof action !== 'string') {
+          throw new TypeError(`Cannot check a non-string action: ${String(action)}`);
+        }
+
+        return customApiToken.permissions.includes(action);
       }),
     };
 

@@ -97,9 +97,10 @@ export const verify = async (auth: any, config: any = {}) => {
   }
 
   // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
-  const scopes = Array.from(castArray(config.scope ?? []));
+  // A hole becomes undefined, and CASL's can throws a TypeError on a non-string, so reject it first.
+  const scopes: unknown[] = Array.from(castArray(config.scope ?? []));
 
-  const isAllowed = scopes.every((scope) => ability.can(scope));
+  const isAllowed = scopes.every((scope) => typeof scope === 'string' && ability.can(scope));
 
   if (!isAllowed) {
     throw new ForbiddenError();
