@@ -15726,6 +15726,944 @@ If we reach this step, we have no declared type and did not accept in 4, 6, or 7
 
 ---
 
+## Media Library admin
+
+The admin part of `@strapi/upload` lives in [`packages/core/upload/admin/src`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src). It contains the Media Library page, the `media` field input of the Content Manager, and the picker that the rich text editors use to insert images.
+
+### One switch, two implementations
+
+[`index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/index.ts) registers the admin part. It reads the `useLegacyMediaLibrary` feature flag and registers one of two implementations for each surface:
+
+| Surface                                                           | Default                                                     | `useLegacyMediaLibrary: true`           |
+| ----------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------- |
+| Media Library page (menu link to `plugins/upload`)                | `App.tsx`, which renders `pages/Assets/AssetsPage.tsx`      | `legacy/pages/App/App.tsx`              |
+| `media` field input                                               | `components/MediaLibraryInput/`                             | `legacy/components/MediaLibraryInput/`  |
+| `media-library` component, used by the Wysiwyg and Blocks editors | `components/AssetPickerDialog/MediaLibraryPickerDialog.tsx` | `legacy/components/MediaLibraryDialog/` |
+| Upload progress dialog and Blocks editor file drop zone           | Registered                                                  | Not registered                          |
+
+Only one implementation is registered, so the menu has a single Media Library entry. The settings page in `pages/SettingsPage/` is registered in both modes. An application sets the flag in `config/features`.
+
+Two other places read the flag:
+
+- `packages/core/admin/admin/src/App.tsx` renders the global components registered with the `future-global::` prefix only when the flag is off. The upload progress dialog is one of them, so it has two gates.
+- `utils/mediaLibraryVersion.ts` tags every tracking event with `v2` or `v1`, from the flag and not from the code that fired the event.
+
+### Layout
+
+```
+admin/src/
+├── index.ts          # Registers the admin part and applies the legacy switch
+├── App.tsx           # Routes of the Media Library page
+├── components/       # Drawer shell, upload progress dialog, media field input,
+│                     # picker dialog, Blocks editor drop zone
+├── hooks/            # Hooks shared by the page and the field: permissions, tracking
+├── pages/
+│   ├── Assets/       # The Media Library page: grid, table, folder tree, asset details
+│   └── SettingsPage/ # Settings > Media Library, registered in both modes
+├── services/         # RTK Query endpoints
+├── store/            # Redux slice for upload progress
+├── translations/
+├── types/
+├── utils/
+└── legacy/           # The previous implementation
+```
+
+### What `legacy/` holds
+
+`legacy/` is the previous Media Library. Its page, field input and picker run only when `useLegacyMediaLibrary` is true. Other parts of it run or load in both modes:
+
+- `index.ts` imports the legacy field input and dialog statically, so they are in the bundle in both modes. It also calls `legacy/utils/prefixPluginTranslations` to register the translations.
+- `pages/SettingsPage/SettingsPage.tsx` uses `legacy/hooks/useSettings` and `legacy/hooks/useAIMetadataAvailability`. A current `hooks/useAIMetadataAvailability.ts` exists, but the settings page does not use it yet.
+- `admin/tests/setup.ts` mocks `legacy/hooks/useTracking` and `legacy/hooks/useSettings` for every unit test, with the mocks in `legacy/hooks/__mocks__/`. Some tests outside `legacy/` also import from it.
+
+Put new work in the current tree, not in `legacy/`. Before you remove a file from `legacy/`, search the whole package for imports of it, tests included.
+
+### Where new code goes
+
+- **A component for one feature of the page**: `pages/Assets/components/<Feature>/`.
+- **A component that several surfaces share**: `components/`, like the `Drawer` shell. Some shared components still live with the page: the media field imports `AssetDetailsDrawer` and `ImportFromUrlDialog` from `pages/Assets/components/`.
+- **A hook**: `hooks/` when the page and the field share it, `pages/Assets/hooks/` when only the page uses it.
+- **An endpoint**: a file in `services/`. See [Data fetching](./07-data-fetching.md).
+- **Tests**: a `tests/` folder next to the code. See [Testing](./08-testing.md).
+- **Translations**: `translations/en.json`. Keys are flat and scoped by feature, for example `asset-details.replace.success`. Read them with `getTranslationKey` from `utils/translations.ts`, which adds the `upload.` prefix.
+
+### Layout pitfall: the global image reset
+
+The design system's global style sets `max-width: 100%` on `img`. This reset clamps any explicit image size that is wider than the container. The crop editor (`pages/Assets/components/AssetDetails/AssetCropEditor.tsx`) sizes a rotated image beyond its container, so it applies that size as an inline style with `maxWidth: 'none'`. Check the computed width in a browser when you size an image explicitly.
+
+### Pages in this section
+
+- [Asset list](./01-asset-list.md): list state, search, filters, sort, infinite loading, selection and folders.
+- [Asset details drawer](./02-asset-details-drawer.md): the drawer shell, stacking, URL state, unsaved edits and in-drawer feedback.
+- [Forms](./03-forms.md): reading form state, the save baseline and save gating.
+- [Uploads](./04-uploads.md): entry points, the upload requests, the progress store and dialog, and AI metadata.
+- [Media field and picker](./05-media-field-and-picker.md): the Content Manager `media` field and the picker of the rich text editors.
+- [Drag and drop](./06-drag-and-drop.md): moving assets and folders, drop rules, and the keyboard alternative.
+- [Data fetching](./07-data-fetching.md): the API slice, cache tags, endpoint names and upload endpoints.
+- [Testing](./08-testing.md): unit tests, the two end-to-end suites, and what jsdom cannot catch.
+
+---
+
+## Asset list
+
+The Media Library page lists the folders and assets of one folder, or the results of a search. The code is in [`pages/Assets/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/pages/Assets). [`AssetsPage.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/AssetsPage.tsx) composes the page. [`hooks/useAssetsList.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useAssetsList.ts) reads the list state and runs the folder and asset queries. The Content Manager picker reuses `useAssetsList` and the views (see [Media field and picker](./05-media-field-and-picker.md)), so a change here affects both surfaces.
+
+### How the page is composed
+
+```
+UploadDropZoneProvider          disabled without assets.create
+└─ AssetSelectionProvider       disabled without assets.update
+   └─ BusyAssetsProvider
+      └─ AssetsDndProvider
+         ├─ ClearSelectionOnChange
+         └─ Layouts.Root
+            ├─ sideNav: FolderTree, with a MainAreaContextMenu for its background
+            └─ Page.Main
+               ├─ MainAreaContextMenu
+               ├─ StickyHeader: title, "New" menu, toolbar, FilterBadges
+               └─ Layouts.Content: page subscribers, drop zone, AssetsView
+FolderFormDialog, ImportFromUrlDialog, AssetDetailsDrawerFromUrl
+```
+
+- The toolbar holds `FilterMenu`, `AssetsSearchInput`, `SearchScopeControls` (only while searching), `SortMenu` and `ViewToggle`.
+- The view (grid or table) is not list state. `usePersistentState` stores it in `localStorage` under `STRAPI_UPLOAD_LIBRARY_VIEW`.
+- `AssetsView` renders a loader, an error, an empty state, or the list. The list is `AssetsGrid` or `AssetsTable`, followed by the infinite scroll sentinel and the `BulkActionsBar`. With no folder and no asset, a search shows `EmptyState` with "Clear search". Filters without a search show `FilteredEmptyState` with "Clear filters".
+- `useListSettings` lets a host turn off the item affordances. Without a provider it returns the page defaults, with the context menus and the bulk actions bar on. The picker turns them off.
+
+### List state
+
+| Parameter   | Hook                  | Value                                         | History entry |
+| ----------- | --------------------- | --------------------------------------------- | ------------- |
+| `folder`    | `useFolderNavigation` | Folder id. Absent at the root.                | Added         |
+| `_q`        | `useAssetSearch`      | The encoded search term                       | Replaced      |
+| `searchAll` | `useAssetSearch`      | `true`, or absent                             | Replaced      |
+| `filters`   | `useListFilters`      | Serialized filter badges                      | Replaced      |
+| `sort`      | `useListSort`         | One sort rule. Absent means `updatedAt:DESC`. | Added         |
+| `folders`   | `useListSort`         | `mixed`, or absent for folders on top         | Added         |
+
+Back returns to the previous folder or sort. Filters replace the entry because they change in small steps, such as each checkbox of the Type submenu, and one change must not become a stack of Back entries.
+
+Every list hook reads and writes through [`useListQueryParams`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useListQueryParams.ts), never through `useQueryParams` directly. Without a `ListQueryStateProvider`, it returns `useQueryParams` from `@strapi/admin`, so the page keeps its state in the URL. A link reproduces the list, and a refresh restores it. `AssetPickerDialog` wraps its content in `ListQueryStateProvider`, which keeps the query string in React state, because the picker opens on a Content Manager page and a URL write would change the URL of the entry. The provider ignores the `replace` argument. Add new list state through `useListQueryParams`, or the picker writes it to the URL of the entry. The drawer's `assetId` exists only on the page and uses `useQueryParams` directly.
+
+Two guards keep `folder` valid. `useFolderNavigation` strips a value that does not parse as a number. `useAssetsList` navigates to the root when `getFolder` fails with a `NotFoundError`, for example after the folder was deleted. Opening a folder clears `_q` and `searchAll` inside `useFolderNavigation`, so no caller can forget it.
+
+#### Encoding `_q` and `filters`
+
+`setQuery` from [`useQueryParams`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/hooks/useQueryParams.ts) merges the current query, which `qs.parse` has decoded, and writes the result with `encode: false`. The in-memory provider does the same round trip. Three rules follow:
+
+- Encode the term when you write it. `useAssetSearch` writes `encodeSearchQuery(value)` from [`utils/searchQueryParam.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/searchQueryParam.ts).
+- A write that keeps the current `_q` must go through `withEncodedUserParams(query, nextParams)` from `@strapi/admin`. It encodes the current `filters` and `_q` again. Without it, a `&` in the decoded term splits it into two parameters. `useListSort`, `useListFilters` and the folder strip do this. Folder navigation does not, which is safe only because it removes `_q` and the filter grammar has no character that needs encoding.
+- The services encode the term once more for the request (`services/assets.ts`, `services/folders.ts`), because `getFetchClient` also stringifies params with `encode: false`.
+
+### Search
+
+`AssetsSearchInput` owns the typed value and a 300 ms debounce. `useAssetSearch` only reads and writes `_q` and `searchAll`, so every consumer reads the same value. The input copies `_q` back when it changes from elsewhere, such as Back or "Clear search". When `folder` changes, the input drops a term that the debounce has not committed yet, or it would start a search in the new folder. Clearing the term also removes `searchAll`.
+
+The scope depends on the folder:
+
+- At the root, a search covers the whole library, and there is no switch.
+- In a folder, a search covers the folder and its subfolders. `SearchScopeControls` shows the "Search all media" switch, which sets `searchAll=true`. `FolderTree` then stops highlighting the open folder.
+- A folder search needs the `path` of the folder, from `getFolder`. `useAssetsList` passes it as `searchFolderPath`. Until it arrives, both queries are skipped and the list reports loading, because without it the search would run on the whole library. If `getFolder` fails, its error becomes the list error.
+
+While searching, the services replace the direct-children scope. Files match `folderPath` equal to the path or starting with `<path>/`. Folders match `path` starting with `<path>/`, so the open folder itself is not a result. The trailing slash keeps `/1` from matching `/12`. List filters apply in both modes. `getFolders` sends no `page` or `pageSize`, so it returns every match. `SearchScopeControls` shows the result count as the number of folders plus the asset `pagination.total`, and hides it while the list loads or fails.
+
+### Filters and sort
+
+`?filters=` holds badges separated by `;`. A badge is `<field>:<condition>:<value>`, for example `type:is:picture,audio`, `created:within:1week` or `created:rangeis:2024-01-01..2024-04-07`. `parseFiltersParam` in [`useListFilters.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useListFilters.ts) drops any badge it cannot parse, since users can edit the URL.
+
+[`buildAssetFilters`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/utils/buildAssetFilters.ts) turns the badges into `filters[$and]` clauses:
+
+- Badges combine with AND. Date badges apply to files and folders.
+- Relative presets stay relative in the URL, so a shared link means "the last week" whenever it is opened. `useAssetsList` resolves them against `new Date()` in a `useMemo` keyed on `listFilters.serialized`. The query args and the RTK Query cache keys stay stable between renders. While the page stays mounted, the resolved dates change only when the filters change.
+- `picture`, `audio` and `video` map to `mime` clauses. `document` means a mime that contains none of `image`, `audio` and `video`.
+- `folder` is not a mime. It decides `showFolders`. An `is` badge with only `folder` sets `showFiles` to false, and the files query does not run.
+
+`FilterMenu` adds badges, and `FilterBadges` edits them in place. The Type submenu stays open and edits the last type badge. Picking a date preset replaces the preset badge of that field. Only creation date offers a range in the UI, but the codec also accepts `updated:rangeis:`.
+
+Range endpoints are `YYYY-MM-DD` calendar days in the user's timezone. Parse them with `parseCalendarDate`, never with `new Date(value)`: a date-only string parses as UTC midnight, which is the previous day west of UTC. `buildAssetFilters` sends the local start and end of day as ISO strings. `pages/Assets/tests/FilterBadges.timezone.test.tsx` runs in `America/Los_Angeles` through `@jest-environment-options`, because the global test setup pins `TZ=UTC`, where this bug cannot show (see [Testing](./08-testing.md)).
+
+[`useListSort`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useListSort.ts) keeps one rule. The date group ("Oldest uploads", "Most recent updates") and the name and size group exclude each other. Clearing the active rule falls back to the default, which is written as no parameter. The folders query uses `foldersSort`: `name:ASC` by default, like the folder tree, and the explicit rule otherwise, except size rules, because folders have no size.
+
+"Folders: Mixed with files" exists in the table only (`showFoldersGroup` on `SortMenu`). The grid always shows folders first. In mixed mode, `mergeMixedList` sorts the folders on the client with the asset rule and interleaves them with the loaded assets. A folder that sorts after the last loaded asset waits for a later page, and ties put folders first.
+
+### Infinite loading
+
+[`useInfiniteAssets`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useInfiniteAssets.ts) loads pages of 20 assets. It keeps one accumulator per `queryKey`, the JSON of the request args. Folders are not paginated.
+
+- **Dedupe by id**: `flattenPages` joins the pages in order through a `Map` keyed by id. An asset that moved to another page after a mutation keeps its first position, shows its latest data, and renders once.
+- **Page subscribers**: the hook subscribes only the latest page. The caller must render the returned `subscribers` node, which mounts one `PageSubscriber` per earlier page. Without it, an `{ type: 'Asset', id: 'LIST' }` invalidation refetches the latest page only (see [Data fetching](./07-data-fetching.md)). `AssetsPage` renders it in `Layouts.Content`.
+- **Previous results stay on screen**: `listKey` ignores the search term. A new term keeps the previous rows until page 1 of the new query lands, so the list does not blank on each debounced commit. Meanwhile `hasNextPage` is false, because it reads only the live response. A change of folder, sort, filters or search scope changes `listKey`. The hook then returns no assets and reports loading, so old rows never show under a new header.
+- **Remembered lists**: the last 10 lists (`MAX_REMEMBERED_LISTS`) keep their pages. Returning to one restores its rows at once, resumes at its deepest page, and refreshes in the background without a loader.
+- **Cache eviction**: on a folder change, the hook removes the `getAssets` cache entries of the folder it leaves. It parses the args out of the `getAssets(...)` cache keys and dispatches the internal `removeQueryResult` action. Both are RTK Query internals, so recheck this code when you upgrade RTK Query. `pages/Assets/hooks/tests/useInfiniteAssets.eviction.test.ts` covers which entries it removes.
+- **Uploads**: a finished upload is merged into the list only without a search or filters, and only in its own folder (`mergeUploadedAssets`, see [Uploads](./04-uploads.md)).
+
+`AssetsView` renders a 1px sentinel after the list, with the callback ref of [`useInfiniteScrollSentinel`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useInfiniteScrollSentinel.ts). Only the observer callback requests a page, and only when `hasNextPage` is true and `isFetchingMore` is false, that is, no page after the first is in flight. A state change never does, so a stale reading from before the new rows rendered cannot fetch an extra page. When a page settles, the hook observes the sentinel again. That forces a fresh reading, so loading continues until the viewport is full. The observer options are read once, when the node attaches: pass a module-level object. `AssetsView` passes a `-1px` bottom root margin, so a sentinel that sits exactly at the fold does not count as visible and loads no page.
+
+`useListScrollRestoration(listQueryKey)` saves the scroll offset of each list and restores it on return. It listens on the main column of `Layouts.Root`, the ancestor marked `data-strapi-main-content`. It keeps 10 offsets. When the key changes, a layout effect sets the saved offset, or the top for a new list. It retries on each commit for 2 seconds while the content is too short, then gives up so it does not move a list the user is reading.
+
+### Selection and bulk actions
+
+The views read selection through the [`AssetSelection`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useAssetSelection.ts) interface. The page provides it with `AssetSelectionProvider`. `AssetSelectionContext` is exported so that the picker can feed the same views its own rules, such as `getSelectability` returning `disabled` for a type the field does not accept. The pure logic is in `utils/selection.ts`.
+
+- Keys are `asset:<id>` and `folder:<id>`, because ids from the two tables can collide.
+- A plain click opens the drawer or the folder. Shift+click selects the range from the anchor, Cmd or Ctrl+click toggles, Space toggles and Enter opens. The checkbox toggles, and Shift extends the range.
+- `AssetsView` builds the rendered order once with `buildRenderedKeys`, from `mergeMixedList` in mixed mode. Range selection, select all and the bulk bar use it, so they agree on what is on screen. Select all covers the loaded items only.
+- `ClearSelectionOnChange` clears the selection when `getListQueryKey` changes: folder, search term, search scope, sort, folder position or filters. Loading more and switching views keep it.
+- On the page, `deselectAll` clears everything. The drawer does not deselect an asset it moves or deletes, so the selection can hold keys that left the list. The item menus deselect their item on success.
+- Without `assets.update`, the provider is disabled: its mutators do nothing and the views hide the checkboxes.
+
+`BulkActionsBar` renders only when something is selected and the user has `assets.update`. It offers select all, metadata generation when AI metadata is on, move, delete and clear. A successful action clears the selection. The bar is fixed, so it renders a spacer under the list, as tall as the space the bar covers. On mobile it hides while the drawer is open. Moves read the parent of each item from `itemLocations`, built from the loaded rows, because a search result can sit in any subfolder (see [Drag and drop](./06-drag-and-drop.md)).
+
+### Context menus
+
+- `ItemContextMenuProvider` wraps both views when item actions are on. A right-click on an item inside a multi-selection opens `SelectionContextMenu`. Any other right-click selects only that item and opens `AssetContextMenu` or `FolderContextMenu`. Each opening has its own React key, so dialog state never carries over to the next one.
+- `MainAreaContextMenu` handles a right-click on the background of the main column. It offers the creation actions, led by the selection actions when items are selected. It ignores targets inside `[data-native-context-menu]`, `thead`, links, buttons and form fields. Cards, rows and the bulk bar carry `data-native-context-menu`. Add it to any new element of the list that must not open the creation menu. The sidebar instance offers creation only.
+
+### Folder tree
+
+[`FolderTree`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/pages/Assets/components/FolderTree) fetches the whole tree in one `getFolderStructure` request. It never writes the URL: it calls `onSelectFolder`, which the page wires to `navigateToFolderId`. Expansion is local state, and the ancestors of the open folder expand by themselves. When the open folder is at depth 4 or deeper (`COLLAPSE_FROM_DEPTH` in `collapsedBranch.ts`), the folders between the root of the branch and the parent fold into one "N parent folders" row. Each folder row has a menu (`FolderTreeRowMenu`) with the `FolderActions` of the list, without Rename (`showRename={false}`). The Home row and the "N parent folders" row have no menu. During a drag, rows are drop targets, and a collapsed row with subfolders opens after a 600 ms hover.
+
+### Busy assets and permissions
+
+`BusyAssetsProvider` maps an asset id to a busy message. `markBusy(id, message)` returns a release function. Call it in `finally`, so a failure clears the flag. `AssetActions` uses it during a replace from the item menu, because the menu has closed by the time the file picker returns. A busy card shows `BusyOverlay`, a busy row shows a loader instead of its thumbnail, and both ignore pointer events. The context is optional: without it, as in the picker, the replace runs with no feedback on the item. A drag move blocks the whole list instead, through `isMovePending` of `AssetsDndProvider`.
+
+[`useMediaLibraryPermissions`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/hooks/useMediaLibraryPermissions.ts) changes the list as follows:
+
+- `canCreate`: the "New" menu, the upload drop zone, both background menus, and the add button of the empty state.
+- `canUpdate`: selection, the bulk actions bar and the selection menu.
+- Asset menu: shown with any of `canUpdate`, `canCopyLink` and `canDownload`. Otherwise the browser menu opens.
+- Folder menu: always shown. `FolderActions.tsx` has a TODO to gate rename, move and delete on `assets.update`.
+
+### Related
+
+- [Asset details drawer](./02-asset-details-drawer.md), [Forms](./03-forms.md), [Uploads](./04-uploads.md)
+- [Media field and picker](./05-media-field-and-picker.md), [Drag and drop](./06-drag-and-drop.md)
+- [Data fetching](./07-data-fetching.md), [Testing](./08-testing.md)
+
+---
+
+## Asset details drawer
+
+The asset details drawer shows one asset. It edits the name, the alternative text, the caption and the folder, and it replaces, crops, downloads and deletes the asset. The code is in [`AssetDetailsDrawer.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/components/AssetDetails/AssetDetailsDrawer.tsx).
+
+Two hosts render it:
+
+- The Media Library page renders `AssetDetailsDrawerFromUrl`. The open asset is the `assetId` URL parameter, so a link to an asset survives a refresh.
+- The `media` field in `components/MediaLibraryInput/MediaLibraryInput.tsx` renders `AssetDetailsDrawer`. The open asset is local state of the field.
+
+### The drawer shell
+
+The panel is the shared `Drawer` from [`components/Drawer.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/Drawer.tsx). The upload progress dialog uses it too. It wraps a non-modal Radix `Dialog`.
+
+- **Width**: below the `medium` breakpoint, the panel takes the full width of the screen. From `medium` up, it is anchored to the right with the `width` prop, 400px by default. Both current callers pass `41.6rem`.
+- **Height**: `maxHeight` defaults to `100dvh`, not `100vh`. The panel is anchored to the bottom, and on mobile the URL bar makes the visible viewport shorter than `100vh`. With `100vh`, the header and the close button would be pushed off screen. The asset details drawer also sets `height="100dvh"`. The upload progress dialog passes `maxHeight="34.2rem"`.
+- **Outside presses**: by default, a pointer press outside the panel does not close it. A host opts in with `onPointerDownOutside`, and can still veto a press with `event.preventDefault()`.
+- **Focus**: focus that moves outside never closes the panel. The panel is non-modal, so tabbing past the last field is a normal action.
+- **Portalled content**: dialogs, popovers and tooltips opened from inside the panel count as inside, because Radix follows the React tree, not the DOM.
+- **Escape**: `onEscapeKeyDown` lets a host veto Escape with `event.preventDefault()`.
+
+The asset details drawer uses these hooks as follows:
+
+- It opts in to outside presses. It keeps the panel open for a press with a button other than the primary one, for a press while the panel is closing, and for a press on a grid card or table row of the page, because that click switches the drawer to the other asset. A press on the checkbox or actions menu of a card still closes it. The cards of the media field do not switch the drawer, so there a press on another asset closes it, or asks first.
+- It vetoes Escape when the event comes from the crop editor. The editor is a design system `Portal` with a `FocusTrap`, which handles Escape itself to close the editor. Without the veto, the same key press would also close the drawer.
+- On open, it stores the element that had focus, such as the card or the edit button of the field. On close, it gives the focus back to that element, unless the user already moved the focus somewhere else.
+- `useDrawerPresence` keeps the drawer mounted until its close animation ends, and keeps the last asset id, so the content does not go blank during the slide-out.
+
+#### Stacking
+
+The panel uses the `overlay` z-index token (300). Design system modals put their overlay on the same token. Equal z-index values stack by DOM order, and a portal is appended when it opens:
+
+- A drawer opened from inside a modal, for example a media field in the relation modal of the Content Manager, comes after the modal and sits above it.
+- A dialog opened from inside the drawer, for example the delete confirmation, comes after the drawer and covers it.
+
+Do not raise the panel to the `modal` token (310). The content of a design system dialog stacks inside its own overlay at 300, so the drawer would cover its own confirmation dialogs. Popovers (500) and tooltips (1000) stay above the panel.
+
+### Open state lives in the URL
+
+On the page, `useAssetDetailsParam` reads and writes the `assetId` parameter. Opening and closing call `setQuery(params, 'push', true)`. The third argument of `setQuery`, from `useQueryParams` in `@strapi/admin`, is `replace`: the navigation replaces the current history entry instead of adding one.
+
+Opening and closing the drawer therefore add no history entries. The browser Back button returns to the previous location, such as another folder or another admin page, instead of closing the drawer. Use `replace` for any panel whose open state lives in the URL.
+
+Build the parameters with `withEncodedUserParams` from `@strapi/admin`, as `useAssetDetailsParam` does. `setQuery` merges the current query and writes it with `encode: false`, and the query it reads is decoded. `withEncodedUserParams` encodes the `filters` and `_q` values of the current query again before they are written back.
+
+Closing removes the parameter, so closing is a navigation. The next section relies on that.
+
+### Unsaved edits
+
+`AssetDetailsDrawer` takes a `guardNavigation` prop. It selects one of two guards:
+
+- **`guardNavigation` is true** (the page): every way to close the drawer removes the URL parameter. That includes the close button, Escape, an outside press, a route change and the browser Back button. `<Blocker>` from `@strapi/admin` intercepts these navigations while the form is modified.
+- **`guardNavigation` is false** (the field): closing is a state change, which `<Blocker>` cannot see. The `ReportUnsavedEdits` component writes `modified && !isSubmitting` into a ref from a layout effect. `requestClose` reads the ref and opens a confirmation dialog instead of closing.
+
+When the user confirms, the blocker lets the navigation through by itself. Its `onProceed` also resets the form. The form stays mounted during the slide-out, and while it is modified it would block the next navigation and keep the unload and session expiry warnings active.
+
+The second guard keeps the dirty state in a ref because only the close handlers read it, so a change of the dirty state does not re-render the drawer. The ref and `requestClose` live in `AssetDetailsDrawer`, above `<Form>`, so a small component rendered inside the function child of `<Form>` reports the state up (see [Forms](./03-forms.md)). The confirmation dialog renders inside the panel, so Radix counts presses on it as inside.
+
+Only `<Blocker>` warns when the user reloads or closes the tab, and when the session expires. The field uses the second guard, so it has neither warning.
+
+Do not set `guardNavigation` in a host that already renders a `<Blocker>`, such as the Content Manager edit view. React Router supports one active blocker per router. When two are mounted, it warns and only checks the last one, so a drawer `<Blocker>` would replace the one of the edit view.
+
+#### One drawer across media fields
+
+An entry can have several media fields. [`components/MediaLibraryInput/openAssetDetails.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/MediaLibraryInput/openAssetDetails.ts) keeps a module-level set of the fields that have a drawer open. A field does not open its drawer or its add menu while any field has a drawer open, because the press that would open it is the press that closes the other drawer. The set is read when the event happens, and a layout effect updates it, so a drawer that a press closes leaves the set before the click reaches the next field.
+
+### Feedback inside the drawer
+
+The results of drawer actions, such as save, replace, crop and their errors, render as a design system `Alert` inside the drawer. They do not go through `useNotification`. The message stays next to the asset it is about, instead of in a corner of the screen.
+
+- The handlers of the drawer call its `notify` function. Buttons deeper in the tree, such as copy link and download, reach it through `DrawerNotifyContext`.
+- The slot holds one alert. A new alert replaces the previous one, and switching to another asset clears it.
+- The alert clears after 5 seconds, unless the toast is `persistent`. The "file too large" error of a replace is persistent.
+- The alert floats over the top of the form (absolute position, z-index 10). The busy overlay (z-index 20) covers it while an action runs.
+
+Two results use the global `toggleNotification` instead:
+
+- A successful delete, because the drawer closes right after.
+- A crop export failure in `AssetCropEditor.tsx`, when the editor cannot produce the cropped file.
+
+The Delete and Replace buttons read their functions and pending flags from `AssetOperationsContext`, and disable themselves while an operation runs. The busy overlay reads the mutation hooks directly, including the upload of a cropped copy.
+
+### Related
+
+- [Forms](./03-forms.md): the form inside the drawer.
+- [Testing](./08-testing.md): page objects and locators for the drawer.
+
+---
+
+## Forms
+
+The Media Library uses `Form`, `useForm` and `useField` from `@strapi/admin/strapi-admin`. The form of the [asset details drawer](./02-asset-details-drawer.md), `AssetDetails` in [`AssetDetailsDrawer.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/components/AssetDetails/AssetDetailsDrawer.tsx), is the reference for the patterns below.
+
+### Read form state inside the form
+
+`useForm` reads the form context, and the context has default values. Outside `<Form>`, reading the state does not throw: it returns the defaults, and `modified` stays `false` forever. A save button gated on that value never enables. Calling an action of the default context, such as `onChange` or `resetForm`, throws.
+
+The component that renders `<Form>` is outside the context. It reads the state through the function child of `Form`:
+
+```tsx
+<Form method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
+  {({ modified, isSubmitting, values, resetForm }) => (
+    <>
+      <FormBody />
+      <Button type="submit" disabled={!modified || isSubmitting}>
+        Save
+      </Button>
+    </>
+  )}
+</Form>
+```
+
+`method` is required. `Form` passes `modified`, `disabled`, `onChange`, the form state (`values`, `errors`, `isSubmitting`), `setErrors` and `resetForm`. Components rendered inside `<Form>` can call `useForm` directly. For example, `DetailField` reads `isSubmitting` with `useForm`.
+
+The same rule applies to `<Blocker>`. It reads `modified` with `useForm`, so render it inside `<Form>`. Outside the form, it sees `false` and never blocks.
+
+### Update fields with the path form of `onChange`
+
+Call `onChange(name, value)` with the field path and the value. Do not pass the change event. The event form turns `''` into `null`, so a field that starts as `''` stays modified after the user types a character and deletes it. `DetailField` calls `field.onChange(name, value)` for this reason.
+
+### Keep `initialValues` stable
+
+`Form` applies `initialValues` again when the prop changes identity and its content differs from the current baseline. After a save, the baseline is the saved values, while the prop still holds the asset from before the save until the refetch arrives. A new `initialValues` object on every render would reset the form to the old values.
+
+`AssetDetails` builds `initialValues` with `React.useMemo` on the asset fields, so the object only changes when the asset does.
+
+### Reset the baseline after a save
+
+`handleSubmit` calls `resetForm(values)` after a successful update. The saved values become the new baseline. Without this call, the form stays modified until the refetched asset arrives, and closing the drawer in that gap asks about edits that are already saved.
+
+`<Form>` has `key={asset.id}`. When the drawer switches to another asset, the form remounts, so values of the previous asset do not leak into the next one.
+
+### Save button gating
+
+The save button is disabled when any of these is true:
+
+- `!modified`: there are no edits.
+- `isSubmitting`: the mutation is in flight.
+- The file name is empty. The check trims the value, so a name made of spaces counts as empty.
+
+```tsx
+const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
+
+<Button type="submit" disabled={!modified || isSubmitting || nameIsEmpty} />;
+```
+
+This gate is the only check on the name. The admin route `PUT /upload/files/:id` validates `name` as a nullable string, and the upload service saves any value that is not `null` or `undefined`, an empty string included.
+
+`DetailField` shows a warning icon next to an empty field, with a tooltip from the `asset-details.field.empty` translation. The icon checks the value without trimming it, so a name made of spaces disables the save button but shows no icon.
+
+---
+
+## Uploads
+
+The Media Library admin sends new files with two RTK Query mutations in [`services/api.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/services/api.ts): `uploadFiles` for files from the computer, and `uploadFromUrls` for URL imports. Both write their progress to the `uploadProgress` Redux slice, and the upload progress dialog renders it. Replacing or cropping an asset uses `replaceAsset` instead, and a cropped copy uses `uploadFileSilently`, see [Asset details drawer](./02-asset-details-drawer.md). The API slice and its cache tags are in [Data fetching](./07-data-fetching.md).
+
+```mermaid
+graph TD
+  Files["Page, media field, Blocks drop zone"] --> UF["uploadFiles"]
+  Urls["Import from URL: page, media field"] --> URL["uploadFromUrls"]
+  UF --> Merge{"Registered batch in flight?"}
+  Merge -->|no| Open["openUploadProgress: new uploadId"]
+  Merge -->|yes| Append["appendUploadFiles: add rows to the batch"]
+  Open --> Pool["runUploadPool: concurrency workers"]
+  Append --> Chain["runMergedUploadPool: run after the current pool"] --> Pool
+  Pool --> XHR["uploadFileViaXHR: one file per request"] --> Store["uploadProgress slice"]
+  XHR --> AI["generateAiMetadata, not awaited"] --> Store
+  URL -->|"new batch, then server-sent events"| Store
+  Store --> Dialog["UploadProgressDialog"]
+  Store --> Lists["Asset list and media field rows"]
+```
+
+### Entry points
+
+| Entry point                                                                                      | Code                                                                                                                                                                                | Mutation                        | Target folder        |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | -------------------- |
+| "File upload" in the **New** menu and the background context menu, and files dropped on the page | `pages/Assets/AssetsPage.tsx`, [`pages/Assets/components/DropZone/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/pages/Assets/components/DropZone) | `uploadFiles`                   | The folder on screen |
+| "File upload from URL" in the same menus                                                         | `pages/Assets/components/ImportFromUrlDialog.tsx`, `handleUrlUpload` in `AssetsPage.tsx`                                                                                            | `uploadFromUrls`                | The folder on screen |
+| Files dropped on the Blocks editor                                                               | [`components/EditorFileDropZone/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/components/EditorFileDropZone)                                      | `uploadFiles`                   | Root                 |
+| The `media` field                                                                                | [`components/MediaLibraryInput/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/components/MediaLibraryInput)                                        | `uploadFiles`, `uploadFromUrls` | Root                 |
+
+Rules that every entry point follows:
+
+- It reads `concurrentUploadRequests` from `useGetUploadSettingsQuery`, with 1 when the settings are missing, and the AI flag from `useAIMetadataEnabled()`. It passes both to `uploadFiles`, and only the AI flag to `uploadFromUrls`. A new entry point must do the same and must go through `uploadFiles`, so its files share the pool and show in the dialog.
+- For `uploadFiles`, the folder is set per file, in the `fileInfo` JSON that goes with the `files` entries of the `FormData`. `uploadFromUrls` sends one `folderId` for the whole import, and the server builds the `fileInfo` itself.
+- A drop zone activates only when `dataTransfer.types` contains `Files` on `dragenter`. The page drop zone still calls `preventDefault` on every `dragover` and `drop`. Moving assets does not reach it because it uses pointer events, not an HTML5 drag. The page drop zone is disabled without `plugin::upload.assets.create`. The Blocks drop zone shows a "no permission" frame and sets `dropEffect` to `none` while the permissions load or when the user cannot create assets.
+- `ImportFromUrlDialog` validates the input with `validateUrls` in `utils/files.ts`: at most 20 URLs, each one parsed with `new URL`. The dialog closes before the upload starts, and the progress shows in the upload progress dialog only.
+- `index.ts` registers the Blocks drop zone as the `media-library-file-drop-zone` component, only when the legacy Media Library is off. `BlocksContent.tsx` in the Content Manager renders it when it is registered and the field is not disabled, passes `allowedTypes={['images']}`, and inserts each uploaded image through `onDropFiles`.
+- The `media` field tags its rows with `owner`, set to the field name, and receives each file through `onFileUploaded`. Its own handling is in [Media field and picker](./05-media-field-and-picker.md).
+
+### One request per file
+
+`uploadFiles` takes the combined `FormData`, splits it into one entry per file, and posts each file alone to `POST /upload/files` with [`services/uploadFileViaXHR.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/services/uploadFileViaXHR.ts). It uses `XMLHttpRequest` because `fetch` does not report upload progress. One request per file also gives each file its own error, cancel and retry.
+
+- The token comes from `admin_app.token` in the store. On a 401, `uploadFileViaXHR` calls `attemptTokenRefresh` once and sends the request again.
+- An abort throws `UploadAbortedError`, except during the 401 retry: an abort there rethrows the original 401 as an `UploadFileError`, and the row ends as `error`, not `cancelled`. Any other failure throws `UploadFileError`, which keeps the status, the `name` of the Strapi error envelope as `errorName`, its `details`, and `isServerMessage`. That flag is false for the English fallback messages that the module writes itself.
+- `xhr.upload.onprogress` goes through `createRafBatcher` in `utils/createRafBatcher.ts`, so each file dispatches at most one `setFileProgress` per animation frame.
+- The response can lack the `folder` relation. `withTargetFolder` then copies the folder from the `fileInfo`, because the asset list needs it to place the new asset.
+
+#### The worker pool
+
+`runUploadPool` starts `concurrency` workers on one shared queue. A worker takes the next file as soon as its current file settles, so `concurrency` files are in flight at any time, not in waves. A value below 1 or not finite gives one worker, and the pool never starts more workers than files. A failed file does not stop the others. An abort stops the workers before they start another file.
+
+`concurrency` is `concurrentUploadRequests` from the `plugin::upload` config, which `GET /upload/settings` echoes, 1 by default. It limits the parallel requests of the browser. The server option `concurrentUploadSize` is a different setting.
+
+#### Batches and merging
+
+A batch is one `uploadId`. `openUploadProgress` replaces every row and increments `uploadId`. Each per-row action carries the `uploadId` it was sent for, and the reducers ignore those of an older batch, so a late callback cannot write to a row of a newer batch that reuses the same index. `setUploadFailed` is the exception: it carries no `uploadId` and marks every `pending` or `uploading` row of the current batch.
+
+`uploadFiles` merges into the current batch when that batch is in `uploadRegistry` and still has a `pending` or `uploading` row (`isUploadInFlight`):
+
+- `appendUploadFiles` adds rows with indices after the existing ones, and shows and expands the dialog again.
+- The new files adopt the `concurrency` and AI flag of the batch, because a new concurrency would raise the limit that the batch applies. Each file keeps its own `fileInfo`, so its folder does not change.
+- `runMergedUploadPool` chains the new run behind the current run of the batch, kept in `poolTails`. Two pools side by side would double the files in flight. The new files therefore start when the earlier run ends.
+- The merged call resolves with its own files only, not with the whole batch.
+
+A batch whose rows are all `complete`, `error` or `cancelled` is settled, and the next call replaces it. `uploadFromUrls` never registers its batch, so nothing merges with it: it always opens a new batch, and a file upload started during a URL import opens a new batch too. The requests of a replaced batch keep running, and the reducers drop their per-row updates. A replaced URL import that then fails still dispatches `setUploadFailed`, which reaches the new batch.
+
+The state that Redux cannot hold lives in module-level maps in `api.ts`: `uploadRegistry` (the `File` objects, `fileInfo`, `onUploaded` callback and flags of each batch), `abortControllers` (one per batch), `fileAbortControllers` (one per file in flight), `skippedFiles` and `poolTails`. The exported abort functions read them, because the component that cancels an upload is not the one that started it. `getUploadSourceFile` returns the original `File` of a row, for the preview in the `media` field.
+
+#### Cancel and retry
+
+The pool never marks an aborted row. Whoever aborts also dispatches the matching reducer, or the row stays `uploading` and the batch never settles.
+
+| Abort                              | Reducer                           | Effect                                                                                                                                                                                            |
+| ---------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abortUpload(uploadId)`            | `cancelUpload()`                  | Aborts the batch controller that is registered for the batch, which the file controllers of its pool listen to. Clears the skip markers of the batch, so a later retry does not skip those files. |
+| `abortUploadFile(uploadId, index)` | `cancelFile({ uploadId, index })` | Aborts the request of a file in flight. For a queued file, adds a skip marker that the worker consumes when it reaches the file.                                                                  |
+
+- `retryCancelledFiles` uploads every `cancelled` row of the current batch again, with a new batch controller and the flags of the batch. The Retry button of the dialog calls it. It does not retry `error` rows. The dialog shows Retry while any row is cancelled, even while other rows still upload. A retry then runs beside the current pool, and its controller replaces the registered one, so Cancel all no longer reaches the first pool.
+- `retryUploadFile({ uploadId, index })` puts one `cancelled` or `error` row back to `pending`, clears its skip marker, and chains the upload behind the current run, like a merge. The `media` field uses it.
+- Both read the batch from `uploadRegistry`. The `onUploaded` callback is stored with each entry, so a retried file still reaches the caller that started it. URL batches are not in the registry and cannot be retried.
+
+#### Silent uploads
+
+`uploadFileSilently` posts one file through `uploadFileViaXHR`, with no row, no dialog, no cancel, no retry and no AI metadata. `AssetDetails` uses it in `handleCropSaveAsCopy`, when the crop editor saves a cropped copy. On failure, it returns the server message only when `isServerMessage` is true, and an empty string otherwise, so the localized message of the caller wins over the English fallback.
+
+### URL imports
+
+`uploadFromUrls` sends `{ urls, folderId }` as JSON with `fetch` to `POST /upload/actions/upload-from-urls`. The server fetches the files and answers with a stream of server-sent events, which `processSSEStream` reads:
+
+| Event             | Store update                                                                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file:fetching`   | The row goes to `uploading`.                                                                                                                 |
+| `file:progress`   | `setFileProgress` with `loadedBytes`, and `totalBytes` as the row size. Ignored when `totalBytes` is `null`, so the row stays indeterminate. |
+| `file:uploading`  | The row goes to `uploading` and gets its size.                                                                                               |
+| `file:complete`   | The row goes to `complete`, then AI metadata starts.                                                                                         |
+| `file:error`      | The row goes to `error`, with `tooLarge` when the details name a size limit.                                                                 |
+| `stream:complete` | Becomes the result of the mutation when its `data` is not empty. Otherwise the mutation returns empty `data` and `errors`.                   |
+
+`uploadFromUrls` opens the batch without `fileSizes`, so the rows start at size 0, `reportsByteProgress` is false, and the dialog header uses `selectCountBasedProgress` instead of the byte-weighted `selectAggregateProgress`. The server already throttles `file:progress`, so this flow does not batch it. A failed response or a network error dispatches `setUploadFailed`, which marks every `pending` or `uploading` row as `error`. An abort returns an error and leaves the rows to `cancelUpload`. This flow does not refresh the token on a 401.
+
+### The progress store
+
+[`store/uploadProgress.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/store/uploadProgress.ts) defines the slice. `index.ts` registers it with `app.addReducers({ uploadProgress: uploadProgressReducer })`, only when the legacy Media Library is off. The readers outside the dialog, `selectCompletedUploads` and `useFieldUploads`, handle a missing slice.
+
+The slice holds the latest batch only: `uploadId`, `totalFiles`, `isVisible`, `isMinimized`, `reportsByteProgress` and one row per file. A row has a `status` (`pending`, `uploading`, `complete`, `error` or `cancelled`), `size` and `uploadedBytes`, and `file` and `completedAt` once the server has created the asset. It can also carry `error`, `tooLarge`, `metadataStatus` and `owner`. The slice also keeps an `errors` list, but no component reads it. Read the row status instead. `metadataStatus` (`generating`, `generated`, `skipped` or `failed`) is separate from `status`, so a metadata failure never turns a successful upload into an error. `undefined` means the row has no metadata phase.
+
+`uploadFiles` invalidates the `Asset` and `Folder` `LIST` tags only when the mutation resolves, at the end of the run. To show each asset as soon as it lands, `useInfiniteAssets` reads `selectCompletedUploads` and passes the completed assets of the folder on screen to `mergeUploadedAssets` in `pages/Assets/utils/mergeUploadedAssets.ts`. Only a list without a search or filters does this, because matching a filter would mean copying the server's filter rules. `mergeUploadedAssets` inserts each asset at its sort position, keeps the server copy when the list already has the id, and skips an asset that sorts after the loaded rows while more pages remain. `useInfiniteAssets` stops adding an asset once the list has data from a request that started after the upload completed, so a later delete or move does not bring it back.
+
+### The upload progress dialog
+
+[`components/UploadProgressDialog.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/UploadProgressDialog.tsx) renders the slice in the shared `Drawer` shell, described in [Asset details drawer](./02-asset-details-drawer.md). It has two gates. `index.ts` registers it as the `future-global::upload-progress` component, only when `useLegacyMediaLibrary` is off. [`packages/core/admin/admin/src/App.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/App.tsx) renders every `future-global::` component next to the route `Outlet`, also only when the flag is off. `App` is the element of the root route, so the dialog stays mounted, and keeps reporting, when the user leaves the Media Library page.
+
+- **Cancel all** shows until every row has settled. It calls `abortUpload`, then dispatches `cancelUpload`. **Retry** shows while any row is `cancelled`.
+- **Minimize** dispatches `toggleMinimize`, which collapses the file list and keeps the header. A new batch or a merge expands the dialog again.
+- **Close** shows only once every row has settled. It dispatches `closeUploadProgress`, which hides the dialog and empties the rows and `errors`. It keeps `uploadId` and does not call `abortUpload`. Escape closes the dialog the same way, even while files upload, because `Drawer.Root` turns any Radix close into `onClose` and the dialog does not veto Escape. The requests then keep running, and their updates find no row. The `media` field hides the rows it started as `cancelled`, but the files still upload and `onFileUploaded` still attaches them to the field.
+
+The header shows a failed state only when every row failed. A settled batch with at least one uploaded file and no cancelled row shows success, with the count of failed files. A row bar is determinate only while `uploadedBytes` is between 0 and `size`. At 100% the row is still `uploading`, because the server has not answered yet, so the bar goes back to indeterminate. A visually hidden `aria-live="polite"` region announces each failed row with its cause only.
+
+### AI metadata after upload
+
+[`hooks/useAIMetadataEnabled.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/hooks/useAIMetadataEnabled.ts) decides whether a batch generates metadata. With no argument, it is true when `useAIMetadataAvailability` reports a registered provider (`aiMetadataAvailable` in the settings response) and the stored `aiMetadata` setting is on. Without `plugin::upload.read`, the settings query is skipped and the hook returns false. `AssetActions.tsx` and `AssetDetailsDrawer.tsx` pass `{ mime }`, which also requires a supported image type. Upload callers pass the result as `generateAiMetadata`. The batch stores it, and merges and retries reuse it.
+
+- When a file completes, in either flow, `maybeGenerateMetadata` sets the row to `generating` and dispatches `generateAiMetadata` for that one file id. It does not await the result: generation overlaps the next upload, and a generation failure cannot fail the upload.
+- Every uploaded file is sent. The server answers per file with `success`, `skipped` for a file that is not an image format the provider supports, or `error`. These map to `generated`, `skipped` and `failed`. A rejected request or a missing result also gives `failed`.
+- The icon and the subline of a completed row follow `metadataStatus`. `failed` shows a warning, not an error. The header shows a metadata percentage while the phase runs, then a summary only when at least one file got metadata.
+- `generateAiMetadata` invalidates the `Asset` tag of each file and the `Asset` `LIST` tag, so subscribed queries refetch the new alternative text and caption.
+
+### Size and type errors
+
+The admin does not check file sizes before it sends them. The server rejects a file that is too large, see [Size limits](../index.md#size-limits). [`utils/getUploadTooLargeError.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/getUploadTooLargeError.ts) reads the rejection from an `UploadFileError`, an RTK Query error, or the `details` of a `file:error` event:
+
+| Reason         | When                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `requestLimit` | `details.code` is `FileTooBig`: `formidable.maxFileSize` on `strapi::body`.                                               |
+| `sizeLimit`    | `details.code` is `SizeLimitExceeded`: `upload.config.sizeLimit`, or the deprecated setting that `details.setting` names. |
+| `external`     | A 413 that is not a Strapi `PayloadTooLargeError`: a limit in front of Strapi.                                            |
+
+The result is plain data, so it sits on the row as `tooLarge`. [`components/UploadTooLargeMessage.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/UploadTooLargeMessage.tsx) renders the cause and a hint for developers that names the setting as inline code. The live region announces the cause only. The replace flows in `AssetActions.tsx` and `AssetDetailsDrawer.tsx` use the same helpers. Other row errors go through `useApiErrorMessage`: the `upload.apiError.<message>` translation when it exists, the message itself otherwise, and a generic message when the row has none.
+
+Two helpers check a MIME type against the `allowedTypes` of a field. Both look at the part before the `/`, and `files` covers everything that is not an image, a video or an audio file. They differ on a missing MIME type: `isMediaTypeAllowed` accepts it where `files` is allowed, and `isAllowedAssetType` rejects it whenever the field restricts types.
+
+- `filterAllowedFiles` and `isMediaTypeAllowed` in [`utils/allowedMediaTypes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/allowedMediaTypes.ts) filter browser files before upload. The `media` field also runs `isMediaTypeAllowed` on the assets that a URL import returns. The `media` field and the Blocks drop zone use them and show a notification for the rejected files, which never reach `uploadFiles`. The Media Library page sends every file, and the server validates the type, see [MIME type validation](../01-backend/01-mime-validation.md).
+- `isAllowedAssetType` in [`utils/isAllowedAssetType.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/isAllowedAssetType.ts) checks existing assets in the picker.
+
+### Related
+
+- [Data fetching](./07-data-fetching.md): the API slice, the cache tags, and why `generateAiMetadata` is defined in `api.ts`.
+- [Media field and picker](./05-media-field-and-picker.md): `useFieldUploads` and the upload rows of the field.
+- [Asset list](./01-asset-list.md): infinite loading, which receives the completed uploads.
+- [Testing](./08-testing.md): the tests of the pool and the requests are in `services/tests/`, of the slice in `store/tests/`, and of the dialog in `components/tests/`.
+
+---
+
+## Media field and picker
+
+Two Media Library surfaces live inside other parts of the admin. [`index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/index.ts) registers both:
+
+- `MediaLibraryInput`, in [`components/MediaLibraryInput/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/components/MediaLibraryInput), is the input of the `media` field type, registered with `app.addFields({ type: 'media' })`. The Content Manager edit view renders it.
+- `MediaLibraryPickerDialog`, in [`components/AssetPickerDialog/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/components/AssetPickerDialog), is the `media-library` component, registered with `app.addComponents`. The Wysiwyg and Blocks editors render it to insert assets.
+
+Both browse the library with `AssetPickerDialog`. They replace `legacy/components/MediaLibraryInput/` and `legacy/components/MediaLibraryDialog/`. The `useLegacyMediaLibrary` flag selects which pair is registered, see [Overview](./00-overview.md).
+
+### The media field
+
+#### Props and value
+
+`MediaLibraryInputProps` declares `name`, `label`, `labelAction`, `hint`, `required`, `disabled`, `attribute`, whose `allowedTypes` and `multiple` shape the field, and `layoutSize`. The `InputRenderer.tsx` of the Content Manager passes `layoutSize`, the width of the field in the edit layout, out of 12. The legacy input takes the same props without `layoutSize`.
+
+The value comes from `useField<File | File[] | null>(name)`. It holds whole file objects. The input reads it as an array and writes it back with `setAssets`: a multiple field stores an array, or `null` when it is empty, and a single field stores the first file, or `null`. Write every change through `setAssets`, so the stored shape stays the same. The field itself never reorders its assets. The order changes only in the picker, see [Reordering](#reordering).
+
+#### What the field renders
+
+- **Empty**, with no asset and no upload row, failed rows included: an `AssetDropZone` of variant `bar`.
+- **Single field**: an `AssetRow` with a thumbnail, the name, and buttons to copy the link, edit and remove. While an upload of the field is in progress or failed, `UploadRow` takes its place until the upload lands or the user removes it. There is no drop zone once the field holds an asset. The user replaces it through the add menu.
+- **Multiple field**: an `AssetCarousel` with one `AssetCard` per asset, one `UploadCard` per upload, and a drop tile. `getRowLayout` sets the number of cards from `layoutSize`: one card stacked over the drop zone at 4 or less, one card beside the tile below 12, two cards at 12. On mobile it shows one card, and below the `small` breakpoint the drop zone goes under it. The measured width of the row can only lower the count. Arrows page through the cards. When the number of cards grows, the row pages to the end, so a new upload is in view.
+
+`AssetPreview` uses the `thumbnail` format in a row and the `small` format in a card. It appends `updatedAt` to the URL, so a replaced asset does not show its old image. It skips this on signed URLs (`isUrlSigned`), where an extra parameter breaks the signature. `UploadPreview` shows an image that is still uploading through an object URL of the local file.
+
+The design system paints a disabled button as a bordered grey plate. [`FieldControls.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/MediaLibraryInput/FieldControls.tsx) holds `GhostIconButton` and `FieldMenuItem`, which keep disabled controls as grey icons and labels. When the field is disabled, edit, remove, retry, the add menu and the drop zone are disabled. Copy link and cancel upload stay enabled.
+
+#### Permissions
+
+The field reads its flags from `useMediaLibraryPermissions`:
+
+- **Browse library** needs read access. **Upload from device** and **Upload from URL** need `canCreate`. The add menu hides each entry without its permission, and hides itself when no entry is left.
+- While the permissions load, every entry shows, disabled, so the menu does not change size when they settle. Drops and device uploads also wait: `canUpload` is `!isLoading && canCreate`, and the drop zone is disabled otherwise.
+- Edit needs read access, because the drawer fetches the asset with `useGetAssetQuery`. Without it, the row and the card render no edit control.
+
+#### The add menu and the drop zone
+
+`AddAssetMenu` sits on the label row with three entries:
+
+- **Browse library** opens `AssetPickerDialog` with the assets of the field as the initial selection. On confirm, `handleSelect` writes the selection to the field.
+- **Upload from device** clicks a hidden `<input type="file">` whose `multiple` attribute follows the field. `handleFileInputChange` copies `event.target.files` before it resets `value`, because the `FileList` is live and the reset empties it. The reset lets the user pick the same file twice in a row.
+- **Upload from URL** opens `ImportFromUrlDialog` from `pages/Assets/components/`.
+
+`AssetDropZone` only takes drops. A click on it does nothing. It counts `dragenter` and `dragleave` pairs, because drag events also fire on its children and a boolean would flicker. A drag that carries no files does not highlight it. Each media field renders its own zone, so the field does not use the page's `UploadDropZoneProvider`.
+
+#### Files coming in
+
+`handleUpload` (drops and device files) and `handleUrlUpload` apply these rules:
+
+- A single field refuses a batch of more than one file or URL, and uploads nothing. The count is taken before type filtering, so the field never keeps one file of several without saying which. The device input cannot produce such a batch, so the rule applies to drops and URLs.
+- `filterAllowedFiles` from [`utils/allowedMediaTypes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/allowedMediaTypes.ts) drops the files outside `allowedTypes`. When none is left, a notification names the accepted types. When some are left, they upload and the same notification shows.
+- For URLs, the server fetches the files, so their type is known only after the upload. Files outside `allowedTypes` stay in the library and are left off the field, and a warning names them. A single field takes the first accepted file. Request errors show in the upload progress dialog.
+- Uploads go to the root of the library: `UPLOAD_FOLDER_ID` is `null`, because an entry form has no current folder.
+
+#### Uploads started from the field
+
+`startUpload` calls `uploadFiles` (see [Uploads](./04-uploads.md)) with the `concurrentUploadRequests` setting as `concurrency` (1 while the settings are unknown), and with two field-specific arguments:
+
+- `owner: name` tags the rows of the field in the progress store. [`useFieldUploads.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/MediaLibraryInput/useFieldUploads.ts) reads the rows of its owner, so the field and the progress dialog show the same state. The store only holds the latest batch, and closing the dialog empties it, so the hook remembers each row once seen. A failed upload stays on the field until the user retries or removes it. A row that leaves the store while in flight is treated as cancelled and disappears from the field, but its request is not aborted: the file still uploads, and `onFileUploaded` still attaches it. A completed row leaves the list.
+- `onFileUploaded: attachUploadedFile` puts each file on the field as it lands. The upload service stores the callback with each file of the batch, so it also runs for a retry in place.
+
+Retry works in place with `retryUploadFile` while the store still holds the row. After that, the field starts a new upload of the source file, if `getUploadSourceFile` still has it. The retry button only shows when one of the two is possible. URL imports pass no `owner`, so they show no row on the field.
+
+`attachUploadedFile` runs when an upload ends, which can be after the input unmounted. It never relies on the value of a render:
+
+- It reads the current value with `getValues` from `useForm` and writes with the `onChange` of the field. Both belong to the form, not to the input.
+- `Form.tsx` updates the ref behind `getValues` during render, so `getValues` returns a new value only after the form renders. Two files can land before that. `unrenderedWrites`, a module-level `WeakMap` keyed by `getValues` and then by field name, keeps the last write and the value it was based on, so the second file does not overwrite the first.
+- A multiple field appends the file. A single field replaces its asset.
+
+`handleAssetChange`, `handleAssetDelete` and `handleUrlUpload` also resume after a request. They read `assetsRef`, the value of the latest render, instead of the `assets` of the render that started them.
+
+#### Editing an asset
+
+The edit control opens `AssetDetailsDrawer`, described in [Asset details drawer](./02-asset-details-drawer.md). The open asset is local state, `editedAssetId`. `handleAssetChange` puts the server's copy of a changed asset on the field, and `handleAssetDelete` removes a deleted asset. A crop saved as a copy leaves the field as it is, because the original asset did not change.
+
+Only one media field at a time can have its drawer open. [`openAssetDetails.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/MediaLibraryInput/openAssetDetails.ts) keeps a module-level set of the fields with an open drawer. `handleEdit` and the add menu (`preventOpen`) do nothing while the set is not empty, because the press that would open them is the press that closes the other drawer. See [One drawer across media fields](./02-asset-details-drawer.md#one-drawer-across-media-fields).
+
+#### Tracking location
+
+The field tags its events with `location: 'content-manager'` (`CONTENT_MANAGER_LOCATION`): `didSelectFile`, `willAddMediaLibraryAssets`, and the drawer events through the `trackedLocation` prop. The Media Library page uses `MEDIA_LIBRARY_LOCATION` (`'upload'`) from `hooks/useTracking.ts`. The value tells events of the field apart from events of the page, so set it on every new event of the field.
+
+The list controls that the picker reuses (`AssetsSearchInput`, `FilterMenu`, `SortMenu`) hard-code `MEDIA_LIBRARY_LOCATION`. Search, filter and sort events from the picker therefore report `'upload'`. The legacy picker reported `'content-manager'` for them.
+
+### The picker dialog
+
+[`AssetPickerDialog.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/AssetPickerDialog/AssetPickerDialog.tsx) takes `open`, `onClose`, `title`, `initialSelection`, `multiple` (false by default), `allowedTypes` and `onConfirm`. `onConfirm` receives the selection as an array, in order, even for a single field. The dialog has two tabs, **Browse assets** and **Selected assets** with a count, and always opens on Browse.
+
+#### How it reuses the Media Library list
+
+The providers sit inside the modal content, and both hosts mount the dialog only while it is open, so each opening starts with a fresh list and selection. From the outside in:
+
+1. `ReadAccessGate`: without read access, it shows `Page.NoPermissions` and mounts nothing that fetches.
+2. `ListQueryStateProvider`: keeps the list query in memory, see the next section.
+3. `ListSettingsProvider`: `showItemActions: false` removes the context menu and the bulk actions bar, because the picker is for choosing assets, not for moving or deleting them. It also sets a narrower `gridMinTileWidth` and turns on the section headings and the grid select-all.
+4. `PickerSelectionRoot`: calls `useAssetsList()` once and shares the result through `AssetsListContext`. `PickerSelectionProvider` needs the loaded assets to resolve a picked key to a file, and the Browse tab renders them.
+
+The Browse tab renders the toolbar parts of the page and `AssetsView`. It passes `onAssetItemClick={toggleAsset}`, so a plain click picks an asset instead of opening the drawer, and `canAddAssets={false}`, so the empty state offers no upload. The grid or table choice uses the same `localStorageKeys.view` key as the page.
+
+#### List state lives in memory
+
+The picker opens over an entry edit view. If it wrote the folder, search, filters and sort to the URL, it would change the URL of the entry. `ListQueryStateProvider` keeps that query in React state instead, and every list hook reads it through [`useListQueryParams`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/hooks/useListQueryParams.ts). The memory store parses and stringifies with `qs`, like the URL, so values that callers encode first read back the same. It ignores the `replace` argument, since memory has no history.
+
+A new list hook must use `useListQueryParams`. A hook that calls `useQueryParams` directly writes to the entry URL when the picker renders it. [Asset list](./01-asset-list.md#list-state) describes the list state and its encoding rules.
+
+#### Selection rules
+
+[`PickerSelectionProvider.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/AssetPickerDialog/PickerSelectionProvider.tsx) provides `AssetSelectionContext` with the same `AssetSelection` interface as the page (see [Asset list](./01-asset-list.md)), so `AssetsGrid` and `AssetsTable` work unchanged. The rules:
+
+- The selection is the value the field will hold: whole `File` objects, in order ([`pickerSelection.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/AssetPickerDialog/pickerSelection.ts)). It starts with what the field holds, and new picks are appended in click order. A picked key is resolved against the loaded assets and the current selection.
+- Only assets take part. A folder key is `hidden`, so folders show no checkbox.
+- An asset outside `allowedTypes` is `disabled`, unless it is already selected. An asset the field already holds stays removable, for example after the schema was narrowed.
+- In a single field, a new pick replaces the selection, and select-all is off (`canSelectAll` is `multiple`). Shift+click (`selectRange`) toggles only the target.
+- Nothing in the picker clears the selection, so it survives folder changes, search, filters and sort.
+- **Confirm** is disabled while the selection has the same ids in the same order as `initialSelection` (`isSameSelection`). Confirming an empty selection clears the field.
+
+Two helpers implement `allowedTypes`. The picker uses `isAllowedAssetType` from `utils/isAllowedAssetType.ts`, and the field checks incoming files with `isMediaTypeAllowed` from `utils/allowedMediaTypes.ts`. Both read the MIME family before the `/`, treat `files` as everything that is not an image, a video or an audio file, and allow everything when `allowedTypes` is empty. They differ on a file with no MIME type: `isMediaTypeAllowed` accepts it where `files` is allowed, `isAllowedAssetType` rejects it. Change both together.
+
+#### Reordering
+
+Reordering happens only on the Selected tab, which is always a grid. The order on this tab is the order the field will hold. [`SortableSelection.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/AssetPickerDialog/SortableSelection.tsx) wraps `AssetsGrid` in a dnd-kit `DndContext` and provides `usePickerSortableAsset` through `AssetSortableContext`.
+
+- A pointer drag starts anywhere on the item after 8px of travel, so a click still picks or unpicks it. The keyboard starts a drag from the grip.
+- The pointer release that ends a drag also fires a click, which would unpick the item. `swallowNextClick` swallows that click after a drop, and after a pointer drag cancelled with Escape.
+- Radix listens for Escape on the document in the capture phase, so it would close the dialog during a drag. `onReorderingChange` sets `isReorderingRef` in the dialog, and `onEscapeKeyDown` keeps the dialog open while it is set.
+
+#### Folder breadcrumbs
+
+[`FolderBreadcrumbs.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/AssetPickerDialog/FolderBreadcrumbs.tsx) shows Home, the ancestors and the current folder, from `useGetFolderStructureQuery`. It renders in the fixed header above the scrolling list, only inside a folder, and not while the search covers all media, because those results are not in the folder. Past three folders, the middle ones collapse into a `CrumbSimpleMenu`. The crumbs are `<button>` elements: the design system `CrumbLink` renders an anchor, and an anchor without `href` is not a button and not reachable with Tab. When the tree does not hold the folder, the trail renders nothing, and `useAssetsList` sends the list back to the root once the folder request returns a `NotFoundError`.
+
+### The editors' contract
+
+[`MediaLibraryPickerDialog.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/components/AssetPickerDialog/MediaLibraryPickerDialog.tsx) adapts the `media-library` props to `AssetPickerDialog`. Its props have the same names as `MediaLibraryDialogProps` of the legacy dialog: `allowedTypes`, `multiple` (true by default), `initiallySelectedAssets`, `onClose` and `onSelectAssets`. The title is a generic "Add assets", because the editors pass no field label.
+
+- The host opens the dialog by mounting it and closes it by unmounting it. The component always renders its modal open.
+- Cancel and Escape call `onClose`.
+- Confirm calls `onSelectAssets` with an array of files and does not call `onClose`. The host closes the dialog itself.
+
+The flag swaps the legacy dialog in under the same callers, so keep this contract compatible with it. The callers in `@strapi/content-manager` read the component with `useStrapiApp('ImageDialog', (state) => state.components)`:
+
+- [`Wysiwyg/Field.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/pages/EditView/components/FormInputs/Wysiwyg/Field.tsx) passes only `onClose` and `onSelectAssets`, so the picker allows several assets of any type. `insertFile` in `Wysiwyg/utils/utils.ts` writes `![alt](url)` for an image and `[alt](url)` for another file. The alt text falls back to the file name, and the URL gets the backend URL prefix. Then the field hides the dialog.
+- `ImageDialog` in [`BlocksInput/Blocks/Image.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/pages/EditView/components/FormInputs/BlocksInput/Blocks/Image.tsx) passes `allowedTypes={['images']}`. `toBlockImage` keeps the fields of the image schema, falls back to the name for the alt text and prefixes the URL. The images go relative to where the caret was when the dialog opened: they replace that block when it is empty, and go below its top-level block otherwise. A Slate `RangeRef` keeps that position, because the editor can lose its selection while the dialog is open.
+
+Neither caller passes `initiallySelectedAssets`, so **Confirm** stays disabled until the user picks an asset.
+
+### Related
+
+- [Overview](./00-overview.md): the `useLegacyMediaLibrary` switch and the legacy tree.
+- [Asset list](./01-asset-list.md): list state, search and selection on the page.
+- [Asset details drawer](./02-asset-details-drawer.md): the drawer that the field opens.
+- [Uploads](./04-uploads.md): the upload pipeline and the progress store.
+- [Data fetching](./07-data-fetching.md): the endpoints behind the list and the uploads.
+- [Testing](./08-testing.md): unit tests, and the `MediaField.ts` page object for the field.
+
+---
+
+## Drag and drop
+
+On the Media Library page, a user moves assets and folders by dragging them onto a folder. The code is in [`pages/Assets/components/Dnd/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/pages/Assets/components/Dnd). [`AssetsDndProvider.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/components/Dnd/AssetsDndProvider.tsx) owns the `DndContext`. `AssetsPage.tsx` mounts it around both the sidebar folder tree and the list, so a drag can start in the list and end in the tree.
+
+The media field picker reuses the list components without this provider. `useFileDraggable` and `useFolderDraggableDroppable` in `Dnd/useAssetDnd.ts` then disable dragging and withhold the drag attributes and listeners, because nothing would handle the drop. The reordering in the Selected tab of the picker uses its own `DndContext` (see [Media field and picker](./05-media-field-and-picker.md)).
+
+### Library and sensors
+
+The page uses `@dnd-kit/core` and the `snapCenterToCursor` modifier of `@dnd-kit/modifiers`.
+
+- **One `PointerSensor`** with `activationConstraint: { distance: 8 }`. A press that moves less than 8px stays a click, so a click still opens an asset or enters a folder. The sensor starts only on the primary button. Escape cancels a drag in progress.
+- **`pointerWithin`** collision detection: the drop target is the droppable under the pointer, not the one that the dragged rectangle overlaps most.
+- **Move permission**: moving needs `canUpdate` from `useMediaLibraryPermissions`, which is the `plugin::upload.assets.update` action. The bulk move route requires the same action. Without it, the activation distance becomes `DRAG_DISABLED_DISTANCE` (`Number.MAX_SAFE_INTEGER`), which no gesture reaches. Do not remove the sensor instead. `canUpdate` is false until the RBAC check resolves, so its value changes after the first render. `useSensors` uses its arguments as the dependency list of a `useMemo`, so React reports an error when their number changes between renders. A conditional `useSensor` call would also break the rules of hooks.
+- **One move at a time**: while the `bulkMove` mutation runs, `isMovePending` is true. Every draggable and droppable is disabled. Cards, rows and tree rows get `pointer-events: none` and the `wait` cursor. `handleDragEnd` also returns early.
+
+### What gets dragged
+
+`buildDragSet` in `Dnd/buildDragSet.ts` computes the drag set at drag start, and the move uses that set:
+
+- If the grabbed item is not selected, only that item moves. The selection does not change.
+- If the grabbed item is selected, the whole selection moves (`fromSelection`). The provider clears the selection after a successful move. A cancelled drag or a failed move keeps it.
+
+Each item is a `DragItemData` from [`types/dnd.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/types/dnd.ts): a file with its `folderId`, or a folder with its `parentId`. The grabbed item takes its location from its own row. The other selected items take it from `locations`, an `ItemLocations` lookup that `AssetsPage` builds from the loaded rows with `buildItemLocations` in [`utils/itemLocations.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/itemLocations.ts). The folder currently open is not a valid stand-in, because a search across folders returns items from anywhere. `locateItem` falls back to the open folder only for an id that is not in the loaded rows. In the lookup, `undefined` means "not loaded" and `null` means "at the root". Keep them apart. The selected items other than the grabbed one have an empty `name`, because validation does not need it.
+
+#### The drag overlay
+
+`DragOverlay` renders `DragOverlayChip` (`data-testid="drag-overlay-chip"`). For one item, the chip shows its icon and name. For several, it shows a count per kind and a total badge. The grabbed item stays in place at 40% opacity.
+
+`snapCenterToCursor` centers the chip on the pointer. Without it, the overlay starts at the top-left corner of the dragged node, so the chip trails the cursor by the distance from that corner to the grab point. On a wide table row, that distance is large. `dropAnimation` is `null`, so the chip disappears on drop instead of animating back.
+
+### Drop targets
+
+| Target                                   | Hook                                     | dnd-kit id                     | Destination       |
+| ---------------------------------------- | ---------------------------------------- | ------------------------------ | ----------------- |
+| Folder card (grid) or folder row (table) | `useFolderDraggableDroppable`            | `folder-target:<id>`           | That folder       |
+| Folder row of the sidebar tree           | `useFolderTreeDroppable`                 | `folder-tree-target:<id>`      | That folder       |
+| Home row of the sidebar tree             | `useFolderTreeDroppable` with `id: null` | `folder-tree-target:home`      | The root (`null`) |
+| "N parent folders" row of the tree       | `useDroppable` in `CollapsedAncestors`   | `folder-tree-summary:<rootId>` | None              |
+
+`Dnd/dndIds.ts` builds and parses these ids. `resolveDestination` in the provider parses only `folder-target` and `folder-tree-target` ids, so a drop on the summary row moves nothing. That row is a droppable only so that hovering it opens it. Without it, the folders it hides could not be reached during a drag. The list itself has no root target, so a drag to the root goes through Home.
+
+Hovering a collapsed tree folder that has subfolders for `SPRING_LOAD_DELAY_MS` (600 ms) expands it, through `useSpringLoadedExpand` in [`FolderTree/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/pages/Assets/components/FolderTree). The summary row opens the same way. A valid target gets a dashed highlight. An invalid target gets `cursor: not-allowed` and no highlight.
+
+### Drop rules
+
+[`canDropItemOnFolder`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/utils/canDropItemOnFolder.ts) decides every drop. A folder target is valid when all of these hold:
+
+- The drag set is not empty.
+- No dragged folder is the target, and the target is not a descendant of a dragged folder. `isFolderDescendantOf` walks the tree from `getFolderStructure`.
+- No item already lives in the target. One item that would not move blocks the whole drop.
+
+The root is valid when at least one item is not already at the root.
+
+`computeValidDropTargets` evaluates the predicate once per drag set, for the root and for every folder of the structure, and returns a `Set`. Each droppable reads `isValidDropTarget(id)` from the context, so hovering does not walk the tree. `handleDragEnd` runs `canDropItemOnFolder` again before it sends the request, so the highlight is not the guard.
+
+`BulkMoveDialog` filters its destinations with the same predicate, and `buildDragSetFromSelection` in `utils/buildDragSetFromSelection.ts` turns a selection into the same `DragItemData[]`. A change to `canDropItemOnFolder` applies to both paths. Do not add a rule to only one of them.
+
+The client checks neither permissions per target (a TODO in `canDropItemOnFolder.ts`) nor name collisions. On the server, `validateMoveManyFoldersFiles` in [`controllers/validation/admin/folder-file.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/server/src/controllers/validation/admin/folder-file.ts) checks that the destination exists, that no moved folder has the name of a folder in the destination, and that no folder moves into itself or a descendant.
+
+### The move request
+
+`buildBulkMovePayload` splits the drag set into file ids and folder ids. The `bulkMove` mutation in [`services/folders.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/services/folders.ts) sends one `POST /upload/actions/bulk-move` request for the whole set:
+
+```json
+{ "fileIds": [12], "folderIds": [3], "destinationFolderId": 7 }
+```
+
+A `destinationFolderId` of `null` moves the items to the root.
+
+### Internal drags and file uploads
+
+The upload drop zone in [`DropZone/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/pages/Assets/components/DropZone) listens to HTML5 drag events. dnd-kit uses pointer events. These checks keep the two apart:
+
+- An internal drag starts no HTML5 drag. Asset cards and table rows cancel `dragstart`, the grid thumbnails set `draggable={false}`, and the pointer sensor cancels `dragstart` on the window while a press is pending or active. The drop zone receives no `dragenter` from it.
+- `UploadDropZoneProvider` ignores a `dragenter` whose `dataTransfer.types` does not include `Files`, such as text dragged from another page.
+- `DropZoneWithOverlay` and `DropFilesMessage` hide while `isInternalDragActive` from `useAssetsDndOptional()` is true.
+
+Without the `assets.create` permission, the zone is `disabled` and never shows. [Uploads](./04-uploads.md) covers what a file drop does.
+
+### Keyboard and screen readers
+
+There is no `KeyboardSensor`. Its default keys are Space and Enter, and the cards and rows already use Space to toggle the selection and Enter to open the asset or folder. The keyboard path is the move dialog:
+
+1. Focus an item and press Space to select it (see [Asset list](./01-asset-list.md)).
+2. Press the Move button of the bulk actions bar. It opens [`BulkMoveDialog`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/pages/Assets/components/BulkMoveDialog.tsx).
+
+The "Move to folder" item in the actions menu of one asset or folder opens the same dialog. The dialog lists destinations by their full path and filters them with `canDropItemOnFolder`, so the [drop rules](#drop-rules) apply. A folder where any selected item already lives is left out, even if other items would move there.
+
+`BulkMoveDialog` does not check permissions. Its callers do: the bulk actions bar renders nothing without `canUpdate`, and the asset actions show Move only with it. Without `canUpdate`, `AssetsPage` also disables the selection. `FolderActions.tsx` does not gate Move yet, and a TODO there tracks it. The server enforces the permission in every case.
+
+`AssetsDndProvider` passes `announcements` to `DndContext` through its `accessibility` prop. The drop announcement builds the drag set again from the selection at drop time:
+
+| Event                            | Announcement                                  |
+| -------------------------------- | --------------------------------------------- |
+| Drag start                       | "Picked up {name}. Drop on a folder to move." |
+| Drag over                        | Nothing                                       |
+| Drop on an invalid target        | "Cannot move item to this folder."            |
+| Drop outside a target, or cancel | "Drag cancelled."                             |
+| Drop on a valid target           | Nothing, because the request has not run yet  |
+| Drop on the summary row          | Nothing                                       |
+
+The result of the move goes to a separate `aria-live="polite"` region in the provider. `announceToLiveRegion` empties the region and writes the message on the next animation frame, so the same message twice in a row is still a change that screen readers announce.
+
+The cards and rows spread the dnd-kit `attributes`, then override `role` and `tabIndex`. They keep `aria-roledescription="draggable"` and an `aria-describedby` that points to the default dnd-kit instructions, which describe a drag with the Space key. The provider does not pass `screenReaderInstructions`.
+
+### After a move
+
+On success, the provider shows a `toggleNotification` toast and announces the same text. `formatMoveSuccessMessage` builds it, for example "2 elements have been moved from Images to Archive". The source is the folder of the grabbed item, not the folder currently open. When the set comes from several folders (`spansMultipleSources`, computed with `sourceFolderIdOf` from `utils/itemSource.ts`), the message leaves out the source: "2 elements have been moved to Archive". The drag path names folders by their own name with `getFolderLabel`. It names the root with the `plugin.name` message (Media Library), not with the Home label of the tree. `BulkMoveDialog` also builds its message with `formatMoveSuccessMessage`, but does not use `getFolderLabel`: it takes the source name from `getFolder` and the destination from the label of its option, which is the full path.
+
+On failure, the toast shows the server message, or "An error occurred while moving the items." when there is none. The live region announces "Move failed." followed by that message.
+
+`bulkMove` invalidates the asset list, the folder lists and the folder structure, so the list, the tree and the valid targets refresh (see [Data fetching](./07-data-fetching.md)).
+
+### Tests
+
+Unit tests are in `Dnd/tests/`, `FolderTree/tests/` and `utils/tests/`. The e2e specs are in [`tests/e2e/tests/media-library/`](https://github.com/strapi/strapi/tree/develop/tests/e2e/tests/media-library):
+
+- `drag-drop-shallow.spec.ts`: files and folders onto folders in both views, a folder onto itself, the success toast, and the chip centered under the pointer within 1px.
+- `drag-drop-deep.spec.ts`: the sidebar targets, spring-loading, a folder hidden behind the summary row, Home, the descendant guard, and a mixed selection that clears after the move.
+- `bulk-move.spec.ts`: the move dialog.
+
+The helpers are in `page-objects/AssetsPage.ts`: `dragItemToFolder`, `dragItemToTreeFolder`, `dragItemToHome`, `dragFolderToSelf`, `grabItemAndHold`, and `springLoadFolder` or `springLoadOnto` followed by `dropDraggedItemOn`. They drive `page.mouse`. The drag helpers press at the center of the item and move 12px to pass the 8px activation distance before going anywhere else. If you raise the activation distance, update that first step. `dropDraggedItemOn` only finishes a drag that a hold or spring-load helper started. `waitForMoveSuccess` waits for a notification that contains "been moved". See [Testing](./08-testing.md) for how to run the suites.
+
+---
+
+## Data fetching
+
+The Media Library admin fetches data with RTK Query. The endpoints are in [`services/`](https://github.com/strapi/strapi/tree/develop/packages/core/upload/admin/src/services).
+
+### One API slice
+
+[`services/api.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/services/api.ts) builds `uploadApi` from the `adminApi` slice of `@strapi/admin`:
+
+```ts
+const uploadApi = adminApi
+  .enhanceEndpoints({ addTagTypes: ['Asset', 'Folder'] })
+  .injectEndpoints({ endpoints: (builder) => ({ ... }) });
+```
+
+`assets.ts`, `folders.ts` and `settings.ts` inject their endpoints into `uploadApi`. Add new endpoints the same way. Do not call `createApi`: a separate slice has its own cache, so its mutations cannot invalidate the queries of `uploadApi`.
+
+An endpoint that the upload flows in `api.ts` dispatch with `initiate()` must live in `api.ts`. `assets.ts` already imports from `api.ts`, so defining it in `assets.ts` would create a circular import. `generateAiMetadata` is defined in `api.ts` for this reason, and `assets.ts` re-exports its hook.
+
+### Endpoint names are global
+
+Every plugin injects its endpoints into the same `adminApi`. The slice has one registry of endpoints, keyed by name. `injectEndpoints` keeps the first endpoint registered under a name and ignores the next ones. Development builds log an error for the duplicate, production builds ignore it silently.
+
+The i18n plugin registers `getSettings`. For that reason, the Media Library endpoint is `getUploadSettings`. With the generic name, the hook could resolve to the i18n endpoint, depending on the order in which the modules load. Give new endpoints a name that includes their resource.
+
+### Cache tags
+
+| Tag                                   | Provided by                                       | Invalidate it when                                                     |
+| ------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------- |
+| `{ type: 'Asset', id }`               | `getAsset`, and each item of `getAssets`          | The asset changes.                                                     |
+| `{ type: 'Asset', id: 'LIST' }`       | `getAssets`                                       | A list of assets can change: upload, update, replace, move or delete.  |
+| `{ type: 'Folder', id }`              | `getFolders`, `getAllFolders` and `getFolder`     | The folder changes.                                                    |
+| `{ type: 'Folder', id: 'LIST' }`      | `getFolders`, `getAllFolders` and `getFolder`     | A list of folders changes, or the number of files in a folder changes. |
+| `{ type: 'Folder', id: 'STRUCTURE' }` | `getFolderStructure` (`/upload/folder-structure`) | A folder is created, renamed, moved or deleted.                        |
+
+Two rules are easy to miss:
+
+- Uploading, moving or deleting an asset changes the file count of a folder. Invalidate `{ type: 'Folder', id: 'LIST' }` too. Every upload mutation in `api.ts` does. `getFolder` also provides the `LIST` tag for this reason, so a mutation does not need the id of the folder.
+- `getFolderStructure` only has the `STRUCTURE` tag. The folder tree in the sidebar, the bulk move dialog, drag and drop, and the folder breadcrumbs of the picker read it. A mutation that changes folders and does not invalidate it leaves old folders in all of them.
+
+Inside a `map`, write the tag type with `as const`, for example `{ type: 'Asset' as const, id }`. Without it, TypeScript widens the type to `string`, which is not a valid tag type.
+
+### The `File` name clash
+
+`shared/contracts/files.ts` exports a `File` type for the file entity. `services/assets.ts` and `services/uploadFileViaXHR.ts` import it as `File`, which shadows the browser `File` in those modules. There, type a browser file as `globalThis.File`, as `ReplaceAssetArgs` in `services/assets.ts` does. `services/api.ts` avoids the clash another way: it imports the contract type as `UploadedFile`.
+
+### Uploads
+
+- `updateAsset` and `replaceAsset` in `services/assets.ts` build a `FormData` in `query` and use the default base query. They send one request and need no progress.
+- `uploadFiles`, `uploadFromUrls`, `uploadFileSilently`, `retryCancelledFiles` and `retryUploadFile` in `services/api.ts` use a `queryFn` instead. They send one XHR request per file, or read a stream of server-sent events for URL imports. All but `uploadFileSilently` report progress to the `uploadProgress` slice. [Uploads](./04-uploads.md) describes them.
+
+---
+
+## Testing(02-admin)
+
+### Unit tests
+
+Unit tests live in a `tests/` folder next to the code they test, for example `pages/Assets/components/AssetDetails/tests/AssetDetailsDrawer.test.tsx`. Jest runs them with [`jest.config.front.js`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/jest.config.front.js).
+
+- Import the helpers from `@tests/utils`. The Jest config maps it to `admin/tests/utils.ts`, which re-exports `render`, `server` and the Testing Library helpers from `@strapi/admin/strapi-admin/test`. `render` wraps the component in the admin providers.
+- [`admin/tests/setup.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/tests/setup.ts) starts the msw `server` and installs the default handlers from `admin/tests/handlers.ts` before each test. It also mocks `legacy/hooks/useTracking` and `legacy/hooks/useSettings` for every test.
+- HTTP mocks use msw 2. Override a handler for one test with `server.use(...)`:
+
+```ts
+import { server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
+
+let captured: { id: string; file: FormDataEntryValue | null } | undefined;
+
+server.use(
+  http.post('/upload/files/:id/replace', async ({ request, params }) => {
+    const body = await request.formData();
+    captured = { id: String(params.id), file: body.get('files') };
+    return HttpResponse.json({ ...asset, name: 'replacement.png' });
+  })
+);
+```
+
+`request.formData()` returns the multipart body, files included. Two problems would break it without a patch. msw 2 clones each request before the resolver runs, and under undici the clone locks the body. A jsdom `FormData` body also loses its multipart encoding when undici serializes it across realms. The Jest environment of `@strapi/admin-test-utils` installs [`request-body-stash.ts`](https://github.com/strapi/strapi/blob/develop/packages/admin-test-utils/src/patches/request-body-stash.ts), which keeps the original string or `FormData` body on the request. `AssetDetailsDrawer.test.tsx` reads the replaced file this way.
+
+#### What jsdom cannot catch
+
+jsdom has no layout engine. It computes no sizes, no overflow, no stacking and no pointer geometry. A unit test still passes when a layout breaks.
+
+For example, a quarter turn in the crop editor takes the image out of the normal flow. The crop area then has no content to size it, so `AssetCropEditor.tsx` renders a spacer `div` in its place. Without the spacer, the crop area collapses, and the unit tests still pass.
+
+Check positional changes in a real browser, and cover them with an e2e test.
+
+### End-to-end tests
+
+The specs are in [`tests/e2e/tests/media-library/`](https://github.com/strapi/strapi/tree/develop/tests/e2e/tests/media-library). The specs of the legacy Media Library are in its `legacy/` folder.
+
+Each spec gates its suite on the `E2E_MEDIA_LIBRARY` variable:
+
+```ts
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Asset details', () => {
+  // ...
+});
+```
+
+Legacy specs check for `'legacy'` instead. Two checks enforce the gate:
+
+- Without `E2E_MEDIA_LIBRARY`, the runner does not start the `media-library` domain at all, and prints why. This keeps both suites out of the shared e2e matrix.
+- `tests/utils/__tests__/e2e-domains.test.ts` fails when a spec of the domain lacks the gate, or has a `test(` or `test.describe(` block at the top level.
+
+CI runs the suites in two jobs of [`.github/workflows/tests.yml`](https://github.com/strapi/strapi/blob/develop/.github/workflows/tests.yml). Both set `runEE: false` (Community Edition), `domains: media-library` and `jestOptions: '--project=chromium'`.
+
+| Job                        | Other inputs                                                 | Runs                                          |
+| -------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| `e2e_media_library`        | `useLegacyMediaLibrary: false`, `mediaLibrarySuite: current` | The current Media Library specs               |
+| `e2e_media_library_legacy` | `useLegacyMediaLibrary: true`, `mediaLibrarySuite: legacy`   | The legacy specs, on the legacy Media Library |
+
+`useLegacyMediaLibrary` becomes the `USE_LEGACY_MEDIA_LIBRARY` variable, which `tests/app-template/config/features.js` reads. The admin UI gets the flag when it is built, not when the server starts. `yarn test:e2e` rebuilds the admin on every run, so the variable takes effect. If you run Playwright again against an existing test app, it keeps the UI of the last build.
+
+Both jobs run on Chromium only. The comment on the jobs in `tests.yml` gives the reason: the upload helper `uploadFilesWithDragAndDrop` in `AssetsPage.ts` builds a `DataTransfer` to drop files, which the suite cannot use on WebKit. The helpers that move items by drag and drop use `page.mouse` and do not need it.
+
+#### Run the suites locally
+
+See the [e2e setup](../../../../contributing/03-testing/e2e/00-setup.md) for the runner. Use `yarn test:e2e:ce` to match CI: plain `yarn test:e2e` switches to the Enterprise Edition when `STRAPI_LICENSE` is set. Local runs use Chromium unless you pass `--project`.
+
+```bash
+# Current Media Library
+E2E_MEDIA_LIBRARY=current yarn test:e2e:ce --domains=media-library -- asset-details.spec.ts
+
+# Legacy Media Library
+USE_LEGACY_MEDIA_LIBRARY=true E2E_MEDIA_LIBRARY=legacy yarn test:e2e:ce --domains=media-library
+```
+
+Remove any `test.only` before you push.
+
+#### Page objects
+
+- [`page-objects/AssetsPage.ts`](https://github.com/strapi/strapi/blob/develop/tests/e2e/tests/media-library/page-objects/AssetsPage.ts) covers the Media Library page. `page-objects/MediaField.ts` covers the `media` field. Add helpers there instead of writing selectors in specs.
+- `assetsPage.assetDetailsDrawer` is the dialog that contains the "File info" heading. Start drawer queries from it.
+- The close button in the drawer header and the close button of an in-drawer alert both have the accessible name "Close". Once an alert is visible, `getByRole('button', { name: 'Close' })` matches two elements and fails in strict mode, even inside the drawer locator. Use `closeAssetDetailsDrawer()`: it keeps only the button that has a `data-state` attribute, which the close button of the alert does not have.
+- Start waiting for the file chooser before the click that opens it. `replaceAssetFromDrawer` calls `page.waitForEvent('filechooser')` first, then clicks, then awaits the promise. If you wait after the click, the event can fire before the listener exists.
+
+---
+
 ## @strapi/upload
 
 ### Purpose
@@ -15777,6 +16715,8 @@ A provider can return `true` from `isPrivate()` and implement `getSignedUrl(file
 #### Admin part
 
 The admin entry adds the Media Library menu link and its settings page, registers the `media` field input, and registers the `media-library` dialog component. `bootstrap` on the server registers the permission actions, for example `plugin::upload.assets.create`, and the webhook events. The redesigned Media Library is the default. The `useLegacyMediaLibrary` key in `config/features` selects the legacy one from `admin/src/legacy`.
+
+The [Admin](./02-admin/00-overview.md) pages document the admin code: its layout, the [asset list](./02-admin/01-asset-list.md), the [asset details drawer](./02-admin/02-asset-details-drawer.md), [forms](./02-admin/03-forms.md), [uploads](./02-admin/04-uploads.md), the [media field and picker](./02-admin/05-media-field-and-picker.md), [drag and drop](./02-admin/06-drag-and-drop.md), [data fetching](./02-admin/07-data-fetching.md) and [testing](./02-admin/08-testing.md).
 
 ### Related
 

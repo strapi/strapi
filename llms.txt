@@ -145,6 +145,15 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Type System](https://contributor.strapi.io/packages/core/types/type-system): Principles, concepts and cheatsheet for the TypeScript type system of Strapi.
 - [Providers](https://contributor.strapi.io/packages/core/upload/backend/providers): Documentation of upload provider implementations.
 - [MIME type validation](https://contributor.strapi.io/packages/core/upload/backend/mime-validation): Guide to MIME type validation in file uploads.
+- [Media Library admin](https://contributor.strapi.io/packages/core/upload/admin/overview): Layout of the Media Library admin code, the switch to the legacy Media Library, and where new code goes.
+- [Asset list](https://contributor.strapi.io/packages/core/upload/admin/asset-list): How the Media Library page lists folders and assets: list state, search scope, filters, sort, infinite loading, selection and the folder tree.
+- [Asset details drawer](https://contributor.strapi.io/packages/core/upload/admin/asset-details-drawer): How the asset details drawer stacks, keeps its open state in the URL, guards unsaved edits and reports results.
+- [Forms](https://contributor.strapi.io/packages/core/upload/admin/forms): How the Media Library uses the admin Form: reading form state, keeping the save baseline, and gating the save button.
+- [Uploads](https://contributor.strapi.io/packages/core/upload/admin/uploads): How the Media Library admin uploads new files: entry points, the request pool, the progress store and dialog, AI metadata and errors.
+- [Media field and picker](https://contributor.strapi.io/packages/core/upload/admin/media-field-and-picker): How the Content Manager media field stores, uploads and edits assets, and how the asset picker serves the field and the rich text editors.
+- [Drag and drop](https://contributor.strapi.io/packages/core/upload/admin/drag-and-drop): How the Media Library page moves assets and folders by drag and drop, the drop rules, and the keyboard path through the move dialog.
+- [Data fetching](https://contributor.strapi.io/packages/core/upload/admin/data-fetching): RTK Query in the Media Library admin: the shared API slice, cache tags, global endpoint names and file uploads.
+- [Testing](https://contributor.strapi.io/packages/core/upload/admin/testing): Unit and end-to-end tests of the Media Library admin: helpers, msw handlers, the two e2e suites, and what jsdom cannot catch.
 - [@strapi/upload](https://contributor.strapi.io/packages/core/upload): Upload plugin: the Media Library, file and folder storage, image processing, and upload providers.
 - [Async utils functions](https://contributor.strapi.io/packages/core/utils/async): Utility functions for handling asynchronous operations.
 - [@strapi/utils](https://contributor.strapi.io/packages/core/utils): Shared server helpers for Strapi packages: hooks, providers, errors, schema traversal, sanitize and validate.
