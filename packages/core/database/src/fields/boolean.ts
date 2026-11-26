@@ -33,7 +33,7 @@ function toRecognisedString(value: string): boolean | undefined {
  * Casts the values both `toDB` and `toFilterValue` accept. Returns `undefined` for any other
  * value, so each caller decides how to handle it.
  */
-function toRecognisedBoolean(value: unknown): boolean | null | undefined {
+export function toRecognisedBoolean(value: unknown): boolean | null | undefined {
   if (typeof value === 'boolean') {
     return value;
   }

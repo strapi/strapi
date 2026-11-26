@@ -11,7 +11,6 @@ import { generateAdminUserHash } from './admin-user-hash';
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
 const tsUtils = (): typeof import('@strapi/typescript-utils') => {
   if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTsUtils = require('@strapi/typescript-utils');
   }
   return lazyTsUtils as typeof import('@strapi/typescript-utils');
@@ -41,7 +40,7 @@ const { timeout, ...fetchDefaults } = defaultQueryOpts;
  * Add properties from the package.json strapi key in the metadata
  */
 const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi: Core.Strapi) => {
-  const { packageJsonStrapi = {} } = strapi.config;
+  const packageJsonStrapi = strapi.config.get<Record<string, unknown>>('packageJsonStrapi', {});
 
   _.defaults(metadata, packageJsonStrapi);
 };
@@ -50,7 +49,11 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
  * Create a send function for event with all the necessary metadata
  */
 export default (strapi: Core.Strapi): Sender => {
-  const { uuid, installId: installIdFromPackageJson } = strapi.config;
+  // The API test helper clears the container after a successful destroy.
+  // Keep the fetch function from startup so a later send does not look it up.
+  const fetch = strapi.fetch;
+  const uuid = strapi.config.get<string | undefined>('uuid');
+  const installIdFromPackageJson = strapi.config.get<string | undefined>('installId');
 
   const installId = generateInstallId(uuid, installIdFromPackageJson);
 
@@ -58,7 +61,7 @@ export default (strapi: Core.Strapi): Sender => {
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
   const anonymousUserProperties = {
-    environment: strapi.config.environment,
+    environment: strapi.config.get('environment'),
     os: os.type(),
     osPlatform: os.platform(),
     osArch: os.arch(),
@@ -110,7 +113,7 @@ export default (strapi: Core.Strapi): Sender => {
 
     try {
       const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
-      const res = await strapi.fetch(`${analyticsUrl}/api/v2/track`, reqParams);
+      const res = await fetch(`${analyticsUrl}/api/v2/track`, reqParams);
       return res.ok;
     } catch {
       return false;

@@ -62,6 +62,8 @@ In the bootstrap phase, `server.initMiddlewares()` reads the `middlewares` confi
 | `strapi::favicon`   | Serves the favicon.                                                                                                                                    |
 | `strapi::public`    | Registers two routes: `GET /` redirects to the admin URL, and a `GET` route serves the `public` folder (except `/uploads`).                            |
 
+`strapi::body` answers a multipart request whose files add up to more than `formidable.maxFileSize` (formidable's default is 200 MiB) with a 413 `PayloadTooLargeError`. formidable 2.x counts the file bytes of the whole request, not of each file. Its message is `FileTooBig` and its details are `{ code: 'FileTooBig', limit }`, with the limit in bytes. This happens before any route runs, so it also caps uploads that the upload plugin `sizeLimit` would accept.
+
 Without a `middlewares` config, Strapi uses the same list with `strapi::session` before `strapi::query`. The boot fails if `strapi::errors`, `strapi::security`, `strapi::cors`, `strapi::query`, `strapi::body`, `strapi::public` or `strapi::favicon` is missing. `strapi::compression`, `strapi::ip`, `strapi::responseTime` and `strapi::responses` exist but are not in the default list.
 
 :::note
@@ -95,13 +97,17 @@ For each route, the registration step also:
 - generates `config.auth.scope` when the handler is a string (see [Route config](#route-config));
 - for API and plugin routes, merges the extra params from `strapi.contentAPI.addQueryParams()` and `addInputParams()` into `route.request`.
 
+So the routers of a module change shape at this step: before it, a router is an object or a factory; after it, every router is an object. A plugin router declared as a plain array stays an array, and so does an API router file that exports an array of routes. Strapi passes such an API array to `strapi.server.routes()` as is, so its routes go on the root router: no `/api` prefix, no `apiName` and no generated scope. To read the routes of a module router in any phase, use `routesOf` and `isBuiltRouter` from [`@strapi/utils`](https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/module-routers.ts). `routesOf` returns an array of routes as is and never calls a factory: it returns the routes a factory exposes as `.routes` (the factories of `createContentApiRoutesFactory` do), or none.
+
+A route added to a module router after `initRouting()` is never served. It has no `route.info` unless it was copied from a registered route, which keeps its `info`. `strapi.contentAPI.getRoutesMap()`, which backs `GET /admin/content-api/routes`, lists only routes whose `info.type` is `content-api`: it skips a new route added late, but still lists a copied one, although Strapi does not serve it. It throws `contentAPI.getRoutesMap() called before routes are registered` when `initRouting()` has not completed, because the map would be incomplete. `initRouting()` sets the flag it checks ([`routes-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routes-registration.ts)). `strapi.isLoaded` cannot tell, since it stays `false` during the whole bootstrap phase.
+
 The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routing.ts) validates each route with a Yup schema and adds `info.type` from the API router (`api` on the root router). An invalid route stops the boot with `Invalid route config`. An unknown handler, policy or middleware stops it with `Error creating endpoint <METHOD> <path>`.
 
 ## Route config
 
 | Key                   | Meaning                                                                                                                     |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `method`, `path`      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `ALL`) and Koa router path. See [Route paths](#route-paths).          |
+| `method`, `path`      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `ALL`) and Koa router path.                                           |
 | `handler`             | A string `'<controller>.<action>'`, a full UID such as `'api::article.article.find'`, a function, or an array of functions. |
 | `config.auth`         | `false` for a public route, or `{ scope?, strategies? }`.                                                                   |
 | `config.policies`     | Policy names or `{ name, config }` objects.                                                                                 |
@@ -109,54 +115,6 @@ The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develo
 | `request`, `response` | Zod schemas. See [Validation and sanitization](#validation-and-sanitization).                                               |
 
 For a string handler, the generated scope is the handler prefixed with the module namespace, unless the handler already starts with it. In `src/api/article`, `article.find` gets the scope `api::article.article.find`. In the admin package, `admin.init` gets `admin::admin.init`. A scope set in the route wins. The scope has the same format as a Content API permission action, which is how the permission check matches a route.
-
-## Route paths
-
-Strapi uses `@koa/router` 15, which matches paths with `path-to-regexp` v8. Strapi 5 routes were written for `path-to-regexp` v6 (`@koa/router` 12). [`route-path.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/route-path.ts) translates v6 syntax at boot, so those routes keep working. A v8 path is left unchanged. The translator is meant to go away in Strapi 6.
-
-Strapi translates:
-
-- every route object, in `compose-endpoint.ts`;
-- every path, router prefix and mount path given to the root router, the two API routers and the sub-router of a prefixed route group. `installRoutePathTranslation` wraps their `register`, `use` and `prefix` methods.
-
-A router that a plugin creates itself is not wrapped up front. When a route object with v6 syntax is composed onto it, `registerTranslatedRoute` wraps that router first.
-
-Matching uses path-to-regexp v8 only. A custom pattern is not applied. A pattern that cannot match `/` becomes an ordinary parameter, and one that can becomes a wildcard, so the route can match requests the v6 path rejected. A request the translated path does match is a path match: another method then answers 405, not 404.
-
-Two parameters with no text between them become one wildcard, and their separate values are not recovered. v8 can also reject a request the v6 path accepted, when a custom pattern contained the text that separates it from the previous parameter. `/:a-:b(\d+-)` used to match `/x-1-` and no longer does.
-
-| v6                                                | v8                                     | Notes                                                                        |
-| ------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
-| `/users/:id(\\d+)`                                | `/users/:id`                           | A pattern that may match `/`, such as `.+\\.js`, becomes a wildcard instead. |
-| `/users/:id?`                                     | `/users{/:id}`                         |                                                                              |
-| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                              |
-| `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.          |
-| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The value is in `ctx.params[0]`.                                             |
-| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | The pattern is dropped. `x` is still the separator, and `w` is quoted.       |
-| `/:a([a-z]+):b(\\d+)`                             | `/{*v6Joined1}`                        | v8 needs text between two parameters, so one wildcard stands for both.       |
-| `/:lang-:region/:id(\\d+)`                        | `/:lang-:region/:id`                   | The pattern is dropped. `-` stays between the parameters.                    |
-| `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.       |
-
-What stays as it was in v6:
-
-- Unnamed groups are numbered across the router prefix, the mount path and the route, in that order. With the prefix `/p/(\\d+)` and the route `/(.*)`, `/p/12/a/b` gives `ctx.params[0] = '12'` and `ctx.params[1] = 'a/b'`. A parameter that matched no text is left out. Names the translation created are removed. A wildcard value is one string, not a list of segments.
-- Case sensitivity and trailing slashes follow the router's `sensitive` and `strict` options. A custom pattern does not add its own case rules.
-- `ctx._matchedRoute` is the path as written, prefix included. Sentry and OpenTelemetry read it.
-- `strapi routes:list` prints the path as written. The OpenAPI document uses `route.path`, which the translator does not change.
-
-Each layer stores its parts under a symbol. `@koa/router` copies the layers of a nested router with `Object.assign`, which keeps symbol properties. The layer is re-described when it is mounted.
-
-Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. When that translation drops a custom pattern other than `.*`, it logs a second warning that names the parameter and the pattern, because the route may now match a request meant for a later route. A `.*` pattern becomes a wildcard that matches the same text, so it does not get that warning. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip both warnings.
-
-Boot fails with `RoutePathMigrationError` for a path v6 rejected too, such as `/:a:b` or a repeated parameter with no prefix and suffix, for a group that starts with `?`, and for one path that mixes v6 syntax with a v8 quoted name.
-
-The public files route is still `'/((?!uploads/).+)'`. v8 cannot express that lookahead, so the handler skips a path under `/uploads/` instead. The documentation version route keeps `major`, `minor` and `patch`, and its controller rejects a part that is not a number. Review-workflow stage and assignee routes are registered twice, once for `collection-types` and once for `single-types`, so another kind does not match.
-
-What changed from `@koa/router` 12:
-
-- `layer.path` in `strapi.server.router.stack` and `listRoutes()` is the translated path, because `@koa/router` compiles and prefixes it. Code that looks for a layer by its path must compare with the v8 form, or call `getRouteSourcePath(layer)`.
-- In a path with no other v6 syntax, a bare `{…}` group is read as v8, where it is optional. In v6 it was required, which made it the same as writing its content without braces.
-- Calling `router.prefix()` again replaces the prefix instead of adding to it. This is `@koa/router` 15 behaviour.
 
 ## The route chain
 
@@ -249,7 +207,7 @@ The core service (`createCoreService`) calls the Document Service: `strapi.docum
 
 The core controller helpers call `strapi.contentAPI.validate` and `strapi.contentAPI.sanitize` ([`services/content-api/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/content-api/index.ts)), which wrap the functions in `@strapi/utils`. They pass `ctx.state.auth`, `ctx.state.route` and `api.rest.strictParams`.
 
-- **`validateQuery`** checks `filters`, `sort`, `fields` and `populate` against the schema and throws `ValidationError` (400). It also rejects filters and sorts on relations whose target the caller cannot `find`. With `strictParams`, it rejects unknown top-level query keys.
+- **`validateQuery`** checks `filters`, `sort`, `fields` and `populate` against the schema and throws `ValidationError` (400). It also rejects filters and sorts on relations whose target the caller cannot `find`. With `strictParams`, it rejects unknown top-level query keys. It rejects a plain-object operand on a scalar, JSON, relation, media or component attribute, `id` or `documentId`, or on an operator at the root of `filters`. It skips the operand of `$null` and `$notNull`: the database layer reads it as a boolean and rejects an object, so the caller still gets a 400. It searches `$not`, `$and` and `$or` operands at any depth, and rejects a plain object inside the value list of any other operator, such as `$in` or `$notIn`, an operator map included. When that object has only index keys, the message names the `strapi::query` `arrayLimit` (100 by default), because `qs` turns a longer list into such an object. It also rejects a `$and` or `$or` operand that is an object rather than a list, whatever its keys (indexes, attribute names or operators) and wherever it sits, including the operator map of an attribute, with the same `arrayLimit` message when the object has only index keys. It accepts such an object when it holds only empty objects, at any depth: it holds no condition, and sanitization and query conversion remove it. It does not check one inside a `$null` or `$notNull` operand, for the same reason as above. It also rejects a `$and` or `$or` list, or a single value, in the operator map of a scalar attribute, `id` or `documentId`, also under `$not`, because the database layer has no attribute level `$and` / `$or`. It leaves an operand with no condition in it, such as an empty list or `null`, as it was.
 - **`sanitizeQuery`** returns a copy of the query without private fields, invalid keys and restricted relations. With `strictParams`, it also drops unknown top-level keys.
 - **`validateInput`** rejects `id`, `documentId`, non-writable attributes, unknown attributes and restricted relations.
 - **`sanitizeInput`** removes the same data instead of throwing.
@@ -276,6 +234,7 @@ The `strapi::errors` middleware in [`middlewares/errors.ts`](https://github.com/
 - If no middleware set a status, it responds 404.
 - An `ApplicationError` from `@strapi/utils` gets its status from its class: `UnauthorizedError` 401, `ForbiddenError` and `PolicyError` 403, `NotFoundError` 404, `PayloadTooLargeError` 413, `RateLimitError` 429, `NotImplementedError` 501, and 400 for the others, such as `ValidationError`.
 - An `http-errors` error keeps its status.
+- A database input error from `@strapi/database` (`InvalidBooleanError`, `InvalidDateError`, `InvalidDateTimeError`, `InvalidTimeError` or `InvalidRelationError`) answers 400 as a `ValidationError` and is not logged. These errors reach the middleware from routes that call `strapi.db.query` directly, for example `filters[flag][$eq]=no` on a boolean. The list is in [`utils/database-input-errors.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/database-input-errors.ts).
 - Any other error is logged. If it carries a 4xx status, the status and message are kept. Otherwise the response has a generic message and status 500 (or the 5xx status of the error), so internal details do not leak.
 
 `strapi::errors` and the error helpers on `ctx` write the same body: `{ data: null, error: { status, name, message, details } }`. A controller that sets `ctx.body` directly can use another shape.

@@ -43,10 +43,22 @@ We use [stega encoding](https://github.com/vercel/stega) to identify which Strap
 
 1. The Document Service encodes field metadata into text values (invisible to users)
 2. The frontend renders the content normally
-3. The preview script decodes the metadata and attaches `data-strapi-source` attributes to DOM elements
-4. Highlights are drawn over elements with source attributes
+3. The preview script decodes the metadata and records each element's source in memory
+4. Highlights are drawn over elements with a source, whether decoded or set by the frontend as a `data-strapi-source` attribute
 
 The metadata uses URL search params format, because it makes it easy to encode and decode multiple pieces of information into a single string: `path=title&type=string&documentId=abc123&locale=en&model=api::page.page`
+
+### Reading the page without rewriting it
+
+The script runs while the frontend may still be streaming and hydrating the page, so it must not change the markup the frontend rendered. If it does, the framework compares its own render with a changed DOM: React reports hydration errors and regenerates the tree on the client, and with Next.js a streamed payload script cut short fails the whole page (`Connection closed`). Because it's a race, this shows up on some loads and not others.
+
+So the decoder only reads:
+
+- It skips `SCRIPT`, `STYLE`, `NOSCRIPT` and `TEMPLATE`. Next.js streams its RSC payload in inline scripts, markers included.
+- It leaves text nodes as they are. The markers are zero-width, so nobody sees them.
+- It keeps decoded sources in a `WeakMap` (`writeSource` / `readSource` and related helpers) instead of setting `data-strapi-source` on rendered elements. `readSource` checks the attribute first, so frontends that render it themselves keep working.
+
+Writing the attribute used to fire a mutation that kept highlights in sync. In-memory writes notify the highlight observer instead (`notifySourceChange`), and media elements the script creates while editing (type-swap injections, cloned gallery slots) are given their original's source explicitly, since copying attributes no longer carries it. The one exception to "only read" is media `src` / `alt`: markers are still cleaned from them, because a marked `src` doesn't load.
 
 ### Stega limitations
 
@@ -163,7 +175,7 @@ Live-preview sync updates the iframe DOM while the popover is open (the host app
 
 When `popoverField` transitions from a non-null value back to `null` (the popover closed), `Preview.tsx` posts `strapiRescanHighlights` to the iframe. The preview script handles this message by scheduling `highlightManager.rescan()` via `requestAnimationFrame`, which:
 
-1. Prunes any `data-strapi-source` elements that were removed from the DOM during editing.
+1. Prunes any sourced elements (decoded or with a `data-strapi-source` attribute) that were removed from the DOM during editing.
 2. Registers any new elements that appeared (e.g., newly created blocks).
 3. Redraws all highlight positions and sizes.
 

@@ -5,17 +5,15 @@ const findPage = jest.fn();
 
 const load = jest.fn(() => mock) as any;
 
-const admin = {
-  services: {
-    user: {
-      findPage,
-    },
+const adminServices: Record<string, unknown> = {
+  user: {
+    findPage,
   },
 };
 
 const mock = {
   load,
-  admin,
+  service: jest.fn((uid: string) => adminServices[uid.slice('admin::'.length)]),
   destroy,
 };
 

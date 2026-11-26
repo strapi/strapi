@@ -274,6 +274,11 @@ export declare namespace GetLicenseLimitInformation {
        * an instance that has never reached the registry and so has nothing cached.
        */
       registrySyncErrorKind: 'unreachable' | 'rejected' | null;
+      adminUsersAcrossInstances?: {
+        activeUsers: number;
+        contractedUsers: number | null;
+        updatedAt: string; // ISO date
+      } | null;
       entitlements: Array<{
         feature: string;
         limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;

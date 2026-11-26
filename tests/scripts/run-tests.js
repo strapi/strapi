@@ -7,7 +7,7 @@ const chalk = require('chalk');
 const dotenv = require('dotenv');
 
 const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/runners/shared-setup');
-const { buildAdmin, runPlaywright } = require('../utils/runners/browser-runner');
+const { buildAdmin, piwiRunLabel, runPlaywright } = require('../utils/runners/browser-runner');
 const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
 const { selectRunnableDomains } = require('../utils/runners/e2e-domains');
 const {
@@ -78,6 +78,12 @@ const cwd = path.resolve(__dirname, '../..');
  */
 const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
 
+// These domains need setup that the default runs do not have, so they run only when named with `--domains`.
+const OPT_IN_DOMAINS_BY_TYPE = {
+  e2e: ['enterprise-plugins'],
+  cli: [],
+};
+
 const pathExists = async (filePath) => {
   try {
     await fs.access(filePath);
@@ -127,6 +133,9 @@ yargs
 
         // Read domains
         const domains = await fs.readdir(testDomainRoot);
+        const defaultDomains = domains.filter(
+          (domain) => !OPT_IN_DOMAINS_BY_TYPE[type].includes(domain)
+        );
 
         // Parse test-specific arguments - need to reconstruct the full argv without --type
         // The outer yargs already parsed --type, so we need to get the remaining args
@@ -144,7 +153,7 @@ yargs
           .option('concurrency', {
             alias: 'c',
             type: 'number',
-            default: domains.length,
+            default: defaultDomains.length,
             describe: `Number of concurrent test ${type === 'cli' ? 'domains' : 'apps'} to run`,
           })
           .option('domains', {
@@ -152,7 +161,7 @@ yargs
             describe: 'Run a specific test suite domain',
             type: 'array',
             choices: domains,
-            default: domains,
+            default: defaultDomains,
           })
           .option('setup', {
             alias: 'f',
@@ -261,7 +270,14 @@ yargs
             console.log(`Skipping ${domain} e2e tests: ${reason}`);
           }
 
-          const runDomain = async ({ domain, testAppPath, port, testArgs }) => {
+          const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
+
+          // Without a CI label, the reporter would give every local process the same
+          // `hostname|project` id, and parallel domains would cancel each other's run. One base
+          // per invocation keeps the shard, domain and lane suffixes working locally too.
+          const piwiBaseLabel = process.env.PIWI_RUN_LABEL || `local-${Date.now()}`;
+
+          const runDomain = async ({ domain, testAppPath, port, testArgs, lane }) => {
             const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
             console.log(
@@ -299,6 +315,12 @@ module.exports = config
                 port,
                 testAppPath,
                 testArgs,
+                runLabel: piwiRunLabel({
+                  baseLabel: piwiBaseLabel,
+                  shard,
+                  domain,
+                  lane,
+                }),
               });
             } catch (err) {
               console.error(`${domain} e2e tests failed`);
@@ -311,7 +333,6 @@ module.exports = config
           // Otherwise each test app takes the next whole domain as soon as it is free, heaviest
           // first. Either way a failing domain doesn't stop the others: every domain runs and the
           // run fails at the end, like the CLI runner.
-          const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
           const weights = shard
             ? loadShardWeights({ edition: process.env.STRAPI_E2E_EDITION, project })
             : null;
@@ -331,6 +352,7 @@ module.exports = config
                     domain: run.domain,
                     testAppPath,
                     port: E2E_PORT_BASE + j,
+                    lane: j,
                     testArgs: [
                       ...argsWithoutShard,
                       ...run.files.map((file) =>
@@ -351,6 +373,7 @@ module.exports = config
                     domain: pendingDomains.shift(),
                     testAppPath,
                     port: E2E_PORT_BASE + j,
+                    lane: j,
                     testArgs: forwardedRunnerArgs,
                   });
                 }

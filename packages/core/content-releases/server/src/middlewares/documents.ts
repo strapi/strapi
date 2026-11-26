@@ -78,6 +78,7 @@ const createRevalidateActionsOnDraftChange =
     }
 
     const contentType = ctx.contentType.uid;
+    const isLocalized = strapi.localization.isLocalizedContentType(ctx.contentType);
     const { action } = ctx;
 
     const result = await next();
@@ -89,7 +90,10 @@ const createRevalidateActionsOnDraftChange =
 
     // `update` returns the updated draft (which may have its own `entries` field); `discardDraft`
     // `{ entries }`, the new draft of each locale it discarded
-    const drafts = action === 'discardDraft' && 'entries' in result ? result.entries : [result];
+    const drafts: Modules.Documents.AnyDocument[] =
+      action === 'discardDraft' && 'entries' in result && Array.isArray(result.entries)
+        ? result.entries
+        : [result];
 
     runAfterCommit(
       async () => {
@@ -97,7 +101,7 @@ const createRevalidateActionsOnDraftChange =
           await getService('release-action', { strapi }).revalidatePlannedActions({
             contentType,
             entryDocumentId: draft.documentId,
-            locale: draft.locale,
+            ...(isLocalized && { locale: draft.locale }),
           });
         }
       },

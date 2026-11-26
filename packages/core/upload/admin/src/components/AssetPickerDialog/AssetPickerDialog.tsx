@@ -16,9 +16,16 @@ import { styled } from 'styled-components';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { AssetsGrid } from '../../pages/Assets/components/AssetsGrid';
 import { AssetsSearchInput } from '../../pages/Assets/components/AssetsSearchInput';
+import {
+  AssetsToolbar,
+  SearchGroup,
+  SearchScopeSlot,
+  ViewGroup,
+} from '../../pages/Assets/components/AssetsToolbar';
 import { AssetsView } from '../../pages/Assets/components/AssetsView';
 import { FilterBadges } from '../../pages/Assets/components/FilterBadges';
 import { FilterMenu } from '../../pages/Assets/components/FilterMenu';
+import { SearchScopeControls } from '../../pages/Assets/components/SearchScopeControls';
 import { SortMenu } from '../../pages/Assets/components/SortMenu';
 import { ViewToggle } from '../../pages/Assets/components/ViewToggle';
 import { localStorageKeys, viewOptions } from '../../pages/Assets/constants';
@@ -143,6 +150,9 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
     navigateToFolderId,
     searchQuery,
     isSearching,
+    canSearchAll,
+    isSearchingAll,
+    setSearchingAll,
     clearSearch,
     listSort,
     listFilters,
@@ -168,21 +178,35 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
   return (
     <>
       <Box paddingLeft={7} paddingRight={7} paddingTop={6} paddingBottom={6}>
-        <Flex justifyContent="space-between" gap={2} wrap="wrap">
-          <Flex gap={2}>
+        <AssetsToolbar>
+          <SearchGroup $isSearching={isSearching}>
             <FilterMenu listFilters={listFilters} />
             <AssetsSearchInput collapsible />
-          </Flex>
-          <Flex gap={2}>
+            {isSearching && (
+              <SearchScopeSlot>
+                <SearchScopeControls
+                  canSearchAll={canSearchAll}
+                  isSearchingAll={isSearchingAll}
+                  onSearchingAllChange={setSearchingAll}
+                  resultCount={
+                    isLoadingAssets || isLoadingFolders || assetsError
+                      ? undefined
+                      : folders.length + (pagination?.total ?? 0)
+                  }
+                />
+              </SearchScopeSlot>
+            )}
+          </SearchGroup>
+          <ViewGroup>
             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
             <ViewToggle view={view} onChange={setView} iconsOnly />
-          </Flex>
-        </Flex>
+          </ViewGroup>
+        </AssetsToolbar>
         <FilterBadges listFilters={listFilters} />
         {/* In the fixed header with the toolbar, so the way back up stays in
-            reach however far the list is scrolled. Search results are global,
-            so a folder trail would be misleading there. */}
-        {currentFolderId !== null && !isSearching && (
+            reach however far the list is scrolled. A search across all media
+            isn't in this folder, so the trail would be misleading there. */}
+        {currentFolderId !== null && !isSearchingAll && (
           <Box paddingTop={2}>
             <FolderBreadcrumbs
               currentFolderId={currentFolderId}

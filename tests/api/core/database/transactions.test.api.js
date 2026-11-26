@@ -231,6 +231,7 @@ describe('transactions', () => {
       await strapi.db.transaction(({ onCommit, onRollback }) => {
         onCommit(() => count++);
       });
+      await strapi.db.settleTransactionHooks();
       expect(count).toEqual(1);
     });
 
@@ -242,6 +243,7 @@ describe('transactions', () => {
           onCommit(() => count++);
         });
       });
+      await strapi.db.settleTransactionHooks();
       expect(count).toEqual(2);
     });
 
@@ -255,6 +257,7 @@ describe('transactions', () => {
       } catch (e) {
         // do nothing
       }
+      await strapi.db.settleTransactionHooks();
       expect(count).toEqual(1);
     });
 
@@ -271,6 +274,7 @@ describe('transactions', () => {
       } catch (e) {
         // do nothing
       }
+      await strapi.db.settleTransactionHooks();
       expect(count).toEqual(2);
     });
 

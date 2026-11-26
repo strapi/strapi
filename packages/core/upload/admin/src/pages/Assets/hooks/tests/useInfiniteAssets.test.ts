@@ -719,6 +719,111 @@ describe('useInfiniteAssets', () => {
     expect(getResult().pagination?.total).toBe(50);
   });
 
+  describe('folder search scope', () => {
+    const renderWithScope = () => {
+      let hookResult: ReturnType<typeof useInfiniteAssets>;
+      let setScope: (path: string | undefined) => void;
+
+      const ScopeTestWrapper = () => {
+        const [searchFolderPath, setSearchFolderPath] = useState<string | undefined>('/1');
+        hookResult = useInfiniteAssets({ folder: 1, search: 'cat', searchFolderPath });
+        setScope = setSearchFolderPath;
+
+        return null;
+      };
+
+      render(createElement(ScopeTestWrapper));
+
+      return {
+        getResult: () => hookResult!,
+        changeScope: (path: string | undefined) => act(() => setScope(path)),
+      };
+    };
+
+    it('resets the list when a folder search is widened to all media', () => {
+      const scopedPage1 = createMockPage(1, 1, 2, 2);
+
+      mockUseGetAssetsQuery.mockImplementation(
+        ({ searchFolderPath }: { searchFolderPath?: string }) =>
+          searchFolderPath ? scopedPage1 : UNINITIALIZED_QUERY
+      );
+
+      const { getResult, changeScope } = renderWithScope();
+
+      expect(getResult().assets).toHaveLength(2);
+
+      changeScope(undefined);
+
+      // Cleared rather than kept like a keystroke, so the list remounts and its
+      // load-more sentinel takes a fresh reading.
+      expect(getResult().isLoading).toBe(true);
+      expect(getResult().assets).toHaveLength(0);
+    });
+
+    it('resets the list when an all-media search is narrowed back to the folder', () => {
+      const allPage1 = createMockPage(1, 1, 2, 2);
+
+      mockUseGetAssetsQuery.mockImplementation(
+        ({ searchFolderPath }: { searchFolderPath?: string }) =>
+          searchFolderPath ? UNINITIALIZED_QUERY : allPage1
+      );
+
+      const { getResult, changeScope } = renderWithScope();
+
+      changeScope(undefined);
+      expect(getResult().assets).toHaveLength(2);
+
+      changeScope('/1');
+
+      expect(getResult().isLoading).toBe(true);
+      expect(getResult().assets).toHaveLength(0);
+    });
+
+    it('keeps the folder rows rendered on the first keystroke of a folder search', () => {
+      const folderPage1 = createMockPage(1, 1, 2, 2);
+
+      mockUseGetAssetsQuery.mockImplementation(({ search }: { search?: string }) =>
+        search
+          ? {
+              data: folderPage1.data,
+              currentData: undefined,
+              isLoading: false,
+              isFetching: true,
+              error: undefined,
+            }
+          : folderPage1
+      );
+
+      let hookResult: ReturnType<typeof useInfiniteAssets>;
+      let startSearch: () => void;
+
+      const FolderSearchWrapper = () => {
+        const [search, setSearch] = useState<string | undefined>(undefined);
+        hookResult = useInfiniteAssets({
+          folder: 1,
+          search,
+          searchFolderPath: search ? '/1' : undefined,
+        });
+        startSearch = () => setSearch('cat');
+
+        return null;
+      };
+
+      render(createElement(FolderSearchWrapper));
+
+      expect(hookResult!.assets).toHaveLength(2);
+
+      act(() => startSearch());
+
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ folder: 1, search: 'cat', searchFolderPath: '/1' }),
+        expect.anything()
+      );
+      expect(hookResult!.isLoading).toBe(false);
+      expect(hookResult!.assets).toHaveLength(2);
+    });
+  });
+
   it('renders an asset that appears in two pages once, in its first position', () => {
     const page1 = createMockPage(1, 2, 25);
     // A row shifted across the page boundary after a mutation, so page 2 now

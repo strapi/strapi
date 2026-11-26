@@ -47,7 +47,7 @@ describe('CTB controllers - validation errors', () => {
     });
   });
 
-  it('keeps the message when content type update validation throws a native error', async () => {
+  it('answers a validation error when content type update attributes are missing', async () => {
     const { ctx, send } = createContext({
       params: { uid: 'api::article.article' },
       body: { contentType: { kind: 'collectionType' } },
@@ -56,16 +56,22 @@ describe('CTB controllers - validation errors', () => {
     await contentTypes.updateContentType(ctx);
 
     expect(send).toHaveBeenCalledWith(expect.anything(), 400);
-    expect(getSentBody(send)).toEqual({
+    expect(getSentBody(send)).toMatchObject({
       error: {
-        name: 'TypeError',
-        message: expect.stringContaining('undefined'),
-        details: {},
+        name: 'ValidationError',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              path: ['contentType', 'attributes'],
+              message: 'attributes.required',
+            }),
+          ]),
+        },
       },
     });
   });
 
-  it('keeps the message when component update validation throws a native error', async () => {
+  it('answers a validation error when component update attributes are missing', async () => {
     const { ctx, send } = createContext({
       params: { uid: 'shared.quote' },
       body: { component: { category: '' } },
@@ -74,11 +80,94 @@ describe('CTB controllers - validation errors', () => {
     await components.updateComponent(ctx);
 
     expect(send).toHaveBeenCalledWith(expect.anything(), 400);
-    expect(getSentBody(send)).toEqual({
+    expect(getSentBody(send)).toMatchObject({
       error: {
-        name: 'TypeError',
-        message: expect.stringContaining('undefined'),
-        details: {},
+        name: 'ValidationError',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              path: ['component', 'attributes'],
+              message: 'attributes.required',
+            }),
+          ]),
+        },
+      },
+    });
+  });
+
+  it('answers a validation error when component update attributes are not an object', async () => {
+    const { ctx, send } = createContext({
+      params: { uid: 'shared.quote' },
+      body: {
+        component: { category: 'default', displayName: 'Quote', attributes: 'not-an-object' },
+      },
+    });
+
+    await components.updateComponent(ctx);
+
+    expect(send).toHaveBeenCalledWith(expect.anything(), 400);
+    expect(getSentBody(send)).toMatchObject({
+      error: {
+        name: 'ValidationError',
+        details: { errors: [expect.objectContaining({ path: ['component', 'attributes'] })] },
+      },
+    });
+  });
+
+  it.each([
+    ['missing', { type: 'enumeration' }],
+    ['null', { type: 'enumeration', enum: null }],
+  ])('answers a validation error when a content type enumeration enum is %s', async (_, level) => {
+    const { ctx, send } = createContext({
+      body: {
+        contentType: {
+          displayName: 'Ticket',
+          singularName: 'ticket',
+          pluralName: 'tickets',
+          kind: 'collectionType',
+          attributes: { level },
+        },
+      },
+    });
+
+    await contentTypes.createContentType(ctx);
+
+    expect(send).toHaveBeenCalledWith(expect.anything(), 400);
+    expect(getSentBody(send)).toMatchObject({
+      error: {
+        name: 'ValidationError',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({ path: ['contentType', 'attributes', 'level', 'enum'] }),
+          ]),
+        },
+      },
+    });
+  });
+
+  it('answers a validation error when a component enumeration enum is missing', async () => {
+    const { ctx, send } = createContext({
+      body: {
+        component: {
+          category: 'default',
+          displayName: 'Ticket',
+          icon: 'cube',
+          attributes: { level: { type: 'enumeration' } },
+        },
+      },
+    });
+
+    await components.createComponent(ctx);
+
+    expect(send).toHaveBeenCalledWith(expect.anything(), 400);
+    expect(getSentBody(send)).toMatchObject({
+      error: {
+        name: 'ValidationError',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({ path: ['component', 'attributes', 'level', 'enum'] }),
+          ]),
+        },
       },
     });
   });

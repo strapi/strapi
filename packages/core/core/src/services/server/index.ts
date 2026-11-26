@@ -1,4 +1,4 @@
-import Router, { type Layer } from '@koa/router';
+import Router from '@koa/router';
 import type { Core, Modules } from '@strapi/types';
 
 import { createHTTPServer } from './http-server';
@@ -6,10 +6,10 @@ import { createRouteManager } from './routing';
 import { createAdminAPI } from './admin-api';
 import { createContentAPI } from './content-api';
 import registerAllRoutes from './register-routes';
+import { markRoutesRegistered } from './routes-registration';
 import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
-import { installRoutePathTranslation } from './route-path';
 
 const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -27,7 +27,6 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
   app.use((ctx, next) => requestCtx.run(ctx, () => next()));
 
   const router = new Router();
-  installRoutePathTranslation(router, strapi);
 
   const routeManager = createRouteManager(strapi);
 
@@ -85,6 +84,7 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
 
     initRouting() {
       registerAllRoutes(strapi);
+      markRoutesRegistered(strapi);
 
       return this;
     },
@@ -96,9 +96,7 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     },
 
     listRoutes() {
-      return router.stack.filter(
-        (route): route is Layer & { path: string } => typeof route.path === 'string'
-      );
+      return [...router.stack];
     },
 
     listen(...args: any[]) {
