@@ -2137,6 +2137,10 @@ For each route, the registration step also:
 - generates `config.auth.scope` when the handler is a string (see [Route config](#route-config));
 - for API and plugin routes, merges the extra params from `strapi.contentAPI.addQueryParams()` and `addInputParams()` into `route.request`.
 
+So the routers of a module change shape at this step: before it, a router is an object or a factory; after it, every router is an object. A plugin router declared as a plain array stays an array. To read the routes of a module router in any phase, use `routesOf` and `isBuiltRouter` from [`@strapi/utils`](https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/module-routers.ts). `routesOf` never calls a factory: it returns the routes a factory exposes as `.routes` (the factories of `createContentApiRoutesFactory` do), or none.
+
+A route added to a module router after `initRouting()` is never served, and it has no `route.info`. `strapi.contentAPI.getRoutesMap()`, which backs `GET /admin/content-api/routes`, skips such routes. It throws `contentAPI.getRoutesMap() called before routes are registered` when `initRouting()` has not completed, because the map would be incomplete. `initRouting()` sets the flag it checks ([`routes-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routes-registration.ts)). `strapi.isLoaded` cannot tell, since it stays `false` during the whole bootstrap phase.
+
 The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routing.ts) validates each route with a Yup schema and adds `info.type` from the API router (`api` on the root router). An invalid route stops the boot with `Invalid route config`. An unknown handler, policy or middleware stops it with `Error creating endpoint <METHOD> <path>`.
 
 ### Route config
