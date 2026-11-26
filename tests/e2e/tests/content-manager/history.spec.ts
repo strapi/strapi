@@ -35,11 +35,8 @@ const goToHistoryPage = async (page: Page) => {
   await moreActionsButton.click();
   const historyButton = page.getByRole('menuitem', { name: /content history/i });
 
-  if (await historyButton.isVisible()) {
-    await clickAndWait(page, historyButton);
-  } else {
-    await goToHistoryPage(page);
-  }
+  await expect(historyButton).toBeVisible();
+  await clickAndWait(page, historyButton);
 };
 
 const ARTICLE_CTB_URL =
