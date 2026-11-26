@@ -241,6 +241,24 @@ registered schema. A subscriber on several models receives the union of their ev
 the caller passes, in `params.data` and `params.where`, stay `unknown`. Read
 [Lifecycles](../packages/core/database/04-lifecycles.md#with-strict-types).
 
+### Routes of loaded plugins and APIs
+
+With strict types, `strapi.plugin(name).routes` and `strapi.api(name).routes` are typed as they are
+in every lifecycle phase:
+
+- Until Strapi registers the routes, in the bootstrap phase before the `bootstrap` function of
+  plugins and APIs, they are what the module declared: router objects, or router factories, which
+  have no routes unless they expose them as `.routes` (`createContentApiRoutesFactory` does). From
+  then on, each router is a router object, built from its factory if needed.
+- A plugin may declare its routes as one array, and an API router file may export an array of
+  routes. Arrays stay arrays in every phase.
+- Routes are `Core.RouteInput`: `route.info` is set only when Strapi registers the route.
+
+Read the routes of a router with `routesOf` from `@strapi/utils`, which returns an array of routes as
+is and never calls a factory. Check `Array.isArray(plugin.routes)` first for a plugin, and narrow a
+router with `Array.isArray` and `isBuiltRouter` before reading its `type` or `prefix`. Read
+[The HTTP request path](../architecture/06-http-request-path.md) for when the routes are registered.
+
 ### Request input is not covered by strict types
 
 Strict types check the contracts that code calls, not the request data that it passes. The Koa
