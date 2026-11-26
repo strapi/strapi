@@ -63,8 +63,7 @@ test('lists the published articles', async () => {
 ```
 
 The cli suite has no `helpers.ts`. Replace the `../helpers` import with the lines below, name the
-app `cli-<domain>-${worker}`, and call the server with
-`fetch(server.url + '/…')`:
+app `cli-<domain>-${worker}`, and call the server with `fetch`, which needs no helper:
 
 ```ts
 import { appPort } from '@strapi/tests-shared';
@@ -72,20 +71,30 @@ import { appPort } from '@strapi/tests-shared';
 // Each Vitest worker gets its own app, port and database (VITEST_POOL_ID starts at 1).
 const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 const port = appPort('cli', worker - 1);
+
+// In the test:
+const res = await fetch(`${server.url}/api/articles`, {
+  headers: { authorization: `Bearer ${token}` },
+});
 ```
+
+No helper runs a CLI command yet. Start it with `node:child_process` in `app.dir`, with
+`env: appEnv(app, { … })` (`@strapi/tests-shared`), never `process.env`: the shell's `DATABASE_*`
+and edition would reach the command.
 
 ## ui
 
 Put the file in `ui/tests/<domain>/<name>.ui-test.ts`.
 
 ```ts
-import { expect, test } from '../../fixtures/app';
+import { expect, test } from '../../fixtures';
 
 // 'file' (default): restore the snapshot before each spec file. 'test': before each test.
 test.use({ resetScope: 'file' });
 
-test('serves the admin panel', async ({ page, server }) => {
-  await page.goto(`${server.url}/admin`);
+// The page starts logged in as the Super Admin: `test.use({ role: 'editor' })` for another role.
+test('serves the admin panel', async ({ page }) => {
+  await page.goto('/admin'); // baseURL is the worker's server
   await expect(page).toHaveTitle(/Strapi/);
 });
 
