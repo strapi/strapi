@@ -14,7 +14,7 @@ import type {
  */
 export declare namespace Create {
   export interface Request {
-    body: AdminUserCreationPayload & { plugins?: PluginInputValues };
+    body: AdminUserCreationPayload & { plugins?: PluginInputValues | null };
     query: {};
   }
 
@@ -29,7 +29,7 @@ export declare namespace Create {
  */
 export declare namespace Create {
   export interface Request {
-    body: AdminUserCreationPayload & { plugins?: PluginInputValues };
+    body: AdminUserCreationPayload & { plugins?: PluginInputValues | null };
     query: {};
   }
 
@@ -83,7 +83,7 @@ export declare namespace FindOne {
  */
 export declare namespace Update {
   export interface Request {
-    body: AdminUserUpdatePayload & { plugins?: PluginInputValues };
+    body: AdminUserUpdatePayload & { plugins?: PluginInputValues | null };
     query: {};
   }
 

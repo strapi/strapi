@@ -5,6 +5,7 @@ import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
 import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
+import { parseRouteId } from '../../../../server/src/utils/route-id';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
 
@@ -68,7 +69,13 @@ export default {
   },
 
   async update(ctx: Context) {
-    const { id } = ctx.params;
+    const id = parseRouteId(ctx.params.id);
+    const user = id === null ? null : await getService('user').findOne(id, null);
+
+    if (id === null || user === null) {
+      return ctx.notFound('User does not exist');
+    }
+
     const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
       body: ctx.request.body,
       user: ctx.state.user,
@@ -87,12 +94,6 @@ export default {
       if (uniqueEmailCheck) {
         throw new ApplicationError('A user with this email address already exists');
       }
-    }
-
-    const user = await getService('user').findOne(id, null);
-
-    if (user === null) {
-      return ctx.notFound('User does not exist');
     }
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {

@@ -14,7 +14,7 @@ type FormData = Record<string, unknown>;
 interface FormContext {
   /** The admin user who sends the form */
   user?: AdminUser;
-  /** The entity the form updates, as the database matches it (`'01'` is `1`). Missing on create */
+  /** The id of the entity the form updates, as core matched it. Missing on create */
   entityId?: Data.ID;
 }
 
@@ -44,17 +44,6 @@ type Save = <TEntity extends { id: Data.ID } | null>(
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
-
-/**
- * The id the database matches for a route id. Databases read a leading number from the string
- * (`'07'`, `' 7'`, `'7e0'`, and on MySQL `'7abc'`, all find row 7), so plugins get that number.
- * Ids that start with no safe integer are passed as sent: they match no row.
- */
-const toEntityId = (id?: Data.ID) => {
-  const number = typeof id === 'string' ? Number.parseFloat(id) : NaN;
-
-  return Number.isSafeInteger(number) ? number : id;
-};
 
 /** A 400 with a field error at `path`, like core's validation errors */
 const fieldError = (message: string, path: string[], details: object = {}) =>
@@ -95,7 +84,7 @@ const formExtensionsService = () => {
   ) => {
     if (!FORMS.includes(form)) {
       throw new Error(
-        `formExtensions.addInputParams: "${form}" is not a form plugins can extend. Use one of: ${FORMS.join(', ')}`
+        `unstable_addInputParams: "${form}" is not a form plugins can extend. Use one of: ${FORMS.join(', ')}`
       );
     }
 
@@ -104,7 +93,7 @@ const formExtensionsService = () => {
     )) {
       if (params[form].has(pluginId)) {
         throw new Error(
-          `formExtensions.addInputParams: param "${pluginId}" has already been added to the ${form} form`
+          `unstable_addInputParams: param "${pluginId}" has already been added to the ${form} form`
         );
       }
 
@@ -112,7 +101,7 @@ const formExtensionsService = () => {
 
       if (resolvedSchema && typeof resolvedSchema.safeParseAsync !== 'function') {
         throw new Error(
-          `formExtensions.addInputParams: the schema of "${pluginId}" must be a Zod schema, from \`z\` in @strapi/utils or the factory argument`
+          `unstable_addInputParams: the schema of "${pluginId}" must be a Zod schema, from \`z\` in @strapi/utils or the factory argument`
         );
       }
 
@@ -155,10 +144,9 @@ const formExtensionsService = () => {
           validate({ ...context, values: values[pluginId] })
         );
 
-        // A plugin bug: returning false refuses nothing, so fail loudly instead of saving
         if (result !== undefined) {
           throw new Error(
-            `formExtensions: the validate step of "${pluginId}" returned a value. Throw a ValidationError to refuse a save`
+            `admin::form-extensions: the validate step of "${pluginId}" returned a value. Throw a ValidationError to refuse a save`
           );
         }
       }
@@ -175,7 +163,7 @@ const formExtensionsService = () => {
    */
   const prepare = async <TBody>(
     form: ExtensibleForm,
-    { body, ...requestContext }: FormContext & { body: TBody }
+    { body, ...context }: FormContext & { body: TBody }
   ) => {
     type TData = Omit<TBody, 'plugins'>;
 
@@ -187,7 +175,6 @@ const formExtensionsService = () => {
     }
 
     const { plugins: input, ...data } = body;
-    const context = { ...requestContext, entityId: toEntityId(requestContext.entityId) };
     const values = await parseInput(form, input, context);
 
     let nextData: FormData = data;
@@ -199,10 +186,9 @@ const formExtensionsService = () => {
           beforeSave({ ...context, values: values[pluginId], data: current })
         );
 
-        // A plugin bug, not a bad request: answer 500 with a clear message
         if (!isRecord(result)) {
           throw new Error(
-            `formExtensions: the beforeSave step of "${pluginId}" must return the core values as an object`
+            `admin::form-extensions: the beforeSave step of "${pluginId}" must return the core values as an object`
           );
         }
 
@@ -218,7 +204,6 @@ const formExtensionsService = () => {
       if (entity) {
         const failures: Array<{ pluginId: string; error: unknown }> = [];
 
-        // Every plugin gets its afterSave, even when another one failed
         for (const [pluginId, { afterSave }] of params[form]) {
           try {
             await afterSave?.({ ...context, values: values[pluginId], entityId: entity.id });
@@ -227,10 +212,17 @@ const formExtensionsService = () => {
           }
         }
 
+        for (const { pluginId, error } of failures) {
+          strapi.log.error(
+            `admin::form-extensions: the afterSave step of "${pluginId}" failed after core saved entity ${entity.id}`,
+            { error }
+          );
+        }
+
         if (failures.length > 0) {
           // Never a 4xx: the entity is saved, and a client retrying a 400 would save it twice
           throw new Error(
-            `formExtensions: the afterSave step of ${failures
+            `admin::form-extensions: the afterSave step of ${failures
               .map(({ pluginId }) => `"${pluginId}"`)
               .join(', ')} failed after core saved entity ${entity.id}`,
             {
@@ -246,7 +238,6 @@ const formExtensionsService = () => {
       return entity;
     };
 
-    // Core checks `data` right after, as it checks the body without plugins
     return { data: nextData as TData, save };
   };
 

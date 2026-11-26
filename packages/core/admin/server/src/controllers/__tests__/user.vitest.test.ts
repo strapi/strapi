@@ -265,6 +265,7 @@ describe('User Controller', () => {
 
     test('User not found', async () => {
       const fakeId = 42;
+      const exists = vi.fn(() => Promise.resolve(false));
       const updateById = vi.fn(() => null);
       const notFound = vi.fn();
       const body = { username: 'Foo' };
@@ -274,14 +275,16 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { updateById },
+            user: { exists, updateById },
           },
         },
       } as any;
 
       await userController.update(ctx);
 
-      expect(updateById).toHaveReturnedWith(null);
+      // Checked before plugin steps and validation
+      expect(exists).toHaveBeenCalledWith({ id: fakeId });
+      expect(updateById).not.toHaveBeenCalled();
       expect(notFound).toHaveBeenCalledWith('User does not exist');
     });
 
@@ -289,6 +292,14 @@ describe('User Controller', () => {
       const body = { firstname: 21 };
 
       const ctx = createContext({ params: { id: user.id }, body }) as any;
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { exists: vi.fn(() => Promise.resolve(true)) },
+          },
+        },
+      } as any;
 
       expect.assertions(2);
 
@@ -312,7 +323,7 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { updateById, sanitizeUser },
+            user: { exists: vi.fn(() => Promise.resolve(true)), updateById, sanitizeUser },
           },
         },
       } as any;
@@ -326,7 +337,8 @@ describe('User Controller', () => {
 
     test('Lowercases email before uniqueness check and update', async () => {
       const updateById = vi.fn((_, input) => ({ ...user, ...input }));
-      const exists = vi.fn(() => Promise.resolve(false));
+      // The user exists, and no other user has the email
+      const exists = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false);
       const sanitizeUser = vi.fn((user) => user);
       const body = { email: 'UPPER@EXAMPLE.COM' };
       const ctx = createContext({ params: { id: user.id }, body }) as any;

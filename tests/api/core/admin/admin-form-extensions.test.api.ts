@@ -49,8 +49,13 @@ describe('Admin form extensions (api)', () => {
     formExtensions.unstable_addInputParams('role', {
       spaces: {
         ...spacesParam,
-        beforeSave: ({ values, data }) =>
-          values?.space === 'bad-name' ? { ...data, name: '' } : data,
+        beforeSave: ({ values, data }) => {
+          if (values?.space === 'refused-before-save') {
+            throw new errors.ValidationError('Refused before save');
+          }
+
+          return values?.space === 'bad-name' ? { ...data, name: '' } : data;
+        },
       },
     });
     formExtensions.unstable_addInputParams('user', {
@@ -195,6 +200,17 @@ describe('Admin form extensions (api)', () => {
       expect(notAnObject.body.error.details.errors[0].path).toEqual(['plugins']);
     });
 
+    test('reports a beforeSave ValidationError without field errors on the plugin field', async () => {
+      const res = await createRole({
+        name: `${prefix}_refused_before_save`,
+        plugins: { spaces: { space: 'refused-before-save' } },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.details.errors[0].path).toEqual(['plugins', 'spaces']);
+      expect(afterSave).not.toHaveBeenCalled();
+    });
+
     test('core checks the role values beforeSave returns', async () => {
       const res = await createRole({
         name: `${prefix}_renamed_by_plugin`,
@@ -203,38 +219,6 @@ describe('Admin form extensions (api)', () => {
 
       expect(res.statusCode).toBe(400);
       expect(afterSave).not.toHaveBeenCalled();
-    });
-
-    test('refuses an update body that is not an object, as core does', async () => {
-      const role = await createRole({ name: `${prefix}_array_body` });
-      afterSave.mockReset();
-
-      for (const url of [
-        `/admin/roles/${role.body.data.id}`,
-        '/admin/users/1',
-        `/admin/api-tokens/${role.body.data.id}`,
-      ]) {
-        const res = await rq({ method: 'PUT', url, body: [] });
-
-        expect(res.statusCode).toBe(400);
-      }
-
-      expect(afterSave).not.toHaveBeenCalled();
-    });
-
-    test('gives plugins the id the database matches for a route id such as 07', async () => {
-      const role = await createRole({ name: `${prefix}_padded_id` });
-      validatedIds.mockReset();
-
-      const res = await rq({
-        method: 'PUT',
-        url: `/admin/roles/0${role.body.data.id}`,
-        body: { description: 'x', plugins: { spaces: { space: 'france' } } },
-      });
-
-      expect(res.statusCode).toBe(200);
-      // The route id as the number the database matched, not the string '0<id>'
-      expect(validatedIds).toHaveBeenCalledWith(role.body.data.id);
     });
 
     test('answers 500 when afterSave refuses with a ValidationError, the role being saved', async () => {
@@ -253,17 +237,6 @@ describe('Admin form extensions (api)', () => {
 
       expect(saved).not.toBeNull();
       roleIds.push(saved.id);
-    });
-
-    test('answers 404 for a missing role, without afterSave', async () => {
-      const res = await rq({
-        method: 'PUT',
-        url: '/admin/roles/999999',
-        body: { name: `${prefix}_missing`, plugins: { spaces: { space: 'france' } } },
-      });
-
-      expect(res.statusCode).toBe(404);
-      expect(afterSave).not.toHaveBeenCalled();
     });
   });
 
@@ -312,17 +285,6 @@ describe('Admin form extensions (api)', () => {
           values: { space: 'spain' },
         })
       );
-    });
-
-    test('answers 404 for a missing user, without afterSave', async () => {
-      const res = await rq({
-        method: 'PUT',
-        url: '/admin/users/999999',
-        body: { firstname: 'Nobody', plugins: { spaces: { space: 'france' } } },
-      });
-
-      expect(res.statusCode).toBe(404);
-      expect(afterSave).not.toHaveBeenCalled();
     });
 
     test('refuses core values from beforeSave that core would refuse', async () => {
@@ -491,17 +453,6 @@ describe('Admin form extensions (api)', () => {
       expect(badType.statusCode).toBe(400);
     });
 
-    test('answers 404 for a missing token, without afterSave', async () => {
-      const res = await rq({
-        method: 'PUT',
-        url: '/admin/api-tokens/999999',
-        body: { description: 'x', plugins: { spaces: { space: 'france' } } },
-      });
-
-      expect(res.statusCode).toBe(404);
-      expect(afterSave).not.toHaveBeenCalled();
-    });
-
     test('refuses an unknown plugin key', async () => {
       const res = await rq({
         method: 'POST',
@@ -510,6 +461,136 @@ describe('Admin form extensions (api)', () => {
       });
 
       expect(res.statusCode).toBe(400);
+    });
+  });
+
+  describe('what plugins see on each form route', () => {
+    const routeIds = (id: number) => ({
+      id: `${id}`,
+      zeroPadded: `0${id}`,
+      missing: '999999',
+      exponent: `${id}e0`,
+      hex: '0x0A',
+      letters: 'abc',
+    });
+
+    const withPlugins = (body: Record<string, unknown>) => ({
+      ...body,
+      plugins: { spaces: { space: 'france' } },
+    });
+
+    const routes = [
+      {
+        name: 'role',
+        path: (id: string) => `/admin/roles/${encodeURIComponent(id)}`,
+        create: () => createRole({ name: `${prefix}_matrix_role` }),
+        body: { description: 'matrix' },
+      },
+      {
+        name: 'user',
+        path: (id: string) => `/admin/users/${encodeURIComponent(id)}`,
+        create: () =>
+          rq({
+            method: 'POST',
+            url: '/admin/users',
+            body: { firstname: 'Matrix', email: `matrix@${prefix}.test`, roles: [keptRoleId] },
+          }),
+        body: { firstname: 'Matrix' },
+      },
+      {
+        name: 'token',
+        path: (id: string) => `/admin/api-tokens/${encodeURIComponent(id)}`,
+        create: () =>
+          rq({
+            method: 'POST',
+            url: '/admin/api-tokens',
+            body: { name: `${prefix}_matrix_token`, type: 'read-only' },
+          }),
+        body: { description: 'matrix' },
+      },
+    ];
+
+    test.each(routes)('$name update: plugins only see the id core matched', async (route) => {
+      const targetId = (await route.create()).body.data.id;
+
+      for (const [kind, id] of Object.entries(routeIds(targetId))) {
+        validatedIds.mockReset();
+        afterSave.mockReset();
+
+        const res = await rq({ method: 'PUT', url: route.path(id), body: withPlugins(route.body) });
+        const matched = kind === 'id' || kind === 'zeroPadded';
+
+        expect({ kind, status: res.statusCode }).toEqual({ kind, status: matched ? 200 : 404 });
+
+        if (matched) {
+          expect(validatedIds).toHaveBeenCalledWith(targetId);
+          expect(afterSave).toHaveBeenCalledWith(expect.objectContaining({ entityId: targetId }));
+        } else {
+          expect(validatedIds).not.toHaveBeenCalled();
+          expect(afterSave).not.toHaveBeenCalled();
+        }
+      }
+
+      validatedIds.mockReset();
+      const array = await rq({ method: 'PUT', url: route.path(`${targetId}`), body: [] });
+
+      expect(array.statusCode).toBe(400);
+      expect(validatedIds).not.toHaveBeenCalled();
+    });
+
+    test.each(['/admin/roles', '/admin/users', '/admin/api-tokens'])(
+      'POST %s with a body that is not an object runs no plugin step',
+      async (url) => {
+        validatedIds.mockReset();
+
+        const res = await rq({ method: 'POST', url, body: [] });
+
+        expect(res.statusCode).toBe(400);
+        expect(validatedIds).not.toHaveBeenCalled();
+      }
+    );
+
+    test('the Super Admin role runs no plugin step', async () => {
+      const superAdminRole = await utils.getSuperAdminRole();
+      validatedIds.mockReset();
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/admin/roles/${superAdminRole.id}`,
+        body: withPlugins({ description: 'x' }),
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(validatedIds).not.toHaveBeenCalled();
+    });
+
+    test('an afterSave failure on user and token create answers 500, the entity being saved', async () => {
+      afterSave.mockRejectedValue(new Error('Plugin save failed'));
+
+      const user = await rq({
+        method: 'POST',
+        url: '/admin/users',
+        body: withPlugins({
+          firstname: 'Late',
+          email: `late@${prefix}.test`,
+          roles: [keptRoleId],
+        }),
+      });
+      const token = await rq({
+        method: 'POST',
+        url: '/admin/api-tokens',
+        body: withPlugins({ name: `${prefix}_late_token`, type: 'read-only' }),
+      });
+
+      expect([user.statusCode, token.statusCode]).toEqual([500, 500]);
+      expect(
+        await strapi.db.query('admin::user').findOne({ where: { email: `late@${prefix}.test` } })
+      ).not.toBeNull();
+      expect(
+        await strapi.db
+          .query('admin::api-token')
+          .findOne({ where: { name: `${prefix}_late_token` } })
+      ).not.toBeNull();
     });
   });
 });

@@ -32,7 +32,7 @@ export type ContentApiApiTokenBody = Pick<ContentApiApiToken, 'name' | 'descript
  */
 export declare namespace Create {
   export interface Request {
-    body: ContentApiApiTokenBody & { plugins?: PluginInputValues };
+    body: ContentApiApiTokenBody & { plugins?: PluginInputValues | null };
     query: {};
   }
 
@@ -100,7 +100,7 @@ export declare namespace Get {
  */
 export declare namespace Update {
   export interface Request {
-    body: Partial<ContentApiApiTokenBody> & { plugins?: PluginInputValues };
+    body: Partial<ContentApiApiTokenBody> & { plugins?: PluginInputValues | null };
     query: {};
   }
 

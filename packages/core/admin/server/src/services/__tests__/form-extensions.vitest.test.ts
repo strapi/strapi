@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { errors, z } from '@strapi/utils';
 
 import formExtensionsService from '../form-extensions';
@@ -6,6 +6,13 @@ import formExtensionsService from '../form-extensions';
 const saveRole = (data: Record<string, unknown>) => Promise.resolve({ id: 7, ...data });
 
 describe('Form extensions service', () => {
+  const logError = vi.fn();
+
+  beforeEach(() => {
+    logError.mockReset();
+    global.strapi = { log: { error: logError } } as any;
+  });
+
   test('returns the core values as they are when no plugin added params', async () => {
     const formExtensions = formExtensionsService();
     const { data, save } = await formExtensions.internal_prepare('role', {
@@ -223,35 +230,6 @@ describe('Form extensions service', () => {
     );
   });
 
-  test('gives every step the id the database matches: the route id as a number, the saved id on create', async () => {
-    const formExtensions = formExtensionsService();
-    const ids: unknown[] = [];
-    formExtensions.unstable_addInputParams('role', {
-      spaces: {
-        validate({ entityId }) {
-          ids.push(entityId);
-        },
-        afterSave({ entityId }) {
-          ids.push(entityId);
-        },
-      },
-    });
-
-    const update = await formExtensions.internal_prepare('role', {
-      body: {},
-      entityId: '07',
-    });
-    await update.save(() => saveRole({}));
-
-    expect(ids).toEqual([7, 7]);
-
-    ids.length = 0;
-    const create = await formExtensions.internal_prepare('role', { body: {} });
-    await create.save(() => saveRole({}));
-
-    expect(ids).toEqual([undefined, 7]);
-  });
-
   test('answers an afterSave ValidationError as a server error, the entity being saved', async () => {
     const formExtensions = formExtensionsService();
     formExtensions.unstable_addInputParams('role', {
@@ -321,8 +299,14 @@ describe('Form extensions service', () => {
     const error = await save(() => saveRole({})).catch((e) => e);
 
     expect(teamsAfterSave).toHaveBeenCalled();
+    // The server log names each failing plugin with its error; clients get a generic 500
+    expect(logError).toHaveBeenCalledWith(
+      'admin::form-extensions: the afterSave step of "spaces" failed after core saved entity 7',
+      { error: expect.objectContaining({ message: 'spaces failed' }) }
+    );
+    expect(logError).toHaveBeenCalledTimes(2);
     expect(error.message).toBe(
-      'formExtensions: the afterSave step of "spaces", "labels" failed after core saved entity 7'
+      'admin::form-extensions: the afterSave step of "spaces", "labels" failed after core saved entity 7'
     );
     expect(error.cause).toBeInstanceOf(AggregateError);
     expect(error.cause.errors.map((e: Error) => e.message)).toEqual([
@@ -352,23 +336,5 @@ describe('Form extensions service', () => {
         spaces: { schema: { validate: () => true } },
       })
     ).toThrow('the schema of "spaces" must be a Zod schema');
-  });
-
-  test('gives plugins the number the database reads from a route id, and other ids as sent', async () => {
-    const formExtensions = formExtensionsService();
-    const ids: unknown[] = [];
-    formExtensions.unstable_addInputParams('role', {
-      spaces: {
-        validate({ entityId }) {
-          ids.push(entityId);
-        },
-      },
-    });
-
-    for (const entityId of ['07', ' 7', '+7', '7e0', '7abc', '7.5', '9007199254740993', 'abc']) {
-      await formExtensions.internal_prepare('role', { body: {}, entityId });
-    }
-
-    expect(ids).toEqual([7, 7, 7, 7, 7, '7.5', '9007199254740993', 'abc']);
   });
 });

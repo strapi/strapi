@@ -4,6 +4,7 @@ import { strings, errors } from '@strapi/utils';
 import { trim, has } from 'lodash';
 
 import { getService } from '../utils';
+import { parseRouteId } from '../utils/route-id';
 import {
   validateApiTokenCreationInput,
   validateApiTokenUpdateInput,
@@ -18,31 +19,20 @@ export default {
   // Create
   // -------------------------------------------------------------------------
   async create(ctx: Context) {
-    const { body } = ctx.request as Create.Request;
     const apiTokenService = getService('api-token-content-api');
-
-    const { data: attributes, save } = await getService('form-extensions').internal_prepare(
+    const { data: body, save } = await getService('form-extensions').internal_prepare(
       'content-api-token',
-      {
-        body: {
-          kind: 'content-api' as const,
-          name: trim(body.name),
-          description: trim(body.description),
-          type: body.type,
-          permissions: body.permissions,
-          lifespan: body.lifespan,
-          plugins: body.plugins,
-        },
-        user: ctx.state.user,
-      }
+      { body: (ctx.request as Create.Request).body, user: ctx.state.user }
     );
 
-    // A plugin's beforeSave can change them: trim again, as update does after the plugin steps
-    for (const key of ['name', 'description'] as const) {
-      if (typeof attributes[key] === 'string') {
-        attributes[key] = trim(attributes[key]);
-      }
-    }
+    const attributes = {
+      kind: 'content-api' as const,
+      name: trim(body.name),
+      description: trim(body.description),
+      type: body.type,
+      permissions: body.permissions,
+      lifespan: body.lifespan,
+    };
 
     await validateApiTokenCreationInput(attributes);
 
@@ -113,16 +103,17 @@ export default {
   // Update
   // -------------------------------------------------------------------------
   async update(ctx: Context) {
-    const { id } = ctx.params as Update.Params;
+    const id = parseRouteId((ctx.params as Update.Params).id);
+    const apiTokenService = getService('api-token-content-api');
+
+    if (id === null || !(await apiTokenService.getById(id))) {
+      return ctx.notFound('API Token not found');
+    }
+
     const { data: body, save } = await getService('form-extensions').internal_prepare(
       'content-api-token',
-      {
-        body: (ctx.request as Update.Request).body,
-        user: ctx.state.user,
-        entityId: id,
-      }
+      { body: (ctx.request as Update.Request).body, user: ctx.state.user, entityId: id }
     );
-    const apiTokenService = getService('api-token-content-api');
 
     const mutableBody = body as Record<string, unknown>;
     if (has(mutableBody, 'name')) {
@@ -133,11 +124,6 @@ export default {
     }
 
     await validateApiTokenUpdateInput(body);
-
-    const existingToken = await apiTokenService.getById(id);
-    if (!existingToken) {
-      return ctx.notFound('API Token not found');
-    }
 
     if (has(body, 'name')) {
       const nameAlreadyTaken = await apiTokenService.getByName(body.name!);

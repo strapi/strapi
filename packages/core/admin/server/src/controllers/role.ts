@@ -8,6 +8,7 @@ import {
 } from '../validation/role';
 import { validatedUpdatePermissionsInput } from '../validation/permission';
 import constants from '../services/constants';
+import { parseRouteId } from '../utils/route-id';
 import { getService } from '../utils';
 import type {
   Create,
@@ -89,26 +90,26 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async update(ctx: Context) {
-    const { id } = ctx.params as Update.Request['params'];
-    const { data: body, save } = await getService('form-extensions').internal_prepare('role', {
-      body: (ctx.request as Omit<Update.Request, 'params'>).body,
-      user: ctx.state.user,
-      entityId: id,
-    });
-
+    const id = parseRouteId((ctx.params as Update.Request['params']).id);
     const roleService = getService('role');
 
-    await validateRoleUpdateInput(body);
+    const role = id === null ? null : await roleService.findOne({ id });
 
-    const role = await roleService.findOne({ id });
-
-    if (!role) {
+    if (id === null || !role) {
       return ctx.notFound('role.notFound');
     }
 
     if (role.code === SUPER_ADMIN_CODE) {
       throw new ApplicationError("Super admin can't be edited.");
     }
+
+    const { data: body, save } = await getService('form-extensions').internal_prepare('role', {
+      body: (ctx.request as Omit<Update.Request, 'params'>).body,
+      user: ctx.state.user,
+      entityId: id,
+    });
+
+    await validateRoleUpdateInput(body);
 
     const updatedRole = await save(() => roleService.update({ id }, body));
     const sanitizedRole = roleService.sanitizeRole(updatedRole) as Omit<

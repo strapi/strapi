@@ -87,7 +87,7 @@ export declare namespace Create {
     body: {
       name: string;
       description?: string;
-      plugins?: PluginInputValues;
+      plugins?: PluginInputValues | null;
     };
   }
 
@@ -107,7 +107,7 @@ export declare namespace Update {
     body: {
       name?: string;
       description?: string;
-      plugins?: PluginInputValues;
+      plugins?: PluginInputValues | null;
     };
   }
 

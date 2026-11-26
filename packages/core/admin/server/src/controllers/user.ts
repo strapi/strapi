@@ -7,6 +7,7 @@ import {
   validateUserUpdateInput,
   validateUsersDeleteInput,
 } from '../validation/user';
+import { parseRouteId } from '../utils/route-id';
 import { getService } from '../utils';
 import { normalizeEmail } from '../utils/normalize-email';
 import {
@@ -96,7 +97,12 @@ export default {
   },
 
   async update(ctx: Context) {
-    const { id } = ctx.params as Update.Params;
+    const id = parseRouteId((ctx.params as Update.Params).id);
+
+    if (id === null || !(await getService('user').exists({ id }))) {
+      return ctx.notFound('User does not exist');
+    }
+
     const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
       body: (ctx.request as Update.Request).body,
       user: ctx.state.user,
