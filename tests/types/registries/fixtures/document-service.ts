@@ -579,3 +579,15 @@ void app.documents(articleOrCategory).delete({ documentId: 'a', status: 'draft' 
 void app.documents(anyContentType).delete({ documentId: 'a', status: 'draft' });
 void app.documents(articleOrCategory).delete({ documentId: 'a', status: 'published' });
 void app.documents('api::category.category').delete({ documentId: 'a', status: 'draft' });
+
+// The core service of a union of UIDs follows the Document Service's `delete`: `published` only
+// once one member enables draft and publish, as `draft` throws for that member.
+const articleOrCategoryService = factories.createCoreService(articleOrCategory)({ strapi: app });
+// @ts-expect-error `draft` throws for the draft and publish member
+void articleOrCategoryService.delete('a', { status: 'draft' });
+void articleOrCategoryService.delete('a', { status: 'published' });
+// A union without draft and publish keeps `draft`: the runtime deletes the entries.
+declare const categoryOrNote: 'api::category.category' | 'api::note.note';
+const categoryOrNoteService = factories.createCoreService(categoryOrNote)({ strapi: app });
+void categoryOrNoteService.delete('a', { status: 'draft' });
+void categoryOrNoteService.delete('a', { status: 'published' });
