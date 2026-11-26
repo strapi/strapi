@@ -31,13 +31,17 @@ interface MainNavMenuArgs {
   Content: React.ComponentType;
 }
 
+/** A hook that returns a CSS colour to tint the main navigation with, or `null` */
+type UseMainNavTint = () => string | null;
+
 class MainNav {
   menus: MainNavMenuArgs[] = [];
+  tints: UseMainNavTint[] = [];
   private isLocked = false;
 
   /**
-   * Called once the admin renders: the navigation reads the registry on every render, so menus
-   * added later would not show until something re-renders it
+   * Called once the admin renders: the navigation reads the registry on every render, so a menu
+   * added later would not show, and a tint added later would change the hooks it calls
    */
   lock = () => {
     this.isLocked = true;
@@ -59,7 +63,17 @@ class MainNav {
 
     this.menus.push(menu);
   };
+
+  addTint = (useTint: UseMainNavTint) => {
+    invariant(
+      !this.isLocked,
+      'Main navigation tints must be added in register, before the admin renders'
+    );
+    invariant(typeof useTint === 'function', 'A tint must be a hook that returns a colour or null');
+
+    this.tints.push(useTint);
+  };
 }
 
 export { MainNav };
-export type { MainNavMenuArgs, MainNavMenuCurrent };
+export type { MainNavMenuArgs, MainNavMenuCurrent, UseMainNavTint };
