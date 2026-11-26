@@ -29,7 +29,6 @@ const DOMAIN_WEIGHTS = {
   admin: 32,
   i18n: 31,
   'media-library': 16,
-  settings: 15,
   'content-releases': 13,
   'review-workflows': 12,
   search: 9,
