@@ -43,8 +43,12 @@ const MainNavWrapper = styled(Flex)`
       fill: ${({ theme }) => theme.colors.neutral600};
     }
 
-    /* The theme hover colour under the same wash, so hover shows as much as without a tint */
-    a:hover {
+    /*
+     * The theme hover colour under the same wash, so hover shows as much as without a tint. Menu
+     * triggers, like the profile menu, hover like the links
+     */
+    a:hover,
+    button[aria-haspopup='menu']:hover {
       background: color-mix(
         in srgb,
         var(--main-nav-tint) 12%,
