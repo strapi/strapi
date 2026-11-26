@@ -310,7 +310,7 @@ const LicenseInfoEE = () => {
           {!isGrowth && formattedDate && <PlanDetail label={dateLabel} value={formattedDate} />}
           {/* Not gated on Growth: Enterprise licences can carry a seat limit too. A licence
               without one (including an older licence the registry has not re-issued yet) has a
-              null `permittedSeats`, and the component already renders nothing in that case. */}
+              null `permittedSeats`: the component then only shows the usage across instances. */}
           <AdminSeatInfoEE />
           {/* Any plan with AI, as before this moved onto the Plan card (AIUsage renders nothing
               without it). The `ai.enabled` gate is kept: without it an instance with AI

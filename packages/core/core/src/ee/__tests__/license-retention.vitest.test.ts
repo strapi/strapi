@@ -72,6 +72,7 @@ const createMockStrapi = () => {
         rollback: vi.fn().mockResolvedValue(undefined),
       }),
       queryBuilder: vi.fn().mockReturnValue(chainable),
+      lifecycles: { subscribe: vi.fn() },
     },
     config: { get: vi.fn().mockReturnValue('project-uuid') },
     cron: { add: vi.fn() },
