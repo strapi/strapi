@@ -41,7 +41,7 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       hadAuthenticatedMcpRequest = true;
       sendDidUseMcpServer(strapi);
 
-      // Let audit logs pick up MCP actions and tag their origin.
+      // Let audit logs and content history pick up MCP actions and tag their origin.
       ctx.state.user = authResult.user;
       ctx.state.auditSource = 'mcp';
       ctx.state.auth = {
