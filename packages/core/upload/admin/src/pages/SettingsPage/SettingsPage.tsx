@@ -6,6 +6,7 @@ import {
   useFetchClient,
   Layouts,
   ConfirmDialog,
+  type FetchError,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -168,12 +169,12 @@ export const SettingsPage = () => {
   const isAIAvailable = useAIMetadataAvailability();
 
   const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
-    GetAIMetadataPendingCount.Response['data'],
-    GetAIMetadataPendingCount.Response['error']
+    GetAIMetadataPendingCount.Response,
+    FetchError
   >(
     ['ai-metadata-count'],
     async () => {
-      const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
+      const { data } = await get<GetAIMetadataPendingCount.Response>(
         '/upload/ai-metadata-jobs/pending-count'
       );
       return data;
@@ -232,19 +233,19 @@ export const SettingsPage = () => {
     }
   );
 
-  // Poll for latest active job - notifications are handled inside the hook
+  // Poll for the latest job, whatever its status - notifications are handled inside the hook
   const { data: aiMetadataJob, refetch: refetchAiMetadataJob } = useAIMetadataJob({
     enabled: isAIAvailable,
   });
 
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
-    CreateAIMetadataJob.Response['data'],
-    CreateAIMetadataJob.Response['error'],
+    CreateAIMetadataJob.Response,
+    FetchError,
     void
   >(
     async () => {
       const { data } = await post<
-        CreateAIMetadataJob.Response['data'],
+        CreateAIMetadataJob.Response,
         CreateAIMetadataJob.Request['body']
       >('/upload/ai-metadata-jobs', {});
       return data;
@@ -258,7 +259,7 @@ export const SettingsPage = () => {
       onError(err) {
         toggleNotification({
           type: 'danger',
-          message: (err as Error)?.message || formatMessage({ id: 'notification.error' }),
+          message: err?.message || formatMessage({ id: 'notification.error' }),
         });
         setIsConfirmDialogOpen(false);
       },

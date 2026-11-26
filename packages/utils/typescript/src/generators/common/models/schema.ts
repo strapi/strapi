@@ -10,6 +10,7 @@ import {
 import type { Schema } from './utils';
 import { attributeToPropertySignature } from './attributes';
 import { addImport } from '../imports';
+import { compareEnglish } from '../compare';
 
 const { factory } = ts;
 
@@ -20,7 +21,7 @@ const generateAttributePropertySignature = (schema: Schema): ts.PropertySignatur
   const { attributes } = schema;
 
   const properties = Object.entries(attributes)
-    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a, b) => compareEnglish(a[0], b[0]))
     .map(([attributeName, attribute]) => {
       return attributeToPropertySignature(schema, attributeName, attribute);
     });

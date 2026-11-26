@@ -111,7 +111,7 @@ const sort = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
-      // eslint-disable-next-line no-unused-vars
+      // oxlint-disable-next-line no-unused-vars
       const { [key]: ignored, ...rest } = data;
 
       return rest;

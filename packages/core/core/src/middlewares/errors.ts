@@ -2,6 +2,7 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
+import { isDatabaseInputError } from '../utils/database-input-errors';
 
 declare module 'koa' {
   interface BaseResponse {
@@ -27,6 +28,15 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
 
       if (error instanceof errors.HttpError) {
         const { status, body } = formatHttpError(error);
+        ctx.status = status;
+        ctx.body = body;
+        return;
+      }
+
+      // Routes that call strapi.db.query directly bypass the document and entity services,
+      // so invalid input values reach this point as raw database errors.
+      if (isDatabaseInputError(error) === true) {
+        const { status, body } = formatApplicationError(new errors.ValidationError(error.message));
         ctx.status = status;
         ctx.body = body;
         return;

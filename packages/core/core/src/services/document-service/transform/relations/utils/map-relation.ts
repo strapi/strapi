@@ -133,7 +133,7 @@ const traverseEntityRelations = async (
 ) => {
   const { includeMedia = false, ...traverseOptions } = options;
 
-  return traverseEntity(
+  return await traverseEntity(
     async (options, utils) => {
       const { attribute } = options;
 
@@ -168,6 +168,7 @@ const mapRelationCurried = curry(mapRelation);
 const traverseEntityRelationsCurried = curry(traverseEntityRelations);
 
 export {
+  isNumeric,
   mapRelationCurried as mapRelation,
   traverseEntityRelationsCurried as traverseEntityRelations,
 };

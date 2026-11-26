@@ -7,6 +7,7 @@ const mockUpdateDocument = jest.fn();
 const mockPublish = jest.fn();
 const mockSetParentFormValue = jest.fn();
 const mockDispatch = jest.fn();
+const mockResetForm = jest.fn();
 const mockCountDraftRelations = jest.fn();
 const mockUseDraftRelationCountQuery = jest.fn();
 const mockDiscard = jest.fn();
@@ -59,7 +60,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
       validate: async () => ({ errors: undefined }),
       setSubmitting: jest.fn(),
       setErrors: jest.fn(),
-      resetForm: jest.fn(),
+      resetForm: mockResetForm,
     }),
   useQueryParams: () => [{ rawQuery: '', query: {} }],
   useGuidedTour: () => jest.fn(),
@@ -104,6 +105,7 @@ jest.mock('../../../../services/documents', () => ({
   useGetDraftRelationCountQuery: (...args: unknown[]) => mockUseDraftRelationCountQuery(...args),
   useLazyGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
   useLazyGetDocumentQuery: () => [mockFetchDraftDocument],
+  useGetI18nLocalesQuery: () => ({ data: undefined }),
 }));
 jest.mock('../FormInputs/Relations/RelationModal', () => ({
   isAnyRelationModalOpen: () => mockIsAnyRelationModalOpen,
@@ -549,6 +551,31 @@ describe('nested relation parent updates', () => {
         type: 'CLEAR_PENDING_CONNECTS',
         payload: { documentMeta: { model: 'api::child.child', documentId: 'existing-child' } },
       })
+    );
+  });
+  it('preserves unsaved changes when updating a document fails with an ApplicationError', async () => {
+    mockResetForm.mockClear();
+    mockDispatch.mockClear();
+
+    mockUpdateDocument.mockResolvedValue({
+      error: {
+        name: 'ApplicationError',
+        message: 'Something went wrong',
+      },
+    });
+
+    const { user } = render(
+      <ExistingDocumentActionHarness Action={UpdateAction} label="Save existing" />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Save existing' }));
+
+    await waitFor(() => {
+      expect(mockResetForm).not.toHaveBeenCalled();
+    });
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'CLEAR_PENDING_CONNECTS' })
     );
   });
 });
@@ -1327,6 +1354,50 @@ describe('DocumentActionsMenu', () => {
     await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('leaves the focus in a modal opened from the menu instead of giving it back to the trigger', async () => {
+    const { user } = render(
+      <DocumentActionsMenu
+        actions={[
+          {
+            id: '1',
+            label: 'Action 1',
+            // The dialog is only set once the click handler resolves, after the menu has closed
+            onClick: async () => {},
+            dialog: {
+              type: 'modal',
+              title: 'hello world',
+              content: <input aria-label="New position" autoFocus />,
+              footer: null,
+            },
+          },
+          { id: '2', label: 'Action 2', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    const trigger = screen.getByRole('button', { name: 'More document actions' });
+
+    await user.click(trigger);
+
+    // jsdom doesn't reproduce the browser timing (the closing menu took the focus back from the
+    // field that just got it), so check that the menu doesn't give it back to the trigger
+    const focusTrigger = jest.spyOn(trigger, 'focus');
+
+    await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
+
+    await waitFor(() => expect(screen.getByLabelText('New position')).toHaveFocus());
+    expect(focusTrigger).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Close modal' }));
+
+    // An action without a dialog still gives the focus back to the trigger
+    focusTrigger.mockClear();
+    await user.click(trigger);
+    await user.click(screen.getByRole('menuitem', { name: 'Action 2' }));
+
+    await waitFor(() => expect(focusTrigger).toHaveBeenCalled());
   });
 
   it('should show correct background colors on hover for different variants', async () => {

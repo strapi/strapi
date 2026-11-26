@@ -22,19 +22,20 @@ The plugin defines two hidden content types. `Release` (`strapi_releases`) store
 
 ### Release's status
 
-Releases are assigned one of five statuses:
+A release is planned until it runs, then frozen: nothing changes it afterwards. Planned statuses are recalculated on every change; frozen ones are written once.
 
-- **Ready**: Indicates that the release is fully prepared for publishing, with no invalid entries present.
-- **Blocked**: Release has at least one invalid entry preventing publishing.
-- **Empty**: Release contains no entries and cannot be published.
-- **Failed**: Indicates that the publishing attempt for the release has encountered an error with no changes since then.
-- **Done**: Confirms that the release has been successfully published without encountering any errors.
+- **Empty** (planned): the release has no entries.
+- **Ready** (planned): publishing now would release every entry (`all_or_nothing`) or at least one (`allow_partial`).
+- **Blocked** (planned): publishing now would release nothing, so it is refused.
+- **Done** (frozen): every entry was released. A release with no entries ends done when it runs or misses its schedule.
+- **Partial** (frozen, `allow_partial` only): some entries were released, the others skipped.
+- **Failed** (frozen): the run released nothing, or a release with entries never ran before its date passed. One that failed before the upgrade is frozen as failed, empty or not, and may have released some entries: nothing recorded which.
 
-These statuses are dynamically updated based on actions such as creation, addition/removal of entries, updates, and publishing attempts. They provide a concise overview of release readiness and validity, ensuring smooth operations and data integrity.
+See [Backend design](./01-backend.md) for the rules behind each status.
 
 ### Publishing a release
 
-The `release` service locks the release row with `forUpdate` in a transaction. It rejects a release that is already published or failed. It groups the actions by content type, publishes in an order that keeps relations, and calls `strapi.documents(uid).publish` and `unpublish`. On success it sets the status to `done`. On failure it sets `failed`. Code: [`services/release.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/release.ts).
+A run holds the release row lock (`forUpdate`) for its whole transaction and rejects a release that already ran. It checks every publish entry before writing anything. A release that would release nothing is refused when published by hand, and frozen as `failed` when its schedule runs it. Otherwise, `all_or_nothing` releases every entry in one savepoint, so the first error rolls them all back and the release fails. `allow_partial` skips the entries that aren't publishable and releases each other entry in its own savepoint, so one that throws is skipped alone. The run records each entry's outcome and the release's totals, then freezes the release as `done`, `partial` or `failed`. Code: [`services/release.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/release.ts) and [`services/release-run.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/release-run.ts).
 
 ### Scheduling
 
@@ -42,7 +43,7 @@ The `scheduling` service adds one cron job per scheduled release with `strapi.cr
 
 ### Keeping actions in sync with documents
 
-The plugin registers two Document Service middlewares, `deleteActionsOnDelete` and `updateActionsOnUpdate`. It also subscribes to database lifecycles for `deleteMany`. They delete actions or revalidate entries when a document changes, and they update the status of the releases that hold them. Handlers on the content type sync hooks delete actions when draft and publish is disabled or a content type is deleted, and they revalidate the changed content types. See [Extension points](../../../architecture/04-extension-points.md).
+The plugin registers two Document Service middlewares, `createDeleteActionsOnDelete` and `createRevalidateActionsOnDraftChange`. It also subscribes to database lifecycles for `deleteMany`. Once the change commits, they remove the deleted entry's actions from planned releases or revalidate the changed draft, and recalculate the status of those releases. Handlers on the content type sync hooks remove the actions of a content type that is deleted or loses draft and publish, and revalidate the changed content types. See [Extension points](../../../architecture/04-extension-points.md).
 
 ### Built as a plugin
 

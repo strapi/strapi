@@ -358,6 +358,7 @@ describe('useSessionKeepalive', () => {
 
     expect(renewSession).toHaveBeenCalledTimes(1);
     expect(onSessionDead).toHaveBeenCalledTimes(1);
+    expect(onSessionDead).toHaveBeenCalledWith(token);
   });
 
   it('prefers cross-tab re-sync over renewal when a newer shared token exists', async () => {

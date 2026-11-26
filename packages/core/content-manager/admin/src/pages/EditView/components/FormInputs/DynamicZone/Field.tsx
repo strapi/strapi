@@ -11,12 +11,15 @@ import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
+import { type AnyData, transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ComponentCopyModal } from '../Component/ComponentCopyModal';
+import { useCopiedComponents } from '../Component/CopiedComponents';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { AddComponentButton } from './AddComponentButton';
@@ -60,12 +63,17 @@ const DynamicZone = ({
   const { max = Infinity, min = -Infinity } = attribute ?? {};
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
+  const [componentUidToCopy, setComponentUidToCopy] = React.useState<string | null>(null);
   const [liveText, setLiveText] = React.useState('');
   const [openComponentKey, setOpenComponentKey] = React.useState<string | null>(null);
+  // The components copied from another entry are flagged until the form is saved.
+  const { isCopied, insertCopies } = useCopiedComponents(name);
 
   const {
+    currentDocumentMeta,
     currentDocument: { components, isLoading },
   } = useDocumentContext('DynamicZone');
+  const canCopyFromExisting = currentDocumentMeta.collectionType === COLLECTION_TYPES;
 
   const disabled = disabledProp || isLoading;
   const addFieldRow = useForm('DynamicZone', (state) => state.addFieldRow);
@@ -92,9 +100,14 @@ const DynamicZone = ({
   React.useEffect(() => {
     if (prevValue && prevValue.length < value.length) {
       const prevKeys = new Set(prevValue.map((v) => v.__temp_key__));
-      const newItem = value.find((v) => !prevKeys.has(v.__temp_key__));
-      if (newItem) {
-        setOpenComponentKey(newItem.__temp_key__);
+      const newItems = value.filter((v) => !prevKeys.has(v.__temp_key__));
+
+      /**
+       * Copied components come in filled: they aren't scrolled into view. Like any new block
+       * they open expanded, see `DynamicComponent`.
+       */
+      if (newItems[0] && !newItems.every((item) => isCopied(item.__temp_key__))) {
+        setOpenComponentKey(newItems[0].__temp_key__);
       }
     } else if (openComponentKey !== null) {
       // Component was removed before forceOpen was handled — clear stale key
@@ -103,7 +116,7 @@ const DynamicZone = ({
         setOpenComponentKey(null);
       }
     }
-  }, [value, prevValue, openComponentKey]);
+  }, [value, prevValue, openComponentKey, isCopied]);
 
   const handleForceOpenHandled = React.useCallback(() => {
     setOpenComponentKey(null);
@@ -165,6 +178,29 @@ const DynamicZone = ({
       addFieldRow(name, data, position);
     },
     [addFieldRow, components, name]
+  );
+
+  const handleCopyComponents = React.useCallback(
+    (items: AnyData[]) => {
+      // The modal doesn't let more items than there's room for be selected, this is a safety net.
+      if (dynamicDisplayedComponentsLength + items.length > max) {
+        toggleNotification({
+          type: 'info',
+          message: formatMessage({
+            id: getTranslation('components.notification.info.maximum-requirement'),
+            defaultMessage: 'You have already reached the maximum number of fields',
+          }),
+        });
+
+        return false;
+      }
+
+      setAddComponentIsOpen(false);
+      insertCopies(items);
+
+      return true;
+    },
+    [dynamicDisplayedComponentsLength, formatMessage, insertCopies, max, toggleNotification]
   );
 
   const handleClickOpenPicker = () => {
@@ -349,6 +385,7 @@ const DynamicZone = ({
                     totalLength={dynamicDisplayedComponentsLength}
                     forceOpen={openComponentKey === field.__temp_key__}
                     onForceOpenHandled={handleForceOpenHandled}
+                    isCopied={isCopied(field.__temp_key__)}
                   >
                     {children}
                   </DynamicComponent>
@@ -371,7 +408,24 @@ const DynamicZone = ({
           dynamicComponentsByCategory={dynamicComponentsByCategory}
           isOpen={addComponentIsOpen}
           onClickAddComponent={handleAddComponent}
+          onClickCopyComponent={canCopyFromExisting ? setComponentUidToCopy : undefined}
         />
+        {componentUidToCopy && (
+          <ComponentCopyModal
+            componentUid={componentUidToCopy}
+            fieldLabel={formatMessage({
+              id: componentUidToCopy,
+              defaultMessage:
+                components[componentUidToCopy]?.info.displayName ?? componentUidToCopy,
+            })}
+            maxSelection={max - dynamicDisplayedComponentsLength}
+            mode="dynamiczone"
+            onClose={() => setComponentUidToCopy(null)}
+            onInsert={handleCopyComponents}
+            selection="multiple"
+            sourceFieldName={name}
+          />
+        )}
       </Flex>
     </DynamicZoneProvider>
   );

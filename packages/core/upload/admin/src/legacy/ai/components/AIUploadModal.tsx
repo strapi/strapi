@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { createContext, useNotification } from '@strapi/admin/strapi-admin';
+import {
+  createContext,
+  useNotification,
+  UnsavedChangesModal,
+  useUnsavedChangesModalDirty,
+} from '@strapi/admin/strapi-admin';
 import { Alert, Button, Flex, Modal } from '@strapi/design-system';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
@@ -53,6 +58,8 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<Error | null>(null);
   const { trackUsage } = useTracking();
+
+  useUnsavedChangesModalDirty(state.hasUnsavedChanges && !isUploading);
 
   const handleCaptionChange = (assetId: number, caption: string) => {
     dispatch({
@@ -121,11 +128,6 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     onClose();
   };
 
-  const handleCancel = () => {
-    resetState();
-    onClose();
-  };
-
   const handleUpload = async (assets: FileWithRawFile[]) => {
     dispatch({ type: 'set_assets_to_upload_length', payload: assets.length });
     setUploadError(null);
@@ -155,7 +157,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   if (state.assetsToUploadLength === 0) {
     return (
       <Modal.Content>
-        <AddAssetStep onClose={onClose} onAddAsset={handleUpload} />
+        <AddAssetStep onAddAsset={handleUpload} />
       </Modal.Content>
     );
   }
@@ -205,9 +207,11 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           </StyledAlert>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={handleCancel} variant="tertiary">
-            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-          </Button>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Modal.Close>
           <Button onClick={handleFinish} loading={isSaving}>
             {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
           </Button>
@@ -242,9 +246,11 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
       </StyledModalBody>
 
       <Modal.Footer>
-        <Button onClick={handleCancel} variant="tertiary">
-          {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-        </Button>
+        <Modal.Close>
+          <Button variant="tertiary">
+            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+          </Button>
+        </Modal.Close>
         <Button onClick={handleFinish} loading={isSaving}>
           {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
         </Button>
@@ -385,9 +391,9 @@ export const AIUploadModal = ({ open, onClose, folderId = null }: AIUploadModalP
       folderId={folderId}
       onClose={handleClose}
     >
-      <Modal.Root open={open} onOpenChange={handleClose}>
+      <UnsavedChangesModal open={open} onOpenChange={handleClose}>
         <ModalContent onClose={handleClose} />
-      </Modal.Root>
+      </UnsavedChangesModal>
     </AIUploadModalContext>
   );
 };

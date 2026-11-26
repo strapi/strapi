@@ -75,6 +75,12 @@ export interface Strapi extends Container {
     }: {
       strapi: Core.Strapi;
     }) => Promise<{ trialEndsAt: string } | null>;
+    /** Active admin users across all instances, or `null` when missing or older than 48 hours. */
+    getAdminUsersAcrossInstances: ({ strapi }: { strapi: Core.Strapi }) => Promise<{
+      activeUsers: number;
+      contractedUsers: number | null;
+      updatedAt: string;
+    } | null>;
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
@@ -194,6 +200,11 @@ export interface Strapi extends Container {
 export interface Reloader {
   isReloading: boolean;
   isWatching: boolean;
+  /**
+   * Turns file watching back on without skipping the next reload.
+   * Setting `isWatching` from `false` to `true` skips the next `reload()` call instead.
+   */
+  resumeWatching(): void;
   (): void;
 }
 

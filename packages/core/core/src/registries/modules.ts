@@ -36,6 +36,9 @@ const modulesRegistry = (strapi: Core.Strapi) => {
     },
     async destroy() {
       for (const mod of Object.values(modules)) {
+        if (mod.isDestroyed()) {
+          continue;
+        }
         await mod.destroy();
       }
     },

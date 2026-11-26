@@ -5,6 +5,7 @@ import type {
   GetProjectType,
 } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
+import { isAuditLogsEnabled } from '../audit-logs/utils';
 
 type RetainedFeature = { name: string; [key: string]: any };
 
@@ -119,6 +120,13 @@ export default {
     // came with it) stored by an earlier online run says nothing about its current state.
     const registryState = licenseMode === 'online' ? eeInformation : null;
 
+    // Offline licenses don't report their admin users. A lapsed license (Community Edition) stops
+    // reporting, so its last count would be stale.
+    const adminUsersAcrossInstances =
+      licenseMode === 'online' && isActiveLicense
+        ? await strapi.ee.getAdminUsersAcrossInstances({ strapi })
+        : null;
+
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
       currentActiveUserCount,
@@ -160,6 +168,7 @@ export default {
       usingCachedLicense: Boolean(registryState?.error && registryState?.license),
       registrySyncError: registryState?.error ?? null,
       registrySyncErrorKind: registryState?.errorKind ?? null,
+      adminUsersAcrossInstances,
       shouldNotify,
       shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
@@ -172,6 +181,7 @@ export default {
       features: (strapi.ee.features.list() ??
         []) as GetLicenseLimitInformation.Response['data']['features'],
       entitlements: strapi.ee.entitlements.list(),
+      auditLogs: { enabled: isAuditLogsEnabled(strapi) },
     };
 
     return { data } satisfies GetLicenseLimitInformation.Response;

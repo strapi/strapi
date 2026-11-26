@@ -4,6 +4,9 @@
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
@@ -366,6 +369,62 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
+    test('Returns the error message when the validation of a creation throws a native error', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/content-types',
+        body: {
+          contentType: {
+            displayName: 'Native error',
+            singularName: 'native-error',
+            pluralName: 'native-errors',
+            attributes: {
+              title: {
+                type: 'string',
+                regex: '(',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          name: 'SyntaxError',
+          message: expect.stringContaining('Invalid regular expression'),
+          details: {},
+        },
+      });
+    });
+
+    test('Returns a validation error when the attributes of an update are missing', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${ctWithDpUID}`,
+        body: {
+          contentType: {
+            kind: 'collectionType',
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        error: {
+          name: 'ValidationError',
+          details: {
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                path: ['contentType', 'attributes'],
+                message: 'attributes.required',
+              }),
+            ]),
+          },
+        },
+      });
+    });
+
     test('Can edit displayName but singularName and pluralName are ignored', async () => {
       const uid = 'api::ct-with-dp.ct-with-dp';
       let res = await rq({
@@ -408,6 +467,116 @@ describe('Content Type Builder - Content types', () => {
                 type: 'string',
               },
             },
+          },
+        },
+      });
+    });
+
+    test('Returns a validation error when the attributes of an update are null', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${ctWithDpUID}`,
+        body: {
+          contentType: {
+            displayName: 'CT with DP',
+            singularName: 'ct-with-dp',
+            pluralName: 'ct-with-dps',
+            attributes: null,
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({ name: 'ValidationError' });
+    });
+
+    test('Answers 400 and keeps the schema when an update that keeps the kind fails to write', async () => {
+      const before = await rq({
+        method: 'GET',
+        url: `/content-type-builder/content-types/${ctWithDpUID}`,
+      });
+      expect(before.statusCode).toBe(200);
+
+      // A directory where the file of the new nested component must go makes its write fail
+      // with EISDIR, and the builder rolls the files back
+      const blockedCategory = path.join(strapi.dirs.app.components, 'ctfail');
+      fs.mkdirSync(path.join(blockedCategory, 'blocked.json'), { recursive: true });
+
+      try {
+        const res = await rq({
+          method: 'PUT',
+          url: `/content-type-builder/content-types/${ctWithDpUID}`,
+          body: {
+            contentType: {
+              displayName: 'Refused displayName',
+              singularName: 'ct-with-dp',
+              pluralName: 'ct-with-dps',
+              attributes: {
+                ...before.body.data.schema.attributes,
+                blocked: { type: 'component', repeatable: false, component: 'tmp-blocked' },
+              },
+            },
+            components: [
+              {
+                tmpUID: 'tmp-blocked',
+                category: 'ctfail',
+                displayName: 'Blocked',
+                icon: 'calendar',
+                attributes: { label: { type: 'string' } },
+              },
+            ],
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ error: 'Invalid schema edition' });
+      } finally {
+        fs.rmSync(blockedCategory, { recursive: true, force: true });
+      }
+
+      await restart();
+
+      const after = await rq({
+        method: 'GET',
+        url: `/content-type-builder/content-types/${ctWithDpUID}`,
+      });
+      expect(after.body.data.schema.displayName).toBe(before.body.data.schema.displayName);
+      expect(after.body.data.schema.attributes).not.toHaveProperty('blocked');
+    });
+
+    test('Keeps draftAndPublish when the update payload does not set it', async () => {
+      const uid = 'api::ct-with-dp.ct-with-dp';
+      let res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${uid}`,
+        body: {
+          contentType: {
+            displayName: 'new displayName',
+            singularName: 'ct-with-dp',
+            pluralName: 'ct-with-dps',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      });
+      expect(res.statusCode).toBe(201);
+
+      await restart();
+
+      res = await rq({
+        method: 'GET',
+        url: `/content-type-builder/content-types/${uid}`,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          uid,
+          schema: {
+            draftAndPublish: true,
           },
         },
       });

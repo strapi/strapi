@@ -113,7 +113,6 @@ const authService = adminApi
         transformResponse(res: Login.Response) {
           return res.data;
         },
-        invalidatesTags: ['Me'],
       }),
       logout: builder.mutation<void, { deviceId?: string } | void>({
         query: (body) => ({

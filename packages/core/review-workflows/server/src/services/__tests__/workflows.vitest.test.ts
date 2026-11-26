@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import workflowsFactory from '../workflows';
-import { WORKFLOW_POPULATE } from '../../constants/workflows';
+import { ERRORS, WORKFLOW_POPULATE } from '../../constants/workflows';
 
 const {
   validateWorkflowCount,
@@ -75,6 +75,7 @@ const createStrapiMock = ({ releaseActionService }: { releaseActionService?: unk
     delete: vi.fn().mockResolvedValue(workflow),
     count: vi.fn().mockResolvedValue(2),
     create: vi.fn().mockResolvedValue(workflow),
+    findOne: vi.fn().mockResolvedValue(null),
   };
 
   return {
@@ -226,6 +227,53 @@ describe('review-workflows workflows service', () => {
     });
   });
 
+  describe('workflow name uniqueness', () => {
+    const otherWorkflow = { id: 2, name: 'Editorial' };
+
+    it('create rejects a name that another workflow already uses', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      strapi.db.query().findOne.mockResolvedValue(otherWorkflow);
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await expect(
+        service.create({ data: { name: 'Editorial', stages: [{ name: 'Todo' }] } })
+      ).rejects.toThrow(ERRORS.DUPLICATED_WORKFLOW_NAME);
+
+      expect(strapi.db.query().findOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { name: 'Editorial' },
+      });
+      expect(createMany).not.toHaveBeenCalled();
+      expect(strapi.db.query().create).not.toHaveBeenCalled();
+    });
+
+    it('update rejects a rename to a name that another workflow already uses', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      strapi.db.query().findOne.mockResolvedValue(otherWorkflow);
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await expect(service.update(workflow, { data: { name: 'Editorial' } })).rejects.toThrow(
+        ERRORS.DUPLICATED_WORKFLOW_NAME
+      );
+
+      expect(strapi.db.query().findOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { name: 'Editorial', id: { $ne: workflow.id } },
+      });
+      expect(strapi.db.query().update).not.toHaveBeenCalled();
+    });
+
+    it('update accepts the current name of the workflow', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await service.update(workflow, { data: { name: workflow.name } });
+
+      expect(strapi.db.query().findOne).not.toHaveBeenCalled();
+      expect(strapi.db.query().update).toHaveBeenCalled();
+    });
+  });
+
   describe('when release-action service is missing', () => {
     it('update should not throw', async () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
@@ -245,6 +293,49 @@ describe('review-workflows workflows service', () => {
   });
 
   describe('when release-action service is present', () => {
+    it('create without contentTypes creates the workflow and revalidates no release action', async () => {
+      const strapi = createStrapiMock({
+        releaseActionService: { validateActionsByContentTypes },
+      });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+      const data = {
+        name: 'Editorial',
+        stages: [{ name: 'Todo' }],
+        stageRequiredToPublishName: 'Todo',
+      };
+      createMany.mockResolvedValue([{ id: 10, name: 'Todo' }]);
+
+      await expect(service.create({ data })).resolves.toEqual(workflow);
+
+      expect(migrate).not.toHaveBeenCalled();
+      expect(strapi.db.query().create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { ...data, stages: [10], stageRequiredToPublish: 10 },
+        })
+      );
+      // No content type is assigned, so no entry's readiness changed
+      expect(validateActionsByContentTypes).not.toHaveBeenCalled();
+    });
+
+    it('create with contentTypes revalidates the release actions of those content types', async () => {
+      const strapi = createStrapiMock({
+        releaseActionService: { validateActionsByContentTypes },
+      });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+      createMany.mockResolvedValue([{ id: 10, name: 'Todo' }]);
+      migrate.mockResolvedValue([]);
+
+      await service.create({
+        data: {
+          name: 'Editorial',
+          stages: [{ name: 'Todo' }],
+          contentTypes: ['api::article.article'],
+        },
+      });
+
+      expect(validateActionsByContentTypes).toHaveBeenCalledWith(['api::article.article']);
+    });
+
     it('update should still call validateActionsByContentTypes', async () => {
       const strapi = createStrapiMock({
         releaseActionService: { validateActionsByContentTypes },

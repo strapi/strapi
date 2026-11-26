@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
+import { expect } from '../../../fixtures';
 
 import {
   clickAndWait,
@@ -11,9 +11,6 @@ import {
 export type RelationLabField = 'manyToOne' | 'oneToOne' | 'oneToMany' | 'manyToManyBi';
 
 export type RelationDialogVariant = 'm2m' | 'xToOne';
-
-/** xToOne-style fields in relation-lab (unidirectional — stripped on publish). */
-export const XTOONE_LAB_FIELDS: RelationLabField[] = ['manyToOne', 'oneToOne', 'oneToMany'];
 
 /** Bidirectional M2M in relation-lab. */
 export const BIDIRECTIONAL_M2M_LAB_FIELD: RelationLabField = 'manyToManyBi';

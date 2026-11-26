@@ -28,7 +28,8 @@ const sendTemplatedEmail = (
   data: EmailTemplateData
 ) => {
   const attributes = ['subject', 'text', 'html'];
-  const missingAttributes = difference(attributes, Object.keys(emailTemplate));
+  const requiredAttributes = ['subject', 'text'];
+  const missingAttributes = difference(requiredAttributes, Object.keys(emailTemplate));
 
   if (missingAttributes.length > 0) {
     throw new Error(

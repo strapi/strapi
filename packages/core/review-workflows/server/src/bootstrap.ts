@@ -11,9 +11,10 @@ import { registerAuditEvents } from './audit-logs';
  * Initialize the default workflow if there is no workflow in the database
  */
 
-async function initDefaultWorkflow() {
+async function initDefaultWorkflow({ strapi }: { strapi: Core.Strapi }) {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
+  const { stagesPerWorkflow } = getService('validation', { strapi }).getLimits();
 
   const wfCount = await workflowsService.count();
   const stagesCount = await stagesService.count();
@@ -24,7 +25,8 @@ async function initDefaultWorkflow() {
     const workflow = {
       ...defaultWorkflow,
       contentTypes: [],
-      stages: defaultStages,
+      // Keep the first stages the license allows, so the first boot never exceeds it
+      stages: defaultStages.slice(0, stagesPerWorkflow),
     };
 
     await workflowsService.create({ data: workflow });
@@ -35,30 +37,30 @@ async function initDefaultWorkflow() {
  * Webhook store limits the events that can be triggered,
  * this function extends it with the events review workflows can trigger
  */
-const registerWebhookEvents = async () =>
+const registerWebhookEvents = async ({ strapi }: { strapi: Core.Strapi }) =>
   Object.entries(webhookEvents).forEach(([eventKey, event]) =>
     strapi.get('webhookStore').addAllowedEvent(eventKey, event)
   );
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Permissions
-  const { actionProvider } = getAdminService('permission');
+  const { actionProvider } = getAdminService('permission', { strapi });
   await actionProvider.registerMany(actions.reviewWorkflows);
 
   // Webhooks and events
-  await registerWebhookEvents();
+  await registerWebhookEvents({ strapi });
 
   // Absent in CE, without the audit-logs license, or when disabled by config
   if (strapi.has('audit-logs-lifecycle')) {
     registerAuditEvents({ strapi }, strapi.get('audit-logs-lifecycle'));
   }
-  await getService('workflow-weekly-metrics').registerCron();
+  await getService('workflow-weekly-metrics', { strapi }).registerCron();
 
   // Data initialization
-  await initDefaultWorkflow();
+  await initDefaultWorkflow({ strapi });
 
   // Document service middleware
-  const docsMiddlewares = getService('document-service-middlewares');
+  const docsMiddlewares = getService('document-service-middlewares', { strapi });
   strapi.documents.use(docsMiddlewares.assignStageOnCreate);
   strapi.documents.use(docsMiddlewares.handleStageOnUpdate);
   strapi.documents.use(docsMiddlewares.checkStageBeforePublish);

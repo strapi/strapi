@@ -209,6 +209,7 @@ const expectedModels = [
         relation: 'morphOne',
         target: 'plugin::upload.file',
         morphBy: 'related',
+        singleRow: true,
       },
       repeatableImage: {
         type: 'relation',

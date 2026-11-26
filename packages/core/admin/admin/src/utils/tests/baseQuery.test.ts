@@ -1,6 +1,11 @@
 import { logout } from '../../reducer';
 import { fetchBaseQuery, isBaseQueryError } from '../baseQuery';
-import { FetchError, getFetchClient, triggerSessionExpired } from '../getFetchClient';
+import {
+  FetchError,
+  getFetchClient,
+  setFailedRequestSessionToken,
+  triggerSessionExpired,
+} from '../getFetchClient';
 
 import type { BaseQueryApi } from '@reduxjs/toolkit/query';
 
@@ -148,8 +153,10 @@ describe('baseQuery', () => {
   describe('401 handling', () => {
     it('triggers session expiry on a non-auth path without clearing auth state directly', async () => {
       const post = jest.fn().mockResolvedValue({});
+      const unauthorizedError = buildUnauthorizedError();
+      setFailedRequestSessionToken(unauthorizedError, 'expired-token');
       (getFetchClient as jest.Mock).mockReturnValue({
-        get: jest.fn().mockRejectedValue(buildUnauthorizedError()),
+        get: jest.fn().mockRejectedValue(unauthorizedError),
         post,
         del: jest.fn(),
         put: jest.fn(),
@@ -163,6 +170,7 @@ describe('baseQuery', () => {
       expect(logout).not.toHaveBeenCalled();
       expect(dispatch).not.toHaveBeenCalledWith({ type: 'LOGOUT', payload: undefined });
       expect(triggerSessionExpired).toHaveBeenCalledTimes(1);
+      expect(triggerSessionExpired).toHaveBeenCalledWith('expired-token');
     });
 
     it('does not log out on auth paths', async () => {

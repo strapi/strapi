@@ -119,7 +119,5 @@
   "sort.name_desc": "依字母倒序 (Z to A)",
   "sort.updated_at_asc": "最早的更新",
   "sort.updated_at_desc": "最近的更新",
-  "tabs.title": "您想要如何上傳您的素材？",
-  "window.confirm.close-modal.file": "你確定嗎？所有的變更將會遺失。",
-  "window.confirm.close-modal.files": "你確定嗎？仍有部份檔案尚未上傳。"
+  "tabs.title": "您想要如何上傳您的素材？"
 }

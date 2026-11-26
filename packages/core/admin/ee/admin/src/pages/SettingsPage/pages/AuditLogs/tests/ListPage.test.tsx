@@ -3,7 +3,7 @@ import { render, screen, server, waitFor } from '@tests/utils';
 import { delay, http, HttpResponse } from 'msw';
 import { Link } from 'react-router-dom';
 
-import { ListPage } from '../ListPage';
+import { ListPage, ProtectedListPage } from '../ListPage';
 
 const anchorClick = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
@@ -423,5 +423,96 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
 
     expect(await screen.findByRole('option', { name: 'John Doe' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Kai Doe' })).toBeInTheDocument();
+  });
+
+  it('should send the bounds of the picked day to the list and to the export', async () => {
+    const dateFilters = (url: string) =>
+      Object.fromEntries(
+        [...new URL(url).searchParams.entries()].filter(([key]) => key.startsWith('filters'))
+      );
+    const listRequests: Record<string, string>[] = [];
+    const exportRequests: Record<string, string>[] = [];
+    server.use(
+      // Returns nothing: the default handler answers
+      http.get('/admin/audit-logs', ({ request }) => {
+        listRequests.push(dateFilters(request.url));
+      }),
+      http.get('/admin/audit-logs/export', ({ request }) => {
+        exportRequests.push(dateFilters(request.url));
+
+        return new HttpResponse('\uFEFFid,action\r\n', {
+          headers: {
+            'Content-Type': 'text/csv; charset=utf-8',
+            'X-Audit-Logs-Export-Until': '10',
+            'X-Audit-Logs-Export-Token': 'tok',
+            'X-Audit-Logs-Export-Next-Cursor': 'none',
+          },
+        });
+      })
+    );
+    // The tests run in UTC: the day is midnight to midnight UTC
+    const dayBounds = {
+      'filters[$and][0][date][$gte]': '2023-10-31T00:00:00.000Z',
+      'filters[$and][0][date][$lt]': '2023-11-01T00:00:00.000Z',
+    };
+
+    const { user } = render(<ListPage />, {
+      initialEntries: ['/?filters[$and][0][date][$eq]=2023-10-31'],
+    });
+
+    expect(await screen.findByText('Date $eq Tuesday, October 31, 2023')).toBeInTheDocument();
+    await waitFor(() => expect(listRequests.at(-1)).toEqual(dayBounds));
+
+    await user.click(await screen.findByRole('button', { name: 'Export as CSV' }));
+
+    await waitFor(() => expect(exportRequests).toEqual([dayBounds]));
+  });
+
+  describe('ProtectedListPage', () => {
+    const originalStrapi = window.strapi;
+
+    beforeEach(() => {
+      window.strapi = {
+        ...originalStrapi,
+        features: {
+          ...originalStrapi.features,
+          isEnabled: (name?: string) => name === 'audit-logs',
+        },
+      };
+    });
+
+    afterEach(() => {
+      window.strapi = originalStrapi;
+    });
+
+    it('renders the not found page when the config disables audit logs', async () => {
+      server.use(
+        http.get('/admin/license-limit-information', () =>
+          HttpResponse.json({
+            data: { features: [{ name: 'audit-logs' }], auditLogs: { enabled: false } },
+          })
+        )
+      );
+
+      render(<ProtectedListPage />);
+
+      expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Audit Logs' })).not.toBeInTheDocument();
+    });
+
+    it('renders the audit logs when the config keeps them enabled', async () => {
+      server.use(
+        http.get('/admin/license-limit-information', () =>
+          HttpResponse.json({
+            data: { features: [{ name: 'audit-logs' }], auditLogs: { enabled: true } },
+          })
+        )
+      );
+
+      render(<ProtectedListPage />);
+
+      expect(await screen.findByRole('heading', { name: 'Audit Logs' })).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Page not found' })).not.toBeInTheDocument();
+    });
   });
 });

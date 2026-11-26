@@ -24,6 +24,7 @@ export const formatDocumentWithMetadata = async (
 
   const serviceOutput = await documentMetadata.formatDocumentWithMetadata(uid, document, opts);
 
+  const { defaultLocale } = serviceOutput.meta;
   let {
     meta: { availableLocales, availableStatus },
   } = serviceOutput;
@@ -45,6 +46,7 @@ export const formatDocumentWithMetadata = async (
     meta: {
       availableLocales,
       availableStatus,
+      defaultLocale,
     },
   };
 };

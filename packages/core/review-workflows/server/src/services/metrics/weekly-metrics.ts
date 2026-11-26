@@ -55,7 +55,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const now = new Date();
       let weeklySchedule = currentSchedule;
 
-      if (!currentSchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
+      if (!weeklySchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
         weeklySchedule = getWeeklyCronScheduleAt(add(now, { seconds: 15 }));
         await setMetricsStoreValue({ ...metricsInfoStored, weeklySchedule });
       }

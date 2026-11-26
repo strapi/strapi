@@ -274,10 +274,20 @@ export declare namespace GetLicenseLimitInformation {
        * an instance that has never reached the registry and so has nothing cached.
        */
       registrySyncErrorKind: 'unreachable' | 'rejected' | null;
+      adminUsersAcrossInstances?: {
+        activeUsers: number;
+        contractedUsers: number | null;
+        updatedAt: string; // ISO date
+      } | null;
       entitlements: Array<{
         feature: string;
         limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
       }>;
+      /**
+       * Whether audit logs run: the license includes them and `admin.auditLogs.enabled` is not
+       * `false`. `features` lists `audit-logs` from the license alone.
+       */
+      auditLogs: { enabled: boolean };
     };
     error?: errors.ApplicationError;
   }
