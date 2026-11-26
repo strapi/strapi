@@ -37,6 +37,10 @@ export const appPort = (suite: Suite, index: number) =>
 export const strapiBin = () =>
   path.join(path.dirname(require.resolve('@strapi/strapi/package.json')), 'bin', 'strapi.js');
 
+/** The `create-strapi-app` CLI of the workspace. It runs the package build (`dist/`). */
+export const createStrapiAppBin = () =>
+  path.join(path.dirname(require.resolve('create-strapi-app/package.json')), 'bin', 'index.js');
+
 /** NODE_ENV of the test apps. The config scaffolders write to `config/env/<APP_NODE_ENV>`. */
 export const APP_NODE_ENV = 'development';
 

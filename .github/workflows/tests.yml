@@ -1142,8 +1142,9 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # Holds migrated CLI tests, so it also runs on `backend` changes, like the old `cli` job.
   tests_next_cli:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
     needs: [conditions, build]
     name: 'tests-next cli (ce, ${{ matrix.database }})'

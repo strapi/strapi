@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+import { describe, expect, it } from 'vitest';
+
 import {
   formatPnpmWorkspaceYaml,
   getPnpmAllowBuilds,
@@ -9,8 +11,8 @@ import {
   shouldUsePackageJsonPnpmConfig,
   shouldUsePnpmWorkspaceConfig,
   writePnpmWorkspaceConfig,
-} from '../../../../packages/cli/create-strapi-app/src/utils/pnpm-config';
-import type { Scope } from '../../../../packages/cli/create-strapi-app/src/types';
+} from '../pnpm-config';
+import type { Scope } from '../../types';
 
 function mkProjectDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-pnpm-config-test-'));
