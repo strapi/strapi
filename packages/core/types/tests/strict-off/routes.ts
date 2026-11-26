@@ -39,3 +39,17 @@ type RouteConfigChecks = [
 ];
 declare const routeConfigChecks: RouteConfigChecks;
 routeConfigChecks satisfies unknown;
+
+// The routes of a loaded API or plugin keep develop's types: built routers, and for a plugin an
+// array of routes. With strict types, they are what the module declared until Strapi registers them.
+type LoadedRoutesChecks = [
+  Expect<Equal<ReturnType<Core.Strapi['api']>['routes'], Record<string, Core.Router>>>,
+  Expect<Equal<Core.Module['routes'], Record<string, Core.Router>>>,
+  Expect<
+    Equal<ReturnType<Core.Strapi['plugin']>['routes'], Core.Route[] | Record<string, Core.Router>>
+  >,
+  Expect<Equal<Core.Plugin['routes'], Core.Route[] | Record<string, Core.Router>>>,
+  Expect<Equal<Core.Strapi['admin']['routes'], Record<string, Core.Router>>>,
+];
+declare const loadedRoutesChecks: LoadedRoutesChecks;
+loadedRoutesChecks satisfies unknown;

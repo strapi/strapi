@@ -15,9 +15,11 @@ interface LifecyclesState {
 
 /**
  * Routers keyed by name: a router, or a factory called with `{ strapi }` when the routes are
- * registered (`services/server/register-routes.ts`), as plugins declare them.
+ * registered (`services/server/register-routes.ts`), as plugins declare them; the routers built from
+ * them after. A plugin may declare one array of routes, and an API router file an array of routes:
+ * arrays stay arrays.
  */
-type ModuleRoutes = Record<string, Core.RouterConfig>;
+type ModuleRoutes = Core.ModuleRoutes | Core.RouteInput[];
 
 export interface RawModule {
   config?: Record<string, unknown>;

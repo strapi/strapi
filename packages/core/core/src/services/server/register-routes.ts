@@ -108,22 +108,33 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
     for (const router of Object.values(routers)) {
       // TODO: remove once auth setup
       // pass meta down to compose endpoint
-      router.type = 'content-api';
-      router.routes?.forEach((route) => {
-        generateRouteScope(route);
-        route.info = { apiName };
-      });
-      strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
+      // An API router file may export an array of routes: it gets the `type` too, and the server
+      // registers its routes as they are, on the root router.
+      Object.assign(router, { type: 'content-api' });
+
+      if (Array.isArray(router) === false) {
+        router.routes?.forEach((route) => {
+          generateRouteScope(route);
+          route.info = { apiName };
+        });
+        strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
+      }
 
       strapi.server.routes(router);
     }
   }
 };
 
-const instantiateRouterInputs = (
-  routers: Record<string, Core.RouterConfig>,
+/**
+ * Calls the router factories with `{ strapi }`; router objects and arrays of routes stay as they are.
+ *
+ * The routers are typed as built (`Core.Router`): the callers set the `type`, `prefix` and route
+ * `info` it declares before they pass them on. An array of routes stays an array.
+ */
+const instantiateRouterInputs = <TRouter extends Core.ModuleRouter | Core.RouteInput[]>(
+  routers: Record<string, TRouter>,
   strapi: Core.Strapi
-): Record<string, Core.Router> => {
+): Record<string, Core.Router | Extract<TRouter, Core.RouteInput[]>> => {
   const entries = Object.entries(routers);
 
   return entries.reduce((record, [key, inputOrCallback]) => {

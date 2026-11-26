@@ -10,7 +10,11 @@ interface API {
   destroy: () => void | Promise<void>;
   register: () => void | Promise<void>;
   config: Record<string, unknown>;
-  routes: Record<string, Core.Router>;
+  /**
+   * The routers of the API's router files, as declared. An API without a `routes` folder holds an
+   * empty array until the routes are registered, read as an empty map.
+   */
+  routes: Core.ModuleRoutes;
   controllers: Record<string, Core.Controller>;
   services: Record<string, Core.Service>;
   policies: Record<string, Core.Policy>;

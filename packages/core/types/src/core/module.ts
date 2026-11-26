@@ -2,6 +2,7 @@ import type { PropertyPath } from 'lodash';
 import type { Router, Controller, Service, Policy, Middleware, Strapi } from '.';
 import type { ContentType } from '../schema';
 import type { ContentTypeSchema } from '../struct';
+import type { ModuleRoutes } from './router';
 import type { ControllerFor, RegisteredControllerUID } from './controller';
 import type {
   MiddlewareConfigFor,
@@ -358,7 +359,11 @@ type LegacyLoadedModuleMembers = {
  * once.
  */
 type StrictLoadedModuleMembers = {
-  routes: Record<string, Router>;
+  /**
+   * The routers as the module declared them until Strapi registers the routes, in the bootstrap
+   * phase; the routers built from them after. Read them with `routesOf` (`@strapi/utils`).
+   */
+  routes: ModuleRoutes;
   /**
    * The schemas of the module's content types, keyed by name, e.g. `locale` for
    * `plugin::i18n.locale`. Built on each read, so read-only: register content types through the

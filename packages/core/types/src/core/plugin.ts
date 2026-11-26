@@ -7,7 +7,7 @@ import type {
 } from './middleware';
 import type { Module, ModuleOf } from './module';
 import type { Route } from './route';
-import type { Router } from './router';
+import type { PluginRoutes, Router } from './router';
 import type { Policy, PolicyConfigFor, RegisteredPolicyName } from './policy';
 import type { RegisteredServiceUID, ServiceFor } from './service';
 import type {
@@ -213,7 +213,12 @@ type PluginMembers<TName extends string> = IsStrict extends false
       [key: string]: any;
     }
   : {
-      routes: Route[] | Record<string, Router>;
+      /**
+       * The routers as the plugin declared them until Strapi registers the routes, in the bootstrap
+       * phase; the routers built from them after. Check `Array.isArray` first, then read them with
+       * `routesOf` (`@strapi/utils`).
+       */
+      routes: PluginRoutes;
       service<
         T = unknown,
         TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<
