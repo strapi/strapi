@@ -166,6 +166,42 @@ actionProvider.registerMany([
   // @ts-expect-error `extra` is not a key of a `plugins` action.
   { section: 'plugins', displayName: 'Read', uid: dynamicUid, pluginName: 'admin', extra: 1 },
 ]);
+// A union checks each member: a key that only one member has is still checked against that
+// member's section.
+declare const pickSettings: boolean;
+actionProvider.register(
+  // @ts-expect-error `unknownRoot` is not a key of a `settings` action.
+  pickSettings
+    ? {
+        section: 'settings',
+        displayName: 'QA',
+        uid: dynamicUid,
+        category: 'reports',
+        unknownRoot: true,
+      }
+    : { section: 'plugins', displayName: 'QA', uid: dynamicUid, pluginName: 'admin' }
+);
+type DeclaredUnionAction =
+  | {
+      section: 'settings';
+      displayName: string;
+      uid: string;
+      category: string;
+      unknownRoot: true;
+    }
+  | { section: 'plugins'; displayName: string; uid: string; pluginName: 'admin' };
+declare const chooseDeclaredUnionAction: () => DeclaredUnionAction;
+// @ts-expect-error `unknownRoot` is not a key of a `settings` action.
+actionProvider.register(chooseDeclaredUnionAction());
+// @ts-expect-error `unknownRoot` is not a key of a `settings` action.
+actionProvider.registerMany([chooseDeclaredUnionAction()]);
+// A declared union whose members only have keys of their sections compiles.
+type ValidDeclaredUnionAction =
+  | { section: 'settings'; displayName: string; uid: string; category: string }
+  | { section: 'plugins'; displayName: string; uid: string; pluginName: 'admin' };
+declare const chooseValidDeclaredUnionAction: () => ValidDeclaredUnionAction;
+actionProvider.register(chooseValidDeclaredUnionAction());
+actionProvider.registerMany([chooseValidDeclaredUnionAction()]);
 // The schema accepts a key of another section with `undefined`, and keeps `options` open.
 actionProvider.register({
   section: 'internal',

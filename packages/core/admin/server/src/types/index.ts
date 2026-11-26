@@ -415,17 +415,20 @@ type DeepReadonly<T> = T extends readonly (infer TItem)[]
 type ActionRegistration = DeepReadonly<z.input<typeof actionRegistrationSchema>>;
 
 /**
+ * The keys of `TAction` that the registration of its section does not have, member by member: the
+ * keys of a union keep only the keys its members share, so a key of one member would be lost.
+ */
+type UnknownActionKeyNames<TAction> = TAction extends { readonly section: infer TSection }
+  ? Exclude<keyof TAction, keyof Extract<ActionRegistration, { readonly section: TSection }>>
+  : never;
+
+/**
  * Each key of `TAction` that the registration of its section does not have, typed `never`. The
  * schema is strict (`z.strictObject`), so such a key fails at boot, and a type parameter turns off
  * the excess property check of an inline action.
  */
 type UnknownActionKeys<TAction> = {
-  [
-    TKey in Exclude<
-      keyof TAction,
-      keyof Extract<ActionRegistration, { readonly section: TAction[keyof TAction & 'section'] }>
-    >
-  ]: never;
+  [TKey in UnknownActionKeyNames<TAction>]: never;
 };
 
 /**
