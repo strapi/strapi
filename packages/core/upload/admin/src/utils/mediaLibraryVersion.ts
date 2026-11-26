@@ -4,12 +4,11 @@
  * way to tell a project that kept the legacy library from one that did not.
  *
  * Read from the feature flag rather than from whichever tree fired the event,
- * because the two do not line up. Several surfaces are registered outside the
- * flag's branch in `index.ts` and so run under both settings — the Content
- * Manager media field and picker are legacy code for everyone, and the Media
- * Library settings page is current code for everyone. Tagging by tree would
- * report a project running the current library as legacy the moment an editor
- * attached an image to an entry, and vice versa.
+ * because the two do not always line up. The Media Library settings page is
+ * registered outside the flag's branch in `index.ts`, so it runs the current
+ * code (and its `useTracking`) under both settings. Tagging by tree would report
+ * a project that kept the legacy library as current whenever its settings page
+ * fires an event.
  *
  * Bump these if a future revamp ever needs its own bucket.
  */

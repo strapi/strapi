@@ -38,6 +38,30 @@ describe('i18n permissions actions', () => {
     setupCommonMocks();
   });
 
+  describe('registerI18nActionsHooks', () => {
+    test('gives the default roles created at first boot the default locale', () => {
+      const createHook = () => ({ register: jest.fn() });
+      const actionProvider = { hooks: { appliesPropertyToSubject: createHook() } };
+      const roleHooks = {
+        willResetSuperAdminPermissions: createHook(),
+        willValidateUpdatePermissions: createHook(),
+        willCreateDefaultRolePermissions: createHook(),
+      };
+
+      global.strapi = {
+        admin: {
+          services: { permission: { actionProvider }, role: { hooks: roleHooks } },
+        },
+      } as any;
+
+      actionsService.registerI18nActionsHooks();
+
+      expect(roleHooks.willCreateDefaultRolePermissions.register).toHaveBeenCalledWith(
+        actionsService.normalizeRolePermissionsLocales
+      );
+    });
+  });
+
   describe('normalizeRolePermissionsLocales', () => {
     beforeEach(() => {
       global.strapi = {
@@ -103,7 +127,7 @@ describe('i18n permissions actions', () => {
     });
 
     test('leaves permissions unchanged when locales do not apply to the action', async () => {
-      global.strapi.admin.services.permission.actionProvider.appliesToProperty = jest.fn(() =>
+      global.strapi.service('admin::permission').actionProvider.appliesToProperty = jest.fn(() =>
         Promise.resolve(false)
       );
 

@@ -43,6 +43,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { Drawer } from '../../../../components/Drawer';
+import { UploadTooLargeMessage } from '../../../../components/UploadTooLargeMessage';
 import { ASSET_TYPES } from '../../../../enums';
 import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
 import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
@@ -63,13 +64,14 @@ import {
   prefixFileUrlWithBackendUrl,
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
+import { getUploadTooLargeError } from '../../../../utils/getUploadTooLargeError';
 import { getTranslationKey } from '../../../../utils/translations';
 import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
 
-import { AssetCropEditor } from './AssetCropEditor';
+import { AssetCropEditor, CROP_EDITOR_SELECTOR } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
 
 import type {
@@ -79,7 +81,9 @@ import type {
 
 interface DrawerToast {
   type: 'success' | 'danger';
-  message: string;
+  message: React.ReactNode;
+  /** Stays until dismissed instead of clearing after a few seconds. */
+  persistent?: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -779,10 +783,13 @@ export const AssetDetails = ({
   // In-drawer toast slot
   const [drawerToast, setDrawerToast] = React.useState<DrawerToast | null>(null);
   React.useEffect(() => {
-    if (!drawerToast) return;
+    if (!drawerToast || drawerToast.persistent) return;
     const timer = window.setTimeout(() => setDrawerToast(null), 5000);
     return () => window.clearTimeout(timer);
   }, [drawerToast]);
+  React.useEffect(() => {
+    setDrawerToast(null);
+  }, [asset.id]);
 
   // Local alias matching the DrawerNotifyContext signature, so the drawer's
   // own handlers (replace, update) read like the consumers do.
@@ -866,6 +873,15 @@ export const AssetDetails = ({
     async (file: globalThis.File) => {
       const res = await replaceMutation({ id: asset.id, file, fileInfo: { name: asset.name } });
       if ('error' in res) {
+        const tooLarge = getUploadTooLargeError(res.error);
+        if (tooLarge) {
+          notify({
+            type: 'danger',
+            message: <UploadTooLargeMessage error={tooLarge} />,
+            persistent: true,
+          });
+          return;
+        }
         notify({
           type: 'danger',
           message: getErrorMessage(
@@ -1244,7 +1260,7 @@ export const AssetDetails = ({
                           type="submit"
                           variant="default"
                           loading={isSubmitting}
-                          // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
+                          // The update route saves a blank name, so this is the only guard against an empty or whitespace name.
                           disabled={!modified || isSubmitting || nameIsEmpty}
                         >
                           {formatMessage({
@@ -1541,6 +1557,12 @@ export const AssetDetailsDrawer = ({
         // like the header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {
           if (shouldKeepDrawerOpen(event, isVisible)) {
+            event.preventDefault();
+          }
+        }}
+        // The crop editor takes Escape for itself: it closes the editor, not the drawer
+        onEscapeKeyDown={(event) => {
+          if (event.target instanceof Element && event.target.closest(CROP_EDITOR_SELECTOR)) {
             event.preventDefault();
           }
         }}

@@ -11,7 +11,7 @@ import {
   useIsDesktop,
   useIsMobile,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Tabs, Box } from '@strapi/design-system';
+import { Grid, Tabs, Box, ScrollArea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -37,6 +37,7 @@ import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
+import { getPublishValidationErrors } from './utils/forms';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -150,15 +151,6 @@ const EditViewPage = () => {
     }
   };
 
-  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
-    const yupSchema = createYupSchema(schema?.attributes, components, {
-      status,
-      ...options,
-    });
-
-    return yupSchema.validateSync(values, { abortEarly: false });
-  };
-
   return (
     <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
@@ -192,7 +184,11 @@ const EditViewPage = () => {
 
             return yupSchema.validate(cleanedValues, { abortEarly: false });
           }}
-          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+          initialErrors={
+            location?.state?.forceValidation
+              ? getPublishValidationErrors(initialValues, { schema, components })
+              : {}
+          }
         >
           <>
             <Header
@@ -249,7 +245,12 @@ const EditViewPage = () => {
                   </Grid.Item>
                   {isDesktop && (
                     <Grid.Item col={3} direction="column" alignItems="stretch">
-                      <Panels />
+                      <StickyPanels>
+                        <Panels actionsOnly />
+                        <ScrollingPanels>
+                          <Panels withActions={false} />
+                        </ScrollingPanels>
+                      </StickyPanels>
                     </Grid.Item>
                   )}
                 </Grid.Root>
@@ -278,6 +279,30 @@ const EditViewPage = () => {
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
+`;
+
+const StickyPanels = styled.div`
+  position: sticky;
+  top: ${({ theme }) => theme.spaces[4]};
+  max-height: calc(100dvh - 2 * ${({ theme }) => theme.spaces[4]});
+  margin-bottom: calc(${({ theme }) => theme.spaces[4]} - ${({ theme }) => theme.spaces[10]});
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[2]};
+`;
+
+const ScrollingPanels = styled(ScrollArea)`
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+
+  [data-radix-scroll-area-viewport] {
+    position: relative;
+  }
+
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+  }
 `;
 
 /**

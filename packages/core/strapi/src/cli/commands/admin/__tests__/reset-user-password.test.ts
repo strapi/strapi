@@ -3,17 +3,15 @@ import { action as resetAdminPasswordCommand } from '../reset-user-password';
 
 const load = jest.fn(() => mock) as any;
 const resetPasswordByEmail = jest.fn();
-const admin = {
-  services: {
-    user: {
-      resetPasswordByEmail,
-    },
+const adminServices: Record<string, unknown> = {
+  user: {
+    resetPasswordByEmail,
   },
 };
 
 const mock = {
   load,
-  admin,
+  service: jest.fn((uid: string) => adminServices[uid.slice('admin::'.length)]),
 };
 
 jest.mock('@strapi/core', () => {

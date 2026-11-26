@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../../../constants';
@@ -321,6 +321,114 @@ describe('AssetDetails (asset details drawer body)', () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     await screen.findByText('photo.png exceeds size limit of 100 KB.');
+  });
+
+  describe('replace rejected as too large', () => {
+    const replaceWith = async (response: () => Response) => {
+      server.use(http.post('*/upload/files/:id/replace', response));
+
+      const utils = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+      await screen.findByRole('combobox');
+
+      await utils.user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+      await screen.findByText(/Replace this media file\?/i);
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = new File(['hello'], 'photo.png', { type: 'image/png' });
+      fireEvent.change(fileInput, { target: { files: [file] } });
+
+      return utils;
+    };
+
+    const bodyParserRejection = () =>
+      HttpResponse.json(
+        {
+          data: null,
+          error: {
+            status: 413,
+            name: 'PayloadTooLargeError',
+            message: 'FileTooBig',
+            details: { code: 'FileTooBig', limit: 200 * 1024 * 1024 },
+          },
+        },
+        { status: 413 }
+      );
+
+    it('names the body parser limit and keeps the toast until dismissed', async () => {
+      jest.useFakeTimers({ advanceTimers: true });
+
+      try {
+        await replaceWith(bodyParserRejection);
+
+        const cause = await screen.findByText(/Exceeds the server request limit of 210 MB\./);
+        expect(cause).toHaveTextContent(
+          'Exceeds the server request limit of 210 MB. To raise it, a developer can increase formidable.maxFileSize on the strapi::body middleware, together with upload.config.sizeLimit.'
+        );
+
+        act(() => {
+          jest.advanceTimersByTime(60_000);
+        });
+
+        expect(
+          screen.getByText(/Exceeds the server request limit of 210 MB\./)
+        ).toBeInTheDocument();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('clears the toast when the drawer switches to another asset', async () => {
+      const { rerender } = await replaceWith(bodyParserRejection);
+
+      await screen.findByText(/Exceeds the server request limit of 210 MB\./);
+
+      rerender(
+        <AssetDetails asset={{ ...baseAsset, id: 2, name: 'other.png' }} closeDetails={jest.fn()} />
+      );
+
+      await waitFor(() =>
+        expect(
+          screen.queryByText(/Exceeds the server request limit of 210 MB\./)
+        ).not.toBeInTheDocument()
+      );
+    });
+
+    it('names upload.config.sizeLimit when the upload plugin rejected the file', async () => {
+      await replaceWith(() =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 413,
+              name: 'PayloadTooLargeError',
+              message: 'photo.png exceeds size limit of 100 KB.',
+              details: { code: 'SizeLimitExceeded', limit: 100000 },
+            },
+          },
+          { status: 413 }
+        )
+      );
+
+      const cause = await screen.findByText(/Exceeds the Media Library upload limit of 100 KB\./);
+      expect(cause).toHaveTextContent(
+        'Exceeds the Media Library upload limit of 100 KB. To raise it, a developer can increase upload.config.sizeLimit.'
+      );
+    });
+
+    it('points outside Strapi when a proxy answered 413', async () => {
+      await replaceWith(
+        () =>
+          new HttpResponse('<html><body>413 Request Entity Too Large</body></html>', {
+            status: 413,
+            headers: { 'Content-Type': 'text/html' },
+          })
+      );
+
+      await screen.findByText(
+        'Rejected as too large before reaching Strapi. A limit outside Strapi, such as a reverse proxy, is the likely cause.'
+      );
+    });
   });
 
   it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {
@@ -699,7 +807,6 @@ describe('Replace media placement', () => {
 
     // The server pins the replacement to the old extension, so a cross-type pick
     // would leave the bytes and the URL disagreeing.
-    // eslint-disable-next-line testing-library/no-node-access
     expect(document.querySelector('input[type="file"]')).toHaveAttribute(
       'accept',
       'application/pdf'
@@ -792,6 +899,23 @@ describe('AssetDetailsDrawer (controlled)', () => {
     rerender(<AssetDetailsDrawer assetId={2} onClose={jest.fn()} />);
 
     expect(await screen.findByRole('heading', { name: 'other.png' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+
+  // The editor is portaled out of the panel: its Escape is the editor's alone
+  it('closes only the crop editor on Escape, not the drawer', async () => {
+    const onClose = jest.fn();
+    const { user } = render(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    await user.click(await screen.findByRole('button', { name: 'Crop' }));
+    await screen.findByRole('button', { name: 'Apply' });
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+    );
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
   });
 });

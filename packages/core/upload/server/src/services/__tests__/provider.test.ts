@@ -159,3 +159,61 @@ describe('Provider service - replace', () => {
     expect(newFile.filepath).toBeUndefined();
   });
 });
+
+describe('Provider service - upload', () => {
+  test('uses uploadStream with a stream when the provider only implements uploadStream', async () => {
+    const seen: Array<{ hasStream: boolean; hasBuffer: boolean }> = [];
+    const uploadStream = jest.fn(async (file: any) => {
+      seen.push({ hasStream: file.stream instanceof Readable, hasBuffer: 'buffer' in file });
+    });
+
+    setupStrapi({ uploadStream });
+
+    const service = createProviderService({ strapi: global.strapi } as any);
+    const file = makeUploadableFile({ filepath: '/tmp/whatever' });
+
+    await service.upload(file);
+
+    expect(uploadStream).toHaveBeenCalledTimes(1);
+    expect(uploadStream).toHaveBeenCalledWith(file);
+    expect(seen).toEqual([{ hasStream: true, hasBuffer: false }]);
+    expect(file.stream).toBeUndefined();
+    expect(file.filepath).toBeUndefined();
+  });
+
+  test('uses upload with a buffer when the provider only implements upload', async () => {
+    const seen: Array<{ buffer: unknown; hasStream: boolean }> = [];
+    const uploadFn = jest.fn(async (file: any) => {
+      seen.push({ buffer: file.buffer, hasStream: 'stream' in file });
+    });
+
+    setupStrapi({ upload: uploadFn });
+
+    const service = createProviderService({ strapi: global.strapi } as any);
+    const file = makeUploadableFile({ filepath: '/tmp/whatever' });
+
+    await service.upload(file);
+
+    expect(uploadFn).toHaveBeenCalledTimes(1);
+    expect(uploadFn).toHaveBeenCalledWith(file);
+    expect(seen).toEqual([{ buffer: Buffer.from('new content'), hasStream: false }]);
+    expect(file.buffer).toBeUndefined();
+    expect(file.filepath).toBeUndefined();
+  });
+
+  test('prefers uploadStream when the provider implements both', async () => {
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const uploadFn = jest.fn().mockResolvedValue(undefined);
+
+    setupStrapi({ uploadStream, upload: uploadFn });
+
+    const service = createProviderService({ strapi: global.strapi } as any);
+    const file = makeUploadableFile();
+
+    await service.upload(file);
+
+    expect(uploadStream).toHaveBeenCalledTimes(1);
+    expect(uploadStream).toHaveBeenCalledWith(file);
+    expect(uploadFn).not.toHaveBeenCalled();
+  });
+});

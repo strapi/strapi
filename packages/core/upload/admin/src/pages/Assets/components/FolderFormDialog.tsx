@@ -45,14 +45,29 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
     if (open) {
       setName(initialName);
       setFieldError(undefined);
-
-      // Renaming starts from the current name, so select it: typing replaces
-      // the whole thing, as in Finder / VS Code / GitHub.
-      if (mode === 'rename') {
-        inputRef.current?.select();
-      }
     }
-  }, [open, initialName, mode]);
+  }, [open, initialName]);
+
+  // Focus the name input when the dialog opens. This runs from Radix's
+  // open auto-focus rather than an effect or `autoFocus`: the dialog portal
+  // mounts its content a render after `open` flips, so an effect here still
+  // sees an empty ref, and `autoFocus` would make Radix skip this hook.
+  const handleOpenAutoFocus = (event: Event) => {
+    const input = inputRef.current;
+
+    if (!input) {
+      return;
+    }
+
+    event.preventDefault();
+    input.focus();
+
+    // Renaming starts from the current name, so select it: typing replaces
+    // the whole thing, as in Finder / VS Code / GitHub.
+    if (mode === 'rename') {
+      input.select();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +147,7 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
       onOpenChange={onClose}
       hasUnsavedChanges={name !== initialName}
     >
-      <StyledModalContent>
+      <StyledModalContent onOpenAutoFocus={handleOpenAutoFocus}>
         <Modal.Header>
           <Modal.Title>
             {props.mode === 'rename'
@@ -165,7 +180,6 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
                   setName(e.target.value);
                   setFieldError(undefined);
                 }}
-                autoFocus
               />
               <Field.Error />
             </Field.Root>

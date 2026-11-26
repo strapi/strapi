@@ -7,6 +7,7 @@
 import * as React from 'react';
 
 import {
+  Box,
   Checkbox,
   DatePicker,
   DateTimePicker,
@@ -19,6 +20,7 @@ import {
   TextInput,
   TimePicker,
   Toggle,
+  Tooltip,
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
@@ -31,6 +33,36 @@ import { handleTimeChange, handleTimeChangeEvent } from '../utils/timeFormat';
 import type { Schema } from '@strapi/types';
 
 const EMPTY_OPTIONS: NonNullable<GenericInputProps['options']> = [];
+
+/**
+ * Input types `GenericInput` renders itself, one per `case` of its `switch`.
+ * Any other type needs an entry in `customInputs`, or renders as "Not supported".
+ *
+ * Both directions are checked: the `switch` runs on a `GenericInputType`, so a `case` missing
+ * from this list fails the type check, and `GenericInputs.test.tsx` renders every entry, so an
+ * entry without a `case` fails the test.
+ */
+const GENERIC_INPUT_TYPES = [
+  'json',
+  'bool',
+  'checkbox',
+  'datetime',
+  'date',
+  'number',
+  'email',
+  'timestamp',
+  'text',
+  'string',
+  'password',
+  'select',
+  'textarea',
+  'time',
+] as const;
+
+type GenericInputType = (typeof GENERIC_INPUT_TYPES)[number];
+
+const isGenericInputType = (type: string): type is GenericInputType =>
+  (GENERIC_INPUT_TYPES as readonly string[]).includes(type);
 
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
@@ -113,6 +145,8 @@ interface GenericInputProps<
   placeholder?: TranslationMessage;
   required?: boolean;
   step?: number;
+  /** Shown on hover. Only rendered for the `checkbox` type. */
+  tooltip?: TranslationMessage;
   type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: unknown;
@@ -137,6 +171,7 @@ const GenericInput = ({
   placeholder,
   required,
   step,
+  tooltip,
   type,
   value: defaultValue,
   isNullable: _isNullable,
@@ -289,7 +324,7 @@ const GenericInput = ({
     : '';
 
   const getComponent = () => {
-    switch (type) {
+    switch (isGenericInputType(type) ? type : undefined) {
       case 'json': {
         return (
           <JSONInput
@@ -328,7 +363,7 @@ const GenericInput = ({
         );
       }
       case 'checkbox': {
-        return (
+        const checkbox = (
           <Checkbox
             disabled={disabled}
             onCheckedChange={(value) => {
@@ -338,6 +373,17 @@ const GenericInput = ({
           >
             {label}
           </Checkbox>
+        );
+
+        if (!tooltip) {
+          return checkbox;
+        }
+
+        // Disabled buttons do not emit pointer events, so the tooltip is attached to a wrapper.
+        return (
+          <Tooltip label={formatMessage(tooltip, tooltip.values)}>
+            <Box width="fit-content">{checkbox}</Box>
+          </Tooltip>
         );
       }
       case 'datetime': {
@@ -653,5 +699,5 @@ const getMinMax = (fieldSchema?: FieldSchema) => {
  */
 const MemoizedGenericInput = React.memo(GenericInput, isEqual);
 
-export type { GenericInputProps, CustomInputProps };
-export { MemoizedGenericInput as GenericInput };
+export type { GenericInputProps, CustomInputProps, GenericInputType };
+export { MemoizedGenericInput as GenericInput, GENERIC_INPUT_TYPES };

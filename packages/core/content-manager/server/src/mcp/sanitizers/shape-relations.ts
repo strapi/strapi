@@ -117,7 +117,6 @@ const shapeRelationToIdentity: Parameters<typeof traverseEntity>[0] = (
     return;
   }
 
-  // @ts-expect-error — reduceToIdentity returns a narrower type; traverseEntity Data allows unknown
   set(key, reduceToIdentity(attribute as { relation?: string }, value));
 };
 
@@ -138,7 +137,6 @@ export const shapeRelationsForMcp = async (
       schema: strapi.getModel(uid),
       getModel: strapi.getModel.bind(strapi),
     },
-    // @ts-expect-error — traverseEntity expects Data; post-sanitize documents are compatible at runtime
     data
   );
 };

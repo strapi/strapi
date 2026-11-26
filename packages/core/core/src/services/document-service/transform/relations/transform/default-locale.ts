@@ -50,7 +50,6 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
         return setDefaultLocaleToRelation(relation, await defaultLocale);
       }, value as any);
 
-      // @ts-expect-error - fix type
       set(key, relation);
     },
     { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },

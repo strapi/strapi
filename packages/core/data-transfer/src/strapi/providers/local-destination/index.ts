@@ -98,11 +98,19 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
     assertValidStrapi(this.strapi);
-    this.transaction?.end();
-    this.strapi.db.lifecycles.enable();
-    // Basically `!== false` but more deterministic
-    if (autoDestroy === undefined || autoDestroy === true) {
-      await this.strapi?.destroy();
+    try {
+      // end() only signals the loop. The commit finishes on the promise.
+      const transaction = this.transaction as
+        (Transaction & Partial<utils.transaction.TransactionCommit>) | undefined;
+      const pending = transaction?.[utils.transaction.transactionCommit]?.() ?? Promise.resolve();
+      transaction?.end();
+      await pending;
+    } finally {
+      this.strapi.db.lifecycles.enable();
+      // Basically `!== false` but more deterministic
+      if (autoDestroy === undefined || autoDestroy === true) {
+        await this.strapi?.destroy();
+      }
     }
   }
 

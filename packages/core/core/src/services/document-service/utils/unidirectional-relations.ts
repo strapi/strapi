@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash';
 
 import type { Data, UID, Schema } from '@strapi/types';

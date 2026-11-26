@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */ // allow __type
 import { curry, groupBy, mapValues, map, isEmpty } from 'lodash';
 import type { Knex } from 'knex';
 
@@ -30,6 +29,9 @@ const getMorphToManyRowsLinkedToMorphOne = (
     const targetAttribute = db.metadata.get(relatedType).attributes[field] as Relation.MorphOne;
 
     // ensure targeted field is the right one + check if it is a morphOne
+    // Known gap: this keeps one row for every morphOne written from the owner side, while
+    // `updateRelations` only reduces `singleRow` morphOnes (single media). Align the two
+    // once the generic morphOne write paths are settled.
     return (
       targetAttribute?.target === uid &&
       targetAttribute?.morphBy === attributeName &&

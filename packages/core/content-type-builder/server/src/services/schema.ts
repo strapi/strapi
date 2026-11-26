@@ -20,6 +20,7 @@ import type { AttributeRenameMigrationMode } from '../config';
 import {
   assertCanConvertToSingleType,
   assertCTBOwnedApplicationContentType,
+  assertValidDisplayName,
   getRestrictRelationsTo,
   isContentTypeVisible,
 } from './content-types';
@@ -608,6 +609,16 @@ export const updateSchema = async (schema: CTBSchema) => {
   contentTypes
     .filter((contentType) => contentType.action === 'delete')
     .forEach((contentType) => assertCTBOwnedApplicationContentType(contentType.uid));
+
+  // An update without `displayName` keeps the stored one; a create has none to fall back on.
+  for (const contentType of contentTypes) {
+    if (
+      contentType.action === 'create' ||
+      (contentType.action === 'update' && contentType.displayName !== undefined)
+    ) {
+      assertValidDisplayName(contentType.displayName);
+    }
+  }
 
   // Same guard as the edit content-type route, run before anything is written.
   for (const contentType of contentTypes) {

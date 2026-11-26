@@ -240,7 +240,7 @@ const getNonVisibleAttributes = (model: Model) => {
 };
 
 const getVisibleAttributes = (model: Model) => {
-  return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
+  return _.difference(Object.keys(model.attributes ?? {}), getNonVisibleAttributes(model));
 };
 
 const isVisibleAttribute = (model: Model, attributeName: string) => {
@@ -337,7 +337,7 @@ const getStoredPrivateAttributes = (model: Model) =>
 const getPrivateAttributes = (model: Model) => {
   return _.union(
     getStoredPrivateAttributes(model),
-    _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
+    Object.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 

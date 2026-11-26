@@ -26,7 +26,7 @@ A `Dialect` class per client hides the differences between databases. The client
 
 ### Metadata
 
-`Metadata` is a map from a model UID to its `Meta`. `loadModels` builds the table names, the column-to-attribute map and the relations from the models. `@strapi/core` builds the models from content types and components with `transformContentTypesToModels`. The database never reads content type files itself. Code: [`src/metadata`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/metadata).
+`Metadata` is a map from a model UID to its `Meta`. `loadModels` builds the table names, the column-to-attribute map and the relations from the models. Every relation that declares a `target` must point to a loaded model, on the inverse (`mappedBy`) side too. Otherwise `loadModels` throws `Error on attribute <attribute> in model <name>(<uid>): Metadata for "<target>" not found`, and Strapi fails to boot. An inverse side stores nothing itself: it reads the join column or join table of the owner on the target that points back to it with `inversedBy`. If no relation on the target points back with `inversedBy: <attribute>`, `loadModels` throws `Error on attribute <attribute> in model <name>(<uid>): mappedBy attribute <mappedBy> in <target> must be a relation to <uid> with inversedBy "<attribute>"`. The `mappedBy` name only picks which attribute on the target is checked first and appears in the error; whether the app loads does not depend on it, so an owner that points back under another name still loads. `@strapi/core` builds the models from content types and components with `transformContentTypesToModels`. The database never reads content type files itself. Code: [`src/metadata`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/metadata).
 
 ### Schema sync
 
@@ -51,6 +51,10 @@ Two providers run migrations: the user provider for files in `database/migration
 ### Lifecycles
 
 `db.lifecycles` runs subscribers around each query with an `Event` (`action`, `model`, `params`, `state`, `result`). Two subscribers exist by default: one sets timestamps, and one calls the `lifecycles` functions of a model. Read [Lifecycles](./04-lifecycles.md).
+
+### Query scopes
+
+`db.unstable_scopes` holds query scopes. The API is unstable. A scope returns a `where` condition per model, and the query builder ANDs it into most queries and joins to model tables. Read [Query scopes](./05-query-scopes.md).
 
 ### Repairs
 
