@@ -17,6 +17,8 @@ import {
   type ServerMode,
 } from '@strapi/tests-shared';
 
+import { ROLES, loginRoles, storageStatePath, type Role } from './auth';
+
 /** Generated and built once per run by setup/global-setup.ts. */
 export const UI_APP_NAME = 'ui';
 
@@ -49,13 +51,27 @@ export interface ResetOptions {
   requires: Requirements;
 }
 
+export interface AuthOptions {
+  /**
+   * The admin role the page starts logged in as (`fixtures/auth.ts`), through its storage state:
+   * `test.use({ role: 'editor' })`. Default: `'admin'` (Super Admin). `null` starts logged out,
+   * for the tests of the login page itself.
+   */
+  role: Role | null;
+}
+
 export interface AppWorkerFixtures {
   /** The Strapi server of this worker, started once per worker. */
   server: Server;
-  /** The spec file whose data is in the database, so file scope knows when to reset. */
-  databaseOwner: { file?: string };
+  /**
+   * The spec file whose data is in the database, so file scope knows when to reset, and how many
+   * restores ran in this worker, so the seeding fixtures know when what they seeded is gone.
+   */
+  databaseOwner: { file?: string; restores: number };
   /** Edition, EE features and future flags of the worker's instance. */
   features: InstanceFeatures;
+  /** The storage state file of each role, saved by `server` (see fixtures/auth.ts). */
+  storageStates: Record<Role, string>;
 }
 
 export interface ResetFixtures {
@@ -70,13 +86,17 @@ export interface ResetFixtures {
  * Playwright doesn't expose it: this reads the same internal method its own fixtures use.
  * `reset-test-scope.ui-test.ts` fails if it stops working.
  */
-const currentHookType = (testInfo: TestInfo) =>
+export const currentHookType = (testInfo: TestInfo) =>
   (testInfo as TestInfo & { _currentHookType?: () => string | undefined })._currentHookType?.();
 
-export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWorkerFixtures>({
+export const test = base.extend<
+  ResetOptions & ResetFixtures & AuthOptions,
+  AppOptions & AppWorkerFixtures
+>({
   serverMode: ['develop', { scope: 'worker', option: true }],
   resetScope: ['file', { option: true }],
   requires: [{}, { option: true }],
+  role: ['admin', { option: true }],
 
   server: [
     async ({ serverMode }, use, workerInfo) => {
@@ -100,8 +120,10 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
         // Snapshots are SQLite only, whatever TESTS_DATABASE says.
         database: SQLITE,
       });
-      // The state every reset goes back to. Seeding and role logins (CMS-1947, CMS-1951) come
-      // before this, so their admin sessions survive the resets.
+      // The role users and their admin sessions come before the snapshot, so every reset keeps
+      // them and the saved storage states stay valid. Seeding (CMS-1947) goes here too.
+      await loginRoles(server, workerInfo);
+      // The state every reset goes back to.
       await snapshotDatabase(server);
       // The probe row is not in the snapshot: the live database starts one row off it, so even
       // the first spec file of a worker starts with a real restore, and a reset spec run on its
@@ -115,10 +137,30 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
     { scope: 'worker', timeout: 180_000 },
   ],
 
+  async baseURL({ server }, use) {
+    await use(server.url);
+  },
+
+  storageStates: [
+    async ({ server }, use, workerInfo) => {
+      const states = {} as Record<Role, string>;
+      for (const role of ROLES) {
+        states[role] = storageStatePath(workerInfo, server, role);
+      }
+      await use(states);
+    },
+    { scope: 'worker' },
+  ],
+
+  // A role's storage state, or a logged-out page for `role: null`.
+  async storageState({ role, storageStates }, use) {
+    await use(role === null ? undefined : storageStates[role]);
+  },
+
   databaseOwner: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
-      await use({});
+      await use({ restores: 0 });
     },
     { scope: 'worker' },
   ],
@@ -143,6 +185,7 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
       const newFile = databaseOwner.file !== testInfo.file;
       if (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll')) {
         await restoreDatabase(server);
+        databaseOwner.restores += 1;
       }
       databaseOwner.file = testInfo.file;
 

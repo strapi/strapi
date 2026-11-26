@@ -1260,7 +1260,7 @@ export const AssetDetails = ({
                           type="submit"
                           variant="default"
                           loading={isSubmitting}
-                          // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
+                          // The update route saves a blank name, so this is the only guard against an empty or whitespace name.
                           disabled={!modified || isSubmitting || nameIsEmpty}
                         >
                           {formatMessage({

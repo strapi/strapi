@@ -38,7 +38,7 @@ interface UploadFilesArgs {
    * settings value. Defaults to 1 (sequential).
    */
   concurrency?: number;
-  /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
+  /** Whether AI metadata generation is enabled (a provider is registered, `aiMetadataAvailable`, and `settings.aiMetadata` is on). */
   generateAiMetadata: boolean;
   /**
    * Called for each file of this call as it finishes uploading, including files
@@ -143,7 +143,8 @@ const getFileKey = (uploadId: number, index: number) => `${uploadId}:${index}`;
 
 /**
  * Aborts an upload by its uploadId.
- * Called from the UploadProgressDialog when the user clicks cancel or close.
+ * Called from the UploadProgressDialog when the user clicks Cancel all. Closing
+ * the dialog does not abort.
  */
 export const abortUpload = (uploadId: number) => {
   const controller = abortControllers.get(uploadId);
@@ -259,8 +260,8 @@ const withTargetFolder = (
  *    succeeded), which is why the promise is fully swallowed here.
  *
  * Every uploaded file is sent, including non-images: the server already classifies
- * them (`ai-metadata.generateForFiles` returns `skipped` for anything whose mime
- * isn't `image/*`) and duplicating that rule here would let the two drift apart.
+ * them (`ai-metadata.generateForFiles` returns `skipped` for anything that is not
+ * an image format the provider supports) and duplicating that rule here would let the two drift apart.
  * The upshot is that a non-image now reports "Metadata generation skipped" rather
  * than silently showing no metadata state at all.
  */
@@ -514,8 +515,9 @@ const runMergedUploadPool = async ({
 
   // The chained value keeps every file in the batch, because the next merged leg
   // reads it as its own `earlier`. The caller gets only what it handed in: a
-  // consumer that attaches the result — the Content Manager field — would
-  // otherwise re-attach the files the earlier drop already added.
+  // consumer that attached the result would otherwise re-attach the files the
+  // earlier drop already added. (The Content Manager field attaches each file
+  // through `onFileUploaded` instead.)
   return run.then((result) => (result.error ? result : { data: result.own ?? result.data }));
 };
 

@@ -704,7 +704,9 @@ describe('AssetsPage search', () => {
     it('does not offer "Search all media" inside a folder without a search term', async () => {
       renderPage('?folder=1');
 
-      expect(await findHeading()).toHaveTextContent('test');
+      // On mobile the loaded folder title replaces the "Loading..." heading with a
+      // new element, so wait for the heading by name instead of holding the first one.
+      expect(await screen.findByRole('heading', { level: 1, name: /test/ })).toBeInTheDocument();
       expect(screen.queryByRole('switch', { name: 'Search all media' })).not.toBeInTheDocument();
     });
 
@@ -770,6 +772,154 @@ describe('AssetsPage search', () => {
         );
       });
     });
+  });
+});
+
+describe('AssetsPage mobile folder breadcrumb', () => {
+  const FOLDER_NAMES: Record<number, string> = { 1: 'Photos', 2: 'Events', 3: 'Paris' };
+
+  const findBreadcrumb = () => screen.findByRole('navigation', { name: 'Folder navigation' });
+  const queryBreadcrumb = () => screen.queryByRole('navigation', { name: 'Folder navigation' });
+
+  beforeEach(() => {
+    respondWithAssets([]);
+    respondWithFolders([]);
+    server.use(
+      http.get('*/upload/folder-structure', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              name: 'Photos',
+              children: [
+                { id: 2, name: 'Events', children: [{ id: 3, name: 'Paris', children: [] }] },
+              ],
+            },
+          ],
+        })
+      ),
+      http.get('*/upload/folders/:id', ({ params }) => {
+        const id = Number(params.id);
+
+        return HttpResponse.json({
+          data: { ...createFolder(id, FOLDER_NAMES[id]), files: { count: 2 } },
+        });
+      })
+    );
+  });
+
+  it('keeps the plain title at the root', async () => {
+    renderPage();
+
+    expect(await findHeading()).toHaveTextContent('Home (0 items)');
+    expect(queryBreadcrumb()).not.toBeInTheDocument();
+  });
+
+  it('goes back to the root from a first-level folder', async () => {
+    const { user } = renderPage('?folder=1');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading()).toHaveAccessibleName('Photos');
+    expect(screen.getByText('2 items')).toBeInTheDocument();
+    expect(
+      within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
+    ).not.toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
+  it('lists the ancestors between Home and a deeper folder, shallowest first', async () => {
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading()).toHaveAccessibleName('Paris');
+    expect(screen.getByText('2 items')).toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Show more folders' }));
+
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((item) => item.textContent)).toEqual(['Photos', 'Events']);
+
+    await user.click(screen.getByRole('menuitem', { name: 'Events' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).toHaveTextContent('?folder=2');
+    });
+  });
+
+  it('goes back to the root from a deeper folder', async () => {
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
+  it.each([
+    [
+      'cannot be loaded',
+      () => HttpResponse.json({ error: { status: 500, message: 'boom' } }, { status: 500 }),
+    ],
+    ['does not hold the folder', () => HttpResponse.json({ data: [] })],
+  ])('still offers Home when the folder tree %s', async (_, resolver) => {
+    server.use(http.get('*/upload/folder-structure', resolver));
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading()).toHaveAccessibleName('Paris');
+    expect(
+      within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
+    ).not.toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
+  it('keeps the plain folder title while searching inside a folder', async () => {
+    renderPage('?folder=3&_q=x');
+
+    // The sidebar row proves the folder structure has loaded.
+    await screen.findByText('Paris');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Paris (2 items)' })
+    ).toBeInTheDocument();
+    expect(queryBreadcrumb()).not.toBeInTheDocument();
+  });
+
+  it('keeps the plain title on desktop, where the sidebar is visible', async () => {
+    const { matchMedia } = window;
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }));
+
+    try {
+      renderPage('?folder=3');
+
+      await screen.findByText('Paris');
+
+      expect(await findHeading()).toHaveTextContent('Paris (2 items)');
+      expect(queryBreadcrumb()).not.toBeInTheDocument();
+    } finally {
+      window.matchMedia = matchMedia;
+    }
   });
 });
 

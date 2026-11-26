@@ -6,6 +6,7 @@ import { createRouteManager } from './routing';
 import { createAdminAPI } from './admin-api';
 import { createContentAPI } from './content-api';
 import registerAllRoutes from './register-routes';
+import { markRoutesRegistered } from './routes-registration';
 import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
@@ -83,6 +84,7 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
 
     initRouting() {
       registerAllRoutes(strapi);
+      markRoutesRegistered(strapi);
 
       return this;
     },

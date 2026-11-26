@@ -6,6 +6,7 @@ import {
   type McpCapabilityRegistry,
   McpCapabilityRegistryBase,
 } from './internal/McpCapabilityRegistry';
+import { assertSchemaConvertsToJsonSchema } from './utils/assertSchemaConvertsToJsonSchema';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
@@ -133,11 +134,26 @@ export class McpPromptRegistry
             ) => toSdkPromptResult(await handler(args, context))
           );
 
-          return mcpServer.registerPrompt(
+          const registered = mcpServer.registerPrompt(
             name,
             { title, description, argsSchema },
             (args, context) => sdkHandler(args, createMcpCapabilityHandlerContext(context))
           );
+
+          // The SDK accepts any schema at registration and only converts it while serving
+          // prompts/list, where one failure hides every prompt. Probe the schema the SDK will
+          // list so an unconvertible one fails this registration alone.
+          try {
+            if (registered.argsSchema !== undefined) {
+              assertSchemaConvertsToJsonSchema(registered.argsSchema, 'input');
+            }
+          } catch (error) {
+            registered.remove();
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`argsSchema cannot be converted to JSON Schema: ${message}`);
+          }
+
+          return registered;
         },
       });
     });
