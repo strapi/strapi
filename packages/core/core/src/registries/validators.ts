@@ -1,6 +1,7 @@
 import _, { PropertyName } from 'lodash';
+import type { validate } from '@strapi/utils';
 
-type Validator = unknown;
+type Validator = validate.Validator;
 
 const validatorsRegistry = () => {
   const validators: Record<string, Validator[]> = {};

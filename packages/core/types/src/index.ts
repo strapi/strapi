@@ -274,7 +274,8 @@ declare global {
        * `strapi.add(name, resolver)`, or what its factory returns (the container calls a function
        * resolver once, with the container and the `args` of the first `get`, and caches the result).
        * With strict types enabled, `get` of a registered name resolves to its value, and of any other
-       * name to `unknown`; `add` lists registered names and does not check the resolver.
+       * name to `unknown`; `add` lists registered names and checks the resolver of a registered
+       * name against its value (`Core.ContainerResolver`).
        *
        * Additive only, with no `Package*` and `App*` pair. A name is added once: a second `add` of
        * the same name throws, and the container has no `set` or `extend`, so an application cannot

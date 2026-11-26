@@ -3,6 +3,7 @@ import { providerFactory, sanitize, validate } from '@strapi/utils';
 import type { z } from 'zod/v4';
 
 import type { Route } from '../core';
+import type { IsStrict } from '../core/strictness';
 
 /** Base Zod scalar types allowed for query params (no nested objects). */
 type ZodScalarSchema = z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodEnum<Record<string, string>>;
@@ -47,13 +48,29 @@ export interface Condition {
   [key: string]: unknown;
 }
 
+/**
+ * The provider the content API's action and condition providers wrap. Each replaces its `register`.
+ * Without strict types, the factory's `register(key, item)` stays intersected with the wrapper's, so
+ * `register('key', item)` type-checks on the condition provider, which then takes `'key'` as the
+ * condition.
+ */
+type BaseProvider = IsStrict extends false
+  ? ReturnType<typeof providerFactory>
+  : Omit<ReturnType<typeof providerFactory>, 'register'>;
+
+/**
+ * What `register` resolves to. At runtime, it is the wrapped provider (`providerFactory`), whose own
+ * `register` skips the wrapper's checks: with strict types it is `unknown`.
+ */
+type RegisterResult = IsStrict extends false ? Promise<void> : Promise<unknown>;
+
 type ConditionProvider = {
-  register: (condition: Condition) => Promise<void>;
-} & ReturnType<typeof providerFactory>;
+  register: (condition: Condition) => RegisterResult;
+} & BaseProvider;
 
 type ActionProvider = {
-  register: (action: string, payload: Record<string, unknown>) => Promise<void>;
-} & ReturnType<typeof providerFactory>;
+  register: (action: string, payload: Record<string, unknown>) => RegisterResult;
+} & BaseProvider;
 
 export interface PermissionUtilities {
   engine: ReturnType<typeof engine.new>;
