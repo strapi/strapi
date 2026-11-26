@@ -1,5 +1,5 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import {
   openUploadProgress,
@@ -80,7 +80,39 @@ interface UploadEntry {
   file: File;
   fileInfo: UploadFileInfo;
   onUploaded?: (file: UploadedFile) => void;
+  /** Read once per drop, so a space switch cannot split the drop. An error fails the file */
+  requestHeaders?: Headers | Error;
 }
+
+const readRequestHeaders = (): Headers | Error => {
+  try {
+    return unstable_getRequestHeaders();
+  } catch (error) {
+    // `unstable_getRequestHeaders` only throws `RequestHeadersError`
+    return error as Error;
+  }
+};
+
+// No file of a failed read was sent, so a retry reads the providers again. Each drop has
+// its own error, so the new value goes to every entry of the retried drops
+const rereadFailedRequestHeaders = (
+  entries: UploadEntry[],
+  retried: Array<UploadEntry | undefined>
+) => {
+  const failed = new Set<UploadEntry['requestHeaders']>(
+    retried.map((entry) => entry?.requestHeaders).filter((headers) => headers instanceof Error)
+  );
+  if (failed.size === 0) {
+    return;
+  }
+
+  const requestHeaders = readRequestHeaders();
+  entries.forEach((entry) => {
+    if (failed.has(entry.requestHeaders)) {
+      entry.requestHeaders = requestHeaders;
+    }
+  });
+};
 
 /**
  * Everything a batch needs to be replayed on retry: the original entries plus the
@@ -375,12 +407,17 @@ const runUploadPool = async ({
     });
 
     try {
+      if (entry.requestHeaders instanceof Error) {
+        throw entry.requestHeaders;
+      }
+
       const file = await uploadFileViaXHR(
         url,
         token,
         formData,
         fileAbortController.signal,
-        (bytes) => batcher.schedule(bytes)
+        (bytes) => batcher.schedule(bytes),
+        entry.requestHeaders
       );
       batcher.cancel();
       uploaded.push(file);
@@ -573,11 +610,10 @@ const fetchUrlUploadStream = async ({
   signal: AbortSignal;
 }): Promise<Response> => {
   const backendURL = window.strapi.backendURL;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers = unstable_getRequestHeaders();
+  headers.set('Content-Type', 'application/json');
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   return fetch(`${backendURL}/upload/actions/upload-from-urls`, {
@@ -740,6 +776,7 @@ const uploadApi = adminApi
           const fileInfoJson = formData.get('fileInfo') as string;
           const fileInfoArray = JSON.parse(fileInfoJson) as UploadFileInfo[];
 
+          const requestHeaders = readRequestHeaders();
           const entries: UploadEntry[] = files.map((file, index) => ({
             file,
             fileInfo: fileInfoArray[index] ?? {
@@ -749,6 +786,7 @@ const uploadApi = adminApi
               folder: null,
             },
             onUploaded: onFileUploaded,
+            requestHeaders,
           }));
 
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
@@ -894,6 +932,10 @@ const uploadApi = adminApi
 
           // Reset cancelled files back to pending
           dispatch(retryCancelledFiles());
+          rereadFailedRequestHeaders(
+            batch.entries,
+            cancelledIndices.map((index) => batch.entries[index])
+          );
 
           // Fresh AbortController for the retry run
           const abortController = new AbortController();
@@ -941,6 +983,7 @@ const uploadApi = adminApi
 
           skippedFiles.delete(getFileKey(uploadId, index));
           dispatch(retryFile({ uploadId, index }));
+          rereadFailedRequestHeaders(batch.entries, [batch.entries[index]]);
 
           return runMergedUploadPool({
             entries: batch.entries,
