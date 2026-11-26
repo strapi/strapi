@@ -9,6 +9,7 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
+import type { LifecycleMethod } from '../plugin/config/strapi-server/lifecycle';
 
 export interface Strapi extends Container {
   server: Modules.Server.Server;
@@ -195,6 +196,13 @@ export interface Strapi extends Container {
    * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
    */
   query(uid: UID.Schema): ReturnType<Database['query']>;
+}
+
+/** The application's `src/index` module, as `loaders/src-index.ts` in `@strapi/core` validates it. */
+export interface AppModule {
+  register?: LifecycleMethod;
+  bootstrap?: LifecycleMethod;
+  destroy?: LifecycleMethod;
 }
 
 export interface Reloader {

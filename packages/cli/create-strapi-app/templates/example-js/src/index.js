@@ -1,6 +1,8 @@
 'use strict';
 
-module.exports = {
+const { factories } = require('@strapi/strapi');
+
+module.exports = factories.createAppModule({
   /**
    * An asynchronous register function that runs before
    * your application is initialized.
@@ -17,4 +19,4 @@ module.exports = {
    * run jobs, or perform some special logic.
    */
   bootstrap(/*{ strapi }*/) {},
-};
+});

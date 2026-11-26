@@ -1,13 +1,13 @@
-// import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 
-export default {
+export default factories.createAppModule({
   /**
    * An asynchronous register function that runs before
    * your application is initialized.
    *
    * This gives you an opportunity to extend code.
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register(/* { strapi } */) {},
 
   /**
    * An asynchronous bootstrap function that runs before
@@ -16,5 +16,5 @@ export default {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
-};
+  bootstrap(/* { strapi } */) {},
+});

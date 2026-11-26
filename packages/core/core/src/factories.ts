@@ -159,11 +159,42 @@ const createUploadProvider = <
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
 
+/**
+ * Types the application's `src/index` module where an application writes it, and returns it
+ * unchanged. `register`, `bootstrap` and `destroy` receive `{ strapi }` typed as `Core.Strapi`,
+ * with no annotation, and editors complete them in JavaScript too. It does not create or start
+ * an application: `createStrapi` does.
+ *
+ * Strapi calls each lifecycle detached from the module, so `this` is typed `void`: call shared
+ * code through a local function, not `this`. Any key besides the three lifecycles fails at startup,
+ * so the object literal rejects it.
+ *
+ * @example
+ * import { factories } from '@strapi/strapi';
+ *
+ * export default factories.createAppModule({
+ *   register({ strapi }) {},
+ *   async bootstrap({ strapi }) {
+ *     strapi.log.info('Bootstrapped');
+ *   },
+ * });
+ *
+ * @example
+ * // JavaScript
+ * const { factories } = require('@strapi/strapi');
+ *
+ * module.exports = factories.createAppModule({
+ *   bootstrap({ strapi }) {},
+ * });
+ */
+const createAppModule = (app: Core.AppModule & ThisType<void>): Core.AppModule => app;
+
 export {
   createCoreController,
   createCoreService,
   createCoreRouter,
   createCoreValidator,
   createUploadProvider,
+  createAppModule,
   isCustomController,
 };
