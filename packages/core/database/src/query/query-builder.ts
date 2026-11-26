@@ -134,6 +134,16 @@ export interface QueryBuilder {
 const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
   ['select', 'count', 'update', 'delete'].includes(type);
 
+/**
+ * An update or delete that does not use ORDER BY to choose rows. `limit: -1` counts as no page,
+ * as `ensurePaginationOrderStability` does. The query still emits `LIMIT -1`.
+ */
+const isUnboundedWrite = (state: Pick<State, 'type' | 'limit' | 'offset' | 'first'>) =>
+  (state.type === 'update' || state.type === 'delete') &&
+  (state.limit == null || state.limit === -1) &&
+  state.offset == null &&
+  !state.first;
+
 const createQueryBuilder = (
   uid: string,
   db: Database,
@@ -141,6 +151,39 @@ const createQueryBuilder = (
 ): QueryBuilder => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
+
+  /**
+   * Drop relation sorts before processOrderBy. Those sorts add joins, and the joins pull a
+   * scalar-filtered write onto the subquery path even though an unbounded write does not use
+   * the order to choose rows. Scalar sorts stay, so MySQL can still emit UPDATE ... ORDER BY.
+   */
+  const omitRelationOrder = (orderBy: unknown): unknown => {
+    const { attributes } = meta;
+
+    if (typeof orderBy === 'string') {
+      return attributes[orderBy]?.type === 'relation' ? [] : orderBy;
+    }
+
+    if (Array.isArray(orderBy)) {
+      return orderBy.flatMap((entry) => {
+        const next = omitRelationOrder(entry);
+
+        if (_.isPlainObject(next) && _.isEmpty(next)) {
+          return [];
+        }
+
+        return [next];
+      });
+    }
+
+    if (_.isPlainObject(orderBy)) {
+      return Object.fromEntries(
+        Object.entries(orderBy).filter(([key]) => attributes[key]?.type !== 'relation')
+      );
+    }
+
+    return orderBy;
+  };
 
   const state: State = _.defaults({}, initialState, {
     type: 'select',
@@ -605,6 +648,10 @@ const createQueryBuilder = (
     processState() {
       if (this.state.processed) {
         return;
+      }
+
+      if (isUnboundedWrite(state)) {
+        state.orderBy = omitRelationOrder(state.orderBy) as State['orderBy'];
       }
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });

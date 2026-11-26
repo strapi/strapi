@@ -437,6 +437,93 @@ describe('relation subquery and deep sort paths', () => {
     await connection.destroy();
   });
 
+  it('query builder keeps a scalar orderBy when an unbounded write also sorts on a relation', async () => {
+    const { connection, em } = await compileSql('mysql2', 'mysql');
+
+    const sql = em
+      .createQueryBuilder(TEST_UID)
+      .where({ views: { $gte: 1 } })
+      .orderBy({ views: 'desc', related: { title: 'asc' } })
+      .increment('views', 1)
+      .getKnexQuery()
+      .toString();
+
+    expect(sql).toMatch(/order by `views` desc/i);
+    expect(sql).not.toMatch(/join/i);
+    expect(sql).not.toMatch(/select/i);
+
+    await connection.destroy();
+  });
+
+  it('query builder adds no relation-sort joins to an unpaginated scalar-filtered write', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { name: 'Hugo LLORIS' }, orderBy: { related: { title: 'asc' } } })
+      .increment('views', 1);
+
+    const sql = qb.getKnexQuery().toString();
+    expect(sql).not.toMatch(/join/i);
+    expect(sql).not.toMatch(/order by/i);
+    expect(sql).not.toMatch(/select/i);
+
+    await qb.execute();
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 10]);
+
+    await connection.destroy();
+  });
+
+  it('query builder adds no relation-sort joins when orderBy and a relation filter both apply', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const withSort = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: 1 }, orderBy: { related: { title: 'asc' } } })
+      .increment('views', 1);
+    const withoutSort = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: 1 } })
+      .increment('views', 1);
+
+    expect(withSort.getKnexQuery().toString()).toBe(withoutSort.getKnexQuery().toString());
+
+    await withSort.execute();
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([11, 10, 11]);
+
+    await connection.destroy();
+  });
+
+  it.each([
+    ['increment', (qb: QueryBuilder) => qb.increment('views', 1)],
+    ['update', (qb: QueryBuilder) => qb.update({ name: 'UPDATED' })],
+    ['delete', (qb: QueryBuilder) => qb.delete()],
+  ])(
+    'query builder drops a relation sort for limit: -1 on %s and still emits the limit',
+    async (_label, apply) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      const qb = em.createQueryBuilder(TEST_UID).init({
+        where: { related: { title: 'Category A' } },
+        orderBy: { related: { title: 'asc' } },
+        limit: -1,
+      });
+
+      const sql = apply(qb).getKnexQuery().toString();
+      expect(sql.match(/left join/gi)).toHaveLength(2);
+      expect(sql).not.toMatch(/order by/i);
+      expect(sql).toMatch(/limit -1/i);
+
+      await connection.destroy();
+    }
+  );
+
   it.each([
     ['increment', (qb: QueryBuilder) => qb.increment('views', 1), 'views', [10, 10, 11]],
     [
