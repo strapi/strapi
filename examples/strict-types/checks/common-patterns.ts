@@ -33,6 +33,19 @@ factories.createCoreController('api::article.article', ({ strapi }) => ({
   },
 })) satisfies Core.ControllerFactory<'api::article.article'>;
 
+// A core controller override that sanitizes the request body before it writes it. The sanitized
+// data keeps the type of the body (`any`), so it passes the strict service as the raw body does.
+factories.createCoreController('api::article.article', ({ strapi }) => ({
+  async update(ctx) {
+    const { data } = ctx.request.body;
+    await this.validateInput(data, ctx);
+
+    return strapi
+      .service('api::article.article')
+      .update(ctx.params.id, { data: await this.sanitizeInput(data, ctx) });
+  },
+}));
+
 factories.createCoreService('api::article.article', () => ({
   async find(params) {
     const result = await super.find(params);

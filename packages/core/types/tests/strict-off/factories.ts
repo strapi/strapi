@@ -36,3 +36,14 @@ declare const coreController: (params: {
 coreController satisfies Core.ControllerFactory<'api::legacy.example'>;
 // @ts-expect-error `Core.Controller` needs an index signature that a core controller does not have.
 coreController satisfies (params: { strapi: Core.Strapi }) => Core.Controller;
+
+// Without strict types, a core controller's `sanitizeInput` resolves to `unknown`, as on develop,
+// whatever the type of its data.
+declare const baseController: Core.CoreAPI.Controller.Base;
+type SanitizeInputChecks = [
+  Expect<
+    Equal<ReturnType<typeof baseController.sanitizeInput<{ title: string }>>, Promise<unknown>>
+  >,
+];
+declare const sanitizeInputChecks: SanitizeInputChecks;
+sanitizeInputChecks satisfies unknown;

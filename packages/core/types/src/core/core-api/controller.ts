@@ -4,6 +4,7 @@ import type * as UID from '../../uid';
 import type { MatchFirst, Test } from '../../utils';
 
 import type { ControllerHandler } from '../controller';
+import type { IsStrict } from '../strictness';
 
 /**
  * Base Core-API controller type
@@ -14,7 +15,11 @@ export interface Base {
   // TODO: Use actual entities instead of regular object
   transformResponse<TData>(data: TData, meta?: object): unknown;
   sanitizeOutput<TData>(data: TData, ctx: Context): Promise<unknown>;
-  sanitizeInput<TData>(data: TData, ctx: Context): Promise<unknown>;
+  /** With strict types, the sanitized data keeps the type of `data` (`any` for a request body). */
+  sanitizeInput<TData>(
+    data: TData,
+    ctx: Context
+  ): Promise<IsStrict extends false ? unknown : TData>;
   sanitizeQuery(ctx: Context): Promise<Record<string, unknown>>;
 
   validateInput<TData>(data: TData, ctx: Context): Promise<void>;
