@@ -10,6 +10,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useAuth,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -46,7 +47,7 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <Modal.Root open={visible} onOpenChange={setVisible}>
+    <UnsavedChangesModal open={visible} onOpenChange={setVisible}>
       <Modal.Trigger>
         <Button
           variant={variant}
@@ -63,7 +64,7 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
         </Button>
       </Modal.Trigger>
       <CreateModal onClose={() => setVisible(false)} />
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
@@ -137,7 +138,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
 
       refetchPermissions();
       onClose();
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -383,6 +384,7 @@ const EnumerationInput = ({
 }: Extract<InputProps, { type: 'enumeration' }>) => {
   const { value, error, onChange } = useField(name);
   const { data: defaultLocales = [] } = useGetDefaultLocalesQuery();
+  const fieldValue = typeof value === 'string' ? value : undefined;
 
   const handleChange = (value: string) => {
     if (Array.isArray(defaultLocales)) {
@@ -398,7 +400,7 @@ const EnumerationInput = ({
   };
 
   // Find the label for the current value to display in the combobox
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedOption = options.find((option) => option.value === fieldValue);
 
   return (
     <Field.Root error={error} hint={hint} name={name} required={required}>
@@ -408,7 +410,7 @@ const EnumerationInput = ({
         onChange={handleChange}
         onClear={() => handleChange('')}
         placeholder={placeholder}
-        value={value}
+        value={fieldValue}
         textValue={selectedOption?.label}
         autocomplete={{ type: 'list', filter: 'contains' }}
       >

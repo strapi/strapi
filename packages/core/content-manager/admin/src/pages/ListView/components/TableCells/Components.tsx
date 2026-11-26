@@ -1,6 +1,5 @@
 import { Badge, Tooltip, Typography, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { CellContentProps } from './CellContent';
 import { CellValue } from './CellValue';

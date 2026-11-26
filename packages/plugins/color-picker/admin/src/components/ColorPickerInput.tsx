@@ -22,7 +22,6 @@ const ColorPreview = styled.div`
   width: 20px;
   height: 20px;
   margin-right: 10px;
-  background-color: ${(props) => props.color};
   border: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
@@ -82,13 +81,14 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const [showColorPicker, setShowColorPicker] = React.useState(false);
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();
-    const field = useField(name);
+    const field = useField<string>(name);
 
     /**
      * The color that will show in the field. We can't presume to show black or something
      *   if no value is currently set (as `null` really corresponds to no color, not
      *   black), so default to empty string if nothing else is available. */
     const color = field.value ?? props.placeholder ?? '';
+    const hasColor = field.value !== undefined && field.value !== null && field.value !== '';
 
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
@@ -113,10 +113,12 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 size="L"
               >
                 <Flex>
-                  <ColorPreview color={color} />
+                  {/* An inline style keeps typed values (e.g. `#ff(`) out of the shared
+                      stylesheet, where they would break parsing of the rules after them. */}
+                  <ColorPreview data-testid="color-preview" style={{ backgroundColor: color }} />
                   <Typography
                     style={{ textTransform: 'uppercase' }}
-                    textColor={field.value ? undefined : 'neutral500'}
+                    textColor={hasColor === true ? undefined : 'neutral500'}
                     variant="omega"
                   >
                     {color}
@@ -144,13 +146,29 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     })}
                     style={{ textTransform: 'uppercase' }}
                     name={name}
-                    // No default value. If nothing is selected, the input will be empty.
-                    defaultValue={field.value ?? ''}
+                    // If nothing is selected, the input will be empty.
+                    value={field.value ?? ''}
                     // Here we default to #000000 as the placeholder, because, absent a
                     //   user defined placeholder, we want to indicate the desired format.
                     placeholder="#000000"
-                    onChange={field.onChange}
                     {...props}
+                    maxLength={7}
+                    onChange={(event) => {
+                      const { value } = event.target;
+                      const hexPattern = /^#?[0-9a-f]{0,6}$/i;
+
+                      if (hexPattern.test(value)) {
+                        field.onChange(name, value && !value.startsWith('#') ? `#${value}` : value);
+                      } else if (
+                        field.value &&
+                        !hexPattern.test(field.value) &&
+                        value.length < field.value.length &&
+                        (field.value.startsWith(value) || field.value.endsWith(value))
+                      ) {
+                        // Let users remove legacy non-HEX values one character at a time.
+                        field.onChange(name, value);
+                      }
+                    }}
                   />
                 </Field.Root>
               </Flex>

@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { has } from 'lodash/fp';
+import { has } from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -92,7 +92,7 @@ const createRouteManager = (strapi: Core.Strapi, opts: { type?: string } = {}) =
     // NOTE: the router type is used to tag controller actions and for authentication / authorization so we need to pass this info down to the route level
     const routeWithInfo = Object.assign(route, {
       info: {
-        ...(route.info ?? {}),
+        ...route.info,
         type: type ?? 'api',
       },
     });
@@ -107,7 +107,7 @@ const createRouteManager = (strapi: Core.Strapi, opts: { type?: string } = {}) =
       const subRouter = new Router({ prefix: routes.prefix });
 
       routes.routes.forEach((route) => {
-        const hasPrefix = has('prefix', route.config);
+        const hasPrefix = has(route.config, 'prefix');
         createRoute(route, hasPrefix ? router : subRouter);
       });
 

@@ -13,7 +13,11 @@ class MockIntersectionObserver {
   disconnect = disconnectMock;
   unobserve = jest.fn();
   takeRecords = jest.fn();
-  constructor(public callback: IntersectionObserverCallback) {}
+  callback: IntersectionObserverCallback;
+
+  constructor(callback: IntersectionObserverCallback) {
+    this.callback = callback;
+  }
 }
 
 Object.defineProperty(global, 'IntersectionObserver', {

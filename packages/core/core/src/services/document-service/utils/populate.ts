@@ -10,7 +10,7 @@ interface Options {
 const deepPopulateCache = new Map<string, any>();
 
 // We want to build a populate object based on the schema
-export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
+export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}): Record<string, unknown> => {
   const cacheKey = `${uid}::${JSON.stringify(opts)}`;
   const cached = deepPopulateCache.get(cacheKey);
   if (cached) {

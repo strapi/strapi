@@ -3,9 +3,11 @@ import { Navigate, useLocation, useMatch } from 'react-router-dom';
 import { useAuth } from '../../features/Auth';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { useInitQuery } from '../../services/admin';
+import { retryDynamicImport } from '../../utils/retryDynamicImport';
 
 import { Login as LoginCE } from './components/Login';
-import { FORMS, FormDictionary } from './constants';
+import { AUTH_TYPES, FORMS, FormDictionary, isAuthType } from './constants';
+import { getRedirectTo } from './utils';
 
 /* -------------------------------------------------------------------------------------------------
  * AuthPage
@@ -19,11 +21,18 @@ const AuthPage = () => {
   const { hasAdmin } = data ?? {};
   const Login = useEnterprise(
     LoginCE,
-    async () => (await import('../../../../ee/admin/src/pages/AuthPage/components/Login')).LoginEE
+    async () =>
+      (
+        await retryDynamicImport(
+          () => import('../../../../ee/admin/src/pages/AuthPage/components/Login')
+        )
+      ).LoginEE
   );
   const forms = useEnterprise<FormDictionary, Partial<FormDictionary>>(
     FORMS,
-    async () => (await import('../../../../ee/admin/src/pages/AuthPage/constants')).FORMS,
+    async () =>
+      (await retryDynamicImport(() => import('../../../../ee/admin/src/pages/AuthPage/constants')))
+        .FORMS,
     {
       combine(ceForms, eeForms) {
         return {
@@ -37,11 +46,11 @@ const AuthPage = () => {
 
   const { token } = useAuth('AuthPage', (auth) => auth);
 
-  if (!authType || !forms) {
+  if (!isAuthType(authType) || !forms) {
     return <Navigate to="/" />;
   }
 
-  const Component = forms[authType as keyof FormDictionary];
+  const Component = forms[authType];
 
   // Redirect the user to the login page if
   // the endpoint does not exists
@@ -50,21 +59,25 @@ const AuthPage = () => {
   }
 
   // User is already logged in
-  if (authType !== 'register-admin' && authType !== 'register' && token) {
-    return <Navigate to="/" />;
+  if (authType !== AUTH_TYPES.REGISTER_ADMIN && authType !== AUTH_TYPES.REGISTER && token) {
+    // Honour the `?redirectTo` the user was sent here with, otherwise logging in from a
+    // deep link always lands on the home page. `login()` sets the token before the login
+    // form gets to navigate, so this branch is what actually performs the redirect.
+    // See https://github.com/strapi/strapi/issues/19557
+    return <Navigate to={getRedirectTo(search)} />;
   }
 
   // there is already an admin user oo
-  if (hasAdmin && authType === 'register-admin' && token) {
-    return <Navigate to="/" />;
+  if (hasAdmin && authType === AUTH_TYPES.REGISTER_ADMIN && token) {
+    return <Navigate to={getRedirectTo(search)} />;
   }
 
   // Redirect the user to the register-admin if it is the first user
-  if (!hasAdmin && authType !== 'register-admin') {
+  if (!hasAdmin && authType !== AUTH_TYPES.REGISTER_ADMIN) {
     return (
       <Navigate
         to={{
-          pathname: '/auth/register-admin',
+          pathname: `/auth/${AUTH_TYPES.REGISTER_ADMIN}`,
           // Forward the `?redirectTo` from /auth/login
           // /abc => /auth/login?redirectTo=%2Fabc => /auth/register-admin?redirectTo=%2Fabc
           search,
@@ -73,10 +86,10 @@ const AuthPage = () => {
     );
   }
 
-  if (Login && authType === 'login') {
+  if (Login && authType === AUTH_TYPES.LOGIN) {
     // Assign the component to render for the login form
     return <Login />;
-  } else if (authType === 'login' && !Login) {
+  } else if (authType === AUTH_TYPES.LOGIN && !Login) {
     // block rendering until the Login EE component is fully loaded
     return null;
   }

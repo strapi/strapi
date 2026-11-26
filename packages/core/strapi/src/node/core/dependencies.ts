@@ -129,7 +129,9 @@ const getInstallCommandHint = (missing: AdminPeerDep[]) => {
     return `pnpm add --save-prod ${packages}`;
   }
 
-  return `npm install --legacy-peer-deps --save ${packages}`;
+  // Do not use --legacy-peer-deps: it rewrites package-lock in a mode that
+  // breaks plain `npm ci` (#27019). Fresh apps install cleanly without it.
+  return `npm install --save ${packages}`;
 };
 
 const reportMissingAdminPeerDeps = (logger: Logger, missing: AdminPeerDep[]) => {
@@ -165,7 +167,7 @@ const validateDeclaredAdminPeerDeps = async (cwd: string, logger: Logger) => {
 
     try {
       minDeclaredVersion = semver.minVersion(dep.declaredVersion);
-    } catch (err) {
+    } catch {
       // Intentional fall-through (variable will be left as null, throwing below)
     }
 
@@ -227,7 +229,7 @@ const installAdminPeerDeps = async (
   let result: ExecaReturnValue<string> | undefined;
 
   if (packageManager === 'npm') {
-    const npmArgs = ['install', '--legacy-peer-deps', '--save', ...packages];
+    const npmArgs = ['install', '--save', ...packages];
     logger.info(`Running 'npm ${npmArgs.join(' ')}'`);
     result = await execa('npm', npmArgs, execOptions);
   } else if (packageManager === 'yarn') {
@@ -271,10 +273,64 @@ const getModuleVersion = async (name: string, cwd: string): Promise<string | nul
   return pkg?.version || null;
 };
 
+/**
+ * Packages released with Strapi, on the same version. Others under `@strapi/`
+ * (`@strapi/plugin-seo`, `@strapi/sdk-plugin`, …) have their own versions and
+ * repositories.
+ */
+const STRAPI_REPOSITORY_URL = 'https://github.com/strapi/strapi.git';
+
+const getRepositoryUrl = ({ repository }: PackageJson) =>
+  typeof repository === 'string' ? repository : repository?.url;
+
+/**
+ * Warns when a package released with Strapi is installed on another version than
+ * `@strapi/strapi`. Each brings its own copy of shared packages such as
+ * `@strapi/utils`, and mixing them can break at runtime.
+ */
+const validateStrapiPackageVersions = async (cwd: string, logger: Logger) => {
+  const { packageJson } = await loadProjectPackageJson(cwd);
+  const strapiVersion = await getModuleVersion('@strapi/strapi', cwd);
+
+  if (!strapiVersion) {
+    return;
+  }
+
+  const names = Object.keys({
+    ...packageJson.dependencies,
+    ...packageJson.devDependencies,
+  }).filter((name) => name.startsWith('@strapi/') && name !== '@strapi/strapi');
+
+  const mismatched: string[] = [];
+
+  for (const name of names) {
+    const installed = await getModule(name, cwd);
+
+    if (
+      installed?.version &&
+      installed.version !== strapiVersion &&
+      getRepositoryUrl(installed) === STRAPI_REPOSITORY_URL
+    ) {
+      mismatched.push(`  - ${name}@${installed.version}`);
+    }
+  }
+
+  if (mismatched.length > 0) {
+    logger.warn(
+      [
+        `These Strapi packages are not on the same version as @strapi/strapi (${strapiVersion}):`,
+        ...mismatched,
+        'You may experience issues, we recommend you install the same version for all of them (npx @strapi/upgrade).',
+      ].join(os.EOL)
+    );
+  }
+};
+
 export {
   ADMIN_PEER_DEPS,
   findUndeclaredAdminPeerDeps,
   validateDeclaredAdminPeerDeps,
+  validateStrapiPackageVersions,
   installAdminPeerDeps,
   reexecCurrentCommand,
   reportMissingAdminPeerDeps,

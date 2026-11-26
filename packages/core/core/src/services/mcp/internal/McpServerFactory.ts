@@ -1,13 +1,14 @@
-// eslint-disable-next-line import/extensions
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer, type ServerCapabilities } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpPromptRegistry } from '../prompt-registry';
 import { McpResourceRegistry } from '../resource-registry';
 import { McpToolRegistry } from '../tool-registry';
 import type { McpAdminTokenAbility } from '../authentication';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
+import { DEFAULT_MAX_TOOL_INPUT_ELEMENTS } from './McpConfiguration';
 import type { McpCapabilityRegistryReadonly } from './McpCapabilityRegistry';
-import { syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
+import { canUseMcpCapability, syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
+import type { McpToolSchemaScope } from './resolveToolSchemaScope';
 
 export type McpCapabilityDefinitions = {
   tools: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
@@ -39,6 +40,10 @@ export type CreateMcpServerWithRegistriesParams = {
   isDevMode: boolean;
   ability: McpAdminTokenAbility;
   user: Modules.MCP.McpHandlerContext['user'];
+  /** Tools whose schemas the request needs. Defaults to `'all'`. */
+  toolSchemaScope?: McpToolSchemaScope;
+  /** Passed to the SDK as `maxToolInputElements`. */
+  maxToolInputElements?: number;
 };
 
 export const createMcpServerWithRegistries = ({
@@ -47,13 +52,10 @@ export const createMcpServerWithRegistries = ({
   isDevMode,
   ability,
   user,
+  toolSchemaScope = 'all',
+  maxToolInputElements = DEFAULT_MAX_TOOL_INPUT_ELEMENTS,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
-  const capabilities: {
-    logging?: Record<string, unknown>;
-    tools?: Record<string, unknown>;
-    prompts?: Record<string, unknown>;
-    resources?: Record<string, unknown>;
-  } = {
+  const capabilities: ServerCapabilities = {
     logging: {},
   };
   // Advertise capability categories when definitions exist (server-level), not per-user enabled
@@ -75,6 +77,7 @@ export const createMcpServerWithRegistries = ({
     },
     {
       capabilities,
+      maxToolInputElements,
     }
   );
 
@@ -84,6 +87,10 @@ export const createMcpServerWithRegistries = ({
     definitions: definitions.tools,
     ability,
     user,
+    // A tool the token cannot use stays disabled, so its schemas are never advertised nor used.
+    shouldResolveSchemas: (definition) =>
+      (toolSchemaScope === 'all' || toolSchemaScope.has(definition.name)) &&
+      canUseMcpCapability({ ability, definition, isDevMode }),
   });
   const prompts = new McpPromptRegistry({
     strapi,

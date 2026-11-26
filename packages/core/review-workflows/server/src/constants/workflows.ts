@@ -1,7 +1,7 @@
 export const WORKFLOW_MODEL_UID = 'plugin::review-workflows.workflow';
 export const STAGE_MODEL_UID = 'plugin::review-workflows.workflow-stage';
 /**
- * TODO: For V4 compatibility, the old UID was kept, when review workflows was in the admin package
+ * TODO: For V4 compatibility, the old UID was kept, when review workflows was in the admin package
  *
  * NOTE!: if you change this string you need to change it here too: strapi/packages/core/review-workflows/admin/src/routes/settings/components/Stages.tsx
  */
@@ -21,6 +21,7 @@ export const ERRORS = {
   STAGES_LIMIT:
     'You’ve reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
   DUPLICATED_STAGE_NAME: 'Stage names must be unique.',
+  DUPLICATED_WORKFLOW_NAME: 'A workflow with this name already exists.',
 };
 
 export const WORKFLOW_POPULATE = {

@@ -7,10 +7,14 @@ import {
   type Plugins,
   type GetLicenseLimitInformation,
   GetGuidedTourMeta,
+  type DebugDump,
 } from '../../../shared/contracts/admin';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
 import { adminApi } from './api';
+
+import type { Dispatch } from '../core/store/configure';
+import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 
 interface ConfigurationLogo {
   custom?: {
@@ -123,9 +127,40 @@ const admin = adminApi
         }),
         providesTags: ['GuidedTourMeta'],
       }),
+      getDebugDump: builder.query<DebugDump.Response['data'], void>({
+        query: () => ({
+          url: '/admin/debug-dump',
+          method: 'GET',
+        }),
+        transformResponse(res: DebugDump.Response) {
+          return res.data;
+        },
+      }),
     }),
     overrideExisting: false,
   });
+
+/**
+ * Clear data cached for the previous admin while retaining `/admin/init`.
+ *
+ * AuthPage uses `init.hasAdmin` to route first-admin registration. Refetching
+ * it immediately after registration observes the newly created admin and can
+ * redirect away before the registration flow reaches `/usecase`.
+ */
+const resetAdminApiState = (dispatch: Dispatch): void => {
+  type InitState = Parameters<ReturnType<typeof admin.endpoints.init.select>>[0];
+  type AdminThunkDispatch = ThunkDispatch<InitState, unknown, AnyAction>;
+
+  (dispatch as AdminThunkDispatch)((thunkDispatch, getState) => {
+    const init = admin.endpoints.init.select()(getState()).data;
+
+    thunkDispatch(adminApi.util.resetApiState());
+
+    if (init) {
+      thunkDispatch(admin.util.upsertQueryData('init', undefined, init));
+    }
+  });
+};
 
 const {
   useInitQuery,
@@ -137,6 +172,7 @@ const {
   useGetLicenseLimitsQuery,
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
+  useLazyGetDebugDumpQuery,
 } = admin;
 
 export {
@@ -149,6 +185,8 @@ export {
   useGetLicenseLimitsQuery,
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
+  useLazyGetDebugDumpQuery,
+  resetAdminApiState,
 };
 
 export type { ConfigurationLogo };

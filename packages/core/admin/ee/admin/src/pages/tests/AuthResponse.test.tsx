@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { render } from '@testing-library/react';
-import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 
-import { login } from '../../../../../admin/src/reducer';
 import { getCookieValue } from '../../../../../admin/src/utils/cookies';
+import { establishAdminSession } from '../../../../../admin/src/utils/establishAdminSession';
 import { AuthResponse } from '../AuthResponse';
 
 jest.mock('react-router-dom', () => ({
@@ -16,7 +15,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({
-    formatMessage: ({ defaultMessage }: any) => defaultMessage,
+    formatMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
   }),
 }));
 
@@ -27,14 +26,15 @@ jest.mock('../../../../../admin/src/services/auth', () => ({
 }));
 
 jest.mock('../../../../../admin/src/features/Auth', () => ({
-  AuthProvider: ({ children }: any) => <>{children}</>,
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('../../../../../admin/src/reducer', () => ({
-  login: jest.fn(),
+jest.mock('../../../../../admin/src/utils/establishAdminSession', () => ({
+  establishAdminSession: jest.fn(),
 }));
 
 jest.mock('../../../../../admin/src/utils/cookies', () => ({
+  ...jest.requireActual('../../../../../admin/src/utils/cookies'),
   getCookieValue: jest.fn(),
 }));
 
@@ -65,18 +65,16 @@ describe('<AuthResponse />', () => {
     );
   });
 
-  it('dispatches login and redirects on success with token', () => {
+  it('establishes an admin session and redirects on success with token', () => {
     (useMatch as jest.Mock).mockReturnValue({ params: { authResponse: 'success' } });
     (useNavigate as jest.Mock).mockReturnValue(navigateMock);
     (getCookieValue as jest.Mock).mockReturnValue('fake-token');
 
     render(<AuthResponse />);
 
-    expect(dispatchMock).toHaveBeenCalledWith(
-      login({
-        token: 'fake-token',
-      })
-    );
+    expect(establishAdminSession).toHaveBeenCalledWith(dispatchMock, {
+      token: 'fake-token',
+    });
     expect(navigateMock).toHaveBeenCalledWith('/auth/login');
   });
 

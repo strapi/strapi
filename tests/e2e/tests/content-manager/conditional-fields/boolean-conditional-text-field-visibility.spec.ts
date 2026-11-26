@@ -1,14 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../../../fixtures';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { createContent, fillField } from '../../../../utils/content-creation';
 import { navToHeader } from '../../../../utils/shared';
 
 test.describe('Conditional Fields - Boolean-controlled conditional text fields', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
 
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });
@@ -34,14 +34,14 @@ test.describe('Conditional Fields - Boolean-controlled conditional text fields',
       { save: false, publish: false, verify: false }
     );
 
-    await page.getByLabel('sku').isVisible();
+    await expect(page.getByLabel('sku')).toBeVisible();
     await page.getByLabel('sku').fill('5');
     await fillField(page, {
       name: 'isAvailable',
       type: 'boolean',
       value: false,
     });
-    await page.getByLabel('sku').isHidden();
+    await expect(page.getByLabel('sku')).toBeHidden();
     await page.getByRole('button', { name: 'Save' }).click();
     await fillField(page, {
       name: 'isAvailable',

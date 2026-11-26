@@ -32,6 +32,44 @@ describe('getRelationLabel', () => {
     ).toBe('doc-1');
   });
 
+  it('returns Untitled when a localized relation has an empty text main field', () => {
+    expect(
+      getRelationLabel(
+        { documentId: 'internal-document-key', id: 1, locale: 'fr', title: '' },
+        mainField('title', 'string')
+      )
+    ).toBe('Untitled');
+  });
+
+  it('uses the provided empty label when the text main field is empty', () => {
+    expect(
+      getRelationLabel(
+        { documentId: 'internal-document-key', id: 1, title: '' },
+        mainField('title', 'string'),
+        'Sans titre'
+      )
+    ).toBe('Sans titre');
+  });
+
+  it('returns Untitled when the configured main field is null', () => {
+    expect(
+      getRelationLabel(
+        { documentId: 'internal-document-key', id: 1, title: null },
+        mainField('title', 'string')
+      )
+    ).toBe('Untitled');
+  });
+
+  it('uses the provided empty label when the configured main field is null', () => {
+    expect(
+      getRelationLabel(
+        { documentId: 'internal-document-key', id: 1, title: null },
+        mainField('title', 'string'),
+        'Sans titre'
+      )
+    ).toBe('Sans titre');
+  });
+
   it('falls back to documentId when mainField is not provided', () => {
     expect(getRelationLabel({ documentId: 'doc-1', id: 1, pub_number: 42 })).toBe('doc-1');
   });

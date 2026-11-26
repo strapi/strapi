@@ -1,5 +1,6 @@
 import { fixtures } from '@strapi/admin-test-utils';
-import { render, screen } from '@tests/utils';
+import { render, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { Page } from '../PageHelpers';
 
@@ -83,6 +84,129 @@ describe('PageHelpers', () => {
       expect(
         screen.getByText("You don't have the permissions to access that content")
       ).toBeInTheDocument();
+    });
+
+    it("should render the children when an unconditioned permission is granted even if another requested permission's condition fails", async () => {
+      server.use(
+        http.post<Record<string, never>, { permissions: Array<{ action: string }> }>(
+          '/admin/permissions/check',
+          async ({ request }) => {
+            const body = await request.json();
+
+            return HttpResponse.json({
+              data: body.permissions.map(({ action }) => action !== 'admin::roles.update'),
+            });
+          }
+        )
+      );
+
+      render(
+        <Page.Protect
+          permissions={[
+            { action: 'admin::roles.read', subject: null },
+            { action: 'admin::roles.update', subject: null },
+          ]}
+        >
+          <div>Content</div>
+        </Page.Protect>,
+        {
+          providerOptions: {
+            permissions: () => [
+              {
+                id: 1,
+                actionParameters: {},
+                action: 'admin::roles.read',
+                subject: null,
+                conditions: [],
+                properties: {},
+              },
+              {
+                id: 2,
+                actionParameters: {},
+                action: 'admin::roles.update',
+                subject: null,
+                conditions: ['willFail'],
+                properties: {},
+              },
+            ],
+          },
+        }
+      );
+
+      await screen.findByText('Content');
+
+      server.restoreHandlers();
+    });
+
+    it('should render the NoPermissions component when every matching permission has a condition that fails', async () => {
+      server.use(http.post('/admin/permissions/check', () => HttpResponse.json({ data: [false] })));
+
+      render(
+        <Page.Protect permissions={[{ action: 'admin::roles.update', subject: null }]}>
+          <div>Content</div>
+        </Page.Protect>,
+        {
+          providerOptions: {
+            permissions: () => [
+              {
+                id: 1,
+                actionParameters: {},
+                action: 'admin::roles.update',
+                subject: null,
+                conditions: ['willFail'],
+                properties: {},
+              },
+            ],
+          },
+        }
+      );
+
+      await screen.findByText("You don't have the permissions to access that content");
+
+      server.restoreHandlers();
+    });
+
+    it('should render the children when only one of several conditioned permissions passes', async () => {
+      server.use(
+        http.post('/admin/permissions/check', () => HttpResponse.json({ data: [true, false] }))
+      );
+
+      render(
+        <Page.Protect
+          permissions={[
+            { action: 'admin::roles.read', subject: null },
+            { action: 'admin::roles.update', subject: null },
+          ]}
+        >
+          <div>Content</div>
+        </Page.Protect>,
+        {
+          providerOptions: {
+            permissions: () => [
+              {
+                id: 1,
+                actionParameters: {},
+                action: 'admin::roles.read',
+                subject: null,
+                conditions: ['willPass'],
+                properties: {},
+              },
+              {
+                id: 2,
+                actionParameters: {},
+                action: 'admin::roles.update',
+                subject: null,
+                conditions: ['willFail'],
+                properties: {},
+              },
+            ],
+          },
+        }
+      );
+
+      await screen.findByText('Content');
+
+      server.restoreHandlers();
     });
   });
 });

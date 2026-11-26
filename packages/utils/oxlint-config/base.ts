@@ -1,0 +1,131 @@
+import type { OxlintConfig } from 'oxlint';
+
+/**
+ * Shared baseline applied to every file in the monorepo.
+ *
+ * Native plugins mirror the current ESLint stack (typescript, react, import)
+ * plus unicorn correctness rules. `unicorn` is kept monorepo-wide (including
+ * admin/TSX) for over-coverage during migration — ESLint does not enable
+ * eslint-plugin-unicorn today, but the correctness rules are low-noise and
+ * catch real bugs (e.g. useless spread).
+ *
+ * `jsx-a11y` is deferred: ESLint front/typescript has 0 active jsx-a11y rules
+ * (legacy javascript config had one warn rule). Revisit in Phase 2 if we want
+ * a11y enforcement via OxLint.
+ *
+ * `vitest` is deferred for Phase 1: ESLint has no eslint-plugin-vitest today, so
+ * enabling it only produced ~500 test-only diagnostics with no ESLint parity
+ * signal. Revisit after an intentional Jest/Vitest ESLint policy exists.
+ */
+export const base = {
+  plugins: ['typescript', 'react', 'import', 'unicorn'],
+  jsPlugins: ['./no-lodash-fp.js'],
+  categories: {
+    // Blocking bar: correctness plus extra-policy `perf`.
+    // Later categories (suspicious/pedantic/style) are not extra policy yet.
+    // The category enable also accepts any new `perf` rule that a future oxlint
+    // release adds. oxlint is pinned exactly, so such a rule breaks the blocking
+    // gate on the version bump PR and not on a code merge.
+    correctness: 'error',
+    perf: 'error',
+  },
+  rules: {
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
+            message: 'Use regular lodash methods or a focused helper instead.',
+          },
+          {
+            group: ['lodash/isArray', 'lodash/isArray.js'],
+            message: 'Use native Array.isArray instead.',
+          },
+          {
+            group: ['lodash/forEach', 'lodash/forEach.js', 'lodash/each', 'lodash/each.js'],
+            message:
+              'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message:
+              'Use native Object.keys / Object.values / Object.entries instead. They throw on null/undefined, so guard nullish input (e.g. `?? {}`).',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
+          },
+        ],
+        paths: [
+          {
+            name: 'lodash',
+            importNames: [
+              'isArray',
+              'forEach',
+              'each',
+              'keys',
+              'values',
+              'entries',
+              'concat',
+              'filter',
+              'find',
+            ],
+            message:
+              'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
+          },
+        ],
+      },
+    ],
+    // Oxlint 1.72's native rule does not check require() or import() calls.
+    'strapi/no-lodash-fp-calls': 'error',
+    // Yup `.when({ then, otherwise })` objects are not Promise thenables; the
+    // rule cannot distinguish DSL keys from real thenable misuse.
+    'unicorn/no-thenable': 'off',
+    // Behavioral / intentional deps; revisit when enabling broader react-hooks.
+    'react/exhaustive-deps': 'off',
+    // Backend ESLint turns this off on purpose (sequential await is allowed).
+    // ESLint only errors it on a 62-file frontend JS surface (2 projects).
+    // A category enable would expand that ban onto the backend (~495 of the
+    // Aug 20 +685 perf delta). Frontend JS stays covered by ESLint.
+    'eslint/no-await-in-loop': 'off',
+  },
+  ignorePatterns: [
+    '**/dist/**',
+    '**/build/**',
+    '**/coverage/**',
+    '**/.nx/**',
+    '**/test-apps/**',
+    // examples are sandboxes (see AGENTS.md).
+    // TODO @Nico Phase 2 — `yarn lint` lints kitchensink + todo-example; decide
+    // whether to lint those example apps here too.
+    'examples/**',
+    // Outside Nx `lint` graph — `yarn lint` runs per-package eslint only (38 projects).
+    'tests/**', // has tests/.eslintrc.cjs but no package lint script
+    'scripts/**', // root repo scripts (package scripts/ dirs are per-package eslint)
+    '.commitlintrc.ts', // root config, not in Nx lint graph
+    'templates/**', // root templates/website demo app
+    // Per-package eslint ignores we mirror here (oxlint has no per-package config).
+    'packages/cli/create-strapi-app/templates/**',
+    // .github/actions/check-pr-status has an Nx lint target; these paths do not.
+    '.github/scripts/**',
+    '.github/actions/community-pr-triage/**',
+    // Parser TS(1016) on can/cannot cannot be suppressed locally; restore via CMS-1692.
+    'packages/core/content-manager/server/src/services/permission-checker.ts',
+  ],
+} satisfies Partial<OxlintConfig>;

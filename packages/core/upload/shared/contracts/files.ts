@@ -75,6 +75,9 @@ export interface File {
         thumbnail: {
           url: string;
         };
+        small?: {
+          url: string;
+        };
       }
     | null;
   hash: string;
@@ -114,6 +117,20 @@ export interface RawFile extends Blob {
   name: string;
   type: string;
 }
+
+/**
+ * `error.details` of a too-large upload, with `limit` in bytes:
+ * - `FileTooBig`: `formidable.maxFileSize` on the `strapi::body` middleware
+ * - `SizeLimitExceeded`: `upload.config.sizeLimit`, or the deprecated `setting` when that is the
+ *   one that applied
+ */
+export type UploadTooLargeDetails =
+  | { code: 'FileTooBig'; limit: number }
+  | {
+      code: 'SizeLimitExceeded';
+      limit: number;
+      setting?: 'upload.config.providerOptions.sizeLimit';
+    };
 
 export interface Pagination {
   page: number;
@@ -234,12 +251,12 @@ export declare namespace CreateFile {
 }
 
 /**
- * POST /upload/unstable/upload-file - Upload a single file
+ * POST /upload/files - Upload a single file
  *
  * Accepts one file per request (multipart `files` + `fileInfo`) and returns the
  * single created `File`. Does not run inline AI metadata generation.
  */
-export declare namespace UnstableCreateFile {
+export declare namespace UploadFile {
   export interface Request {
     body: FormData;
   }
@@ -250,7 +267,7 @@ export declare namespace UnstableCreateFile {
 }
 
 /**
- * POST /upload/unstable/stream-from-urls - Stream upload files with partial success support
+ * POST /upload/actions/upload-from-urls - Stream upload files with partial success support
  *
  * Still used by the URL upload flow (`uploadFromUrls`).
  */
@@ -269,12 +286,34 @@ export declare namespace CreateFilesStream {
 }
 
 /**
- * POST /upload/unstable/stream-from-urls - SSE streaming event types
+ * POST /upload/actions/upload-from-urls - SSE streaming event types
  *
  * The endpoint streams Server-Sent Events as each file is processed.
  * The final `stream:complete` event carries the same shape as CreateFilesStream.Response.
  */
 export declare namespace CreateFilesStreamEvents {
+  export interface FileFetchingEvent {
+    url: string;
+    index: number;
+    total: number;
+  }
+
+  /**
+   * Byte progress of the remote -> server temp file transfer, throttled server-side.
+   *
+   * `loadedBytes` / `totalBytes` rather than `loaded` / `total`: `total` already means
+   * "number of files in the batch" on the fetching and uploading events.
+   *
+   * `totalBytes` is `null` when the remote sent no usable `Content-Length` — consumers must
+   * leave the row indeterminate rather than invent a denominator.
+   */
+  export interface FileProgressEvent {
+    index: number;
+    loadedBytes: number;
+    totalBytes: number | null;
+    phase: 'fetch';
+  }
+
   export interface FileUploadingEvent {
     name: string;
     index: number;
@@ -292,6 +331,8 @@ export declare namespace CreateFilesStreamEvents {
     name: string;
     index: number;
     message: string;
+    /** `details` of the `ApplicationError` that failed the file, if any. */
+    details?: UploadTooLargeDetails | Record<string, unknown>;
   }
 
   export interface StreamCompleteEvent {
@@ -300,6 +341,8 @@ export declare namespace CreateFilesStreamEvents {
   }
 
   export type SSEEventMap = {
+    'file:fetching': FileFetchingEvent;
+    'file:progress': FileProgressEvent;
     'file:uploading': FileUploadingEvent;
     'file:complete': FileCompleteEvent;
     'file:error': FileErrorEvent;
@@ -347,41 +390,71 @@ export declare namespace BulkUpdateFiles {
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/count - Get count of images without metadata
+ * GET /upload/ai-metadata-jobs/pending-count - Get count of images without metadata
+ *
+ * The counts are the bare response body, not wrapped in `{ data }`. Failures
+ * come back as a Strapi error response instead.
  */
-export declare namespace GetAIMetadataCount {
+export declare namespace GetAIMetadataPendingCount {
   export interface Request {
     query: {};
   }
 
   export interface Response {
-    data: {
-      imagesWithoutMetadataCount: number;
-      totalImages: number;
-    };
-    error?: errors.ApplicationError;
+    imagesWithoutMetadataCount: number;
+    totalImages: number;
   }
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata - Start AI metadata generation job
+ * POST /upload/ai-metadata-jobs - Create a backfill job over every image missing metadata
+ *
+ * The created job, or a zero count when no image misses metadata, is the bare
+ * response body, not wrapped in `{ data }`. Failures come back as a Strapi
+ * error response instead.
  */
-export declare namespace GenerateAIMetadata {
+export declare namespace CreateAIMetadataJob {
   export interface Request {
     body: {};
   }
 
+  export type Response =
+    | {
+        jobId: number;
+        status: 'pending';
+      }
+    | {
+        count: 0;
+        message: string;
+      };
+}
+
+/**
+ * POST /upload/actions/generate-ai-metadata - Generate AI metadata for selected files
+ *
+ * Synchronous (no job): generates and persists alt text / caption for the given
+ * files and reports the outcome per file. Non-images are `skipped`; ids that no
+ * longer exist and files whose generation failed are reported as `error` rather
+ * than failing the whole request.
+ */
+export declare namespace GenerateAIMetadata {
+  export type FileStatus = 'success' | 'skipped' | 'error';
+
+  export interface FileResult {
+    id: number;
+    status: FileStatus;
+    error?: string;
+  }
+
+  export interface Request {
+    body: {
+      fileIds: number[];
+    };
+  }
+
   export interface Response {
-    data:
-      | {
-          jobId: number;
-          status: 'pending';
-        }
-      | {
-          count: 0;
-          message: string;
-        };
-    error?: errors.ApplicationError;
+    data: FileResult[];
+    error?: errors.ApplicationError | errors.ValidationError;
   }
 }
 

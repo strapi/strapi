@@ -1,5 +1,5 @@
 import { server } from '@tests/server';
-import { waitFor, renderHook, screen } from '@tests/utils';
+import { act, waitFor, renderHook, screen } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -89,6 +89,12 @@ const mockWidgetRows = [
   },
 ];
 
+/**
+ * A handler call whose state change is then read from `result.current` is wrapped in `act()`, not
+ * `waitFor()`. `renderHook` updates `result.current` from a `useEffect`; `act()` flushes the render
+ * and that effect before it returns, `waitFor()` does not, so under CPU load the read could still
+ * see the render from before the call.
+ */
 describe('useWidgets', () => {
   const mockSetFilteredWidgets = jest.fn();
   const defaultProps = {
@@ -284,7 +290,7 @@ describe('useWidgets', () => {
       mockIsValidResizeOperation.mockReturnValue(false);
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await waitFor(() => {
+      act(() => {
         result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
@@ -296,10 +302,10 @@ describe('useWidgets', () => {
   });
 
   describe('drag state management', () => {
-    it('should handle drag start', async () => {
+    it('should handle drag start', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await waitFor(() => {
+      act(() => {
         result.current.handleDragStart('widget-1');
       });
 
@@ -307,18 +313,18 @@ describe('useWidgets', () => {
       expect(result.current.draggedWidgetId).toBe('widget-1');
     });
 
-    it('should handle drag end', async () => {
+    it('should handle drag end', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       // Start dragging first
-      await waitFor(() => {
+      act(() => {
         result.current.handleDragStart('widget-1');
       });
 
       expect(result.current.isDraggingWidget).toBe(true);
 
       // End dragging
-      await waitFor(() => {
+      act(() => {
         result.current.handleDragEnd();
       });
 
@@ -328,10 +334,10 @@ describe('useWidgets', () => {
   });
 
   describe('columnWidths state management', () => {
-    it('should update columnWidths when setColumnWidths is called', async () => {
+    it('should update columnWidths when setColumnWidths is called', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await waitFor(() => {
+      act(() => {
         result.current.setColumnWidths(mockColumnWidths);
       });
 

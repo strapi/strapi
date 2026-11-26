@@ -74,21 +74,24 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
 };
 
 const replaceListWithEmptyBlock = (editor: Editor, currentListPath: Path) => {
-  // Delete the empty list
-  Transforms.removeNodes(editor, { at: currentListPath });
+  // Normalize once the paragraph is in, or removing the only block adds a second paragraph
+  Editor.withoutNormalizing(editor, () => {
+    // Delete the empty list
+    Transforms.removeNodes(editor, { at: currentListPath });
 
-  if (currentListPath[0] === 0) {
-    // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
-    Transforms.insertNodes(
-      editor,
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
-      { at: currentListPath }
-    );
-    Transforms.select(editor, currentListPath);
-  }
+    if (currentListPath[0] === 0) {
+      // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
+      Transforms.insertNodes(
+        editor,
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        },
+        { at: currentListPath }
+      );
+      Transforms.select(editor, currentListPath);
+    }
+  });
 };
 
 const isText = (node: unknown): node is Text => {
@@ -103,14 +106,11 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
 
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty =
-    currentList.children.length === 1 &&
-    isText(currentListItem.children[0]) &&
-    currentListItem.children[0].text === '';
   const isListItemEmpty =
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isListEmpty = currentList.children.length === 1 && isListItemEmpty;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-2) === 0;
 
@@ -184,14 +184,11 @@ const handleEnterKeyOnList = (editor: Editor) => {
 
   const [currentListItem, currentListItemPath] = currentListItemEntry;
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty =
-    currentList.children.length === 1 &&
-    isText(currentListItem.children[0]) &&
-    currentListItem.children[0].text === '';
   const isListItemEmpty =
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isListEmpty = currentList.children.length === 1 && isListItemEmpty;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
@@ -332,8 +329,12 @@ const handleTabOnList = (editor: Editor) => {
  * Common handler for the shift+tab key on ordered and unordered lists (un-indentation)
  */
 
-const hasChildren = (node: any): node is { children: unknown[] } => {
+const hasChildren = (node: unknown): node is { children: unknown[] } => {
   return typeof node === 'object' && node !== null && 'children' in node;
+};
+
+const isNestedListNode = (node: unknown): node is { type: 'list'; children: unknown[] } => {
+  return hasChildren(node) && 'type' in node && node.type === 'list';
 };
 
 const handleShiftTabOnList = (editor: Editor) => {
@@ -349,11 +350,7 @@ const handleShiftTabOnList = (editor: Editor) => {
 
   const [currentList] = Editor.parent(editor, currentListItemPath);
 
-  if (
-    !Editor.isEditor(currentList) &&
-    hasChildren(currentList) &&
-    (currentList as any).type === 'list'
-  ) {
+  if (!Editor.isEditor(currentList) && isNestedListNode(currentList)) {
     const parentListPath = Path.parent(currentListItemPath);
 
     const [parentList] = Editor.parent(editor, parentListPath);
@@ -371,7 +368,7 @@ const handleShiftTabOnList = (editor: Editor) => {
     }
 
     // Case 2: The parent of the current list is another list.
-    if (hasChildren(parentList) && (parentList as any).type === 'list') {
+    if (isNestedListNode(parentList)) {
       Transforms.liftNodes(editor, {
         at: currentListItemPath,
         match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
@@ -380,14 +377,10 @@ const handleShiftTabOnList = (editor: Editor) => {
       try {
         const [remainingList, remainingListPath] = Editor.node(editor, parentListPath);
 
-        if (
-          hasChildren(remainingList) &&
-          (remainingList as any).type === 'list' &&
-          remainingList.children.length === 0
-        ) {
+        if (isNestedListNode(remainingList) && remainingList.children.length === 0) {
           Transforms.removeNodes(editor, { at: remainingListPath });
         }
-      } catch (error) {
+      } catch {
         // The path might no longer exist if the structure changed, which is fine
       }
     }

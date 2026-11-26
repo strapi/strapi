@@ -1,8 +1,9 @@
-import pipe from 'lodash/fp/pipe';
-// eslint-disable-next-line import/default
+import flow from 'lodash/flow';
+import isPlainObject from 'lodash/isPlainObject';
 import qs from 'qs';
 
-import { getCookieValue, setCookie } from './cookies';
+import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
+import { decodeAccessTokenExpiry } from './jwt';
 
 import type { errors } from '@strapi/utils';
 
@@ -35,12 +36,118 @@ let refreshPromise: Promise<string | null> | null = null;
 let onTokenUpdate: ((token: string) => void) | null = null;
 
 /**
+ * Returns headers to add to an admin request, as a plain object (not a promise).
+ * A `null` or `undefined` value skips that entry. Values must be Latin-1 without
+ * line breaks: send identifiers, not display names.
+ */
+type RequestHeadersProvider = () => Record<string, string | null | undefined>;
+
+/**
+ * Thrown, instead of sending the request, when a provider fails or returns an
+ * invalid header name or value. Sending the request without the header could
+ * run it in the wrong context (e.g. the wrong space), so the request fails.
+ */
+class RequestHeadersError extends Error {
+  constructor(message: string, cause: unknown) {
+    super(message, { cause });
+    this.name = 'RequestHeadersError';
+  }
+}
+
+const requestHeadersProviders = new Set<RequestHeadersProvider>();
+
+/**
+ * Headers that core sets itself. A provider that returns one of them is ignored
+ * for that header: replacing them would break authentication or how the server
+ * reads the request body.
+ */
+const CORE_HEADERS = new Set(['authorization', 'content-type', 'accept']);
+
+/**
+ * Registers a function whose headers are added to every request the admin sends
+ * to the Strapi server through the fetch client. Auth and pre-login paths do not
+ * read the providers. Unstable: the API can change in a minor release.
+ *
+ * @returns A function that removes the provider.
+ */
+const unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => void) => {
+  requestHeadersProviders.add(provider);
+
+  return () => {
+    requestHeadersProviders.delete(provider);
+  };
+};
+
+/**
+ * Calls every registered provider and returns the headers to add to a request,
+ * for request code that does not go through `getFetchClient` (e.g. an
+ * `XMLHttpRequest` upload). Call it once per request and reuse the result for a
+ * retry. Values that are `undefined` or `null` are left out, and so are
+ * `Authorization`, `Content-Type` and `Accept`, which core sets itself.
+ * Unstable: the API can change in a minor release.
+ *
+ * @throws {RequestHeadersError} When a provider throws, returns a value that is
+ * not a plain object, or returns an invalid header name or value. Do not send the
+ * request.
+ */
+const unstable_getRequestHeaders = (): Headers => {
+  const headers = new Headers();
+
+  for (const provider of requestHeadersProviders) {
+    let entries: Array<[string, string | null | undefined]>;
+    try {
+      const result = provider();
+      // A promise or array has no own header entries, so it would silently send no header
+      if (!isPlainObject(result)) {
+        throw new TypeError('A request headers provider must return a plain object.');
+      }
+      entries = Object.entries(result);
+    } catch (error) {
+      throw new RequestHeadersError(
+        'A plugin failed to provide its request headers, so the request was not sent.',
+        error
+      );
+    }
+
+    for (const [name, value] of entries) {
+      if (value === undefined || value === null || CORE_HEADERS.has(name.toLowerCase())) {
+        continue;
+      }
+
+      try {
+        // `Headers.set` would send any other value as text, e.g. `[object Promise]`
+        if (typeof value !== 'string') {
+          throw new TypeError('A request header value must be a string.');
+        }
+        headers.set(name, value);
+      } catch (error) {
+        throw new RequestHeadersError(
+          `The request header "${name}" from a plugin is not valid, so the request was not sent.`,
+          error
+        );
+      }
+    }
+  }
+
+  return headers;
+};
+
+/**
  * Callback to notify the app when the session has been terminated and the user
  * should be redirected to the login page (e.g., refresh token rejected, idle
  * session expired). The React layer registers a handler that clears local
  * auth state and navigates to /auth/login.
  */
-let onSessionExpired: (() => void) | null = null;
+let onSessionExpired: ((expiredToken?: string | null) => void) | null = null;
+
+/**
+ * A 401 after a failed refresh is delivered twice in the common RTK path
+ * (baseQuery, then the store middleware). Concurrent in-flight queries can
+ * add more. Fire the React handler once per dead session; re-arm when a new
+ * token is stored (refresh or login).
+ */
+let sessionExpiredNotified = false;
+let sessionExpiredToken: string | null | undefined;
 
 /**
  * Set the callback that will be called when the token is refreshed.
@@ -60,22 +167,50 @@ const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
 
 /**
  * Set the callback that will be called when the active session is no longer
- * valid (refresh token rejected by the server, or detected idle on the
- * client). This lets the active tab redirect to /auth/login without waiting
- * for the next user-initiated request to fail.
+ * valid — i.e. the server rejected the refresh token, not merely that the
+ * short-lived access token expired. This lets the tab redirect to /auth/login
+ * (after any unsaved-changes guard) rather than sitting on a dead session.
  *
  * @param callback - Function to call when the session ends, or null to clear
  */
-const setOnSessionExpired = (callback: (() => void) | null): void => {
+const setOnSessionExpired = (callback: ((expiredToken?: string | null) => void) | null): void => {
   onSessionExpired = callback;
+  if (callback === null) {
+    resetSessionExpiredNotification();
+  }
+};
+
+/**
+ * Re-arm session-expired notifications after a new access token is stored
+ * (silent refresh) or after a successful login.
+ */
+const resetSessionExpiredNotification = (): void => {
+  sessionExpiredNotified = false;
+  sessionExpiredToken = undefined;
 };
 
 /**
  * Trigger the registered session-expired callback, if any. Safe to call from
- * non-React code (e.g., the RTK Query baseQuery 401 handler).
+ * non-React code (e.g., the RTK Query baseQuery 401 handler). Returns `false`
+ * when nothing is listening, so callers can fall back to a hard redirect
+ * instead of leaving the user on a dead page. Subsequent calls during the same
+ * dead session return `true` without invoking the handler again.
  */
-const triggerSessionExpired = (): void => {
-  onSessionExpired?.();
+const triggerSessionExpired = (expiredToken?: string | null): boolean => {
+  if (!onSessionExpired) {
+    return false;
+  }
+
+  if (sessionExpiredNotified) {
+    if (expiredToken === undefined || expiredToken === sessionExpiredToken) {
+      return true;
+    }
+  }
+
+  sessionExpiredNotified = true;
+  sessionExpiredToken = expiredToken;
+  onSessionExpired(expiredToken);
+  return true;
 };
 
 /**
@@ -84,6 +219,14 @@ const triggerSessionExpired = (): void => {
  * This differs from baseQuery.ts which uses ^/admin since it receives normalized paths.
  */
 const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.test(url);
+
+/**
+ * Login, logout, token and pre-login requests carry no context such as a space, so
+ * the fetch client does not read the providers for them: a failing provider must not
+ * block a login or a logout. Matches the path the caller passes, not its subpaths.
+ */
+const SKIPS_REQUEST_HEADERS =
+  /^\/admin\/(login|logout|access-token|init|registration-info|register|register-admin|forgot-password|reset-password|providers)(\?|$)/;
 
 /**
  * Store the new token in the appropriate storage (localStorage or cookie)
@@ -96,13 +239,15 @@ const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.tes
  * @internal Exported for testing purposes
  */
 const storeToken = (token: string): void => {
+  resetSessionExpiredNotification();
+
   // Check if the original token was stored in localStorage (persist mode)
   const wasPersistedToLocalStorage = Boolean(localStorage.getItem(STORAGE_KEYS.TOKEN));
 
   if (wasPersistedToLocalStorage) {
     localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
   } else {
-    setCookie(STORAGE_KEYS.TOKEN, token);
+    setCookie(AUTH_COOKIE_NAME, token);
   }
 
   // Notify the app to update its state (e.g., Redux)
@@ -111,39 +256,139 @@ const storeToken = (token: string): void => {
   }
 };
 
+const getToken = (): string | null => {
+  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  if (fromLocalStorage) {
+    return JSON.parse(fromLocalStorage);
+  }
+
+  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
+  return fromCookie ?? null;
+};
+
+const ADMIN_REFRESH_LOCK = 'strapi-admin-access-token';
+const FALLBACK_ADOPT_TIMEOUT_MS = 250;
+const FALLBACK_ADOPT_POLL_MS = 25;
+
+const postAccessToken = (backendURL: string) =>
+  fetch(`${backendURL}/admin/access-token`, {
+    method: 'POST',
+    credentials: 'include', // Include cookies for the refresh token
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+
+const adoptSharedAccessToken = (token: string): string => {
+  resetSessionExpiredNotification();
+
+  if (onTokenUpdate) {
+    onTokenUpdate(token);
+  }
+  return token;
+};
+
+/**
+ * Another tab may have refreshed already and written a newer access token to the
+ * shared localStorage/cookie. Per-tab Redux is not visible here — only shared
+ * storage counts.
+ */
+const readValidAccessTokenFromSharedStorage = (staleToken: string | null): string | null => {
+  const stored = getToken();
+  if (!stored || stored === staleToken) {
+    return null;
+  }
+
+  const expiry = decodeAccessTokenExpiry(stored);
+  if (expiry === null || expiry <= Date.now()) {
+    return null;
+  }
+
+  return stored;
+};
+
+const waitForSharedAccessToken = async (staleToken: string | null): Promise<string | null> => {
+  const timeoutAt = Date.now() + FALLBACK_ADOPT_TIMEOUT_MS;
+
+  while (Date.now() < timeoutAt) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, FALLBACK_ADOPT_POLL_MS);
+    });
+
+    const adopted = readValidAccessTokenFromSharedStorage(staleToken);
+    if (adopted) {
+      return adoptSharedAccessToken(adopted);
+    }
+  }
+
+  return null;
+};
+
+const executeRefreshAccessToken = async (
+  backendURL: string,
+  tokenBeforeRefresh: string | null,
+  { allowHttpRetry }: { allowHttpRetry: boolean }
+): Promise<string | null> => {
+  const adopted = readValidAccessTokenFromSharedStorage(tokenBeforeRefresh);
+  if (adopted) {
+    return adoptSharedAccessToken(adopted);
+  }
+
+  let response = await postAccessToken(backendURL);
+
+  if (response.status === 401 && allowHttpRetry) {
+    const adoptedAfterFail = readValidAccessTokenFromSharedStorage(tokenBeforeRefresh);
+    if (adoptedAfterFail) {
+      return adoptSharedAccessToken(adoptedAfterFail);
+    }
+
+    const adoptedAfterWait = await waitForSharedAccessToken(tokenBeforeRefresh);
+    if (adoptedAfterWait) {
+      return adoptedAfterWait;
+    }
+
+    response = await postAccessToken(backendURL);
+  }
+
+  if (!response.ok) {
+    console.warn('[Auth] Token refresh failed with status:', response.status);
+    return null;
+  }
+
+  const result = await response.json();
+  const token = result?.data?.token as string | undefined;
+
+  if (!token) {
+    console.warn('[Auth] Token refresh response missing token');
+    return null;
+  }
+
+  storeToken(token);
+  return token;
+};
+
 /**
  * Refresh the access token by calling the /admin/access-token endpoint.
  * This uses a low-level fetch to avoid recursion through the interceptor.
  * Returns the new token on success, or null on failure.
  */
-const refreshAccessToken = async (): Promise<string | null> => {
+const refreshAccessToken = async (
+  tokenUsedByFailedRequest?: string | null
+): Promise<string | null> => {
   const backendURL = window.strapi.backendURL;
+  const tokenBeforeRefresh = tokenUsedByFailedRequest ?? getToken();
 
   try {
-    const response = await fetch(`${backendURL}/admin/access-token`, {
-      method: 'POST',
-      credentials: 'include', // Include cookies for the refresh token
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
+    if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+      return await navigator.locks.request(ADMIN_REFRESH_LOCK, () =>
+        executeRefreshAccessToken(backendURL, tokenBeforeRefresh, { allowHttpRetry: false })
+      );
+    }
+
+    return await executeRefreshAccessToken(backendURL, tokenBeforeRefresh, {
+      allowHttpRetry: true,
     });
-
-    if (!response.ok) {
-      console.warn('[Auth] Token refresh failed with status:', response.status);
-      return null;
-    }
-
-    const result = await response.json();
-    const token = result?.data?.token as string | undefined;
-
-    if (!token) {
-      console.warn('[Auth] Token refresh response missing token');
-      return null;
-    }
-
-    storeToken(token);
-    return token;
   } catch (error) {
     console.error('[Auth] Token refresh error:', error);
     return null;
@@ -158,9 +403,9 @@ const refreshAccessToken = async (): Promise<string | null> => {
  * @throws {Error} If the token refresh fails (e.g., refresh token expired)
  * @internal Exported for testing purposes
  */
-const attemptTokenRefresh = async (): Promise<string> => {
+const attemptTokenRefresh = async (tokenUsedByFailedRequest?: string | null): Promise<string> => {
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken().finally(() => {
+    refreshPromise = refreshAccessToken(tokenUsedByFailedRequest).finally(() => {
       refreshPromise = null;
     });
   }
@@ -175,14 +420,14 @@ const attemptTokenRefresh = async (): Promise<string> => {
   return newToken;
 };
 
-type FetchResponse<TData = any> = {
+type FetchResponse<TData = unknown> = {
   data: TData;
   status?: number;
   headers?: Headers;
 };
 
 type FetchOptions = {
-  params?: any;
+  params?: unknown;
   signal?: AbortSignal;
   headers?: Record<string, string>;
   validateStatus?: ((status: number) => boolean) | null;
@@ -195,7 +440,7 @@ type FetchConfig = {
 
 interface ErrorResponse {
   data: {
-    data?: any;
+    data?: unknown;
     error: ApiError & { status?: number };
   };
 }
@@ -226,15 +471,50 @@ const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
 };
 
-const getToken = (): string | null => {
-  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  if (fromLocalStorage) {
-    return JSON.parse(fromLocalStorage);
-  }
+/**
+ * Access token the failed request actually sent. Kept off `FetchError` so
+ * logs and error reporters cannot pick the bearer token up from the object.
+ */
+const failedRequestSessionTokens = new WeakMap<FetchError, string | null>();
 
-  const fromCookie = getCookieValue(STORAGE_KEYS.TOKEN);
-  return fromCookie ?? null;
+const setFailedRequestSessionToken = (error: FetchError, token: string | null): void => {
+  failedRequestSessionTokens.set(error, token);
 };
+
+const getFailedRequestSessionToken = (error: FetchError): string | null | undefined => {
+  return failedRequestSessionTokens.get(error);
+};
+
+export type AbortError = DOMException & {
+  name: 'AbortError' | 'TimeoutError';
+};
+
+/**
+ * Type guard that checks whether an error comes from an aborted operation,
+ * such as a `fetch` cancelled via `AbortController` or timed out via
+ * `AbortSignal.timeout()`.
+ *
+ * Note: if the controller was aborted with a custom reason
+ * (`controller.abort(reason)`), the operation rejects with that reason
+ * instead of an `AbortError`, and this guard returns `false`. In that case,
+ * also check the signal itself:
+ *
+ * @example
+ * try {
+ *   await fetch(url, { signal: controller.signal });
+ * } catch (err) {
+ *   if (isAbortError(err) || controller.signal.aborted) return;
+ *   throw err;
+ * }
+ *
+ * @param error - The caught value to check.
+ * @returns `true` if `error` is a `DOMException` named `AbortError` or `TimeoutError`.
+ */
+export function isAbortError(error: unknown): error is AbortError {
+  return (
+    error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')
+  );
+}
 
 type FetchClient = {
   get: {
@@ -244,19 +524,19 @@ type FetchClient = {
       url: string,
       config: FetchOptions & { responseType: 'arrayBuffer' }
     ): Promise<FetchResponse<ArrayBuffer>>;
-    <TData = any>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
+    <TData = unknown>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
   };
-  put: <TData = any, TSend = any>(
+  put: <TData = unknown, TSend = unknown>(
     url: string,
     data?: TSend,
     config?: FetchOptions
   ) => Promise<FetchResponse<TData>>;
-  post: <TData = any, TSend = any>(
+  post: <TData = unknown, TSend = unknown>(
     url: string,
     data?: TSend,
     config?: FetchOptions
   ) => Promise<FetchResponse<TData>>;
-  del: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
+  del: <TData = unknown>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
 };
 
 /**
@@ -286,11 +566,38 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * Create default headers with the current token.
    * This is a function so we can get a fresh token after refresh.
    */
-  const getDefaultHeaders = () => ({
+  const getDefaultHeaders = (token = getToken()) => ({
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${getToken()}`,
+    Authorization: `Bearer ${token}`,
   });
+
+  /**
+   * Header names are case-insensitive, so the merge goes through `Headers.set()`:
+   * a later source replaces an earlier one whatever its casing. Spreading objects
+   * would keep `Authorization` and `authorization` as two keys, and `Headers`
+   * would then join them into one comma-separated value.
+   *
+   * `providerHeaders` is read once per call, outside `executeRequest`, so a retry
+   * after a 401 sends the same values as the first attempt.
+   */
+  const buildHeaders = (
+    defaults: Record<string, string>,
+    providerHeaders: Headers,
+    perCall?: Record<string, string>
+  ) => {
+    const headers = new Headers(defaults);
+
+    providerHeaders.forEach((value, name) => headers.set(name, value));
+    Object.entries(perCall ?? {}).forEach(([name, value]) => headers.set(name, value));
+
+    return headers;
+  };
+
+  const readProviderHeaders = (url: string) =>
+    SKIPS_REQUEST_HEADERS.test(addPrependingSlash(url))
+      ? new Headers()
+      : unstable_getRequestHeaders();
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
@@ -302,7 +609,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
   // Add a response interceptor to return the response
-  const responseInterceptor = async <TData = any>(
+  const responseInterceptor = async <TData = unknown>(
     response: Response,
     validateStatus?: FetchOptions['validateStatus'],
     responseType: NonNullable<FetchOptions['responseType']> = 'json'
@@ -355,10 +662,17 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // constructor is not the same identity as the one this module closes over. Name
       // comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
-        return { data: {}, status: response.status } as FetchResponse<any>;
-      } else {
-        throw error;
+        return { data: {}, status: response.status } as FetchResponse<TData>;
       }
+
+      // A non-JSON error body (e.g. an HTML page from a reverse proxy) still has a status worth keeping.
+      if ((error as Error | null)?.name === 'SyntaxError' && !validateStatus?.(response.status)) {
+        const fetchError = new FetchError('Unknown Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
+      }
+
+      throw error;
     }
   };
 
@@ -369,20 +683,33 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    */
   const withTokenRefresh = async <TData>(
     url: string,
-    executeRequest: () => Promise<FetchResponse<TData>>
+    executeRequest: () => Promise<FetchResponse<TData>>,
+    getRequestToken: () => string | null
   ): Promise<FetchResponse<TData>> => {
     try {
       return await executeRequest();
     } catch (error) {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
+        const tokenUsedByFailedRequest = getRequestToken();
+
         try {
-          await attemptTokenRefresh();
-          // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
-          return await executeRequest();
+          await attemptTokenRefresh(tokenUsedByFailedRequest);
         } catch {
           // If refresh fails, throw the original error
+          setFailedRequestSessionToken(error, tokenUsedByFailedRequest);
           throw error;
+        }
+
+        // Retry outside the refresh catch so a second 401 is attributed to the
+        // refreshed token instead of the token used by the original request.
+        try {
+          return await executeRequest();
+        } catch (retryError) {
+          if (isFetchError(retryError) && retryError.status === 401) {
+            setFailedRequestSessionToken(retryError, getRequestToken());
+          }
+          throw retryError;
         }
       }
       throw error;
@@ -420,47 +747,53 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * are unique to the individual request
    */
   const makeCreateRequestUrl = (options?: FetchOptions) =>
-    pipe(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
+    flow(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
 
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
-        const { Authorization } = getDefaultHeaders();
+        requestToken = getToken();
+        const { Authorization } = getDefaultHeaders(requestToken);
 
         // For non-JSON response types, omit content negotiation headers that imply JSON
-        const defaultHeaders = responseType === 'json' ? getDefaultHeaders() : { Authorization };
+        const defaultHeaders =
+          responseType === 'json' ? getDefaultHeaders(requestToken) : { Authorization };
 
-        const headers = new Headers({
-          ...defaultHeaders,
-          ...options?.headers,
-        });
+        const headers = buildHeaders(defaultHeaders, providerHeaders, options?.headers);
 
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'GET',
+          credentials: 'include',
           headers,
         });
 
         return responseInterceptor<TData>(response, options?.validateStatus, responseType);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
-    post: async <TData, TSend = any>(
+    post: async <TData, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
-        const headers = new Headers({
-          ...getDefaultHeaders(),
-          ...options?.headers,
-        });
+        requestToken = getToken();
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         /**
          * we have to remove the Content-Type value if it was a formData request
@@ -473,26 +806,31 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'POST',
+          credentials: 'include',
           headers,
           body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
         });
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
-    put: async <TData, TSend = any>(
+    put: async <TData, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
-        const headers = new Headers({
-          ...getDefaultHeaders(),
-          ...options?.headers,
-        });
+        requestToken = getToken();
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         /**
          * we have to remove the Content-Type value if it was a formData request
@@ -505,6 +843,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'PUT',
+          credentials: 'include',
           headers,
           body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
         });
@@ -512,26 +851,31 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = readProviderHeaders(url);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
-        const headers = new Headers({
-          ...getDefaultHeaders(),
-          ...options?.headers,
-        });
+        requestToken = getToken();
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'DELETE',
+          credentials: 'include',
           headers,
         });
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
   };
 
@@ -542,10 +886,25 @@ export {
   getFetchClient,
   isFetchError,
   FetchError,
+  RequestHeadersError,
+  getFailedRequestSessionToken,
+  setFailedRequestSessionToken,
   attemptTokenRefresh,
+  refreshAccessToken,
   storeToken,
   setOnTokenUpdate,
   setOnSessionExpired,
   triggerSessionExpired,
+  resetSessionExpiredNotification,
+  unstable_addRequestHeaders,
+  unstable_getRequestHeaders,
+  ADMIN_REFRESH_LOCK,
 };
-export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
+export type {
+  FetchOptions,
+  FetchResponse,
+  FetchConfig,
+  FetchClient,
+  ErrorResponse,
+  RequestHeadersProvider,
+};

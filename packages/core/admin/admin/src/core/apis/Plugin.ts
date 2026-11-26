@@ -3,8 +3,9 @@ import * as React from 'react';
 
 import { immerable } from 'immer';
 
-export interface PluginConfig
-  extends Partial<Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>> {
+export interface PluginConfig extends Partial<
+  Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>
+> {
   name: string;
   id: string;
 }
@@ -13,7 +14,7 @@ export class Plugin {
   [immerable] = true;
 
   apis: Record<string, unknown>;
-  initializer: React.ComponentType<{ setPlugin(pluginId: string): void }> | null;
+  initializer: React.ComponentType<{ setPlugin(_pluginId: string): void }> | null;
   injectionZones: Record<
     string,
     Record<string, Array<{ name: string; Component: React.ComponentType }>>

@@ -136,7 +136,7 @@
   "Settings.application.description": "Información global del panel de administración",
   "Settings.application.edition-title": "Edición actual",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Edición comunitaria} other {Edición Empresarial}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Añadir asientos} other {contactar con ventas}}",
+  "Settings.application.ee.admin-seats.add-seats": "Gestionar suscripción",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Al límite: añade más asientos para añadir más usuarios",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Consigue ayuda",

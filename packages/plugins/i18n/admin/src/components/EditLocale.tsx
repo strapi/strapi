@@ -6,6 +6,7 @@ import {
   Form,
   FormHelpers,
   useAuth,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -120,7 +121,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
 
       refetchPermissions();
       onOpenChange(false);
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -132,7 +133,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
   };
 
   return (
-    <Modal.Root open={open} onOpenChange={onOpenChange}>
+    <UnsavedChangesModal open={open} onOpenChange={onOpenChange}>
       <Modal.Content>
         <Form
           method="PUT"
@@ -202,7 +203,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
           </Modal.Footer>
         </Form>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

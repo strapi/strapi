@@ -2,7 +2,6 @@ import { errors } from '@strapi/utils';
 import type { Modules, Struct, UID } from '@strapi/types';
 
 type PaginatedDocuments = Modules.Documents.PaginatedResult<UID.Schema>;
-type PaginationQuery = Modules.Documents.Params.Pagination.PageNotation;
 type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & string;
 
 // Admin document response follows the same format as the document service
@@ -20,6 +19,13 @@ export type DocumentMetadata = {
   availableStatus: AvailableStatusDocument[];
   // Available locales within the same status of the returned document
   availableLocales: AvailableLocaleDocument[];
+  /**
+   * i18n default locale code (e.g. `en`). Present when the content type is
+   * localized; used by the admin to lock non-localized fields on secondary
+   * locales. Not inferred from `availableLocales[0]` because that list
+   * excludes the currently viewed locale.
+   */
+  defaultLocale?: string | null;
 };
 
 /**
@@ -373,7 +379,10 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: number;
+    data: {
+      unpublishedRelations: number;
+      draftM2mLinks: number;
+    };
     error?: errors.ApplicationError;
   }
 }

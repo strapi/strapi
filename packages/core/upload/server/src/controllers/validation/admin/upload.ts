@@ -1,5 +1,4 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import { isNil } from 'lodash/fp';
 import { getService } from '../../../utils';
 
 const focalPointSchema = yup
@@ -19,7 +18,7 @@ const fileInfoSchema = yup.object({
     .strapiID()
     .nullable()
     .test('folder-exists', 'the folder does not exist', async (folderId) => {
-      if (isNil(folderId)) {
+      if (folderId == null) {
         return true;
       }
 
@@ -46,8 +45,7 @@ const validateUploadBody = (data = {}, isMulti = false) => {
 export { validateUploadBody };
 
 export type UploadBody =
-  | yup.InferType<typeof uploadSchema>
-  | yup.InferType<typeof multiUploadSchema>;
+  yup.InferType<typeof uploadSchema> | yup.InferType<typeof multiUploadSchema>;
 
 const bulkUpdatesSchema = yup.object({
   updates: yup

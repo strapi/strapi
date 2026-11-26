@@ -128,7 +128,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as d`)
         .select(`d.${idCol}`)
         .whereNull(`d.${pubCol}`)
-        .whereNotExists(function (this: any) {
+        .whereNotExists(function excludePublishedVersion(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as p`)
             .whereRaw(pairOn('p', 'd'))
@@ -143,7 +143,7 @@ export const buildPublicationFilterWhere = (
         const sub = knex(`${table} as d`)
           .select(`d.${idCol}`)
           .whereNull(`d.${pubCol}`)
-          .whereExists(function (this: any) {
+          .whereExists(function includePublishedVersion(this: any) {
             this.select(knex.raw('1'))
               .from(`${table} as p`)
               .whereRaw(pairOn('p', 'd'))
@@ -156,7 +156,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as p`)
         .select(`p.${idCol}`)
         .whereNotNull(`p.${pubCol}`)
-        .whereExists(function (this: any) {
+        .whereExists(function includeDraftVersion(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as d`)
             .whereRaw(pairOn('d', 'p'))
@@ -171,7 +171,7 @@ export const buildPublicationFilterWhere = (
         const sub = knex(`${table} as d`)
           .select(`d.${idCol}`)
           .whereNull(`d.${pubCol}`)
-          .whereExists(function (this: any) {
+          .whereExists(function includeModifiedPublishedVersion(this: any) {
             this.select(knex.raw('1'))
               .from(`${table} as p`)
               .whereRaw(pairOn('p', 'd'))
@@ -185,7 +185,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as p`)
         .select(`p.${idCol}`)
         .whereNotNull(`p.${pubCol}`)
-        .whereExists(function (this: any) {
+        .whereExists(function includeModifiedDraftVersion(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as d`)
             .whereRaw(pairOn('d', 'p'))
@@ -201,7 +201,7 @@ export const buildPublicationFilterWhere = (
         const sub = knex(`${table} as d`)
           .select(`d.${idCol}`)
           .whereNull(`d.${pubCol}`)
-          .whereExists(function (this: any) {
+          .whereExists(function includeUnmodifiedPublishedVersion(this: any) {
             this.select(knex.raw('1'))
               .from(`${table} as p`)
               .whereRaw(pairOn('p', 'd'))
@@ -215,7 +215,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as p`)
         .select(`p.${idCol}`)
         .whereNotNull(`p.${pubCol}`)
-        .whereExists(function (this: any) {
+        .whereExists(function includeUnmodifiedDraftVersion(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as d`)
             .whereRaw(pairOn('d', 'p'))
@@ -234,7 +234,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as d`)
         .select(`d.${idCol}`)
         .whereNull(`d.${pubCol}`)
-        .whereNotExists(function (this: any) {
+        .whereNotExists(function excludePublishedDocument(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as p`)
             .whereRaw(documentOn('p', 'd'))
@@ -249,7 +249,7 @@ export const buildPublicationFilterWhere = (
         const sub = knex(`${table} as d`)
           .select(`d.${idCol}`)
           .whereNull(`d.${pubCol}`)
-          .whereExists(function (this: any) {
+          .whereExists(function includePublishedDocument(this: any) {
             this.select(knex.raw('1'))
               .from(`${table} as p`)
               .whereRaw(documentOn('p', 'd'))
@@ -262,7 +262,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as p`)
         .select(`p.${idCol}`)
         .whereNotNull(`p.${pubCol}`)
-        .whereExists(function (this: any) {
+        .whereExists(function includeDraftDocument(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as d`)
             .whereRaw(documentOn('d', 'p'))
@@ -280,7 +280,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as p`)
         .select(`p.${idCol}`)
         .whereNotNull(`p.${pubCol}`)
-        .whereNotExists(function (this: any) {
+        .whereNotExists(function excludeDraftVersion(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as d`)
             .whereRaw(pairOn('d', 'p'))
@@ -298,7 +298,7 @@ export const buildPublicationFilterWhere = (
       const sub = knex(`${table} as p`)
         .select(`p.${idCol}`)
         .whereNotNull(`p.${pubCol}`)
-        .whereExists(function (this: any) {
+        .whereExists(function includeDraftVersion(this: any) {
           this.select(knex.raw('1'))
             .from(`${table} as d`)
             .whereRaw(pairOn('d', 'p'))

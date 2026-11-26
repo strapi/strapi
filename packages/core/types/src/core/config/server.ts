@@ -1,4 +1,5 @@
 import type { OpenAPI } from './openapi';
+import type { CronTasks } from '../../modules/cron';
 
 export interface App {
   keys: string[];
@@ -6,14 +7,23 @@ export interface App {
 
 export interface Cron {
   enabled?: boolean;
-  tasks?: object;
+  tasks?: CronTasks;
 }
 
 export interface Dirs {
   public?: string;
 }
 
+export interface LoggerConfig {
+  level?: string;
+  [key: string]: unknown;
+}
+
 export interface Logger {
+  /**
+   * Winston logger options merged into the Strapi logger at startup.
+   */
+  config?: LoggerConfig;
   updates?:
     | {
         enabled?: boolean;
@@ -41,6 +51,9 @@ export interface ServerTransfer {
 }
 
 export interface ServerAdmin {
+  /**
+   * @deprecated Use `admin.autoOpen` in `config/admin.ts` instead. Ignored at runtime; a startup warning is logged if set.
+   */
   autoOpen?: boolean;
 }
 
@@ -50,10 +63,13 @@ export interface Proxy {
   https?: string;
   fetch?: string;
   koa?: boolean;
+  ipHeader?: string;
+  maxIpsCount?: number;
 }
 
 export interface Webhooks {
   populateRelations?: boolean;
+  deduplicateReleaseWebhooks?: boolean;
   [key: string]: unknown;
 }
 
@@ -68,11 +84,16 @@ export interface Http {
 }
 
 export interface McpConfig {
-  enabled: boolean;
+  enabled?: boolean;
   /** Maximum time (ms) to wait for the MCP transport connection. Defaults to 5 000. */
   connectTimeoutMs?: number;
   /** Maximum time (ms) to wait for a single MCP request to complete. Defaults to 60 000. */
   requestTimeoutMs?: number;
+  /**
+   * Maximum array elements and object keys combined in one tool call's arguments.
+   * Must be an integer >= 1. Set to `Infinity` to disable (JS/TS config only). Defaults to 10 000.
+   */
+  maxToolInputElements?: number;
 }
 
 export interface Server {
@@ -83,15 +104,24 @@ export interface Server {
 
   // optional
   socket?: string | number;
+  /**
+   * @deprecated Not read by Strapi. Reserved for backward compatibility in config files.
+   */
   emitErrors?: boolean;
   url?: string;
   absoluteUrl?: string;
   proxy?: boolean | Proxy;
+  /**
+   * @deprecated Use `server.proxy.global` instead. Ignored at runtime; a startup warning is logged if set.
+   */
   globalProxy?: string;
   cron?: Cron;
   dirs?: Dirs;
   logger?: Logger;
   transfer?: ServerTransfer;
+  /**
+   * @deprecated Use `admin.autoOpen` in `config/admin.ts` instead.
+   */
   admin?: ServerAdmin;
   openapi?: OpenAPI;
   webhooks?: Webhooks;

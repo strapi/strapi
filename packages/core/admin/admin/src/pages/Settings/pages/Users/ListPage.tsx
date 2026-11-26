@@ -51,10 +51,16 @@ const ListPageCE = () => {
     CreateActionCE,
     async () =>
       (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE'
-        )
+        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE')
       ).CreateActionEE
+  );
+
+  const LicenseLimitBanner = useEnterprise(
+    null,
+    async () =>
+      (
+        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/LicenseLimitBanner')
+      ).LicenseLimitBanner
   );
 
   const headers = TABLE_HEADERS.map((header) => ({
@@ -82,7 +88,7 @@ const ListPageCE = () => {
           message: formatAPIError(res.error),
         });
       }
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -136,6 +142,7 @@ const ListPageCE = () => {
           defaultMessage: 'All the users who have access to the Strapi admin panel',
         })}
       />
+      {LicenseLimitBanner && <LicenseLimitBanner />}
       <Layouts.Action
         startActions={
           <>
@@ -235,7 +242,7 @@ const ListPageCE = () => {
 };
 
 const TABLE_HEADERS: Array<
-  Omit<Table.Header<SanitizedAdminUser, any>, 'label'> & { label: MessageDescriptor }
+  Omit<Table.Header<SanitizedAdminUser, object>, 'label'> & { label: MessageDescriptor }
 > = [
   {
     name: 'firstname',
@@ -328,27 +335,7 @@ const FILTERS = [
   },
 ] satisfies Filters.Filter[];
 
-/* -------------------------------------------------------------------------------------------------
- * ListPage
- * -----------------------------------------------------------------------------------------------*/
-
-// component which determines whether this page should render the CE or EE page
-const ListPage = () => {
-  const UsersListPage = useEnterprise(
-    ListPageCE,
-    async () =>
-      // eslint-disable-next-line import/no-cycle
-      (await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
-        .UserListPageEE
-  );
-
-  // block rendering until the EE component is fully loaded
-  if (!UsersListPage) {
-    return null;
-  }
-
-  return <UsersListPage />;
-};
+const ListPage = ListPageCE;
 
 /* -------------------------------------------------------------------------------------------------
  * ProtectedListPage

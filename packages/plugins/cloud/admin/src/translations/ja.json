@@ -1,0 +1,21 @@
+{
+  "Homepage.deploy.ariaLabel": "デプロイオプション",
+  "Homepage.deploy.cli.ariaLabel": "パッケージマネージャー",
+  "Homepage.deploy.cli.copy": "コピー",
+  "Homepage.deploy.cli.subTitle": "コマンドラインを使ってStrapiプロジェクトを直接デプロイします",
+  "Homepage.deploy.cli.title": "CLIでデプロイ",
+  "Homepage.deploy.documentation": "お困りですか？ドキュメントをご確認ください",
+  "Homepage.deploy.git.badge": "推奨",
+  "Homepage.deploy.git.button": "Strapi Cloudにデプロイ",
+  "Homepage.deploy.git.subTitle": "GitHubまたはGitLabのプロジェクトをStrapi Cloud内で直接デプロイします",
+  "Homepage.deploy.git.title": "Strapi Cloudにデプロイ",
+  "Homepage.deploy.title": "お好みのデプロイ方法を選択してください",
+  "Homepage.freePlan.api": "2.5K APIリクエスト",
+  "Homepage.freePlan.bandwidth": "10 GBアセット帯域幅",
+  "Homepage.freePlan.cdn": "グローバルCDN",
+  "Homepage.freePlan.pushToDeploy": "プッシュするだけでデプロイ",
+  "Homepage.freePlan.storage": "10 GBストレージ",
+  "Homepage.subTitle": "完全無料プランで始められます。クレジットカード不要、期間制限なし。",
+  "Homepage.title": "Strapi Cloudで無料デプロイ！",
+  "Plugin.name": "デプロイ"
+}

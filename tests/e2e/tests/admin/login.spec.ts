@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { toggleRateLimiting } from '../../../utils/rate-limit';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
@@ -11,7 +11,7 @@ test.describe('Login', () => {
     await page.goto('/admin');
   });
 
-  test.describe('Successful login', () => {
+  test.describe('Successful login', { tag: ['@critical'] }, () => {
     test('A user should be able to log in with or without making their authentication persistent', async ({
       page,
       context,
@@ -49,8 +49,9 @@ test.describe('Login', () => {
       );
       expect(persistentRefreshCookie?.expires).toBeGreaterThan(-1);
 
-      // Clear cookies to test persistence behavior
+      // Clear both the refresh cookie and persisted access token to simulate session expiry.
       await context.clearCookies();
+      await page.evaluate(() => localStorage.removeItem('jwtToken'));
       await page.goto('/admin');
       await expect(page).toHaveTitle(TITLE_LOGIN);
     });

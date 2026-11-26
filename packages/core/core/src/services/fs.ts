@@ -17,7 +17,7 @@ export default (strapi: Core.Strapi) => {
   function normalizePath(optPath: string | string[]) {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 
-    const normalizedPath = path.normalize(filePath).replace(/^\/?(\.\/|\.\.\/)+/, '');
+    const normalizedPath = path.posix.normalize(filePath).replace(/^\/?(\.\/|\.\.\/)+/, '');
 
     return path.resolve(strapi.dirs.app.root, normalizedPath);
   }

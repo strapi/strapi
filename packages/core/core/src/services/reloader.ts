@@ -34,6 +34,12 @@ export const createReloader = (strapi: Core.Strapi) => {
     },
   });
 
+  // Turn watching back on without skipping the next reload.
+  // Use it when the write that turned watching off was refused, so no restart is pending.
+  reload.resumeWatching = () => {
+    state.isWatching = true;
+  };
+
   reload.isReloading = false;
   reload.isWatching = true;
 

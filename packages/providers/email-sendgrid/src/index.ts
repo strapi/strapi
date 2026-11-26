@@ -19,11 +19,16 @@ interface SendOptions {
 
 interface ProviderOptions {
   apiKey: string;
+  region?: 'eu' | 'global';
 }
 
 export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
     sendgrid.setApiKey(providerOptions.apiKey);
+
+    if (providerOptions.region) {
+      (sendgrid as any).client.setDataResidency(providerOptions.region);
+    }
 
     return {
       send(options: SendOptions): Promise<void> {

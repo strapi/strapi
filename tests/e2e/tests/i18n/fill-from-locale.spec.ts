@@ -1,14 +1,19 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { loginWithApi } from '../../../utils/login';
+import {
+  clickAndWait,
+  findAndClose,
+  navToHeader,
+  publishAndConfirmDraftRelations,
+} from '../../../utils/shared';
 
 test.describe('i18n - Fill from another locale', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to retrieve localized relations with the fill from another locale feature', async ({
@@ -29,7 +34,7 @@ test.describe('i18n - Fill from another locale', () => {
     /**
      * Publish the document
      */
-    await page.getByRole('button', { name: 'Publish' }).click();
+    await publishAndConfirmDraftRelations(page);
     await findAndClose(page, 'Published document');
 
     /**
@@ -81,7 +86,7 @@ test.describe('i18n - Fill from another locale', () => {
     await page.locator('span').filter({ hasText: 'English (en)' }).first().click();
     await page.getByRole('button', { name: 'Yes, fill in' }).click();
     /** Publish the document */
-    await page.getByRole('button', { name: 'Publish' }).click();
+    await publishAndConfirmDraftRelations(page);
     await findAndClose(page, 'Published document');
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();

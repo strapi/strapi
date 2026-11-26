@@ -43,7 +43,10 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
   /**
    * Generates a validation schema for document IDs
    *
-   * @returns A schema that validates UUIDs
+   * Document IDs are strings. Strapi generates them with cuid2, but older data and imports can hold
+   * other formats, so the schema does not enforce a pattern.
+   *
+   * @returns A schema that validates document IDs
    *
    * @example
    * ```ts
@@ -52,7 +55,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    * ```
    */
   get documentID() {
-    return z.uuid().describe('The document ID, represented by a UUID');
+    return z.string().describe('The document ID');
   }
 
   /**
@@ -155,7 +158,9 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    * Schema-aware filters validation that restricts to actual model fields
    */
   protected get schemaAwareFilters() {
-    return z.record(this.scalarFieldsEnum, z.any()).describe('Filters to apply to the query');
+    return z
+      .partialRecord(this.scalarFieldsEnum, z.any())
+      .describe('Filters to apply to the query');
   }
 
   get locale() {

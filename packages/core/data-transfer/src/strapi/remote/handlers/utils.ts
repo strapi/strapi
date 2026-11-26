@@ -5,7 +5,7 @@ import type { RawData, ServerOptions } from 'ws';
 import { WebSocket, WebSocketServer } from 'ws';
 
 import type { Handler, TransferState } from './abstract';
-import type { Protocol } from '../../../../types';
+import type { Protocol } from '../../../types';
 import { ProviderError, ProviderTransferError } from '../../../errors/providers';
 import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
 import { TransferMethod } from '../constants';
@@ -147,7 +147,7 @@ export const handlerControllerFactory =
   (options: HandlerOptions) => {
     const { verify, server: serverOptions } = options ?? {};
 
-    const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
+    const wss = new WebSocketServer({ ...serverOptions, noServer: true });
 
     return async (ctx: Context) => {
       const cb: WSCallback = (ws) => {
@@ -163,7 +163,7 @@ export const handlerControllerFactory =
           try {
             ws.terminate();
             ctx.req.socket.destroy();
-          } catch (err) {
+          } catch {
             strapi?.log?.error('[Data transfer] Failed to close socket on error');
           }
         };

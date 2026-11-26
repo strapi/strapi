@@ -48,7 +48,6 @@ export function buildComponentInputSchema(
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const [key, attr] of Object.entries(component.attributes)) {
     if (key === 'id') {
-      // eslint-disable-next-line no-continue
       continue;
     }
     shape[key] = attributeToInputSchema(strapi, attr, visited);
@@ -68,9 +67,6 @@ export function buildComponentInputSchema(
  * here to avoid a cross-package import from @strapi/content-manager into
  * @strapi/core (which is not a listed dependency).
  *
- * TODO — custom fields call `strapi.get('custom-fields')` at schema-build
- * time; confirm with an integration test that the registry is populated when MCP
- * tools are registered (post-bootstrap).
  */
 export const attributeToInputSchema = (
   strapi: Core.Strapi,
@@ -256,7 +252,16 @@ export const attributeToInputSchema = (
                 'Replace all relations. Array replaces existing; null clears all. Mutually exclusive with connect/disconnect.'
               ),
           })
-          .strict();
+          .strict()
+          .refine(
+            (value) =>
+              value.set === undefined ||
+              (value.connect === undefined && value.disconnect === undefined),
+            {
+              message: 'set is mutually exclusive with connect and disconnect',
+              path: ['set'],
+            }
+          );
       } else {
         s = z.union([
           relDocumentId,

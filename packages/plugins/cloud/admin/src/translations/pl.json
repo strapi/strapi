@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "Wdrożenie",
+  "Homepage.title": "Wdróż ze Strapi Cloud za darmo!",
+  "Homepage.subTitle": "Zacznij od naszego całkowicie darmowego planu - bez karty kredytowej, bez limitów czasowych.",
+  "Homepage.deploy.title": "Wybierz preferowaną metodę wdrożenia",
+  "Homepage.deploy.ariaLabel": "Opcje wdrożenia",
+  "Homepage.deploy.git.badge": "Zalecane",
+  "Homepage.deploy.git.title": "Wdróż do Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Wdróż projekt GitHub lub GitLab bezpośrednio w Strapi Cloud",
+  "Homepage.deploy.git.button": "Wdróż do Strapi Cloud",
+  "Homepage.deploy.cli.title": "Wdróż przez CLI",
+  "Homepage.deploy.cli.subTitle": "Użyj wiersza poleceń, aby wdrożyć swój projekt Strapi bezpośrednio",
+  "Homepage.deploy.cli.ariaLabel": "Menedżer pakietów",
+  "Homepage.deploy.cli.copy": "Kopiuj",
+  "Homepage.deploy.documentation": "Masz problemy? Sprawdź naszą dokumentację",
+  "Homepage.freePlan.api": "2.5K żądań API",
+  "Homepage.freePlan.storage": "10 GB pamięci",
+  "Homepage.freePlan.bandwidth": "10 GB przepustowości zasobów",
+  "Homepage.freePlan.cdn": "Globalny CDN",
+  "Homepage.freePlan.pushToDeploy": "Wypchnij, aby wdrożyć"
+}

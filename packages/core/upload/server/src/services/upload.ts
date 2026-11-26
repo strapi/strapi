@@ -9,13 +9,16 @@ import {
   sanitize,
   contentTypes as contentTypesUtils,
   errors,
+  emitAudit,
   file as fileUtils,
 } from '@strapi/utils';
 
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
-import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
+import { findAndCountRestPage } from '../utils/rest-pagination';
+import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audit-logs';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -42,8 +45,46 @@ type Metas = {
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 
-const { ApplicationError, NotFoundError } = errors;
+// The audit log records the folder of an updated file
+const FOLDER_REF_POPULATE = { folder: { fields: ['id', 'name'] } };
+
+const { ApplicationError, NotFoundError, ValidationError } = errors;
 const { bytesToKbytes } = fileUtils;
+
+/**
+ * Queue a provider operation for a later `Promise.all`, with a rejection handler
+ * attached in the same turn so a fast failure is never an unhandled rejection.
+ *
+ * `Promise.resolve` first — a provider may hand back a plain value, which
+ * `Promise.all` accepts but `.catch` would throw on.
+ */
+const queueConcurrentOperation = <T>(queue: Promise<T>[], operation: Promise<T>) => {
+  Promise.resolve(operation).catch(() => undefined);
+  queue.push(operation);
+};
+
+/**
+ * An all-digit value is a numeric id; anything else is a documentId. A documentId can
+ * start with a digit (e.g. `'3d52c864df72fcc68ab62ebe'`), so `parseInt` must not be used.
+ */
+const isNumericId = (id: Data.ID | Data.DocumentID) => /^\d+$/.test(String(id));
+
+/**
+ * Files can be addressed by numeric id or documentId (1:1, files have no draft & publish).
+ * A numeric id passes through untouched; a documentId resolves to the file's numeric id,
+ * or `undefined` when no file has it.
+ */
+export const resolveFileId = async (strapi: Core.Strapi, id: Data.ID | Data.DocumentID) => {
+  if (isNumericId(id)) {
+    return id;
+  }
+
+  const file = await strapi.db
+    .query(FILE_MODEL_UID)
+    .findOne({ where: { documentId: id }, select: ['id'] });
+
+  return file?.id;
+};
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
@@ -114,6 +155,40 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.eventHub.emit(event, { media: sanitizedData });
   }
 
+  /**
+   * `refId` is either the numeric id of one entry row or an entry's documentId. A documentId
+   * maps to every row of `ref` that carries it — draft and published, every locale — the
+   * way the document service links a non-draft-and-publish source to a draft-and-publish
+   * target. Resolved before the file is persisted so an unknown documentId orphans nothing.
+   * `ref` is user input: it is only looked up when it names a registered model.
+   * A documentId is only accepted for content types; components need the numeric id.
+   */
+  async function resolveRefIds(ref: UID.Schema, refId: Data.ID | Data.DocumentID): Promise<ID[]> {
+    if (isNumericId(refId)) {
+      return [refId];
+    }
+
+    const model = strapi.getModel(ref);
+
+    if (!model) {
+      return [refId];
+    }
+
+    if (model.modelType !== 'contentType') {
+      throw new ValidationError('refId must be a numeric id when ref is not a content type');
+    }
+
+    const entries = await strapi.db
+      .query(ref)
+      .findMany({ where: { documentId: refId }, select: ['id'] });
+
+    if (entries.length === 0) {
+      throw new NotFoundError(`No ${ref} entry found with documentId "${refId}"`);
+    }
+
+    return entries.map((entry) => entry.id);
+  }
+
   async function formatFileInfo(
     { filename, type, size }: { filename: string; type: string; size: number },
     fileInfo: Partial<FileInfo> = {},
@@ -161,13 +236,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const { refId, ref, field } = metas;
 
     if (refId && ref && field) {
-      entity.related = [
-        {
-          id: refId,
-          __type: ref,
-          __pivot: { field },
-        },
-      ];
+      const ids = await resolveRefIds(ref as UID.Schema, refId);
+
+      entity.related = ids.map((id) => ({
+        id,
+        __type: ref,
+        __pivot: { field },
+      }));
     }
 
     if (metas.path) {
@@ -277,6 +352,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return uploadedFiles;
   }
 
+  // `_.set(fileData, ['formats', key], ...)` reads an all-digit key (a `breakpoints`
+  // entry like `{ 100: 100 }`) as an array index and builds an array when formats is
+  // unset, so build the object explicitly.
+  function setFormat(fileData: UploadableFile, key: string, format: UploadableFile) {
+    fileData.formats = { ...fileData.formats, [key]: format };
+  }
+
   /**
    * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
@@ -300,39 +382,105 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // For performance reasons, all uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
       await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      setFormat(fileData, 'thumbnail', thumbnailFile);
     };
 
     // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
       const { key, file } = format;
       await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
+      setFormat(fileData, key, file);
     };
 
     const uploadPromises: Promise<void>[] = [];
 
     // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
+    queueConcurrentOperation(uploadPromises, getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
+        queueConcurrentOperation(uploadPromises, uploadThumbnail(thumbnailFile));
       }
 
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
-          // eslint-disable-next-line no-continue
           if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
+          queueConcurrentOperation(uploadPromises, uploadResponsiveFormat(format));
         }
       }
     }
     // Wait for all uploads to finish
     await Promise.all(uploadPromises);
+  }
+
+  /**
+   * Like uploadImage, but pairs the main file and each format with its old
+   * counterpart and routes through provider.replace so providers that implement
+   * an atomic replace can use it. Formats that no longer exist on the new image
+   * are deleted; formats that didn't exist on the old image are uploaded fresh.
+   */
+  async function replaceImage(fileData: UploadableFile, oldFile: File) {
+    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
+      getService('image-manipulation');
+
+    const { width, height } = await getDimensions(fileData);
+
+    _.assign(fileData, {
+      width,
+      height,
+    });
+
+    const replaceFormat = async (key: string, newFormat: UploadableFile) => {
+      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      if (oldFormat) {
+        await getService('provider').replace(newFormat, oldFormat);
+      } else {
+        await getService('provider').upload(newFormat);
+      }
+      setFormat(fileData, key, newFormat);
+    };
+
+    const promises: Promise<unknown>[] = [];
+
+    // Replace the main file
+    queueConcurrentOperation(promises, getService('provider').replace(fileData, oldFile));
+
+    const newFormatKeys = new Set<string>();
+
+    if (await isResizableImage(fileData)) {
+      const thumbnailFile = await generateThumbnail(fileData);
+      if (thumbnailFile) {
+        newFormatKeys.add('thumbnail');
+        queueConcurrentOperation(promises, replaceFormat('thumbnail', thumbnailFile));
+      }
+
+      const formats = await generateResponsiveFormats(fileData);
+      if (Array.isArray(formats) && formats.length > 0) {
+        for (const format of formats) {
+          if (!format) continue;
+          newFormatKeys.add(format.key);
+          queueConcurrentOperation(promises, replaceFormat(format.key, format.file));
+        }
+      }
+    }
+
+    // Delete any formats that existed on the old file but are not present on the new one
+    if (
+      oldFile.formats &&
+      oldFile.provider === strapi.config.get<Config>('plugin::upload').provider
+    ) {
+      for (const oldKey of Object.keys(oldFile.formats)) {
+        if (!newFormatKeys.has(oldKey)) {
+          const oldFormat = oldFile.formats[oldKey] as File;
+          queueConcurrentOperation(promises, strapi.plugin('upload').provider.delete(oldFormat));
+        }
+      }
+    }
+
+    await Promise.all(promises);
   }
 
   /**
@@ -366,7 +514,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ) {
     const { user } = opts ?? {};
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
 
     if (!dbFile) {
       throw new NotFoundError();
@@ -380,18 +528,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
       focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
-      folder: _.isUndefined(folder) ? dbFile.folder : folder,
+      ...(_.isUndefined(folder) ? {} : { folder }),
       folderPath: _.isUndefined(folder)
         ? dbFile.folderPath
         : await fileService.getFolderPath(folder),
     };
 
-    return update(id, newInfos, { user });
+    return update(id, newInfos, { user }, { previous: dbFile });
   }
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo }; file: InputFile },
+    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -400,7 +548,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const { isImage } = getService('image-manipulation');
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
     if (!dbFile) {
       throw new NotFoundError();
     }
@@ -411,8 +559,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      const { fileInfo } = data;
-      fileData = await enhanceAndValidateFile(file, fileInfo);
+      // `refId` / `ref` / `field` are dropped rather than forwarded: `formatFileInfo` turns
+      // them into a one-element `related` array, and a bare array reaches the morph join as
+      // `set` — which deletes every row for this file, detaching it from every other entry
+      // that uses it. Attaching an existing file to an entry is the content API's job.
+      const { fileInfo, refId: _refId, ref: _ref, field: _field, ...metas } = data;
+      fileData = await enhanceAndValidateFile(file, fileInfo, metas);
+
+      // Replacing a file writes new bytes just like creating one, so it has to
+      // respect sizeLimit too. Checked before any provider write, and measured on
+      // the same post-optimization file as the create path (uploadFileAndPersist).
+      await getService('provider').checkFileSize(fileData);
 
       // keep a constant hash and extension so the file url doesn't change when the file is replaced
       _.assign(fileData, {
@@ -420,23 +577,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ext: dbFile.ext,
       });
 
-      // execute delete function of the provider
-      if (dbFile.provider === config.provider) {
-        await strapi.plugin('upload').provider.delete(dbFile);
-
-        if (dbFile.formats) {
-          await Promise.all(
-            Object.keys(dbFile.formats).map((key) => {
-              return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
-            })
-          );
-        }
+      // A plain replace sends no folder, so `formatFileInfo` resolved folderPath to
+      // '/' while the relation survived — and folder deletion selects by folderPath,
+      // which orphaned the file. An explicitly sent folder still moves it.
+      if (fileInfo?.folder === undefined) {
+        _.assign(fileData, { folderPath: dbFile.folderPath });
       }
 
-      // clear old formats
-      _.set(fileData, 'formats', {});
+      // `update` only writes the keys it gets, so clear the old image values. A new
+      // image gets its own from replaceImage / uploadImage; a non-image keeps null,
+      // like a fresh upload of the same file.
+      _.assign(fileData, { width: null, height: null, formats: null });
 
-      if (await isImage(fileData)) {
+      if (dbFile.provider === config.provider) {
+        if (await isImage(fileData)) {
+          await replaceImage(fileData, dbFile);
+        } else {
+          // The new file is not an image, so it has no formats. Replace the main
+          // file, then delete any formats the old image left behind — otherwise
+          // they're orphaned in storage since the DB record no longer tracks them.
+          await getService('provider').replace(fileData, dbFile);
+          if (dbFile.formats) {
+            await Promise.all(
+              Object.keys(dbFile.formats).map((key) =>
+                strapi.plugin('upload').provider.delete(dbFile.formats![key] as File)
+              )
+            );
+          }
+        }
+      } else if (await isImage(fileData)) {
+        // Cross-provider replacement: no delete on the old provider, upload to the new one.
         await uploadImage(fileData);
       } else {
         await getService('provider').upload(fileData);
@@ -448,10 +618,46 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user });
+    return update(id, fileData, { user }, { replaced: true, previous: dbFile });
   }
 
-  async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
+  type FolderRef = { id: number; name: string } | null;
+
+  async function getFolderAfterUpdate(
+    values: Partial<UploadableFile>,
+    previous: { folder?: FolderRef } | null
+  ): Promise<FolderRef> {
+    const previousFolder = previous?.folder ?? null;
+
+    if (values.folder === undefined) {
+      return previousFolder;
+    }
+
+    const value = values.folder as number | { id: number } | null;
+    const folderId = value !== null && typeof value === 'object' ? value.id : value;
+
+    if (folderId == null) {
+      return null;
+    }
+
+    if (previousFolder && Number(previousFolder.id) === Number(folderId)) {
+      return previousFolder;
+    }
+
+    return strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id: folderId }, select: ['id', 'name'] });
+  }
+
+  async function update(
+    id: ID,
+    values: Partial<UploadableFile>,
+    opts?: CommonOptions,
+    {
+      replaced = false,
+      previous: knownPrevious,
+    }: { replaced?: boolean; previous?: Record<string, any> } = {}
+  ) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -463,9 +669,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
+    // Callers that already read the file pass it, with its folder
+    const previous =
+      knownPrevious ??
+      (await strapi.db
+        .query(FILE_MODEL_UID)
+        .findOne({ where: { id }, populate: { folder: { select: ['id', 'name'] } } }));
+
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
     await emitEvent(MEDIA_UPDATE, res);
+
+    // The webhook event above carries no folder (a private field) and not the file as it was
+    if (res && previous) {
+      const folder = await getFolderAfterUpdate(values, previous);
+      strapi.eventHub.emit(AUDITED_EVENTS.MEDIA_UPDATE_AUDIT, {
+        file: toAuditedFile({ ...res, folder }),
+        previous: toAuditedFile(previous),
+        replaced,
+      });
+    }
 
     return res;
   }
@@ -531,6 +754,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     };
   }
 
+  /**
+   * REST-aware paginated find for the content API files endpoint, with signed URLs.
+   */
+  async function findAndCountPage(query: any = {}) {
+    const { results, pagination } = await findAndCountRestPage(strapi, FILE_MODEL_UID, query);
+
+    const signedResults = await async.map(results, (file: File) => fileService.signFileUrls(file));
+
+    return { results: signedResults, pagination };
+  }
+
   async function remove(file: File) {
     const config = strapi.config.get<Config>('plugin::upload');
 
@@ -571,7 +805,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
-    return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+    const previous = await getSettings();
+
+    await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+
+    const changes = getUploadSettingsChanges(previous, value);
+
+    if (Object.keys(changes).length > 0) {
+      await emitAudit({ strapi }, AUDITED_EVENTS.UPLOAD_SETTINGS_UPDATE, { changes });
+    }
   }
 
   async function getConfiguration() {
@@ -598,6 +840,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     findOne,
     findMany,
     findPage,
+    findAndCountPage,
     remove,
     getSettings,
     setSettings,
@@ -609,5 +852,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    _replaceImage: replaceImage,
+    _queueConcurrentOperation: queueConcurrentOperation,
   };
 };

@@ -150,6 +150,7 @@ export class MinimalSmtpServer {
         const isData = line.toUpperCase() === 'DATA';
         processLine(line);
 
+        // @ts-expect-error TODO: function exits earlier if phase === 'data'
         if (isData && phase === 'data') {
           dataBuffer += lineBuffer;
           lineBuffer = '';

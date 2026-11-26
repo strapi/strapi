@@ -7,9 +7,11 @@ import { useIntl } from 'react-intl';
 import { Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -26,6 +28,7 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
+import { isPermissionsCeilingError } from './utils/isPermissionsCeilingError';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -46,11 +49,21 @@ const EditPage = () => {
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
+  const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  /**
+   * An admin cannot grant a permission they do not hold themselves, so the permissions
+   * tree is restricted to the current user's own permissions unless they are a super admin.
+   */
+  const currentUserPermissions = useAuth('EditPage', (state) => state.permissions);
+  const currentUser = useAuth('EditPage', (state) => state.user);
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles.some((role) => role.code === SUPER_ADMIN_CODE) ?? false;
 
   const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -95,9 +108,46 @@ const EditPage = () => {
     data: EditRoleFormValues,
     formik: FormikHelpers<EditRoleFormValues>
   ) => {
+    // Re-check via ref on submit: state may lag behind the latest matrix edits when save is clicked quickly
+    if (permissionsRef.current?.hasLocaleValidationErrors()) {
+      return;
+    }
+
     try {
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
+
+      // Save the permissions first: when the server rejects them (for instance a permission the
+      // user does not hold), the name and description are not saved either
+      if (role.code !== SUPER_ADMIN_CODE && permissionsToSend) {
+        const updateRes = await updateRolePermissions({
+          id,
+          permissions: permissionsToSend,
+        });
+
+        if ('error' in updateRes) {
+          if (isBaseQueryError(updateRes.error) && updateRes.error.name === 'ValidationError') {
+            formik.setErrors(formatValidationErrors(updateRes.error));
+          } else {
+            toggleNotification({
+              type: 'danger',
+              message: isPermissionsCeilingError(updateRes.error)
+                ? formatMessage({
+                    id: 'Settings.permissions.cannot-grant-unheld.error',
+                    defaultMessage:
+                      "Some permissions could not be saved because you don't have them yourself.",
+                  })
+                : formatAPIError(updateRes.error),
+            });
+          }
+
+          return;
+        }
+
+        if (didUpdateConditions) {
+          trackUsage('didUpdateConditions');
+        }
+      }
 
       const res = await updateRole({
         id,
@@ -117,30 +167,6 @@ const EditPage = () => {
         return;
       }
 
-      if (role.code !== 'strapi-super-admin' && permissionsToSend) {
-        const updateRes = await updateRolePermissions({
-          id: res.data.id,
-          permissions: permissionsToSend,
-        });
-
-        if ('error' in updateRes) {
-          if (isBaseQueryError(updateRes.error) && updateRes.error.name === 'ValidationError') {
-            formik.setErrors(formatValidationErrors(updateRes.error));
-          } else {
-            toggleNotification({
-              type: 'danger',
-              message: formatAPIError(updateRes.error),
-            });
-          }
-
-          return;
-        }
-
-        if (didUpdateConditions) {
-          trackUsage('didUpdateConditions');
-        }
-      }
-
       permissionsRef.current?.setFormAfterSubmit();
 
       await refetchRole();
@@ -149,7 +175,7 @@ const EditPage = () => {
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved' }),
       });
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
@@ -157,7 +183,7 @@ const EditPage = () => {
     }
   };
 
-  const isFormDisabled = !isRoleLoading && role.code === 'strapi-super-admin';
+  const isFormDisabled = !isRoleLoading && role.code === SUPER_ADMIN_CODE;
 
   if (isLoadingPermissionsLayout || isRoleLoading || isLoadingPermissions || !permissionsLayout) {
     return <Page.Loading />;
@@ -192,7 +218,7 @@ const EditPage = () => {
                 <Button
                   type="submit"
                   startIcon={<Check />}
-                  disabled={role.code === 'strapi-super-admin'}
+                  disabled={role.code === SUPER_ADMIN_CODE || hasLocaleValidationErrors}
                   loading={isSubmitting}
                   fullWidth
                 >
@@ -230,9 +256,12 @@ const EditPage = () => {
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}
+                    onLocaleValidationChange={setHasLocaleValidationErrors}
                     permissions={permissions}
+                    permissionsAreStored
                     ref={permissionsRef}
                     layout={permissionsLayout}
+                    userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}
                   />
                 </Box>
               </Flex>

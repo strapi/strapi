@@ -1,3 +1,6 @@
+// Must stay first: it patches yup's `.email()` before any module builds a schema.
+import './utils/yupEmail';
+
 /**
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
@@ -15,8 +18,10 @@ export * from './components/Context';
 export * from './components/DescriptionComponentRenderer';
 export * from './components/Filters';
 export * from './components/Form';
+export * from './components/UnsavedChangesModal';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export { LazyOutlet, type LazyOutletProps } from './components/LazyOutlet';
 export * from './components/WidgetHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
@@ -51,7 +56,7 @@ export {
   NotificationsProvider,
 } from './features/Notifications';
 export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
-export { type Permission, useAuth, type AuthContextValue } from './features/Auth';
+export { type Permission, getAdminUserId, useAuth, type AuthContextValue } from './features/Auth';
 export { useHistory } from './features/BackButton';
 
 /**
@@ -59,7 +64,11 @@ export { useHistory } from './features/BackButton';
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
 export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
-export { useQueryParams } from './hooks/useQueryParams';
+export {
+  useQueryParams,
+  deepEncodeQueryValues,
+  withEncodedUserParams,
+} from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';

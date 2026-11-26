@@ -1,20 +1,31 @@
 import { useQueryParams, usePersistentStateScope } from '@strapi/admin/strapi-admin';
 import { renderHook, waitFor } from '@tests/utils';
-import { useLocation } from 'react-router-dom';
+import { parse, stringify } from 'qs';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { usePersistentPartialQueryParams } from '../usePersistentQueryParams';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(),
+  useNavigate: jest.fn(),
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useQueryParams: jest.fn(),
   usePersistentStateScope: jest.fn(),
 }));
 
 const mockSetQuery = jest.fn();
+const mockNavigate = jest.fn();
+
+// The URL the hook restores the saved params into, keeping the history entry's state
+const expectHydratedWith = (query: Record<string, unknown>) =>
+  expect(mockNavigate).toHaveBeenCalledWith(
+    { search: stringify(query, { encode: false }) },
+    { replace: true, state: undefined }
+  );
 
 describe('usePersistentPartialQueryParams', () => {
   const keyPrefix = 'test-prefix-';
@@ -22,10 +33,32 @@ describe('usePersistentPartialQueryParams', () => {
   const pathname = '/content-manager/collection-types/api::article.article';
   const key = `${keyPrefix}${pathname}`;
 
+  const filtersFor = (value: string) => ({ $and: [{ name: { $eq: value } }] });
+
+  const renderWithQuery = (query: Record<string, unknown>) => {
+    (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
+    window.localStorage.setItem(key, JSON.stringify({ page: 2 }));
+
+    return renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
+  };
+
+  const lastHydratedSearch = () => {
+    const [lastCall] = mockNavigate.mock.calls.slice(-1);
+
+    expect(lastCall).toBeDefined();
+
+    return (lastCall[0] as { search: string }).search;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     window.localStorage.clear();
     (useLocation as jest.Mock).mockReturnValue({ pathname });
+    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
     (useQueryParams as jest.Mock).mockReturnValue([{ query: {} }, mockSetQuery]);
     (usePersistentStateScope as jest.Mock).mockReturnValue('test-uuid');
   });
@@ -37,7 +70,7 @@ describe('usePersistentPartialQueryParams', () => {
       })
     );
 
-    expect(mockSetQuery).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('should load query params from localStorage on mount', async () => {
@@ -51,7 +84,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true);
+      expectHydratedWith(savedParams);
     });
   });
 
@@ -66,11 +99,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith(
-        { page: 2, pageSize: 20, sort: 'name:asc' },
-        'push',
-        true
-      );
+      expectHydratedWith({ page: 2, pageSize: 20, sort: 'name:asc' });
     });
   });
 
@@ -89,7 +118,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith({ ...existingQuery, ...savedParams }, 'push', true);
+      expectHydratedWith({ ...savedParams, ...existingQuery });
     });
   });
 
@@ -179,7 +208,7 @@ describe('usePersistentPartialQueryParams', () => {
       })
     );
 
-    expect(mockSetQuery).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('should handle empty object in localStorage', () => {
@@ -191,7 +220,7 @@ describe('usePersistentPartialQueryParams', () => {
       })
     );
 
-    expect(mockSetQuery).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('should load different params for different pathnames/keys', async () => {
@@ -210,10 +239,10 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith(params1, 'push', true);
+      expectHydratedWith(params1);
     });
 
-    mockSetQuery.mockClear();
+    mockNavigate.mockClear();
     renderHook(() =>
       usePersistentPartialQueryParams({
         [`${keyPrefix}${pathname2}`]: { paths: keysToPersist },
@@ -221,7 +250,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith(params2, 'push', true);
+      expectHydratedWith(params2);
     });
   });
 
@@ -240,16 +269,12 @@ describe('usePersistentPartialQueryParams', () => {
     renderHook(() => usePersistentPartialQueryParams(config));
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith(
-        {
-          page: 2,
-          pageSize: 20,
-          sort: 'name:asc',
-          plugins: { i18n: { locale: 'en' } },
-        },
-        'push',
-        true
-      );
+      expectHydratedWith({
+        page: 2,
+        pageSize: 20,
+        sort: 'name:asc',
+        plugins: { i18n: { locale: 'en' } },
+      });
     });
   });
 
@@ -269,7 +294,7 @@ describe('usePersistentPartialQueryParams', () => {
     renderHook(() => usePersistentPartialQueryParams(config));
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith({ pageSize: 20, sort: 'name:asc' }, 'push', true);
+      expectHydratedWith({ pageSize: 20, sort: 'name:asc' });
     });
   });
 
@@ -288,7 +313,88 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() => usePersistentPartialQueryParams(config));
 
-    expect(mockSetQuery).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a literal percent sign', '100%', '100%25'],
+    ['a percent sign mid-string', '50%off', '50%25off'],
+    ['an ampersand, which would otherwise truncate the value', 'a&b', 'a%26b'],
+    ['a plus sign, which would otherwise return as a space', 'a+b', 'a%2Bb'],
+    ['a hash, which would otherwise make navigate throw', 'a#b', 'a%23b'],
+    ['text that merely looks pre-encoded', 'a%26b', 'a%2526b'],
+    ['a non-ascii character', 'café', 'caf%C3%A9'],
+  ])('should re-encode %s', async (_label, decoded, encoded) => {
+    renderWithQuery({ filters: filtersFor(decoded) });
+
+    await waitFor(() => {
+      expectHydratedWith({ page: 2, filters: filtersFor(encoded) });
+    });
+  });
+
+  it.each(['100%', 'a&b', 'a+b', 'a#b', 'a%26b', 'café', 'a=b', 'plain'])(
+    'should restore %s through the full URL round-trip',
+    async (value) => {
+      renderWithQuery({ filters: filtersFor(value) });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalled();
+      });
+
+      // What the URL -> useQueryParams would produce.
+      const reparsed = parse(lastHydratedSearch()) as {
+        filters: { $and: [{ name: { $eq: string } }] };
+      };
+
+      expect(reparsed.filters.$and[0].name.$eq).toBe(value);
+    }
+  );
+
+  it('should not double-encode when the value is hydrated twice', async () => {
+    renderWithQuery({ filters: filtersFor('100%') });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalled();
+    });
+
+    const reparsed = parse(lastHydratedSearch()) as { filters: unknown };
+
+    jest.clearAllMocks();
+    window.localStorage.clear();
+    renderWithQuery({ filters: reparsed.filters as Record<string, unknown> });
+
+    await waitFor(() => {
+      expectHydratedWith({ page: 2, filters: filtersFor('100%25') });
+    });
+  });
+
+  it('should leave non-string filter leaves untouched', async () => {
+    renderWithQuery({ filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] } });
+
+    await waitFor(() => {
+      expectHydratedWith({
+        page: 2,
+        filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] },
+      });
+    });
+  });
+
+  it('should persist the decoded value to localStorage, not the encoded one', async () => {
+    (useQueryParams as jest.Mock).mockReturnValue([
+      { query: { page: 1, filters: filtersFor('100%') } },
+      mockSetQuery,
+    ]);
+
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: [...keysToPersist, 'filters'] },
+      })
+    );
+
+    await waitFor(() => {
+      const saved = JSON.parse(window.localStorage.getItem(key) ?? '{}');
+      expect(saved.filters).toEqual(filtersFor('100%'));
+    });
   });
 
   describe('isHydrated', () => {

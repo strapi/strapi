@@ -2,9 +2,10 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen, waitFor, fireEvent, act } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
+import { CopiedComponentsProvider } from '../../Component/CopiedComponents';
 import { DynamicZone, DynamicZoneProps } from '../Field';
 
-const TEST_NAME = 'DynamicZoneComponent';
+import type { ComponentCopyModalProps } from '../../Component/ComponentCopyModal';
 
 /**
  * We _could_ unmock this and use it, but it requires more
@@ -36,6 +37,43 @@ jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useIsDesktop: jest.fn().mockReturnValue(true),
+}));
+
+/**
+ * The copy itself is covered by the modal tests, here the modal hands the field ready-made copies
+ * and reports what the field tells it.
+ */
+const mockModalProps = jest.fn();
+const mockInsertResult = jest.fn();
+
+jest.mock('../../Component/ComponentCopyModal', () => ({
+  ComponentCopyModal: (props: ComponentCopyModalProps) => {
+    mockModalProps(props);
+
+    return (
+      <div role="dialog" aria-label="copy modal">
+        {[1, 2].map((count) => (
+          <button
+            key={count}
+            type="button"
+            onClick={() => {
+              mockInsertResult(
+                props.onInsert(
+                  Array.from({ length: count }, (_, index) => ({
+                    __component: props.componentUid,
+                    name: `Copy ${index + 1}`,
+                  }))
+                )
+              );
+              props.onClose();
+            }}
+          >
+            {`Insert ${count}`}
+          </button>
+        ))}
+      </div>
+    );
+  },
 }));
 
 describe('DynamicZone', () => {
@@ -94,7 +132,7 @@ describe('DynamicZone', () => {
               path="/content-manager/:collectionType/:slug/:id"
               element={
                 <Form initialValues={initialFormValues} method="POST" onSubmit={jest.fn()}>
-                  {children}
+                  <CopiedComponentsProvider>{children}</CopiedComponentsProvider>
                 </Form>
               }
             />
@@ -154,6 +192,73 @@ describe('DynamicZone', () => {
       expect(screen.getByText('dynamic description')).toBeInTheDocument();
 
       expect(screen.getByText('test comp - test')).toBeInTheDocument();
+    });
+
+    // Regression test for https://github.com/strapi/strapi/issues/26815
+    it('should not crash when the dynamic zone value is null', async () => {
+      render({
+        initialFormValues: {
+          DynamicZoneComponent: null,
+        },
+      });
+
+      // Before the fix, a `null` value bypassed the `value = []` default and crashed
+      // on `value.length` / `value.map`.
+      await waitForQueryToFinish();
+
+      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
+    });
+
+    it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-como', 'shared.deleted-component'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      expect(screen.getByRole('button', { name: 'test comp' })).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'shared.deleted-component' })
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
+    });
+
+    it('should render a preview image in the picker for a component whose info defines one', async () => {
+      useDocumentMock.mockReturnValue({
+        isLoading: false,
+        components: {
+          'blog.test-comp': {
+            category: 'blog',
+            info: { displayName: 'test comp', preview: '/_component-screenshots/test.png' },
+            attributes: {
+              name: { type: 'string', default: 'toto' },
+            },
+          },
+        },
+      });
+
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-comp'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      // info.preview must flow through Field -> ComponentCategory and render as an <img>.
+      const preview = screen.getByAltText('test comp');
+      expect(preview).toHaveAttribute('src', '/_component-screenshots/test.png');
     });
   });
 
@@ -348,6 +453,88 @@ describe('DynamicZone', () => {
       await user.keyboard('[Escape]');
 
       expect(screen.getByText(/Re-order cancelled/)).toBeInTheDocument();
+    });
+  });
+
+  describe('copying existing content', () => {
+    beforeEach(() => {
+      // Copying is only offered on collection types.
+      useDocMock.mockReturnValue({
+        collectionType: 'collection-types',
+        model: 'api::address.address',
+        id: 'create',
+      });
+    });
+
+    const openCopyModal = async (user: ReturnType<typeof render>['user']) => {
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+      await user.click(screen.getByRole('menuitem', { name: /Use existing content/ }));
+    };
+
+    it('should insert the copies, flag them and close the picker', async () => {
+      const { user } = render({
+        initialFormValues: {
+          DynamicZoneComponent: [
+            { __temp_key__: 'a0', __component: 'blog.test-como', name: 'existing', id: 1 },
+          ],
+        },
+      });
+
+      await waitForQueryToFinish();
+      await openCopyModal(user);
+
+      expect(mockModalProps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          componentUid: 'blog.test-como',
+          maxSelection: Infinity,
+          mode: 'dynamiczone',
+          selection: 'multiple',
+          sourceFieldName: 'DynamicZoneComponent',
+        })
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Insert 2' }));
+
+      expect(mockInsertResult).toHaveBeenLastCalledWith(true);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(screen.queryByText('Pick one component')).not.toBeInTheDocument();
+      expect(screen.getByText('test comp - Copy 1')).toBeInTheDocument();
+      expect(screen.getByText('test comp - Copy 2')).toBeInTheDocument();
+      expect(screen.getAllByText('Copied')).toHaveLength(2);
+
+      // a component added empty is not flagged
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+      await user.click(screen.getByRole('menuitem', { name: /Empty component/ }));
+
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
+      expect(screen.getAllByText('Copied')).toHaveLength(2);
+    });
+
+    it('should tell the modal how many components can still be added and refuse more', async () => {
+      const { user } = render({
+        attribute: { ...defaultProps.attribute, max: 2 },
+        initialFormValues: {
+          DynamicZoneComponent: [
+            { __temp_key__: 'a0', __component: 'blog.test-como', name: 'existing', id: 1 },
+          ],
+        },
+      });
+
+      await waitForQueryToFinish();
+      await openCopyModal(user);
+
+      expect(mockModalProps).toHaveBeenCalledWith(expect.objectContaining({ maxSelection: 1 }));
+
+      // the safety net, should the modal still hand over too many copies
+      await user.click(screen.getByRole('button', { name: 'Insert 2' }));
+
+      expect(mockInsertResult).toHaveBeenLastCalledWith(false);
+      expect(
+        await screen.findByText('You have already reached the maximum number of fields')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('test comp - Copy 1')).not.toBeInTheDocument();
     });
   });
 

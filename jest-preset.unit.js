@@ -2,21 +2,25 @@
 
 module.exports = {
   setupFilesAfterEnv: [__dirname + '/tests/setup/unit.setup.js'],
-  modulePathIgnorePatterns: ['.cache', 'dist'],
+  modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
   testPathIgnorePatterns: [
-    '.testdata.{js,ts}',
-    '.test.utils.{js,ts}',
-    '.d.ts',
+    '\\.testdata\\.(js|ts)$',
+    '\\.test\\.utils\\.(js|ts)$',
+    '\\.d\\.ts$',
     '__tests__/resources',
     'tests/resources',
     // Prevent Jest from running Vitest test files
     '.vitest.test.ts',
   ],
-  prettierPath: require.resolve('prettier-2'),
+  // Required: Jest 29 cannot format inline snapshots with Prettier 3, the default 'prettier' path.
+  prettierPath: null,
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
+  // stream-chain 4 is ESM-only and Jest 29 cannot load ESM without --experimental-vm-modules,
+  // so unit tests compile it to CommonJS. Built code still loads it with a real import().
+  transformIgnorePatterns: ['/node_modules/(?!(stream-chain)/)', String.raw`\.pnp\.[^\/]+$`],
   // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
   // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
@@ -39,7 +43,7 @@ module.exports = {
     '!**/*.spec.{js,ts,jsx,tsx}',
   ],
   coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', ['lcov', { projectRoot: __dirname }], 'html'],
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/node_modules/',

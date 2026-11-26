@@ -52,6 +52,16 @@ const getInitialRoutes = (): RouteObject[] => [
     },
   },
   {
+    path: 'me/sessions',
+    lazy: async () => {
+      const { SessionsPage } = await import('./pages/SessionsPage');
+
+      return {
+        Component: SessionsPage,
+      };
+    },
+  },
+  {
     path: 'settings/*',
     lazy: async () => {
       const { Layout } = await import('./pages/Settings/Layout');
@@ -64,9 +74,8 @@ const getInitialRoutes = (): RouteObject[] => [
       {
         path: 'application-infos',
         lazy: async () => {
-          const { ApplicationInfoPage } = await import(
-            './pages/Settings/pages/ApplicationInfo/ApplicationInfoPage'
-          );
+          const { ApplicationInfoPage } =
+            await import('./pages/Settings/pages/ApplicationInfo/ApplicationInfoPage');
 
           return {
             Component: ApplicationInfoPage,

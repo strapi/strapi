@@ -101,4 +101,34 @@ describe('CellValue', () => {
 
     expect(getByText('900719925474099312345')).toBeInTheDocument();
   });
+
+  it('should format a date value (string) as a full date', () => {
+    const { getByText } = render(CellValueWithProvider('date', '2024-01-15'));
+
+    expect(getByText(/January 15, 2024/)).toBeInTheDocument();
+  });
+
+  it('should format a datetime value as a full date and short time', () => {
+    const { getByText } = render(CellValueWithProvider('datetime', '2024-01-15T09:30:00.000Z'));
+
+    expect(getByText(/January 15, 2024/)).toBeInTheDocument();
+  });
+
+  it('should format a time value (HH:mm:ss string) as a short time', () => {
+    const { getByText } = render(CellValueWithProvider('time', '14:30:00'));
+
+    expect(getByText(/2:30/)).toBeInTheDocument();
+  });
+
+  it('should render the on-label for a truthy boolean', () => {
+    const { getByText } = render(CellValueWithProvider('boolean', true));
+
+    expect(getByText('true')).toBeInTheDocument();
+  });
+
+  it('should render the off-label for a falsy boolean', () => {
+    const { getByText } = render(CellValueWithProvider('boolean', false));
+
+    expect(getByText('false')).toBeInTheDocument();
+  });
 });

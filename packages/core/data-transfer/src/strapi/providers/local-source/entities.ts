@@ -2,7 +2,7 @@ import { Readable, Transform } from 'stream';
 import type { Core, Struct } from '@strapi/types';
 
 import * as shared from '../../queries';
-import { IEntity } from '../../../../types';
+import { IEntity } from '../../../types';
 
 /**
  * Generate and consume content-types streams in order to stream each entity individually

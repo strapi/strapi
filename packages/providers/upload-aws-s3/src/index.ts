@@ -1,5 +1,5 @@
 import type { ReadStream } from 'node:fs';
-import { getOr } from 'lodash/fp';
+import { get } from 'lodash';
 import {
   S3Client,
   GetObjectCommand,
@@ -15,7 +15,8 @@ import {
   StorageClass,
   ServerSideEncryption,
 } from '@aws-sdk/client-s3';
-import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
+import type { Providers } from '@strapi/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
@@ -84,8 +85,7 @@ export interface File {
 }
 
 export type UploadCommandOutput = (
-  | CompleteMultipartUploadCommandOutput
-  | AbortMultipartUploadCommandOutput
+  CompleteMultipartUploadCommandOutput | AbortMultipartUploadCommandOutput
 ) & {
   Location?: string;
   ETag?: string;
@@ -140,8 +140,9 @@ export interface DefaultOptions extends S3ClientConfig {
   // TODO Remove this in V5
   accessKeyId?: AwsCredentialIdentity['accessKeyId'];
   secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
-  // Keep this for V5
-  credentials?: AwsCredentialIdentity;
+  // Keep this for V5. Accepts either static credentials or an AWS credential
+  // provider function, which the SDK resolves (and refreshes) at runtime.
+  credentials?: AwsCredentialIdentity | AwsCredentialIdentityProvider;
   params?: AWSParams;
   [k: string]: unknown;
 }
@@ -330,7 +331,7 @@ const getConfig = ({
   };
 };
 
-export default {
+const providerModule = {
   init({ baseUrl, rootPath, s3Options, providerConfig, ...legacyS3Options }: InitOptions) {
     // Validate configuration and emit warnings for potential issues
     validateProviderConfig(providerConfig, s3Options as DefaultOptions);
@@ -402,7 +403,7 @@ export default {
 
       // Merge customParams but preserve critical security parameters
       // Bucket, Key, and Body must not be overridden by customParams
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // oxlint-disable-next-line no-unused-vars
       const { Bucket, Key, Body, ...safeCustomParams } = customParams as any;
       return { ...params, ...safeCustomParams };
     };
@@ -591,7 +592,7 @@ export default {
             Key: fileKey,
           }),
           {
-            expiresIn: getOr(15 * 60, ['params', 'signedUrlExpires'], config),
+            expiresIn: get(config, ['params', 'signedUrlExpires'], 15 * 60),
           }
         );
 
@@ -610,6 +611,48 @@ export default {
        */
       upload(file: File, customParams = {}) {
         return upload(file, customParams);
+      },
+
+      /**
+       * Replaces an existing object in S3. Since `PutObject` with the same key
+       * overwrites the existing object, this is just an upload of the new file
+       * — and if the key changed, we delete the old object afterwards so we
+       * never leave the bucket in a state where the asset is missing.
+       */
+      async replaceStream(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // oxlint-disable-next-line no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
+      },
+
+      async replace(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // oxlint-disable-next-line no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
       },
 
       /**
@@ -639,7 +682,7 @@ export default {
        */
       delete(file: File, customParams = {}): Promise<DeleteObjectCommandOutput> {
         // Spread customParams first, then override with secure values
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // oxlint-disable-next-line no-unused-vars
         const { Bucket, Key, ...safeParams } = customParams as any;
         const command = new DeleteObjectCommand({
           ...safeParams,
@@ -651,3 +694,9 @@ export default {
     };
   },
 };
+
+// Checked apart from its declaration, so the contract does not re-type the parameters the
+// provider leaves to inference.
+providerModule satisfies Providers.Upload.Factory<InitOptions>;
+
+export default providerModule;

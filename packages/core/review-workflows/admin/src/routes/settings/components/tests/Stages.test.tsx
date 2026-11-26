@@ -49,7 +49,7 @@ const setup = ({
   },
   ...props
 }: StagesProps & {
-  initialValues?: Record<string, any>;
+  initialValues?: Record<string, unknown>;
 } = {}) => {
   return render(<Stages canDelete canUpdate {...props} />, {
     renderOptions: {

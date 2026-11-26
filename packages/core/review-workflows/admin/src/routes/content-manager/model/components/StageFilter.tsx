@@ -22,7 +22,7 @@ const StageFilter = (props: Filters.ValueInputProps) => {
   const { formatMessage } = useIntl();
   const { workflows, isLoading } = useReviewWorkflows({ filters: { contentTypes: model } });
 
-  const field = useField(props.name);
+  const field = useField<string | number | null>(props.name);
 
   const [workflow] = workflows ?? [];
 
@@ -30,7 +30,7 @@ const StageFilter = (props: Filters.ValueInputProps) => {
     <SingleSelect
       aria-label={formatMessage({
         id: 'content-manager.components.Filters.reviewWorkflows.label',
-        defaultMessage: 'Search and select an workflow stage to filter',
+        defaultMessage: 'Search and select a workflow stage to filter',
       })}
       value={field.value}
       onChange={(value) => {

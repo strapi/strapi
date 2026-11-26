@@ -8,6 +8,7 @@ import {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  UnlockSharedFieldsAction,
   AITranslationStatusAction,
 } from './components/CMHeaderActions';
 import {
@@ -52,10 +53,17 @@ type ContentTypeBuilderFormsAPI = {
     fields: typeof LOCALIZED_FIELDS,
     extension: {
       form: {
-        advanced: (args: any) => Array<Record<string, unknown>>;
+        advanced: (args: ContentTypeBuilderAdvancedFieldArgs) => Array<Record<string, unknown>>;
       };
     }
   ) => void;
+};
+
+type ContentTypeBuilderAdvancedFieldArgs = {
+  contentTypeSchema?: Record<string, unknown>;
+  forTarget: string;
+  step?: string;
+  type?: string;
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -102,6 +110,7 @@ export default {
       AITranslationStatusAction,
       LocalePickerAction,
       FillFromAnotherLocaleAction,
+      UnlockSharedFieldsAction,
     ] as HeaderActionComponent[]);
     contentManagerApis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
@@ -172,7 +181,12 @@ export default {
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
         form: {
-          advanced({ contentTypeSchema, forTarget, type, step }: any) {
+          advanced({
+            contentTypeSchema,
+            forTarget,
+            type,
+            step,
+          }: ContentTypeBuilderAdvancedFieldArgs) {
             if (forTarget !== 'contentType') {
               return [];
             }

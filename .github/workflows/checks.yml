@@ -9,12 +9,11 @@ on:
       - reopened
       - labeled
       - unlabeled
-      - milestoned
-      - demilestoned
     branches:
       - main
       - develop
       - v4
+      - 'releases/**'
 
 permissions:
   contents: read
@@ -24,14 +23,14 @@ jobs:
   check-pr-status:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/check-pr-status
 
   security-lockfile-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
       - uses: ./.github/actions/security/lockfile
@@ -42,11 +41,19 @@ jobs:
     name: Package version alignment
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
       - name: Install dependencies
         uses: ./.github/actions/yarn-nm-install
       - name: Check package versions
         run: yarn version:check
+
+  check-actions-pinned:
+    name: GitHub Actions pinned to SHA
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check actions are pinned
+        run: node scripts/check-actions-pinned.mjs

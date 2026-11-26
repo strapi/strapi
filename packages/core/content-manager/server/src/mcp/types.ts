@@ -1,4 +1,4 @@
-import type { Struct, Modules } from '@strapi/types';
+import type { Struct, Modules, Core } from '@strapi/types';
 import type { z } from '@strapi/utils';
 
 export type ContentManagerModelForMcp = Pick<
@@ -15,9 +15,9 @@ export type ContentManagerModelForMcp = Pick<
 };
 
 export type McpToolsBuildContext = {
-  /** Installed locale codes from i18n plugin. null when i18n is not installed. */
+  /** Installed locale codes. null when no localization provider is registered. */
   localeCodes: [string, ...string[]] | null;
-  /** Default locale from i18n plugin. null when i18n is not installed or unknown. */
+  /** Default locale. null when no localization provider is registered or unknown. */
   defaultLocale: string | null;
 };
 
@@ -30,7 +30,7 @@ export type DerivedTool = {
   resolveInputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   resolveOutputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   createHandler: (
-    strapi: import('@strapi/types').Core.Strapi,
+    strapi: Core.Strapi,
     context: Modules.MCP.McpHandlerContext
   ) => Modules.MCP.McpToolHandler<z.ZodObject<z.ZodRawShape>, z.ZodObject<z.ZodRawShape>>;
 };

@@ -39,6 +39,10 @@ describe('object', () => {
     it('return "undefined" if value was not found using given path and an intermediate value is a string', () => {
       expect(getIn(obj, 's.z')).toBeUndefined();
     });
+
+    it('gets properties from truthy primitive values', () => {
+      expect(getIn(obj, 's.length')).toBe(15);
+    });
   });
 
   describe('setIn', () => {

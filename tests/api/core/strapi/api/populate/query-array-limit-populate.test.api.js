@@ -128,13 +128,18 @@ describe('Content API | populate (qs arrayLimit)', () => {
       if (builder) await builder.cleanup();
     });
 
-    test('does not return 200 when the request has more than 100 indexed populate keys', async () => {
+    test('returns 400 with a clear arrayLimit error when the request has more than 100 indexed populate keys', async () => {
       const res = await rq({
         method: 'GET',
         url: `/pop-array-limit-hubs?${buildIndexedPopulateQuery(INDEXED_POPULATE_COUNT)}`,
       });
 
-      expect(res.statusCode).not.toBe(200);
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: expect.stringContaining(`Too many populate entries (${INDEXED_POPULATE_COUNT})`),
+      });
+      expect(res.body.error.message).not.toMatch(/Invalid key 2/);
     });
   });
 });

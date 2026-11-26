@@ -1,8 +1,13 @@
 import type { Context } from 'koa';
 
 import { strings, errors } from '@strapi/utils';
-import { trim, has } from 'lodash/fp';
+import { trim, has } from 'lodash';
+
 import { getService } from '../utils';
+import {
+  getCallingAdminToken,
+  getCallingTokenPermissions,
+} from '../services/permission/ceiling-requester';
 import constants from '../services/constants';
 import {
   validateAdminTokenCreationInput,
@@ -42,6 +47,16 @@ const isTokenOwner = (user: AdminUser, token: AdminApiToken): boolean =>
 const canAccessAdminToken = (user: AdminUser, token: AdminApiToken): boolean =>
   isTokenOwner(user, token) || isSuperAdmin(user);
 
+/**
+ * A request made with an admin token acts as its owner, but may only read the key of, or
+ * regenerate, the token it was made with, not the owner's other tokens.
+ */
+const isOtherThanCallingToken = (ctx: Context, token: AdminApiToken): boolean => {
+  const callingToken = getCallingAdminToken(ctx);
+
+  return callingToken !== null && String(callingToken.id) !== String(token.id);
+};
+
 // ---------------------------------------------------------------------------
 // Controller
 // ---------------------------------------------------------------------------
@@ -77,12 +92,16 @@ export default {
       throw new ApplicationError('Name already taken');
     }
 
-    const apiToken = await apiTokenService.create(attributes, ctx.state.user);
+    const apiToken = await apiTokenService.create(
+      attributes,
+      ctx.state.user,
+      getCallingTokenPermissions(ctx)
+    );
     ctx.created({ data: apiToken });
   },
 
   // -------------------------------------------------------------------------
-  // Regenerate — owner-only, super-admin does NOT bypass
+  // Regenerate — owner-only, super-admin does NOT bypass; with an admin token, that token only
   // -------------------------------------------------------------------------
   async regenerate(ctx: Context) {
     const { id } = ctx.params;
@@ -94,7 +113,7 @@ export default {
       return;
     }
 
-    if (!isTokenOwner(ctx.state.user, token)) {
+    if (!isTokenOwner(ctx.state.user, token) || isOtherThanCallingToken(ctx, token)) {
       return ctx.forbidden();
     }
 
@@ -133,7 +152,7 @@ export default {
   },
 
   // -------------------------------------------------------------------------
-  // Get — key exposed only to owner
+  // Get — key exposed only to owner; with an admin token, of that token only
   // -------------------------------------------------------------------------
   async get(ctx: Context) {
     const { id } = ctx.params;
@@ -150,7 +169,7 @@ export default {
       return;
     }
 
-    if (isTokenOwner(ctx.state.user, token)) {
+    if (isTokenOwner(ctx.state.user, token) && !isOtherThanCallingToken(ctx, token)) {
       const withKey = await apiTokenService.getById(id, { includeDecryptedKey: true });
       ctx.send({ data: withKey ?? token } satisfies Get.Response);
       return;
@@ -168,10 +187,10 @@ export default {
     const apiTokenService = getService('api-token-admin');
 
     const mutableBody = body as Record<string, unknown>;
-    if (has('name', mutableBody)) {
+    if (has(mutableBody, 'name')) {
       mutableBody.name = trim(body.name ?? '');
     }
-    if (has('description', mutableBody) || mutableBody.description === null) {
+    if (has(mutableBody, 'description') || mutableBody.description === null) {
       mutableBody.description = trim(body.description ?? '');
     }
 
@@ -182,7 +201,7 @@ export default {
       return ctx.notFound('API Token not found');
     }
 
-    if (has('name', body)) {
+    if (has(body, 'name')) {
       const nameAlreadyTaken = await apiTokenService.getByName(body.name!);
       if (nameAlreadyTaken !== null && !strings.isEqual(nameAlreadyTaken.id, id)) {
         throw new ApplicationError('Name already taken');
@@ -193,7 +212,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const apiToken = await apiTokenService.update(id, body);
+    const apiToken = await apiTokenService.update(id, body, getCallingTokenPermissions(ctx));
     ctx.send({ data: apiToken } satisfies Update.Response);
   },
 

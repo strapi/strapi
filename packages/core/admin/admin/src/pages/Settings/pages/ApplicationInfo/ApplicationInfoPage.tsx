@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, Link, Typography } from '@strapi/design-system';
-import { Check, ExternalLink } from '@strapi/icons';
+import { Badge, Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -10,16 +10,14 @@ import { Page } from '../../../../components/PageHelpers';
 import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
-import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { LogoInput, LogoInputProps } from './components/LogoInput';
+import { PlanCard } from './components/PlanCard';
+import { SupportCard } from './components/SupportCard';
+import { UpgradeBanner } from './components/UpgradeBanner';
 import { DIMENSION, SIZE } from './utils/constants';
-
-const AdminSeatInfoCE = () => null;
-const AIUageDataCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
  * ApplicationInfoPage
@@ -28,42 +26,24 @@ const AIUageDataCE = () => null;
 const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
-  const latestStrapiReleaseTag = useAppInfo(
-    'ApplicationInfoPage',
-    (state) => state.latestStrapiReleaseTag
-  );
   const nodeVersion = useAppInfo('ApplicationInfoPage', (state) => state.nodeVersion);
-  const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
+  const strapiUpdateSeverity = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.strapiUpdateSeverity
+  );
+  const strapiReleasesBehind = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.strapiReleasesBehind
+  );
+  const isStrapiMajorBehind = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.isStrapiMajorBehind
+  );
   const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
-
-  const AdminSeatInfo = useEnterprise(
-    AdminSeatInfoCE,
-    async () =>
-      (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
-        )
-      ).AdminSeatInfoEE
-  );
-  const isAiEnabled = window.strapi.ai?.enabled !== false;
-  const AIUsageData = useEnterprise(
-    AIUageDataCE,
-    async () =>
-      (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AIUsage'
-        )
-      ).AIUsage,
-    {
-      enabled: isAiEnabled,
-    }
-  );
 
   const {
     allowedActions: { canRead, canUpdate },
@@ -106,15 +86,6 @@ const ApplicationInfoPage = () => {
     });
   }, [serverLogos]);
 
-  // block rendering until the EE component is fully loaded
-  if (!AdminSeatInfo) {
-    return null;
-  }
-
-  if (!AIUsageData) {
-    return null;
-  }
-
   const isSaveDisabled =
     logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
 
@@ -152,6 +123,7 @@ const ApplicationInfoPage = () => {
           />
           <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={6}>
+              <UpgradeBanner />
               <Flex
                 direction="column"
                 alignItems="stretch"
@@ -179,48 +151,35 @@ const ApplicationInfoPage = () => {
                         defaultMessage: 'strapi version',
                       })}
                     </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" tag="dd">
+                    <Flex gap={2} alignItems="center" wrap="wrap" tag="dd">
                       <Typography>v{strapiVersion}</Typography>
-                      {shouldUpdateStrapi && (
-                        <Link
-                          href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
-                          endIcon={<ExternalLink />}
-                        >
+                      {strapiUpdateSeverity === 'default' && (
+                        <Badge variant="primary">
                           {formatMessage({
-                            id: 'Settings.application.link-upgrade',
-                            defaultMessage: 'Upgrade your admin panel',
+                            id: 'Settings.application.update-badge.available',
+                            defaultMessage: 'Update available',
                           })}
-                        </Link>
+                        </Badge>
+                      )}
+                      {strapiUpdateSeverity === 'urgent' && (
+                        <Badge variant="warning">
+                          {isStrapiMajorBehind
+                            ? formatMessage({
+                                id: 'Settings.application.update-badge.major-behind',
+                                defaultMessage: 'Major update available',
+                              })
+                            : formatMessage(
+                                {
+                                  id: 'Settings.application.update-badge.releases-behind',
+                                  defaultMessage:
+                                    '{count, plural, one {# minor version} other {# minor versions}} behind',
+                                },
+                                { count: strapiReleasesBehind }
+                              )}
+                        </Badge>
                       )}
                     </Flex>
                   </Grid.Item>
-                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
-                    <Typography variant="sigma" textColor="neutral600" tag="dt">
-                      {formatMessage({
-                        id: 'Settings.application.edition-title',
-                        defaultMessage: 'current edition',
-                      })}
-                    </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                      <Typography>
-                        {formatMessage(
-                          {
-                            id: 'Settings.application.ee-or-ce',
-                            defaultMessage:
-                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
-                          },
-                          { communityEdition }
-                        )}
-                      </Typography>
-                      <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
-                        {formatMessage({
-                          id: 'Settings.application.link-pricing',
-                          defaultMessage: 'See all pricing plans',
-                        })}
-                      </Link>
-                    </Flex>
-                  </Grid.Item>
-
                   <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
@@ -230,10 +189,9 @@ const ApplicationInfoPage = () => {
                     </Typography>
                     <Typography tag="dd">{nodeVersion}</Typography>
                   </Grid.Item>
-                  <AdminSeatInfo />
-                  <AIUsageData />
                 </Grid.Root>
               </Flex>
+              <PlanCard />
               {canRead && (
                 <Box
                   hasRadius
@@ -296,6 +254,7 @@ const ApplicationInfoPage = () => {
                   </Grid.Root>
                 </Box>
               )}
+              <SupportCard />
             </Flex>
           </Layouts.Content>
         </form>

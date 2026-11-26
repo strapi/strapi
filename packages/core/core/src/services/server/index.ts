@@ -6,6 +6,7 @@ import { createRouteManager } from './routing';
 import { createAdminAPI } from './admin-api';
 import { createContentAPI } from './content-api';
 import registerAllRoutes from './register-routes';
+import { markRoutesRegistered } from './routes-registration';
 import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
@@ -18,6 +19,8 @@ const healthCheck: Core.MiddlewareHandler = async (ctx) => {
 const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
   const app = createKoaApp({
     proxy: strapi.config.get('server.proxy.koa'),
+    proxyIpHeader: strapi.config.get('server.proxy.ipHeader'),
+    maxIpsCount: strapi.config.get('server.proxy.maxIpsCount'),
     keys: strapi.config.get('server.app.keys'),
   });
 
@@ -81,6 +84,7 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
 
     initRouting() {
       registerAllRoutes(strapi);
+      markRoutesRegistered(strapi);
 
       return this;
     },

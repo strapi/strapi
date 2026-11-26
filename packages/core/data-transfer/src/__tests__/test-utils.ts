@@ -1,7 +1,7 @@
 import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { Core } from '@strapi/types';
-import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
+import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../types';
 
 /**
  * Create a slow Writable that applies backpressure (low highWaterMark, delayed write).
@@ -82,6 +82,22 @@ export const assertWriteStreamBackpressure = async <T = unknown>(
 /**
  * Collect every entity in a Readable stream
  */
+/**
+ * Entity sources for `maxSizeJsonl: 10` tests. The oversized row is rejected asynchronously by
+ * the entry writer, so it can surface either after the input ended or while it is still flowing.
+ */
+export async function* oversizedLast() {
+  yield { id: 1, title: 'longer than ten bytes' };
+}
+
+export async function* oversizedThenMore() {
+  yield { id: 1, title: 'longer than ten bytes' };
+  await new Promise((resolve) => {
+    setTimeout(resolve, 20);
+  });
+  yield { id: 2 };
+}
+
 export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
   const chunks: T[] = [];
 
@@ -242,7 +258,7 @@ export const extendExpectForDataTransferTests = () => {
           pass: true,
           message: () => 'Expected source provider not to have all stages called',
         };
-      } catch (e) {
+      } catch {
         return {
           pass: false,
           message: () =>
@@ -258,7 +274,7 @@ export const extendExpectForDataTransferTests = () => {
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;
-          } catch (e) {
+          } catch {
             return true;
           }
         }
@@ -290,7 +306,7 @@ export const extendExpectForDataTransferTests = () => {
           pass: true,
           message: () => 'Expected destination provider not to have all stages called',
         };
-      } catch (e) {
+      } catch {
         return {
           pass: false,
           message: () =>
@@ -306,7 +322,7 @@ export const extendExpectForDataTransferTests = () => {
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;
-          } catch (e) {
+          } catch {
             return true;
           }
         }

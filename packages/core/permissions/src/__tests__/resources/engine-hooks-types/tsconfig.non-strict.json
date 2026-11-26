@@ -1,0 +1,10 @@
+{
+  // The server preset that `@strapi/typescript-utils` ships to applications (`strict: false`)
+  "extends": "../../../../../../utils/typescript/tsconfigs/server.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "types": []
+  },
+  "files": ["call-args.ts"]
+}

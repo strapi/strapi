@@ -2,13 +2,13 @@ import { Field, MultiSelectNested } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
-import { IntlLabel } from '../types';
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface AllowedTypesSelectProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
-  value?: any;
+  onChange: FormChangeHandler<string[] | null, 'allowed-types-select'>;
+  value?: string[] | null;
 }
 
 const options = [
@@ -31,7 +31,6 @@ export const AllowedTypesSelect = ({
 }: AllowedTypesSelectProps) => {
   const { formatMessage } = useIntl();
 
-  /* eslint-disable indent */
   const displayedValue =
     value === null || value?.length === 0
       ? formatMessage({ id: 'global.none', defaultMessage: 'None' })
@@ -39,8 +38,6 @@ export const AllowedTypesSelect = ({
           .sort()
           .map((v) => upperFirst(v))
           .join(', ');
-
-  /* eslint-enable indent */
 
   const label = intlLabel.id
     ? formatMessage({ id: intlLabel.id, defaultMessage: intlLabel.defaultMessage })
@@ -51,7 +48,7 @@ export const AllowedTypesSelect = ({
       <Field.Label>{label}</Field.Label>
       <MultiSelectNested
         customizeContent={() => displayedValue}
-        onChange={(values: any[]) => {
+        onChange={(values: string[]) => {
           if (values.length > 0) {
             onChange({ target: { name, value: values, type: 'allowed-types-select' } });
           } else {

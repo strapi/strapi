@@ -15,7 +15,6 @@ import {
   Tbody,
   Td,
   Tooltip,
-  IconButton,
   Thead,
   Tr,
   RawTrProps,
@@ -33,9 +32,12 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
+
+const EMPTY_HEADERS: [] = [];
+const EMPTY_ROWS: [] = [];
 
 /* -------------------------------------------------------------------------------------------------
  * Root
@@ -43,22 +45,31 @@ import { createContext } from './Context';
 
 interface BaseRow {
   id: string | number;
-  [key: string]: any;
 }
 
-interface TableHeader<TData = object, THeader = object> {
-  /**
-   * Typically used by plugins to render a custom cell
-   */
-  cellFormatter?: (data: TData, header: Omit<THeader, 'cellFormatter'>) => React.ReactNode;
+interface TableHeaderBase {
   label: string;
   name: string;
   searchable?: boolean;
   sortable?: boolean;
 }
 
-interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Pick<TableProps, 'footer'> {
+interface TableHeader<TData = object, THeader = object, TMeta = void> extends TableHeaderBase {
+  /**
+   * Typically used by plugins to render a custom cell. `meta` is whatever the table owner
+   * passes as third argument (the Content Manager list view passes `{ collectionType, model }`).
+   */
+  cellFormatter?: (
+    data: TData,
+    header: Omit<THeader, 'cellFormatter'>,
+    meta: TMeta
+  ) => React.ReactNode;
+}
+
+interface TableContextValue<TRow extends BaseRow, THeader extends TableHeaderBase> extends Pick<
+  TableProps,
+  'footer'
+> {
   colCount: number;
   hasHeaderCheckbox: boolean;
   headers: THeader[];
@@ -70,28 +81,37 @@ interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TR
   selectRow: (row: TRow | TRow[]) => void;
 }
 
-const [TableProvider, useTable] = createContext<TableContextValue<any, any>>('Table');
+type DefaultTableHeader = TableHeader<BaseRow, object>;
+type DefaultTableContextValue = TableContextValue<BaseRow, DefaultTableHeader>;
 
-interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Partial<
-    Pick<
-      TableContextValue<TRow, THeader>,
-      'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
-    >
-  > {
+const [TableProvider, useTable] = createContext<DefaultTableContextValue>('Table');
+
+const GenericTableProvider = TableProvider as <
+  TRow extends BaseRow,
+  THeader extends TableHeaderBase,
+>(
+  props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
+) => React.ReactElement;
+
+interface RootProps<TRow extends BaseRow, THeader extends TableHeaderBase> extends Partial<
+  Pick<
+    TableContextValue<TRow, THeader>,
+    'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
+  >
+> {
   children?: React.ReactNode;
   defaultSelectedRows?: TRow[];
   onSelectedRowsChange?: (selectedRows: TRow[]) => void;
 }
 
-const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>({
+const Root = <TRow extends BaseRow, THeader extends TableHeaderBase>({
   children,
   defaultSelectedRows,
   footer,
-  headers = [],
+  headers = EMPTY_HEADERS,
   isLoading = false,
   onSelectedRowsChange,
-  rows = [],
+  rows = EMPTY_ROWS,
   selectedRows: selectedRowsProps,
 }: RootProps<TRow, THeader>) => {
   const [selectedRows = [], setSelectedRows] = useControllableState({
@@ -120,7 +140,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   };
 
   return (
-    <TableProvider
+    <GenericTableProvider
       colCount={colCount}
       hasHeaderCheckbox={hasHeaderCheckbox}
       setHasHeaderCheckbox={setHasHeaderCheckbox}
@@ -133,7 +153,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
       selectRow={selectRow}
     >
       {children}
-    </TableProvider>
+    </GenericTableProvider>
   );
 };
 
@@ -173,8 +193,12 @@ const Head = ({ children }: Table.HeadProps) => {
  * @description A header cell in your table, internally will set the query params for sorting to
  * be passed to your data-fetching function.
  */
-const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, THead>) => {
-  const [{ query }, setQuery] = useQueryParams<{ sort?: `${string}:${'ASC' | 'DESC'}` }>();
+const HeaderCell = ({ name, label, sortable }: TableHeaderBase) => {
+  const [{ query }, setQuery] = useQueryParams<{
+    sort?: `${string}:${'ASC' | 'DESC'}`;
+    filters?: unknown;
+    _q?: unknown;
+  }>();
   const sort = query?.sort ?? '';
   const [sortBy, sortOrder] = sort.split(':');
   const { formatMessage } = useIntl();
@@ -191,9 +215,9 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   const handleClickSort = () => {
     if (sortable) {
       setQuery(
-        {
+        withEncodedUserParams(query, {
           sort: `${name}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
-        },
+        }),
         'push',
         true
       );
@@ -412,7 +436,11 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
   const { formatMessage } = useIntl();
 
   const handleSelectRow = () => {
-    selectRow(rows.find((row) => row.id === id));
+    const row = rows.find((row) => row.id === id);
+
+    if (row !== undefined) {
+      selectRow(row);
+    }
   };
 
   const isChecked = selectedRows.findIndex((row) => row.id === id) > -1;
@@ -510,7 +538,7 @@ const Table = {
 namespace Table {
   export type Props<
     TData extends BaseRow,
-    THeader extends TableHeader<TData, THeader> = TableHeader<TData, TableHeader>,
+    THeader extends TableHeaderBase = TableHeader<TData, TableHeader>,
   > = RootProps<TData, THeader>;
   export interface ActionBarProps {
     children?: React.ReactNode;
@@ -520,7 +548,7 @@ namespace Table {
     children: React.ReactNode;
   }
 
-  export type Header<TData, THeader> = TableHeader<TData, THeader>;
+  export type Header<TData, THeader, TMeta = void> = TableHeader<TData, THeader, TMeta>;
 
   export interface HeadProps {
     children: React.ReactNode;

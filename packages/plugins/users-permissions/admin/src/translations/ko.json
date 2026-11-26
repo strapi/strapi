@@ -78,5 +78,6 @@
   "popUpWarning.button.cancel": "취소",
   "popUpWarning.button.confirm": "확인",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.warning.cancel": "수정 사항을 취소하시겠습니까?"
+  "popUpWarning.warning.cancel": "수정 사항을 취소하시겠습니까?",
+  "Email.template.reset_password": "비밀번호 재설정"
 }

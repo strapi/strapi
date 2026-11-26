@@ -1,0 +1,73 @@
+// Credential/identity concepts describe access boundaries, not a chain of strategies.
+model {
+  admin_identity = concept 'Admin users' {
+    summary 'Content teams sign in with an Admin account and roles.'
+    description 'Admin identities and sessions are distinct from application users. Local login is shown in the login journey. SSO is an alternative when configured and licensed; it is not required for local login.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/strategies/admin.ts 'Admin authentication'
+  }
+  application_identity = concept 'Application users and visitors' {
+    summary 'Users & Permissions supplies user and public-role access.'
+    description 'Requires the Users & Permissions plugin. A valid user token selects the user role; a request without credentials can use the public role when permitted. These users do not become Admin users.'
+    link https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/strategies/users-permissions.js 'Users & Permissions strategy'
+  }
+  content_api_credential = concept 'Content API tokens' {
+    summary 'Machine access to content using configured token permissions.'
+    description 'Full-access, read-only and custom tokens authorize Content API scopes. They do not grant Admin access. Generated routes also validate input and sanitize output.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/strategies/content-api-token.ts 'Content token strategy'
+  }
+  admin_api_credential = concept 'Admin API tokens' {
+    summary 'Scoped automation access to Admin APIs.'
+    description 'This checkout distinguishes tokens of kind admin from content tokens. Authentication provides an Admin ability and user context; route policies still authorize the action. MCP also uses Admin token authentication when enabled; its protocol is outside this view.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/strategies/admin-token.ts 'Admin token strategy'
+  }
+  transfer_credential = concept 'Transfer tokens' {
+    summary 'Authorize remote data-transfer operations.'
+    description 'Transfer permissions and expiry are checked separately from content delivery and ordinary Admin editing. Remote transfer must be enabled; local import/export is a different path.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/strategies/data-transfer.ts 'Transfer token strategy'
+  }
+  admin_access_scope = concept 'Admin operations' {
+    summary 'Editing, settings and administration under Admin permissions.'
+    description 'Server policies enforce access. Hiding UI controls is a convenience, not the authorization boundary. Content Manager adds document, field and subject-specific permission handling.'
+    link https://github.com/strapi/strapi/tree/develop/packages/core/admin/server/src/policies 'Admin policies'
+  }
+  content_access_scope = concept 'Content API operations' {
+    summary 'Content delivery and permitted mutations for applications.'
+    description 'A public role, user credential or Content API token is an alternative authentication path, not three sequential checks. Route scope, policies, validation and sanitization remain relevant.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts 'Endpoint authorization'
+  }
+  transfer_access_scope = concept 'Data transfer' {
+    summary 'Operational movement of content, assets and configuration.'
+    link https://github.com/strapi/strapi/tree/develop/packages/core/data-transfer/src 'Transfer engine'
+  }
+  admin_identity -> admin_access_scope 'session and Admin permissions'
+  admin_api_credential -> admin_access_scope 'token ability and route policies'
+  application_identity -> content_access_scope 'user or public-role permissions'
+  content_api_credential -> content_access_scope 'token scopes'
+  transfer_credential -> transfer_access_scope 'transfer scopes'
+
+  extend strapi.server_runtime {
+    admin_login = component 'Admin login' {
+      summary 'Checks credentials and creates the browser login response.'
+      description 'Local login uses the configured authentication service, creates a refresh session, sets the refresh cookie and returns an access token. Failed login does not enter the protected request path.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/controllers/authentication.ts 'Login controller'
+    }
+    admin_sessions = component 'Admin sessions' {
+      summary 'Issues tokens and tracks active, expiring login sessions.'
+      description 'Session-manager service in the Admin namespace. Protected requests validate access tokens and require an active session. Refresh rotation and logout are separate requests omitted from the success journey.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/session-manager.ts 'Session manager'
+    }
+    admin_request_access = component 'Admin request access' {
+      summary 'Authenticates requests and applies server permission policies.'
+      description 'Groups the Admin authentication strategy and protected-route policies for readability. The strategy checks the session and active user and creates an ability; policies and endpoint-specific permission handling enforce the requested action.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/strategies/admin.ts 'Admin strategy'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/admin/server/src/policies 'Route policies'
+    }
+    admin_permission_engine = component 'Admin permission engine' {
+      summary 'Builds abilities from Admin roles, actions and conditions.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/services/permission/engine.ts 'Permission engine'
+    }
+  }
+  strapi.server_runtime.admin_login -> strapi.server_runtime.admin_sessions 'creates a login session'
+  strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_sessions 'validates token and active session'
+  strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_permission_engine 'loads user ability'
+}

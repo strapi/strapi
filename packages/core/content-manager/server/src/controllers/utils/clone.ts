@@ -1,8 +1,8 @@
-import { set } from 'lodash/fp';
-import strapiUtils from '@strapi/utils';
+import { objects, contentTypes } from '@strapi/utils';
+
 import { ProhibitedCloningField } from '../../../../shared/contracts/collection-types';
 
-const { isVisibleAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute } = contentTypes;
 
 /**
  * Use an array of strings to represent the path to a field, so we can show breadcrumbs in the admin
@@ -82,7 +82,7 @@ const getProhibitedCloningFields = (
  * remove the fields that the user can't create.
  */
 const excludeNotCreatableFields =
-  (uid: any, permissionChecker: any) =>
+  (uid: any, permissionChecker: any): ((body: any, path?: any[]) => any) =>
   (body: any, path = []): any => {
     const model = strapi.getModel(uid);
     const canCreate = (path: any) => permissionChecker.can.create(null, path);
@@ -100,7 +100,7 @@ const excludeNotCreatableFields =
         // Relation should be empty if the user can't create it
         case 'relation': {
           if (canCreate(attributePath)) return body;
-          return set(attributePath, { set: [] }, body);
+          return objects.set(body, attributePath, { set: [] });
         }
         // Go deeper into the component
         case 'component': {
@@ -112,7 +112,7 @@ const excludeNotCreatableFields =
         // Attribute should be null if the user can't create it
         default: {
           if (canCreate(attributePath)) return body;
-          return set(attributePath, null, body);
+          return objects.set(body, attributePath, null);
         }
       }
     }, body);

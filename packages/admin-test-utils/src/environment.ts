@@ -58,6 +58,24 @@ interface StrapiEnvOptions {
    * Defaults to `true`. Set to `false` for test suites that never import msw.
    */
   msw?: boolean;
+  /**
+   * IANA timezone for this test file's realm (e.g. `America/Los_Angeles`).
+   *
+   * The global setup pins `TZ=UTC`, and V8 freezes a realm's Date/Intl
+   * timezone when the jsdom window is created — mutating `process.env.TZ`
+   * inside a test has no effect. This option sets `TZ` BEFORE the realm is
+   * built, which is the only way to run a test file in a non-UTC zone
+   * (timezone regressions are invisible in UTC). Opt in per file:
+   *
+   *   / **
+   *    * @jest-environment @strapi/admin-test-utils/environment
+   *    * @jest-environment-options {"strapi": {"tz": "America/Los_Angeles"}}
+   *    * /
+   *
+   * The previous `TZ` is restored on teardown so sibling files in the same
+   * worker keep the UTC pin.
+   */
+  tz?: string;
 }
 
 // https://github.com/facebook/jest/blob/v29.4.3/website/versioned_docs/version-29.4/Configuration.md#testenvironment-string
@@ -66,14 +84,27 @@ export default class CustomJSDOMEnvironment extends TestEnvironment {
 
   private teardowns: Teardown[] = [];
 
+  private readonly previousTZ: string | undefined;
+
   constructor(config: EnvConfig, context: EnvContext) {
-    super(config, context);
     // `testEnvironmentOptions` is not exposed on the parent class's public
     // surface, so grab it from the jest config handed to the constructor.
     const raw = config.projectConfig.testEnvironmentOptions as {
       strapi?: StrapiEnvOptions;
     };
-    this.strapiOptions = raw.strapi ?? {};
+    const strapiOptions = raw.strapi ?? {};
+
+    // Must happen before super(): the parent constructor creates the jsdom
+    // window, and V8 freezes the realm's Date/Intl timezone at that point.
+    const previousTZ = process.env.TZ;
+    if (strapiOptions.tz) {
+      process.env.TZ = strapiOptions.tz;
+    }
+
+    super(config, context);
+
+    this.strapiOptions = strapiOptions;
+    this.previousTZ = previousTZ;
   }
 
   async setup(): Promise<void> {
@@ -95,6 +126,9 @@ export default class CustomJSDOMEnvironment extends TestEnvironment {
       if (fn) {
         fn();
       }
+    }
+    if (this.strapiOptions.tz) {
+      process.env.TZ = this.previousTZ;
     }
     await super.teardown();
   }

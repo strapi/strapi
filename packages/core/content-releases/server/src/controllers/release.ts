@@ -2,9 +2,14 @@ import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
-import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
+import {
+  validateCreateFromSkippedEntries,
+  validateRelease,
+  validatefindByDocumentAttachedParams,
+} from './validation/release';
 import type {
   CreateRelease,
+  CreateReleaseFromSkippedEntries,
   UpdateRelease,
   PublishRelease,
   GetRelease,
@@ -63,7 +68,7 @@ const releaseController = {
         },
         populate: {
           actions: {
-            fields: ['type'],
+            fields: ['type', 'isEntryValid', 'reason'],
             filters: {
               contentType,
               entryDocumentId: entryDocumentId ?? null,
@@ -118,26 +123,33 @@ const releaseController = {
     const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
     const { results, pagination } = await releaseService.findPage(query);
 
+    const notReadyCounts = await getService('release-action', { strapi }).countNotReadyByRelease(
+      results
+        .filter((release: ReleaseWithPopulatedActions) => !release.releasedAt)
+        .map((release: ReleaseWithPopulatedActions) => release.id)
+    );
+
     const data = results.map((release: ReleaseWithPopulatedActions) => {
       const { actions, ...releaseData } = release;
+      const notReadyCount = notReadyCounts.get(release.id);
 
       return {
         ...releaseData,
         actions: {
           meta: {
             count: actions.count,
+            ...(notReadyCount !== undefined && { notReadyCount }),
           },
         },
       };
     });
 
-    const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
-      where: {
-        releasedAt: null,
-      },
-    });
+    const [pendingReleasesCount, statusCounts] = await Promise.all([
+      strapi.db.query(RELEASE_MODEL_UID).count({ where: { releasedAt: null } }),
+      releaseService.countByStatus(),
+    ]);
 
-    ctx.body = { data, meta: { pagination, pendingReleasesCount } };
+    ctx.body = { data, meta: { pagination, pendingReleasesCount, statusCounts } };
   },
 
   async findOne(ctx: Koa.Context) {
@@ -155,6 +167,10 @@ const releaseController = {
         release: id,
       },
     });
+    // Counted as for the releases list, so both say the same; absent for a release that ran
+    const notReadyCount = (await releaseActionService.countNotReadyByRelease([release.id])).get(
+      release.id
+    );
     const sanitizedRelease = {
       ...release,
       createdBy: release.createdBy
@@ -168,6 +184,7 @@ const releaseController = {
       actions: {
         meta: {
           count,
+          ...(notReadyCount !== undefined && { notReadyCount }),
         },
       },
     };
@@ -247,6 +264,33 @@ const releaseController = {
     });
   },
 
+  async createFromSkippedEntries(ctx: Koa.Context) {
+    const user: UserInfo = ctx.state.user;
+    const id: CreateReleaseFromSkippedEntries.Request['params']['id'] = ctx.params.id;
+    const releaseArgs = ctx.request.body as CreateReleaseFromSkippedEntries.Request['body'];
+
+    await validateCreateFromSkippedEntries(releaseArgs);
+
+    const releaseService = getService('release', { strapi });
+    const { release, actionsCount } = await releaseService.createFromSkippedEntries(
+      id,
+      releaseArgs,
+      { user }
+    );
+
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
+    });
+
+    ctx.created({
+      data: {
+        ...(await permissionsManager.sanitizeOutput(release)),
+        actions: { meta: { count: actionsCount } },
+      },
+    });
+  },
+
   async update(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
     const releaseArgs = ctx.request.body as UpdateRelease.Request['body'];
@@ -255,6 +299,7 @@ const releaseController = {
     await validateRelease(releaseArgs);
 
     const releaseService = getService('release', { strapi });
+
     const release = await releaseService.update(id, releaseArgs, { user });
 
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
@@ -282,30 +327,18 @@ const releaseController = {
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
-    const releaseActionService = getService('release-action', { strapi });
-    const release = await releaseService.publish(id);
 
-    const [countPublishActions, countUnpublishActions] = await Promise.all([
-      releaseActionService.countActions({
-        filters: {
-          release: id,
-          type: 'publish',
-        },
-      }),
-      releaseActionService.countActions({
-        filters: {
-          release: id,
-          type: 'unpublish',
-        },
-      }),
-    ]);
+    // The service audits the run itself, whoever the caller is
+    const release = await releaseService.publish(id, { trigger: 'manual' });
+    const { totalPublishedEntries, totalUnpublishedEntries, totalSkippedEntries } = release;
 
     ctx.body = {
       data: release,
       meta: {
-        totalEntries: countPublishActions + countUnpublishActions,
-        totalPublishedEntries: countPublishActions,
-        totalUnpublishedEntries: countUnpublishActions,
+        totalEntries: totalPublishedEntries + totalUnpublishedEntries + totalSkippedEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
+        totalSkippedEntries,
       },
     };
   },

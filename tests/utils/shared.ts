@@ -1,4 +1,5 @@
-import { test, expect, type Page, type Locator, type Response } from '@playwright/test';
+import { type Page, type Locator, type Response } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 type NavItem = string | [string, string] | Locator | { text: string; exact?: boolean };
 
@@ -97,14 +98,19 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
 };
 
 /**
- * Clicks on a link and waits for the page to load completely.
+ * Clicks a locator.
  *
- * NOTE: this util is used to avoid inconsistent behaviour on webkit
+ * This used to wait for `networkidle` after the click. Playwright fires that event once per
+ * document, so the wait only did something for the first click after a full page load
+ * (`page.goto`, `page.reload`, a login), where it held the test for 0.4 to 1.3 s; every later call
+ * returned at once. When the next step depends on the click, wait for that instead: a web-first
+ * assertion on the new page (`await expect(locator).toBeVisible()`), `page.waitForURL`, or the
+ * response the step needs.
  *
+ * The unused `page` argument keeps the existing call sites compiling.
  */
-export const clickAndWait = async (page: Page, locator: Locator) => {
+export const clickAndWait = async (_page: Page, locator: Locator) => {
   await locator.click();
-  await page.waitForLoadState('networkidle');
 };
 
 // ---------------------------------------------------------------------------
@@ -180,6 +186,93 @@ export const withContentManagerPublish = async (
   const done = waitForContentManagerMutation(page, 'publish');
   await act();
   await done;
+};
+
+/**
+ * Clicks Publish (or a custom publish button) and confirms the draft-relations
+ * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
+ * xToOne-style warnings use "Publish without relations".
+ */
+export const publishAndConfirmDraftRelations = async (
+  page: Page,
+  publishButton: Locator = page.getByRole('button', { name: 'Publish', exact: true })
+) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const publishDone = waitForContentManagerMutation(page, 'publish');
+
+  await publishButton.click();
+
+  const dialogAppeared = await Promise.race([
+    dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true as const),
+    publishDone.then(() => false as const),
+  ]);
+
+  if (!dialogAppeared) {
+    return;
+  }
+
+  const publishWithoutRelations = dialog.getByRole('button', {
+    name: 'Publish without relations',
+  });
+
+  if (await publishWithoutRelations.isVisible()) {
+    await withContentManagerPublish(page, () => publishWithoutRelations.click());
+    return;
+  }
+
+  await withContentManagerPublish(page, () =>
+    dialog.getByRole('button', { name: 'Publish', exact: true }).click()
+  );
+};
+
+/**
+ * Clicks Publish and asserts the draft-relations confirmation dialog does not appear
+ * (publish completes directly).
+ */
+export const clickPublishExpectNoDraftRelationsDialog = async (page: Page) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const publishDone = waitForContentManagerMutation(page, 'publish');
+
+  await page.getByRole('button', { name: 'Publish', exact: true }).click();
+
+  const dialogAppeared = await Promise.race([
+    dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true as const),
+    publishDone.then(() => false as const),
+  ]);
+
+  expect(dialogAppeared).toBe(false);
+};
+
+export type DraftRelationsDialogVariant = 'm2m' | 'xToOne' | 'mixed';
+
+/**
+ * Clicks Publish and asserts the draft-relations confirmation dialog appears with the
+ * expected copy and confirm button for the relation category.
+ */
+export const clickPublishExpectDraftRelationsDialog = async (
+  page: Page,
+  variant: DraftRelationsDialogVariant
+) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+
+  await page.getByRole('button', { name: 'Publish', exact: true }).click();
+  await expect(dialog).toBeVisible();
+
+  if (variant === 'm2m') {
+    await expect(dialog.getByText(/linked entr(y|ies) (is|are) still in draft/)).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Publish', exact: true })).toBeVisible();
+  } else if (variant === 'mixed') {
+    await expect(dialog.getByText(/not be included in the published version/)).toBeVisible();
+    await expect(dialog.getByText(/many-to-many link/)).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Publish without relations' })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
+  } else {
+    await expect(dialog.getByText(/related to .* draft entr/)).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Publish without relations' })).toBeVisible();
+  }
+
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).not.toBeVisible();
 };
 
 /** Map a segment under `/admin` (or legacy `/admin/…`) to a pathname. */
@@ -532,20 +625,13 @@ type DragElementAboveOptions = {
   delay?: number;
 };
 
-type InnerDropSurfaceDragParams = DragElementAboveOptions & {
-  /** Prefix for thrown errors (e.g. `WebKit`, `Firefox`). */
-  browserLabel: string;
-  /** Run after `mouseup` — e.g. Firefox teardown so later clicks are not swallowed. */
-  afterMouseUp?: () => Promise<void>;
-};
-
 /**
- * WebKit + Firefox: drop targets use the inner row card (`:scope > *` index 1), same rect as react-dnd’s `objectRef`.
+ * WebKit: drop targets use the inner row card (`:scope > *` index 1), same rect as react-dnd’s `objectRef`.
  * Chromium keeps its own `<li>`-based path.
  */
-const dragElementAboveInnerDropSurface = async (
+const dragElementAboveWebKit = async (
   page: Page,
-  { source, target, steps = 5, delay = 20, browserLabel, afterMouseUp }: InnerDropSurfaceDragParams
+  { source, target, steps = 5, delay = 20 }: DragElementAboveOptions
 ) => {
   const hitTarget = target.locator(':scope > *').nth(1);
 
@@ -585,7 +671,7 @@ const dragElementAboveInnerDropSurface = async (
   if (!freshTargetBox || freshTargetBox.width === 0) {
     await page.mouse.up();
     throw new Error(
-      `${browserLabel}: drop surface bounding box could not be resolved after drag start (layout may still be settling).`
+      'WebKit: drop surface bounding box could not be resolved after drag start (layout may still be settling).'
     );
   }
   targetBox = freshTargetBox;
@@ -617,7 +703,6 @@ const dragElementAboveInnerDropSurface = async (
 
   await page.waitForTimeout(140);
   await page.mouse.up();
-  await afterMouseUp?.();
 };
 
 /**
@@ -682,30 +767,10 @@ const dragElementAboveChromium = async (page: Page, options: DragElementAboveOpt
   }
 };
 
-/** WebKit: same inner-card drag as Firefox; no post-`mouseup` hook. */
-const dragElementAboveWebKit = async (page: Page, options: DragElementAboveOptions) =>
-  dragElementAboveInnerDropSurface(page, { ...options, browserLabel: 'WebKit' });
-
-/** Firefox: inner-card drag + teardown so later UI clicks are not swallowed after HTML5 DnD. */
-const dragElementAboveFirefox = async (page: Page, options: DragElementAboveOptions) =>
-  dragElementAboveInnerDropSurface(page, {
-    ...options,
-    browserLabel: 'Firefox',
-    afterMouseUp: async () => {
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(100);
-      const vp = page.viewportSize();
-      if (vp) {
-        await page.mouse.move(Math.floor(vp.width / 2), Math.floor(vp.height / 2));
-      }
-    },
-  });
-
 /**
  * Smoothly drags a draggable element within a source <li> to just above a target <li>.
  *
- * Dispatches to {@link dragElementAboveChromium} or {@link dragElementAboveInnerDropSurface}
- * (WebKit / Firefox — shared logic; Firefox passes an `afterMouseUp` hook).
+ * Dispatches to {@link dragElementAboveChromium} or {@link dragElementAboveWebKit}.
  *
  * @param {object} page - The Playwright page instance.
  * @param {object} options - Options for the drag operation.
@@ -718,9 +783,6 @@ export const dragElementAbove = async (page: Page, options: DragElementAboveOpti
   const browserType = page.context().browser()?.browserType().name() ?? '';
   if (browserType === 'webkit') {
     return dragElementAboveWebKit(page, options);
-  }
-  if (browserType === 'firefox') {
-    return dragElementAboveFirefox(page, options);
   }
   if (browserType === 'chromium') {
     return dragElementAboveChromium(page, options);
@@ -809,4 +871,29 @@ export const ensureCheckbox = async (locator: Locator, checked: boolean) => {
   if (isChecked !== checked) {
     await locator.click();
   }
+};
+
+/**
+ * Confirm the CTB "Preserve data for renamed fields?" modal that appears after Save
+ * when `renameMigrations.attributes` is `prompt-before-save` (the default).
+ *
+ * @param preserve - Click "Preserve data" so a rename migration is generated.
+ *   Pass `false` to click "Don't preserve data" (field dropped and recreated empty —
+ *   the pre-rename-migration behavior history tests still need).
+ */
+export const confirmRenameMigration = async (
+  page: Page,
+  { preserve = true }: { preserve?: boolean } = {}
+) => {
+  const dialog = page.getByRole('dialog').filter({
+    hasText: /Preserve data for renamed fields/i,
+  });
+  await expect(dialog).toBeVisible();
+
+  await dialog
+    .getByRole('button', {
+      name: preserve ? 'Preserve data' : "Don't preserve data",
+      exact: true,
+    })
+    .click();
 };

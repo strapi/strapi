@@ -30,7 +30,9 @@ import {
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
+import { unstable_addRequestHeaders as addRequestHeaders } from './utils/getFetchClient';
 
+import type { RequestHeadersProvider } from './utils/getFetchClient';
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
 
@@ -227,12 +229,33 @@ class StrapiApp {
     links: UnloadedSettingsLink[]
   ) => this.router.addSettingsLink(section, links);
 
+  /**
+   * Register one or more settings links under an existing or new section.
+   *
+   * @param sectionId - Section id string, or section metadata to create a new section
+   * @param link - A single link or an array of links to register
+   */
   addSettingsLink = (
     sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink
-  ) => {
+    link: UnloadedSettingsLink | UnloadedSettingsLink[]
+  ): void => {
     this.router.addSettingsLink(sectionId, link);
   };
+
+  /**
+   * Adds headers to every request the admin sends to the Strapi server through its
+   * fetch client and Media Library uploads, e.g. the space a browser tab works in.
+   * The provider is called when a request starts, so it returns the current value;
+   * a retry after a 401 reuses it. A provider cannot replace `Authorization`,
+   * `Content-Type` or `Accept`. If a provider throws or returns an invalid header
+   * name or value, the request fails with a `RequestHeadersError` instead of being
+   * sent without the header. Auth and pre-login paths do not read the providers.
+   * Unstable: the API can change in a minor release.
+   *
+   * @returns A function that removes the provider.
+   */
+  unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => void) =>
+    addRequestHeaders(provider);
 
   async bootstrap(customBootstrap?: unknown) {
     Object.keys(this.appPlugins).forEach((plugin) => {
@@ -400,9 +423,8 @@ class StrapiApp {
             defaultMessage: 'Last activity',
           },
           component: async () => {
-            const { AuditLogsWidget } = await import(
-              '../../ee/admin/src/components/AuditLogs/Widgets'
-            );
+            const { AuditLogsWidget } =
+              await import('../../ee/admin/src/components/AuditLogs/Widgets');
             return AuditLogsWidget;
           },
           pluginId: 'admin',
@@ -482,7 +504,7 @@ class StrapiApp {
       const normalizedKey = normalizeAdminLocale(key);
 
       acc[normalizedKey] = {
-        ...(acc[normalizedKey] || {}),
+        ...acc[normalizedKey],
         ...customTranslations[key],
       };
 
@@ -529,8 +551,8 @@ class StrapiApp {
     }>((acc, current) => {
       acc[current] = {
         ...adminTranslations[current],
-        ...(mergedTrads[current] || {}),
-        ...(normalizedCustomTranslations[current] ?? {}),
+        ...mergedTrads[current],
+        ...normalizedCustomTranslations[current],
       };
 
       return acc;

@@ -1,5 +1,7 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "vitest.config.ts"],
+  "compilerOptions": {
+    "types": ["node"]
+  }
 }

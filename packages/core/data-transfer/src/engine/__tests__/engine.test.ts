@@ -1,8 +1,8 @@
 import path, { posix, win32 } from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-import { cloneDeep, get, set } from 'lodash/fp';
-import { Readable, Writable } from 'stream-chain';
+import { cloneDeep, get, set } from 'lodash';
+import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
@@ -16,10 +16,22 @@ import type {
   ISourceProvider,
   ITransferEngineOptions,
   TransferFilterPreset,
-} from '../../../types';
+} from '../../types';
 
-import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
+import { extendExpectForDataTransferTests, getStrapiFactory } from '../../__tests__/test-utils';
+import * as esmDeps from '../../utils/esm-deps';
+import { createLocalStrapiDestinationProvider } from '../../strapi/providers';
 import { TransferEngineValidationError } from '../errors';
+
+jest.mock('../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 /**
  * Parallel Jest + V8 can move `heapUsed` by tens of MB unrelated to transfer payload.
@@ -417,6 +429,9 @@ describe('Transfer engine', () => {
 
   beforeEach(() => {
     jest.restoreAllMocks();
+    // restoreAllMocks clears the esm-deps jest.fn. Put the real loader back.
+    const actual = jest.requireActual<typeof esmDeps>('../../utils/esm-deps');
+    (esmDeps.loadStreamDeps as jest.Mock).mockImplementation(() => actual.loadStreamDeps());
     completeSource = createSource();
     completeDestination = createDestination();
   });
@@ -466,6 +481,115 @@ describe('Transfer engine', () => {
   });
 
   describe('transfer', () => {
+    test('applies global and stage entity transforms together', async () => {
+      const received: Array<{ id?: number; data?: { foo?: string } }> = [];
+      const source = createSource({
+        entities: [
+          { id: 1, type: 'api::foo.foo', data: { foo: 'drop' } },
+          { id: 2, type: 'api::foo.foo', data: { foo: 'keep' } },
+        ],
+      });
+      const destination = createDestination({
+        createEntitiesWriteStream: jest.fn().mockImplementation(
+          () =>
+            new Writable({
+              objectMode: true,
+              write(chunk, _encoding, callback) {
+                received.push(chunk);
+                callback();
+              },
+            })
+        ),
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        transforms: {
+          global: [{ filter: (entity: { id?: number }) => entity.id !== 1 }],
+          entities: [
+            {
+              map: (entity: { id?: number; type: string; data?: { foo?: string } }) => ({
+                ...entity,
+                data: { ...entity.data, foo: 'mapped' },
+              }),
+            },
+          ],
+        },
+      });
+
+      await engine.transfer();
+
+      expect(received).toEqual([
+        expect.objectContaining({ id: 2, type: 'api::foo.foo', data: { foo: 'mapped' } }),
+      ]);
+    });
+
+    test('runs global transforms before stage transforms when throttled', async () => {
+      const received: Array<{ data?: { foo?: string } }> = [];
+      const source = createSource({
+        entities: [
+          { id: 1, type: 'api::foo.foo', data: { foo: '' } },
+          { id: 2, type: 'api::foo.foo', data: { foo: '' } },
+        ],
+      });
+      const destination = createDestination({
+        createEntitiesWriteStream: jest.fn().mockImplementation(
+          () =>
+            new Writable({
+              objectMode: true,
+              write(chunk, _encoding, callback) {
+                received.push(chunk);
+                callback();
+              },
+            })
+        ),
+      });
+      const append = (suffix: string) => (entity: { type: string; data?: { foo?: string } }) => ({
+        ...entity,
+        data: { foo: `${entity.data?.foo ?? ''}${suffix}` },
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        throttle: 1,
+        transforms: {
+          global: [{ map: append('global,') }],
+          entities: [{ map: append('stage') }],
+        },
+      });
+
+      await engine.transfer();
+
+      expect(received.map((entity) => entity.data?.foo)).toEqual(['global,stage', 'global,stage']);
+    });
+
+    test('throttles only the items that pass the transform filters', async () => {
+      const throttle = 3;
+      const entities = Array.from({ length: 5 }, (_, id) => ({
+        id,
+        type: 'api::foo.foo',
+        data: { foo: '' },
+      }));
+
+      const countThrottleDelays = async (keepEntities: boolean) => {
+        const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+        const engine = createTransferEngine(createSource({ entities }), createDestination(), {
+          ...defaultOptions,
+          throttle,
+          transforms: { entities: [{ filter: () => keepEntities }] },
+        });
+
+        await engine.transfer();
+
+        const delays = setTimeoutSpy.mock.calls.filter(([, delay]) => delay === throttle).length;
+        setTimeoutSpy.mockRestore();
+        return delays;
+      };
+
+      const withEntities = await countThrottleDelays(true);
+      const withoutEntities = await countThrottleDelays(false);
+
+      expect(withEntities - withoutEntities).toBe(entities.length);
+    });
+
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
       expect(completeSource).toHaveAllSourceStagesCalledTimes(0);
@@ -474,6 +598,212 @@ describe('Transfer engine', () => {
 
       expect(completeSource).toHaveAllSourceStagesCalledTimes(1);
       expect(completeDestination).toHaveAllDestinationStagesCalledTimes(1);
+    });
+
+    test('stops before provider bootstrap when stream dependencies fail to load', async () => {
+      const loadError = new Error("Cannot find module 'stream-chain'");
+      const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+        typeof esmDeps.loadStreamDeps
+      >;
+      loadStreamDeps.mockRejectedValueOnce(loadError);
+
+      const sourceBootstrap = jest.fn();
+      const sourceClose = jest.fn();
+      const source = {
+        ...minimalSource,
+        bootstrap: sourceBootstrap,
+        close: sourceClose,
+      };
+      const beforeTransfer = jest.fn();
+      const destinationBootstrap = jest.fn();
+      const destinationClose = jest.fn();
+      const rollback = jest.fn();
+      const destination = createDestination({
+        beforeTransfer,
+        bootstrap: destinationBootstrap,
+        close: destinationClose,
+        rollback,
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      try {
+        await expect(engine.transfer()).rejects.toBe(loadError);
+
+        expect(sourceBootstrap).not.toHaveBeenCalled();
+        expect(destinationBootstrap).not.toHaveBeenCalled();
+        expect(beforeTransfer).not.toHaveBeenCalled();
+        expect(rollback).not.toHaveBeenCalled();
+        expect(sourceClose).not.toHaveBeenCalled();
+        expect(destinationClose).not.toHaveBeenCalled();
+        expect(engine.diagnostics.stack.items).toContainEqual(
+          expect.objectContaining({
+            kind: 'error',
+            details: expect.objectContaining({ error: loadError }),
+          })
+        );
+      } finally {
+        loadStreamDeps.mockReset();
+        loadStreamDeps.mockImplementation(() =>
+          jest.requireActual<typeof esmDeps>('../../utils/esm-deps').loadStreamDeps()
+        );
+      }
+    });
+
+    test('validates included source stages before preparing the destination', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockImplementation((stage: TransferStage) => {
+          if (stage === 'assets') {
+            throw validationError;
+          }
+        }),
+      };
+      const beforeTransfer = jest.fn();
+      const destination = createDestination({ beforeTransfer });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(source.validateStage).toHaveBeenCalledWith('assets');
+      expect(beforeTransfer).not.toHaveBeenCalled();
+    });
+
+    test('closes both providers when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const disableLifecycles = jest.fn();
+      const enableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const destination = createDestination({
+        bootstrap: disableLifecycles,
+        rollback,
+        close: enableLifecycles,
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        rollback.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('re-enables local Strapi lifecycles when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        getMetadata: jest.fn().mockResolvedValue(null),
+        getSchemas: jest.fn().mockResolvedValue(null),
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const enableLifecycles = jest.fn();
+      const disableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const transaction = jest.fn(async (handler) => {
+        await handler({ trx: {}, rollback });
+      });
+      const strapi = getStrapiFactory({
+        config: {
+          get(key: string) {
+            if (key === 'info.strapi') {
+              return '5.0.0';
+            }
+            if (key === 'plugin::upload') {
+              return { provider: 'local' };
+            }
+            return undefined;
+          },
+        },
+        db: {
+          transaction,
+          lifecycles: {
+            enable: enableLifecycles,
+            disable: disableLifecycles,
+          },
+        },
+        contentTypes: {},
+        components: {},
+      })();
+      const destination = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        autoDestroy: false,
+        strategy: 'restore',
+        restore: {},
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        versionStrategy: 'ignore',
+        schemaStrategy: 'ignore',
+      });
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        disableLifecycles.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('reports but does not rethrow cleanup errors raised on the failure path', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+        close: jest.fn().mockRejectedValue(new Error('source close failed')),
+      };
+      const destination = createDestination({
+        rollback: jest.fn().mockRejectedValue(new Error('rollback failed')),
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(destination.close).toHaveBeenCalledTimes(1);
+      expect(engine.diagnostics.stack.items.filter((item) => item.kind === 'warning')).toHaveLength(
+        2
+      );
+    });
+
+    test('does not retry provider cleanup when close itself fails', async () => {
+      const closeError = new Error('source close failed');
+      const source = {
+        ...completeSource,
+        close: jest.fn().mockRejectedValue(closeError),
+      };
+      const rollback = jest.fn();
+      const destination = createDestination({ rollback });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(closeError);
+
+      expect(rollback).not.toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(destination.close).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not validate an excluded source stage', async () => {
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn(),
+      };
+      const engine = createTransferEngine(source, completeDestination, {
+        ...defaultOptions,
+        exclude: ['files'],
+      });
+
+      await engine.transfer();
+
+      expect(source.validateStage).not.toHaveBeenCalledWith('assets');
     });
 
     test.each<
@@ -883,12 +1213,12 @@ describe('Transfer engine', () => {
             const fakeSchemas = cloneDeep(schemas);
 
             const path = `attributes.createdAt.${attributeName}`;
-            const oldValue = get(path, fakeSchemas['api::homepage.homepage']);
+            const oldValue = get(fakeSchemas['api::homepage.homepage'], path);
 
             fakeSchemas['api::homepage.homepage'] = set(
+              fakeSchemas['api::homepage.homepage'],
               path,
-              transformValue(oldValue),
-              fakeSchemas['api::homepage.homepage']
+              transformValue(oldValue)
             );
 
             destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
@@ -905,9 +1235,9 @@ describe('Transfer engine', () => {
         test(`Throws on regular attributes' properties`, () => {
           const destination = createDestination();
           const fakeSchemas = set(
+            cloneDeep(schemas),
             '["api::homepage.homepage"].attributes.createdAt.type',
-            'string',
-            cloneDeep(schemas)
+            'string'
           );
 
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);

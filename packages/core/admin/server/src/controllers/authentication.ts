@@ -2,15 +2,20 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
+import { USER_NOT_ACTIVE_MESSAGE } from '../services/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
+  buildSessionMetadataFromContext,
   getSessionManager,
   extractDeviceParams,
   generateDeviceId,
   getRefreshCookieOptions,
+  resolveLogoutDeviceId,
 } from '../../../shared/utils/session-auth';
 
 import {
@@ -34,6 +39,37 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
 
+/**
+ * Emits `admin.auth.error` without delaying the response. The account is looked up by
+ * the email of the request, as the local strategy does, because passport does not pass
+ * the user along with an error.
+ */
+const emitLocalLoginFailure = (ctx: Context, error: Error, reason: LoginFailureReason) => {
+  const { email } = (ctx.request.body ?? {}) as { email?: unknown };
+
+  const emit = (user?: { id: Data.ID; email: string } | null) =>
+    emitLoginFailure(
+      { strapi },
+      {
+        error,
+        reason,
+        provider: 'local',
+        ...(user ? { user: { id: user.id, email: user.email } } : {}),
+      }
+    );
+
+  // A failed lookup still emits, without the account
+  Promise.resolve()
+    .then(() =>
+      typeof email === 'string'
+        ? strapi.db
+            .query('admin::user')
+            .findOne({ select: ['id', 'email'], where: { email: email.toLowerCase() } })
+        : null
+    )
+    .then(emit, () => emit());
+};
+
 export default {
   login: compose([
     async (ctx: Context, next: Next) => {
@@ -43,7 +79,11 @@ export default {
     (ctx: Context, next: Next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
-          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+          emitLocalLoginFailure(
+            ctx,
+            err,
+            err.details?.code === 'LOGIN_NOT_ALLOWED' ? 'login_not_allowed' : 'unexpected_error'
+          );
           // if this is a recognized error, allow it to bubble up to user
           if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
             throw err;
@@ -54,10 +94,11 @@ export default {
         }
 
         if (!user) {
-          strapi.eventHub.emit('admin.auth.error', {
-            error: new Error(info.message),
-            provider: 'local',
-          });
+          emitLocalLoginFailure(
+            ctx,
+            new Error(info.message),
+            info.message === USER_NOT_ACTIVE_MESSAGE ? 'account_inactive' : 'invalid_credentials'
+          );
           throw new ApplicationError(info.message);
         }
 
@@ -85,6 +126,7 @@ export default {
           'admin'
         ).generateRefreshToken(userId, deviceId, {
           type: rememberMe ? 'refresh' : 'session',
+          metadata: buildSessionMetadataFromContext(ctx),
         });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
@@ -146,7 +188,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: rememberMe ? 'refresh' : 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -194,7 +239,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: rememberMe ? 'refresh' : 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -227,8 +275,15 @@ export default {
     const input = ctx.request.body as ForgotPassword.Request['body'];
 
     await validateForgotPasswordInput(input);
+    // The promise below can settle after Strapi is destroyed, so capture the logger now.
+    const logger = strapi.log;
 
-    getService('auth').forgotPassword(input);
+    // Not awaited: the response must not reveal whether the email exists. The call runs
+    // synchronously so a broken service still surfaces as a 500; only a rejection of the
+    // returned promise is caught here, since nothing else would handle it.
+    Promise.resolve(getService('auth').forgotPassword(input)).catch((error: unknown) => {
+      logger.error('Failed to process the forgot-password request', { error });
+    });
 
     ctx.status = 204;
   },
@@ -255,7 +310,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry(
@@ -329,9 +387,6 @@ export default {
     const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
     strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
 
-    const bodyDeviceId = ctx.request.body?.deviceId as string | undefined;
-    const deviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
-
     // Clear cookie regardless of token validity
     ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
       ...getRefreshCookieOptions(ctx.request.secure),
@@ -342,7 +397,15 @@ export default {
       const sessionManager = getSessionManager();
       if (sessionManager) {
         const userId = String(ctx.state.user.id);
-        await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
+        const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
+        const sessionId = (ctx.state.session as { id?: string } | undefined)?.id;
+
+        if (typeof bodyDeviceId === 'string' && bodyDeviceId.length > 0) {
+          const deviceId = await resolveLogoutDeviceId(userId, sessionId, bodyDeviceId);
+          await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
+        } else {
+          await sessionManager('admin').invalidateRefreshToken(userId);
+        }
       }
     } catch (err) {
       strapi.log.error('Failed to revoke admin sessions during logout', err as any);

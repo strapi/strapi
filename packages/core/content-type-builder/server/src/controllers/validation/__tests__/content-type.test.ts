@@ -35,6 +35,53 @@ describe('Content type validator', () => {
     });
   });
 
+  describe('displayName', () => {
+    const base = { singularName: 'test', pluralName: 'tests', attributes: {} };
+
+    test('Rejects a content type that only sets info.displayName', async () => {
+      const data = {
+        contentType: { ...base, info: { displayName: 'Test' } },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).rejects.toMatchObject({
+        name: 'ValidationError',
+        details: {
+          errors: [expect.objectContaining({ path: ['contentType', 'displayName'] })],
+        },
+      });
+    });
+
+    test('Accepts a content type with a top-level displayName', async () => {
+      const data = {
+        contentType: { ...base, displayName: 'Test' },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).resolves.toBeDefined();
+    });
+  });
+
+  describe('validateUpdateContentTypeInput with attributes that are not objects', () => {
+    const contentType = { singularName: 'test', pluralName: 'tests', displayName: 'Test' };
+
+    test.each([
+      ['null attributes', null],
+      ['a null attribute', { foo: null }],
+      ['an array with a null attribute', [null]],
+    ])(
+      'rejects %s with a validation error',
+      async (_label, attributes) => {
+        const data = {
+          contentType: { ...contentType, attributes },
+        } as unknown as CreateContentTypeInput;
+
+        await expect(validateUpdateContentTypeInput(data)).rejects.toMatchObject({
+          name: 'ValidationError',
+        });
+      },
+      2000
+    );
+  });
+
   describe('Prevents use of reservedNames in attributes', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
@@ -57,13 +104,13 @@ describe('Content type validator', () => {
         expect(err).toMatchObject({
           name: 'ValidationError',
           message:
-            'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
+            'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
           details: {
             errors: [
               {
                 path: ['contentType', 'attributes', 'entryId'],
                 message:
-                  'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
+                  'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
                 name: 'ValidationError',
               },
             ],
@@ -93,13 +140,13 @@ describe('Content type validator', () => {
         expect(err).toMatchObject({
           name: 'ValidationError',
           message:
-            'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
+            'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
           details: {
             errors: [
               {
                 path: ['contentType', 'attributes', 'ENTRY_ID'],
                 message:
-                  'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
+                  'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
                 name: 'ValidationError',
               },
             ],
@@ -222,6 +269,49 @@ describe('Content type validator', () => {
         expect(data.components[0]?.attributes?.title.default).toBeUndefined();
         expect(data.components[1]?.attributes?.title.default).toBe('');
       });
+    });
+
+    test('Rejects a non-boolean options.draftAndPublish', async () => {
+      const data = {
+        contentType: {
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          options: { draftAndPublish: 'false' },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateUpdateContentTypeInput(data)).rejects.toMatchObject({
+        name: 'ValidationError',
+        details: {
+          errors: [
+            expect.objectContaining({ path: ['contentType', 'options', 'draftAndPublish'] }),
+          ],
+        },
+      });
+    });
+
+    test('Accepts a boolean options.draftAndPublish', async () => {
+      const data = {
+        contentType: {
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          options: { draftAndPublish: false },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateUpdateContentTypeInput(data)).resolves.toBeDefined();
     });
 
     test('Deleted UID target fields are removed from input data', async () => {

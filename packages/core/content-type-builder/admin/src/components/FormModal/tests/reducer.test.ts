@@ -1,4 +1,10 @@
-import { reducer, initialState, actions } from '../reducer';
+import { reducer, initialState, actions, type State } from '../reducer';
+
+// Actions that seed the form also snapshot the seeded data, so it can tell real edits apart.
+const withPristine = <T extends { modifiedData: unknown }>(state: T) => ({
+  ...state,
+  pristineData: state.modifiedData,
+});
 
 describe('CTB | components | FormModal | reducer | actions', () => {
   describe('onChange', () => {
@@ -8,7 +14,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         value: 'test',
       });
 
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           type: 'string',
@@ -27,7 +33,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('should remove the default value if the type of date input type has been changed', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'short_movie_time',
@@ -53,7 +59,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('should not remove the default value if the type of another input type has been changed', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'number_of_movies',
@@ -78,11 +84,91 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should drop a pending folder target when the kind changes', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'singleType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'singleType',
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should keep a pending new-folder name when the kind changes', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { newFolderName: 'Marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'singleType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'singleType',
+          folder: { newFolderName: 'Marketing' },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should keep a pending folder target when the kind is unchanged', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'collectionType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('ON_CHANGE_RELATION_TARGET', () => {
     it('Should handle the target change correctly for a one side relation (oneWay, manyWay)', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category test',
@@ -116,7 +202,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the target change correctly for the manyToMany relation', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'categories',
@@ -151,7 +237,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the target change correctly if the target has restricted relations and the relation type is not correct', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'categories',
@@ -186,7 +272,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the target change correctly if the target has restricted relations and the relation type is correct', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'categories',
@@ -222,7 +308,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('ON_CHANGE_RELATION_TYPE', () => {
     it('Should handle the relation type change correctly from oneWay to manyToMany', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category test',
@@ -254,7 +340,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the relation type change correctly from manyToMany to oneWay', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category_tests',
@@ -287,7 +373,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the relation type change correctly from oneToOne to oneToMany', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category_test',
@@ -322,7 +408,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('RESET_PROPS', () => {
     it('Should return the initialState', () => {
-      const state = { ...initialState, modifiedData: { foo: 'bar' } };
+      const state: State = { ...initialState, modifiedData: { foo: 'bar' } };
       const action = actions.resetProps();
 
       expect(reducer(state, action)).toEqual(initialState);
@@ -335,7 +421,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         uid: 'api::address.address',
       });
 
-      const state = { ...initialState, modifiedData: { foo: 'bar' } };
+      const state: State = { ...initialState, modifiedData: { foo: 'bar' } };
       const expected = {
         ...initialState,
         modifiedData: {
@@ -344,7 +430,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(state, action)).toEqual(expected);
+      expect(reducer(state, action)).toEqual(withPristine(expected));
     });
   });
 
@@ -354,7 +440,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         uid: 'api::address.address',
       });
 
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           type: 'component',
@@ -387,13 +473,51 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('Should reset to the initial state when the component to create has no displayName', () => {
+      const action = actions.resetPropsAndSaveCurrentData({ uid: 'api::address.address' });
+
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          type: 'component',
+          createComponent: true,
+          componentToCreate: {
+            type: 'component',
+            icon: 'air-freshener',
+            category: 'default',
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(initialState);
+    });
+
+    it('Should reset to the initial state when the component to create has no category', () => {
+      const action = actions.resetPropsAndSaveCurrentData({ uid: 'api::address.address' });
+
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          type: 'component',
+          createComponent: true,
+          componentToCreate: {
+            type: 'component',
+            displayName: 'compo',
+            icon: 'air-freshener',
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(initialState);
+    });
   });
 
   describe('RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ', () => {
     it('Should reset the state and prepare the form for adding or creating a component to a dynamic zone', () => {
       const action = actions.resetPropsAndSetTheFormForAddingACompoToADz();
 
-      const state = {
+      const state: State = {
         ...initialState,
         initialData: {
           foo: 'bar',
@@ -416,7 +540,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(state, action)).toEqual(expected);
+      expect(reducer(state, action)).toEqual(withPristine(expected));
     });
   });
 
@@ -433,7 +557,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         initialData: action.payload.data,
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
   });
 
@@ -453,7 +577,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         uid: 'api::address.address',
       });
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a component in step 1', () => {
@@ -462,7 +586,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: '1',
         uid: 'api::address.address',
       });
@@ -475,7 +599,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a component in step 2', () => {
@@ -484,7 +608,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: '2',
         uid: 'api::address.address',
       });
@@ -497,7 +621,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a dynamiczone', () => {
@@ -506,7 +630,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: '2',
         uid: 'api::address.address',
       });
@@ -519,7 +643,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a text', () => {
@@ -528,7 +652,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -540,7 +664,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a number', () => {
@@ -549,13 +673,13 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: {} };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a date', () => {
@@ -564,13 +688,13 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: {} };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a media', () => {
@@ -579,7 +703,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -592,7 +716,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for an enumeration', () => {
@@ -601,13 +725,13 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: { type: 'enumeration', enum: [] } };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for a relation', () => {
@@ -616,7 +740,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address test',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -631,7 +755,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
 
     it('Should set the state correctly for the other cases', () => {
@@ -640,13 +764,35 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: { type: 'json', default: null } };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
+    });
+
+    it('keeps the seeded snapshot while the user edits a new field', () => {
+      const seeded = reducer(
+        initialState,
+        actions.setAttributeDataSchema({
+          attributeType: 'text',
+          nameToSetForRelation: '',
+          targetUid: 'api::address.address',
+          isEditing: false,
+          modifiedDataToSetForEditing: {},
+          step: null,
+          uid: 'api::address.address',
+        })
+      );
+
+      const edited = reducer(seeded, actions.onChange({ keys: ['name'], value: 'title' }));
+
+      expect(edited.pristineData).toEqual({ type: 'string' });
+      expect(edited.modifiedData).toEqual({ type: 'string', name: 'title' });
+      // `initialData` stays empty for a new field: rename handling relies on it.
+      expect(edited.initialData).toEqual({});
     });
   });
 
@@ -668,7 +814,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         initialData: action.payload.attributeToEdit,
       };
 
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(initialState, action)).toEqual(withPristine(expected));
     });
   });
 
@@ -676,12 +822,80 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     it('Should set the formErrors object correctly', () => {
       const action = actions.setErrors({
         errors: {
-          test: 'this is required',
+          test: {
+            id: 'test.error',
+            defaultMessage: 'this is required',
+          },
         },
       });
       const expected = { ...initialState, formErrors: action.payload.errors };
 
       expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  // Errors describe the data they were produced from. Every action that replaces that data
+  // must drop them, otherwise the previous attempt's errors show up on a blank form.
+  // https://github.com/strapi/strapi/issues/20947
+  describe('Clearing stale form errors', () => {
+    const stateWithErrors: State = {
+      ...initialState,
+      modifiedData: { name: '', type: 'string' },
+      formErrors: {
+        name: {
+          id: 'component.Input.error.validation.required',
+          defaultMessage: 'this is required',
+        },
+      },
+    };
+
+    it('clears the errors when a new attribute type is picked', () => {
+      const action = actions.setAttributeDataSchema({
+        attributeType: 'text',
+        nameToSetForRelation: 'address',
+        targetUid: 'api::address.address',
+        isEditing: false,
+        modifiedDataToSetForEditing: {},
+        step: null,
+        uid: 'api::address.address',
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when an existing attribute is opened for editing', () => {
+      const action = actions.setAttributeDataSchema({
+        isEditing: true,
+        modifiedDataToSetForEditing: { name: 'address', type: 'string' },
+        uid: 'api::address.address',
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when a custom field is picked', () => {
+      const action = actions.setCustomFieldDataSchema({
+        isEditing: false,
+        modifiedDataToSetForEditing: {},
+        uid: 'api::address.address',
+        customField: { type: 'string' },
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when a dynamic zone schema is set', () => {
+      const action = actions.setDynamicZoneDataSchema({
+        attributeToEdit: { name: 'dz', type: 'dynamiczone', components: [] },
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when the data to edit is replaced', () => {
+      const action = actions.setDataToEdit({ data: { displayName: 'Address' } });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
     });
   });
 

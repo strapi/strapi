@@ -55,6 +55,7 @@ export const ALLOWED_CONTENT_TYPES = [
    * UPLOADS
    */
   'plugin::upload.file',
+  'plugin::upload.folder',
 ];
 
 export const TITLE_LOGIN = 'Strapi Admin';

@@ -143,6 +143,17 @@ describe('content-manager', () => {
         'Expected the `panels` passed to `addEditViewSidePanel` to be an array or a function, but received string'
       );
     });
+
+    it("should throw a clear error if an item in the array isn't a function", () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addEditViewSidePanel([{ title: 'test', content: null }])
+      ).toThrowError(
+        'Expected every item in the `panels` array passed to `addEditViewSidePanel` to be a function that returns a description object, but received object at index 0'
+      );
+    });
   });
 
   describe('addDocumentAction', () => {
@@ -202,6 +213,17 @@ describe('content-manager', () => {
         'Expected the `actions` passed to `addDocumentAction` to be an array or a function, but received string'
       );
     });
+
+    it("should throw a clear error if an item in the array isn't a function", () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addDocumentAction([{ label: 'Publish & Notify Twitter', onClick: () => {} }])
+      ).toThrowError(
+        'Expected every item in the `actions` array passed to `addDocumentAction` to be a function that returns a description object, but received object at index 0'
+      );
+    });
   });
 
   describe('addDocumentHeaderAction', () => {
@@ -229,6 +251,56 @@ describe('content-manager', () => {
         plugin.addDocumentHeaderAction('I will break')
       ).toThrowError(
         'Expected the `actions` passed to `addDocumentHeaderAction` to be an array or a function, but received string'
+      );
+    });
+
+    it("should throw a clear error if an item in the array isn't a function", () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addDocumentHeaderAction([{ label: 'Notify Twitter', onClick: () => {} }])
+      ).toThrowError(
+        'Expected every item in the `actions` array passed to `addDocumentHeaderAction` to be a function that returns a description object, but received object at index 0'
+      );
+    });
+  });
+
+  describe('addBulkAction', () => {
+    it('should let users add a bulk action as an array', () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(plugin.bulkActions).toHaveLength(0);
+
+      plugin.addBulkAction([
+        () => ({
+          label: 'Dummy Bulk Action',
+          onClick: () => {},
+        }),
+      ]);
+
+      expect(plugin.bulkActions).toHaveLength(1);
+    });
+
+    it("should throw an error if you've not passed a function or an array", () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addBulkAction('I will break')
+      ).toThrowError(
+        'Expected the `actions` passed to `addBulkAction` to be an array or a function, but received string'
+      );
+    });
+
+    it("should throw a clear error if an item in the array isn't a function", () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addBulkAction([{ label: 'Dummy Bulk Action', onClick: () => {} }])
+      ).toThrowError(
+        'Expected every item in the `actions` array passed to `addBulkAction` to be a function that returns a description object, but received object at index 0'
       );
     });
   });

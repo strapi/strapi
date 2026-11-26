@@ -10,7 +10,7 @@ const GET_COUNTS_SCRIPT = path.join(__dirname, 'get-db-counts.js');
  * Used by CLI tests (e.g. import-export roundtrip) to read SQLite counts and IDs.
  *
  * @param {string} appPath - Path to the test app (must have .tmp/data.db and better-sqlite3)
- * @returns {{ articles: number, categories: number, articleIds: number[], categoryIds: number[], error?: string }}
+ * @returns {{ articles: number, categories: number, uploadFiles: number, uploadFolders: number, articleIds: number[], categoryIds: number[], error?: string }}
  */
 function getDbState(appPath) {
   const result = spawnSync('node', [GET_COUNTS_SCRIPT], {

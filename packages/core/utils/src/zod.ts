@@ -4,15 +4,15 @@ import { ValidationError } from './errors';
 
 /**
  * Re-export of the Zod v4 schema builder from the same version Strapi uses
- * internally. Use this for building schemas passed to content API param
- * registration (addQueryParams / addInputParams) so your code stays compatible
- * across Strapi minor/patch updates.
+ * internally. Intended for packages that already depend on `@strapi/utils`.
+ *
+ * For `contentAPI.addQueryParams` / `addInputParams`, pass a factory instead
+ * of importing this `z` (or `zod` / `zod/v4`). Strapi supplies its own Zod:
  *
  * @example
- * import { z } from '@strapi/utils';
  * strapi.contentAPI.addQueryParams({
  *   search: {
- *     schema: z.string().max(200).optional(),
+ *     schema: (z) => z.string().max(200).optional(),
  *     matchRoute: (route) => route.path.includes('articles'),
  *   },
  * });

@@ -1,15 +1,39 @@
+import { AUTH_COOKIE_NAME, deleteCookie } from '../cookies';
 import {
+  ADMIN_REFRESH_LOCK,
+  attemptTokenRefresh,
+  FetchError,
+  getFailedRequestSessionToken,
   getFetchClient,
+  refreshAccessToken,
+  resetSessionExpiredNotification,
   setOnSessionExpired,
   setOnTokenUpdate,
   triggerSessionExpired,
+  unstable_addRequestHeaders,
 } from '../getFetchClient';
+
+import type { FetchClient, FetchOptions, RequestHeadersProvider } from '../getFetchClient';
+
+const buildJwt = (expSeconds: number): string => {
+  const json = JSON.stringify({ exp: expSeconds });
+  const base64url = window.btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `header.${base64url}.signature`;
+};
 
 describe('getFetchClient', () => {
   const originalLocalStorage = window.localStorage;
+  const originalNavigatorLocks = navigator.locks;
 
   beforeEach(() => {
     window.fetch = jest.fn(); // Reset the mock before each test
+
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: {
+        request: jest.fn(async (_name: string, callback: () => Promise<unknown>) => callback()),
+      },
+    });
 
     // Mock localStorage
     const localStorageMock = {
@@ -28,6 +52,10 @@ describe('getFetchClient', () => {
     Object.defineProperty(window, 'localStorage', {
       value: originalLocalStorage,
       writable: true,
+    });
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: originalNavigatorLocks,
     });
     jest.clearAllMocks();
   });
@@ -162,6 +190,34 @@ describe('getFetchClient', () => {
     });
   });
 
+  describe('credentials', () => {
+    it('should send credentials for all HTTP methods', async () => {
+      const mockOk = () =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () => Promise.resolve({ data: 'success response' }),
+        });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(mockOk)
+        .mockImplementationOnce(mockOk)
+        .mockImplementationOnce(mockOk)
+        .mockImplementationOnce(mockOk);
+
+      const fetchClient = getFetchClient();
+
+      await fetchClient.get('/test');
+      await fetchClient.post('/test', {});
+      await fetchClient.put('/test', {});
+      await fetchClient.del('/test');
+
+      (window.fetch as jest.Mock).mock.calls.forEach(([, options]) => {
+        expect(options).toEqual(expect.objectContaining({ credentials: 'include' }));
+      });
+    });
+  });
+
   describe('responseType', () => {
     it('should return a Blob when responseType is blob', async () => {
       const blobContent = new Blob(['file content'], { type: 'application/zip' });
@@ -287,6 +343,94 @@ describe('getFetchClient', () => {
     });
   });
 
+  describe('non-JSON response body', () => {
+    const nonJsonResponse = (status: number) => ({
+      status,
+      ok: status >= 200 && status < 300,
+      json: () => Promise.reject(new SyntaxError('Unexpected token <')),
+    });
+
+    it('should throw a FetchError with the status on a non-2xx response', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(nonJsonResponse(413))
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.post('/upload', {})).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Unknown Server Error',
+        status: 413,
+      });
+    });
+
+    it('should refresh the token and retry on a 401', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() => Promise.resolve(nonJsonResponse(401)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    it('should throw the 401 with the session token when the refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() => Promise.resolve(nonJsonResponse(401)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({ error: { message: 'Refresh token invalid', status: 401 } }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Unknown Server Error', status: 401 });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+      }
+    });
+
+    it('should rethrow the parse error when validateStatus accepts the status', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(nonJsonResponse(413))
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(
+        fetchClient.post('/upload', {}, { validateStatus: (status) => status === 413 })
+      ).rejects.toMatchObject({ name: 'SyntaxError' });
+    });
+  });
+
   describe('token refresh on 401', () => {
     it('should refresh token and retry on 401 error', async () => {
       // First call returns 401
@@ -335,6 +479,50 @@ describe('getFetchClient', () => {
       );
     });
 
+    it('attributes a failed retry to the refreshed token instead of the original token', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Original token expired', status: 401 },
+              }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Refreshed token rejected', status: 401 },
+              }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the retried request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Refreshed token rejected' });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('new-token');
+        expect(Object.keys(error as object)).not.toContain('sessionToken');
+        expect(JSON.stringify(error)).not.toContain('new-token');
+      }
+    });
+
     it('should not refresh token for auth paths', async () => {
       // Call to login endpoint returns 401
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
@@ -359,6 +547,8 @@ describe('getFetchClient', () => {
     });
 
     it('should throw original error if token refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+
       // First call returns 401
       (window.fetch as jest.Mock)
         .mockImplementationOnce(() =>
@@ -371,7 +561,7 @@ describe('getFetchClient', () => {
               }),
           })
         )
-        // Token refresh call fails
+        // Token refresh fails once under the cross-tab lock
         .mockImplementationOnce(() =>
           Promise.resolve({
             status: 401,
@@ -385,10 +575,275 @@ describe('getFetchClient', () => {
 
       const fetchClient = getFetchClient();
 
-      await expect(fetchClient.get('/api/test')).rejects.toThrow('Token expired');
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Token expired' });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+        expect(Object.keys(error as object)).not.toContain('sessionToken');
+        expect(JSON.stringify(error)).not.toContain('token-a');
+      }
 
-      // Should have called original request and refresh attempt
+      // Original request plus one access-token attempt
       expect(window.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should adopt a valid access token from shared storage before calling access-token', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let storageReads = 0;
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        storageReads += 1;
+        return JSON.stringify(storageReads === 1 ? staleToken : freshToken);
+      });
+
+      const token = await attemptTokenRefresh();
+
+      expect(token).toBe(freshToken);
+      expect(window.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should serialize refresh across tabs so only one access-token call is made', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let lockChain = Promise.resolve();
+      let holders = 0;
+
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: {
+          request: jest.fn(async (_name: string, callback: () => Promise<unknown>) => {
+            const run = lockChain.then(async () => {
+              holders += 1;
+              expect(holders).toBe(1);
+              try {
+                return await callback();
+              } finally {
+                holders -= 1;
+              }
+            });
+            lockChain = run.then(() => undefined);
+            return run;
+          }),
+        },
+      });
+
+      let storageReads = 0;
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        storageReads += 1;
+        // Two tabs capture stale tokens, then the lock holder checks storage once more.
+        return JSON.stringify(storageReads <= 3 ? staleToken : freshToken);
+      });
+
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: { token: freshToken },
+            }),
+        })
+      );
+
+      const [first, second] = await Promise.all([refreshAccessToken(), refreshAccessToken()]);
+
+      expect(first).toBe(freshToken);
+      expect(second).toBe(freshToken);
+      expect(window.fetch).toHaveBeenCalledTimes(1);
+      expect(navigator.locks.request).toHaveBeenCalledWith(
+        ADMIN_REFRESH_LOCK,
+        expect.any(Function)
+      );
+    });
+
+    it('should adopt a token refreshed before the failed request starts refresh handling', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let storageReads = 0;
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        storageReads += 1;
+        return JSON.stringify(storageReads === 1 ? staleToken : freshToken);
+      });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(navigator.locks.request).toHaveBeenCalledWith(
+        ADMIN_REFRESH_LOCK,
+        expect.any(Function)
+      );
+      expect(window.fetch).toHaveBeenCalledTimes(2);
+      expect(window.fetch).not.toHaveBeenCalledWith(
+        'http://localhost:1337/admin/access-token',
+        expect.anything()
+      );
+
+      const retryHeaders = (window.fetch as jest.Mock).mock.calls[1][1].headers as Headers;
+      expect(retryHeaders.get('Authorization')).toBe(`Bearer ${freshToken}`);
+    });
+
+    it('should adopt a token from shared cookie storage before calling access-token', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(null);
+      document.cookie = `jwtToken=${encodeURIComponent(freshToken)}; Path=/`;
+
+      const token = await refreshAccessToken(staleToken);
+
+      expect(token).toBe(freshToken);
+      expect(window.fetch).not.toHaveBeenCalled();
+
+      document.cookie = 'jwtToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    });
+
+    it('should wait for a shared token before retrying when Web Locks are unavailable', async () => {
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: undefined,
+      });
+
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let storedToken = staleToken;
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        return JSON.stringify(storedToken);
+      });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+          })
+        )
+        .mockImplementationOnce(() => {
+          setTimeout(() => {
+            storedToken = freshToken;
+          }, 0);
+
+          return Promise.resolve({
+            status: 401,
+            ok: false,
+          });
+        })
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(window.fetch).toHaveBeenCalledTimes(3);
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
+
+      const retryHeaders = (window.fetch as jest.Mock).mock.calls[2][1].headers as Headers;
+      expect(retryHeaders.get('Authorization')).toBe(`Bearer ${freshToken}`);
+    });
+
+    it('should retry access-token once when Web Locks are unavailable', async () => {
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: undefined,
+      });
+
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        return JSON.stringify(staleToken);
+      });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: { token: 'recovered-token' },
+              }),
+          })
+        );
+
+      const token = await attemptTokenRefresh();
+
+      expect(token).toBe('recovered-token');
+      expect(window.fetch).toHaveBeenCalledTimes(2);
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        1,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
     });
 
     it('should store new token in localStorage when refresh succeeds', async () => {
@@ -569,16 +1024,49 @@ describe('getFetchClient', () => {
       const callback = jest.fn();
       setOnSessionExpired(callback);
 
-      triggerSessionExpired();
-
+      expect(triggerSessionExpired()).toBe(true);
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    it('should be a no-op when no callback is registered', () => {
+    it('should invoke the callback only once for a single dead session', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      expect(triggerSessionExpired()).toBe(true);
+      expect(triggerSessionExpired()).toBe(true);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should invoke the callback again after the session is re-armed', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired();
+      resetSessionExpiredNotification();
+      triggerSessionExpired();
+
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('deduplicates one expired token without suppressing a newer session expiry', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired('token-a');
+      triggerSessionExpired();
+      triggerSessionExpired('token-a');
+      triggerSessionExpired('token-b');
+
+      expect(callback).toHaveBeenNthCalledWith(1, 'token-a');
+      expect(callback).toHaveBeenNthCalledWith(2, 'token-b');
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('should report that nothing handled the expiry when no callback is registered', () => {
       // Explicit clear in case any prior test left one set.
       setOnSessionExpired(null);
 
-      expect(() => triggerSessionExpired()).not.toThrow();
+      expect(triggerSessionExpired()).toBe(false);
     });
 
     it('should clear the callback when set to null', () => {
@@ -589,6 +1077,281 @@ describe('getFetchClient', () => {
       triggerSessionExpired();
 
       expect(callback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('request headers', () => {
+    type Send = (client: FetchClient, url: string, options?: FetchOptions) => Promise<unknown>;
+
+    const methods: Array<[string, Send]> = [
+      ['get', (client, url, options) => client.get(url, options)],
+      ['post', (client, url, options) => client.post(url, {}, options)],
+      ['put', (client, url, options) => client.put(url, {}, options)],
+      ['del', (client, url, options) => client.del(url, options)],
+    ];
+
+    let removers: Array<() => void> = [];
+    const register = (provider: RequestHeadersProvider) => {
+      removers.push(unstable_addRequestHeaders(provider));
+    };
+
+    const sentHeaders = (call = 0): Headers =>
+      (window.fetch as jest.Mock).mock.calls[call][1].headers;
+
+    beforeEach(() => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('stored-token'));
+      (window.fetch as jest.Mock).mockImplementation(() =>
+        Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+      );
+    });
+
+    afterEach(() => {
+      removers.forEach((remove) => remove());
+      removers = [];
+    });
+
+    it.each(methods)(
+      '%s: a caller header replaces the default whatever its casing',
+      async (_method, send) => {
+        await send(getFetchClient(), '/x', { headers: { authorization: 'Bearer caller-token' } });
+
+        expect(sentHeaders().get('Authorization')).toBe('Bearer caller-token');
+      }
+    );
+
+    it.each(methods)('%s: sends the headers a plugin registered', async (_method, send) => {
+      register(() => ({ 'x-strapi-space': 'france' }));
+
+      await send(getFetchClient(), '/x');
+
+      expect(sentHeaders().get('x-strapi-space')).toBe('france');
+    });
+
+    it.each(methods)(
+      '%s: a 401 retry sends the headers read when the call started',
+      async (_method, send) => {
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        let storageReads = 0;
+        (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+          if (key !== 'jwtToken') {
+            return null;
+          }
+          storageReads += 1;
+          return JSON.stringify(buildJwt(nowSeconds + (storageReads === 1 ? -60 : 3600)));
+        });
+
+        let space = 'france';
+        register(() => ({ 'x-strapi-space': space }));
+
+        (window.fetch as jest.Mock)
+          .mockImplementationOnce(() => {
+            // The tab switches space while the first attempt is in flight.
+            space = 'spain';
+            return Promise.resolve({
+              status: 401,
+              ok: false,
+              json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+            });
+          })
+          .mockImplementationOnce(() =>
+            Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+          );
+
+        await send(getFetchClient(), '/x');
+
+        expect(window.fetch).toHaveBeenCalledTimes(2);
+        expect(sentHeaders(1).get('x-strapi-space')).toBe('france');
+      }
+    );
+
+    it.each(methods)(
+      '%s: a caller header replaces a registered header with the same name',
+      async (_method, send) => {
+        register(() => ({ 'x-strapi-space': 'france' }));
+
+        await send(getFetchClient(), '/x', { headers: { 'X-Strapi-Space': 'spain' } });
+
+        expect(sentHeaders().get('x-strapi-space')).toBe('spain');
+      }
+    );
+
+    it.each([
+      [
+        'post',
+        (client: FetchClient, body: FormData, options: FetchOptions) =>
+          client.post('/x', body, options),
+      ],
+      [
+        'put',
+        (client: FetchClient, body: FormData, options: FetchOptions) =>
+          client.put('/x', body, options),
+      ],
+    ])('%s: sends a FormData body without a caller Content-Type', async (_method, send) => {
+      await send(getFetchClient(), new FormData(), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      expect(sentHeaders().has('Content-Type')).toBe(false);
+    });
+
+    it('sends the headers on the retry of a request sent without a stored token', async () => {
+      const freshToken = buildJwt(Math.floor(Date.now() / 1000) + 3600);
+      let storageReads = 0;
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+        storageReads += 1;
+        return storageReads === 1 ? null : JSON.stringify(freshToken);
+      });
+      deleteCookie(AUTH_COOKIE_NAME);
+      register(() => ({ 'x-strapi-space': 'france' }));
+
+      let attempts = 0;
+      (window.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (url.endsWith('/admin/access-token')) {
+          return Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: freshToken } }),
+          });
+        }
+        attempts += 1;
+        return Promise.resolve(
+          attempts === 1
+            ? {
+                status: 401,
+                ok: false,
+                json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+              }
+            : { status: 200, ok: true, json: () => Promise.resolve({}) }
+        );
+      });
+
+      await getFetchClient().get('/x');
+
+      const retry = (window.fetch as jest.Mock).mock.calls.at(-1);
+      expect(retry[0]).toMatch(/\/x$/);
+      expect(retry[1].headers.get('x-strapi-space')).toBe('france');
+    });
+
+    it('leaves out a registered header whose value is undefined', async () => {
+      register(() => ({ 'x-strapi-space': undefined }));
+
+      await getFetchClient().get('/x');
+
+      expect(sentHeaders().has('x-strapi-space')).toBe(false);
+    });
+
+    it('stops sending a header once its provider is removed', async () => {
+      const remove = unstable_addRequestHeaders(() => ({ 'x-strapi-space': 'france' }));
+      remove();
+
+      await getFetchClient().get('/x');
+
+      expect(sentHeaders().has('x-strapi-space')).toBe(false);
+    });
+
+    it.each([
+      ['Authorization', 'Bearer stored-token'],
+      ['Content-Type', 'application/json'],
+      ['Accept', 'application/json'],
+    ])('keeps the value core sends when a registered header names %s', async (name, expected) => {
+      register(() => ({ [name.toLowerCase()]: 'from-plugin' }));
+
+      await getFetchClient().post('/x', {});
+
+      expect(sentHeaders().get(name)).toBe(expected);
+    });
+
+    describe('when a provider fails', () => {
+      it.each(methods)('%s: does not send the request when a provider throws', async (_m, send) => {
+        const failure = new Error('provider failed');
+        register(() => {
+          throw failure;
+        });
+        register(() => ({ 'x-strapi-space': 'france' }));
+
+        await expect(send(getFetchClient(), '/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          cause: failure,
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['a promise', async () => ({ 'x-strapi-space': 'france' })],
+        ['null', () => null],
+      ])('does not send the request when a provider returns %s', async (_name, provider) => {
+        // Plain JavaScript plugins can return anything, which the type does not allow
+        register(provider as unknown as RequestHeadersProvider);
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        '/admin/login',
+        '/admin/logout',
+        '/admin/access-token',
+        '/admin/init',
+        '/admin/registration-info',
+        '/admin/register',
+        '/admin/register-admin',
+        '/admin/forgot-password',
+        '/admin/reset-password',
+        '/admin/providers',
+        '/admin/providers?mode=sso',
+        'admin/logout',
+      ])('still sends %s', async (url) => {
+        register(() => {
+          throw new Error('provider failed');
+        });
+
+        await getFetchClient().post(url, {});
+
+        expect(window.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      it.each(['/admin/login-history', '/admin/providers/isSSOLocked'])(
+        'does not send %s',
+        async (url) => {
+          register(() => {
+            throw new Error('provider failed');
+          });
+
+          await expect(getFetchClient().get(url)).rejects.toMatchObject({
+            name: 'RequestHeadersError',
+          });
+          expect(window.fetch).not.toHaveBeenCalled();
+        }
+      );
+
+      it('does not send the request when a header value is not a string', async () => {
+        // Plain JavaScript plugins can return any value, which the type does not allow
+        register(
+          () =>
+            ({ 'x-strapi-space': Promise.resolve('france') }) as unknown as Record<string, string>
+        );
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          message: expect.stringContaining('"x-strapi-space"'),
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
+
+      it('does not send the request when a header cannot be sent by the browser', async () => {
+        register(() => ({ 'x-strapi-space': '日本' }));
+
+        await expect(getFetchClient().get('/x')).rejects.toMatchObject({
+          name: 'RequestHeadersError',
+          message: expect.stringContaining('"x-strapi-space"'),
+        });
+        expect(window.fetch).not.toHaveBeenCalled();
+      });
     });
   });
 });

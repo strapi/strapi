@@ -14,8 +14,8 @@ const AssigneeFilter = ({ name }: Filters.ValueInputProps) => {
   const [pageSize, setPageSize] = React.useState(PAGE_SIZE);
   const [hasOpened, setHasOpened] = React.useState(false);
   const { formatMessage } = useIntl();
-  const field = useField(name);
-  const shouldFetch = hasOpened || Boolean(field.value);
+  const field = useField<string>(name);
+  const shouldFetch = hasOpened || (field.value !== undefined && field.value !== '');
   const { data, isLoading } = useAdminUsers({ pageSize }, { skip: !shouldFetch });
 
   const handleChange = (value?: string) => {

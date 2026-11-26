@@ -1,0 +1,41 @@
+---
+title: Releases page
+description: 'Documentation of the content releases page user interface.'
+tags:
+  - tech-design
+  - frontend
+status: stub
+---
+
+### Overview
+
+The releases page lists every release in one paginated table (10, 20, 50 or 100 per page, the admin's sizes; 10 by default), sorted by scheduled date (the unscheduled releases first, most recently updated first, then soonest first). Its columns are name, status, schedule, entries and release mode; clicking a row opens the release details page. The header subtitle shows the number of releases matching the applied filters (every release without filters).
+
+The schedule column shows the release's `scheduledAt`, the date the schedule sorts and the "Scheduled for" filter use, or "Not scheduled": a release published by hand without a schedule stays "Not scheduled" after it ran. Before the date, on the same line, the same instant reads as a relative time alone, sentence-cased ("In 2 days", "3 days ago", "Yesterday"), with no words around it: the status column tells a release that ran from one that missed its schedule, and the release details page shows when a release ran (`releasedAt`; for one that froze without running, `failureReason` set, `releasedAt` is only when it froze). The relative time counts days by calendar day in the viewer's timezone, not by elapsed 24-hour periods. A calendar icon marks a date still to come on a release that hasn't run and a paper plane any other date; "Not scheduled" has a minus icon. A release still to come (not run, and scheduled in the future or not at all) is in the table's text colour (`neutral800`) in its name, entries and release mode columns; a release that ran or whose schedule passed is grey (`neutral600`), so the runs to come stand out. The date itself is in the text colour only while it is still to come.
+
+The list, the release details and its entries refetch when content changes in the Content Manager (save, discard, delete, publish and unpublish, one entry or many: `ENTRY_MUTATIONS` in `services/release.ts`) and when an entry's review stage or a review workflow changes, as these change which entries are ready. The review-workflows mutations invalidate the `ReviewWorkflowStages` tag, which the release queries provide: extending those mutations from `services/release.ts` would depend on the plugins' load order.
+
+#### Filters
+
+A "Filters" button above the table opens the admin's list filters popover (`Filters` from `@strapi/admin`), with four fields:
+
+- **Status**: the release's stored `status` (`is` / `is not`).
+- **Release mode**: `allow_partial` or `all_or_nothing` (`is` / `is not`).
+- **Scheduled for**: the release's `scheduledAt`. "Not scheduled" is `is null`.
+- **Released on**: the release's `releasedAt`, set when it ran. "Not released yet" is `is null`.
+
+The two date fields use `ScheduleFilterInput`: a date, and an optional time. A date alone is stored in the URL as `YYYY-MM-DD` and matches that whole day; a date and a time is stored as an ISO string and matches that minute. Stored dates have seconds and milliseconds, so `utils/scheduleFilters` turns each date filter into bounds before calling the API: `is` becomes `$gte` start and `$lt` end, `is not` an `$or` outside them, and before/after the matching bound. Days and times are the viewer's, as in the pickers, and the time picker shows times in the admin locale's format. A hand-edited URL setting several operators on one date filter keeps all of them, combined with `$and`; a date that doesn't exist (e.g. `2026-13-45`) is sent as it is. The date tags show the value through the filter's `formatValue`; the status and release mode tags show the option's label.
+
+Filters live in the URL as `filters[$and]`, like the Content Manager list view, and combine with each other. Applied filters show as removable tags; "Clear all" next to the tags, or "Clear filters" in the empty state, removes them all. A `filters[releasedAt]` left in the URL by the old Pending/Done tabs is ignored, and so is a `filters[$and]` that isn't a list.
+
+#### Sort
+
+A "Sort" menu on the right of the filter bar sets the `sort` URL param: scheduled date soonest first (`scheduledAt:asc`, the default) or latest first (`scheduledAt:desc`), most recent updates, oldest updates, most recently created, and name A to Z or Z to A. Both schedule sorts list the unscheduled releases first, whatever the database (see the backend page). They sort by `scheduledAt`, the date the schedule column shows. Changing the sort keeps the applied filters and goes back to the first page; adding or clearing filters and changing page keep the sort. A sort set in the URL that the menu doesn't offer is still sent to the API; the menu then reads just "Sort".
+
+#### New Release Creation:
+
+If a user has the `plugin::content-releases.create` permission, a 'New release' button will be visible in the header. Clicking the button opens a side panel with the release name, its schedule ("I don't have a release date yet", then the date, time and timezone) and its release mode. The schedule uses the design system's `DatePicker`, `TimePicker` and `Combobox`: a combined date, time and timezone picker waits for the `/next` `Popover`, `Calendar` and `Combobox` (strapi/design-system#2082), so the plugin doesn't depend on `@base-ui/react` itself. The side panel reads a release's schedule as the date and time a clock in the release's timezone shows (`getWallClock` in `utils/time.ts`), never through a browser `Date`, so a time in the browser's DST gap doesn't shift. The form keeps the time as `HH:mm`; the time picker shows and returns it in the admin locale's format (`10.00` in Finnish), as in the date filters. The date and time start empty. Ticking "I don't have a release date yet", which sits above the date and time so it doesn't move when they hide, only hides the schedule: unticking it brings back what was picked, and while it's ticked the schedule is neither validated nor submitted. The release modes list "Release all ready items" first and the default, "Require every entry to be ready", second (the reverse of `RELEASE_CONDITIONS`). The name of a pending release must be unique. Once created, the user is taken to the new release. If the API refuses it, e.g. for a name already in use, its error message shows in the notification.
+
+#### License limits
+
+If the user reaches the limit of maximum pending releases defined on their license then the 'New release' button is disabled and a banner is displayed to inform the user.

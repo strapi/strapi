@@ -2,8 +2,6 @@ import path from 'path';
 import { createWriteStream } from 'fs';
 import { Writable, pipeline } from 'stream';
 import fs from 'fs-extra';
-import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain } from 'stream-chain';
 
 import type {
   IAsset,
@@ -11,8 +9,9 @@ import type {
   IDestinationProviderTransferResults,
   IMetadata,
   ProviderType,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
+import { createJsonlWriteStream } from '../../../utils/jsonl-write-stream';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -26,8 +25,7 @@ export interface ILocalDirectoryDestinationProviderOptions {
   };
 }
 
-export interface ILocalDirectoryDestinationProviderTransferResults
-  extends IDestinationProviderTransferResults {
+export interface ILocalDirectoryDestinationProviderTransferResults extends IDestinationProviderTransferResults {
   file?: {
     path?: string;
   };
@@ -54,6 +52,8 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #rolledBack = false;
+
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
     this.#rootResolved = path.resolve(options.directory.path);
@@ -77,16 +77,22 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
+    this.#rolledBack = false;
     this.#reportInfo('preparing directory export');
     await fs.mkdir(this.#rootResolved, { recursive: true });
     this.results.file = { path: this.#rootResolved };
   }
 
   async close() {
+    if (this.#rolledBack) {
+      return;
+    }
+
     await this.#writeMetadata();
   }
 
   async rollback(): Promise<void> {
+    this.#rolledBack = true;
     this.#reportInfo('rolling back');
     await fs.rm(this.#rootResolved, { recursive: true, force: true });
   }
@@ -105,48 +111,32 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     }
   }
 
-  createSchemasWriteStream() {
-    this.#reportInfo('creating schemas write stream');
-    const filePathFactory = createFilePathFactory('schemas');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+  createSchemasWriteStream(): Writable {
+    return this.#createJsonlWriteStream('schemas');
   }
 
   createEntitiesWriteStream(): Writable {
-    this.#reportInfo('creating entities write stream');
-    const filePathFactory = createFilePathFactory('entities');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('entities');
   }
 
   createLinksWriteStream(): Writable {
-    this.#reportInfo('creating links write stream');
-    const filePathFactory = createFilePathFactory('links');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('links');
   }
 
   createConfigurationWriteStream(): Writable {
-    this.#reportInfo('creating configuration write stream');
-    const filePathFactory = createFilePathFactory('configuration');
+    return this.#createJsonlWriteStream('configuration');
+  }
+
+  #createJsonlWriteStream(stage: string): Writable {
+    this.#reportInfo(`creating ${stage} write stream`);
+    const filePathFactory = createFilePathFactory(stage);
     const entryStream = createDirectoryJsonlWriter(
       this.#rootResolved,
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
-    return chain([stringer(), entryStream]);
+
+    return createJsonlWriteStream(entryStream);
   }
 
   createAssetsWriteStream(): Writable {

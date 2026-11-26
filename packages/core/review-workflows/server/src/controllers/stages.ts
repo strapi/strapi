@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { async, validate } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateUpdateStageOnEntity, validateLocale } from '../validation/review-workflows';
 import {
@@ -25,14 +25,21 @@ function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown
   return (entity: unknown) => permissionChecker.sanitizeOutput(entity);
 }
 
+/**
+ * Converts the query string populate (`'*'`, `'a,b'`, `['a']`, `{ a: 'true' }`) into the shape
+ * the database query accepts. A populate it cannot convert throws a ValidationError (400).
+ */
+function convertPopulate({ strapi }: { strapi: Core.Strapi }, populate: unknown) {
+  return strapi.get('query-params').transform(STAGE_MODEL_UID, { populate }).populate;
+}
+
 export default {
   /**
    * List all stages
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx: Context) {
     const { workflow_id: workflowId } = ctx.params;
-    const { populate } = ctx.query;
+    const populate = convertPopulate({ strapi }, ctx.query.populate);
     const stagesService = getService('stages');
     const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
@@ -47,11 +54,10 @@ export default {
   },
   /**
    * Get one stage
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async findById(ctx: Context) {
     const { id, workflow_id: workflowId } = ctx.params;
-    const { populate } = ctx.query;
+    const populate = convertPopulate({ strapi }, ctx.query.populate);
     const stagesService = getService('stages');
     const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
@@ -59,6 +65,10 @@ export default {
       workflowId,
       populate,
     });
+
+    if (stage === null) {
+      return ctx.notFound("Stage doesn't exist");
+    }
 
     ctx.body = {
       data: await sanitizer(stage),

@@ -1,0 +1,188 @@
+import { attemptTokenRefresh, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
+
+import type { File } from '../../../shared/contracts/files';
+
+/**
+ * Thrown when an upload is aborted via its `AbortSignal`.
+ * Distinct from {@link UploadFileError} so callers can tell cancellation apart
+ * from a genuine failure.
+ */
+export class UploadAbortedError extends Error {
+  constructor(message = 'Upload aborted') {
+    super(message);
+    this.name = 'UploadAbortedError';
+  }
+}
+
+/**
+ * Thrown when an upload fails (non-2xx response, network error, or unparseable body).
+ */
+export class UploadFileError extends Error {
+  status?: number;
+
+  /**
+   * Whether `message` came from the response body. The fallbacks this module
+   * invents are hardcoded English; callers with localized text should use theirs.
+   */
+  isServerMessage: boolean;
+
+  /** `error.name` from the Strapi error envelope, when there is one. */
+  errorName?: string;
+
+  /** `error.details` from the Strapi error envelope, when there is one. */
+  details?: unknown;
+
+  constructor(
+    message: string,
+    status?: number,
+    isServerMessage = false,
+    { errorName, details }: { errorName?: string; details?: unknown } = {}
+  ) {
+    super(message);
+    this.name = 'UploadFileError';
+    this.status = status;
+    this.isServerMessage = isServerMessage;
+    this.errorName = errorName;
+    this.details = details;
+  }
+}
+
+export type UploadProgressCallback = (bytes: number, total: number) => void;
+
+/**
+ * Uploads a single file via `XMLHttpRequest`, exposing real byte-level upload
+ * progress through {@link XMLHttpRequest.upload}'s `progress` event.
+ *
+ * This is the only place raw XHR lives. `fetch()` is intentionally avoided here
+ * because it does not surface upload progress.
+ *
+ * @param url - The full endpoint URL to POST to.
+ * @param token - Admin auth token; the `Authorization` header is only set when present.
+ * @param requestHeaders - Headers from `unstable_getRequestHeaders()`, read by the caller.
+ * @param formData - Prebuilt multipart body containing the single file and its `fileInfo`.
+ * @param signal - Aborts the in-flight request when triggered.
+ * @param onProgress - Called with `(loaded, total)` bytes as the upload progresses.
+ * @returns The parsed response body on a 2xx response — a signed `File` by default,
+ * or `T` when the endpoint returns a different shape (e.g. an array of files).
+ * @throws {UploadAbortedError} When the signal aborts.
+ * @throws {UploadFileError} On a non-2xx response or network error.
+ */
+const sendUploadViaXHR = <T>(
+  url: string,
+  token: string | null | undefined,
+  requestHeaders: Headers,
+  formData: FormData,
+  signal: AbortSignal,
+  onProgress?: UploadProgressCallback
+): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new UploadAbortedError());
+      return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+
+    if (token) {
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    }
+
+    requestHeaders.forEach((value, name) => xhr.setRequestHeader(name, value));
+
+    const handleAbort = () => xhr.abort();
+    signal.addEventListener('abort', handleAbort);
+
+    const cleanup = () => signal.removeEventListener('abort', handleAbort);
+
+    if (onProgress) {
+      xhr.upload.onprogress = (event: ProgressEvent) => {
+        if (event.lengthComputable) {
+          onProgress(event.loaded, event.total);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      cleanup();
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as T);
+        } catch {
+          reject(new UploadFileError('Failed to parse upload response'));
+        }
+        return;
+      }
+
+      let message = `Upload failed with status ${xhr.status}`;
+      let isServerMessage = false;
+      let errorName: string | undefined;
+      let details: unknown;
+      try {
+        const parsed = JSON.parse(xhr.responseText);
+        const serverMessage = parsed?.error?.message || parsed?.message;
+        if (serverMessage) {
+          message = serverMessage;
+          isServerMessage = true;
+        }
+        if (parsed?.error && typeof parsed.error === 'object') {
+          errorName = typeof parsed.error.name === 'string' ? parsed.error.name : undefined;
+          details = parsed.error.details;
+        }
+      } catch {
+        // Keep the default status-based message.
+      }
+      reject(new UploadFileError(message, xhr.status, isServerMessage, { errorName, details }));
+    };
+
+    xhr.onerror = () => {
+      cleanup();
+      reject(new UploadFileError('Network error occurred'));
+    };
+
+    xhr.onabort = () => {
+      cleanup();
+      reject(new UploadAbortedError());
+    };
+
+    xhr.send(formData);
+  });
+};
+
+/** @throws {RequestHeadersError} When `requestHeaders` is absent and a provider fails */
+export const uploadFileViaXHR = async <T = File>(
+  url: string,
+  token: string | null | undefined,
+  formData: FormData,
+  signal: AbortSignal,
+  onProgress?: UploadProgressCallback,
+  requestHeaders: Headers = unstable_getRequestHeaders()
+): Promise<T> => {
+  try {
+    return await sendUploadViaXHR<T>(url, token, requestHeaders, formData, signal, onProgress);
+  } catch (error) {
+    if (!(error instanceof UploadFileError) || error.status !== 401) {
+      throw error;
+    }
+
+    try {
+      const refreshedToken = await attemptTokenRefresh();
+
+      return await sendUploadViaXHR<T>(
+        url,
+        refreshedToken,
+        requestHeaders,
+        formData,
+        signal,
+        onProgress
+      );
+    } catch (refreshError) {
+      if (refreshError instanceof UploadFileError) {
+        throw refreshError;
+      }
+
+      throw error;
+    }
+  }
+};

@@ -1,6 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
 
 import { StrapiApp } from '../StrapiApp';
+import { getFetchClient } from '../utils/getFetchClient';
 
 describe('ADMIN | new StrapiApp', () => {
   it('should render the app without plugins', async () => {
@@ -164,6 +165,50 @@ describe('ADMIN | new StrapiApp', () => {
           },
           permissions: [],
           to: 'bar',
+        },
+      ]);
+    });
+
+    it('should add an array of links via addSettingsLink to the global section', () => {
+      const app = new StrapiApp();
+      const links = [
+        {
+          Component: jest.fn(),
+          to: 'bar',
+          id: 'bar',
+          intlLabel: { id: 'bar', defaultMessage: 'bar' },
+          permissions: [],
+        },
+        {
+          Component: jest.fn(),
+          to: 'baz',
+          id: 'baz',
+          intlLabel: { id: 'baz', defaultMessage: 'baz' },
+          permissions: [],
+        },
+      ];
+
+      app.addSettingsLink('global', links);
+
+      expect(app.router.settings.global.links).toHaveLength(2);
+      expect(app.router.settings.global.links).toEqual([
+        {
+          id: 'bar',
+          intlLabel: {
+            defaultMessage: 'bar',
+            id: 'bar',
+          },
+          permissions: [],
+          to: 'bar',
+        },
+        {
+          id: 'baz',
+          intlLabel: {
+            defaultMessage: 'baz',
+            id: 'baz',
+          },
+          permissions: [],
+          to: 'baz',
         },
       ]);
     });
@@ -430,6 +475,39 @@ describe('ADMIN | new StrapiApp', () => {
       expect(() => app.customFields.register(field)).toThrowError(
         "The 'name' property is required on an options object"
       );
+    });
+  });
+
+  describe('Request headers api', () => {
+    const originalFetch = window.fetch;
+    let removeHeaders: (() => void) | undefined;
+
+    afterEach(() => {
+      removeHeaders?.();
+      window.fetch = originalFetch;
+      window.localStorage.removeItem('jwtToken');
+    });
+
+    it('adds the headers a plugin registers to admin requests', async () => {
+      window.fetch = jest.fn().mockResolvedValue({ status: 200, ok: true, json: async () => ({}) });
+      const app = new StrapiApp({
+        appPlugins: {
+          spaces: {
+            register(strapiApp) {
+              removeHeaders = strapiApp.unstable_addRequestHeaders(() => ({
+                'x-strapi-space': 'france',
+              }));
+            },
+          },
+        },
+      });
+
+      await app.register();
+      window.localStorage.setItem('jwtToken', JSON.stringify('token'));
+      await getFetchClient().get('/admin/users/me');
+
+      const sent: Headers = (window.fetch as jest.Mock).mock.calls[0][1].headers;
+      expect(sent.get('x-strapi-space')).toBe('france');
     });
   });
 

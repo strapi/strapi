@@ -131,8 +131,8 @@ const CodeBlock = styled.pre`
   flex-shrink: 1;
 
   & > code {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
-      monospace;
+    font-family:
+      'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
     color: ${({ theme }) => theme.colors.neutral800};
     overflow: auto;
     max-width: 100%;

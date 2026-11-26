@@ -14,7 +14,11 @@ Larger chunks of changes to Strapi that might affect many users require a thorou
 
 The Request For Comments process will help us create consensus among the core team and include as much feedback as possible from the community for these upcoming changes.
 
-A Request For Comments has to be created on the [strapi/rfcs](https://github.com/strapi/rfcs) repository.
+Requests For Comments are held in the [RFCs category of GitHub Discussions](https://github.com/strapi/strapi/discussions/categories/rfcs). Open a new discussion there describing the problem, the motivation and your proposed design. Listing the specific questions you'd like feedback on at the top helps reviewers focus.
+
+Please do not open a pull request containing an RFC document. The [discussion](https://github.com/strapi/strapi/discussions/categories/rfcs) stays the record of the design decision once the RFC has been discussed and approved.
+
+The [strapi/rfcs](https://github.com/strapi/rfcs) repository is no longer used for new proposals.
 
 ## Code of Conduct
 
@@ -52,7 +56,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version `>= v20 and <= v26` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version `>= v22 and <= v26` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -65,8 +69,8 @@ The Strapi core team will review your pull request and either merge it, request 
   - `yarn test:unit`
   - `yarn test:front`
   - `yarn test:e2e --setup --concurrency=1`
-    - you **_may_** need to install Playwright browsers first: `yarn playwright install`
-    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/guides/e2e/00-setup.md`](docs/docs/guides/e2e/00-setup.md))
+    - you **_may_** need to install Playwright browsers first: `yarn playwright install chromium webkit`
+    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/contributing/03-testing/e2e/00-setup.md`](docs/docs/contributing/03-testing/e2e/00-setup.md))
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 
@@ -90,7 +94,15 @@ Go to the root of the repository and run the setup:
 cd strapi
 yarn install
 yarn setup
+yarn ai:sync  # link AI skills into your local tool directories (.agents/, .claude/, .cursor/)
+```
 
+To set up a checkout created with Git worktrees:
+
+```bash
+git worktree add <path> <commit-ish>
+cd <path>
+yarn setup:worktree
 ```
 
 ### 4. Start the example application
@@ -125,7 +137,7 @@ Both commands must be running at same time; now you will be able to see the admi
 ### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
-- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn build` builds every package (code and types).
 - `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
 - `yarn setup` installs dependencies.
 - `yarn lint` lints the codebase.
@@ -134,25 +146,23 @@ Both commands must be running at same time; now you will be able to see the admi
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:api` runs the api integration tests.
-- `yarn test:generate-app` generates a test application.
-- `yarn test:run-app` runs a test application.
-- `yarn test:start-app` starts the test application.
+- `yarn test:generate-app` generates a test application in `test-apps/base`.
 
 ---
 
 ## Running the API Integration tests
 
-The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+The API integration tests require a Strapi app to be able to run. `yarn test:api` generates a fresh one in `test-apps/api` on every run, so you don't need to generate it yourself. A stale app makes the test suite fail.
+
+To generate a standalone test app (in `test-apps/base`, not used by `yarn test:api`), pass the database as a positional argument:
 
 ```bash
-$ yarn test:generate-app --db=sqlite
-$ yarn test:generate-app --db=postgres
-$ yarn test:generate-app --db=mysql
+$ yarn test:generate-app sqlite
+$ yarn test:generate-app postgres
+$ yarn test:generate-app mysql
 ```
 
-A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
-
-This command runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
+`yarn test:api` runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
 
 ### Changing the database
 
@@ -195,7 +205,7 @@ The types are based on our GitHub label, here are a subset:
 
 - `fix` – When fixing an issue.
 - `chore` – When doing some cleanup, working on tooling, some refactoring. (usually reserved for **internal** work)
-- `doc` – When writing documentation.
+- `docs` – When writing documentation.
 - `feat` – When working on a feature.
 
 You can see the complete list [here](https://github.com/strapi/strapi/blob/develop/.commitlintrc.ts#L11).
@@ -207,14 +217,14 @@ The subject of a commit should be a summary of what the commit is about. It shou
 - `feat: what the feature is`
 - `fix: what the problem is`
 - `chore: what the PR is about`
-- `doc: what is documented`
+- `docs: what is documented`
 
 Examples:
 
 - `feat: introduce document service`
 - `fix: unable to publish documents due to missing permissions`
 - `chore: refactor data-fetching in EditView to use react-query`
-- `doc: document service API reference`
+- `docs: document service API reference`
 
 > ⚠️ For a `fix` commit the message should explain what the commit is fixing. Not what the solution is.
 

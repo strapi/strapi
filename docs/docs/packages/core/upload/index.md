@@ -1,0 +1,72 @@
+---
+title: '@strapi/upload'
+sidebar_label: 'upload'
+description: 'Upload plugin: the Media Library, file and folder storage, image processing, and upload providers.'
+package: '@strapi/upload'
+status: draft
+review_notes:
+  - Written from the package source on develop; needs a maintainer review.
+  - AI metadata, MCP tools and the GraphQL extension are not documented beyond a mention. Add pages for them.
+---
+
+## Purpose
+
+`@strapi/upload` is the plugin that stores files for a Strapi application. It provides the Media Library in the admin panel, the upload routes of the admin API and the Content API, and the file and folder content types. It processes images and hands the files to an upload provider.
+
+The plugin has a server part (`strapi-server`), an admin part (`strapi-admin`) and shared code (`shared/`, bundled into both parts and not exported). The plugin loader always enables it. The `media` attribute of any content type points to its files. The provider packages under `packages/providers/upload-*` implement the storage.
+
+## Key concepts
+
+### Content types
+
+The plugin declares two content types: `plugin::upload.file` and `plugin::upload.folder`. Both are hidden from the content manager and the content-type builder. A file has a morph relation named `related` to the entries that use it. A folder has `parent`, `children` and `files` relations, and a unique `path` and `pathId`. The relations build the folder tree of the Media Library.
+
+### Upload provider
+
+`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. See [Providers](./01-backend/00-providers.md).
+
+### Upload flow
+
+The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. It sends the file to the provider service, which prefers `uploadStream` over `upload`. It saves the `plugin::upload.file` entry and emits a `media.create` event, or `media.update` and `media.delete` for the other actions. The option `concurrentUploadSize` sets how many files one request processes at the same time.
+
+### Size limits
+
+Two limits apply to an uploaded file. The `strapi::body` middleware rejects a request whose files add up to more than `formidable.maxFileSize` while it parses it, before the plugin runs. formidable 2.x counts the file bytes of the whole request, not of each file, so a batch of small files can hit the limit too. The plugin then rejects a file above `upload.config.sizeLimit` (default 1 GB) in `checkFileSize`. The base provider in `server/src/register.ts` implements it, and a provider can override it, as `@strapi/provider-upload-local` does. A URL import checks `sizeLimit` while it downloads the file, in `fetchUrlToInputFile`.
+
+Each rejection carries a `details` object that names the limit, typed as `UploadTooLargeDetails` in `shared/contracts/files.ts`, with the limit in bytes:
+
+- The body parser answers with a 413 `PayloadTooLargeError` and `{ code: 'FileTooBig', limit }`.
+- `checkFileSize` throws a `PayloadTooLargeError` (413) with `{ code: 'SizeLimitExceeded', limit }`. When `@strapi/provider-upload-local` applies the deprecated `upload.config.providerOptions.sizeLimit`, the details also have `setting: 'upload.config.providerOptions.sizeLimit'`, and the admin names that setting instead of `upload.config.sizeLimit`.
+- A URL import throws an `ApplicationError` with `{ code: 'SizeLimitExceeded', limit }`. The response is a stream with status 200, so the error reaches the admin as a `file:error` event that carries the same details.
+
+The admin reads them in `admin/src/utils/getUploadTooLargeError.ts`. It treats a 413 that is not a Strapi `PayloadTooLargeError` as a limit outside Strapi, such as a reverse proxy.
+
+`register` calls `warnOnSizeLimitMismatch` (`server/src/size-limit-warning.ts`). It logs one warning when `sizeLimit` is higher than the body parser limit, because files between the two are rejected by the body parser. It compares the effective values, so it stays quiet when both are at their defaults (1 GB and 200 MiB), which have always been in that state. A `sizeLimit` or `maxFileSize` set explicitly to its default cannot be told apart from an unset one, so that pair stays quiet too.
+
+### MIME type validation
+
+`server/src/utils/mime-validation.ts` decides whether a file is accepted. It compares the declared type, the type from the file extension and the type detected from the content against the `allowedTypes` and `deniedTypes` lists. See [MIME type validation](./01-backend/01-mime-validation.md).
+
+### Image processing
+
+The `image-manipulation` service uses `sharp`. It checks that a file is a valid image, optimizes it, and generates a thumbnail and the responsive formats. The stored settings `sizeOptimization`, `responsiveDimensions` and `autoOrientation` control these steps. `bootstrap` writes their defaults into the plugin store.
+
+### Private providers and signed URLs
+
+A provider can return `true` from `isPrivate()` and implement `getSignedUrl(file)`. In that case, `signFileUrlsOnDocumentService` adds a document service middleware. The middleware signs the file URLs in the results and removes signatures from the data that callers write.
+
+### Admin part
+
+The admin entry adds the Media Library menu link and its settings page, registers the `media` field input, and registers the `media-library` dialog component. `bootstrap` on the server registers the permission actions, for example `plugin::upload.assets.create`, and the webhook events. The redesigned Media Library is the default. The `useLegacyMediaLibrary` key in `config/features` selects the legacy one from `admin/src/legacy`.
+
+The [Admin](./02-admin/00-overview.md) pages document the admin code: its layout, the [asset list](./02-admin/01-asset-list.md), the [asset details drawer](./02-admin/02-asset-details-drawer.md), [forms](./02-admin/03-forms.md), [uploads](./02-admin/04-uploads.md), the [media field and picker](./02-admin/05-media-field-and-picker.md), [drag and drop](./02-admin/06-drag-and-drop.md), [data fetching](./02-admin/07-data-fetching.md) and [testing](./02-admin/08-testing.md).
+
+## Related
+
+- [Extension points](../../../architecture/04-extension-points.md): the plugin loader enables this plugin, and the plugin adds a document middleware.
+- [Document write path](../../../architecture/05-document-write-path.md): the signing middleware runs in the Document Service chain.
+- [`@strapi/provider-upload-local`](../../providers/upload-local/index.md): the default provider.
+- [`@strapi/provider-upload-aws-s3`](../../providers/upload-aws-s3/index.md): a remote provider.
+- [`@strapi/provider-upload-cloudinary`](../../providers/upload-cloudinary/index.md): a remote provider.
+- [`@strapi/admin`](../admin/index.md): hosts the field registry and the menu API that the admin part uses.
+- [`@strapi/utils`](../utils/index.md): provides the file helpers and error classes.

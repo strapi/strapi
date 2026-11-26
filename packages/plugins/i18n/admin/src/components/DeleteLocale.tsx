@@ -43,7 +43,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
       });
 
       setVisible(false);
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

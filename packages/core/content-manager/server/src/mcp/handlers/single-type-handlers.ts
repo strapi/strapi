@@ -7,7 +7,8 @@ import { formatDocumentWithMetadata } from '../../controllers/utils/metadata';
 import { getPopulateForLocalizations } from '../../services/utils/populate';
 import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
-import { ok } from '../utils';
+import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
+import { ok, sanitizeFormatShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -66,7 +67,6 @@ export const singleCreateOrUpdate = async (
   const populate = await getService('populate-builder')(typedUid)
     .populateFromQuery(sanitizedQuery)
     .populateDeep(Infinity)
-    .countRelations()
     .withPopulateOverride(getPopulateForLocalizations(typedUid))
     .build();
 
@@ -120,8 +120,7 @@ export const singleCreateOrUpdate = async (
       });
     }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(doc);
-    return formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+    return sanitizeFormatShape(permissionChecker, typedUid, doc);
   });
 
   return ok(formatted as Record<string, unknown>);
@@ -163,7 +162,6 @@ export const createSingleGetHandler =
     const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
-      .countRelations()
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
@@ -206,8 +204,7 @@ export const createSingleGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, typedUid, version);
 
     return ok(result as Record<string, unknown>);
   };
@@ -255,7 +252,6 @@ export const createSingleDeleteHandler =
     const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(sanitizedQuery)
       .populateDeep(Infinity)
-      .countRelations()
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
@@ -284,9 +280,11 @@ export const createSingleDeleteHandler =
       locale: localeForQuery,
     });
 
+    // Delete returns `{ data }` without metadata — no status to compute, so sanitize + shape only.
     const sanitizedResult = await permissionChecker.sanitizeOutput(deletedEntity);
+    const shapedResult = await shapeRelationsForMcp(typedUid, sanitizedResult);
 
-    return ok({ data: sanitizedResult } as Record<string, unknown>);
+    return ok({ data: shapedResult } as Record<string, unknown>);
   };
 
 /**
@@ -340,8 +338,7 @@ export const createSinglePublishHandler =
       return publishResult?.at(0);
     });
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, typedUid, publishedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -404,8 +401,7 @@ export const createSingleUnpublishHandler =
       return asyncPipe.pipe(
         (doc: any) =>
           documentManager.unpublish(doc.documentId, typedUid, { locale: resolvedLocale }),
-        permissionChecker.sanitizeOutput,
-        (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
+        (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
       )(document);
     });
 
@@ -458,8 +454,7 @@ export const createSingleDiscardDraftHandler =
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) =>
         documentManager.discardDraft(doc.documentId, typedUid, { locale: resolvedLocale }),
-      permissionChecker.sanitizeOutput,
-      (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
+      (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
     )(document);
 
     return ok(discardedDocument as Record<string, unknown>);

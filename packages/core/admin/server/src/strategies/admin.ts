@@ -61,6 +61,8 @@ export const authenticate = async (ctx: Context) => {
   // ctx.state.userAbility, and remove the assign below
   ctx.state.userAbility = userAbility;
   ctx.state.user = user;
+  // Expose the session backing this request so endpoints can flag the "current" session.
+  ctx.state.session = { id: result.payload.sessionId };
 
   return {
     authenticated: true,

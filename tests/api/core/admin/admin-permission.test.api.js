@@ -416,10 +416,22 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
+                "action": "admin::audit-logs.export",
+                "category": "audit logs",
+                "displayName": "Export",
+                "subCategory": "options",
+              },
+              {
                 "action": "admin::audit-logs.read",
                 "category": "audit logs",
                 "displayName": "Read",
                 "subCategory": "options",
+              },
+              {
+                "action": "admin::debug-dump.read",
+                "category": "debug and support",
+                "displayName": "Generate a support debug dump",
+                "subCategory": "general",
               },
               {
                 "action": "admin::marketplace.read",
@@ -1035,6 +1047,12 @@ describe('Role CRUD End to End', () => {
                 "action": "admin::api-tokens.update",
                 "category": "api tokens",
                 "displayName": "Update",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::debug-dump.read",
+                "category": "debug and support",
+                "displayName": "Generate a support debug dump",
                 "subCategory": "general",
               },
               {

@@ -4,26 +4,31 @@ import { deriveDisplayedContentTypeMcpToolDefinitions } from './derive-content-t
 import { getService } from '../utils';
 
 /**
- * Registers derived content-type MCP tools during plugin bootstrap, before the MCP HTTP server starts.
+ * Registers derived content-type MCP tools via strapi.ai.mcp.registerTool().
+ * Must be called from the plugin bootstrap phase: after every plugin's register (so the
+ * localization provider is installed and locale rows are readable) and before the MCP HTTP
+ * server starts.
  */
 export const registerContentManagerMcpTools = async ({
   strapi,
 }: {
   strapi: Core.Strapi;
 }): Promise<void> => {
+  // Performance only: registerTool() is safe when MCP is disabled (definitions are stored but
+  // never exposed). Skip the expensive derivation below when the MCP server will not start.
   if (strapi.ai.mcp.isEnabled() !== true) {
     return;
   }
 
-  const i18nPlugin = strapi.plugin('i18n');
-
-  let localeCodes = null;
+  let localeCodes: [string, ...string[]] | null = null;
   let defaultLocale: string | null = null;
-  if (i18nPlugin !== undefined) {
-    localeCodes = (await i18nPlugin.service('locales').find()).map(
-      (locale: { code: string }) => locale.code
-    ) as [string, ...string[]];
-    defaultLocale = await i18nPlugin.service('locales').getDefaultLocale();
+  if (strapi.localization.isEnabled() === true) {
+    // The tuple type is a lie for zero locales; consumers guard on length > 0 before z.enum.
+    localeCodes = (await strapi.localization.getLocales()).map((locale) => locale.code) as [
+      string,
+      ...string[],
+    ];
+    defaultLocale = await strapi.localization.getDefaultLocale();
   }
 
   const models = getService('content-types').findDisplayedContentTypes();

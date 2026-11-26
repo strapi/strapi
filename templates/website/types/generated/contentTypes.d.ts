@@ -862,7 +862,7 @@ export interface AdminTransferTokenPermission extends Struct.CollectionTypeSchem
 }
 
 declare module '@strapi/strapi' {
-  export module Public {
+  export namespace Public {
     export interface ContentTypeSchemas {
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;

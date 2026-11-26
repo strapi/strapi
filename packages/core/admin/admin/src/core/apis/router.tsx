@@ -13,6 +13,10 @@ import { Theme } from '../../components/Theme';
 import { Permission } from '../../features/Auth';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { getImmutableRoutes } from '../../router';
+import {
+  wrapRouteObjectLazyWithRetry,
+  wrapRouteObjectsLazyWithRetry,
+} from '../../utils/retryDynamicImport';
 
 import type { StrapiApp } from '../../StrapiApp';
 
@@ -31,6 +35,11 @@ interface MenuItem {
   exact?: boolean;
   position?: number;
   licenseOnly?: boolean;
+  /**
+   * The license feature a `licenseOnly` link belongs to, e.g. `'sso'`. Its ⚡ is purple while a
+   * trial grants the feature, absent once a paid license includes it, and grey otherwise.
+   */
+  licenseFeature?: string;
 }
 
 interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {
@@ -90,6 +99,24 @@ class Router {
    * It should not be used by plugins, doing so will likely break the application.
    */
   createRouter(strapi: StrapiApp, { memory, ...opts }: RouterOptions = {}) {
+    const authenticatedLayoutRoute: RouteObject = {
+      path: '/*',
+      lazy: async () => {
+        const { PrivateAdminLayout } = await import('../../layouts/AuthenticatedLayout');
+
+        return {
+          Component: PrivateAdminLayout,
+        };
+      },
+      children: [
+        ...this.routes,
+        {
+          path: '*',
+          element: <NotFoundPage />,
+        },
+      ],
+    };
+
     const routes = [
       {
         path: '/*',
@@ -104,24 +131,8 @@ class Router {
         ),
         element: <App strapi={strapi} store={strapi.store!} />,
         children: [
-          ...getImmutableRoutes(),
-          {
-            path: '/*',
-            lazy: async () => {
-              const { PrivateAdminLayout } = await import('../../layouts/AuthenticatedLayout');
-
-              return {
-                Component: PrivateAdminLayout,
-              };
-            },
-            children: [
-              ...this.routes,
-              {
-                path: '*',
-                element: <NotFoundPage />,
-              },
-            ],
-          },
+          ...wrapRouteObjectsLazyWithRetry(getImmutableRoutes()),
+          wrapRouteObjectLazyWithRetry(authenticatedLayoutRoute),
         ],
       },
     ];
@@ -202,12 +213,8 @@ class Router {
     links?: never
   ): void;
   public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink
-  ): void;
-  public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink[]
+    section: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink | UnloadedSettingsLink[]
   ): void;
   public addSettingsLink(
     section:

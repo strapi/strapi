@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { set } = require('lodash/fp');
+const { cloneDeep, set } = require('lodash');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const form = require('api-tests/generators');
@@ -18,11 +18,11 @@ const restart = async () => {
 };
 
 // Set a new attribute to form.article
-const ct = set('attributes.nonVisible', {
+const ct = set(cloneDeep(form.article), 'attributes.nonVisible', {
   type: 'string',
   visible: false,
   writable: true,
-})(form.article);
+});
 
 describe('Content Manager - Configuration', () => {
   beforeAll(async () => {
@@ -165,7 +165,11 @@ describe('Content Manager - Configuration', () => {
     });
 
     // set default sort
-    const configuration = set('contentType.settings.defaultSortBy', 'nonVisible', body.data);
+    const configuration = set(
+      cloneDeep(body.data),
+      'contentType.settings.defaultSortBy',
+      'nonVisible'
+    );
 
     const res = await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -185,7 +189,11 @@ describe('Content Manager - Configuration', () => {
     });
 
     // set default sort
-    const configuration = set('contentType.settings.defaultSortBy', 'author[username]', body.data);
+    const configuration = set(
+      cloneDeep(body.data),
+      'contentType.settings.defaultSortBy',
+      'author[username]'
+    );
 
     const res = await rq({
       url: '/content-manager/content-types/api::article.article/configuration',

@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import { isValidBlocksLink, yup } from '@strapi/utils';
 
 const textNodeValidator = yup.object().shape({
   type: yup.string().equals(['text']).required(),
@@ -18,21 +18,11 @@ const textNodeValidator = yup.object().shape({
   code: yup.boolean(),
 });
 
-const checkValidLink = (link: string) => {
-  try {
-    // eslint-disable-next-line no-new
-    new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
-  } catch (error) {
-    return false;
-  }
-  return true;
-};
-
 const linkNodeValidator = yup.object().shape({
   type: yup.string().equals(['link']).required(),
   url: yup
     .string()
-    .test('invalid-url', 'Please specify a valid link.', (value) => checkValidLink(value ?? '')),
+    .test('invalid-url', 'Please specify a valid link.', (value) => isValidBlocksLink(value ?? '')),
   children: yup.array().of(textNodeValidator).required(),
 });
 

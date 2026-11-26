@@ -1,4 +1,3 @@
-/* eslint-disable import/export */
 import * as React from 'react';
 
 import {
@@ -16,11 +15,13 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 
 import type { Pagination as PaginationApi } from '../../../shared/contracts/shared';
+
+const DEFAULT_OPTIONS: NonNullable<Pagination.PageSizeProps['options']> = ['10', '20', '50', '100'];
 
 /* -------------------------------------------------------------------------------------------------
  * Root
@@ -51,14 +52,21 @@ interface RootProps {
   pageCount?: PaginationApi['pageCount'];
   /**
    * @default 1
-   * @description the initial page number.
+   * @description the initial page number when the URL has no `page` param.
+   * A spread API `page` is ignored; the active page always comes from the URL.
    */
   defaultPage?: PaginationApi['page'];
   /**
    * @default 10
-   * @description the initial number of items to display
+   * @description the initial number of items to display when the URL has no
+   * `pageSize` param. Wins over a spread `pageSize`.
    */
   defaultPageSize?: PaginationApi['pageSize'];
+  /**
+   * @description page size from a spread API pagination object. Used only when
+   * `defaultPageSize` is omitted and the URL has no `pageSize` param.
+   */
+  pageSize?: PaginationApi['pageSize'];
   /**
    * @description a callback that is called when the page size changes.
    */
@@ -88,18 +96,28 @@ interface RootProps {
  */
 const Root = React.forwardRef<HTMLDivElement, RootProps>(
   (
-    { children, defaultPageSize = 10, pageCount = 0, defaultPage = 1, onPageSizeChange, total = 0 },
+    {
+      children,
+      defaultPageSize,
+      pageSize: spreadPageSize,
+      pageCount = 0,
+      defaultPage = 1,
+      onPageSizeChange,
+      total = 0,
+    },
     forwardedRef
   ) => {
-    const [{ query }, setQuery] = useQueryParams<Pick<PaginationContextValue, 'page' | 'pageSize'>>(
-      {
-        pageSize: defaultPageSize.toString(),
-        page: defaultPage.toString(),
-      }
-    );
+    const resolvedPageSize = defaultPageSize ?? spreadPageSize ?? 10;
+
+    const [{ query }, setQuery] = useQueryParams<
+      Pick<PaginationContextValue, 'page' | 'pageSize'> & { filters?: unknown; _q?: unknown }
+    >({
+      pageSize: resolvedPageSize.toString(),
+      page: defaultPage.toString(),
+    });
 
     const setPageSize = (pageSize: string) => {
-      setQuery({ pageSize, page: '1' });
+      setQuery(withEncodedUserParams(query, { pageSize, page: '1' }));
 
       if (onPageSizeChange) {
         onPageSizeChange(pageSize);
@@ -138,7 +156,7 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
  * the user to change the number of items displayed per page.
  * If the total number of items is less than the minimum option, this component will not render.
  */
-const PageSize = ({ options = ['10', '20', '50', '100'] }: Pagination.PageSizeProps) => {
+const PageSize = ({ options = DEFAULT_OPTIONS }: Pagination.PageSizeProps) => {
   const { formatMessage } = useIntl();
 
   const pageSize = usePagination('PageSize', (state) => state.pageSize);
@@ -250,7 +268,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...startPages,
 
     // Start ellipsis
-    // eslint-disable-next-line no-nested-ternary
     ...(siblingsStart > boundaryCount + 2
       ? ['start-ellipsis']
       : boundaryCount + 1 < pageCount - boundaryCount
@@ -261,7 +278,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...range(siblingsStart, siblingsEnd),
 
     // End ellipsis
-    // eslint-disable-next-line no-nested-ternary
     ...(siblingsEnd < pageCount - boundaryCount - 1
       ? ['end-ellipsis']
       : pageCount - boundaryCount > boundaryCount

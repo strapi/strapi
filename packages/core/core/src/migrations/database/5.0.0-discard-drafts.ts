@@ -26,7 +26,6 @@
  *   they’re tiny and reused.
  */
 
-/* eslint-disable no-continue */
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { createId } from '@paralleldrive/cuid2';
@@ -39,6 +38,7 @@ import {
   getComponentTypeColumn,
   getDzJoinTableName,
 } from '../../utils/transform-content-types-to-models';
+import { serializeJsonColumns } from './serialize-json-columns';
 
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
@@ -363,7 +363,7 @@ async function copyMorphRowsByIdMap({
       if (originalId == null) continue;
       const newId = idMap.get(originalId);
       if (newId == null) continue;
-      const { id, ...rest } = row;
+      const { id: _id, ...rest } = row;
       toInsert.push({ ...rest, [columnToRewrite]: newId });
     }
     if (toInsert.length > 0) {
@@ -413,7 +413,7 @@ async function copyMorphRowsByPairs({
       if (originalId == null) continue;
       const draftIds = pairs.filter((p) => p.originalId === originalId).map((p) => p.draftId);
       for (const draftId of draftIds) {
-        const { id, ...rest } = row;
+        const { id: _id, ...rest } = row;
         toInsert.push({ ...rest, [columnToRewrite]: draftId });
       }
     }
@@ -675,6 +675,84 @@ const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: strin
 };
 
 /**
+ * v4 join rows often only persisted order on one side of a bidirectional join table.
+ * When cloning relations for draft rows, derive missing order values from the other side
+ * so populate does not fall back to primary-key order.
+ */
+const assignMissingOrderColumnFromFallback = (
+  relations: Array<Record<string, any>>,
+  {
+    orderColumn,
+    fallbackOrderColumn,
+    groupByColumn,
+    tieBreakerColumn,
+  }: {
+    orderColumn: string;
+    fallbackOrderColumn: string;
+    groupByColumn: string;
+    tieBreakerColumn?: string;
+  }
+) => {
+  if (!orderColumn || !fallbackOrderColumn || relations.length === 0) {
+    return relations;
+  }
+
+  const byGroup = new Map<string | number, Array<Record<string, any>>>();
+
+  for (const relation of relations) {
+    const groupId = relation[groupByColumn];
+    const key = groupId ?? 'null';
+    const group = byGroup.get(key);
+
+    if (group) {
+      group.push(relation);
+    } else {
+      byGroup.set(key, [relation]);
+    }
+  }
+
+  for (const group of byGroup.values()) {
+    if (!group.some((relation) => relation[orderColumn] == null)) {
+      continue;
+    }
+
+    const sorted = [...group].sort((left, right) => {
+      const leftOrder = left[fallbackOrderColumn];
+      const rightOrder = right[fallbackOrderColumn];
+
+      if (leftOrder != null && rightOrder != null) {
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder;
+        }
+      } else if (leftOrder != null) {
+        return -1;
+      } else if (rightOrder != null) {
+        return 1;
+      }
+
+      if (tieBreakerColumn) {
+        const leftTie = normalizeId(left[tieBreakerColumn]) ?? left[tieBreakerColumn];
+        const rightTie = normalizeId(right[tieBreakerColumn]) ?? right[tieBreakerColumn];
+
+        if (leftTie != null && rightTie != null && leftTie !== rightTie) {
+          return leftTie < rightTie ? -1 : 1;
+        }
+      }
+
+      return 0;
+    });
+
+    sorted.forEach((relation, index) => {
+      if (relation[orderColumn] == null) {
+        relation[orderColumn] = index + 1;
+      }
+    });
+  }
+
+  return relations;
+};
+
+/**
  * Builds a stable key for join-table relations to detect duplicates.
  * Key format: sourceId::targetId::field::componentType
  */
@@ -698,23 +776,26 @@ async function getExistingRelationKeys({
   joinTable,
   sourceColumnName,
   targetColumnName,
-  sourceIds,
+  filterIds,
+  filterColumnName,
 }: {
   trx: Knex;
   joinTable: any;
   sourceColumnName: string;
   targetColumnName: string;
-  sourceIds: number[];
+  filterIds: number[];
+  filterColumnName?: string;
 }): Promise<Set<string>> {
   const existingKeys = new Set<string>();
+  const columnName = filterColumnName ?? sourceColumnName;
 
-  if (sourceIds.length === 0) {
+  if (filterIds.length === 0) {
     return existingKeys;
   }
 
-  const idChunks = chunkArray(sourceIds, getBatchSize(trx, 1000));
+  const idChunks = chunkArray(filterIds, getBatchSize(trx, 1000));
   for (const chunk of idChunks) {
-    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(sourceColumnName, chunk);
+    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(columnName, chunk);
 
     applyJoinTableOrdering(existingRelationsQuery, joinTable, sourceColumnName);
 
@@ -1202,6 +1283,127 @@ type ComponentHierarchyCaches = {
   parentDpCache: Map<string, boolean>;
 };
 
+const getParentInstanceCacheKey = (
+  componentUid: string,
+  componentId: number | string,
+  excludeUid: string | undefined
+) => `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
+
+/**
+ * Resolves the owning parent of every component instance in `componentRelations` up front, with
+ * one query per (potential parent join table, component type, id chunk) instead of one query per
+ * instance per potential parent table, and stores the answers in `caches.parentInstanceCache`.
+ *
+ * `findComponentParentInstance` then answers from the cache. The lookup order is unchanged: parent
+ * schemas are tried in `listComponentParentSchemas` order and the first table holding the instance
+ * wins. Instances found in no table are cached as `null`, exactly as the per-instance lookup would.
+ * If an instance has several rows in the same join table, the row with the lowest id wins; the
+ * per-instance lookup took whichever row the database returned first.
+ */
+async function prefetchComponentParentInstances(
+  trx: Knex,
+  identifiers: any,
+  componentRelations: Array<Record<string, any>>,
+  excludeUid: string | undefined,
+  caches: ComponentHierarchyCaches
+): Promise<void> {
+  const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
+  const componentTypeColumn = getComponentTypeColumn(identifiers);
+  const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
+
+  // keyed by the stringified id (as in the cache key), keeping the raw value for the query
+  const idsByComponentUid = new Map<string, Map<string, string | number>>();
+  for (const relation of componentRelations) {
+    const componentSchema = strapi.components[
+      relation[componentTypeColumn] as keyof typeof strapi.components
+    ] as any;
+    const componentId = relation[componentIdColumn];
+    if (!componentSchema || componentId == null) {
+      continue;
+    }
+
+    const ids = idsByComponentUid.get(componentSchema.uid) ?? new Map<string, string | number>();
+    ids.set(String(componentId), componentId);
+    idsByComponentUid.set(componentSchema.uid, ids);
+  }
+
+  for (const [componentUid, ids] of idsByComponentUid) {
+    let unresolved = Array.from(ids.keys()).filter(
+      (id) =>
+        !caches.parentInstanceCache.has(getParentInstanceCacheKey(componentUid, id, excludeUid))
+    );
+
+    const potentialParents = listComponentParentSchemas(componentUid).filter(
+      (schema) => schema.uid !== excludeUid
+    );
+
+    for (const parentSchema of potentialParents) {
+      if (unresolved.length === 0) {
+        break;
+      }
+
+      if (!parentSchema.collectionName) {
+        continue;
+      }
+
+      const parentJoinTableName = getComponentJoinTableName(
+        parentSchema.collectionName,
+        identifiers
+      );
+
+      try {
+        if (!(await ensureTableExists(trx, parentJoinTableName))) {
+          continue;
+        }
+      } catch {
+        continue;
+      }
+
+      const found = new Set<string>();
+      for (const idChunk of chunkArray(unresolved, getBatchSize(trx, 1000))) {
+        let rows: Array<Record<string, any>>;
+        try {
+          rows = await trx(parentJoinTableName)
+            .select(componentIdColumn, entityIdColumn)
+            .where(componentTypeColumn, componentUid)
+            .whereIn(
+              componentIdColumn,
+              idChunk.map((id) => ids.get(id)!)
+            )
+            .orderBy('id');
+        } catch {
+          // as with a failed per-instance lookup, these instances move on to the next table
+          continue;
+        }
+
+        for (const row of rows) {
+          const componentId = String(row[componentIdColumn]);
+          if (found.has(componentId)) {
+            continue;
+          }
+
+          found.add(componentId);
+          caches.parentInstanceCache.set(
+            getParentInstanceCacheKey(componentUid, componentId, excludeUid),
+            { uid: parentSchema.uid, parentId: row[entityIdColumn] }
+          );
+        }
+      }
+
+      if (found.size > 0) {
+        unresolved = unresolved.filter((id) => !found.has(id));
+      }
+    }
+
+    for (const componentId of unresolved) {
+      caches.parentInstanceCache.set(
+        getParentInstanceCacheKey(componentUid, componentId, excludeUid),
+        null
+      );
+    }
+  }
+}
+
 /**
  * Locates the owning entity (content type or component) for a given component instance.
  * This mirrors the document service logic we need in order to decide whether a relation
@@ -1215,7 +1417,7 @@ async function findComponentParentInstance(
   excludeUid: string | undefined,
   caches: ComponentHierarchyCaches
 ): Promise<ComponentParentInstance | null> {
-  const cacheKey = `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
+  const cacheKey = getParentInstanceCacheKey(componentUid, componentId, excludeUid);
   if (caches.parentInstanceCache.has(cacheKey)) {
     return caches.parentInstanceCache.get(cacheKey)!;
   }
@@ -1779,11 +1981,15 @@ async function cloneComponentInstance({
     );
   }
 
+  // mysql2 deserializes JSON columns on SELECT but knex does not re-serialize
+  // them on INSERT. Ensure any object values in JSON/blocks columns are stringified.
+  serializeJsonColumns(newComponentRow, componentMeta);
+
   let insertResult;
   if (supportsReturning(trx)) {
     try {
       insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
-    } catch (error: any) {
+    } catch {
       insertResult = await trx(componentTableName).insert(newComponentRow);
     }
   } else {
@@ -1875,7 +2081,7 @@ async function cloneComponentInstance({
             isForDraftEntity,
             reverseMapCache,
           });
-          const { id, ...rest } = row;
+          const { id: _id, ...rest } = row;
           await insertRowWithDuplicateHandling(trx, nestedJoinTableName, {
             ...rest,
             [entityIdCol]: newComponentId,
@@ -1904,7 +2110,7 @@ async function cloneComponentInstance({
             isForDraftEntity,
             reverseMapCache,
           });
-          const { id, ...rest } = row;
+          const { id: _id, ...rest } = row;
           await insertRowWithDuplicateHandling(trx, dzJoinTableName, {
             ...rest,
             [entityIdCol]: newComponentId,
@@ -1959,9 +2165,8 @@ async function buildPublishedToDraftMap({
     return null;
   }
 
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
   const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
-  const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+  const isLocalized = strapi.localization.isLocalizedContentType(contentType);
 
   const draftByDocumentId = new Map<string, (typeof draftEntries)[0]>();
   for (const draft of draftEntries) {
@@ -2088,7 +2293,7 @@ async function copyRelationsForContentType({
           }
 
           // Create new relation object without the 'id' field
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           return {
             ...relationWithoutId,
             [sourceColumnName]: newSourceId,
@@ -2106,7 +2311,7 @@ async function copyRelationsForContentType({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftSourceIds,
+        filterIds: draftSourceIds,
       });
 
       const relationsToInsert = newRelations.filter((relation) => {
@@ -2207,7 +2412,8 @@ async function copyRelationsFromOtherContentTypes({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftTargetIds,
+        filterIds: draftTargetIds,
+        filterColumnName: targetColumnName,
       });
 
       const publishedIdChunks = chunkArray(publishedTargetIds, getBatchSize(trx, 1000));
@@ -2237,7 +2443,7 @@ async function copyRelationsFromOtherContentTypes({
 
           existingKeys.add(key);
 
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           newRelations.push({
             ...relationWithoutId,
             [targetColumnName]: newTargetId,
@@ -2247,6 +2453,13 @@ async function copyRelationsFromOtherContentTypes({
         if (newRelations.length === 0) {
           continue;
         }
+
+        assignMissingOrderColumnFromFallback(newRelations, {
+          orderColumn: joinTable.inverseOrderColumnName,
+          fallbackOrderColumn: joinTable.orderColumnName,
+          groupByColumn: targetColumnName,
+          tieBreakerColumn: sourceColumnName,
+        });
 
         await insertRelationsWithDuplicateHandling({
           trx,
@@ -2365,7 +2578,7 @@ async function copyRelationsToOtherContentTypes({
           }
 
           // Create new relation object without the 'id' field
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           return {
             ...relationWithoutId,
             [sourceColumnName]: newSourceId,
@@ -2407,7 +2620,7 @@ async function copyRelationsToOtherContentTypes({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftSourceIds,
+        filterIds: draftSourceIds,
       });
 
       // Filter out relations that already exist
@@ -2418,6 +2631,13 @@ async function copyRelationsToOtherContentTypes({
       });
 
       if (relationsToInsert.length > 0) {
+        assignMissingOrderColumnFromFallback(relationsToInsert as Array<Record<string, any>>, {
+          orderColumn: joinTable.orderColumnName,
+          fallbackOrderColumn: joinTable.inverseOrderColumnName,
+          groupByColumn: sourceColumnName,
+          tieBreakerColumn: targetColumnName,
+        });
+
         await insertRelationsWithDuplicateHandling({
           trx,
           tableName: joinTable.name,
@@ -3165,8 +3385,19 @@ async function copyComponentRelations({
       parentDpCache: new Map(),
     };
 
+    // Only fills lookups made with `excludeUid = uid` (the filter below). Ancestor lookups for
+    // components nested two or more levels deep (`hasDraftPublishAncestorForComponent`, no
+    // `excludeUid`) are not prefetched and still query per instance.
+    await prefetchComponentParentInstances(
+      trx,
+      identifiers,
+      componentRelations,
+      uid,
+      componentHierarchyCaches
+    );
+
     // Filter component relations: only propagate if component's parent in the component hierarchy doesn't have draft/publish
-    // This matches discardDraft() behavior via shouldPropagateComponentRelationToNewVersion
+    // This matches discardDraft() behavior via createComponentRelationFilter (document-service/components.ts)
     //
     // The logic: find what contains this component instance (could be a content type or another component).
     // If it's a component, recursively check its parents. If any parent in the chain has DP, filter out the relation.
@@ -3287,7 +3518,7 @@ async function copyComponentRelations({
             cloneMap.set(componentKey, newComponentId);
           }
 
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           return {
             ...relationWithoutId,
             [entityIdColumn]: newEntityId,

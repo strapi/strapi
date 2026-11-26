@@ -1,6 +1,8 @@
 import { type HttpHandler, http, HttpResponse } from 'msw';
 import * as qs from 'qs';
 
+import type { GetAIMetadataPendingCount } from '../../shared/contracts/files';
+
 // Define the expected structure of your query parameters
 interface CustomQuery extends qs.ParsedQs {
   filters?: {
@@ -169,18 +171,43 @@ const handlers: HttpHandler[] = [
         responsiveDimensions: true,
         autoOrientation: true,
         aiMetadata: true,
+        aiMetadataAvailable: true,
       },
     });
   }),
 
-  http.get('/upload/actions/generate-ai-metadata/count', () => {
-    return HttpResponse.json({
-      count: 0,
+  http.get('/upload/ai-metadata-jobs/pending-count', () => {
+    return HttpResponse.json<GetAIMetadataPendingCount.Response>({
+      imagesWithoutMetadataCount: 0,
+      totalImages: 0,
     });
   }),
 
-  http.get('/upload/actions/generate-ai-metadata/latest', () => {
-    return HttpResponse.json(null);
+  // The route answers 404 when no job exists, never 200 with an empty body
+  http.get('/upload/ai-metadata-jobs/latest', () => {
+    return HttpResponse.json(
+      {
+        data: null,
+        error: {
+          status: 404,
+          name: 'NotFoundError',
+          message: 'No AI metadata job found',
+          details: {},
+        },
+      },
+      { status: 404 }
+    );
+  }),
+
+  // Per-file AI metadata generation, reported per file so a single failure never
+  // fails the batch. Fired after each upload completes — for every file, including
+  // non-images, which the server reports as `skipped`.
+  http.post('*/upload/actions/generate-ai-metadata', async ({ request }) => {
+    const { fileIds } = (await request.json()) as { fileIds: number[] };
+
+    return HttpResponse.json({
+      data: fileIds.map((id) => ({ id, status: 'success' })),
+    });
   }),
 
   http.get('/upload/folder-structure', () => {

@@ -32,12 +32,14 @@ const createSettingsSchema = (schema: any) => {
       // should be reset when the type changes
       defaultSortBy: yup
         .string()
+        // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
         .test('is-valid-sort-attribute', '${path} is not a valid sort attribute', async (value) =>
           isValidDefaultSort(schema, value)
         )
         .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
       relationOpenMode: yup.string().oneOf(['modal', 'page', 'newTab']).default('modal'),
+      customOrder: yup.boolean().nullable(),
     })
     .noUnknown();
 };
@@ -97,6 +99,7 @@ const createMetadasSchema = (schema: any) => {
 
 const createArrayTest = ({ allowUndefined = false } = {}) => ({
   name: 'isArray',
+  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
   message: '${path} is required and must be an array',
   test: (val: any) => (allowUndefined === true && val === undefined ? true : Array.isArray(val)),
 });

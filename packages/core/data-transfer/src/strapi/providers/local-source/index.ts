@@ -1,8 +1,7 @@
 import { Readable } from 'stream';
-import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
-import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../../types';
+import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
@@ -11,6 +10,7 @@ import { createAssetsStream } from './assets';
 import { estimateAssetTotals } from './estimate-asset-totals';
 import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
@@ -39,6 +39,13 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
+
+    // Remote pull runs this on the server during the CLI engine bootstrap, which
+    // is before the CLI destination beforeTransfer moves or deletes local uploads.
+    // Load here so a missing stream-chain fails the pull at that point. Later
+    // reads reuse the cached load. Do this before touching the Strapi instance.
+    await loadStreamDeps();
+
     this.strapi = await this.options.getStrapi();
     this.strapi.db.lifecycles.disable();
   }
@@ -98,6 +105,11 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async close(): Promise<void> {
+    // bootstrap() can reject before getStrapi(), and close() is still called after that.
+    if (!this.strapi) {
+      return;
+    }
+
     const { autoDestroy } = this.options;
     assertValidStrapi(this.strapi);
     this.strapi.db.lifecycles.enable();
@@ -124,6 +136,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   async createEntitiesReadStream(): Promise<Readable> {
     assertValidStrapi(this.strapi, 'Not able to stream entities');
     this.#reportInfo('creating entities read stream');
+    const { chain } = await loadStreamDeps();
     return chain([
       // Entities stream
       createEntitiesStream(this.strapi, {
@@ -142,7 +155,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream links');
     this.#reportInfo('creating links read stream');
 
-    return createLinksStream(this.strapi);
+    return createLinksStream(this.strapi, {
+      onWarning: (message) => {
+        this.strapi?.log.warn(message);
+        this.#reportWarning(message);
+      },
+    });
   }
 
   createConfigurationReadStream(): Readable {

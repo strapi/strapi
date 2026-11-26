@@ -5,6 +5,7 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useIsAuditLogsDisabledByConfig } from '../../../../ee/admin/src/hooks/useIsAuditLogsDisabledByConfig';
 import { DragLayer, isWidgetDragItem } from '../../components/DragLayer';
 import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
@@ -13,7 +14,7 @@ import { Page } from '../../components/PageHelpers';
 import { WidgetResizeHandle } from '../../components/ResizeIndicator';
 import { Widget } from '../../components/WidgetHelpers';
 import { WidgetRoot } from '../../components/WidgetRoot';
-import { useEnterprise } from '../../ee';
+import { useAppInfo } from '../../features/AppInfo';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
@@ -31,6 +32,10 @@ import {
   canResizeBetweenWidgets,
   getWidgetWidth,
 } from '../../utils/widgetLayout';
+import {
+  hideAuditLogsWidgetWhenDisabled,
+  hideDeployNowWidgetInProduction,
+} from '../../utils/widgetVisibility';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
@@ -107,7 +112,16 @@ const HomePageCE = () => {
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
-  const allWidgets = React.useMemo(() => getAllWidgets(), [getAllWidgets]);
+  const currentEnvironment = useAppInfo('HomePageCE', (state) => state.currentEnvironment);
+  const { isDisabledByConfig: isAuditLogsDisabledByConfig } = useIsAuditLogsDisabledByConfig();
+  const allWidgets = React.useMemo(
+    () =>
+      hideAuditLogsWidgetWhenDisabled(
+        hideDeployNowWidgetInProduction(getAllWidgets(), currentEnvironment),
+        isAuditLogsDisabledByConfig
+      ),
+    [getAllWidgets, currentEnvironment, isAuditLogsDisabledByConfig]
+  );
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const { data: homepageLayout, isLoading: _isLoadingLayout } = useGetHomepageLayoutQuery();
   // Prefetch expensive widget data as soon as the homepage route is active.
@@ -408,23 +422,6 @@ const HomePageCE = () => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * HomePage
- * -----------------------------------------------------------------------------------------------*/
-
-const HomePage = () => {
-  const Page = useEnterprise(
-    HomePageCE,
-    // eslint-disable-next-line import/no-cycle
-    async () => (await import('../../../../ee/admin/src/pages/HomePage')).HomePageEE
-  );
-
-  // block rendering until the EE component is fully loaded
-  if (!Page) {
-    return null;
-  }
-
-  return <Page />;
-};
+const HomePage = HomePageCE;
 
 export { HomePage, HomePageCE };

@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
+  Badge,
   Box,
   Flex,
   Grid,
@@ -12,6 +13,7 @@ import {
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
+import upperFirst from 'lodash/upperFirst';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -28,10 +30,15 @@ import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
 
+const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
+  DynamicComponentProps['dynamicComponentsByCategory']
+> = {};
+
 interface DynamicComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
+  extends
+    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
-  componentUid: string;
+  componentUid?: string;
   disabled?: boolean;
   index: number;
   name: string;
@@ -50,6 +57,10 @@ interface DynamicComponentProps
    * so the parent can clear the forced state.
    */
   onForceOpenHandled?: () => void;
+  /**
+   * Whether the component was copied from another entry and not saved yet.
+   */
+  isCopied?: boolean;
 }
 
 const DynamicComponent = ({
@@ -62,12 +73,13 @@ const DynamicComponent = ({
   onGrabItem,
   onDropItem,
   onCancel,
-  dynamicComponentsByCategory = {},
+  dynamicComponentsByCategory = EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY,
   onAddComponent,
   totalLength,
   children,
   forceOpen,
   onForceOpenHandled,
+  isCopied,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
@@ -77,7 +89,7 @@ const DynamicComponent = ({
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
 
-  const { mainField = 'id' } = components[componentUid]?.settings ?? {};
+  const { mainField = 'id' } = componentUid ? (components[componentUid]?.settings ?? {}) : {};
 
   const mainFieldValue = useForm('DynamicComponent', (state) =>
     getIn(state.values, `${name}.${index}.${mainField}`)
@@ -87,6 +99,16 @@ const DynamicComponent = ({
   const displayTitle = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
   const { icon, displayName } = React.useMemo(() => {
+    if (!componentUid) {
+      return {
+        icon: null,
+        displayName: formatMessage({
+          id: getTranslation('components.DynamicZone.unknown-component'),
+          defaultMessage: 'Unknown component',
+        }),
+      };
+    }
+
     const [category] = componentUid.split('.');
     const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
       (component) => component.uid === componentUid
@@ -140,7 +162,7 @@ const DynamicComponent = ({
   );
   const isNewItem = useForm(
     'DynamicComponent',
-    (state) => getIn(state.values, componentPath)?.id == null
+    (state) => getIn<{ id?: unknown }>(state.values, componentPath)?.id == null
   );
   const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
 
@@ -271,7 +293,7 @@ const DynamicComponent = ({
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
                   <Menu.Label>
-                    {formatMessage({ id: category, defaultMessage: category })}
+                    {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
@@ -293,7 +315,7 @@ const DynamicComponent = ({
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
                   <Menu.Label>
-                    {formatMessage({ id: category, defaultMessage: category })}
+                    {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
@@ -332,15 +354,26 @@ const DynamicComponent = ({
                 >
                   {accordionTitle}
                 </Accordion.Trigger>
-                <Accordion.Actions>{accordionActions}</Accordion.Actions>
+                <Accordion.Actions>
+                  {isCopied && (
+                    <Badge variant="success" size="S">
+                      {formatMessage({
+                        id: getTranslation('components.Component.copied'),
+                        defaultMessage: 'Copied',
+                      })}
+                    </Badge>
+                  )}
+                  {accordionActions}
+                </Accordion.Actions>
               </Accordion.Header>
               <Accordion.Content>
                 <AccordionContentRadius background="neutral0">
                   <DynamicComponentFields
                     componentUid={componentUid}
                     index={index}
-                    layout={components[componentUid]?.layout}
+                    layout={componentUid ? components[componentUid]?.layout : undefined}
                     name={name}
+                    disabled={disabled}
                   >
                     {children}
                   </DynamicComponentFields>
@@ -385,29 +418,37 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   margin: 0;
 `;
 
-interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {
-  componentUid: string;
+interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children' | 'disabled'> {
+  componentUid?: string;
   index: number;
   layout?: EditFieldLayout[][];
   name: string;
 }
 
 const DynamicComponentFields = React.memo(
-  ({ children, componentUid, index, layout, name }: DynamicComponentFieldsProps) => {
+  ({ children, componentUid, index, layout, name, disabled }: DynamicComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
       <Box padding={{ initial: 4, medium: 6 }}>
         <Grid.Root gap={4}>
-          {layout?.map((row, rowInd) => {
+          {layout?.map((row) => {
             return (
-              <Grid.Item col={12} key={rowInd} xs={12} direction="column" alignItems="stretch">
+              <Grid.Item
+                col={12}
+                key={row.map((field) => field.name).join('.')}
+                xs={12}
+                direction="column"
+                alignItems="stretch"
+              >
                 <ResponsiveGridRoot gap={4}>
                   {row.map(({ size, ...field }) => {
                     const fieldName = `${name}.${index}.${field.name}`;
 
                     const fieldWithTranslatedLabel = {
                       ...field,
+                      // Inherit parent disable (e.g. locked non-localized DZ on a secondary locale)
+                      disabled: field.disabled || disabled,
                       label: formatMessage({
                         id: `content-manager.components.${componentUid}.${field.name}`,
                         defaultMessage: field.label,
@@ -426,10 +467,15 @@ const DynamicComponentFields = React.memo(
                         {children ? (
                           children({
                             ...fieldWithTranslatedLabel,
+                            size,
                             name: fieldName,
                           })
                         ) : (
-                          <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                          <InputRenderer
+                            {...fieldWithTranslatedLabel}
+                            size={size}
+                            name={fieldName}
+                          />
                         )}
                       </ResponsiveGridItem>
                     );
