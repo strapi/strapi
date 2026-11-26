@@ -53,6 +53,17 @@ describe('FormFields', () => {
     expect(formFields.get('role')).toHaveLength(1);
   });
 
+  test('lets only one plugin replace a core field', () => {
+    formFields.unstable_register('user', [field('spaces', { replaces: ['roles'] })]);
+
+    expect(() =>
+      formFields.unstable_register('user', [field('teams', { replaces: ['roles'] })])
+    ).toThrow(
+      'Only one plugin can replace the roles field of the user form, but "spaces" and "teams" both do'
+    );
+    expect(formFields.get('user').map(({ pluginId }) => pluginId)).toEqual(['spaces']);
+  });
+
   test('lets only the user forms replace core fields', () => {
     expect(() =>
       formFields.unstable_register('role', [field('spaces', { replaces: ['roles'] })])

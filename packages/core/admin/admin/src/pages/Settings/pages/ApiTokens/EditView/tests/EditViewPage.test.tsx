@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { createTeamsFormFields, teamsFieldMounted } from '../../../../../../../tests/formFields';
+import {
+  createTeamsFormFields,
+  pluginValidationError,
+  teamsFieldMounted,
+} from '../../../../../../../tests/formFields';
 import { EditView } from '../EditViewPage';
 
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
@@ -90,5 +94,58 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     // After the save, the field remounts with no value, to load its saved values again
     expect(await screen.findByRole('button', { name: 'Teams of 1: null' })).toBeInTheDocument();
     expect(teamsFieldMounted).toHaveBeenCalledTimes(2);
+  });
+
+  describe('plugin fields on create', () => {
+    const renderCreate = () =>
+      render(<EditView />, {
+        initialEntries: ['/settings/api-tokens/create'],
+        providerOptions: { formFields: createTeamsFormFields('content-api-token') },
+      });
+
+    const fillAndSave = async (user: ReturnType<typeof render>['user']) => {
+      await user.click(await screen.findByRole('button', { name: 'Teams of new: null' }));
+      await user.type(screen.getByRole('textbox', { name: /^Name/ }), 'New token');
+      await user.click(screen.getByRole('combobox', { name: /^Token duration/ }));
+      await user.click(screen.getByRole('option', { name: 'Unlimited' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    };
+
+    it('sends the values of plugin fields with the new token', async () => {
+      const bodies: unknown[] = [];
+
+      server.use(
+        http.post('/admin/api-tokens', async ({ request }) => {
+          bodies.push(await request.json());
+
+          return HttpResponse.json({
+            data: { id: 2, name: 'New token', type: 'read-only', accessKey: 'key' },
+          });
+        })
+      );
+
+      const { user } = renderCreate();
+      await fillAndSave(user);
+
+      await waitFor(() =>
+        expect(bodies).toEqual([
+          expect.objectContaining({ name: 'New token', plugins: { teams: { teams: ['blue'] } } }),
+        ])
+      );
+    });
+
+    it('shows a plugin error from the server on the plugin field only', async () => {
+      server.use(
+        http.post('/admin/api-tokens', () =>
+          HttpResponse.json(pluginValidationError('teams', 'Pick a team'), { status: 400 })
+        )
+      );
+
+      const { user } = renderCreate();
+      await fillAndSave(user);
+
+      expect(await screen.findByText('Teams error: Pick a team')).toBeInTheDocument();
+      expect(screen.getAllByText(/Pick a team/)).toHaveLength(1);
+    });
   });
 });

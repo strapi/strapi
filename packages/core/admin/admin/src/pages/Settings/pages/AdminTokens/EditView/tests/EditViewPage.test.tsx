@@ -1,6 +1,7 @@
-import { render, server, waitFor } from '@tests/utils';
+import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { createTeamsFormFields } from '../../../../../../../tests/formFields';
 import { EditView } from '../EditViewPage';
 
 describe('ADMIN | Pages | ADMIN TOKENS | EditView', () => {
@@ -32,6 +33,16 @@ describe('ADMIN | Pages | ADMIN TOKENS | EditView', () => {
 
       // Permissions component renders "Plugins" and "Settings" tabs
       await findByText('Plugins');
+    });
+
+    it('shows no field of the content API token plugins', async () => {
+      render(<EditView />, {
+        initialEntries: ['/settings/admin-tokens/create'],
+        providerOptions: { formFields: createTeamsFormFields('content-api-token') },
+      });
+
+      await screen.findByText('Name');
+      expect(screen.queryByRole('button', { name: /^Teams of/ })).not.toBeInTheDocument();
     });
   });
 

@@ -60,6 +60,13 @@ class FormFields {
         formFields.findIndex((field) => field.pluginId === pluginId) === index,
         `Fields of the "${pluginId}" plugin have already been added to the ${form} form`
       );
+      replaces?.forEach((replaced) => {
+        const first = formFields.find((field) => field.replaces?.includes(replaced));
+        invariant(
+          first?.pluginId === pluginId,
+          `Only one plugin can replace the ${replaced} field of the ${form} form, but "${first?.pluginId}" and "${pluginId}" both do`
+        );
+      });
     });
   };
 

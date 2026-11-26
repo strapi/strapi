@@ -34,13 +34,13 @@ const FormikValues = () => {
   return <pre>{JSON.stringify(values)}</pre>;
 };
 
-/** A plugin field that sets its value when it mounts, as a plugin with a default can */
+/** A plugin field that sets a default value in an effect, as a plugin with a default can */
 const setOnMount =
   (value: string) =>
   ({ onChange }: FormFieldsProps) => {
     React.useEffect(() => {
       onChange(value);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [onChange]);
 
     return null;
   };
@@ -150,6 +150,79 @@ describe('PluginFormFields', () => {
       ).toBeInTheDocument();
     }
   );
+
+  it.each([
+    [
+      'the admin Form',
+      (field: React.ReactElement) => (
+        <Form method="POST" initialValues={{}} onSubmit={jest.fn()}>
+          {field}
+        </Form>
+      ),
+      <PluginFormFields key="form" form="user" />,
+    ],
+    [
+      'a Formik form',
+      (field: React.ReactElement) => (
+        <Formik initialValues={{}} onSubmit={jest.fn()}>
+          <Grid.Root>{field}</Grid.Root>
+        </Formik>
+      ),
+      <FormikPluginFormFields key="formik" form="user" />,
+    ],
+  ])(
+    'keeps onChange and the roles onChange the same across renders, in %s',
+    async (_, wrap, field) => {
+      const seen = { onChange: new Set<unknown>(), roles: new Set<unknown>() };
+      const Field = ({ onChange, replacedFields }: FormFieldsProps) => {
+        seen.onChange.add(onChange);
+        seen.roles.add(replacedFields.roles?.onChange);
+
+        return (
+          <button type="button" onClick={() => onChange(Math.random())}>
+            Change
+          </button>
+        );
+      };
+
+      const formFields = new FormFields();
+      formFields.unstable_register('user', [
+        { pluginId: 'spaces', Component: Field, replaces: ['roles'] },
+      ]);
+
+      const { user } = render(wrap(field), { providerOptions: { formFields } });
+
+      await user.click(screen.getByRole('button', { name: 'Change' }));
+      await user.click(screen.getByRole('button', { name: 'Change' }));
+
+      expect(seen.onChange.size).toBe(1);
+      expect(seen.roles.size).toBe(1);
+    }
+  );
+
+  it('gives the roles field only to the plugin that replaces it', () => {
+    const Roles = ({ replacedFields }: FormFieldsProps) => (
+      <p>{`roles field ${replacedFields.roles ? 'given' : 'not given'}`}</p>
+    );
+
+    const formFields = new FormFields();
+    formFields.unstable_register('user', [
+      { pluginId: 'spaces', Component: Roles, replaces: ['roles'] },
+      { pluginId: 'teams', Component: Roles },
+    ]);
+
+    render(
+      <Form method="PUT" initialValues={{ roles: [1] }} onSubmit={jest.fn()}>
+        <PluginFormFields form="user" />
+      </Form>,
+      { providerOptions: { formFields } }
+    );
+
+    expect(screen.getAllByText(/^roles field/).map((element) => element.textContent)).toEqual([
+      'roles field given',
+      'roles field not given',
+    ]);
+  });
 
   it('remounts the plugin fields when the form sets plugins back to undefined after a save', async () => {
     const mounted = jest.fn();
