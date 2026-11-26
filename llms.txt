@@ -61,6 +61,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [How Permissions Work](https://contributor.strapi.io/packages/core/admin/permissions/how-they-work): Explanation of how permissions are evaluated and enforced in admin.
 - [Fetching Permissions](https://contributor.strapi.io/packages/core/admin/permissions/frontend/fetching-permissions): Guide to fetching and retrieving user permissions in frontend.
 - [Using Permissions](https://contributor.strapi.io/packages/core/admin/permissions/frontend/using-permissions): Guide to checking and using permissions in frontend components.
+- [Request headers](https://contributor.strapi.io/packages/core/admin/request-headers): How a plugin adds headers to the requests the admin sends to the Strapi server, and what happens when a provider fails.
 - [Documents](https://contributor.strapi.io/packages/core/content-manager/documents): An introduction to documents in the content-manager
 - [Layouts](https://contributor.strapi.io/packages/core/content-manager/layouts): How layouts work with the List & Edit view
 - [RBAC](https://contributor.strapi.io/packages/core/content-manager/RBAC): How RBAC work with documents in the content-manager
