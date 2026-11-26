@@ -6,6 +6,7 @@ import { styled } from 'styled-components';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetPreview, UploadPreview } from './AssetPreview';
+import { AssetSubtitle } from './AssetSubtitle';
 import { GhostIconButton } from './FieldControls';
 import { UploadProgressBar } from './UploadProgressBar';
 
@@ -68,9 +69,10 @@ export const AssetRow = ({
   return (
     <RowFrame tone="neutral">
       <AssetPreview asset={asset} size="S" />
-      <Name textColor="neutral800" flex={1}>
-        {asset.name}
-      </Name>
+      <Flex direction="column" alignItems="stretch" flex={1} minWidth={0}>
+        <Name textColor="neutral800">{asset.name}</Name>
+        <AssetSubtitle asset={asset} />
+      </Flex>
       <Flex gap={2} shrink={0}>
         <GhostIconButton
           onClick={() => onCopyLink(asset)}
