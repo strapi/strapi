@@ -17,6 +17,7 @@ import {
   renameSync,
   statSync,
 } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { resolve, sep } from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -40,8 +41,9 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const file = resolve(root, match[1]);
-  if (file.startsWith(root + sep) === false) {
+  // Store entries under a digest of the hash so no part of the request URL reaches a file path.
+  const file = resolve(root, createHash('sha256').update(match[1]).digest('hex'));
+  if (!file.startsWith(root + sep)) {
     res.writeHead(400).end();
     return;
   }
