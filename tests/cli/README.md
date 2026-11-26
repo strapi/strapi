@@ -123,7 +123,7 @@ For remote pull/push transfer, the suites under `data-transfer/pull-remote.test.
 
 Each subdirectory within the `./tests` directory here is considered a test "domain" and will have its own test app(s) available. By default only one test app is made available unless additional ones are configured in a config.js within that test domain.
 
-Some domains need no shared test app (e.g. **`create-strapi-app`** uses `testApps: 0` in `config.js`). Those domains can run in parallel with app-backed domains; the runner reserves apps only when `testApps > 0`. Others put tests in **subfolders** under the domain—e.g. `strapi/strapi/`, `strapi/data-transfer/`, `strapi/version/`. Use the `*.test.cli.js` / `*.test.cli.ts` naming from `jest.config.cli.js` at the repo root.
+A domain can use `testApps: 0` in `config.js` when it needs no shared test app: it can run in parallel with app-backed domains, since the runner reserves apps only when `testApps > 0`. Domains can put tests in **subfolders**, e.g. `strapi/data-transfer/`. Use the `*.test.cli.js` / `*.test.cli.ts` naming from `jest.config.cli.js` at the repo root. The `create-strapi-app` tests and the simple `strapi` command tests moved to `tests-next/cli`.
 
 #### tests/{domain}/config.js
 
@@ -140,12 +140,3 @@ module.exports = () => {
 ### How to run and test CLI commands
 
 See the available tests in the `tests` directory for examples.
-
-### Updating Jest snapshots
-
-Some CLI tests (for example `strapi/strapi/openapi-generate.test.cli.ts`) commit **Jest snapshot** files. After intentional changes to the app template, generator output, or CLI output, regenerate snapshots with Jest’s `-u` instead of editing `.snap` files by hand.
-
-- **From the repo root:** `yarn test:cli:update` runs the CLI test runner with `-u` forwarded to Jest (same as `yarn test:cli -u`). Limit domains or add extra Jest flags when needed, for example `yarn test:cli -d strapi -u -- --testPathPattern=openapi-generate`.
-- **Direct Jest** (single file or when you only want to refresh snapshots without touching every domain): see **[tests/strapi/strapi/README.md](tests/strapi/strapi/README.md)** — you must set `TEST_APPS`, `JWT_SECRET`, and `NODE_OPTIONS=--experimental-vm-modules` like the runner does.
-
-See **[tests/strapi/strapi/README.md](tests/strapi/strapi/README.md)** for how snapshots work in the `strapi` domain (including OpenAPI and list-output tests) and when to run `yarn test:cli:clean` / `yarn test:cli --setup`.

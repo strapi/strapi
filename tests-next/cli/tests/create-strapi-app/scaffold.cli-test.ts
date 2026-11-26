@@ -39,8 +39,13 @@ const tempDir = () => {
   return dir;
 };
 
-const csa = (args: string[], options: RunOptions = {}) =>
-  run(bin, args, { cwd: os.tmpdir(), ...options });
+/** `env` is added to the runner's env. */
+const csa = (args: string[], { env, ...options }: RunOptions = {}) =>
+  run(bin, args, {
+    cwd: os.tmpdir(),
+    ...options,
+    env: { ...process.env, STRAPI_TELEMETRY_DISABLED: 'true', ...env },
+  });
 
 const expectExitCode = (result: RunResult, code: number) => {
   expect(result.code, result.output).toBe(code);
