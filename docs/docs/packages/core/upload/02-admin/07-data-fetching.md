@@ -42,7 +42,7 @@ The i18n plugin registers `getSettings`. For that reason, the Media Library endp
 Two rules are easy to miss:
 
 - Uploading, moving or deleting an asset changes the file count of a folder. Invalidate `{ type: 'Folder', id: 'LIST' }` too. Every upload mutation in `api.ts` does. `getFolder` also provides the `LIST` tag for this reason, so a mutation does not need the id of the folder.
-- `getFolderStructure` only has the `STRUCTURE` tag. The folder tree in the sidebar, the bulk move dialog, drag and drop, and the folder breadcrumbs of the picker read it. A mutation that changes folders and does not invalidate it leaves old folders in all of them.
+- `getFolderStructure` only has the `STRUCTURE` tag. The folder tree in the sidebar, the bulk move dialog and drag and drop read it. So does [`useFolderTrail`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/admin/src/hooks/useFolderTrail.ts), which gives the folder breadcrumbs of the picker and the mobile folder header of the page their path. A mutation that changes folders and does not invalidate it leaves old folders in all of them. A folder that the old tree does not hold has no path, so the breadcrumbs render nothing and the mobile header shows no parent folders.
 
 Inside a `map`, write the tag type with `as const`, for example `{ type: 'Asset' as const, id }`. Without it, TypeScript widens the type to `string`, which is not a valid tag type.
 
