@@ -112,8 +112,6 @@ export interface QueryBuilder {
 
   shouldUseSubQuery(): boolean;
 
-  isUnboundedWrite(): boolean;
-
   runSubQuery(): any;
 
   processState(): void;
@@ -540,19 +538,6 @@ const createQueryBuilder = (
       return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
     },
 
-    /**
-     * An update/delete that is not narrowed by a limit, an offset or first(). `limit: -1` means
-     * "no limit" (see ensurePaginationOrderStability), so it does not count as bounded.
-     */
-    isUnboundedWrite() {
-      return (
-        ['delete', 'update'].includes(state.type) &&
-        (state.limit == null || state.limit === -1) &&
-        state.offset == null &&
-        !state.first
-      );
-    },
-
     runSubQuery() {
       const originalType = state.type;
 
@@ -561,8 +546,11 @@ const createQueryBuilder = (
       // because joins were already baked against it. The clone inherits processed: true.
       const sub = this.clone();
       sub.alias = this.alias;
-      // Postgres rejects FOR UPDATE with DISTINCT, so the inner SELECT never locks.
-      sub.state.forUpdate = false;
+      // Postgres rejects FOR UPDATE together with DISTINCT. MySQL accepts it, and the
+      // clause locks the rows the relation filter reads, so only Postgres drops it.
+      if (db.dialect.client === 'postgres') {
+        sub.state.forUpdate = false;
+      }
       // The inner SELECT must not carry counters meant for the outer write.
       sub.state.increments = [];
       sub.state.decrements = [];
@@ -617,13 +605,6 @@ const createQueryBuilder = (
     processState() {
       if (this.state.processed) {
         return;
-      }
-
-      // Ordering only matters for a write when it picks which rows are written. Drop it before
-      // processOrderBy so a relation sort does not add LEFT JOINs that would otherwise force a
-      // scalar-filtered write onto the subquery path.
-      if (this.isUnboundedWrite()) {
-        state.orderBy = [];
       }
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
