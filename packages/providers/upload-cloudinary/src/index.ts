@@ -101,19 +101,24 @@ const providerModule = {
       const { public_id: oldPublicId, resource_type: oldResourceType } =
         oldFile.provider_metadata ?? {};
 
-      // If the public_id is preserved, we can overwrite in place and invalidate
-      // the CDN cache in a single call. `public_id` and `overwrite` come after the options so
-      // they cannot be overridden.
+      // A replace must overwrite the bytes and invalidate the CDN cache wherever the new asset
+      // lands, including on the old public_id through options such as `folder`, where the old
+      // asset is not destroyed below. These flags come after the options so they cannot be
+      // overridden.
+      const replaceConfig = { overwrite: true, invalidate: true };
+
+      // If the public_id is preserved, overwrite in place. `public_id` comes after the options so
+      // it cannot be overridden. On the other branch `resource_type` stays `auto`, so a type
+      // change makes the new asset a different one and the old asset is destroyed below.
       if (oldPublicId && newFile.hash === oldPublicId) {
         await upload(newFile, {
-          invalidate: true,
           ...(oldResourceType ? { resource_type: oldResourceType } : {}),
           ...customConfig,
           public_id: oldPublicId as string,
-          overwrite: true,
+          ...replaceConfig,
         });
       } else {
-        await upload(newFile, customConfig);
+        await upload(newFile, { ...customConfig, ...replaceConfig });
       }
 
       // Cloudinary identifies an asset by its public_id and resource_type together. Options such
