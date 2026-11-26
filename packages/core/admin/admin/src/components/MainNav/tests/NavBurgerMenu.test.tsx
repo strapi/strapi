@@ -10,7 +10,7 @@ describe('NavBurgerMenu', () => {
     const mainNav = new MainNav();
     mainNav.addMenu({
       id: 'spaces',
-      icon: Earth,
+      useCurrent: () => ({ label: 'Control center', icon: <Earth /> }),
       intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
       Content: () => <Menu.Item>France</Menu.Item>,
     });
@@ -20,7 +20,7 @@ describe('NavBurgerMenu', () => {
       { providerOptions: { mainNav } }
     );
 
-    const spaces = await screen.findByRole('button', { name: 'Space' });
+    const spaces = await screen.findByRole('button', { name: 'Space: Control center' });
     const menuTriggers = screen
       .getAllByRole('button')
       .filter((button) => button.getAttribute('aria-haspopup') === 'menu');

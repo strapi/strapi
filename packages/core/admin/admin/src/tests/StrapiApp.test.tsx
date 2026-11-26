@@ -516,7 +516,7 @@ describe('ADMIN | new StrapiApp', () => {
       const app = new StrapiApp();
       const menu = {
         id: 'spaces',
-        icon: () => null,
+        useCurrent: () => null,
         intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
         Content: () => null,
       };

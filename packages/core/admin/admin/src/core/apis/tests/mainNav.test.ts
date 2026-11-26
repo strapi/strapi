@@ -1,10 +1,8 @@
-import { Earth } from '@strapi/icons';
-
 import { MainNav, type MainNavMenuArgs } from '../MainNav';
 
 const menu = (args: Partial<MainNavMenuArgs> = {}): MainNavMenuArgs => ({
   id: 'spaces',
-  icon: Earth,
+  useCurrent: () => null,
   intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
   Content: () => null,
   ...args,
@@ -20,12 +18,15 @@ describe('MainNav', () => {
     expect(mainNav.menus.map(({ id }) => id)).toEqual(['spaces', 'environments']);
   });
 
-  test('refuses a menu without content and a menu added twice', () => {
+  test('refuses a menu without content or useCurrent, and a menu added twice', () => {
     const mainNav = new MainNav();
     mainNav.addMenu(menu());
 
     expect(() => mainNav.addMenu(menu({ id: 'other', Content: undefined as never }))).toThrow(
       'A Content component must be provided'
+    );
+    expect(() => mainNav.addMenu(menu({ id: 'other', useCurrent: undefined as never }))).toThrow(
+      'A useCurrent hook must be provided'
     );
     expect(() => mainNav.addMenu(menu())).toThrow(
       'A main navigation menu with the id "spaces" has already been added'
@@ -40,7 +41,7 @@ describe('MainNav', () => {
     expect(() =>
       mainNav.addMenu({
         id: 'spaces',
-        icon: Earth,
+        useCurrent: () => null,
         intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
         Content: () => null,
       })

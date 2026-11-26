@@ -42,7 +42,7 @@ describe('LeftMenu', () => {
     const mainNav = new MainNav();
     mainNav.addMenu({
       id: 'spaces',
-      icon: Earth,
+      useCurrent: () => ({ label: 'Control center', icon: <Earth /> }),
       intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
       Content: () => <Menu.Item>France</Menu.Item>,
     });
@@ -58,7 +58,10 @@ describe('LeftMenu', () => {
     );
 
     // The bottom of the desktop navigation is hidden below the large breakpoint, as in jsdom
-    const spaces = await screen.findByRole('button', { name: 'Space', hidden: true });
+    const spaces = await screen.findByRole('button', {
+      name: 'Space: Control center',
+      hidden: true,
+    });
     const buttons = screen.getAllByRole('button', { hidden: true });
 
     const profile = buttons[buttons.indexOf(spaces) + 1];

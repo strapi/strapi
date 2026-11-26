@@ -10,6 +10,12 @@ import { NavLink } from './NavLink';
 
 import type { MainNavMenuArgs } from '../../core/apis/MainNav';
 
+const MenuIcon = styled(Flex)`
+  height: ${({ theme }) => theme.spaces[7]};
+  width: ${({ theme }) => theme.spaces[7]};
+  border-radius: 50%;
+`;
+
 const MenuTrigger = styled(Menu.Trigger)`
   padding: 0;
 
@@ -18,20 +24,26 @@ const MenuTrigger = styled(Menu.Trigger)`
     height: 4rem;
     justify-content: center;
   }
+
+  &[data-state='open'] ${MenuIcon} {
+    box-shadow:
+      0 0 0 2px ${({ theme }) => theme.colors.neutral0},
+      0 0 0 4px ${({ theme }) => theme.colors.primary600};
+  }
 `;
 
-// Not clipped: the plugin's icon may draw outside its box, for example a ring
-const MenuIcon = styled(Flex)`
-  height: ${({ theme }) => theme.spaces[7]};
-  width: ${({ theme }) => theme.spaces[7]};
+const ReadOnlyValue = styled(Flex)`
+  ${({ theme }) => theme.breakpoints.large} {
+    width: 4rem;
+    height: 4rem;
+    justify-content: center;
+  }
 `;
 
 const MenuContent = styled(Menu.Content)`
   max-height: min(48rem, 70dvh);
   min-width: 24rem;
 `;
-
-const useNoCurrent = () => null;
 
 const NO_PERMISSIONS: NonNullable<MainNavMenuArgs['permissions']> = [];
 
@@ -52,41 +64,48 @@ const NavMenu = ({ menu, showLabel }: NavMenuProps) => {
   return <NavMenuImpl menu={menu} showLabel={showLabel} />;
 };
 
-const NavMenuImpl = ({
-  menu: { icon: Icon, intlLabel, useCurrent = useNoCurrent, Content },
-  showLabel,
-}: NavMenuProps) => {
+const NavMenuImpl = ({ menu: { intlLabel, useCurrent, Content }, showLabel }: NavMenuProps) => {
   const { formatMessage } = useIntl();
   const isDesktop = useIsDesktop();
   const current = useCurrent();
 
-  const label = formatMessage(intlLabel);
-  const name = current
-    ? formatMessage(
-        { id: 'app.components.LeftMenu.menu.current', defaultMessage: '{label}: {current}' },
-        { label, current: current.label }
-      )
-    : label;
+  if (!current) {
+    return null;
+  }
 
-  const trigger = (
-    <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
-      <Flex alignItems="center" gap={3}>
-        <MenuIcon justifyContent="center" aria-hidden>
-          {current?.icon ?? <Icon width="20" height="20" fill="neutral500" />}
-        </MenuIcon>
-        {showLabel ? (
-          <Typography variant="omega">{name}</Typography>
-        ) : (
-          <VisuallyHidden tag="span">{name}</VisuallyHidden>
-        )}
-      </Flex>
-    </MenuTrigger>
+  const name = formatMessage(
+    { id: 'app.components.LeftMenu.menu.current', defaultMessage: '{label}: {current}' },
+    { label: formatMessage(intlLabel), current: current.label }
   );
+
+  const value = (
+    <Flex alignItems="center" gap={3}>
+      <MenuIcon justifyContent="center" aria-hidden>
+        {current.icon}
+      </MenuIcon>
+      {showLabel ? (
+        <Typography variant="omega">{name}</Typography>
+      ) : (
+        <VisuallyHidden tag="span">{name}</VisuallyHidden>
+      )}
+    </Flex>
+  );
+
+  // With its label shown, as in the mobile menu, the value needs no tooltip
+  const withTooltip = (node: React.ReactNode) =>
+    showLabel ? node : <NavLink.Tooltip label={name}>{node}</NavLink.Tooltip>;
+
+  if (current.readOnly) {
+    return withTooltip(<ReadOnlyValue>{value}</ReadOnlyValue>);
+  }
 
   return (
     <Menu.Root>
-      {/* With its label shown, as in the mobile menu, the trigger needs no tooltip */}
-      {showLabel ? trigger : <NavLink.Tooltip label={name}>{trigger}</NavLink.Tooltip>}
+      {withTooltip(
+        <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
+          {value}
+        </MenuTrigger>
+      )}
       <MenuContent popoverPlacement={isDesktop ? 'right-end' : 'top-start'} zIndex={3}>
         <Content />
       </MenuContent>

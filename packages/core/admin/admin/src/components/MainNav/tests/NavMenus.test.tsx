@@ -24,8 +24,8 @@ const renderMenus = (menu: Partial<MainNavMenuArgs> = {}, { showLabel = false } 
   const mainNav = new MainNav();
   mainNav.addMenu({
     id: 'spaces',
-    icon: Earth,
     intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
+    useCurrent: () => ({ label: 'Control center', icon: <Earth /> }),
     Content: SpaceItems,
     ...menu,
   });
@@ -38,10 +38,36 @@ describe('NavMenus', () => {
     onSelect.mockClear();
   });
 
-  it('names the trigger after the menu while there is no current value', async () => {
-    renderMenus();
+  it('hides the menu while useCurrent returns null', () => {
+    renderMenus({ useCurrent: () => null });
 
-    expect(await screen.findByRole('button', { name: 'Space' })).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Space/)).not.toBeInTheDocument();
+  });
+
+  it('shows a read-only value without a menu', async () => {
+    renderMenus({
+      useCurrent: () => ({ label: 'Pebble & Pine', icon: <span>PP</span>, readOnly: true }),
+    });
+
+    expect(await screen.findByText('Space: Pebble & Pine')).toBeInTheDocument();
+    expect(screen.getByText('PP')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('rings the current value while the menu is open', async () => {
+    const { user } = renderMenus({
+      useCurrent: () => ({ label: 'Control center', icon: <span>CC</span> }),
+    });
+
+    const trigger = await screen.findByRole('button', { name: 'Space: Control center' });
+    const icon = screen.getByText('CC').parentElement!;
+
+    expect(getComputedStyle(icon).boxShadow).toBe('');
+
+    await user.click(trigger);
+
+    expect(getComputedStyle(icon).boxShadow).not.toBe('');
   });
 
   it('shows the current value in the trigger and its accessible name', async () => {
@@ -54,7 +80,7 @@ describe('NavMenus', () => {
     expect(trigger).toHaveTextContent('CC');
   });
 
-  it('follows the current value when it loads late or changes', async () => {
+  it('shows the menu once its current value loads, and follows it', async () => {
     let current: MainNavMenuCurrent | null = null;
     const listeners = new Set<() => void>();
     const subscribe = (listener: () => void) => {
@@ -64,10 +90,10 @@ describe('NavMenus', () => {
 
     renderMenus({ useCurrent: () => React.useSyncExternalStore(subscribe, () => current) });
 
-    expect(await screen.findByRole('button', { name: 'Space' })).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
 
     act(() => {
-      current = { label: 'France' };
+      current = { label: 'France', icon: <span>FR</span> };
       listeners.forEach((listener) => listener());
     });
 
@@ -77,21 +103,21 @@ describe('NavMenus', () => {
   it('shows the name in a tooltip, and not when it is shown next to the icon', async () => {
     const { user, unmount } = renderMenus();
 
-    await user.hover(await screen.findByRole('button', { name: 'Space' }));
-    expect((await screen.findAllByRole('tooltip'))[0]).toHaveTextContent('Space');
+    await user.hover(await screen.findByRole('button', { name: 'Space: Control center' }));
+    expect((await screen.findAllByRole('tooltip'))[0]).toHaveTextContent('Space: Control center');
 
     unmount();
 
     const { user: mobileUser } = renderMenus({}, { showLabel: true });
 
-    await mobileUser.hover(await screen.findByRole('button', { name: 'Space' }));
+    await mobileUser.hover(await screen.findByRole('button', { name: 'Space: Control center' }));
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
   it('opens the plugin items and closes once one is selected', async () => {
     const { user } = renderMenus();
 
-    await user.click(await screen.findByRole('button', { name: 'Space' }));
+    await user.click(await screen.findByRole('button', { name: 'Space: Control center' }));
     await user.click(screen.getByRole('menuitem', { name: 'France' }));
 
     expect(onSelect).toHaveBeenCalledWith('france');
@@ -101,7 +127,7 @@ describe('NavMenus', () => {
   it('closes on Escape', async () => {
     const { user } = renderMenus();
 
-    await user.click(await screen.findByRole('button', { name: 'Space' }));
+    await user.click(await screen.findByRole('button', { name: 'Space: Control center' }));
     expect(screen.getByRole('menu')).toBeInTheDocument();
 
     await user.keyboard('[Escape]');
@@ -110,10 +136,10 @@ describe('NavMenus', () => {
   });
 
   it('hides a menu from users without its permissions, without running its useCurrent', async () => {
-    const useNotHeldCurrent = jest.fn(() => null);
+    const useNotHeldCurrent = jest.fn(() => ({ label: 'France', icon: <span /> }));
     const mainNav = new MainNav();
     const spaces = {
-      icon: Earth,
+      useCurrent: () => ({ label: 'Control center', icon: <Earth /> }),
       intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
       Content: SpaceItems,
     };
@@ -132,8 +158,10 @@ describe('NavMenus', () => {
 
     render(<NavMenus />, { providerOptions: { mainNav } });
 
-    expect(await screen.findByRole('button', { name: 'Space' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Other' })).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Space: Control center' })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Other/ })).not.toBeInTheDocument();
     // Nor while the permissions were loading
     expect(useNotHeldCurrent).not.toHaveBeenCalled();
   });
