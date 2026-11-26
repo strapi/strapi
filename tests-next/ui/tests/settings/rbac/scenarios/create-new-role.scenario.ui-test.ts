@@ -10,6 +10,8 @@ const TARGET_USER = {
   email: 'editor@testing.com',
   password: 'Testing123!',
 };
+/** The actions step 3 adds to the role, on top of Publish that it removes. */
+const EDITED_ACTIONS = ['Read', 'Update', 'Create', 'Delete'];
 const USER_FULL_NAME = `${TARGET_USER.firstname} ${TARGET_USER.lastname}`;
 
 // A user of its own with the Editor role, not the `editor` role user the other files log in with.
@@ -60,16 +62,24 @@ test.describe('RBAC - Full Role Management Flow', () => {
     await roles.open();
     await roles.openRole(NEW_ROLE.name);
     await role.openPermissionsTab('Collection Types');
-    for (const action of ['Read', 'Update', 'Create', 'Delete']) {
+    for (const action of EDITED_ACTIONS) {
       await role.permission(action, 'article').check();
     }
     await role.permission('Publish', 'article').uncheck();
     await role.save();
 
-    // Verify the updated role in the list
+    // Verify the edited permissions are saved: reopen the role from the list
     await roles.open();
 
     await expect(roles.row(NEW_ROLE.name)).toBeVisible();
+
+    await roles.openRole(NEW_ROLE.name);
+    await role.openPermissionsTab('Collection Types');
+
+    for (const action of EDITED_ACTIONS) {
+      await expect(role.permission(action, 'article')).toBeChecked();
+    }
+    await expect(role.permission('Publish', 'article')).not.toBeChecked();
 
     // Step 4: revert the roles' assignment for the user
     await assignRoleToUser(NEW_ROLE.name, OLD_ROLE.name);
