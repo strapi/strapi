@@ -47,13 +47,20 @@ export interface Condition {
   [key: string]: unknown;
 }
 
+/** The provider created by `providerFactory`, which the content-API providers wrap. */
+type BaseProvider = ReturnType<typeof providerFactory>;
+
+/**
+ * The content-API providers replace the base provider's `register(key, item)`, so it is omitted
+ * here. Their `register` resolves to the base provider they wrap, not to themselves.
+ */
 type ConditionProvider = {
-  register: (condition: Condition) => Promise<void>;
-} & ReturnType<typeof providerFactory>;
+  register: (condition: Condition) => Promise<BaseProvider>;
+} & Omit<BaseProvider, 'register'>;
 
 type ActionProvider = {
-  register: (action: string, payload: Record<string, unknown>) => Promise<void>;
-} & ReturnType<typeof providerFactory>;
+  register: (action: string, payload: Record<string, unknown>) => Promise<BaseProvider>;
+} & Omit<BaseProvider, 'register'>;
 
 export interface PermissionUtilities {
   engine: ReturnType<typeof engine.new>;
