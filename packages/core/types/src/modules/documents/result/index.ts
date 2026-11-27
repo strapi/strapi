@@ -465,8 +465,63 @@ type StrictEntry<
   : never;
 
 /**
+ * Whether `TParams` is only known at runtime: its type has a string index signature, as `ctx.query`
+ * and the result of `sanitizeQuery()` do. The client sets `fields`, `populate` and `status` in such
+ * params, so their result cannot follow them.
+ *
+ * `any` is not open: `ReturnType` of a method instantiates its params with `any`, and the result
+ * must stay the one of the method's constraint, or `ReturnType` resolves to `any` (document service
+ * middlewares type `next()` that way).
+ */
+export type IsOpenParams<TParams> = 0 extends 1 & TParams
+  ? false
+  : [TParams] extends [never]
+    ? false
+    : string extends keyof TParams
+      ? true
+      : false;
+
+/**
+ * A strict result entry for params only known at runtime ({@link IsOpenParams}): `id` and
+ * `documentId`, and every other attribute optional, since the client may select fields and
+ * populate attributes. A populated attribute holds its value, as with `populate: '*'`.
+ * `publishedAt` follows `TStatus`.
+ */
+// TODO @Nico A countable relation populated with `count: true` holds `{ count: number }`; the
+// wide entry types only the value. Decide whether REST queries can send it before widening.
+type OpenEntry<TSchemaUID extends UID.Schema, TStatus extends PublicationStatus> = {
+  id: Data.ID;
+  documentId: Data.DocumentID;
+} & {
+  -readonly [TName in Schema.NonPopulatableAttributeNames<TSchemaUID>]+?: ScalarValue<
+    TSchemaUID,
+    TName,
+    TStatus
+  >;
+} & {
+  -readonly [TName in Schema.PopulatableAttributeNames<TSchemaUID>]+?: StrictPopulatedValue<
+    TSchemaUID,
+    TName,
+    true
+  >;
+};
+
+/**
+ * The result of a call whose params are only known at runtime ({@link IsOpenParams}), with strict
+ * types. `TStatus` is the status the call may read: every status for reads, as the client may send
+ * one, or the status the method fixes. Without registered schemas, any document.
+ */
+export type StrictOpenResult<
+  TSchemaUID extends UID.Schema,
+  TStatus extends PublicationStatus = PublicationStatus,
+> = If<Constants.IsSchemaRegistered<TSchemaUID>, OpenEntry<TSchemaUID, TStatus>, AnyDocument>;
+
+/**
  * The result of a Document Service or core service call with strict types, for the entries of
  * `TSchemaUID` read with `TParams`.
+ *
+ * Params only known at runtime, such as `ctx.query`, give {@link StrictOpenResult}: every attribute
+ * optional, and `publishedAt` of either status.
  *
  * It describes what the runtime returns, not what the schema asks for:
  *
@@ -488,6 +543,21 @@ type StrictEntry<
  * @template TUndefinedStatus - The status read when the params pass `status: undefined`.
  */
 export type StrictResult<
+  TSchemaUID extends UID.Schema,
+  TParams,
+  TDefaultStatus extends PublicationStatus,
+  TUndefinedStatus extends PublicationStatus = TDefaultStatus,
+> =
+  IsOpenParams<TParams> extends true
+    ? StrictOpenResult<TSchemaUID>
+    : StrictClosedResult<TSchemaUID, TParams, TDefaultStatus, TUndefinedStatus>;
+
+/**
+ * {@link StrictResult} for params known at compile time: it follows their `fields`, `populate` and
+ * `status`. Methods that fix the status themselves call it with the params without `status`, whose
+ * `Omit` keeps an index signature for `any`.
+ */
+export type StrictClosedResult<
   TSchemaUID extends UID.Schema,
   TParams,
   TDefaultStatus extends PublicationStatus,
