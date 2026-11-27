@@ -1,6 +1,9 @@
 import { test, expect } from '../../../fixtures';
 import { login, loginWithApi } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import {
+  resetDatabaseAndImportDataFromPath,
+  resyncSuperAdminPermissionsAfterImport,
+} from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
@@ -68,6 +71,7 @@ test.describe('Home as super admin — key statistics', () => {
     didWriteSchemaFiles = false;
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await resyncSuperAdminPermissionsAfterImport();
     await loginWithApi({ page });
     await page.goto('/admin');
   });
@@ -82,252 +86,181 @@ test.describe('Home as super admin — key statistics', () => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).toBeVisible();
 
-    // Get initial entries count
-    const entriesContent = await keyStatisticsWidget
-      .getByText('Entries')
-      .locator('..')
-      .textContent();
-    const initialEntriesMatch = entriesContent?.match(/Entries(\d+)/);
-    const initialEntriesCount = initialEntriesMatch ? parseInt(initialEntriesMatch[1]) : 0;
+    const readCount = async (label: string) => {
+      const content = await keyStatisticsWidget.getByText(label).locator('..').textContent();
+      const match = content?.match(new RegExp(`${label}(\\d+)`));
+      if (!match) {
+        await expect(keyStatisticsWidget.getByText(label)).toBeVisible();
+        return null;
+      }
+      return parseInt(match[1], 10);
+    };
 
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialEntriesMatch) {
-      await expect(keyStatisticsWidget.getByText('Entries')).toBeVisible();
-    }
+    const initialEntriesCount = await readCount('Entries');
+    const initialAssetsCount = await readCount('Assets');
+    const initialLocalesCount = await readCount('Locales');
+    const initialAdminsCount = await readCount('Admins');
+    const initialWebhooksCount = await readCount('Webhooks');
+    const initialApiTokensCount = await readCount('API Tokens');
 
-    // Get initial assets count
-    const assetsContent = await keyStatisticsWidget.getByText('Assets').locator('..').textContent();
-    const initialAssetsMatch = assetsContent?.match(/Assets(\d+)/);
-    const initialAssetsCount = initialAssetsMatch ? parseInt(initialAssetsMatch[1]) : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialAssetsMatch) {
-      await expect(keyStatisticsWidget.getByText('Assets')).toBeVisible();
-    }
-
-    // Get initial content types count
-    const contentTypesContent = await keyStatisticsWidget
-      .getByText('Content-Types')
-      .locator('..')
-      .textContent();
-    const initialContentTypesMatch = contentTypesContent?.match(/Content-Types(\d+)/);
-    const initialContentTypesCount = initialContentTypesMatch
-      ? parseInt(initialContentTypesMatch[1])
-      : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialContentTypesMatch) {
-      await expect(keyStatisticsWidget.getByText('Content-Types')).toBeVisible();
-    }
-
-    // Get initial components count
-    const componentsContent = await keyStatisticsWidget
-      .getByText('Components')
-      .locator('..')
-      .textContent();
-    const initialComponentsMatch = componentsContent?.match(/Components(\d+)/);
-    const initialComponentsCount = initialComponentsMatch ? parseInt(initialComponentsMatch[1]) : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialComponentsMatch) {
-      await expect(keyStatisticsWidget.getByText('Components')).toBeVisible();
-    }
-
-    // Get initial locales count
-    const localesContent = await keyStatisticsWidget
-      .getByText('Locales')
-      .locator('..')
-      .textContent();
-    const initialLocalesMatch = localesContent?.match(/Locales(\d+)/);
-    const initialLocalesCount = initialLocalesMatch ? parseInt(initialLocalesMatch[1]) : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialLocalesMatch) {
-      await expect(keyStatisticsWidget.getByText('Locales')).toBeVisible();
-    }
-
-    // Get initial admins count
-    const adminsContent = await keyStatisticsWidget.getByText('Admins').locator('..').textContent();
-    const initialAdminsMatch = adminsContent?.match(/Admins(\d+)/);
-    const initialAdminsCount = initialAdminsMatch ? parseInt(initialAdminsMatch[1]) : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialAdminsMatch) {
-      await expect(keyStatisticsWidget.getByText('Admins')).toBeVisible();
-    }
-
-    // Get initial webhooks count
-    const webhooksContent = await keyStatisticsWidget
-      .getByText('Webhooks')
-      .locator('..')
-      .textContent();
-    const initialWebhooksMatch = webhooksContent?.match(/Webhooks(\d+)/);
-    const initialWebhooksCount = initialWebhooksMatch ? parseInt(initialWebhooksMatch[1]) : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialWebhooksMatch) {
-      await expect(keyStatisticsWidget.getByText('Webhooks')).toBeVisible();
-    }
-
-    // Get initial API tokens count
-    const apiTokensContent = await keyStatisticsWidget
-      .getByText('API Tokens')
-      .locator('..')
-      .textContent();
-    const initialApiTokensMatch = apiTokensContent?.match(/API Tokens(\d+)/);
-    const initialApiTokensCount = initialApiTokensMatch ? parseInt(initialApiTokensMatch[1]) : 0;
-
-    // If we can't parse the initial count, just verify the element exists
-    if (!initialApiTokensMatch) {
-      await expect(keyStatisticsWidget.getByText('API Tokens')).toBeVisible();
-    }
-
-    // If we found all the initial counts, we can run the test of adding items to the project
     if (
-      initialApiTokensMatch &&
-      initialAdminsMatch &&
-      initialWebhooksMatch &&
-      initialContentTypesMatch &&
-      initialComponentsMatch &&
-      initialLocalesMatch &&
-      initialAssetsMatch &&
-      initialEntriesMatch
+      initialEntriesCount === null ||
+      initialAssetsCount === null ||
+      initialLocalesCount === null ||
+      initialAdminsCount === null ||
+      initialWebhooksCount === null ||
+      initialApiTokensCount === null
     ) {
-      didWriteSchemaFiles = true;
-
-      // Create an entry
-      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-      await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
-      await page.getByRole('textbox', { name: /title/i }).fill('Test article');
-      await Promise.all([
-        page.waitForURL(/\/admin\/content-manager\/collection-types\/api::article\.article\/[^/]+/),
-        page.getByRole('button', { name: /save/i }).click(),
-      ]);
-      await findAndClose(page, 'Saved document');
-
-      // Upload an asset, through the Media Library's page object rather than locators spelled
-      // out here — hardcoded panel copy is what broke this step when the new Media Library
-      // became the default.
-      //
-      // `navToHeader` cannot be used for the same reason: it asserts an exact heading, and the
-      // page is now titled after the folder you are in ("Home (3 items)" at the root). The menu
-      // link is unchanged, so only the readiness check moves — to `New`, which the upload opens
-      // anyway.
-      const assetsPage = new AssetsPage(page);
-      await clickAndWait(page, page.locator('role=link[name^="Media Library"]').last());
-      await expect(assetsPage.newButton).toBeVisible();
-
-      await assetsPage.uploadFilesWithFilePicker('public/assets/administration_panel.png');
-      await assetsPage.waitForUploadProgressSuccess();
-      // Dismissed before moving on: the dialog overlays the page the next steps navigate from.
-      await assetsPage.closeUploadProgressDialog();
-
-      // Create a content type and a component
-      await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-      await startCreateContentType(page, 'collection');
-      await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
-      await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
-      await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');
-      await expect(page.getByLabel('API ID (Plural)')).toHaveValue('new-types');
-      await page.getByRole('button', { name: /continue/i }).click();
-      await expect(page.getByRole('button', { name: 'Add new field' }).first()).toBeVisible();
-
-      await page.getByRole('button', { name: /create new component/i }).click();
-      await expect(page.getByRole('heading', { name: 'Create a component' })).toBeVisible();
-      await page.getByRole('textbox', { name: /display name/i }).fill('NewComponent');
-      await page
-        .getByRole('combobox', { name: 'Select a category or enter a name to create a new one' })
-        .fill('NewCategory');
-      await page.getByRole('button', { name: /continue/i }).click();
-
-      await page.getByRole('button', { name: /save/i }).click();
-      await waitForRestart(page);
-
-      // Create a locale
-      await navToHeader(page, ['Settings', 'Internationalization'], 'Internationalization');
-      await page.getByRole('button', { name: /add new locale/i }).click();
-      await page.getByRole('combobox', { name: 'Locales' }).click();
-      await page.getByRole('option', { name: 'Afrikaans (af)' }).click();
-      await page.getByRole('button', { name: /save/i }).click();
-
-      // Create an admin
-      await navToHeader(page, ['Settings', 'Users'], 'Users');
-      await page.getByRole('button', { name: /invite new user/i }).click();
-      await page.getByRole('textbox', { name: /first name/i }).fill('New');
-      await page.getByRole('textbox', { name: /email/i }).fill('newadmin@example.com');
-      await page.getByRole('combobox', { name: "User's roles" }).click();
-      await page.getByRole('option', { name: 'Author' }).click();
-      await page.keyboard.press('Escape');
-
-      await page.getByRole('button', { name: /invite user/i }).click();
-      await page.getByRole('button', { name: /finish/i }).click();
-
-      // Create a webhook
-      await navToHeader(page, ['Webhooks'], 'Webhooks');
-      await clickAndWait(page, page.getByRole('link', { name: 'Create new webhook' }).first());
-      await page.getByRole('textbox', { name: /name/i }).fill('NewWebhook');
-      await page
-        .getByRole('textbox', { name: /url/i })
-        .fill('http://localhost:1337/api/webhooks/new');
-      await Promise.all([
-        page.waitForURL(/\/admin\/settings\/webhooks\/(?!create)[^/]+/),
-        page.getByRole('button', { name: /save/i }).click(),
-      ]);
-
-      // Create an API token
-      await navToHeader(page, ['API Tokens'], 'API Tokens');
-      await clickAndWait(page, page.getByRole('link', { name: 'Create new API token' }).first());
-      await page.getByRole('textbox', { name: /name/i }).fill('NewAPIToken');
-      await page.getByRole('combobox', { name: 'Token duration' }).click();
-      await page.getByRole('option', { name: '30 days' }).click();
-      await page.getByRole('combobox', { name: 'Token type' }).click();
-      await page.getByRole('option', { name: 'Full access' }).click();
-      await Promise.all([
-        page.waitForURL(/\/admin\/settings\/api-tokens\/(?!create)[^/]+/),
-        page.getByRole('button', { name: /save/i }).click(),
-      ]);
-
-      // Go back to the home page and wait for refreshed statistics.
-      // Don't wait for network idle: the homepage SPA often never reaches it.
-      // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
-      // keep that RTK query warm, so Home remount often serves cache and no GET is issued
-      // (waitForResponse then times out). Entries still come from count-documents — assert
-      // via expect() polling once the widget is ready.
-      const keyStatisticsReady = page.waitForResponse(
-        (response) =>
-          response.request().method() === 'GET' &&
-          response.url().includes('/homepage/key-statistics') &&
-          response.ok()
-      );
-      await page.getByRole('link', { name: /^home$/i }).click();
-      await keyStatisticsReady;
-
-      // The numbers should be updated
-      await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText(
-        String(initialEntriesCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('Assets').locator('..')).toContainText(
-        String(initialAssetsCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('Content-Types').locator('..')).toContainText(
-        String(initialContentTypesCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('Components').locator('..')).toContainText(
-        String(initialComponentsCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('Locales').locator('..')).toContainText(
-        String(initialLocalesCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('Admins').locator('..')).toContainText(
-        String(initialAdminsCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('Webhooks').locator('..')).toContainText(
-        String(initialWebhooksCount + 1)
-      );
-      await expect(keyStatisticsWidget.getByText('API Tokens').locator('..')).toContainText(
-        String(initialApiTokensCount + 1)
-      );
+      return;
     }
+
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
+    await page.getByRole('textbox', { name: /title/i }).fill('Test article');
+    await Promise.all([
+      page.waitForURL(/\/admin\/content-manager\/collection-types\/api::article\.article\/[^/]+/),
+      page.getByRole('button', { name: /save/i }).click(),
+    ]);
+    await findAndClose(page, 'Saved document');
+
+    // Upload through the Media Library page object. Hardcoded panel copy broke this step
+    // when the new Media Library became the default. navToHeader asserts an exact heading,
+    // and the page is titled after the current folder ("Home (3 items)" at the root).
+    const assetsPage = new AssetsPage(page);
+    await clickAndWait(page, page.locator('role=link[name^="Media Library"]').last());
+    await expect(assetsPage.newButton).toBeVisible();
+
+    await assetsPage.uploadFilesWithFilePicker('public/assets/administration_panel.png');
+    await assetsPage.waitForUploadProgressSuccess();
+    await assetsPage.closeUploadProgressDialog();
+
+    await navToHeader(page, ['Settings', 'Internationalization'], 'Internationalization');
+    await page.getByRole('button', { name: /add new locale/i }).click();
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'Afrikaans (af)' }).click();
+    await page.getByRole('button', { name: /save/i }).click();
+
+    await navToHeader(page, ['Settings', 'Users'], 'Users');
+    await page.getByRole('button', { name: /invite new user/i }).click();
+    await page.getByRole('textbox', { name: /first name/i }).fill('New');
+    await page.getByRole('textbox', { name: /email/i }).fill('newadmin@example.com');
+    await page.getByRole('combobox', { name: "User's roles" }).click();
+    await page.getByRole('option', { name: 'Author' }).click();
+    await page.keyboard.press('Escape');
+
+    await page.getByRole('button', { name: /invite user/i }).click();
+    await page.getByRole('button', { name: /finish/i }).click();
+
+    await navToHeader(page, ['Webhooks'], 'Webhooks');
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new webhook' }).first());
+    await page.getByRole('textbox', { name: /name/i }).fill('NewWebhook');
+    await page
+      .getByRole('textbox', { name: /url/i })
+      .fill('http://localhost:1337/api/webhooks/new');
+    await Promise.all([
+      page.waitForURL(/\/admin\/settings\/webhooks\/(?!create)[^/]+/),
+      page.getByRole('button', { name: /save/i }).click(),
+    ]);
+
+    await navToHeader(page, ['API Tokens'], 'API Tokens');
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new API token' }).first());
+    await page.getByRole('textbox', { name: /name/i }).fill('NewAPIToken');
+    await page.getByRole('combobox', { name: 'Token duration' }).click();
+    await page.getByRole('option', { name: '30 days' }).click();
+    await page.getByRole('combobox', { name: 'Token type' }).click();
+    await page.getByRole('option', { name: 'Full access' }).click();
+    await Promise.all([
+      page.waitForURL(/\/admin\/settings\/api-tokens\/(?!create)[^/]+/),
+      page.getByRole('button', { name: /save/i }).click(),
+    ]);
+
+    const keyStatisticsReady = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'GET' &&
+        response.url().includes('/homepage/key-statistics') &&
+        response.ok()
+    );
+    await page.getByRole('link', { name: /^home$/i }).click();
+    await keyStatisticsReady;
+
+    await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText(
+      String(initialEntriesCount + 1)
+    );
+    await expect(keyStatisticsWidget.getByText('Assets').locator('..')).toContainText(
+      String(initialAssetsCount + 1)
+    );
+    await expect(keyStatisticsWidget.getByText('Locales').locator('..')).toContainText(
+      String(initialLocalesCount + 1)
+    );
+    await expect(keyStatisticsWidget.getByText('Admins').locator('..')).toContainText(
+      String(initialAdminsCount + 1)
+    );
+    await expect(keyStatisticsWidget.getByText('Webhooks').locator('..')).toContainText(
+      String(initialWebhooksCount + 1)
+    );
+    await expect(keyStatisticsWidget.getByText('API Tokens').locator('..')).toContainText(
+      String(initialApiTokensCount + 1)
+    );
+  });
+
+  test('a super admin should see content type and component counts update', async ({ page }) => {
+    const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
+    await expect(keyStatisticsWidget).toBeVisible();
+
+    const readCount = async (label: string) => {
+      const content = await keyStatisticsWidget.getByText(label).locator('..').textContent();
+      const match = content?.match(new RegExp(`${label}(\\d+)`));
+      if (!match) {
+        await expect(keyStatisticsWidget.getByText(label)).toBeVisible();
+        return null;
+      }
+      return parseInt(match[1], 10);
+    };
+
+    const initialContentTypesCount = await readCount('Content-Types');
+    const initialComponentsCount = await readCount('Components');
+
+    if (initialContentTypesCount === null || initialComponentsCount === null) {
+      return;
+    }
+
+    didWriteSchemaFiles = true;
+
+    await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
+    await startCreateContentType(page, 'collection');
+    await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+    await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
+    await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');
+    await expect(page.getByLabel('API ID (Plural)')).toHaveValue('new-types');
+    await page.getByRole('button', { name: /continue/i }).click();
+    await expect(page.getByRole('button', { name: 'Add new field' }).first()).toBeVisible();
+
+    await page.getByRole('button', { name: /create new component/i }).click();
+    await expect(page.getByRole('heading', { name: 'Create a component' })).toBeVisible();
+    await page.getByRole('textbox', { name: /display name/i }).fill('NewComponent');
+    await page
+      .getByRole('combobox', { name: 'Select a category or enter a name to create a new one' })
+      .fill('NewCategory');
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    await page.getByRole('button', { name: /save/i }).click();
+    await waitForRestart(page);
+
+    const keyStatisticsReady = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'GET' &&
+        response.url().includes('/homepage/key-statistics') &&
+        response.ok()
+    );
+    await page.getByRole('link', { name: /^home$/i }).click();
+    await keyStatisticsReady;
+
+    await expect(keyStatisticsWidget.getByText('Content-Types').locator('..')).toContainText(
+      String(initialContentTypesCount + 1)
+    );
+    await expect(keyStatisticsWidget.getByText('Components').locator('..')).toContainText(
+      String(initialComponentsCount + 1)
+    );
   });
 });
 
