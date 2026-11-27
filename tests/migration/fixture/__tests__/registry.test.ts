@@ -29,6 +29,7 @@ describe('resolveCheckIds', () => {
     const ids = resolveCheckIds(spec, v4Entries, { skipJoinParity: false });
     expect(ids).toContain('relationApiParity');
     expect(ids).toContain('documentIdBackfill');
+    expect(ids).toContain('localizedDocumentIdRecovery');
     expect(ids).toContain('joinTableParity');
   });
 
@@ -52,8 +53,10 @@ describe('resolveCheckIds', () => {
     const ids = resolveCheckIds(spec, v4Entries, { skipJoinParity: false });
     const rowIdx = ids.indexOf('rowCounts');
     const docIdx = ids.indexOf('documentIdBackfill');
+    const recoveryIdx = ids.indexOf('localizedDocumentIdRecovery');
     const dbIdx = ids.indexOf('dbMorphAndDz');
     expect(rowIdx).toBeLessThan(docIdx);
+    expect(docIdx).toBeLessThan(recoveryIdx);
     expect(docIdx).toBeLessThan(dbIdx);
   });
 });
