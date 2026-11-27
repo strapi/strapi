@@ -5,6 +5,7 @@ status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - The statement that plugin modules and API modules have no guaranteed relative order comes from reading `loadApplicationContext` (`Promise.all`). No test confirms it.
+  - The "Module routes by phase", "Registry maps" and "When an API works" sections come from runtime probes on `examples/getstarted` (SQLite, Enterprise Edition off) and from reading the code on develop. Rows for Enterprise Edition features and other databases are not probed.
   - Destroy leaves the service container in place. A second call waits for an in-flight shutdown and returns immediately after it succeeds. A failed shutdown can be retried from the step that did not finish. The API test helper clears the container after destroy succeeds.
 ---
 
@@ -91,7 +92,7 @@ At the end of this phase, the registries are full. The database is not ready. `s
 | `middlewares` | `dist/src/middlewares/*.js` and the internal middlewares                        | `middlewares` registry, under `global::` and `strapi::`                            |
 | `policies`    | `dist/src/policies/*.js`                                                        | `policies` registry, under `global::`                                              |
 
-When the `plugins` and `apis` loaders add a module, the `modules` registry creates it and calls `module.load()` at once. `load()` adds the module content types, services, policies, middlewares and controllers to their registries under the module namespace. It also stores the module config under the namespace. Routes stay on the module object. `server.initRouting()` reads them in the bootstrap phase.
+When the `plugins` and `apis` loaders add a module, the `modules` registry creates it and calls `module.load()` at once. `load()` adds the module content types, services, policies, middlewares and controllers to their registries under the module namespace. It also stores the module config under the namespace. Routes stay on the module object. `server.initRouting()` reads them in the bootstrap phase. See [Module routes by phase](#module-routes-by-phase).
 
 :::caution
 The loaders run at the same time. Each loader awaits file-system calls before it adds entries. The `plugins` and `apis` loaders add modules to the same `modules` registry, and the code does not set an order between them. The `modules` registry runs `register`, `bootstrap` and `destroy` in insertion order. Do not write a plugin that must run before or after an API module.
@@ -132,6 +133,10 @@ Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootst
 
 `strapi.start()` calls `load()` if `strapi.isLoaded` is `false`. Then it calls `listen()`. `listen()` uses `server.socket` if it is set. Otherwise it uses `server.host` and `server.port`.
 
+`load()` sets `isLoaded` to `true` after `bootstrap()` returns. Thus `isLoaded` is `false` in every `register` and `bootstrap` function and in the `strapi::app.afterBootstrap` handlers. A process that calls only `register()`, such as `strapi services:list` or `strapi ts:generate-types`, never sets it.
+
+`server.listen()` calls `server.mount()` if it did not run yet. `mount()` attaches the content API and admin routers to the root router and adds the root router to the Koa app. Thus a process that only calls `load()`, such as `strapi admin:create-user` or a script, has no API route on the root router. `strapi routes:list` calls `server.mount()` itself. See [Routers and route registration](./06-http-request-path.md#routers-and-route-registration).
+
 After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, `openAdmin()` opens the admin panel in a browser. Without `strapi develop --open` or `--no-open`, it opens only when no admin user exists and `admin.autoOpen` is not `false`. `--open` opens it when the first worker starts. Workers forked after a reload use the default behaviour, so once an admin user exists a reload opens no new tab, while a restart with no admin user still opens one. A worker that failed before its server listened does not count as a start, and the worker that replaces it keeps `--open`. `--no-open` never opens it, including on restarts. The flag reaches `openAdmin()` through the `open` option of `createStrapi()`, not through the app config. The Vite dev server runs in middleware mode, so it never opens a browser.
 
 If `start()` catches an error, it calls `stopWithError()`. This logs the error and calls `stop()`. `stop()` calls `destroy()` without awaiting it, sends `stop` to the parent process when `autoReload` is on, and calls `process.exit(1)`.
@@ -155,6 +160,69 @@ A second `destroy()` waits for the shutdown already in progress. After that shut
 `strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files, with two exceptions. If that `destroy()` throws, the worker sends `stop` to the primary and exits with code 1. A failure in `start()` never reaches this path, because develop does not await `start()`: `start()` calls `stopWithError()` itself. If `destroy()` throws during a restart, the worker sends neither `killed` nor `stop` and does not exit by itself: what happens next depends on how the process handles the unhandled rejection. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
 
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
+
+## Module routes by phase
+
+The `routes` member of a plugin, an API or the admin changes shape in `server.initRouting()` (bootstrap step 11):
+
+| Module                     | Until `initRouting()`                                                                                      | After `initRouting()`                                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Plugin with a router map   | As declared: each entry is a router object or a factory. Core plugins use factories that expose `.routes`. | A new map of built routers. Strapi calls each factory once with `{ strapi }`. Router objects are kept and get `type` and `prefix` defaults. |
+| Plugin with a routes array | The array.                                                                                                 | The same array.                                                                                                                             |
+| Plugin without routes      | `[]`. All plugins without routes share one array instance.                                                 | The same shared array.                                                                                                                      |
+| API                        | A map keyed by file name in `routes/`, or `[]` without a `routes/` folder.                                 | A new map of built routers, all with `type: 'content-api'`. `[]` becomes `{}`.                                                              |
+| Admin                      | As declared by `@strapi/admin`.                                                                            | A new map of built routers.                                                                                                                 |
+
+`initRouting()` also sets `route.info` (`{ pluginName }` or `{ apiName }`) on each route, and the route manager adds `info.type`. A route added to a module after `initRouting()` has no `info` and is never served.
+
+A router from `createCoreRouter()` builds its route list on the first read of `.routes`, from the content type at that moment. A read in a `register` function freezes the routes before other plugins extend the content type.
+
+## Registry maps
+
+`strapi.services`, `strapi.controllers`, `strapi.contentTypes`, `strapi.policies`, `strapi.middlewares` and `strapi.hooks` return a new object on each read. So do the `contentTypes`, `services`, `controllers`, `policies` and `middlewares` members of a module. A write to such an object is lost. On `strapi.services` and `strapi.controllers`, a write to an existing key throws `TypeError`, because each key is a getter. Use the registry methods instead, for example `strapi.get('services').set(uid, service)` or `strapi.get('content-types').extend(uid, fn)`.
+
+`strapi.plugins`, `strapi.apis` and `strapi.components` return the registry's own object. A write there persists, but it skips the checks of `add()`.
+
+## When an API works
+
+The steps refer to the [register](#register-phase) and [bootstrap](#bootstrap-phase) lists above.
+
+### Ready from
+
+| API                                                                                          | Ready from                                                        | Before                                                                   |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `strapi.plugin(name)`, `strapi.api(name)`, `strapi.config.get('plugin::<name>')`             | The loaders, in the `registries` provider `register`              | `undefined`                                                              |
+| `strapi.hook()` for the sync hooks and `strapi::app.afterBootstrap`                          | The `registries` provider `register`, after the loaders           | `undefined`                                                              |
+| `strapi.plugin('upload').provider`                                                           | The upload plugin `register`                                      | `undefined`                                                              |
+| `strapi.plugin('email').provider`                                                            | The email plugin `bootstrap`                                      | `undefined`                                                              |
+| Custom field attributes with their underlying type                                           | End of the register phase (`convertCustomFieldType()`)            | `type: 'customField'`                                                    |
+| `strapi.db.query()`, `strapi.documents(uid)` methods, `strapi.entityService`, `strapi.store` | Bootstrap step 3 (`strapi.db.init()`). Tables exist after step 6. | Throws `Model <uid> not found`                                           |
+| `strapi.contentAPI.getRoutesMap()`                                                           | Bootstrap step 11 (`initRouting()`)                               | `{}` in the constructor. From the register phase on, throws `TypeError`. |
+| Content API permission actions                                                               | Bootstrap step 12                                                 | Empty map                                                                |
+| Running cron jobs, stored webhooks in the runner                                             | Bootstrap step 14 (provider `bootstrap`)                          | `strapi.cron.add()` queues the job. An event reaches no stored webhook.  |
+| API routes on the root router                                                                | `listen()` (`server.mount()`)                                     | Not served, not in `server.listRoutes()`                                 |
+| `strapi.isLoaded === true`                                                                   | End of `load()`                                                   | `false`                                                                  |
+
+`strapi.db.lifecycles.subscribe()`, `strapi.documents.use()`, `strapi.eventHub.on()`, `strapi.cron.add()` and `strapi.config` work from the constructor on.
+
+### Effective until
+
+These calls are accepted in every phase. A call after the step below has no effect, or only part of it, and nothing warns.
+
+| Call                                                                                                 | Effective until                     | After                                                                                 |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------- |
+| `strapi.customFields.register()`                                                                     | End of the register phase           | An attribute that uses it already stopped the boot with `Could not find Custom Field` |
+| `strapi.get('models').add()`                                                                         | Bootstrap step 2                    | `strapi.db.query()` throws `Model <uid> not found`                                    |
+| `strapi.get('content-types').add()`, `.extend()`, attribute changes                                  | Bootstrap step 2                    | The registry changes. The database does not.                                          |
+| `strapi.hook('strapi::content-types.beforeSync')` or `afterSync` `.register()`                       | Bootstrap steps 5 and 9             | Never called in this boot                                                             |
+| `strapi.db.migrations.providers.internal.register()`                                                 | Bootstrap step 6                    | Not run in this boot                                                                  |
+| Add or replace routes on a module                                                                    | Bootstrap step 11 (`initRouting()`) | Never served. The route has no `info`, so `getRoutesMap()` throws `TypeError`.        |
+| `strapi.get('controllers').set()` or `.extend()` for a routed action, route policies and middlewares | Bootstrap step 11                   | Routes keep the action, policies and middlewares bound at step 11                     |
+| `strapi.contentAPI.addQueryParams()`, `addInputParams()`                                             | Bootstrap step 11                   | Stored, never merged into the routes                                                  |
+| `strapi.hook('strapi::app.afterBootstrap').register()`                                               | Bootstrap step 16                   | Never called                                                                          |
+| `strapi.server.routes({ type, routes })`, `strapi.server.api(name).routes()`                         | `server.mount()` in `listen()`      | Never served                                                                          |
+
+Some registrations throw instead. The content API action and condition providers throw once `isLoaded` is `true`. The admin action provider also throws once the admin `strapi::app.afterBootstrap` handler locks it.
 
 ## Idempotency guards
 
