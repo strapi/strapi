@@ -24,6 +24,6 @@ export class HomePage {
 
   async logOut() {
     await this.profileMenuButton().click();
-    await this.page.getByRole('menuitem', { name: 'Log out' }).click();
+    await this.page.getByRole('menuitem', { name: 'Sign out' }).click();
   }
 }
