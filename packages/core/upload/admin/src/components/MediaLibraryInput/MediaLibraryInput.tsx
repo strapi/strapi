@@ -112,13 +112,13 @@ export const MediaLibraryInput = ({
 
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
-  // Echoes the app config; a missing payload (still loading) falls back to
-  // sequential rather than outpacing what the server asked for.
   const { isLoading, canRead, canCreate } = useMediaLibraryPermissions();
   // Not while permissions load: `useRBAC` starts with every flag false, and an
   // upload sent before it settles can end in a 403.
   const canUpload = !isLoading && canCreate;
   const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
+  // Echoes the app config; a missing payload (still loading) falls back to
+  // sequential rather than outpacing what the server asked for.
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
 

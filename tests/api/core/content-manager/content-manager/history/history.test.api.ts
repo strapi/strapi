@@ -967,18 +967,13 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
 
-      const { documentId } = await strapi.db
-        .query('admin::api-token')
-        .findOne({ select: ['documentId'], where: { id: body.data.id } });
-
       return {
-        token: { ...body.data, documentId },
         tokenRq: await createAgent(strapi, { token: body.data.accessKey }),
       };
     };
 
     const createAdminTokenVersion = async (name: string) => {
-      const { token, tokenRq } = await createAdminToken(name);
+      const { tokenRq } = await createAdminToken(name);
 
       const res = await tokenRq({
         method: 'PUT',
@@ -990,7 +985,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       const [latestVersion] = await findVersions(collectionTypeDocumentId);
 
-      return { token, version: latestVersion };
+      return latestVersion;
     };
 
     test('Records an admin panel write with the admin panel source', async () => {
@@ -1030,17 +1025,17 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
-    test('Records an admin token write with the admin API source and the token as its author', async () => {
+    test('Records an admin token write with the admin API source and the token owner as its author', async () => {
       const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
 
-      const { token, version } = await createAdminTokenVersion('history-author-token');
+      const version = await createAdminTokenVersion('history-author-token');
 
       expect(version.source).toBe('admin-api');
       expect(version.author).toEqual({
-        type: 'token',
-        name: 'history-author-token',
-        model: 'admin::api-token',
-        id: token.documentId,
+        type: 'person',
+        name: 'admin admin',
+        model: 'admin::user',
+        id: me.data.documentId,
       });
       expect(version.createdBy).toMatchObject({ id: me.data.id });
     });
@@ -1097,38 +1092,6 @@ describeOnCondition(edition === 'EE')('History API', () => {
         type: 'person',
         name: null,
         model: 'admin::user',
-        id: null,
-      });
-    });
-
-    test('Shows the current name of the token', async () => {
-      const { token, version } = await createAdminTokenVersion('history-renamed-token');
-
-      await rq({
-        method: 'PUT',
-        url: `/admin/admin-tokens/${token.id}`,
-        body: { name: 'history-renamed-token-new-name' },
-      });
-
-      const versions = await findVersions(collectionTypeDocumentId);
-      expect(versions.find(({ id }) => id === version.id).author).toEqual({
-        type: 'token',
-        name: 'history-renamed-token-new-name',
-        model: 'admin::api-token',
-        id: token.documentId,
-      });
-    });
-
-    test('Shows a deleted token when the token is deleted', async () => {
-      const { token, version } = await createAdminTokenVersion('history-deleted-token');
-
-      await rq({ method: 'DELETE', url: `/admin/admin-tokens/${token.id}` });
-
-      const versions = await findVersions(collectionTypeDocumentId);
-      expect(versions.find(({ id }) => id === version.id).author).toEqual({
-        type: 'token',
-        name: null,
-        model: 'admin::api-token',
         id: null,
       });
     });

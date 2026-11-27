@@ -103,8 +103,9 @@ export const UploadDropZoneProvider = ({
         return;
       }
 
-      // Bidirectional guard with AssetsDndProvider — internal item drags must not
-      // activate the upload overlay. See AssetsDndProvider.tsx.
+      // Only a drag that carries files activates the upload overlay. Internal item
+      // drags (AssetsDndProvider) use pointer events and start no HTML5 drag, and
+      // UploadDropZone also hides its overlay while one is active.
       if (!e.dataTransfer.types.includes('Files')) {
         return;
       }

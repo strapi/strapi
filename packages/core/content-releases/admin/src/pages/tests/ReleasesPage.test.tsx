@@ -259,6 +259,38 @@ describe('Releases home page', () => {
     });
   });
 
+  it('shows the date alone for a release published by hand before a schedule still to come', async () => {
+    const [base] = mockReleasesPageData.releasesByStatus.data;
+    const DAY = 24 * 60 * 60 * 1000;
+    server.use(
+      http.get('/content-releases', () =>
+        HttpResponse.json({
+          ...mockReleasesPageData.releasesByStatus,
+          data: [
+            {
+              ...base,
+              id: 1,
+              name: 'Published early',
+              status: 'done',
+              scheduledAt: '2099-01-15T09:00:00.000Z',
+              timezone: 'UTC',
+              releasedAt: new Date(Date.now() - DAY).toISOString(),
+            },
+          ],
+        })
+      )
+    );
+
+    render(<ReleasesPage />);
+
+    await screen.findByRole('link', { name: 'Published early' });
+    const [early] = screen.getAllByRole('row').slice(1);
+
+    expect(within(early).getByText(/^Jan 15, 2099 • 09:00/)).toBeInTheDocument();
+    expect(within(early).queryByRole('time')).not.toBeInTheDocument();
+    expect(early).not.toHaveTextContent(/\bin \d+ \w+|\bago\b/i);
+  });
+
   it('dates a release by its schedule, the one the sort and the filters use, even once it ran', async () => {
     const [base] = mockReleasesPageData.releasesByStatus.data;
     server.use(

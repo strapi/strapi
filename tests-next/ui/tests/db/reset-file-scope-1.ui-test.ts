@@ -1,6 +1,6 @@
 import { writeProbe } from '@strapi/tests-shared';
 
-import { expect, test } from '../../fixtures/app';
+import { expect, test } from '../../fixtures';
 
 // Default `file` scope: the tests of a file share what its `beforeAll` wrote. They don't share
 // data between tests: each one must pass alone (--grep, shard), and a failed test restarts the

@@ -19,8 +19,8 @@ const RESTORE_WINDOW_MS = 2000;
 
 /**
  * How many list offsets to keep. Matches `MAX_REMEMBERED_LISTS` in
- * `useInfiniteAssets`: the two are keyed identically, so they should forget on
- * the same terms.
+ * `useInfiniteAssets`, so both forget lists at the same pace. The keys differ:
+ * offsets use `getListQueryKey`, the remembered pages use the request args.
  */
 const MAX_REMEMBERED_OFFSETS = 10;
 
