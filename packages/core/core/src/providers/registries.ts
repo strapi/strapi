@@ -1,10 +1,9 @@
-import { hooks } from '@strapi/utils';
-
 import { defineProvider } from './provider';
 import * as registries from '../registries';
 import { loadApplicationContext } from '../loaders';
 import * as syncMigrations from '../migrations';
 import { discardDocumentDrafts } from '../migrations/database/5.0.0-discard-drafts';
+import { setLifecycleHooks } from '../utils/lifecycle-hooks';
 
 export default defineProvider({
   init(strapi) {
@@ -27,9 +26,7 @@ export default defineProvider({
   async register(strapi) {
     await loadApplicationContext(strapi);
 
-    strapi.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
-    strapi.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
-    strapi.get('hooks').set('strapi::app.afterBootstrap', hooks.createAsyncSeriesHook());
+    setLifecycleHooks(strapi);
 
     // Content migration to enable draft and publish
     strapi.hook('strapi::content-types.beforeSync').register(syncMigrations.disable);
