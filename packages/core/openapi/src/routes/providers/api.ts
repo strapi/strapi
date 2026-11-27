@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { routesOf } from '@strapi/utils';
 import { createDebugger } from '../../utils';
 
 import { AbstractRoutesProvider } from './abstract';
@@ -28,8 +29,8 @@ export class ApiRoutesProvider extends AbstractRoutesProvider {
     const routes = Object.values(apis)
       // Extract and flatten each router from every API
       .flatMap((api) => Object.values(api.routes))
-      // Extract and flatten the routes from each router
-      .flatMap((router) => router.routes);
+      // Extract and flatten the routes from each router, which may be declared as an array of routes
+      .flatMap((router) => routesOf(router));
 
     debug('found %o routes in Strapi APIs', routes.length);
 

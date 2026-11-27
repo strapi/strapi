@@ -10243,6 +10243,7 @@ __metadata:
   resolution: "@strapi/openapi@workspace:packages/core/openapi"
   dependencies:
     "@strapi/types": "npm:5.64.0"
+    "@strapi/utils": "npm:5.64.0"
     "@types/debug": "npm:^4"
     "@types/jest": "npm:29.5.2"
     "@types/node": "npm:22.20.0"
