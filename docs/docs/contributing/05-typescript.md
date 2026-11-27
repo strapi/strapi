@@ -335,6 +335,40 @@ contracts through `@strapi/strapi/strict-types` or generated types.
 [Decision: global type registries](./05-typescript-registries-decision.md) explains why contracts
 use the global `Strapi.Registries` interfaces and `registries.ts` files, and lists the alternatives.
 
+### Registered contracts without new `any`
+
+`yarn test:types:contract-any` lists every `any` that an application with strict types reads in
+the registered contracts, and fails when the list differs from
+`tests/types/contract-any/known-any.json`. CI runs it as the last step of the `typescript` job.
+
+The check builds an application program from the published declarations (`dist`, so build first)
+once per license scope: every licensed feature listed, and no license marker. It walks each member
+of every service and controller entry, each entry of the other `Strapi.Registries` interfaces, and
+`Core.Strapi`, `Core.MiddlewareHandler`, `Core.ControllerHandler` and `Core.PolicyHandler`. The walk
+follows members, call parameters and results, index signatures, and the items of arrays, promises,
+maps and sets, 6 levels deep. `Core.Strapi` members and `ContainerEntries` entries are core API:
+they are walked 3 levels deep. The walk does not enter TypeScript lib or third-party types, so a
+third-party `any` is reported only where a Strapi type exposes it. An unresolved type in a
+published declaration is reported as `<error>`.
+
+It fails with one line per difference:
+
+- `NEW`: an application reads `any` at that path. Type it. To keep the strict-off output
+  unchanged, write the gate out in the declaration:
+  `Core.IsStrict extends true ? <type> : <previous type>`. An inferred result that contains a gate
+  is emitted as its strict-off side, `any`, so the check still fails.
+- `GONE`: a listed path is no longer `any`. Drop it from the list.
+- `NO REASON`: a listed member has no `reason`.
+
+When an `any` must stay, or after a fix, build and run
+`node tests/types/contract-any/check.cjs --update`. It keeps the reasons of the members still
+found, drops the paths that are gone, and adds new members with an empty `reason`, so the check
+fails until you write one. `tracking` is optional. `--print` lists what the check finds without
+comparing.
+
+At each rebase on develop, build and run `yarn test:types:contract-any`: a develop change can add
+an `any` to a contract.
+
 ## Declaring a package's contracts
 
 Keep contracts in the package that implements them, under `server/src/types/`, and declare them
