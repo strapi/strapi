@@ -54,7 +54,7 @@ export const AdminSeatInfoEE = () => {
 
   return (
     <Flex direction="column" alignItems="start" gap={2}>
-      <Flex gap={2} alignItems="center" tag="dt">
+      <Flex gap={1} alignItems="center" tag="dt">
         <Typography variant="sigma" textColor="neutral600">
           {formatMessage({
             id: 'Settings.application.admin-users',
@@ -68,7 +68,7 @@ export const AdminSeatInfoEE = () => {
               'Unique active admin users across every instance using this license. Updated at each license check and when users are added or removed.',
           })}
         >
-          <Information width="1.4rem" height="1.4rem" fill="neutral500" />
+          <Information width="1.4rem" height="1.4rem" fill="neutral400" />
         </Tooltip>
       </Flex>
       <Flex direction="column" alignItems="start" gap={1} tag="dd">

@@ -104,27 +104,22 @@ const STATUS_BADGE: Record<License['licenseStatus'], StatusBadge> = {
 };
 
 /**
- * Absolute dates are rendered as `yyyy/mm/dd` rather than through `formatDate`, so the
- * value is unambiguous in every locale (a locale-ordered `03/04` could be either March 4th
- * or April 3rd). Relative values, like the last license check, stay relative per the design.
+ * Absolute dates spell the month out ("July 2, 2027" in English, "2 juillet 2027" in French), so
+ * they read naturally and stay unambiguous in every locale (a numeric `03/04` could be either
+ * March 4th or April 3rd). Relative values, like the last license check, stay relative per the
+ * design.
  */
-const formatAbsoluteDate = (value: string | number): string => {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  // UTC, not the local calendar: license dates are UTC-midnight instants, which local getters
-  // turn into the previous day anywhere west of UTC.
-  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getUTCDate()}`.padStart(2, '0');
-
-  return `${date.getUTCFullYear()}/${month}/${day}`;
+const ABSOLUTE_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  // UTC, not the local calendar: license dates are UTC-midnight instants, which the local
+  // calendar turns into the previous day anywhere west of UTC.
+  timeZone: 'UTC',
 };
 
 const LicenseInfoEE = () => {
-  const { formatMessage, formatRelativeTime } = useIntl();
+  const { formatMessage, formatRelativeTime, formatDate } = useIntl();
   const { license, isLoading, isError } = useLicenseLimits();
   const { data: trialTimeLeft } = useGetLicenseTrialTimeLeftQuery(undefined, {
     skip: !license?.isTrial,
@@ -207,6 +202,12 @@ const LicenseInfoEE = () => {
       return formatRelativeTime(diffMinutes, 'minute', { numeric: 'auto' });
     }
     return formatRelativeTime(Math.round(diffMs / (60 * 60 * 1000)), 'hour', { numeric: 'auto' });
+  };
+
+  const formatAbsoluteDate = (value: string | number): string => {
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? '' : formatDate(date, ABSOLUTE_DATE_FORMAT);
   };
 
   const currentPlanValue = licenseMode === 'offline' ? `${licensedPlan} - offline` : licensedPlan;
@@ -319,7 +320,7 @@ const LicenseInfoEE = () => {
         </Flex>
         <Flex direction="column" alignItems="stretch" gap={5} flex="1">
           <Flex direction="column" alignItems="start" gap={2}>
-            <Flex gap={2} alignItems="center" tag="dt">
+            <Flex gap={1} alignItems="center" tag="dt">
               <Typography variant="sigma" textColor="neutral600">
                 {formatMessage({
                   id: 'Settings.license.status',
@@ -333,7 +334,7 @@ const LicenseInfoEE = () => {
                     'Strapi checks the license status every 12 hours and on every build.',
                 })}
               >
-                <Information width="1.4rem" height="1.4rem" fill="neutral500" />
+                <Information width="1.4rem" height="1.4rem" fill="neutral400" />
               </Tooltip>
             </Flex>
             <Flex direction="column" alignItems="start" gap={2} tag="dd">

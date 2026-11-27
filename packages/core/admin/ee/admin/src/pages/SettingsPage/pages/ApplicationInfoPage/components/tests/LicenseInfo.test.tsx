@@ -85,8 +85,8 @@ describe('LicenseInfoEE', () => {
 
     expect(await screen.findByText('Enterprise - offline')).toBeInTheDocument();
     expect(
-      // `expireAt` is 2026-12-31T00:00:00.000Z; dates are absolute `yyyy/mm/dd` in UTC
-      screen.getByText('License valid until 2026/12/31')
+      // `expireAt` is 2026-12-31T00:00:00.000Z; dates are absolute, month spelled out, in UTC
+      screen.getByText('License valid until December 31, 2026')
     ).toBeInTheDocument();
     expect(screen.queryByText(/Last license validity check/)).not.toBeInTheDocument();
   });
@@ -249,6 +249,14 @@ describe('LicenseInfoEE', () => {
     render(<LicenseInfoEE />);
 
     expect(await screen.findByText('Unknown')).toBeInTheDocument();
+  });
+
+  it('shows the renewal date with the month spelled out', async () => {
+    licenseData = structuredClone(baseLicense);
+    render(<LicenseInfoEE />);
+
+    // `renewalDate` is 2027-03-18T00:00:00.000Z
+    expect(await screen.findByText('March 18, 2027')).toBeInTheDocument();
   });
 
   it('omits the renewal date row when renewalDate is null', async () => {
