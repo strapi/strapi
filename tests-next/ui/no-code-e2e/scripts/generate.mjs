@@ -27,8 +27,8 @@ const ANSWER_SCHEMA = {
   type: 'object',
   properties: {
     status: { type: 'string', enum: ['generated', 'refused', 'needs_clarification'] },
-    reason: { type: 'string', description: 'Pourquoi, en une ou deux phrases, en français.' },
-    files: { type: 'array', items: { type: 'string' }, description: 'Fichiers créés ou modifiés.' },
+    reason: { type: 'string', description: 'Why, in one or two sentences, in English.' },
+    files: { type: 'array', items: { type: 'string' }, description: 'Files created or changed.' },
   },
   required: ['status', 'reason'],
   additionalProperties: false,
@@ -103,7 +103,7 @@ if (queue.length) {
   log('Warm-up: preparing the ui app');
   const warmUp = await runSpecs({ specs: ['tests/app/browser.ui-test.ts'] });
   if (warmUp.code !== 0) {
-    report.notes.push('La préparation de l’app de test a échoué : aucun agent n’a été lancé.');
+    report.notes.push('Preparing the test app failed: no agent was started.');
     report.suite = { ran: true, ok: false, output: warmUp.report.slice(-4000) };
     save();
     console.log(warmUp.report);
@@ -137,10 +137,10 @@ for (const scenario of queue) {
         specFile: scenario.spec,
         scratchDir: config.paths.scratch,
         regenerating: regenerating
-          ? `La spec existe déjà (scénario modifié) : mets-la à jour pour qu'elle corresponde au nouveau scénario.`
-          : 'La spec n’existe pas encore.',
+          ? 'The spec already exists (the scenario changed): update it to match the new scenario.'
+          : 'The spec does not exist yet.',
         feedback: feedback
-          ? `## Tentative précédente\n\nLa tentative précédente a échoué. Corrige à partir de cet état des fichiers :\n\n\`\`\`\n${feedback}\n\`\`\``
+          ? `## Previous attempt\n\nThe previous attempt failed. Fix it, starting from the files as they are:\n\n\`\`\`\n${feedback}\n\`\`\``
           : '',
       }),
       model,
@@ -157,6 +157,7 @@ for (const scenario of queue) {
       outcome: result.stop,
     };
     entry.attempts.push(attempt);
+    if (result.denials.length) log(`Denied tool calls: ${result.denials.join(' | ')}`);
     rmSync(path.join(REPO_ROOT, config.paths.scratch), { recursive: true, force: true });
 
     const status = /** @type {string | undefined} */ (result.answer?.status);
@@ -171,7 +172,7 @@ for (const scenario of queue) {
 
     if (!existsSync(specFile)) {
       attempt.outcome = result.ok ? 'no-spec' : result.stop;
-      feedback = `Aucune spec n'a été écrite dans ${scenario.spec}. ${result.text.slice(-1500)}`;
+      feedback = `No spec was written to ${scenario.spec}. ${result.text.slice(-1500)}`;
       continue;
     }
 
@@ -186,14 +187,14 @@ for (const scenario of queue) {
     });
     if (violations.length) {
       attempt.outcome = 'diff-refused';
-      feedback = `Le contrôle du diff a refusé ces changements, corrige-les :\n${violations.join('\n')}`;
+      feedback = `The diff check refused these changes, fix them:\n${violations.join('\n')}`;
       continue;
     }
 
     const run = await runSpecs({ specs: [scenario.spec], repeatEach: config.repeatEach });
     if (run.code !== 0) {
       attempt.outcome = 'red';
-      feedback = `La spec échoue avec --repeat-each=${config.repeatEach} :\n${run.report.slice(-6000)}`;
+      feedback = `The spec fails with --repeat-each=${config.repeatEach}:\n${run.report.slice(-6000)}`;
       continue;
     }
 
@@ -206,7 +207,7 @@ for (const scenario of queue) {
 
   if (entry.status === 'failed') {
     resetTo(before, suitePaths);
-    entry.reason = 'Aucune tentative n’a produit une spec verte et stable.';
+    entry.reason = 'No attempt produced a green, stable spec.';
     failed = true;
   }
   save();

@@ -71,8 +71,9 @@ comments on it.
 
 ## Cost
 
-- `--bare`: no CLAUDE.md, hooks or plugins in the agents' context; `prompts/context.md` carries
-  what they need.
+- `--safe-mode`: no CLAUDE.md, skills, hooks or plugins in the agents' context;
+  `prompts/context.md` carries what they need. (`--bare` would also remove the Write, Glob and
+  Grep tools.)
 - `run-spec.mjs` prints the end of the Playwright output and the page's accessibility snapshot at
   the failure (`error-context.md`), not the whole log. Agents explore a page with a throwaway spec
   that logs an aria snapshot, instead of a browser MCP server.

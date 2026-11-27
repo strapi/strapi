@@ -5,20 +5,20 @@ tier: extended
 edition: CE
 ---
 
-# Filtrer les articles par titre avec l'API REST
+# Filter articles by title with the REST API
 
-Scénario de démonstration du PoC : il est hors périmètre de l'E2E, l'agent doit le refuser.
+PoC demo scenario: it is out of the E2E scope, and the agent must refuse it.
 
-## Préconditions
+## Preconditions
 
-Il existe 3 articles publiés, dont un intitulé "Hello world".
-Un API token en lecture seule existe.
+There are 3 published articles, one of them titled "Hello world".
+There is a read-only API token.
 
-## Étapes
+## Steps
 
-1. Appeler `GET /api/articles?filters[title][$eq]=Hello world` avec le token.
+1. Call `GET /api/articles?filters[title][$eq]=Hello world` with the token.
 
-## Résultats attendus
+## Expected results
 
-- La réponse a le statut 200.
-- La réponse contient exactement 1 article, intitulé "Hello world".
+- The response status is 200.
+- The response holds exactly 1 article, titled "Hello world".

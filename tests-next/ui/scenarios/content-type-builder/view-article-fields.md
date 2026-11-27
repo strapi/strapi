@@ -5,19 +5,19 @@ tier: extended
 edition: CE
 ---
 
-# Consulter les champs du content type Article
+# View the fields of the Article content type
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'administrateur.
+I am logged in as an administrator.
 
-## Étapes
+## Steps
 
-1. Aller dans le Content-Type Builder.
-2. Ouvrir le content type "Article".
+1. Go to the Content-Type Builder.
+2. Open the "Article" content type.
 
-## Résultats attendus
+## Expected results
 
-- "Article" apparaît dans la liste des collection types.
-- Le champ "title" est affiché avec son type.
-- Le bouton "Save" est désactivé tant que rien n'a été modifié.
+- "Article" shows in the list of collection types.
+- The "title" field shows with its type.
+- The "Save" button is disabled as long as nothing changed.

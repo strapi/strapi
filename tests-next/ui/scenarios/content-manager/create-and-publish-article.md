@@ -5,22 +5,22 @@ tier: critical
 edition: CE
 ---
 
-# Créer et publier un article
+# Create and publish an article
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'éditeur.
-Il existe 3 articles publiés.
+I am logged in as an editor.
+There are 3 published articles.
 
-## Étapes
+## Steps
 
-1. Aller dans le Content Manager, collection "Article".
-2. Créer une nouvelle entrée avec le titre "Hello world".
-3. Publier l'entrée.
-4. Revenir à la liste des articles.
+1. Go to the Content Manager, "Article" collection.
+2. Create a new entry with the title "Hello world".
+3. Publish the entry.
+4. Go back to the list of articles.
 
-## Résultats attendus
+## Expected results
 
-- Une notification de succès s'affiche après la publication.
-- La liste contient 4 articles.
-- L'entrée "Hello world" apparaît avec le statut "Published".
+- A success notification shows after publishing.
+- The list contains 4 articles.
+- The "Hello world" entry shows with the "Published" status.

@@ -30,8 +30,8 @@ const TRIAGE_SCHEMA = {
   type: 'object',
   properties: {
     verdict: { type: 'string', enum: ['locator', 'assertion', 'environment'] },
-    explanation: { type: 'string', description: 'En français, 2 à 4 phrases.' },
-    expected: { type: 'string', description: 'Ce que le scénario attend.' },
+    explanation: { type: 'string', description: 'In English, 2 to 4 sentences.' },
+    expected: { type: 'string', description: 'What the scenario expects.' },
     actual: { type: 'string', description: 'Ce que la page montre.' },
   },
   required: ['verdict', 'explanation'],
@@ -42,7 +42,7 @@ const HEAL_SCHEMA = {
   type: 'object',
   properties: {
     status: { type: 'string', enum: ['healed', 'cannot_heal'] },
-    reason: { type: 'string', description: 'En français, une ou deux phrases.' },
+    reason: { type: 'string', description: 'In English, one or two sentences.' },
   },
   required: ['status', 'reason'],
   additionalProperties: false,
@@ -87,7 +87,7 @@ const hasSpecs = (/** @type {string} */ dir) =>
   existsSync(dir) &&
   readdirSync(dir, { recursive: true }).some((name) => String(name).endsWith('.ui-test.ts'));
 if (!values.only?.length && !hasSpecs(path.join(REPO_ROOT, config.paths.generated))) {
-  report.notes.push('Aucune spec générée pour l’instant : rien à vérifier.');
+  report.notes.push('No generated spec yet: nothing to check.');
   save();
   console.log(renderReport(report));
   process.exit(0);
@@ -101,7 +101,7 @@ const first = await runSpecs({
 report.suite = { ran: true, ok: first.code === 0 };
 const failing = first.code === 0 ? [] : failingFiles(jsonOutput);
 if (first.code !== 0 && failing.length === 0) {
-  report.notes.push('La suite a échoué sans test en échec identifiable (setup ?) : voir le job.');
+  report.notes.push('The run failed without a failing test to point at (setup?): see the job.');
   report.suite.output = first.report.slice(-4000);
   failed = true;
 }
@@ -123,10 +123,10 @@ for (const spec of failing) {
   const again = await runSpecs({ specs: [spec] });
   if (again.code === 0) {
     entry.status = 'flaky';
-    entry.reason = 'Échec puis succès sans changement.';
+    entry.reason = 'Failed, then passed with no change.';
     entry.link = await issue(
       id,
-      `Test instable : ${title}`,
+      `Flaky test: ${title}`,
       describe({ spec, scenarioFile, verdict: 'flaky', failure: first.report })
     );
     save();
@@ -164,7 +164,7 @@ for (const spec of failing) {
     entry.reason = explanation;
     entry.link = await issue(
       id,
-      `Régression potentielle : ${title}`,
+      `Possible regression: ${title}`,
       describe({
         spec,
         scenarioFile,
@@ -212,6 +212,7 @@ for (const spec of failing) {
     outcome: heal.stop,
   };
   entry.attempts.push(attempt);
+  if (heal.denials.length) log(`Denied tool calls: ${heal.denials.join(' | ')}`);
   rmSync(path.join(REPO_ROOT, config.paths.scratch), { recursive: true, force: true });
 
   const violations = checkChanges({ mode: 'heal', changes: changesSince(before), config });
@@ -228,11 +229,11 @@ for (const spec of failing) {
     resetTo(before, suitePaths);
     attempt.outcome = violations.length ? 'diff-refused' : String(heal.answer?.status ?? heal.stop);
     entry.reason = violations.length
-      ? `Correctif refusé par le contrôle du diff : ${violations.join(' ; ')}`
-      : `Correctif impossible : ${String(heal.answer?.reason ?? 'spec toujours rouge')}`;
+      ? `Fix refused by the diff check: ${violations.join('; ')}`
+      : `Could not heal: ${String(heal.answer?.reason ?? 'the spec is still red')}`;
     entry.link = await issue(
       id,
-      `Heal impossible : ${title}`,
+      `Could not heal: ${title}`,
       describe({
         spec,
         scenarioFile,
@@ -251,9 +252,7 @@ if (head() !== base) {
   const suite = await runSpecs({ specs: [], all: true });
   report.suite = { ran: true, ok: suite.code === 0, output: suite.report.slice(-4000) };
   if (suite.code !== 0) {
-    report.notes.push(
-      'La suite ui complète échoue après les correctifs : les correctifs ont été annulés.'
-    );
+    report.notes.push('The whole ui suite fails after the fixes: the fixes were rolled back.');
     resetTo(base, suitePaths);
     for (const entry of report.entries) if (entry.status === 'healed') entry.status = 'failed';
     failed = true;
@@ -299,16 +298,16 @@ function recentCommits() {
 /** @param {Record<string, unknown>} details */
 function describe({ spec, scenarioFile, verdict, failure, explanation, expected, actual }) {
   return [
-    `**Scénario :** \`${scenarioFile}\``,
-    `**Spec :** \`${spec}\``,
-    `**Verdict du triage :** ${verdict}`,
-    runUrl ? `**Run :** ${runUrl}` : '',
+    `**Scenario:** \`${scenarioFile}\``,
+    `**Spec:** \`${spec}\``,
+    `**Triage verdict:** ${verdict}`,
+    runUrl ? `**Run:** ${runUrl}` : '',
     '',
-    explanation ? `### Analyse\n\n${explanation}` : '',
-    expected ? `**Attendu :** ${expected}` : '',
-    actual ? `**Constaté :** ${actual}` : '',
+    explanation ? `### Analysis\n\n${explanation}` : '',
+    expected ? `**Expected:** ${expected}` : '',
+    actual ? `**Actual:** ${actual}` : '',
     '',
-    '### Sortie Playwright (fin)',
+    '### Playwright output (end)',
     '',
     '```',
     String(failure).slice(-3000),
@@ -325,7 +324,7 @@ async function issue(
   /** @type {string} */ description
 ) {
   if (!process.env.NO_CODE_E2E_LINEAR_API_KEY) {
-    report.notes.push(`Pas de clé Linear : aucun ticket créé pour ${id}.`);
+    report.notes.push(`No Linear key: no issue created for ${id}.`);
     return undefined;
   }
   try {

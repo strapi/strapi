@@ -42,7 +42,7 @@ message, which page, which value?), and say exactly what is missing. Don't guess
    code doesn't make the step obvious.
 
 Don't touch other specs, the scenario, or anything outside the allowed paths: those edits are
-denied. When you are done, answer with the JSON object: `status`, `reason` (in French, one or two
+denied. When you are done, answer with the JSON object: `status`, `reason` (in English, one or two
 sentences a QA engineer understands) and `files`.
 
 {{feedback}}

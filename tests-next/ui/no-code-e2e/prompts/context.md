@@ -62,6 +62,13 @@ the ones that matter, and every turn costs money.
 - Test names in English, short, describing the behaviour (`logs out and goes back to the login
 page`). Code comments in English, only where the code alone doesn't say why.
 
+## Tools
+
+- Explore files with Read, Glob and Grep. Create a file with Write (it creates the folders),
+  change one with Edit (Read it first).
+- Bash runs `run-spec.mjs` and nothing else: `ls`, `cat`, `mkdir`, `npx`, `yarn` and `git` are
+  denied. Don't ask for more permissions: they won't be granted.
+
 ## Running specs
 
 Run specs only with:

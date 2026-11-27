@@ -32,5 +32,5 @@ const violations = checkChanges({
   regenerated: values.regenerated ?? [],
 });
 for (const violation of violations) console.log(`✖ ${violation}`);
-console.log(violations.length ? `${violations.length} violation(s).` : 'Diff autorisé.');
+console.log(violations.length ? `${violations.length} violation(s).` : 'Diff allowed.');
 process.exit(violations.length ? 1 : 0);

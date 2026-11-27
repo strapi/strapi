@@ -28,5 +28,5 @@ Failure (end of the Playwright output, then the page snapshot at the failure):
 - Don't add waits for time, skips or retries.
 - Run the spec with `run-spec.mjs` until it passes, then once with `--repeat-each 3`.
 
-Answer with the JSON object: `status` (`healed` or `cannot_heal`) and `reason` (in French, one or
+Answer with the JSON object: `status` (`healed` or `cannot_heal`) and `reason` (in English, one or
 two sentences: what changed in the UI and what you changed).

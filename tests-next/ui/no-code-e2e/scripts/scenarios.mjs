@@ -25,18 +25,18 @@ for (const { file, errors: fileErrors, warnings } of work.lint) {
 
 console.log('');
 console.log(
-  `À générer   : ${work.toGenerate.map((scenario) => scenario.meta.id).join(', ') || '—'}`
+  `To generate : ${work.toGenerate.map((scenario) => scenario.meta.id).join(', ') || '—'}`
 );
-console.log(`À jour      : ${work.upToDate.map((scenario) => scenario.meta.id).join(', ') || '—'}`);
+console.log(`Up to date  : ${work.upToDate.map((scenario) => scenario.meta.id).join(', ') || '—'}`);
 console.log(
-  `Ignorés     : ${work.skipped.map(({ scenario, reason }) => `${scenario.meta.id} (${reason})`).join(', ') || '—'}`
+  `Skipped     : ${work.skipped.map(({ scenario, reason }) => `${scenario.meta.id} (${reason})`).join(', ') || '—'}`
 );
-console.log(`À supprimer : ${work.orphans.join(', ') || '—'}`);
+console.log(`To delete   : ${work.orphans.join(', ') || '—'}`);
 
 const hasWork = work.toGenerate.length > 0 || work.orphans.length > 0;
 if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `generate=${hasWork}\n`);
 
 if (errors) {
-  console.log(`\n${errors} erreur(s) : corrige les scénarios ci-dessus.`);
+  console.log(`\n${errors} error(s): fix the scenarios above.`);
   process.exit(1);
 }

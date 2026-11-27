@@ -64,7 +64,7 @@ export const reportIssue = async ({ linear, id, title, description }) => {
           }
         }
       `,
-      { issueId: issue.id, body: `Nouvel échec détecté.\n\n${description}` }
+      { issueId: issue.id, body: `New failure.\n\n${description}` }
     );
     return { url: issue.url, created: false };
   }

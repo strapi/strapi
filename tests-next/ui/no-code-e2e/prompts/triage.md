@@ -35,5 +35,5 @@ Read the spec and the Page Objects it uses. Then pick one verdict:
 
 When in doubt between `locator` and `assertion`, answer `assertion`: a human looks at it.
 
-Answer with the JSON object: `verdict`, `explanation` (in French, 2 to 4 sentences, citing what
+Answer with the JSON object: `verdict`, `explanation` (in English, 2 to 4 sentences, citing what
 the snapshot shows), and for an `assertion`, `expected` and `actual`.

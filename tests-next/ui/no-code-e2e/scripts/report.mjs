@@ -16,16 +16,16 @@ import { parseArgs } from 'node:util';
 const marker = (/** @type {string} */ mode) => `<!-- no-code-e2e-report:${mode} -->`;
 
 const STATUS = {
-  generated: '✅ généré',
-  healed: '🩹 corrigé',
-  refused: '⛔ refusé',
-  needs_clarification: '❓ à préciser',
-  failed: '❌ échec',
-  deleted: '🗑️ spec supprimée',
-  skipped: '⏭️ ignoré',
-  regression: '🐞 régression potentielle',
+  generated: '✅ generated',
+  healed: '🩹 healed',
+  refused: '⛔ refused',
+  needs_clarification: '❓ needs clarification',
+  failed: '❌ failed',
+  deleted: '🗑️ spec deleted',
+  skipped: '⏭️ skipped',
+  regression: '🐞 possible regression',
   flaky: '🎲 flaky',
-  environment: '⚙️ problème d’environnement',
+  environment: '⚙️ environment issue',
 };
 
 /**
@@ -66,14 +66,14 @@ export const totalCost = (/** @type {Report} */ report) =>
 export const renderReport = (report) => {
   const lines = [
     marker(report.mode),
-    `## No-code E2E : ${report.mode === 'generate' ? 'génération' : 'heal'}`,
+    `## No-code E2E: ${report.mode === 'generate' ? 'generation' : 'heal'}`,
     '',
   ];
 
   const lintErrors = report.lint.filter((item) => item.errors.length);
   const lintWarnings = report.lint.filter((item) => item.warnings.length);
   if (lintErrors.length) {
-    lines.push('### ❌ Scénarios invalides', '');
+    lines.push('### ❌ Invalid scenarios', '');
     for (const item of lintErrors) {
       lines.push(`- \`${item.file}\``, ...item.errors.map((error) => `  - ${error}`));
     }
@@ -82,12 +82,12 @@ export const renderReport = (report) => {
 
   if (report.entries.length) {
     lines.push(
-      '| Scénario | Résultat | Détail | Modèles | Coût |',
+      '| Scenario | Result | Details | Models | Cost |',
       '| --- | --- | --- | --- | --- |'
     );
     for (const entry of report.entries) {
       const models = entry.attempts
-        .map((attempt) => `${attempt.task}:${attempt.model} (${attempt.turns} tours)`)
+        .map((attempt) => `${attempt.task}:${attempt.model} (${attempt.turns} turns)`)
         .join(', ');
       const cost = entry.attempts.reduce((sum, attempt) => sum + attempt.costUsd, 0);
       const detail = [entry.reason, entry.link]
@@ -99,26 +99,24 @@ export const renderReport = (report) => {
         `| \`${entry.id}\` | ${STATUS[entry.status] ?? entry.status} | ${detail} | ${models || '—'} | ${money(cost)} |`
       );
     }
-    lines.push('', `**Coût total : ${money(totalCost(report))}**`, '');
+    lines.push('', `**Total cost: ${money(totalCost(report))}**`, '');
   } else if (!lintErrors.length) {
-    lines.push('Rien à faire : toutes les specs sont à jour.', '');
+    lines.push('Nothing to do: every spec is up to date.', '');
   }
 
   if (report.suite.ran) {
     lines.push(
-      report.suite.ok
-        ? '✅ Suite ui complète : verte.'
-        : '❌ Suite ui complète : en échec, voir le job.',
+      report.suite.ok ? '✅ Whole ui suite: green.' : '❌ Whole ui suite: failing, see the job.',
       ''
     );
   }
   if (!report.diffCheck.ok) {
-    lines.push('### ❌ Contrôle du diff', '', 'Les changements de l’agent ont été annulés :', '');
+    lines.push('### ❌ Diff check', '', 'The agent’s changes were rolled back:', '');
     lines.push(...report.diffCheck.violations.map((violation) => `- ${violation}`), '');
   }
   if (lintWarnings.length) {
-    lines.push('<details><summary>Avertissements du lint</summary>', '');
-    for (const item of lintWarnings) lines.push(`- \`${item.file}\` : ${item.warnings.join(' ')}`);
+    lines.push('<details><summary>Lint warnings</summary>', '');
+    for (const item of lintWarnings) lines.push(`- \`${item.file}\`: ${item.warnings.join(' ')}`);
     lines.push('', '</details>', '');
   }
   if (report.notes.length) lines.push(...report.notes.map((note) => `> ${note}`), '');

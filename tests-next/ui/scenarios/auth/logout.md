@@ -5,20 +5,20 @@ tier: critical
 edition: CE
 ---
 
-# Se déconnecter de l'admin
+# Log out of the admin panel
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'administrateur.
+I am logged in as an administrator.
 
-## Étapes
+## Steps
 
-1. Aller sur la page d'accueil de l'admin.
-2. Ouvrir le menu de mon profil.
-3. Cliquer sur "Log out".
-4. Essayer de rouvrir la page d'accueil de l'admin.
+1. Go to the home page of the admin panel.
+2. Open my profile menu.
+3. Click "Log out".
+4. Try to open the home page of the admin panel again.
 
-## Résultats attendus
+## Expected results
 
-- Après la déconnexion, la page de connexion s'affiche.
-- À l'étape 4, je suis redirigé vers la page de connexion.
+- After logging out, the login page shows.
+- At step 4, I am redirected to the login page.

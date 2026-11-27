@@ -69,7 +69,7 @@ export const runSpecs = async ({ specs, all, repeatEach, retries, jsonOutput, qu
   const lines = output.text.split('\n');
   const parts = [];
   if (lines.length > MAX_OUTPUT_LINES)
-    parts.push(`[… ${lines.length - MAX_OUTPUT_LINES} lignes coupées …]`);
+    parts.push(`[… ${lines.length - MAX_OUTPUT_LINES} lines cut …]`);
   parts.push(lines.slice(-MAX_OUTPUT_LINES).join('\n'));
 
   if (output.code !== 0) {
@@ -77,10 +77,10 @@ export const runSpecs = async ({ specs, all, repeatEach, retries, jsonOutput, qu
     for (const file of contexts) {
       const content = readFileSync(file, 'utf8').split('\n');
       parts.push(
-        `\n===== ${path.relative(REPO_ROOT, file)} (snapshot de la page au moment de l'échec) =====`,
+        `\n===== ${path.relative(REPO_ROOT, file)} (page snapshot at the failure) =====`,
         content.slice(0, MAX_CONTEXT_LINES).join('\n'),
         content.length > MAX_CONTEXT_LINES
-          ? `[… ${content.length - MAX_CONTEXT_LINES} lignes coupées …]`
+          ? `[… ${content.length - MAX_CONTEXT_LINES} lines cut …]`
           : ''
       );
     }

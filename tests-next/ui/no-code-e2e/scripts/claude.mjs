@@ -2,8 +2,9 @@
 /**
  * Runs Claude Code headless (`claude -p`) for one task and returns its structured answer and cost.
  *
- * - `--bare`: no CLAUDE.md, hooks or plugins. The prompts carry the context the task needs, so
- *   the agent doesn't pay for the whole repo guide on every turn.
+ * - `--safe-mode`: no CLAUDE.md, skills, hooks or plugins, but the built-in tools. The prompts
+ *   carry the context the task needs, so the agent doesn't pay for the whole repo guide on every
+ *   turn. (`--bare` would also drop the Write, Glob and Grep tools.)
  * - `--permission-mode dontAsk` with `--allowedTools`: any tool call outside the list is denied.
  *   File edits are limited to the task's paths; Bash only runs `run-spec.mjs`.
  * - `--json-schema`: the final answer is validated JSON (`structured_output`).
@@ -52,6 +53,7 @@ export const prompt = (
  * @property {number} costUsd
  * @property {number} turns
  * @property {string} stop `subtype` of Claude Code's result, or the error.
+ * @property {string[]} denials Tool calls the permission rules denied.
  */
 
 /**
@@ -74,7 +76,7 @@ export const runClaude = async ({
 }) => {
   const args = [
     '-p',
-    '--bare',
+    '--safe-mode',
     '--output-format',
     'json',
     '--no-session-persistence',
@@ -124,6 +126,7 @@ export const runClaude = async ({
       costUsd: 0,
       turns: 0,
       stop: `exit ${code}`,
+      denials: [],
     };
   }
 
@@ -134,6 +137,10 @@ export const runClaude = async ({
     costUsd: Number(result.total_cost_usd ?? 0),
     turns: Number(result.num_turns ?? 0),
     stop: String(result.subtype ?? result.terminal_reason ?? 'unknown'),
+    denials: (result.permission_denials ?? []).map(
+      (/** @type {{ tool_name?: string, tool_input?: unknown }} */ denial) =>
+        `${denial.tool_name} ${JSON.stringify(denial.tool_input).slice(0, 200)}`
+    ),
   };
 };
 

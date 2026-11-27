@@ -102,7 +102,7 @@ describe('lintScenario', () => {
 
   test('flags a missing section', () => {
     const { errors } = lint(VALID.replace(/## Résultats attendus[\s\S]*$/, ''));
-    assert.match(errors.join('\n'), /Résultats attendus/);
+    assert.match(errors.join('\n'), /Expected results/);
   });
 
   test('warns about EE and out-of-scope keywords, without blocking', () => {

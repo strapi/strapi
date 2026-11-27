@@ -5,20 +5,20 @@ tier: extended
 edition: CE
 ---
 
-# Créer un API token en lecture seule
+# Create a read-only API token
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'administrateur.
+I am logged in as an administrator.
 
-## Étapes
+## Steps
 
-1. Aller dans Settings > API Tokens.
-2. Créer un token nommé "PoC read-only", de type "Read-only", avec une durée illimitée.
-3. Enregistrer.
-4. Revenir à la liste des API tokens.
+1. Go to Settings > API Tokens.
+2. Create a token named "PoC read-only", of type "Read-only", with an unlimited duration.
+3. Save.
+4. Go back to the list of API tokens.
 
-## Résultats attendus
+## Expected results
 
-- La valeur du token est affichée après la création.
-- Le token "PoC read-only" apparaît dans la liste avec le type "Read-only".
+- The token's value shows after the creation.
+- The "PoC read-only" token shows in the list with the "Read-only" type.

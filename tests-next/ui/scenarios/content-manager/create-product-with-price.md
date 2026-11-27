@@ -5,23 +5,23 @@ tier: extended
 edition: CE
 ---
 
-# Créer un produit avec un prix
+# Create a product with a price
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'administrateur.
-Il existe un content type "Product" avec un champ "name" (texte, requis) et un champ "price" (décimal, requis).
+I am logged in as an administrator.
+There is a "Product" content type with a "name" field (text, required) and a "price" field (decimal, required).
 
-## Étapes
+## Steps
 
-1. Aller dans le Content Manager, collection "Product".
-2. Créer une nouvelle entrée avec le nom "Chaise" sans renseigner de prix.
-3. Essayer d'enregistrer.
-4. Renseigner le prix 49.90.
-5. Enregistrer.
+1. Go to the Content Manager, "Product" collection.
+2. Create a new entry with the name "Chair", without a price.
+3. Try to save.
+4. Fill in the price 49.90.
+5. Save.
 
-## Résultats attendus
+## Expected results
 
-- À l'étape 3, l'enregistrement est refusé et le champ "price" affiche une erreur de validation.
-- À l'étape 5, une notification de succès s'affiche.
-- L'entrée "Chaise" apparaît dans la liste des produits.
+- At step 3, the save is refused and the "price" field shows a validation error.
+- At step 5, a success notification shows.
+- The "Chair" entry shows in the list of products.

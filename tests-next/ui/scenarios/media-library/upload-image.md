@@ -5,20 +5,20 @@ tier: critical
 edition: CE
 ---
 
-# Uploader une image dans la Media Library
+# Upload an image to the Media Library
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'administrateur.
-La Media Library est vide.
+I am logged in as an administrator.
+The Media Library is empty.
 
-## Étapes
+## Steps
 
-1. Aller dans la Media Library.
-2. Uploader une image JPEG depuis l'ordinateur.
+1. Go to the Media Library.
+2. Upload a JPEG image from the computer.
 
-## Résultats attendus
+## Expected results
 
-- L'upload se termine sans erreur.
-- L'image apparaît dans la Media Library avec son nom de fichier.
-- La Media Library contient exactement 1 asset.
+- The upload ends without an error.
+- The image shows in the Media Library with its file name.
+- The Media Library holds exactly 1 asset.

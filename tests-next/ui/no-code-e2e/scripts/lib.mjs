@@ -134,38 +134,36 @@ export const lintScenario = (scenario, config) => {
   const { meta, sections } = scenario;
 
   if (!scenario.hasFrontMatter)
-    errors.push('Front-matter manquant (bloc `---` en haut du fichier).');
-  if (!meta.id) errors.push('`id` manquant dans le front-matter.');
+    errors.push('Missing front-matter (a `---` block at the top of the file).');
+  if (!meta.id) errors.push('Missing `id` in the front-matter.');
   else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(meta.id))
-    errors.push(
-      `\`id\` doit être en kebab-case (lettres minuscules, chiffres, tirets) : "${meta.id}".`
-    );
-  if (!meta.feature) errors.push('`feature` manquant dans le front-matter.');
+    errors.push(`\`id\` must be kebab-case (lowercase letters, digits, dashes): "${meta.id}".`);
+  if (!meta.feature) errors.push('Missing `feature` in the front-matter.');
   if (!config.tiers.includes(meta.tier))
-    errors.push(`\`tier\` doit valoir ${config.tiers.join(', ')} : "${meta.tier ?? ''}".`);
+    errors.push(`\`tier\` must be one of ${config.tiers.join(', ')}: "${meta.tier ?? ''}".`);
   if (!config.editions.known.includes(meta.edition))
     errors.push(
-      `\`edition\` doit valoir ${config.editions.known.join(' ou ')} : "${meta.edition ?? ''}".`
+      `\`edition\` must be ${config.editions.known.join(' or ')}: "${meta.edition ?? ''}".`
     );
   else if (!config.editions.supported.includes(meta.edition))
-    warnings.push(`L'édition ${meta.edition} n'est pas encore supportée : le scénario est ignoré.`);
+    warnings.push(`The ${meta.edition} edition is not supported yet: the scenario is skipped.`);
 
-  if (!scenario.title) errors.push('Titre manquant (une ligne `# Titre`).');
-  if (!sections.preconditions) errors.push('Section `## Préconditions` manquante ou vide.');
-  if (!sections.steps) errors.push('Section `## Étapes` manquante ou vide.');
+  if (!scenario.title) errors.push('Missing title (a `# Title` line).');
+  if (!sections.preconditions) errors.push('Missing or empty `## Preconditions` section.');
+  if (!sections.steps) errors.push('Missing or empty `## Steps` section.');
   else if (!/^\s*\d+\.\s+\S/m.test(sections.steps))
-    errors.push('`## Étapes` doit être une liste numérotée (`1. …`).');
-  if (!sections.expected) errors.push('Section `## Résultats attendus` manquante ou vide.');
+    errors.push('`## Steps` must be a numbered list (`1. …`).');
+  if (!sections.expected) errors.push('Missing or empty `## Expected results` section.');
   else if (!/^\s*[-*]\s+\S/m.test(sections.expected))
-    errors.push('`## Résultats attendus` doit être une liste à puces (`- …`).');
+    errors.push('`## Expected results` must be a bulleted list (`- …`).');
   for (const heading of scenario.unknownSections)
-    warnings.push(`Section inconnue ignorée par le lint : "## ${heading}".`);
+    warnings.push(`Unknown section, not checked: "## ${heading}".`);
 
   const haystack = normalize(scenario.content);
   const hits = config.outOfScopeKeywords.filter((keyword) => haystack.includes(normalize(keyword)));
   if (hits.length)
     warnings.push(
-      `Peut-être hors périmètre E2E (${hits.map((hit) => `"${hit}"`).join(', ')}) : l'agent décidera.`
+      `May be out of the E2E scope (${hits.map((hit) => `"${hit}"`).join(', ')}): the agent decides.`
     );
 
   return { errors, warnings };
@@ -237,13 +235,13 @@ export const plan = (config, scenarios = loadScenarios(config)) => {
   for (const scenario of scenarios) {
     const result = lintScenario(scenario, config);
     const { id } = scenario.meta;
-    if (id && ids.has(id)) result.errors.push(`\`id\` "${id}" déjà utilisé par ${ids.get(id)}.`);
+    if (id && ids.has(id)) result.errors.push(`\`id\` "${id}" is already used by ${ids.get(id)}.`);
     if (id) ids.set(id, scenario.file);
     lint.push({ file: scenario.file, ...result });
     if (result.errors.length) continue;
 
     if (!config.editions.supported.includes(scenario.meta.edition)) {
-      skipped.push({ scenario, reason: `édition ${scenario.meta.edition} non supportée` });
+      skipped.push({ scenario, reason: `${scenario.meta.edition} edition not supported yet` });
       continue;
     }
     const specFile = path.join(REPO_ROOT, scenario.spec);
@@ -284,10 +282,10 @@ const FORBIDDEN_ADDED = [
     pattern: /\b(test|describe|it)(\.describe)?\.(skip|fixme|only)\s*\(/,
     reason: 'skip / fixme / only',
   },
-  { pattern: /\bdescribeOnCondition\b/, reason: 'describeOnCondition (skip conditionnel)' },
+  { pattern: /\bdescribeOnCondition\b/, reason: 'describeOnCondition (conditional skip)' },
   {
     pattern: /\btest\.skip\s*\(\s*[^'"`]|\b(testInfo|test\.info\(\))\.skip\b/,
-    reason: 'skip conditionnel',
+    reason: 'conditional skip',
   },
   { pattern: /waitForTimeout\s*\(/, reason: 'waitForTimeout' },
   { pattern: /['"]networkidle['"]/, reason: "waitForLoadState('networkidle')" },
@@ -321,30 +319,29 @@ export const checkChanges = ({ mode, changes, config, regenerated = [] }) => {
   for (const change of changes) {
     const { path: file } = change;
     if (file.startsWith(`${config.paths.scratch}/`)) {
-      violations.push(`${file} : fichier de brouillon (_scratch) laissé dans le diff.`);
+      violations.push(`${file}: scratch file (_scratch) left in the diff.`);
       continue;
     }
     if (!matchesAny(file, allowed)) {
-      violations.push(`${file} : chemin non autorisé en mode ${mode}.`);
+      violations.push(`${file}: path not allowed in ${mode} mode.`);
       continue;
     }
     if (change.status === 'D' && !(mode === 'generate' && isGenerated(file))) {
-      violations.push(`${file} : suppression non autorisée.`);
+      violations.push(`${file}: deletion not allowed.`);
     }
 
     if (!/\.(ts|js|mjs|cjs)$/.test(file)) continue;
 
     for (const line of change.added) {
       for (const { pattern, reason } of FORBIDDEN_ADDED) {
-        if (pattern.test(line))
-          violations.push(`${file} : ajout interdit (${reason}) : ${line.trim()}`);
+        if (pattern.test(line)) violations.push(`${file}: forbidden (${reason}): ${line.trim()}`);
       }
       for (const [, name] of line.matchAll(/process\.env\.([A-Za-z_]\w*)/g)) {
         if (!config.allowedEnv.includes(name))
-          violations.push(`${file} : variable d'environnement non autorisée : ${name}`);
+          violations.push(`${file}: environment variable not allowed: ${name}`);
       }
       if (/process\.env\[/.test(line))
-        violations.push(`${file} : accès dynamique à process.env : ${line.trim()}`);
+        violations.push(`${file}: dynamic process.env access: ${line.trim()}`);
     }
 
     // Assertions belong to the scenario: only a spec regenerated from a changed scenario may
@@ -355,7 +352,7 @@ export const checkChanges = ({ mode, changes, config, regenerated = [] }) => {
         /\bexpect(\.soft)?\s*\(/.test(line)
       );
       for (const line of removedAssertions)
-        violations.push(`${file} : assertion supprimée ou modifiée : ${line.trim()}`);
+        violations.push(`${file}: assertion removed or changed: ${line.trim()}`);
     }
   }
   return violations;

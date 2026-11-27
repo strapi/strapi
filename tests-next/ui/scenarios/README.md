@@ -1,74 +1,71 @@
-# Scénarios no-code E2E
+# No-code E2E scenarios
 
-Chaque fichier `.md` de ce dossier décrit un test de l'admin, en français ou en anglais. Quand une
-PR ajoute ou modifie un scénario, la CI génère le test Playwright correspondant et le pousse sur la
-branche de la PR. Il n'y a pas de code à écrire : relis le test généré et le commentaire laissé
-sur la PR, puis merge.
+Each `.md` file of this folder describes a test of the admin panel. When a PR adds or changes a
+scenario, CI generates the matching Playwright spec and pushes it to the PR's branch. There is no
+code to write: review the generated spec and the comment left on the PR, then merge.
 
-Le fonctionnement complet est décrit dans [`../no-code-e2e/README.md`](../no-code-e2e/README.md).
+How it works: [`../no-code-e2e/README.md`](../no-code-e2e/README.md).
 
-## Écrire un scénario
+## Writing a scenario
 
-Un dossier par domaine (`content-manager/`, `settings/`…), un fichier par scénario.
+One folder per domain (`content-manager/`, `settings/`…), one file per scenario.
 
 ```markdown
 ---
-id: cm-create-and-publish-article # unique, en kebab-case
+id: cm-create-and-publish-article # unique, kebab-case
 feature: content-manager
 tier: critical # critical | extended | release
-edition: CE # CE (EE pas encore supporté)
+edition: CE # CE (EE not supported yet)
 ---
 
-# Créer et publier un article
+# Create and publish an article
 
-## Préconditions
+## Preconditions
 
-Je suis connecté en tant qu'éditeur.
-Il existe 3 articles publiés.
+I am logged in as an editor.
+There are 3 published articles.
 
-## Étapes
+## Steps
 
-1. Aller dans le Content Manager, collection "Article".
-2. Créer une nouvelle entrée avec le titre "Hello world".
-3. Publier l'entrée.
+1. Go to the Content Manager, "Article" collection.
+2. Create a new entry with the title "Hello world".
+3. Publish the entry.
 
-## Résultats attendus
+## Expected results
 
-- Une notification de succès s'affiche.
-- L'entrée apparaît dans la liste avec le statut "Published".
+- A success notification shows.
+- The entry shows in the list with the "Published" status.
 ```
 
-- **Préconditions** : en langage libre. Rôle (administrateur, éditeur, auteur, non connecté),
-  données (« 3 articles publiés »), content type nécessaire (« un content type Product avec un
-  champ price »). Elles sont créées directement en base, sans passer par l'interface.
-- **Étapes** : une liste numérotée d'actions qu'un utilisateur fait dans l'admin.
-- **Résultats attendus** : une liste à puces. Chaque puce devient au moins une vérification.
-  Sois précis : le texte exact d'un message, le statut attendu, le nombre d'éléments. Un résultat
-  trop vague est renvoyé avec une question en commentaire de PR plutôt que deviné.
-- Les titres de section peuvent aussi être en anglais : `Preconditions`, `Steps`,
-  `Expected results`.
+- **Preconditions**: free text. The role (administrator, editor, author, logged out), the data
+  ("3 published articles"), a content type the test needs ("a Product content type with a price
+  field"). They are created directly in the database, not through the UI.
+- **Steps**: a numbered list of what a user does in the admin panel.
+- **Expected results**: a bulleted list. Each bullet becomes at least one check. Be precise: the
+  exact text of a message, the expected status, the number of items. A result too vague to check
+  gets a question on the PR instead of a guess.
+- Section titles can also be in French: `Préconditions`, `Étapes`, `Résultats attendus`.
 
-## Ce qui n'est pas accepté
+## What is refused
 
-L'agent refuse, avec une explication sur la PR :
+The agent refuses these, with an explanation on the PR:
 
-- les tests d'API (REST, GraphQL, droits d'un API token) : ils relèvent de la suite API ;
-- Document Service, data transfer, serveur MCP, CLI ;
-- la création ou la modification d'un content type dans le Content-Type Builder (le consulter est
-  accepté) ;
-- les fonctionnalités IA du produit ;
-- l'édition EE, pour l'instant.
+- API tests (REST, GraphQL, API token rights): they belong to the API suite;
+- Document Service, data transfer, MCP server, CLI;
+- creating or changing a content type in the Content-Type Builder (viewing one is fine);
+- the product's AI features;
+- the EE edition, for now.
 
-## Vérifier un scénario avant de pousser
+## Checking a scenario before pushing
 
 ```bash
 node tests-next/ui/no-code-e2e/scripts/scenarios.mjs
 ```
 
-Affiche les erreurs de format et la liste des scénarios qui seront générés. Aucun appel à l'IA.
+Prints format errors and the scenarios that will be generated. No AI call.
 
-## Modifier ou supprimer un scénario
+## Changing or deleting a scenario
 
-- Modifier un `.md` régénère son test au prochain passage de la CI.
-- Supprimer un `.md` supprime son test.
-- Ne modifie jamais un test généré à la main : il serait écrasé. Change le scénario.
+- Changing a `.md` regenerates its spec on the next CI run.
+- Deleting a `.md` deletes its spec.
+- Never edit a generated spec by hand: it would be overwritten. Change the scenario.
