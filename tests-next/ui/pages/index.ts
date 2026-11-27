@@ -1,5 +1,11 @@
+export { ApiTokenPage } from './settings/api-token-page';
+export { ApiTokensPage } from './settings/api-tokens-page';
+export { ContentTypeBuilderPage } from './content-type-builder/content-type-builder-page';
 export { EditViewPage } from './content-manager/edit-view-page';
+export { HomePage } from './home-page';
 export { ListViewPage } from './content-manager/list-view-page';
+export { LoginPage } from './login-page';
+export { MediaLibraryPage } from './media-library/media-library-page';
 export { RolePage } from './settings/role-page';
 export { RolesPage } from './settings/roles-page';
 export { SettingsPage } from './settings/settings-page';

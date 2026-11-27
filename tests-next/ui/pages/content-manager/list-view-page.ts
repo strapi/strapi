@@ -19,6 +19,31 @@ export class ListViewPage {
     await expect(this.heading(displayName)).toBeVisible();
   }
 
+  /** The "Create new entry" link of the list. */
+  createEntryLink(): Locator {
+    return this.page.getByRole('link', { name: 'Create new entry' }).first();
+  }
+
+  /** Clicks "Create new entry". */
+  async createEntry() {
+    await this.createEntryLink().click();
+  }
+
+  /** The rows of the table (header excluded). */
+  rows(): Locator {
+    return this.page
+      .getByRole('grid')
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('checkbox', { name: /^Select \d+/ }) });
+  }
+
+  /** The row of an entry, by the text of one of its cells. */
+  row(cellText: string): Locator {
+    return this.rows().filter({
+      has: this.page.getByRole('gridcell', { name: cellText, exact: true }),
+    });
+  }
+
   /** Opens an entry's edit view (EditViewPage) by clicking a cell of its row. */
   async openEntry(cellText: string) {
     await this.page.getByRole('gridcell', { name: cellText, exact: true }).click();

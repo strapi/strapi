@@ -1,0 +1,137 @@
+name: 'No-code E2E: heal'
+
+# Runs the generated ui specs, fixes the ones a UI change broke, and opens a Linear issue for the
+# others (possible regression, flaky test). See tests-next/ui/no-code-e2e/README.md.
+#
+# - After the Tests workflow fails on develop.
+# - On a PR of this repository, when the `no-code-e2e-heal` label is added (also how to try it
+#   before this file is on develop).
+# - By hand, on a branch.
+#
+# A fix goes to a new branch and a PR against the branch that was tested: never a direct push.
+#
+# Secrets: NO_CODE_E2E_ANTHROPIC_API_KEY, NO_CODE_E2E_APP_PRIVATE_KEY, NO_CODE_E2E_LINEAR_API_KEY.
+# Variables: NO_CODE_E2E_APP_ID.
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types: [completed]
+    branches: [develop]
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Generated specs to check, space-separated (tests-next/ui/tests/generated/...). Empty: all of them.'
+        required: false
+        default: ''
+
+concurrency:
+  group: no-code-e2e-heal-${{ github.event.workflow_run.head_branch || github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CLAUDE_CODE_VERSION: '2.1.326'
+  REPORT: test-apps/no-code-e2e/report.json
+  TARGET_BRANCH: ${{ github.event.workflow_run.head_branch || github.head_ref || github.ref_name }}
+
+jobs:
+  heal:
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'no-code-e2e-heal' &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.NO_CODE_E2E_APP_ID }}
+          private-key: ${{ secrets.NO_CODE_E2E_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The commit the Tests workflow ran on, or the PR's branch.
+          ref: ${{ github.event.workflow_run.head_sha || github.head_ref || github.ref_name }}
+          token: ${{ steps.app-token.outputs.token }}
+          # The triage reads the recent commits under packages/.
+          fetch-depth: 50
+
+      - name: Git identity of the app
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${user_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Install Chromium
+        run: yarn playwright install --with-deps chromium
+      - name: Install Claude Code
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Heal the generated specs
+        id: heal
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.NO_CODE_E2E_ANTHROPIC_API_KEY }}
+          NO_CODE_E2E_LINEAR_API_KEY: ${{ secrets.NO_CODE_E2E_LINEAR_API_KEY }}
+          ONLY: ${{ inputs.only }}
+        run: |
+          args=(--report "$REPORT")
+          for spec in $ONLY; do args+=(--only "$spec"); done
+          node tests-next/ui/no-code-e2e/scripts/heal.mjs "${args[@]}"
+
+      - name: Open a PR with the fixes
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          HEAL_BRANCH: no-code-e2e/heal-${{ github.run_id }}
+        run: |
+          base="$(node -p "require('./$REPORT').base" 2>/dev/null || true)"
+          if [ -z "$base" ] || [ -z "$(git log --oneline "$base..HEAD")" ]; then
+            echo "No fix to propose."
+            exit 0
+          fi
+          git push origin "HEAD:refs/heads/$HEAL_BRANCH"
+          body="$(mktemp)"
+          node tests-next/ui/no-code-e2e/scripts/report.mjs "$REPORT" > "$body"
+          gh pr create --base "$TARGET_BRANCH" --head "$HEAL_BRANCH" \
+            --title "test(tests-next): heal generated ui specs" --body-file "$body"
+
+      - name: Report
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          [ -f "$REPORT" ] || exit 0
+          node tests-next/ui/no-code-e2e/scripts/report.mjs "$REPORT" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$PR_NUMBER" ]; then
+            node tests-next/ui/no-code-e2e/scripts/report.mjs "$REPORT" --comment "$PR_NUMBER"
+            # The label triggers a run: removing it lets the next one trigger another.
+            gh pr edit "$PR_NUMBER" --remove-label no-code-e2e-heal || true
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: no-code-e2e-heal
+          path: |
+            test-apps/no-code-e2e/report.json
+            tests-next/ui/test-results/
+          retention-days: 7
+          if-no-files-found: ignore

@@ -167,6 +167,12 @@ test('Super Admin can create a new role', { tag: ['@critical'] }, async ({ page 
   written into the app by global setup before any server starts (the role specs need `article`
   in the permission matrix). Add one there when a migrated spec needs it.
 
+## Generated specs (no-code E2E, PoC)
+
+`tests/generated/` holds specs generated from the Markdown scenarios of [`scenarios/`](./scenarios/README.md)
+by the `No-code E2E` workflows: don't edit them by hand, change their scenario. See
+[`no-code-e2e/README.md`](./no-code-e2e/README.md).
+
 ## Migrating a domain
 
 The legacy suite (`tests/e2e`) moves here domain by domain (`settings` first, CMS-1956).

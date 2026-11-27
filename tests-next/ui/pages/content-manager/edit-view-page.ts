@@ -14,6 +14,49 @@ export class EditViewPage {
     this.publishButton = page.getByRole('button', { name: 'Publish', exact: true });
   }
 
+  /** Fills the title field. */
+  async fillTitle(title: string) {
+    await this.page.getByRole('textbox', { name: 'title' }).fill(title);
+  }
+
+  /** Fills the name field. */
+  async fillName(name: string) {
+    await this.page.getByRole('textbox', { name: 'name' }).fill(name);
+  }
+
+  /** Fills the price field (a decimal). */
+  async fillPrice(price: string) {
+    await this.page.getByRole('textbox', { name: 'price' }).fill(price);
+  }
+
+  /** The price field. */
+  priceField(): Locator {
+    return this.page.getByRole('textbox', { name: 'price' });
+  }
+
+  /** Clicks Save. */
+  async save() {
+    await this.page.getByRole('button', { name: 'Save', exact: true }).click();
+  }
+
+  /** The validation error shown under a field, by its text. */
+  fieldError(text: string | RegExp): Locator {
+    return this.page.getByRole('main').getByText(text);
+  }
+
+  /** Publishes the entry. */
+  async publish() {
+    await this.publishButton.click();
+  }
+
+  /** The success notification shown after an action. */
+  notification(text: string | RegExp) {
+    return this.page
+      .getByRole('region', { name: /^Notifications/ })
+      .getByRole('status')
+      .filter({ hasText: text });
+  }
+
   /** The entry's title: the value of its main field. */
   heading(title: string) {
     return this.page.getByRole('heading', { name: title, level: 1 });
