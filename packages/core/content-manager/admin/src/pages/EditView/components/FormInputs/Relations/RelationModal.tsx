@@ -654,6 +654,19 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
           </Modal.Header>
           <Modal.Body>
             <FormContext
+              /**
+               * `Form` applies new `initialValues` in an effect, so for one render after the
+               * current document changes (closing the modal or going back) it still holds the
+               * previous document's values while the new document's layout is rendered. Fields
+               * with different types under the same name (e.g. a Blocks field on the root entry
+               * and a string field on the relation) then crash in their input. Remounting the
+               * form per document keeps values and layout in sync.
+               */
+              key={[
+                currentDocumentMeta.model,
+                currentDocumentMeta.documentId ?? 'create',
+                currentDocumentMeta.params?.locale ?? '',
+              ].join(':')}
               method={isCreating ? 'POST' : 'PUT'}
               initialValues={initialValues}
               validate={(values: Record<string, unknown>, options: Record<string, string>) => {
