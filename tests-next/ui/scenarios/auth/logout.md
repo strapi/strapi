@@ -21,4 +21,5 @@ I am logged in as an administrator.
 ## Expected results
 
 - After logging out, the login page shows.
+- The login form shows the "Email" and "Password" fields.
 - At step 4, I am redirected to the login page.

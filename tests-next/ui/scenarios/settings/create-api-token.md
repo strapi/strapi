@@ -17,8 +17,10 @@ I am logged in as an administrator.
 2. Create a token named "PoC read-only", of type "Read-only", with an unlimited duration.
 3. Save.
 4. Go back to the list of API tokens.
+5. Open the "PoC read-only" token.
 
 ## Expected results
 
 - The token's value shows after the creation.
-- The "PoC read-only" token shows in the list with the "Read-only" type.
+- The "PoC read-only" token shows in the list of API tokens.
+- On the token's page, the token type is "Read-only".
