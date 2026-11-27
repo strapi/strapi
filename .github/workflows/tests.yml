@@ -203,6 +203,9 @@ jobs:
       # nx ignores examples (.nxignore), so the affected targets above never run this one
       - name: Strict types example application
         run: yarn test:types:example
+      # Last: a failing step skips the next ones, and a list update must not hide a type error
+      - name: Registered contracts without new any
+        run: yarn test:types:contract-any
 
   unit_back:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'

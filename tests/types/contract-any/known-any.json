@@ -1,0 +1,50 @@
+{
+  "$comment": "Known `any` in registered contracts, as an application with strict types sees them. Checked by tests/types/contract-any/check.cjs. Each member needs a reason; remove a path when its `any` is gone.",
+  "members": {
+    "ContainerEntries db *": {
+      "reason": "`@strapi/database` declares `phase`, `poolDiagnostics` and `startTransaction` without types, as on develop. Core API, not a package contract.",
+      "tracking": "@strapi/database types",
+      "paths": ["phase", "poolDiagnostics", "startTransaction"]
+    },
+    "PackageConfigs middlewares *": {
+      "reason": "Re-exposes the `strapi::session` config: koa-session types `ContextStore` as `any`.",
+      "tracking": "third-party",
+      "paths": ["Array<0>.config.ContextStore"]
+    },
+    "PackageControllers plugin::content-manager.relations extractAndValidateRequestInfo": {
+      "reason": "The Koa `Context` index signature and koa-body's `request.body: any`.",
+      "tracking": "third-party",
+      "paths": ["(ctx).[index]", "(ctx).request.body"]
+    },
+    "PackageMiddlewares strapi::session *": {
+      "reason": "koa-session types `ContextStore` as `any`.",
+      "tracking": "third-party",
+      "paths": ["ContextStore"]
+    },
+    "PackageServices admin::auth forgotPassword": {
+      "reason": "Fix pending: the CE result is inferred, so the emitted declaration prints the strict-off side of the `sendTemplatedEmail` gate, `Promise<any>`.",
+      "tracking": "fix pending",
+      "paths": ["=>.Promise<0>"]
+    },
+    "PackageServices admin::passport getPassportStrategies": {
+      "reason": "Passport strategies are untyped.",
+      "tracking": "passport types",
+      "paths": ["=>.Array<0>"]
+    },
+    "PackageServices plugin::content-releases.release-action groupActions": {
+      "reason": "Fix pending: `GroupedReleaseAction` picks `contentType` from the inferred result, whose `mainFieldValue` reads `entry[mainField]` and prints as `any` in the emitted declaration.",
+      "tracking": "fix pending",
+      "paths": ["=>.Promise<0>.[index].Array<0>.contentType.mainFieldValue"]
+    },
+    "PackageServices plugin::graphql.builders get": {
+      "reason": "Nexus builder types.",
+      "tracking": "GraphQL precise types",
+      "paths": ["=>"]
+    },
+    "PackageServices plugin::graphql.utils mappers": {
+      "reason": "Nexus scalar types.",
+      "tracking": "GraphQL precise types",
+      "paths": ["strapiScalarToGraphQLScalar.=>"]
+    }
+  }
+}
