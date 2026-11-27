@@ -3,10 +3,8 @@
 /* eslint-env jest */
 
 const jwt = require('jsonwebtoken');
+const { createMockSessionManager } = require('unit-test-utils/create-session-manager-mock');
 const jwtService = require('../jwt');
-const {
-  createMockSessionManager,
-} = require('../../../../../../../tests/helpers/create-session-manager-mock');
 
 describe('JWT Service', () => {
   let strapi;

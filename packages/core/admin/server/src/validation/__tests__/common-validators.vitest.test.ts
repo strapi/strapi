@@ -10,7 +10,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
  * nil action => deferred to `.required()`), which previously had NO unit coverage at all.
  *
  * The validator reads the global `strapi` (via `getService('permission')` =
- * `strapi.service('admin::permission')`). The shared unit setup (tests/setup/unit.setup.js)
+ * `strapi.service('admin::permission')`). The shared unit setup (unit-test-utils/jest-setup.js)
  * rebuilds `strapi.service` to resolve `admin::x` from `strapi.admin.services[x]`, so we stub
  * the provider by assigning a `strapi` instance with that shape.
  */
@@ -48,7 +48,7 @@ describe('permission validation — action-validity', () => {
   });
 
   afterEach(() => {
-    // global.strapi is non-configurable (unit.setup.js); delete throws and the setter rejects undefined.
+    // global.strapi is non-configurable (unit-test-utils/jest-setup.js); delete throws and the setter rejects undefined.
     if (previousStrapi !== undefined) {
       (global as any).strapi = previousStrapi;
     } else {

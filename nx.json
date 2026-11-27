@@ -40,9 +40,8 @@
       "inputs": [
         "default",
         "{workspaceRoot}/jest-preset.unit.js",
-        "{workspaceRoot}/tests/setup/unit.setup.js",
-        "{workspaceRoot}/tests/setup/timezone-environment.js",
-        "{workspaceRoot}/tests/helpers/**"
+        "{workspaceRoot}/packages/utils/unit-test-utils/**",
+        "{workspaceRoot}/tests/setup/timezone-environment.js"
       ],
       "cache": true
     },

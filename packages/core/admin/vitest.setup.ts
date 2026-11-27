@@ -1,5 +1,5 @@
 /**
- * Port of `tests/setup/unit.setup.js` from the Jest unit preset.
+ * Port of `unit-test-utils/jest-setup.js` from the Jest unit preset.
  *
  * Many admin server tests assign a plain object to `global.strapi` and rely on the
  * `strapi.service('admin::…')` / `strapi.plugin()` helpers being attached on assignment.

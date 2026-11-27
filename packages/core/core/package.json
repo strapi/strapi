@@ -138,6 +138,7 @@
     "eslint-config-custom": "5.64.0",
     "supertest": "7.2.2",
     "tsconfig": "5.64.0",
+    "unit-test-utils": "5.64.0",
     "vitest": "catalog:",
     "vitest-config": "5.64.0"
   },

@@ -54,7 +54,7 @@ describe('AI Metadata Service', () => {
         info: jest.fn(),
       },
       // `strapi.plugin()` / `plugin.service()` are wired by the global strapi
-      // setter in `tests/setup/unit.setup.js`.
+      // setter in `unit-test-utils/jest-setup.js`.
       plugins: {
         upload: {
           services: {

@@ -5,9 +5,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
  * (which resolves to built `dist/`). Validation behavior is covered separately in
  * `validation/__tests__/user.test.ts`.
  */
-// @ts-expect-error - types are not generated for this file
-// eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
+import createContext from 'unit-test-utils/create-context';
 import { validateProfileUpdateInput } from '../../validation/user';
 import authenticatedUserController from '../authenticated-user';
 

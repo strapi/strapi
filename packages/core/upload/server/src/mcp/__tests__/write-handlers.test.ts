@@ -69,7 +69,7 @@ const setupStrapi = (options: MockOptions = {}) => {
 
   const adminUserFindOne = jest.fn().mockResolvedValue({ id: 9, roles: [{ id: 1 }] });
 
-  // Shaped for `tests/setup/unit.setup.js`, whose global `strapi` setter derives
+  // Shaped for `unit-test-utils/jest-setup.js`, whose global `strapi` setter derives
   // `strapi.plugin()` from `plugins` and `strapi.service('admin::x')` from `admin.services`.
   const strapi = {
     plugins: {
@@ -99,7 +99,7 @@ const invoke = (args: Record<string, unknown>) =>
 
 describe('media_update_asset handler', () => {
   afterEach(() => {
-    // `tests/setup/unit.setup.js` defines the global `strapi` as an accessor, so it is
+    // `unit-test-utils/jest-setup.js` defines the global `strapi` as an accessor, so it is
     // reassigned per test rather than deleted.
     jest.clearAllMocks();
   });

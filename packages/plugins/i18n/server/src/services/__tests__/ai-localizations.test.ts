@@ -607,7 +607,7 @@ describe('ai-localizations service', () => {
     afterEach(() => {
       jest.restoreAllMocks();
       delete (global as any).fetch;
-      // global.strapi is a non-configurable accessor from unit.setup — cannot delete;
+      // global.strapi is a non-configurable accessor from unit-test-utils/jest-setup — cannot delete;
       // each test reassigns its mock.
     });
 

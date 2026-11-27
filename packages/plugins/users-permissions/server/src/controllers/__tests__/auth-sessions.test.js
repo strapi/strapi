@@ -2,10 +2,8 @@
 
 /* eslint-env jest */
 
-const createContext = require('../../../../../../../tests/helpers/create-context');
-const {
-  createMockSessionManager,
-} = require('../../../../../../../tests/helpers/create-session-manager-mock');
+const createContext = require('unit-test-utils/create-context');
+const { createMockSessionManager } = require('unit-test-utils/create-session-manager-mock');
 
 const setStrapi = (value) => {
   global.strapi = value;

@@ -8,7 +8,7 @@ import { buildUploadMcpToolDefinitions } from '../register-upload-mcp-tools';
  * `folder` and `file` services silently query `global.strapi` — see the module for why they are
  * not converted to factories here. These tests pin both halves of that contract.
  *
- * `global.strapi` is deliberately not torn down between tests. `tests/setup/unit.setup.js`
+ * `global.strapi` is deliberately not torn down between tests. `unit-test-utils/jest-setup.js`
  * installs it with `Object.defineProperty` and no `configurable: true`, so `delete global.strapi`
  * throws a TypeError under module strict mode, and assigning `undefined` trips the setter, which
  * immediately reads `strapi.plugins`. Jest isolates globals per test file, so the property does

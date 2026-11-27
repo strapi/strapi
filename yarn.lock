@@ -9614,6 +9614,7 @@ __metadata:
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
     typescript: "npm:5.9.3"
+    unit-test-utils: "npm:5.64.0"
     vite: "npm:6.4.5"
     vite-plugin-dts: "npm:^4.3.0"
     vitest: "catalog:"
@@ -9738,6 +9739,7 @@ __metadata:
     slate-history: "npm:0.93.0"
     slate-react: "npm:0.98.4"
     styled-components: "npm:6.4.1"
+    unit-test-utils: "npm:5.64.0"
     yup: "npm:0.32.9"
     zod: "npm:4.6.7"
   peerDependencies:
@@ -9941,6 +9943,7 @@ __metadata:
     tsconfig: "npm:5.64.0"
     typescript: "npm:5.9.3"
     undici: "npm:8.12.4"
+    unit-test-utils: "npm:5.64.0"
     vitest: "catalog:"
     vitest-config: "npm:5.64.0"
     yup: "npm:0.32.9"
@@ -10489,6 +10492,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.6"
     styled-components: "npm:6.4.1"
+    unit-test-utils: "npm:5.64.0"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
     zod: "npm:4.6.7"
@@ -30899,6 +30903,14 @@ __metadata:
   checksum: 10c0/51434a1d80252c1540cce6271a90fd1a106dbe624997c09ed8879279667fb0b2d3a685e02e92bf66598dcbe6cdffa7a5f5fb363af8fdf90dda6c855449ae39a5
   languageName: node
   linkType: hard
+
+"unit-test-utils@npm:5.64.0, unit-test-utils@workspace:packages/utils/unit-test-utils":
+  version: 0.0.0-use.local
+  resolution: "unit-test-utils@workspace:packages/utils/unit-test-utils"
+  dependencies:
+    lodash: "npm:4.18.1"
+  languageName: unknown
+  linkType: soft
 
 "universal-user-agent@npm:^6.0.0":
   version: 6.0.0

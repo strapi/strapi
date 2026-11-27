@@ -1,0 +1,22 @@
+{
+  "name": "unit-test-utils",
+  "version": "5.64.0",
+  "private": true,
+  "description": "Shared helpers and the Jest setup file for package unit tests in the Strapi monorepo",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    "./create-context": {
+      "types": "./create-context.d.ts",
+      "default": "./create-context.js"
+    },
+    "./create-session-manager-mock": "./create-session-manager-mock.js",
+    "./jest-setup": "./jest-setup.js"
+  },
+  "dependencies": {
+    "lodash": "4.18.1"
+  },
+  "engines": {
+    "node": ">=22.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  }
+}
