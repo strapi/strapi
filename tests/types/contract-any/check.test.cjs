@@ -68,7 +68,7 @@ describe('walk', () => {
     assert.deepEqual(pathsOf('export type T = ReadonlySet<any>;'), ['Set<0>']);
   });
 
-  // The cases of the former type-level walk (`tests/types/registries/fixtures/no-any-contracts.ts`).
+  // The `walkChecks` cases of the type-level walk that this check replaced.
   test('finds nested any, any records in parameters and rest parameters', () => {
     assert.deepEqual(
       pathsOf('export type T = (id: number) => Promise<{ items: Array<{ value: any }> }>;'),
