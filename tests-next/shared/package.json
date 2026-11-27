@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@strapi/strapi": "workspace:*",
+    "@strapi/types": "workspace:*",
     "create-strapi-app": "workspace:*",
     "knex": "3.3.0",
     "mysql2": "3.23.1",

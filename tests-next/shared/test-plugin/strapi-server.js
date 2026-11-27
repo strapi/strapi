@@ -20,6 +20,8 @@
  * - POST /db/snapshot             SQLite snapshot of the live DB (lib/sqlite-snapshot.js)
  * - POST /db/restore              restore it, without a restart
  * - POST /seed <SeedPlan>         run the seeders in the running server (lib/seed.js)
+ * - POST /db/query { uid, method, params }    strapi.db.query(uid)[method](params) (lib/data.js)
+ * - POST /documents { uid, method, params }   strapi.documents(uid)[method](params)
  *
  * With `STRAPI_TEST_AI_PROVIDER=fake`, registers a fake AI translations provider. Strapi only
  * accepts a custom provider in EE with the `cms-byok-ai` license feature, and otherwise
@@ -31,6 +33,7 @@ const { isLoopbackAddress } = require('./lib/loopback');
 const { createFakeAiTranslationsProvider } = require('./lib/fake-ai-provider');
 const sqliteSnapshot = require('./lib/sqlite-snapshot');
 const { runSeed } = require('./lib/seed');
+const { runDocuments, runQuery } = require('./lib/data');
 
 /** Changes on every worker start, so a restart can be told apart from the previous worker. */
 const BOOT_ID = `${process.pid}-${Date.now()}`;
@@ -48,6 +51,21 @@ const route = (method, path, handler) => ({
   handler: `tests.${handler}`,
   config: { auth: false, policies: ['plugin::tests.loopback'] },
 });
+
+/**
+ * Answers `{ result }`. An error is a test mistake (unknown uid, bad params) or what the test
+ * checks (a validation error): return it whole, with its name, instead of a bare 500.
+ */
+const answerData = async (ctx, run) => {
+  try {
+    // JSON drops an `undefined` value: `null` keeps `result` in the body when a method returns
+    // nothing.
+    ctx.body = { result: (await run()) ?? null };
+  } catch (error) {
+    ctx.status = 400;
+    ctx.body = { error: { name: error.name, message: error.message, details: error.details } };
+  }
+};
 
 module.exports = {
   register({ strapi }) {
@@ -96,6 +114,8 @@ module.exports = {
         route('POST', '/db/snapshot', 'snapshotDb'),
         route('POST', '/db/restore', 'restoreDb'),
         route('POST', '/seed', 'seed'),
+        route('POST', '/db/query', 'query'),
+        route('POST', '/documents', 'documents'),
       ],
     },
   },
@@ -201,6 +221,14 @@ module.exports = {
             error: { name: error.name, message: error.message, details: error.details },
           };
         }
+      },
+
+      async query(ctx) {
+        await answerData(ctx, () => runQuery(strapi, ctx.request.body));
+      },
+
+      async documents(ctx) {
+        await answerData(ctx, () => runDocuments(strapi, ctx.request.body));
       },
 
       clearAiCalls(ctx) {
