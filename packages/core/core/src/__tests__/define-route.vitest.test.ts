@@ -286,6 +286,26 @@ describe('factories.defineRoute', () => {
 
       expect(res.body.input).toEqual({ params: { id: 7 }, body: { clientMutationId: 'abc' } });
     });
+
+    test('a multipart or form request passes as a request without a body', async () => {
+      const multipart = await request(app)
+        .post('/orders/7/cancel')
+        .set('Authorization', 'Bearer ok')
+        .field('reason', 'late')
+        .expect(200);
+
+      expect(multipart.body.input).toEqual({ params: { id: 7 } });
+      expect(multipart.body.raw.body).toEqual({ reason: 'late' });
+
+      const form = await request(app)
+        .post('/orders/7/cancel')
+        .set('Authorization', 'Bearer ok')
+        .type('form')
+        .send({ reason: 'late' })
+        .expect(200);
+
+      expect(form.body.input).toEqual({ params: { id: 7 } });
+    });
   });
 
   test('leaves routes defined without the helper unchanged', async () => {

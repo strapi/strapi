@@ -92,10 +92,18 @@ const files = {
       config: { auth: false },
     });
 
+    const cancelRoute = factories.defineRoute({
+      method: 'POST',
+      path: '/validated-orders/:id/cancel',
+      request: { params: { id: z.coerce.number().int() } },
+      config: { auth: false },
+      handler: echo,
+    });
+
     module.exports = {
       payRoute,
       statusRoute,
-      routes: [refundRoute, privateRefundRoute, payRoute, showRoute, statusRoute],
+      routes: [refundRoute, privateRefundRoute, payRoute, showRoute, statusRoute, cancelRoute],
     };
   `,
   [`controllers/${API_NAME}.js`]: `
@@ -237,6 +245,21 @@ describe('Routes defined with factories.defineRoute', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.input).toEqual({ params: { id: 7 }, query: {} });
+    });
+
+    test('a multipart or form request passes as a request without a body', async () => {
+      const multipart = await agent.post('/api/validated-orders/7/cancel').field('reason', 'late');
+
+      expect(multipart.status).toBe(200);
+      expect(multipart.body.input).toEqual({ params: { id: 7 }, query: {} });
+
+      const form = await agent
+        .post('/api/validated-orders/7/cancel')
+        .type('form')
+        .send({ reason: 'late' });
+
+      expect(form.status).toBe(200);
+      expect(form.body.input).toEqual({ params: { id: 7 }, query: {} });
     });
 
     test('a GET request to a controller action passes', async () => {

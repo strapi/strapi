@@ -235,6 +235,18 @@ describe('createValidatedInputParser', () => {
       ).toEqual({ body: undefined });
     });
 
+    test('parses a body of an undeclared media type as no body when the body is optional', () => {
+      const request = { body: { 'application/json': z.object({ clientMutationId: z.string() }) } };
+      const ctx = createContext({ body: { file: 'x' }, contentType: 'multipart/form-data' });
+
+      expect(() => createValidatedInputParser(request)(ctx)).toThrow(
+        'Request body must be sent as'
+      );
+      expect(createValidatedInputParser(request, { bodyOptional: true })(ctx)).toEqual({
+        body: undefined,
+      });
+    });
+
     test('treats an empty body as no body', () => {
       const ctx = createContext({ body: {}, contentType: 'text/plain' });
       const emptyCtx = { ...ctx, request: { ...ctx.request, length: 0 } };

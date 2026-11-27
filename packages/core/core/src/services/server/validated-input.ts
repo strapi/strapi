@@ -14,8 +14,9 @@ type Parser = (ctx: RequestContext) => Record<string, unknown>;
 
 type ParserOptions = {
   /**
-   * Parses a missing body as valid. For a route that declares no body: `addInputParams` merges a
-   * JSON body schema into every matched route, and that schema must not make a body required.
+   * Parses a missing body, or a body of an undeclared media type, as no body. For a route that
+   * declares no body: `addInputParams` merges a JSON body schema into every matched route, and that
+   * schema must not make a body required or reject a multipart or form request.
    */
   bodyOptional?: boolean;
 };
@@ -159,7 +160,7 @@ export const assertRouteRequest = (request: Core.RouteRequest) => {
  *   unless its schema coerces it (`z.coerce.number()`, `z.stringbool()`).
  * - The body schema is the one of the request media type, matched without parameters. A request
  *   without a body, or with an empty one, parses `undefined` with the first declared schema, so an
- *   optional body passes. A body of an undeclared media type answers 415.
+ *   optional body passes. A body of an undeclared media type answers 415, unless `bodyOptional` is set.
  * - On failure, throws a `ValidationError` (400) whose `details.errors[].path` starts with the part.
  *
  * koa-body parses no body for GET, HEAD and DELETE by default, so a body declared on these methods
@@ -214,7 +215,8 @@ export const createValidatedInputParser = (
   return (ctx) => {
     // Koa's `is()` counts a `Content-Length: 0` request as having a body.
     const matched = ctx.request.length === 0 ? null : ctx.request.is(mediaTypes);
-    const hasBody = matched !== null;
+    // An optional body was not declared by the route: another media type is a request without it.
+    const hasBody = typeof matched === 'string' || (matched === false && bodyOptional === false);
     const mediaType = hasBody ? matched : mediaTypes[0];
     const schema = typeof mediaType === 'string' ? schemasByMediaType.get(mediaType) : undefined;
 
