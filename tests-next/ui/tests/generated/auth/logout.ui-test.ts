@@ -1,4 +1,4 @@
-// no-code-e2e: scenario=tests-next/ui/scenarios/auth/logout.md id=auth-logout hash=d0ecf4d81a1f
+// no-code-e2e: scenario=tests-next/ui/scenarios/auth/logout.md id=auth-logout hash=77a11f32ff57
 // Generated from tests-next/ui/scenarios/auth/logout.md. Do not edit by hand: change the scenario instead.
 import { expect, test } from '../../../fixtures';
 import { HomePage, LoginPage } from '../../../pages';
@@ -16,6 +16,10 @@ test(
     // After logging out, the login page shows.
     await expect(page).toHaveURL(/\/admin\/auth\/login/);
     await expect(login.loginButton()).toBeVisible();
+
+    // The login form shows the "Email" and "Password" fields.
+    await expect(login.emailField()).toBeVisible();
+    await expect(login.passwordField()).toBeVisible();
 
     // Step 4: opening the home page again redirects to the login page.
     await page.goto('/admin');

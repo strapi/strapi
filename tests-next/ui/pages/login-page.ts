@@ -8,6 +8,14 @@ export class LoginPage {
     this.page = page;
   }
 
+  emailField() {
+    return this.page.getByLabel('Email');
+  }
+
+  passwordField() {
+    return this.page.getByLabel('Password');
+  }
+
   loginButton() {
     return this.page.getByRole('button', { name: 'Login' });
   }
