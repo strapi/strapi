@@ -117,7 +117,7 @@ const setupTables = async (connection: knex.Knex) => {
   ]);
 };
 
-describe('relation subquery path (delete / update writes)', () => {
+describe('relation subquery and deep sort paths', () => {
   it.each([
     [
       'nested relation where',
@@ -665,4 +665,41 @@ describe('relation subquery path (delete / update writes)', () => {
       await connection.destroy();
     }
   );
+
+  it('deep sort select uses the explicit transaction', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const trx = await connection.transaction();
+    try {
+      await trx('tests').where({ id: 1 }).update({ name: 'IN TRANSACTION' });
+
+      const deepSort = em
+        .createQueryBuilder(TEST_UID)
+        .select(['id', 'name'])
+        .orderBy({ related: { title: 'asc' } })
+        .transacting(trx);
+
+      // The outer builder must be the transaction client. Checking this first avoids execute()
+      // waiting on SQLite's single connection when the transaction was not copied over.
+      expect(deepSort.getKnexQuery().client).toBe(trx.client);
+
+      const rows = await deepSort.execute<{ name: string }[]>();
+
+      expect(rows.map((row) => row.name)).toEqual([
+        'IN TRANSACTION',
+        'Lucas HERNANDEZ',
+        'Samuel UMTITI',
+      ]);
+    } finally {
+      await trx.rollback();
+    }
+
+    expect(await connection('tests').where({ id: 1 }).first('name')).toEqual({
+      name: 'Hugo LLORIS',
+    });
+
+    await connection.destroy();
+  });
 });
