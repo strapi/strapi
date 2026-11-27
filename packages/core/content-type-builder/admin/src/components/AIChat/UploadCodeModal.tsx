@@ -430,7 +430,7 @@ export const UploadCodeModal = () => {
       <StepModal.Step
         title={t('chat.code-upload.step1-title', 'Import code')}
         nextLabel={t('chat.code-upload.continue-button', 'Continue')}
-        cancelLabel={t('common.cancel', 'Cancel')}
+        cancelLabel={t('form.button.cancel', 'Cancel')}
         disableNext={!projectAttachment || isLoading}
         onNext={validateUploadStep}
       >
@@ -444,7 +444,7 @@ export const UploadCodeModal = () => {
 
       <StepModal.Step
         title={t('chat.code-upload.step2-title', 'Confirm')}
-        nextLabel={t('common.finish', 'Finish')}
+        nextLabel={t('form.button.finish', 'Finish')}
         backLabel={t('form.button.back', 'Back')}
         disableNext={!projectAttachment || isLoading}
       >

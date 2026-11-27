@@ -3,6 +3,7 @@ import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
 import { getAvailableConditionFields } from '../utils/conditions';
+import { getTrad } from '../utils/getTrad';
 
 import { GenericInput } from './GenericInputs';
 
@@ -161,7 +162,7 @@ export const TabForm = ({
                   );
 
                   const noFieldsMessage = formatMessage({
-                    id: 'form.attribute.condition.no-fields',
+                    id: getTrad('form.attribute.condition.no-fields'),
                     defaultMessage:
                       'No boolean or enumeration fields available to set conditions on.',
                   });
@@ -195,7 +196,7 @@ export const TabForm = ({
                               disabled={availableFields.length === 0}
                             >
                               {formatMessage({
-                                id: 'form.attribute.condition.apply',
+                                id: getTrad('form.attribute.condition.apply'),
                                 defaultMessage: 'Apply condition',
                               })}
                             </Button>

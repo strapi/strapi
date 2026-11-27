@@ -216,7 +216,7 @@
   "chat.input.defaults.generate": "إنشاء مخطط منتج",
   "chat.input.defaults.ctb": "أخبرني عن Content-Type Builder",
   "chat.input.defaults.strapi": "أخبرني عن Strapi",
-  "chat.input.thinking": "Strapi AI يفكر...",
+  "chat.input.thinking": "Strapi AI يفكر",
   "chat.input.placeholder": "اسأل Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "يمكن أن يرتكب Strapi AI أخطاء.",
   "chat.messages.error": "حدث خطأ ما.",

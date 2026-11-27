@@ -246,7 +246,7 @@
   "chat.input.defaults.generate": "Wygeneruj schemat produktu",
   "chat.input.defaults.ctb": "Opowiedz mi o Kreatorze typu treści",
   "chat.input.defaults.strapi": "Opowiedz mi o Strapi",
-  "chat.input.thinking": "Strapi AI myśli...",
+  "chat.input.thinking": "Strapi AI myśli",
   "chat.input.placeholder": "Zapytaj Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI może popełniać błędy.",
   "chat.messages.error": "Coś poszło nie tak.",

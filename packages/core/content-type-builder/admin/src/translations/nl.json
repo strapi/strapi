@@ -79,7 +79,7 @@
   "chat.input.defaults.title": "Hoe kan ik je helpen?",
   "chat.input.placeholder": "Vraag Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI kan fouten maken.",
-  "chat.input.thinking": "Strapi AI denkt na...",
+  "chat.input.thinking": "Strapi AI denkt na",
   "chat.messages.error": "Er is iets misgegaan.",
   "chat.messages.license-limit-exceeded": "AI-tegoed overschreden.",
   "chat.messages.license-limit-reached": "Licentielimiet bereikt, probeer het morgen opnieuw.",

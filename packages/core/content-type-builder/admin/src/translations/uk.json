@@ -205,7 +205,7 @@
   "chat.input.defaults.generate": "Згенерувати schema продукту",
   "chat.input.defaults.ctb": "Розкажіть мені про Content-Type Builder",
   "chat.input.defaults.strapi": "Розкажіть мені про Strapi",
-  "chat.input.thinking": "Strapi AI думає...",
+  "chat.input.thinking": "Strapi AI думає",
   "chat.input.placeholder": "Запитайте Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI може робити помилки.",
   "chat.messages.error": "Щось пішло не так.",

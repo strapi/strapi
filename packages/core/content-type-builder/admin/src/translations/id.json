@@ -216,7 +216,7 @@
   "chat.input.defaults.generate": "Buat schema produk",
   "chat.input.defaults.ctb": "Ceritakan tentang Content-Type Builder",
   "chat.input.defaults.strapi": "Ceritakan tentang Strapi",
-  "chat.input.thinking": "Strapi AI sedang berpikir...",
+  "chat.input.thinking": "Strapi AI sedang berpikir",
   "chat.input.placeholder": "Tanya Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI dapat membuat kesalahan.",
   "chat.messages.error": "Ada yang salah.",

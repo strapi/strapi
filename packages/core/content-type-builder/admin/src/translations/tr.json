@@ -178,7 +178,7 @@
   "chat.input.defaults.generate": "Bir ürün schema'sı oluştur",
   "chat.input.defaults.ctb": "Bana Content-Type Builder hakkında bilgi ver",
   "chat.input.defaults.strapi": "Bana Strapi hakkında bilgi ver",
-  "chat.input.thinking": "Strapi AI düşünüyor...",
+  "chat.input.thinking": "Strapi AI düşünüyor",
   "chat.input.placeholder": "Strapi AI'ya sor...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI hata yapabilir.",
   "chat.messages.error": "Bir şeyler ters gitti.",

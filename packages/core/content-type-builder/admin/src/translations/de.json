@@ -246,7 +246,7 @@
   "chat.input.defaults.generate": "Ein Produktschema generieren",
   "chat.input.defaults.ctb": "Erzähle mir über den Inhaltstyp-Editor",
   "chat.input.defaults.strapi": "Erzähle mir über Strapi",
-  "chat.input.thinking": "Strapi AI denkt nach...",
+  "chat.input.thinking": "Strapi AI denkt nach",
   "chat.input.placeholder": "Frage Strapi AI...",
   "chat.input.strapi-ai-can-make-errors": "Strapi AI kann Fehler machen.",
   "chat.messages.error": "Etwas ist schief gelaufen.",
