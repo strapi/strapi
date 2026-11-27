@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`policies:list should output list of policies 1`] = `
-"│ Name                                   │
-│ plugin::content-manager.hasPermissions │
-│ admin::isAuthenticatedAdmin            │
-│ admin::hasPermissions                  │
-│ admin::isTelemetryEnabled              │"
-`;
