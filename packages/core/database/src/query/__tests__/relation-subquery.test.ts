@@ -37,6 +37,7 @@ const models = [
       publishedAt: { type: 'string' },
       views: { type: 'integer' },
       likes: { type: 'integer' },
+      viewCount: { type: 'integer' },
       related: {
         type: 'relation',
         relation: 'manyToOne',
@@ -93,6 +94,7 @@ const setupTables = async (connection: knex.Knex) => {
     t.string('published_at');
     t.integer('views').defaultTo(10);
     t.integer('likes').defaultTo(10);
+    t.integer('view_count').defaultTo(10);
   });
   await connection.schema.createTable('tests_related_lnk', (t) => {
     t.increments('id');
@@ -244,6 +246,16 @@ describe('relation subquery path (delete / update writes)', () => {
       (qb: QueryBuilder) => qb.increment('views', 1).decrement('likes', 2),
       { views: [11, 10, 11], likes: [8, 10, 8] },
     ],
+    [
+      'increment + decrement on the same column',
+      (qb: any) => qb.increment('views', 2).decrement('views', 1),
+      { views: [11, 10, 11], likes: [10, 10, 10] },
+    ],
+    [
+      'two increments on the same column',
+      (qb: any) => qb.increment('views', 2).increment('views', 3),
+      { views: [15, 10, 15], likes: [10, 10, 10] },
+    ],
   ])('query builder %s: nested relation where', async (_label, apply, expected) => {
     const { db, connection } = makeDb();
     await setupTables(connection);
@@ -260,6 +272,49 @@ describe('relation subquery path (delete / update writes)', () => {
 
     await connection.destroy();
   });
+
+  it.each([
+    ['nested relation where', { related: { title: 'Category A' } }, [12, 10, 12]],
+    ['scalar where (no subquery)', { name: 'Samuel UMTITI' }, [10, 12, 10]],
+  ])(
+    'query builder maps counter attribute names to columns: %s',
+    async (_label, where, expected) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      await em.createQueryBuilder(TEST_UID).init({ where }).increment('viewCount', 2).execute();
+
+      expect(await connection('tests').orderBy('id').pluck('view_count')).toEqual(expected);
+
+      await connection.destroy();
+    }
+  );
+
+  it.each([
+    ['nested relation where', { related: { title: 'Category A' } }],
+    ['scalar where (no subquery)', { name: 'Samuel UMTITI' }],
+  ])(
+    'query builder rejects a counter on a column also in update data: %s',
+    async (_label, where) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      await expect(
+        em
+          .createQueryBuilder(TEST_UID)
+          .init({ where })
+          .update({ views: 1 })
+          .increment('views', 2)
+          .execute()
+      ).rejects.toThrow('Cannot update and increment or decrement the column "views"');
+
+      expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 10, 10]);
+
+      await connection.destroy();
+    }
+  );
 
   it('query builder ignores forUpdate and orderBy in the relation subquery', async () => {
     const { db, connection } = makeDb();
@@ -406,6 +461,99 @@ describe('relation subquery path (delete / update writes)', () => {
       await apply(qb).execute();
 
       expect(await connection('tests').orderBy('id').pluck(column)).toEqual(expected);
+
+      await connection.destroy();
+    }
+  );
+
+  it.each([
+    ['numeric string increment', (qb: any) => qb.increment('views', '2'), [12, 10, 12]],
+    ['numeric string decrement', (qb: any) => qb.decrement('views', '3'), [7, 10, 7]],
+    ['negative numeric string', (qb: any) => qb.increment('views', '-2'), [8, 10, 8]],
+    [
+      'two numeric string increments on the same column',
+      (qb: any) => qb.increment('views', '2').increment('views', '3'),
+      [15, 10, 15],
+    ],
+  ])('query builder sums %s as numbers: nested relation where', async (_label, apply, expected) => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } });
+    await apply(qb).execute();
+
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual(expected);
+
+    await connection.destroy();
+  });
+
+  it.each([['abc'], [''], ['   '], [NaN], [Infinity], [null], [true]])(
+    'query builder rejects a non-numeric counter amount: %p',
+    async (amount) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      await expect(
+        em
+          .createQueryBuilder(TEST_UID)
+          .init({ where: { related: { title: 'Category A' } } })
+          .increment('views', amount as any)
+          .execute()
+      ).rejects.toThrow('non-numeric amount');
+
+      expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 10, 10]);
+
+      await connection.destroy();
+    }
+  );
+
+  it.each([
+    [
+      'decrement object on scalar where',
+      { name: 'Samuel UMTITI' },
+      (qb: any) => qb.decrement({ views: 2, viewCount: 3 }),
+      { views: [10, 8, 10], viewCount: [10, 7, 10] },
+    ],
+    [
+      'increment and decrement objects on nested relation where',
+      { related: { title: 'Category A' } },
+      (qb: any) => qb.increment({ views: 5, viewCount: 1 }).decrement({ views: 2 }),
+      { views: [13, 10, 13], viewCount: [11, 10, 11] },
+    ],
+  ])('query builder expands counter column objects: %s', async (_label, where, apply, expected) => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em.createQueryBuilder(TEST_UID).init({ where });
+    await apply(qb).execute();
+
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual(expected.views);
+    expect(await connection('tests').orderBy('id').pluck('view_count')).toEqual(expected.viewCount);
+
+    await connection.destroy();
+  });
+
+  it.each([[null], [123], [''], [['views']], [{}]])(
+    'query builder rejects an invalid counter column: %p',
+    async (column) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      await expect(
+        em
+          .createQueryBuilder(TEST_UID)
+          .init({ where: { related: { title: 'Category A' } } })
+          .decrement(column as any, 2)
+          .execute()
+      ).rejects.toThrow(/Counter column/);
+
+      expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 10, 10]);
 
       await connection.destroy();
     }

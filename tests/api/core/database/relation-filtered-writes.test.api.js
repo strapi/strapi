@@ -37,6 +37,7 @@ const articleCT = {
     title: { type: 'string' },
     views: { type: 'integer' },
     likes: { type: 'integer' },
+    viewCount: { type: 'integer' },
     category: {
       type: 'relation',
       relation: 'manyToOne',
@@ -91,7 +92,7 @@ describe('relation-filtered query builder writes', () => {
     ]) {
       await strapi.db
         .query(ARTICLE_UID)
-        .create({ data: { title, views: 10, likes: 10, category } });
+        .create({ data: { title, views: 10, likes: 10, viewCount: 0, category } });
     }
   });
 
@@ -108,6 +109,32 @@ describe('relation-filtered query builder writes', () => {
       { title: 'a2', views: 12, likes: 7 },
       { title: 'b1', views: 10, likes: 10 },
     ]);
+  });
+
+  test('sums counters on the same column', async () => {
+    await strapi.db
+      .queryBuilder(ARTICLE_UID)
+      .where(inCategoryA)
+      .increment('views', 2)
+      .decrement('views', 1)
+      .execute();
+
+    expect((await readArticles()).map((row) => row.views)).toEqual([11, 11, 10]);
+  });
+
+  test('maps attribute names to column names for counters', async () => {
+    await strapi.db
+      .queryBuilder(ARTICLE_UID)
+      .where(inCategoryA)
+      .increment('viewCount', 4)
+      .decrement('viewCount', 1)
+      .execute();
+
+    const rows = await strapi.db
+      .query(ARTICLE_UID)
+      .findMany({ select: ['title', 'viewCount'], orderBy: { title: 'asc' } });
+
+    expect(rows.map((row) => row.viewCount)).toEqual([3, 3, 0]);
   });
 
   test('ignores forUpdate and orderBy in the relation subquery', async () => {
