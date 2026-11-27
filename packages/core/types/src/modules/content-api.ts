@@ -82,12 +82,23 @@ type AcceptsQueryString<TInput> = unknown extends TInput
 export type QueryStringSchema<TSchema> =
   AcceptsQueryString<z.input<TSchema>> extends true ? TSchema : QueryStringSchemaError;
 
-/** Checks each param schema of `TOptions`, given directly or returned by its factory. */
-export type QueryStringParams<TOptions extends AddQueryParamsOptions> = {
-  [TParam in keyof TOptions]: {
-    schema: TOptions[TParam]['schema'] extends (z: ZodSchemaFactory) => infer TSchema
+/** Param name → schema or factory of each query param entry. */
+export type QueryParamSchemas = Record<string, QueryParamEntry['schema']>;
+
+/**
+ * Options of `addQueryParams`, given the schema or factory of each param: each schema is checked
+ * with {@link QueryStringSchema}, and an entry has no key other than `schema` and `matchRoute`.
+ *
+ * `addQueryParams` infers `TSchemas` from its options instead of taking
+ * `TOptions & QueryStringParams<TOptions>`: an object literal keeps its excess-property check (a
+ * typo of `matchRoute` is an error), and a generic `T extends AddQueryParamsOptions` stays assignable.
+ */
+export type QueryStringParams<TSchemas extends QueryParamSchemas> = {
+  [TParam in keyof TSchemas]: {
+    schema: TSchemas[TParam] extends (z: ZodSchemaFactory) => infer TSchema
       ? (z: ZodSchemaFactory) => QueryStringSchema<TSchema>
-      : QueryStringSchema<TOptions[TParam]['schema']>;
+      : QueryStringSchema<TSchemas[TParam]>;
+    matchRoute?: QueryParamEntry['matchRoute'];
   };
 };
 
@@ -155,8 +166,8 @@ export interface ContentApi {
    * @param options.[paramName].schema - {@link ZodQueryParamSchema} or `(z: {@link ZodSchemaFactory}) => {@link ZodQueryParamSchema}`. Prefer the factory. Must be scalar or array of scalars, and accept a string ({@link QueryStringSchema}). No nested objects.
    * @param options.[paramName].matchRoute - Optional. `(route: {@link Route}) => boolean`; if provided, this param is only added to routes for which it returns true.
    */
-  addQueryParams: <TOptions extends AddQueryParamsOptions>(
-    options: TOptions & QueryStringParams<TOptions>
+  addQueryParams: <TSchemas extends QueryParamSchemas>(
+    options: QueryStringParams<TSchemas>
   ) => void;
   /**
    * Register extra input params (root-level body.data) to be merged into content-api route schemas.

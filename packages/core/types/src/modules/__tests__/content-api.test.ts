@@ -60,6 +60,14 @@ contentAPI.addQueryParams({ q: { schema: z.string() }, size: { schema: z.coerce.
 declare const options: Modules.ContentAPI.AddQueryParamsOptions;
 contentAPI.addQueryParams(options);
 
+// Wrappers that forward options typed by the wide AddQueryParamsOptions, generic or not
+const registerQueryParams = <TOptions extends Modules.ContentAPI.AddQueryParamsOptions>(
+  params: TOptions
+) => contentAPI.addQueryParams(params);
+registerQueryParams({ q: { schema: z.string() } });
+declare const forwarded: Parameters<typeof contentAPI.addQueryParams>[0];
+contentAPI.addQueryParams(forwarded);
+
 // Schemas that accept no string fail on every query value
 // @ts-expect-error z.number() accepts no string: use z.coerce.number()
 contentAPI.addQueryParams({ count: { schema: z.number() } });
@@ -83,6 +91,12 @@ contentAPI.addQueryParams({
   q: { schema: z.string() },
   // @ts-expect-error one invalid param among valid ones
   count: { schema: z.number() },
+});
+
+// Unknown entry keys, e.g. a typo of matchRoute that would merge the param into every route
+contentAPI.addQueryParams({
+  // @ts-expect-error matchroute is not a key of a query param entry
+  search: { schema: z.string(), matchroute: () => true },
 });
 
 // Schemas the runtime check rejects at registration
