@@ -21,11 +21,6 @@
       "tracking": "third-party",
       "paths": ["ContextStore"]
     },
-    "PackageServices admin::auth forgotPassword": {
-      "reason": "Fix pending: the CE result is inferred, so the emitted declaration prints the strict-off side of the `sendTemplatedEmail` gate, `Promise<any>`.",
-      "tracking": "fix pending",
-      "paths": ["=>.Promise<0>"]
-    },
     "PackageServices admin::passport getPassportStrategies": {
       "reason": "Passport strategies are untyped.",
       "tracking": "passport types",

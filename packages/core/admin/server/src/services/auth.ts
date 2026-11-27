@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { expiresInToSeconds } from './token';
 import { AUDITED_EVENTS, toAdminUserEvent } from '../audit-logs/admin-users';
@@ -140,8 +141,11 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
 /**
  * Send an email to the user if it exists or do nothing
  * @param email user email for which to reset the password
+ * @returns `sendTemplatedEmail`'s result, written out so its gate reaches the emitted declaration
  */
-const forgotPassword = async ({ email } = {} as { email: string }) => {
+const forgotPassword = async (
+  { email } = {} as { email: string }
+): Promise<Core.IsStrict extends true ? unknown : any> => {
   const user: AdminUser = await strapi.db
     .query('admin::user')
     .findOne({ where: { email, isActive: true } });
