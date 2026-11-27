@@ -1,5 +1,4 @@
 import { omit, pick } from 'lodash';
-import type { Context } from 'koa';
 import type { Core, Providers, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
@@ -295,7 +294,7 @@ const defineRoute = <
  * });
  */
 const parseRouteInput = <TRoute extends { request?: Core.RouteRequest }>(
-  ctx: Context,
+  ctx: Parameters<Core.ControllerHandler>[0],
   route: TRoute
 ): Core.ValidatedRouteInputOf<TRoute> => {
   // TODO @Nico check the schemas when the route is registered, not on the first request.
