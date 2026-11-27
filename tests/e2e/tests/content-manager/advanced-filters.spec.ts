@@ -40,8 +40,6 @@ const cases = [
 const ALL_AUTHORS = ['Ted Lasso', 'Coach Beard', 'Led Tasso'];
 
 test.describe('Content Manager - advanced filters', { tag: ['@extended'] }, () => {
-  test.describe.configure({ timeout: 300000 });
-
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await loginWithApi({ page });

@@ -8,8 +8,6 @@ import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 
 test.describe('Locale Permissions', () => {
-  test.describe.configure({ timeout: 500000 });
-
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await loginWithApi({ page });
