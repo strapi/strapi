@@ -5,7 +5,7 @@ import { z } from '@strapi/utils';
 import request from 'supertest';
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { defineRoute } from '../factories';
+import { defineRoute, parseRouteInput } from '../factories';
 import { body } from '../middlewares/body';
 import { errors } from '../middlewares/errors';
 import { query } from '../middlewares/query';
@@ -17,10 +17,11 @@ import createKoaApp from '../services/server/koa';
  * (qs) and body (koa-body) middlewares, then the route chain built by `compose-endpoint`. Only the
  * auth service is replaced: a request is authenticated when it sends `Authorization: Bearer ok`.
  */
-const createApp = (routes: Core.RouteInput[]) => {
+const createApp = (routes: Core.RouteInput[], controllers: Record<string, unknown> = {}) => {
   const app = createKoaApp({});
   const strapi = {
     server: { app },
+    controller: (uid: string) => controllers[uid],
     config: { get: (_key: string, defaultValue?: unknown) => defaultValue },
     plugin: () => undefined,
     get(name: string) {
@@ -60,39 +61,73 @@ const echo = (ctx: any) => ({
   raw: { params: ctx.params, query: ctx.query, body: ctx.request.body },
 });
 
+// A route whose handler is a controller action: the action parses with `parseRouteInput`.
+const payRoute = {
+  method: 'POST',
+  path: '/orders/:id/pay',
+  handler: 'api::order.order.pay',
+  request: {
+    params: { id: z.coerce.number().int() },
+    body: { 'application/json': z.object({ amount: z.number() }) },
+  },
+} satisfies Core.RouteInput;
+
+const orderController = {
+  pay(ctx: any) {
+    return { input: parseRouteInput(ctx, payRoute) };
+  },
+};
+
+// Registration replaces `route.request` when it merges the params of `addQueryParams`.
+const searchRoute = defineRoute({
+  method: 'GET',
+  path: '/search',
+  request: { query: { page: z.coerce.number() } },
+  handler: echo,
+});
+searchRoute.request = {
+  ...searchRoute.request,
+  query: { ...searchRoute.request.query, term: z.string() },
+} as typeof searchRoute.request;
+
 describe('factories.defineRoute', () => {
   let app: ReturnType<typeof createApp>;
 
   beforeAll(() => {
-    app = createApp([
-      defineRoute({
-        method: 'POST',
-        path: '/orders/:id/refunds',
-        request: {
-          params: { id: z.coerce.number().int() },
-          query: { notify: z.stringbool().optional() },
-          body: { 'application/json': z.object({ amount: z.number().positive() }) },
-        },
-        handler: echo,
-      }),
-      defineRoute({
-        method: 'GET',
-        path: '/orders',
-        request: {
-          query: {
-            pagination: z.object({ page: z.coerce.number().int().min(1) }).optional(),
+    app = createApp(
+      [
+        defineRoute({
+          method: 'POST',
+          path: '/orders/:id/refunds',
+          request: {
+            params: { id: z.coerce.number().int() },
+            query: { notify: z.stringbool().optional() },
+            body: { 'application/json': z.object({ amount: z.number().positive() }) },
           },
+          handler: echo,
+        }),
+        defineRoute({
+          method: 'GET',
+          path: '/orders',
+          request: {
+            query: {
+              pagination: z.object({ page: z.coerce.number().int().min(1) }).optional(),
+            },
+          },
+          handler: echo,
+        }),
+        // A route with the same schemas, not defined with the helper: nothing is parsed.
+        {
+          method: 'GET',
+          path: '/legacy/:id',
+          request: { params: { id: z.coerce.number().int() } },
+          handler: echo,
         },
-        handler: echo,
-      }),
-      // A route with the same schemas, not defined with the helper: nothing is parsed.
-      {
-        method: 'GET',
-        path: '/legacy/:id',
-        request: { params: { id: z.coerce.number().int() } },
-        handler: echo,
-      },
-    ]);
+        payRoute,
+        searchRoute,
+      ],
+      { 'api::order.order': orderController }
+    );
   });
 
   test('hands the parsed request to the handler and keeps the raw values', async () => {
@@ -139,15 +174,46 @@ describe('factories.defineRoute', () => {
     ]);
   });
 
-  test('answers 400 when the body is not sent with a declared media type', async () => {
+  test('answers 415 when the body is not sent with a declared media type', async () => {
     const res = await request(app)
       .post('/orders/7/refunds')
       .set('Authorization', 'Bearer ok')
       .type('form')
       .send({ amount: '5' })
+      .expect(415);
+
+    expect(res.body.error).toMatchObject({
+      status: 415,
+      name: 'UnsupportedMediaTypeError',
+      message: 'Request body must be sent as application/json',
+    });
+  });
+
+  test('parses for a controller action that calls parseRouteInput', async () => {
+    const res = await request(app)
+      .post('/orders/7/pay')
+      .set('Authorization', 'Bearer ok')
+      .send({ amount: 5 })
+      .expect(200);
+
+    expect(res.body).toEqual({ input: { params: { id: 7 }, body: { amount: 5 } } });
+
+    const invalid = await request(app)
+      .post('/orders/7/pay')
+      .set('Authorization', 'Bearer ok')
+      .send({ amount: 'five' })
       .expect(400);
 
-    expect(res.body.error.message).toBe('Request body must be sent as application/json');
+    expect(invalid.body.error.details.errors[0].path).toEqual(['body', 'amount']);
+  });
+
+  test('parses the params that registration adds to the route', async () => {
+    const res = await request(app)
+      .get('/search?page=2&term=shoes')
+      .set('Authorization', 'Bearer ok')
+      .expect(200);
+
+    expect(res.body.input).toEqual({ query: { page: 2, term: 'shoes' } });
   });
 
   test('authenticates before it parses', async () => {

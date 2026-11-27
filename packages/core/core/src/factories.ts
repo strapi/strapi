@@ -1,11 +1,16 @@
 import { omit, pick } from 'lodash';
+import type { Context } from 'koa';
 import type { Core, Providers, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
-import { createValidatedInputParser } from './services/server/validated-input';
+import {
+  assertRouteRequest,
+  createValidatedInputParser,
+  parseRouteInput as parseInput,
+} from './services/server/validated-input';
 
 const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),
@@ -160,19 +165,24 @@ const createUploadProvider = <
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
 
-type DefineRouteConfig<TRequest extends Core.RouteRequest> = Omit<
+// The route keeps its `config` as written, not widened to `Core.RouteConfig`.
+// TODO @Nico when strict types land, widen the constraint to `Core.RouteConfig | Core.RouteConfigFor`
+// so a defined route also fits `Core.RouterInputFor`, which checks policy and middleware names.
+type DefineRouteConfig<TRequest extends Core.RouteRequest, TConfig extends Core.RouteConfig> = Omit<
   Core.RouteInput,
-  'handler' | 'request'
+  'handler' | 'request' | 'config'
 > & {
   request?: TRequest;
+  config?: TConfig;
   handler: Core.ValidatedRouteHandler<TRequest>;
 };
 
-type DefinedRoute<TRequest extends Core.RouteRequest> = Omit<
+type DefinedRoute<TRequest extends Core.RouteRequest, TConfig extends Core.RouteConfig> = Omit<
   Core.RouteInput,
-  'handler' | 'request'
+  'handler' | 'request' | 'config'
 > & {
-  request?: TRequest;
+  request: TRequest;
+  config?: TConfig;
   handler: Core.MiddlewareHandler;
 };
 
@@ -184,14 +194,15 @@ type DefinedRoute<TRequest extends Core.RouteRequest> = Omit<
  * `ctx.request.body` keep their raw values, and routes not defined with this helper are not parsed.
  *
  * - `params` and `query` values arrive as strings. Coerce them in the schema: `z.coerce.number()`,
- *   `z.stringbool()` for booleans. `z.number()`, `z.boolean()` and `z.coerce.boolean()` throw here.
+ *   `z.stringbool()` for booleans. Schemas that never accept a string, such as `z.number()`, and
+ *   schemas that OpenAPI cannot document, such as `.transform()`, throw here.
  * - Unknown `params` and `query` keys are stripped from `ctx.input`.
- * - The body schema is chosen by the request content type.
+ * - The body schema is the one of the request media type. Another media type answers 415.
  * - A request that does not match answers 400 with a `ValidationError`, after authentication,
  *   policies and route middlewares ran.
  *
- * The handler must be a function. A controller action referenced by name (`'api::x.x.find'`) is
- * not supported.
+ * The handler must be a function. A route whose handler is a controller action (`'api::x.x.pay'`)
+ * keeps its permission scope: its action calls `factories.parseRouteInput(ctx, route)` instead.
  *
  * @example
  * import { factories } from '@strapi/strapi';
@@ -216,20 +227,25 @@ type DefinedRoute<TRequest extends Core.RouteRequest> = Omit<
  *   ],
  * };
  */
-const defineRoute = <const TRequest extends Core.RouteRequest = Record<never, never>>(
-  route: DefineRouteConfig<TRequest>
-): DefinedRoute<TRequest> => {
-  const { handler, request = {} } = route;
+const defineRoute = <
+  const TRequest extends Core.RouteRequest = Record<never, never>,
+  const TConfig extends Core.RouteConfig = never,
+>(
+  route: DefineRouteConfig<TRequest, TConfig>
+): DefinedRoute<TRequest, TConfig> => {
+  const { handler } = route;
+  const request = (route.request ?? {}) as TRequest;
   const label = `defineRoute ${route.method} ${route.path}`;
 
   if (typeof handler !== 'function') {
-    throw new TypeError(`${label}: the handler must be a function`);
+    throw new TypeError(
+      `${label}: the handler must be a function. For a controller action, call factories.parseRouteInput(ctx, route) in the action.`
+    );
   }
 
-  let parse: ReturnType<typeof createValidatedInputParser>;
-
   try {
-    parse = createValidatedInputParser(request);
+    assertRouteRequest(request);
+    createValidatedInputParser(request);
   } catch (error) {
     if (error instanceof Error) {
       error.message = `${label}: ${error.message}`;
@@ -238,13 +254,52 @@ const defineRoute = <const TRequest extends Core.RouteRequest = Record<never, ne
     throw error;
   }
 
-  const validatedHandler: Core.MiddlewareHandler = (ctx, next) => {
-    ctx.input = parse(ctx);
+  const definedRoute: DefinedRoute<TRequest, TConfig> = {
+    ...route,
+    request,
+    handler(ctx, next) {
+      // Reads `definedRoute.request` per request: registration can replace it to add extra params.
+      ctx.input = parseInput(ctx, definedRoute);
 
-    return handler(ctx as Core.ValidatedRouteContext<TRequest>, next);
+      return handler(ctx as Core.ValidatedRouteContext<TRequest>, next);
+    },
   };
 
-  return { ...route, handler: validatedHandler };
+  return definedRoute;
+};
+
+/**
+ * Parses the request with the `request` schemas of `route` and returns the parsed values, typed
+ * from the schemas' output, with the same rules and errors as `defineRoute`.
+ *
+ * For a controller action that a route references by name. Such a route keeps the permission scope
+ * Strapi generates from its handler, which a function handler has not. TypeScript cannot link the
+ * action to its route, so the action names the route it parses for.
+ *
+ * Unlike `defineRoute`, the schemas are checked on the first request, not at definition.
+ *
+ * @example
+ * // src/api/order/routes/order.ts
+ * export const refundRoute = {
+ *   method: 'POST',
+ *   path: '/orders/:id/refunds',
+ *   handler: 'api::order.order.refund',
+ *   request: { params: { id: z.coerce.number().int() } },
+ * } satisfies Core.RouteInput;
+ *
+ * // src/api/order/controllers/order.ts
+ * export default factories.createCoreController('api::order.order', {
+ *   async refund(ctx) {
+ *     const { params } = factories.parseRouteInput(ctx, refundRoute); // { id: number }
+ *   },
+ * });
+ */
+const parseRouteInput = <TRoute extends { request?: Core.RouteRequest }>(
+  ctx: Context,
+  route: TRoute
+): Core.ValidatedRouteInputOf<TRoute> => {
+  // TODO @Nico check the schemas when the route is registered, not on the first request.
+  return parseInput(ctx, route) as Core.ValidatedRouteInputOf<TRoute>;
 };
 
 export {
@@ -255,4 +310,5 @@ export {
   createUploadProvider,
   defineRoute,
   isCustomController,
+  parseRouteInput,
 };

@@ -6,7 +6,7 @@
 import type { Core } from '@strapi/types';
 import { z } from 'zod/v4';
 
-import { defineRoute } from '../factories';
+import { defineRoute, parseRouteInput } from '../factories';
 
 type Assert<T extends true> = T;
 type IsEqual<Left, Right> =
@@ -86,23 +86,61 @@ export const uploadRoute = defineRoute({
   },
 });
 
-// The defined route fits the router types and keeps its `request` for reuse.
-export const router: Core.RouterInput = {
-  type: 'content-api',
-  routes: [refundRoute, listRoute, pingRoute, uploadRoute],
-};
+// A route keeps its `config` as written and fits the router types.
+export const configuredRoute = defineRoute({
+  method: 'GET',
+  path: '/orders/stats',
+  config: { auth: false, policies: ['global::is-owner'], middlewares: ['global::timer'] },
+  handler() {
+    return null;
+  },
+});
 
 true satisfies Assert<
-  IsEqual<
-    Core.ValidatedRouteInput<NonNullable<(typeof refundRoute)['request']>>['params'],
-    { id: number }
-  >
+  IsEqual<NonNullable<(typeof configuredRoute)['config']>['policies'], ['global::is-owner']>
+>;
+
+export const router: Core.RouterInput = {
+  type: 'content-api',
+  routes: [refundRoute, listRoute, pingRoute, uploadRoute, configuredRoute],
+};
+
+// The defined route keeps its `request` for reuse.
+true satisfies Assert<
+  IsEqual<Core.ValidatedRouteInputOf<typeof refundRoute>['params'], { id: number }>
 >;
 
 defineRoute({
   method: 'GET',
   path: '/orders/:id',
   request: { params: { id: z.coerce.number() } },
-  // @ts-expect-error a controller action referenced by name is not supported
+  // @ts-expect-error a controller action referenced by name parses with parseRouteInput instead
   handler: 'api::order.order.findOne',
 });
+
+// A route whose handler is a controller action: the action parses with `parseRouteInput`.
+export const payRoute = {
+  method: 'POST',
+  path: '/orders/:id/pay',
+  handler: 'api::order.order.pay',
+  request: {
+    params: { id: z.coerce.number().int() },
+    body: { 'application/json': z.object({ amount: z.number() }) },
+  },
+} satisfies Core.RouteInput;
+
+export const orderController = {
+  async pay(ctx) {
+    const input = parseRouteInput(ctx, payRoute);
+
+    true satisfies Assert<
+      IsEqual<typeof input, { params: { id: number }; body: { amount: number } }>
+    >;
+    true satisfies Assert<IsEqual<typeof input, Core.ValidatedRouteInputOf<typeof payRoute>>>;
+
+    // @ts-expect-error no query declared
+    input.query satisfies unknown;
+
+    return input.body.amount;
+  },
+} satisfies Core.Controller;

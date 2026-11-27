@@ -24,6 +24,19 @@ export type ValidatedRouteInput<TRequest extends RouteRequest> = {
 };
 
 /**
+ * The parsed request of a route object, as `factories.parseRouteInput(ctx, route)` returns it.
+ *
+ * @example
+ * export const refundRoute = { method: 'POST', path: '/refunds/:id', handler: 'api::order.order.refund',
+ *   request: { params: { id: z.coerce.number() } } } satisfies Core.RouteInput;
+ *
+ * type RefundInput = Core.ValidatedRouteInputOf<typeof refundRoute>; // { params: { id: number } }
+ */
+export type ValidatedRouteInputOf<TRoute extends { request?: RouteRequest }> = ValidatedRouteInput<
+  NonNullable<TRoute['request']>
+>;
+
+/**
  * The Koa context of a handler defined with `factories.defineRoute`: the usual context plus the
  * parsed request on `input`. `ctx.params`, `ctx.query` and `ctx.request.body` keep their raw values.
  */
