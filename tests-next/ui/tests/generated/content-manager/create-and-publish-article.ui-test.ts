@@ -5,19 +5,16 @@ import { EditViewPage, ListViewPage } from '../../../pages';
 
 const ARTICLE = 'api::article.article';
 
-test.use({
-  role: 'editor',
-  seedPlan: {
+test.use({ role: 'editor' });
+
+test('creates an article and publishes it', { tag: ['@critical'] }, async ({ page, seed }) => {
+  await seed({
     entries: [
       { uid: ARTICLE, data: { title: 'Existing article 1' }, status: 'published' },
       { uid: ARTICLE, data: { title: 'Existing article 2' }, status: 'published' },
       { uid: ARTICLE, data: { title: 'Existing article 3' }, status: 'published' },
     ],
-  },
-});
-
-test('creates an article and publishes it', { tag: ['@critical'] }, async ({ page, seeded }) => {
-  void seeded;
+  });
   const list = new ListViewPage(page);
   const edit = new EditViewPage(page);
 

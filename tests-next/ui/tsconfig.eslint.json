@@ -3,5 +3,13 @@
   "compilerOptions": {
     "allowJs": true
   },
-  "include": ["tests", "fixtures", "setup", "playwright.config.ts", "no-code-e2e/scripts/**/*.mjs"]
+  "include": [
+    "tests",
+    "fixtures",
+    "setup",
+    "pages",
+    "components",
+    "playwright.config.ts",
+    "no-code-e2e/scripts/**/*.mjs"
+  ]
 }

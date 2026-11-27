@@ -20,6 +20,7 @@ import { parseArgs } from 'node:util';
 import { editingTools, prompt, runClaude } from './claude.mjs';
 import { changesSince, changedFilesSince, commit, head, resetTo } from './git.mjs';
 import { checkChanges, loadConfig, matchesAny, plan, REPO_ROOT, withSpecHeader } from './lib.mjs';
+import { lintChanged } from './lint.mjs';
 import { renderReport } from './report.mjs';
 import { runSpecs } from './run-spec.mjs';
 
@@ -188,6 +189,13 @@ for (const scenario of queue) {
     if (violations.length) {
       attempt.outcome = 'diff-refused';
       feedback = `The diff check refused these changes, fix them:\n${violations.join('\n')}`;
+      continue;
+    }
+
+    const lint = lintChanged(before);
+    if (!lint.ok) {
+      attempt.outcome = 'lint';
+      feedback = `ESLint fails on the changed files, fix them:\n${lint.output.slice(-4000)}`;
       continue;
     }
 

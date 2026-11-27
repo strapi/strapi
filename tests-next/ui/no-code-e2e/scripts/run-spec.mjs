@@ -16,6 +16,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { loadConfig, REPO_ROOT } from './lib.mjs';
+import { lintChanged } from './lint.mjs';
 
 const MAX_OUTPUT_LINES = 150;
 const MAX_CONTEXT_LINES = 120;
@@ -120,6 +121,9 @@ if (isMain) {
     console.error('Usage: run-spec.mjs <spec...> [--repeat-each N] [--retries N] | --all');
     process.exit(2);
   }
+  // ESLint on the changed files first: the agent fixes lint errors while it iterates.
+  const lint = lintChanged();
+  if (!lint.ok) console.log(`ESLint (${lint.files.join(', ')}):\n${lint.output}\n`);
   const { code, report } = await runSpecs({
     specs: positionals,
     all: values.all,
@@ -127,5 +131,5 @@ if (isMain) {
     retries: values.retries ? Number(values.retries) : undefined,
   });
   console.log(report);
-  process.exit(code);
+  process.exit(code || (lint.ok ? 0 : 1));
 }

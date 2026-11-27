@@ -23,6 +23,7 @@ import { editingTools, prompt, readOnlyTools, runClaude } from './claude.mjs';
 import { changesSince, commit, git, head, resetTo } from './git.mjs';
 import { reportIssue } from './linear.mjs';
 import { checkChanges, loadConfig, readSpecHeader, REPO_ROOT } from './lib.mjs';
+import { lintChanged } from './lint.mjs';
 import { renderReport } from './report.mjs';
 import { runSpecs } from './run-spec.mjs';
 
@@ -216,6 +217,8 @@ for (const spec of failing) {
   rmSync(path.join(REPO_ROOT, config.paths.scratch), { recursive: true, force: true });
 
   const violations = checkChanges({ mode: 'heal', changes: changesSince(before), config });
+  const lint = lintChanged(before);
+  if (!lint.ok) violations.push(`ESLint: ${lint.output.slice(-1500)}`);
   const verified =
     violations.length === 0 && heal.answer?.status === 'healed'
       ? (await runSpecs({ specs: [spec], repeatEach: config.repeatEach })).code === 0

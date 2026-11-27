@@ -19,9 +19,9 @@ the ones that matter, and every turn costs money.
 - Page Objects: `tests-next/ui/pages/` (one class per page, grouped like the panel's URLs,
   exported from `pages/index.ts`) and `tests-next/ui/components/` (shared UI: `Navigation`,
   `ConfirmDialog`). Reuse them first. Create one when a page has none, and export it.
-- Content types of the app: `tests-next/ui/setup/schema.ts` (`article`, with a `title` string and
-  draft & publish). Add one with `scaffoldContentType` when a scenario needs it; never remove or
-  change an existing one.
+- Content types of the app: `UI_CONTENT_TYPES` in `tests-next/ui/setup/schema.ts`. Add an entry
+  (with a one-line comment saying which spec needs it) when a scenario needs a content type that
+  isn't there; never remove or change an existing one.
 - Exploration: to look at a page, write a throwaway spec in `tests-next/ui/tests/generated/_scratch/`
   that opens it and logs `await page.locator('main').ariaSnapshot()` (or another landmark), then
   run it. The folder is deleted after you finish.
@@ -36,6 +36,9 @@ the ones that matter, and every turn costs money.
 'published' | 'draft' }`), `media` (`{ file: <absolute path> }`), `apiTokens`, `adminRoles`,
   `adminUsers`, `users`, `locales`. See `SeedPlan` in `tests-next/shared/src/seed/types.ts`.
   Preconditions always become fixtures, never clicks.
+- `seeded` must be used once it is in a test's parameters (ESLint rejects an unused one, and
+  `void seeded` too): when the test doesn't need the created ids, call `await seed(plan)` at the
+  start of the test instead of `seedPlan`.
 - Each file starts from a reset database. Each test must pass alone and again with
   `--repeat-each`: a name the test creates and that must be unique (user, role, token) uses
   `unique('label')`, unless the scenario gives the exact name and nothing else creates it.
