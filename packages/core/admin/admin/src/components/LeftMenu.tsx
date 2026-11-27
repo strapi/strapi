@@ -14,6 +14,7 @@ import { MainNav } from './MainNav/MainNav';
 import { MainNavIcons } from './MainNav/MainNavLinks';
 import { NavBrand } from './MainNav/NavBrand';
 import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
+import { NavMenus } from './MainNav/NavMenus';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
 
@@ -180,7 +181,10 @@ const LeftMenu = ({
             borderColor="neutral150"
             padding={3}
           >
-            <NavUser />
+            <Flex direction="column" gap={3}>
+              <NavMenus />
+              <NavUser />
+            </Flex>
           </Box>
         </MenuDetails>
 

@@ -511,6 +511,25 @@ describe('ADMIN | new StrapiApp', () => {
     });
   });
 
+  describe('Main navigation api', () => {
+    it('locks the main navigation once the app renders', () => {
+      const app = new StrapiApp();
+      const menu = {
+        id: 'spaces',
+        useCurrent: () => null,
+        intlLabel: { id: 'spaces.switcher.label', defaultMessage: 'Space' },
+        Content: () => null,
+      };
+
+      app.unstable_addMainNavMenu(menu);
+      app.render();
+
+      expect(() => app.unstable_addMainNavMenu({ ...menu, id: 'other' })).toThrow(
+        'before the admin renders'
+      );
+    });
+  });
+
   describe('Menu api', () => {
     it('the menu should be defined', () => {
       const app = new StrapiApp();

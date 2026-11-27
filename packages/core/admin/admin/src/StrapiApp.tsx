@@ -14,6 +14,7 @@ import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/adm
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
+import { MainNav, type MainNavMenuArgs } from './core/apis/MainNav';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
@@ -136,6 +137,7 @@ class StrapiApp {
   store: Store | null = null;
   customFields = new CustomFields();
   widgets = new Widgets();
+  mainNav = new MainNav();
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.appPlugins = appPlugins || {};
@@ -209,6 +211,12 @@ class StrapiApp {
 
   addMenuLink = (link: Parameters<typeof this.router.addMenuLink>[0]) =>
     this.router.addMenuLink(link);
+
+  /**
+   * Adds a menu at the bottom of the main navigation, above the profile menu. Core renders the
+   * trigger and the menu, the plugin renders the items
+   */
+  unstable_addMainNavMenu = (menu: MainNavMenuArgs) => this.mainNav.addMenu(menu);
 
   /**
    * @deprecated use `addSettingsLink` instead, it internally supports
@@ -587,6 +595,8 @@ class StrapiApp {
   runHookParallel = (name: string) => this.hooksDict[name].runParallel();
 
   render() {
+    this.mainNav.lock();
+
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
     const storedLocale = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
     const locale = normalizeAdminLocale(storedLocale) as keyof typeof localeNames;

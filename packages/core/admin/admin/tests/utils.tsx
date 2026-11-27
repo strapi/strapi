@@ -28,6 +28,7 @@ import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-rou
 import { GuidedTourContext } from '../src/components/GuidedTour/Context';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
+import { MainNav } from '../src/core/apis/MainNav';
 import { RBAC } from '../src/core/apis/rbac';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
@@ -68,6 +69,7 @@ interface ProvidersProps {
   initialEntries?: MemoryRouterProps['initialEntries'];
   storeConfig?: Partial<ConfigureStoreOptions>;
   permissions?: Permission[] | ((defaultPermissions: Permission[]) => Permission[] | undefined);
+  mainNav?: MainNav;
 }
 
 const defaultTestStoreConfig = () => ({
@@ -104,6 +106,7 @@ const Providers = ({
   initialEntries,
   storeConfig,
   permissions = EMPTY_PERMISSIONS,
+  mainNav,
 }: ProvidersProps) => {
   /**
    * Keep these instances stable for the lifetime of the render.
@@ -112,6 +115,11 @@ const Providers = ({
   const queryClientRef = React.useRef<QueryClient | null>(null);
   const storeRef = React.useRef<ReturnType<typeof configureStore> | null>(null);
   const routerRef = React.useRef<ReturnType<typeof createMemoryRouter> | null>(null);
+  const mainNavRef = React.useRef<MainNav | null>(null);
+
+  if (mainNavRef.current === null) {
+    mainNavRef.current = mainNav ?? new MainNav();
+  }
 
   if (queryClientRef.current === null) {
     queryClientRef.current = new QueryClient({
@@ -158,6 +166,7 @@ const Providers = ({
                   register: jest.fn(),
                 } as unknown as React.ComponentProps<typeof StrapiAppProvider>['widgets']
               }
+              mainNav={mainNavRef.current}
               customFields={{
                 customFields: {},
                 get: jest.fn().mockReturnValue({
@@ -257,7 +266,7 @@ export interface RenderOptions {
   renderOptions?: RTLRenderOptions;
   userEventOptions?: Parameters<typeof userEvent.setup>[0];
   initialEntries?: MemoryRouterProps['initialEntries'];
-  providerOptions?: Pick<ProvidersProps, 'storeConfig' | 'permissions'>;
+  providerOptions?: Pick<ProvidersProps, 'storeConfig' | 'permissions' | 'mainNav'>;
 }
 
 /**
