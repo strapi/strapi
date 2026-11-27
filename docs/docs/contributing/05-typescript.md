@@ -465,11 +465,21 @@ pin those results until the repository is typed.
   `Modules.Documents.StrictResult<uid, params, 'published'>` gives every column, possibly `null`,
   and only the populated relations. Pick the selected columns from it, e.g. `regenerate` of
   `admin::api-token`. The admin services do so with strict types (`AdminRow` in
-  `packages/core/admin/server/src/types/index.ts`).
+  `packages/core/admin/server/src/types/index.ts`), and so do the content-releases services
+  (`ReleaseRow` and `ReleaseActionRow` in `packages/core/content-releases/server/src/types/index.ts`).
+- When a row keeps a richer type than the schema gives, justify it in a comment next to the
+  overlay. `ReleaseRow` keeps `name` a `string`: the create and update validation requires it
+  (`packages/core/content-releases/server/src/controllers/validation/release.ts`), but a direct
+  service call skips that check, so the comment states the assumption. `ReleaseActionRow` keeps the
+  domain types of `contentType`, `entryDocumentId` and `reason`, and the entry of a `findPage` row
+  has a `locale` of `string | null`, because the runtime returns `null` for a content type without
+  i18n.
 - Check the rows against the types with a shape comparison: the probe module
   `tests/api/core/admin/admin-service-shapes/probe.ts` makes the calls, and the API test compares
   the shape of each runtime result with the type of its variable in a strict program
-  (`tests/api/utils/shapes.ts`).
+  (`tests/api/utils/shapes.ts`). The content-releases services do the same in
+  `tests/api/core/content-releases/content-releases-service-shapes.test.api.ts` with its
+  `content-releases-service-shapes/probe.ts`.
 - Keep the members that the package itself calls on the implementation's types: internal code reads
   them through its own `getService` (`ImplementationServices` in the admin).
 
