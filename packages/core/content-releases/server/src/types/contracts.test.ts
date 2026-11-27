@@ -1,9 +1,20 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Modules, Struct } from '@strapi/types';
+import type { Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { AdminUser } from '@strapi/admin/strapi-server';
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
-import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
+import type {
+  ReleaseAction,
+  ReleaseActionOutcome,
+  ReleaseActionReason,
+} from '../../../shared/contracts/release-actions';
+import type {
+  Pagination,
+  Release,
+  ReleaseCondition,
+  ReleaseDataResponse,
+  ReleaseFailureReason,
+  ReleaseStatus,
+} from '../../../shared/contracts/releases';
 import type { ReleaseActionService as ReleaseActionImplementation } from '../services/release-action';
 import type { Services } from './index';
 
@@ -38,11 +49,31 @@ type Result<TMember extends keyof ReleaseActionService> = Awaited<
 >;
 
 // The rows that `tests/api/core/content-releases/content-releases-service-results.test.api.ts`
-// records: the action columns without relations, `locale` present and `null` when not localized.
-type ActionRow = Omit<ReleaseAction, 'entry' | 'locale' | 'release' | 'status'> & {
-  locale: string | null;
-};
+// records: the columns of the registered release-action schema without relations, every column
+// possibly `null`, `locale` present and `null` when not localized. `contentType`, `entryDocumentId`
+// and `reason` keep the domain types of `ReleaseAction`.
+type ActionColumns = Modules.Documents.StrictResult<
+  'plugin::content-releases.release-action',
+  Record<never, never>,
+  'published'
+>;
+type ActionRow = Omit<ActionColumns, 'contentType' | 'entryDocumentId' | 'reason'> &
+  Pick<ReleaseAction, 'contentType' | 'entryDocumentId' | 'reason'>;
 type CreatedAction = ActionRow & { release: Pick<Release, 'id'> };
+
+// The entry of a page row: the deep-populated document, its `locale` `null` when the content type
+// is not localized (`release-action.findPage` in the same API test, and the typed-vs-runtime
+// comparison of `content-releases-service-shapes.test.api.ts`).
+type PageRowEntry = Modules.Documents.AnyDocument & {
+  [key: string]: Schema.Attribute.AnyAttribute;
+} & { locale?: string | null };
+type PageRow = ActionRow & { entry: PageRowEntry | null; status: ReleaseAction['status'] };
+
+export type PageRowAssertions = [
+  Expect<Equal<[PageRowEntry['locale']], [string | null | undefined]>>,
+  Expect<Equal<[PageRowEntry['documentId']], [string]>>,
+  Expect<Equal<[PageRowEntry['id']], [Data.ID]>>,
+];
 
 // The callers filter the `release` relation by its ID, which the query engine accepts
 // (`countActions filters the release relation by its ID` in the same API test).
@@ -59,7 +90,7 @@ export type ReleaseActionServiceContractAssertions = [
       [Result<'findPage'>],
       [
         {
-          results: Array<ActionRow & Pick<ReleaseAction, 'entry' | 'status'>>;
+          results: PageRow[];
           pagination: Pagination;
         },
       ]
@@ -106,7 +137,7 @@ export type GroupActionsContractAssertions = [
   Expect<Equal<['release' extends keyof GroupedPageRow ? true : false], [false]>>,
   Expect<Equal<[GroupedPageRow['locale']], [FormattedAction['locale']]>>,
   Expect<Equal<[GroupedPageRow['contentType']], [FormattedAction['contentType']]>>,
-  Expect<Equal<[GroupedPageRow['entry']], [ReleaseAction['entry']]>>,
+  Expect<Equal<[GroupedPageRow['entry']], [PageRowEntry | null]>>,
   Expect<Equal<[GroupedPageRow['status']], [ReleaseAction['status']]>>,
 ];
 
@@ -115,8 +146,77 @@ type ReleaseResult<TMember extends keyof ReleaseService> = Awaited<
   ReturnType<ReleaseService[TMember]>
 >;
 
-// The row that the same API test records for `update`: the release columns without relations.
-type ReleaseRow = Omit<Release, 'actions'>;
+// The row that the same API test records for `update`: the columns of the registered release
+// schema without relations, every column possibly `null` but `name`, which the create and update
+// validation requires.
+type ReleaseRow = Omit<
+  Modules.Documents.StrictResult<
+    'plugin::content-releases.release',
+    Record<never, never>,
+    'published'
+  >,
+  'name'
+> &
+  Pick<Release, 'name'>;
+
+export type RowAssertions = [
+  // The columns the API test records, `publishedAt` and `locale` included.
+  Expect<
+    Equal<
+      [keyof ReleaseRow],
+      [
+        | 'id'
+        | 'documentId'
+        | 'name'
+        | 'releasedAt'
+        | 'scheduledAt'
+        | 'timezone'
+        | 'status'
+        | 'releaseCondition'
+        | 'totalPublishedEntries'
+        | 'totalUnpublishedEntries'
+        | 'totalSkippedEntries'
+        | 'failureReason'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'publishedAt'
+        | 'locale',
+      ]
+    >
+  >,
+  Expect<Equal<[ReleaseRow['name']], [string]>>,
+  Expect<Equal<[ReleaseRow['status']], [ReleaseStatus | null]>>,
+  Expect<Equal<[ReleaseRow['releaseCondition']], [ReleaseCondition | null]>>,
+  Expect<Equal<[ReleaseRow['failureReason']], [ReleaseFailureReason | null]>>,
+  Expect<Equal<[ReleaseRow['totalPublishedEntries']], [number | null]>>,
+  Expect<Equal<[ReleaseRow['locale']], [string | null]>>,
+  Expect<
+    Equal<
+      [keyof ActionRow],
+      [
+        | 'id'
+        | 'documentId'
+        | 'type'
+        | 'contentType'
+        | 'entryDocumentId'
+        | 'locale'
+        | 'isEntryValid'
+        | 'outcome'
+        | 'reason'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'publishedAt',
+      ]
+    >
+  >,
+  Expect<Equal<[ActionRow['type']], [ReleaseAction['type'] | null]>>,
+  Expect<Equal<[ActionRow['contentType']], [UID.ContentType]>>,
+  Expect<Equal<[ActionRow['entryDocumentId']], [ReleaseAction['entryDocumentId']]>>,
+  Expect<Equal<[ActionRow['locale']], [string | null]>>,
+  Expect<Equal<[ActionRow['isEntryValid']], [boolean | null]>>,
+  Expect<Equal<[ActionRow['outcome']], [ReleaseActionOutcome | null]>>,
+  Expect<Equal<[ActionRow['reason']], [ReleaseActionReason | null]>>,
+];
 
 export type ReleaseServiceContractAssertions = [
   Expect<Equal<[ReleaseResult<'update'>], [ReleaseRow]>>,
