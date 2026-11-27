@@ -453,6 +453,48 @@ describe('Permissions Engine', () => {
     ).not.toThrow();
   });
 
+  // `$exists` must treat null/undefined as absent, matching the SQL `$exists -> $notNull` mapping
+  // used for list queries, so single reads and lists agree.
+  describe('$exists treats null and undefined as absent', () => {
+    const present = { price: 5 };
+    const nullField = { price: null };
+    const missingField = {};
+
+    it.each([
+      ['plain', (value: boolean) => ({ price: { $exists: value } })],
+      ['inside $and', (value: boolean) => ({ $and: [{ price: { $exists: value } }] })],
+      ['inside $or', (value: boolean) => ({ $or: [{ price: { $exists: value } }] })],
+    ])('%s', async (_, buildQuery) => {
+      const existsTrue = await abilityForQuery(buildQuery(true));
+      const existsFalse = await abilityForQuery(buildQuery(false));
+
+      expect(existsTrue.can('read', subject('article', present))).toBe(true);
+      expect(existsTrue.can('read', subject('article', nullField))).toBe(false);
+      expect(existsTrue.can('read', subject('article', missingField))).toBe(false);
+
+      expect(existsFalse.can('read', subject('article', present))).toBe(false);
+      expect(existsFalse.can('read', subject('article', nullField))).toBe(true);
+      expect(existsFalse.can('read', subject('article', missingField))).toBe(true);
+    });
+
+    it('inside $elemMatch', async () => {
+      const existsTrue = await abilityForQuery({
+        items: { $elemMatch: { price: { $exists: true } } },
+      });
+      const existsFalse = await abilityForQuery({
+        items: { $elemMatch: { price: { $exists: false } } },
+      });
+
+      expect(existsTrue.can('read', subject('article', { items: [present] }))).toBe(true);
+      expect(existsTrue.can('read', subject('article', { items: [nullField] }))).toBe(false);
+      expect(existsTrue.can('read', subject('article', { items: [missingField] }))).toBe(false);
+
+      expect(existsFalse.can('read', subject('article', { items: [present] }))).toBe(false);
+      expect(existsFalse.can('read', subject('article', { items: [nullField] }))).toBe(true);
+      expect(existsFalse.can('read', subject('article', { items: [missingField] }))).toBe(true);
+    });
+  });
+
   it('skips an unregistered condition and denies access instead of throwing', async () => {
     const permissions = [
       {
