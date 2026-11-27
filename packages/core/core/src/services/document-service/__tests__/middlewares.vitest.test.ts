@@ -138,6 +138,14 @@ describe('databaseErrorsMiddleware', () => {
       await expect(result).rejects.toHaveProperty('cause', error);
     });
 
+    test('rethrows an unrelated reference error unchanged', async () => {
+      delete globalWithStrapi.strapi;
+      const error = new ReferenceError('foo is not defined');
+      const next = vi.fn(() => Promise.reject(error));
+
+      await expect(databaseErrorsMiddleware(ctx, next)).rejects.toBe(error);
+    });
+
     test('rethrows a reference error unchanged while Strapi is available', async () => {
       globalWithStrapi.strapi = {};
       const error = new ReferenceError('foo is not defined');
