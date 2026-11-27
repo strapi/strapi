@@ -1,4 +1,31 @@
-import { getRedirectTo } from '../utils';
+import { getRedirectTo, getRedirectToSearch } from '../utils';
+
+describe('Auth | getRedirectToSearch', () => {
+  it('points back to the page and its search params', () => {
+    expect(
+      getRedirectToSearch({
+        pathname: '/content-manager/collection-types/api::article.article/abc',
+        search: '?plugins[i18n][locale]=en',
+      })
+    ).toBe(
+      '?redirectTo=%2Fcontent-manager%2Fcollection-types%2Fapi%3A%3Aarticle.article%2Fabc%3Fplugins%5Bi18n%5D%5Blocale%5D%3Den'
+    );
+  });
+
+  it('round-trips through getRedirectTo', () => {
+    const location = { pathname: '/foo', search: '?value=a%26b' };
+
+    expect(getRedirectTo(getRedirectToSearch(location) ?? '')).toBe('/foo?value=a%26b');
+  });
+
+  it.each([
+    ['the home page', '/'],
+    ['the login page', '/auth/login'],
+    ['another auth page', '/auth/forgot-password'],
+  ])('adds no redirect for %s', (_label, pathname) => {
+    expect(getRedirectToSearch({ pathname, search: '' })).toBeUndefined();
+  });
+});
 
 describe('Auth | getRedirectTo', () => {
   it('returns the decoded `redirectTo` param', () => {
