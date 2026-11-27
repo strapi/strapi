@@ -1013,12 +1013,9 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
     return;
   }
 
-  await strapi.db.transaction(async ({ trx }) => {
+  await strapi.db.transaction(async () => {
     for (const [componentUID, ids] of tree) {
       for (const batch of _.chunk(ids, DELETE_BATCH_SIZE)) {
-        await strapi.db.entityManager.deleteManyRelations(componentUID, batch, {
-          transaction: trx,
-        });
         await strapi.db.query(componentUID).deleteMany({ where: { id: { $in: batch } } });
       }
     }

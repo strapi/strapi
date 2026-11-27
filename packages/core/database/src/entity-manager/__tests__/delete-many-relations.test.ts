@@ -113,6 +113,21 @@ describe('entity-manager deleteManyRelations', () => {
     );
   });
 
+  it('cleans existing links during schema migration without querying new tables', async () => {
+    const builder = createBuilder();
+    (createQueryBuilder as jest.Mock).mockReturnValue(builder);
+    const em = createEntityManager(createDb());
+
+    await em.deleteManyRelations(LINK_UID, [1, 2], {
+      hasStorage: (table) => table === 'links_cmps',
+    });
+
+    expect(createQueryBuilder).toHaveBeenCalledTimes(1);
+    expect(createQueryBuilder).toHaveBeenCalledWith('links_cmps', expect.anything());
+    expect(builder.where).toHaveBeenCalledWith({ entity_id: { $in: [1, 2] }, field: 'blocks' });
+    expect(deleteRelations).not.toHaveBeenCalled();
+  });
+
   it('leaves the join tables to the foreign keys when the dialect has them', async () => {
     const builder = createBuilder();
     (createQueryBuilder as jest.Mock).mockReturnValue(builder);

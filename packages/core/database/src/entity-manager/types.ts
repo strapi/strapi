@@ -2,6 +2,9 @@ import type { Knex } from 'knex';
 import type { CountResult, ID } from '../types';
 import { QueryBuilder } from '../query/query-builder';
 
+// A beforeSync migration sees the previous physical schema while metadata describes the next.
+export type RelationStorage = (table: string, columns: string[]) => boolean;
+
 export type Data = Record<string, unknown>;
 
 export type Params = {
@@ -81,7 +84,7 @@ export interface EntityManager {
   update(uid: string, params: Params): Promise<any>;
   updateMany(uid: string, params: Params): Promise<CountResult>;
   delete(uid: string, params: Params): Promise<any>;
-  deleteMany(uid: string, params: Params): Promise<CountResult>;
+  deleteMany(uid: string, params: Params, hasStorage?: RelationStorage): Promise<CountResult>;
   populate(uid: string, entity: Entity, populate: Params['populate']): Promise<Entity>;
   load(
     uid: string,
@@ -105,7 +108,7 @@ export interface EntityManager {
   deleteManyRelations(
     uid: string,
     ids: ID[],
-    options?: { transaction?: Knex.Transaction }
+    options?: { transaction?: Knex.Transaction; hasStorage?: RelationStorage }
   ): Promise<void>;
   insertJoinTableRows(
     joinTableName: string,

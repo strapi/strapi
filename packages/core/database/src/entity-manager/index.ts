@@ -1,5 +1,6 @@
 import {
   castArray,
+  chunk,
   compact,
   difference,
   differenceWith,
@@ -613,18 +614,33 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: unlike delete(), deleteMany does not run deleteRelations() per removed row.
-    async deleteMany(uid, params = {}) {
+    async deleteMany(uid, params = {}, hasStorage) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
-      // Only apply filter criteria (_q / where / filters), same as count — not full findMany params.
-      // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
-      // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
-      const deletedRows = await this.createQueryBuilder(uid)
-        .init(pick(params, ['_q', 'where', 'filters']))
-        .delete()
-        .execute<number>({ mapResults: false });
+      const query = this.createQueryBuilder(uid).init(pick(params, ['_q', 'where', 'filters']));
+      const { attributes } = db.metadata.get(uid);
+      const hasRelations = Object.values(attributes).some(
+        (attribute) => attribute.type === 'relation'
+      );
 
+      const removeWithRelations = () =>
+        db.transaction(async ({ trx }) => {
+          const ids = await query.deleteReturningIds(trx);
+          for (const batch of chunk(ids, db.dialect.getBatchInsertSize())) {
+            await this.deleteManyRelations(uid, batch, { transaction: trx, hasStorage });
+          }
+          return ids.length;
+        });
+
+      let deletedRows: number;
+      if (!hasRelations) {
+        deletedRows = await query.delete().execute<number>({ mapResults: false });
+      } else if (db.inTransaction()) {
+        // A caller can catch a cleanup error and continue its own transaction.
+        deletedRows = await db.savepoint(removeWithRelations);
+      } else {
+        deletedRows = await removeWithRelations();
+      }
       const result = { count: deletedRows };
 
       await db.lifecycles.run('afterDeleteMany', uid, { params, result }, states);
@@ -1947,7 +1963,25 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       const { attributes } = db.metadata.get(uid);
-      const { transaction: trx } = options ?? {};
+      const { transaction: trx, hasStorage } = options ?? {};
+      const deleteLinks = async (table: string, where: Record<string, unknown>) => {
+        if (!hasStorage || hasStorage(table, Object.keys(where))) {
+          await this.createQueryBuilder(table).delete().where(where).transacting(trx).execute();
+        }
+      };
+      const clearLinkColumns = async (
+        target: string,
+        where: Record<string, unknown>,
+        data: Record<string, null>
+      ) => {
+        if (!hasStorage || hasStorage(db.metadata.get(target).tableName, Object.keys(where))) {
+          await this.createQueryBuilder(target)
+            .update(data)
+            .where(where)
+            .transacting(trx)
+            .execute();
+        }
+      };
 
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
@@ -1964,11 +1998,11 @@ export const createEntityManager = (db: Database): EntityManager => {
           if (targetAttribute.type === 'relation' && targetAttribute.relation === 'morphToOne') {
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-            await this.createQueryBuilder(target)
-              .update({ [idColumn.name]: null, [typeColumn.name]: null })
-              .where({ [idColumn.name]: { $in: ids }, [typeColumn.name]: uid })
-              .transacting(trx)
-              .execute();
+            await clearLinkColumns(
+              target,
+              { [idColumn.name]: { $in: ids }, [typeColumn.name]: uid },
+              { [idColumn.name]: null, [typeColumn.name]: null }
+            );
           } else if (
             targetAttribute.type === 'relation' &&
             targetAttribute.relation === 'morphToMany'
@@ -1976,16 +2010,12 @@ export const createEntityManager = (db: Database): EntityManager => {
             const { joinTable } = targetAttribute;
             const { idColumn, typeColumn } = joinTable.morphColumn;
 
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({
-                [idColumn.name]: { $in: ids },
-                [typeColumn.name]: uid,
-                ...joinTable.on,
-                field: attributeName,
-              })
-              .transacting(trx)
-              .execute();
+            await deleteLinks(joinTable.name, {
+              [idColumn.name]: { $in: ids },
+              [typeColumn.name]: uid,
+              ...joinTable.on,
+              field: attributeName,
+            });
           }
 
           continue;
@@ -1995,11 +2025,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           const { joinTable } = attribute;
           const { joinColumn } = joinTable;
 
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({ [joinColumn.name]: { $in: ids }, ...joinTable.on })
-            .transacting(trx)
-            .execute();
+          await deleteLinks(joinTable.name, { [joinColumn.name]: { $in: ids }, ...joinTable.on });
 
           continue;
         }
@@ -2016,15 +2042,27 @@ export const createEntityManager = (db: Database): EntityManager => {
         if ('joinColumn' in attribute && attribute.joinColumn && !attribute.owner) {
           const { target } = attribute;
 
-          await this.createQueryBuilder(target)
-            .where({ [attribute.joinColumn.referencedColumn]: { $in: ids } })
-            .update({ [attribute.joinColumn.referencedColumn]: null })
-            .transacting(trx)
-            .execute();
+          const column = attribute.joinColumn.referencedColumn;
+          await clearLinkColumns(target, { [column]: { $in: ids } }, { [column]: null });
         }
 
         if ('joinTable' in attribute && attribute.joinTable) {
-          if (hasInverseOrderColumn(attribute)) {
+          const { joinTable } = attribute;
+          if (
+            hasInverseOrderColumn(attribute) &&
+            (!hasStorage ||
+              hasStorage(
+                joinTable.name,
+                compact([
+                  'id',
+                  joinTable.joinColumn.name,
+                  joinTable.inverseJoinColumn.name,
+                  ...Object.keys(joinTable.on ?? {}),
+                  joinTable.orderColumnName,
+                  joinTable.inverseOrderColumnName,
+                ])
+              ))
+          ) {
             for (const id of ids) {
               await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
             }
@@ -2032,13 +2070,10 @@ export const createEntityManager = (db: Database): EntityManager => {
             continue;
           }
 
-          const { joinTable } = attribute;
-
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({ [joinTable.joinColumn.name]: { $in: ids }, ...joinTable.on })
-            .transacting(trx)
-            .execute();
+          await deleteLinks(joinTable.name, {
+            [joinTable.joinColumn.name]: { $in: ids },
+            ...joinTable.on,
+          });
         }
       }
     },

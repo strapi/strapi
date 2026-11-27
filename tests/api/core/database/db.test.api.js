@@ -19,6 +19,7 @@ const testCT = {
     locale: {
       type: 'string',
     },
+    cover: { type: 'media', multiple: false },
     related: {
       type: 'relation',
       relation: 'manyToOne',
@@ -437,6 +438,89 @@ describe('deleteMany filter params', () => {
 
   beforeEach(async () => {
     await resetTestEntries();
+  });
+
+  describe('media relations', () => {
+    let file;
+    let removed;
+    let kept;
+
+    const mediaLinks = () =>
+      strapi.db
+        .getConnection('files_related_mph')
+        .where({ file_id: file.id, related_type: TEST_UID, field: 'cover' })
+        .orderBy('related_id')
+        .pluck('related_id');
+
+    beforeEach(async () => {
+      file = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'cover.png',
+          hash: 'bulk-delete-cover',
+          mime: 'image/png',
+          size: 1,
+          url: '/uploads/cover.png',
+          provider: 'local',
+        },
+      });
+      [removed, kept] = await strapi.db.query(TEST_UID).findMany({ orderBy: { id: 'asc' } });
+      for (const row of [removed, kept]) {
+        await strapi.db.query(TEST_UID).update({ where: { id: row.id }, data: { cover: file.id } });
+      }
+      expect(await mediaLinks()).toEqual([removed.id, kept.id]);
+    });
+
+    afterEach(async () => {
+      await strapi.db.query('plugin::upload.file').delete({ where: { id: file.id } });
+    });
+
+    test('cleans media and relation links only for rows visible to the delete scope', async () => {
+      const { joinTable } = strapi.db.metadata.get(TEST_UID).attributes.related;
+      const relationLinks = () =>
+        strapi.db
+          .getConnection(joinTable.name)
+          .whereIn(joinTable.joinColumn.name, [removed.id, kept.id])
+          .orderBy(joinTable.joinColumn.name)
+          .pluck(joinTable.joinColumn.name);
+      expect(await relationLinks()).toEqual([removed.id, kept.id]);
+
+      const unregister = strapi.db.unstable_scopes.register({
+        where: ({ uid, type }) =>
+          uid === TEST_UID && type === 'delete' ? { id: removed.id } : null,
+      });
+      try {
+        const result = await strapi.db
+          .query(TEST_UID)
+          .deleteMany({ where: { id: { $in: [removed.id, kept.id] } } });
+        expect(result.count).toBe(1);
+      } finally {
+        unregister();
+      }
+      expect(await mediaLinks()).toEqual([kept.id]);
+      expect(await relationLinks()).toEqual([kept.id]);
+      expect(await strapi.db.query(TEST_UID).findOne({ where: { id: kept.id } })).toBeTruthy();
+    });
+
+    test('restores rows and links when cleanup fails inside a transaction that handles the error', async () => {
+      const original = strapi.db.entityManager.deleteManyRelations.bind(strapi.db.entityManager);
+      const cleanup = jest
+        .spyOn(strapi.db.entityManager, 'deleteManyRelations')
+        .mockImplementationOnce(async (...args) => {
+          await original(...args);
+          throw new Error('cleanup failed');
+        });
+      try {
+        await strapi.db.transaction(async () => {
+          await expect(
+            strapi.db.query(TEST_UID).deleteMany({ where: { id: removed.id } })
+          ).rejects.toThrow('cleanup failed');
+        });
+      } finally {
+        cleanup.mockRestore();
+      }
+      expect(await strapi.db.query(TEST_UID).findOne({ where: { id: removed.id } })).toBeTruthy();
+      expect(await mediaLinks()).toEqual([removed.id, kept.id]);
+    });
   });
 
   test.each(deleteManyFilterCases)(

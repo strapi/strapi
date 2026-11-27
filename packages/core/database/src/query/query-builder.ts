@@ -2,6 +2,7 @@ import type { Knex } from 'knex';
 import _ from 'lodash';
 
 import type { Database } from '..';
+import type { ID } from '../types';
 
 import { DatabaseError } from '../errors';
 import { transactionCtx } from '../transaction-context';
@@ -112,7 +113,7 @@ export interface QueryBuilder {
 
   shouldUseSubQuery(): boolean;
 
-  runSubQuery(): any;
+  runSubQuery(lockDeleteIds?: boolean): any;
 
   processState(): void;
 
@@ -124,12 +125,18 @@ export interface QueryBuilder {
 
   processSelect(): void;
 
-  getKnexQuery(): Knex.QueryBuilder;
+  getKnexQuery(lockDeleteIds?: boolean): Knex.QueryBuilder;
+
+  deleteReturningIds(trx: Knex.Transaction): Promise<ID[]>;
 
   execute<T>(options?: { mapResults?: boolean }): Promise<T>;
 
   stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
+
+// Keep the delete scope and its relation subquery when locking the target rows on MySQL.
+const buildDelete = (qb: Knex.QueryBuilder, lockIds: boolean) =>
+  lockIds ? qb.select('id').orderBy('id').forUpdate() : qb.delete();
 
 const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
   ['select', 'count', 'update', 'delete'].includes(type);
@@ -469,7 +476,7 @@ const createQueryBuilder = (
       return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
     },
 
-    runSubQuery() {
+    runSubQuery(lockDeleteIds = false) {
       const originalType = state.type;
 
       // Build the inner SELECT from a clone that stays `select`, so the outer write
@@ -491,7 +498,7 @@ const createQueryBuilder = (
       }
 
       if (originalType === 'delete') {
-        return qb.delete();
+        return buildDelete(qb, lockDeleteIds);
       }
 
       if (state.data) {
@@ -661,7 +668,7 @@ const createQueryBuilder = (
       }
     },
 
-    getKnexQuery() {
+    getKnexQuery(lockDeleteIds = false) {
       if (!state.type) {
         this.select('*');
       }
@@ -675,7 +682,7 @@ const createQueryBuilder = (
       this.processState();
 
       if (this.shouldUseSubQuery()) {
-        return this.runSubQuery();
+        return this.runSubQuery(lockDeleteIds);
       }
 
       switch (state.type) {
@@ -724,7 +731,7 @@ const createQueryBuilder = (
           break;
         }
         case 'delete': {
-          qb.delete();
+          buildDelete(qb, lockDeleteIds);
 
           break;
         }
@@ -813,6 +820,54 @@ const createQueryBuilder = (
       }
 
       return qb;
+    },
+
+    async deleteReturningIds(trx) {
+      this.delete().transacting(trx);
+      try {
+        if (db.dialect.client === 'mysql') {
+          const rows: { id: ID }[] = await applyQueryTimeout(this.getKnexQuery(true), db);
+          const ids = rows.map((row) => row.id);
+
+          const deletion = this.getKnexQuery();
+          const deletedIds: ID[] = [];
+          for (const batch of _.chunk(ids, db.dialect.getBatchInsertSize())) {
+            // Keep the delete predicate: a related row used by a filter can change even
+            // while the source rows stay locked. Read survivors only on a partial delete.
+            const count = await applyQueryTimeout(deletion.clone().whereIn('id', batch), db);
+            if (count === batch.length) {
+              deletedIds.push(...batch);
+            } else if (count > 0) {
+              const survivors = await applyQueryTimeout(
+                db
+                  .getConnection(tableName)
+                  .whereIn('id', batch)
+                  .pluck('id')
+                  .forUpdate()
+                  .transacting(trx),
+                db
+              );
+              deletedIds.push(..._.difference(batch, survivors));
+            }
+          }
+          return deletedIds;
+        }
+
+        const query = this.getKnexQuery();
+        // Knex does not emit RETURNING for SQLite DELETE. Bind the compiled query so its
+        // filters and values are preserved. The better-sqlite3 driver returns the rows.
+        const returning =
+          db.dialect.client === 'sqlite'
+            ? db.connection.raw('? returning ??', [query, 'id']).transacting(trx)
+            : query.returning('id');
+        const rows: { id: ID }[] = await applyQueryTimeout(returning, db);
+        return rows.map((row) => row.id);
+      } catch (error) {
+        if (error instanceof Error) {
+          db.dialect.transformErrors(error);
+        }
+        throw error;
+      }
     },
 
     async execute({ mapResults = true } = {}) {

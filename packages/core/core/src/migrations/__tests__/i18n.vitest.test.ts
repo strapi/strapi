@@ -130,7 +130,20 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
     });
 
     describe('Should migrate', () => {
-      test('i18n => non i18n - pg', async () => {
+      test('deletes non-default rows using only relation storage installed before sync', async () => {
+        strapi.db.query = createDBQueryMock();
+        const deleteMany = vi.fn();
+        Object.assign(strapi.db, {
+          entityManager: { deleteMany },
+          transaction: (run: () => Promise<void>) => run(),
+          dialect: {
+            schemaInspector: {
+              getSchema: async () => ({
+                tables: [{ name: 'existing_links', columns: [{ name: 'entity_id' }] }],
+              }),
+            },
+          },
+        });
         const previousDefinition = {
           pluginOptions: { i18n: { localized: true } },
         };
@@ -141,8 +154,19 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           contentTypes: { test: definition as any },
         });
 
-        expect(strapi.localization.getDefaultLocale).toHaveBeenCalled();
-        expect(strapi.db.query).toHaveBeenCalled();
+        expect(deleteMany).toHaveBeenCalledWith(
+          'test',
+          { where: { locale: { $ne: 'default-locale' } } },
+          expect.any(Function)
+        );
+        const hasStorage = deleteMany.mock.calls[0][2];
+        expect(hasStorage('existing_links', ['entity_id'])).toBe(true);
+        expect(hasStorage('existing_links', ['new_column'])).toBe(false);
+        expect(hasStorage('new_links', ['entity_id'])).toBe(false);
+        expect(strapi.db.query('test').updateMany).toHaveBeenCalledWith({
+          where: { locale: { $eq: 'default-locale' } },
+          data: { locale: null },
+        });
       });
     });
 

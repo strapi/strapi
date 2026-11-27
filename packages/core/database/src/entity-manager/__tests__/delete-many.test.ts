@@ -1,64 +1,37 @@
 import { createEntityManager } from '../index';
 import { createQueryBuilder } from '../../query';
+import type { Database } from '../..';
 
-jest.mock('../../query', () => ({
-  createQueryBuilder: jest.fn(),
-}));
+jest.mock('../../query', () => ({ createQueryBuilder: jest.fn() }));
+
+const uid = 'api::test.test';
+
+const setup = (ids: number[]) => {
+  const trx = {};
+  const builder = {
+    init: jest.fn().mockReturnThis(),
+    deleteReturningIds: jest.fn(async () => ids),
+  };
+  jest
+    .mocked(createQueryBuilder)
+    .mockReturnValue(builder as unknown as ReturnType<typeof createQueryBuilder>);
+  const db = {
+    metadata: { get: () => ({ attributes: { cover: { type: 'relation' } } }) },
+    inTransaction: () => false,
+    transaction: jest.fn((run: (ctx: { trx: object }) => unknown) => run({ trx })),
+    dialect: { getBatchInsertSize: () => 2 },
+    lifecycles: { run: jest.fn(async () => ({})) },
+  };
+  const em = createEntityManager(db as unknown as Database);
+  const cleanup = jest.spyOn(em, 'deleteManyRelations').mockResolvedValue(undefined);
+  return { db, em, trx, builder, cleanup };
+};
 
 describe('entity-manager deleteMany', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('initializes the query builder with filter params only', async () => {
-    const init = jest.fn().mockReturnThis();
-    const deleteFn = jest.fn().mockReturnThis();
-    const execute = jest.fn().mockResolvedValue(2);
-
-    (createQueryBuilder as jest.Mock).mockReturnValue({
-      init,
-      delete: deleteFn,
-      execute,
-    });
-
-    const db = {
-      lifecycles: {
-        run: jest.fn(async () => undefined),
-      },
-    } as any;
-
-    const em = createEntityManager(db);
-    const params = { where: { author: { id: 1 } } };
-
-    const result = await em.deleteMany('api::test.test', params);
-
-    expect(createQueryBuilder).toHaveBeenCalledWith('api::test.test', db);
-    expect(init).toHaveBeenCalledWith({ where: { author: { id: 1 } } });
-    expect(deleteFn).toHaveBeenCalled();
-    expect(execute).toHaveBeenCalledWith({ mapResults: false });
-    expect(result).toEqual({ count: 2 });
-  });
-
-  it('ignores pagination and populate params (same pick set as count)', async () => {
-    const init = jest.fn().mockReturnThis();
-    const deleteFn = jest.fn().mockReturnThis();
-    const execute = jest.fn().mockResolvedValue(1);
-
-    (createQueryBuilder as jest.Mock).mockReturnValue({
-      init,
-      delete: deleteFn,
-      execute,
-    });
-
-    const db = {
-      lifecycles: {
-        run: jest.fn(async () => undefined),
-      },
-    } as any;
-
-    const em = createEntityManager(db);
+  it('applies only the delete filters and cleans the returned ids in the same transaction', async () => {
+    const { db, em, trx, builder, cleanup } = setup([2, 5, 9]);
     const params = {
-      where: { name: 'foo' },
+      where: { author: { id: 1 } },
       filters: { published: true },
       _q: 'search',
       limit: 1,
@@ -68,12 +41,37 @@ describe('entity-manager deleteMany', () => {
       select: ['name'],
     };
 
-    await em.deleteMany('api::test.test', params);
-
-    expect(init).toHaveBeenCalledWith({
+    await expect(em.deleteMany(uid, params)).resolves.toEqual({ count: 3 });
+    expect(builder.init).toHaveBeenCalledWith({
+      where: params.where,
+      filters: params.filters,
       _q: 'search',
-      where: { name: 'foo' },
-      filters: { published: true },
     });
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(builder.deleteReturningIds).toHaveBeenCalledWith(trx);
+    expect(cleanup.mock.calls).toEqual([
+      [uid, [2, 5], { transaction: trx }],
+      [uid, [9], { transaction: trx }],
+    ]);
+    expect(db.lifecycles.run).toHaveBeenLastCalledWith(
+      'afterDeleteMany',
+      uid,
+      { params, result: { count: 3 } },
+      {}
+    );
+  });
+
+  it('skips cleanup when the delete returned no ids', async () => {
+    const { em, cleanup } = setup([]);
+    await expect(em.deleteMany(uid, {})).resolves.toEqual({ count: 0 });
+    expect(cleanup).not.toHaveBeenCalled();
+  });
+
+  it('propagates cleanup failures without firing the after lifecycle', async () => {
+    const { db, em, cleanup } = setup([2]);
+    cleanup.mockRejectedValueOnce(new Error('cleanup failed'));
+    await expect(em.deleteMany(uid, {})).rejects.toThrow('cleanup failed');
+    expect(db.lifecycles.run).toHaveBeenCalledTimes(1);
+    expect(db.lifecycles.run).toHaveBeenCalledWith('beforeDeleteMany', uid, { params: {} });
   });
 });

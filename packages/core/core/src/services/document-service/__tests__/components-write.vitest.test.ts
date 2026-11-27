@@ -105,7 +105,6 @@ const setup = (stored: Record<string, Stored>) => {
     query: vi.fn((uid: string) => queries[uid]),
     queryBuilder,
     transaction: vi.fn(async (run: (ctx: { trx: string }) => unknown) => run({ trx: 'trx' })),
-    entityManager: { deleteManyRelations: vi.fn(async () => undefined) },
     lifecycles: { hasSubscribers: vi.fn(() => false) },
   };
 
@@ -725,11 +724,6 @@ describe('deleteComponents', () => {
     });
     expect(queries.builders[LINK_UID]).toBeUndefined();
 
-    const { deleteManyRelations } = queries.db.entityManager;
-    expect(deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [1, 2, 4, 3], {
-      transaction: 'trx',
-    });
-    expect(deleteManyRelations).toHaveBeenCalledWith(SECTION_UID, [20, 21], { transaction: 'trx' });
     expect(queries[LINK_UID].deleteMany).toHaveBeenCalledWith({
       where: { id: { $in: [1, 2, 4, 3] } },
     });
@@ -752,9 +746,7 @@ describe('deleteComponents', () => {
       'sections',
       'zone',
     ]);
-    expect(queries.db.entityManager.deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [1], {
-      transaction: 'trx',
-    });
+    expect(queries[LINK_UID].deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [1] } } });
   });
 
   it('does nothing when the entry holds no component', async () => {
@@ -775,7 +767,6 @@ describe('deleteComponents', () => {
 
     await deleteComponents(PAGE_UID, entry as any, { loadComponents: false });
 
-    expect(queries.db.entityManager.deleteManyRelations).not.toHaveBeenCalled();
     expect(queries[LINK_UID].deleteMany).not.toHaveBeenCalled();
     // attribute by attribute: links, then the nested link of the section, then the zone
     expect(queries[LINK_UID].delete.mock.calls.map(([params]: any) => params.where.id)).toEqual([
@@ -800,8 +791,6 @@ describe('deleteComponents', () => {
       20, 21,
     ]);
     // the links under a section are a tree of their own, with nobody listening: still in bulk
-    expect(queries.db.entityManager.deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [3], {
-      transaction: 'trx',
-    });
+    expect(queries[LINK_UID].deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [3] } } });
   });
 });

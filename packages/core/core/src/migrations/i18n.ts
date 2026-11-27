@@ -34,6 +34,7 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
+  const installedColumns = new Map<string, Set<string>>();
   for (const uid in contentTypes) {
     if (!oldContentTypes[uid]) {
       continue;
@@ -53,17 +54,28 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
         );
       }
 
-      await Promise.all([
-        // Delete all entities that are not in the default locale
-        strapi.db.query(uid).deleteMany({
-          where: { locale: { $ne: defaultLocale } },
-        }),
-        // Set locale to null for the rest
-        strapi.db.query(uid).updateMany({
+      // New relation tables and columns are still pending schema sync. Existing media and
+      // relation links must be cleaned against the schema that is actually installed.
+      if (installedColumns.size === 0) {
+        const schema = await strapi.db.dialect.schemaInspector.getSchema();
+        for (const table of schema.tables) {
+          installedColumns.set(table.name, new Set(table.columns.map((column) => column.name)));
+        }
+      }
+      const hasStorage = (table: string, columns: string[]) =>
+        columns.every((column) => installedColumns.get(table)?.has(column));
+
+      await strapi.db.transaction(async () => {
+        await strapi.db.entityManager.deleteMany(
+          uid,
+          { where: { locale: { $ne: defaultLocale } } },
+          hasStorage
+        );
+        await strapi.db.query(uid).updateMany({
           where: { locale: { $eq: defaultLocale } },
           data: { locale: null },
-        }),
-      ]);
+        });
+      });
     }
   }
 };

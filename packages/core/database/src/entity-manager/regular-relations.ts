@@ -291,7 +291,7 @@ const cleanOrderColumns = async ({
         .where(joinColumn.name, id)
         .toSQL();
 
-    switch (strapi.db.dialect.client) {
+    switch (db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
         const select = selectRowsToOrder(joinTable.name);
@@ -349,7 +349,7 @@ const cleanOrderColumns = async ({
         .whereIn(inverseJoinColumn.name, inverseRelIds)
         .toSQL();
 
-    switch (strapi.db.dialect.client) {
+    switch (db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
         const select = selectRowsToOrder(joinTable.name);

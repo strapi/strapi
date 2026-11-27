@@ -36,6 +36,8 @@ A `Dialect` class per client hides the differences between databases. The client
 
 `db.query(uid)` returns a repository with `findOne`, `findMany`, `create`, `update`, `delete`, `count` and relation helpers. The entity manager implements them and delegates to the query builder, which builds Knex queries for filters, populate, ordering and search. Repositories work at the row level. The Document Service adds draft and publish and locale logic on top. See [Document write path](../../../architecture/05-document-write-path.md). Code: [`src/entity-manager`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/entity-manager) and [`src/query`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/query).
 
+Bulk deletion applies the delete scope and the `_q`, `where` and `filters` criteria. Within one transaction, `deleteMany` deletes the matching rows and cleans the relations of the IDs it removed, including media links. A cleanup error rolls back both changes.
+
 ### Relations
 
 The entity manager writes relations into join tables and keeps their order. Polymorphic relations store the target type next to the target id, in inline columns or in the join table. Read [Polymorphic relations](./01-relations/polymorphic-relations.md) and [Reordering](./01-relations/reordering.md).
