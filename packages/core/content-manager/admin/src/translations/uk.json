@@ -416,18 +416,5 @@
   "components.DynamicZone.add-item-below": "Додати компонент нижче",
   "search.placeholder": "Пошук",
   "containers.SettingPage.edit-settings.modal-form.mainField.hint": "Виберіть поле для відображення",
-  "containers.ListSettingsView.modal-form.size": "Розмір",
-  "containers.Edit.Link.Layout": "Налаштувати компонування",
-  "containers.Edit.Link.Model": "Змінити Тип Колекцій",
-  "containers.Edit.addAnItem": "Додати елемент...",
-  "containers.Edit.clickToJump": "Натисніть щоб перейти до запису",
-  "containers.Edit.editing": "Редагування...",
-  "containers.Edit.pluginHeader.title.new": "Створити запис",
-  "containers.Edit.reset": "Скинути",
-  "containers.Edit.returnList": "Повернутися до списку",
-  "containers.Edit.seeDetails": "Докладніше",
-  "containers.Edit.submit": "Зберегти",
-  "containers.List.errorFetchRecords": "Помилка",
-  "containers.ListSettingsView.modal-form.edit-label": "Налаштуйте підпис",
-  "popUpWarning.warning.cancelAllSettings": "Ви впевнені, що хочете скасувати свої зміни?"
+  "containers.ListSettingsView.modal-form.size": "Розмір"
 }

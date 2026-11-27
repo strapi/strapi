@@ -116,7 +116,6 @@
   "pages.ReleaseDetails.header-subtitle.scheduled": "Заплановано на {date} о {time} ({offset})",
   "pages.ReleaseDetails.header-subtitle.released-on": "Випущено {date} о {time} ({offset})",
   "pages.ReleaseDetails.header-subtitle.ran-on": "Запущено {date} о {time} ({offset})",
-  "pages.Settings.releases.title": "Релізи",
   "pages.Settings.releases.description": "Створюйте та керуйте оновленнями вмісту",
   "pages.Settings.releases.preferences.title": "Параметри",
   "pages.Settings.releases.timezone.label": "Часовий пояс за замовчуванням",
