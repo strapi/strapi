@@ -6,6 +6,8 @@ describe('isTruthyEnvVar', () => {
     expect(isTruthyEnvVar('true')).toBe(true);
 
     expect(isTruthyEnvVar('false')).toBe(false);
+    expect(isTruthyEnvVar('TRUE')).toBe(true);
+    expect(isTruthyEnvVar('True')).toBe(true);
   });
 
   test('Handle numbers', () => {

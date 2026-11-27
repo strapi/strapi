@@ -68,7 +68,7 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
 const createProvider = (config: Config) => {
   const { providerOptions, actionOptions = {} } = config;
 
-  const providerName = _.toLower(config.provider);
+  const providerName = String(config.provider ?? '').toLowerCase();
   // Documents what the module should be: `require` returns `any`, so nothing is checked here.
   let provider: Providers.Upload.Factory<
     Config['providerOptions'],

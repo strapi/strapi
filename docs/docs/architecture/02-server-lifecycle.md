@@ -121,12 +121,19 @@ The `admin` `register` runs before any plugin or API `register`, because provide
 14. It runs the `bootstrap` function of each provider.
 15. It runs `strapi.app.bootstrap({ strapi })`, if the application defines it.
 16. It calls the `strapi::app.afterBootstrap` hook. The admin uses it to lock the action provider, reset the super admin permissions and delete the stored permissions whose action is not registered.
+17. In development, it warns about the routes added to a module router after step 11. Strapi does not serve them.
 
 :::note
 The sync hooks run in steps 5 and 9, before module `bootstrap`. Add sync hook handlers in `register`. A handler that a module adds in `bootstrap` does not run during the current boot.
 :::
 
 Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootstrap` runs, the webhook runner has not read the stored webhooks, the cron service has not started, and the admin `bootstrap` has not run.
+
+### Late registrations
+
+Many registration APIs accept a call in any phase, but a fixed step reads what they hold. A registration that arrives after that step has no effect, or only part of it. For example, a route pushed into a module router after `server.initRouting()` is never served.
+
+Such a call does not throw, so that an app that never noticed the problem keeps working. Instead, `warnLateRegistration` in [`late-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/late-registration.ts) logs one warning per app and registration, in the `development` environment only. The warning says what was registered, which step closed its window, and where to register it instead. The caller decides that the window is closed, with a flag that the closing step sets, such as `areRoutesRegistered`. Do not use `strapi.isLoaded` for this: it stays `false` until the bootstrap phase ends.
 
 ## Start and listen
 

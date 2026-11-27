@@ -75,6 +75,19 @@ describe.each(cases)(
       });
     });
 
+    test('create stores a numeric name as a string', async () => {
+      const create = vi.fn().mockResolvedValue({});
+      mountServices({ exists: vi.fn(() => false), create });
+      const ctx = createContext(
+        { body: { name: 123, ...extraCreateBody } },
+        { created: vi.fn(), badRequest: vi.fn(), state: { user: owner } }
+      );
+
+      await controller.create(ctx);
+
+      expect(create.mock.calls[0][0]).toMatchObject({ name: '123' });
+    });
+
     test('create stores a missing description as an empty string', async () => {
       const create = vi.fn().mockResolvedValue({});
       mountServices({ exists: vi.fn(() => false), create });

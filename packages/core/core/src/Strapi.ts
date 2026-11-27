@@ -34,6 +34,7 @@ import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createLocalizationService } from './services/localization';
 import { createContentSourceMapsService } from './services/content-source-maps';
+import { warnAboutRoutesAddedAfterRouting } from './services/server/late-routes';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
@@ -555,6 +556,8 @@ class Strapi extends Container implements Core.Strapi {
 
     // Runs once every module, provider and the app have bootstrapped
     await this.hook('strapi::app.afterBootstrap').call();
+
+    warnAboutRoutesAddedAfterRouting(this);
 
     return this;
   }

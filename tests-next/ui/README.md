@@ -103,11 +103,11 @@ There is no `sharedSetup`: the per-file reset and `seedPlan` give each file its 
 Selectors live in Page Objects, never in tests. When the selector strategy changes (test ids, a
 design-system update), only Page Objects change.
 
-| Folder                                       | What                                                                                     |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [`pages/`](./pages/index.ts)                 | One class per page of the panel, grouped like the panel (`pages/settings/roles-page.ts`) |
-| [`components/`](./components/index.ts)       | UI shared by pages: `Navigation` (main menu, Settings menu), `ConfirmDialog`             |
-| [`pages/responses.ts`](./pages/responses.ts) | `adminResponse(page, method, pathname)`: waits for the admin API call a click causes     |
+| Folder                                       | What                                                                                                                                                                                         |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`pages/`](./pages/index.ts)                 | One class per page of the panel, grouped like the panel's URLs (`pages/settings/roles-page.ts`, `pages/settings/users-permissions/roles-page.ts`, `pages/content-manager/edit-view-page.ts`) |
+| [`components/`](./components/index.ts)       | UI shared by pages: `Navigation` (main menu, Settings menu), `ConfirmDialog`                                                                                                                 |
+| [`pages/responses.ts`](./pages/responses.ts) | `adminResponse(page, method, pathname)`: waits for the admin API call a click causes                                                                                                         |
 
 Tests create Page Objects with `new`, from the page they drive. Example from
 [`tests/settings/rbac/create-role.ui-test.ts`](./tests/settings/rbac/create-role.ui-test.ts):
@@ -136,7 +136,11 @@ test('Super Admin can create a new role', { tag: ['@critical'] }, async ({ page 
   (`storageStates`). The fixtures stay about the app, roles and data.
 - **One class per page, component objects for shared UI.** A page opens itself (`goto()` by URL,
   `open()` through `Navigation`) and waits until it shows (its heading or first field). The menus
-  are in `Navigation` only, so a menu change is fixed in one place.
+  are in `Navigation` only, so a menu change is fixed in one place. A page a test only opens and
+  never acts on gets no class: [`SettingsPage`](./pages/settings/settings-page.ts) opens any
+  Settings page by section and link and exposes its `heading(name)` (the Settings smoke test).
+  Two pages with the same title get names that say which one (`RolesPage` for admin roles,
+  `UsersPermissionsRolesPage` for end-user roles).
 - **Page Objects act and expose locators; tests assert.** `roles.row('Editor')`,
   `role.permission('Read', 'article')` and `user.roles` are locators the test checks with
   `expect`. Waiting for the page to be ready (`await expect(this.heading).toBeVisible()`) is the
@@ -176,14 +180,43 @@ The legacy suite (`tests/e2e`) moves here domain by domain (`settings` first, CM
   `seed` instead of DTS imports and `sharedSetup`), selectors (into Page Objects) and forbidden
   waits. Each test is independent: it seeds what it needs and never relies on another test.
 
+- **Same place, new suffix**: `tests/e2e/tests/<domain>/<path>/<name>.spec.ts` becomes
+  `tests/<domain>/<path>/<name>.ui-test.ts` (`rbac/scenarios/create-new-role.scenario.ui-test.ts`).
+- **Check the data the test relies on, not only its steps.** The legacy DTS packets (`with-admin`)
+  are not the app's defaults: there, the built-in Author role can publish articles; in this app it
+  can't. When a test relies on such a difference, seed the state it needs (a role with its own
+  `permissions`, a user, entries) instead of changing a built-in role or user the other files log
+  in with. Walk the flow in the browser first, as the role and the data the test will have.
+- **The app is a plain create-strapi-app** (Users & Permissions, plus the plugins of
+  `@strapi/strapi`): no Documentation plugin, unlike the legacy test app. A step that needs a
+  plugin the app doesn't have is dropped and listed in the inventory with that reason.
+- **Editions**: a legacy test that runs in both editions and must keep running in EE runs gets
+  `@smoke` (EE runs replay `@ee` and `@smoke` only). `describeOnCondition(edition === 'EE')`
+  becomes `@ee` plus `test.use({ requires: { ee: [...] } })` with the license features it shows.
+- **Logins as another user**: a second context as a built-in role uses
+  `browser.newContext({ storageState: storageStates.author })`; a seeded user logs in with
+  `logIn` (see [Roles](#roles)). A logout and a login form in the middle of a legacy test become
+  that second context, unless the login itself is what the test checks.
+- **Names the test creates**: `--repeat-each` runs a file again before its next reset, so a
+  test that creates a user, role or end user with a fixed name fails on its second run. Use
+  `unique(label)` (legacy tests used `Date.now()` because nothing reset end users).
+
 Checklist for each migration PR:
 
 1. **Inventory**: list every legacy test of the migrated files, and say where each one went
    (file and test name) or why it was dropped.
 2. **Delete the legacy files** in the same PR, with their entries in
-   `tests/e2e/shard-weights.json` and any legacy helper only they used.
+   `tests/e2e/shard-weights.json` and any legacy helper only they used. When the whole domain
+   goes, also remove it from `DOMAIN_WEIGHTS` in `tests/scripts/run-tests.js` and from examples
+   that name it. The legacy runner lists its domains from the folders of `tests/e2e/tests`, so
+   no list needs editing; check it still starts (`yarn test:e2e --domains search -- --list`).
 3. **Runtime**: give the runtime of the migrated tests next to the legacy baseline (a local run
-   of the legacy specs, or their `tests/e2e/shard-weights.json` CI weights).
+   of the legacy specs, or their `tests/e2e/shard-weights.json` CI weights). Run the legacy
+   suite with its own `HOME` (`HOME=$PWD/.e2e-home`, keeping `PLAYWRIGHT_BROWSERS_PATH`):
+   its setup runs `yalc push`, which updates the legacy test apps of every other checkout on the
+   machine.
+4. **Check that each migrated test can fail**: break the step it checks (skip the save, the
+   permission change) and see it fail on the assertion it exists for.
 
 ## The app
 
@@ -272,6 +305,52 @@ database until the next reset.
 
 Only [`tests/auth/login.ui-test.ts`](./tests/auth/login.ui-test.ts) drives the login form
 (`role: null`). Use the `baseURL` (the worker's server) for navigation: `page.goto('/admin')`.
+
+### Another user in the same test
+
+A test that acts as two users (the Super Admin changes a role, then its user checks what it can
+do) opens a second browser context. Contexts from the `browser` fixture get the project's
+options, `baseURL` included.
+
+```ts
+import { accessToken, logIn, test } from '../../fixtures';
+
+// A built-in role: its saved storage state.
+test('as the author too', async ({ browser, storageStates }) => {
+  const context = await browser.newContext({ storageState: storageStates.author });
+  // ...
+  await context.close();
+});
+
+// A custom role: seed the role and a user, then log the user in through the API.
+test('as a seeded user', async ({ browser, server, seed, unique }) => {
+  const credentials = { email: `${unique('publisher')}@tests.strapi.io`, password: 'Testing123!' };
+  await seed({
+    adminRoles: [
+      {
+        name: 'Publisher',
+        code: 'publisher',
+        permissions: [
+          { action: 'plugin::content-manager.explorer.publish', subject: 'api::article.article' },
+        ],
+      },
+    ],
+    adminUsers: [{ ...credentials, firstname: 'A', lastname: 'Publisher', roles: ['publisher'] }],
+  });
+  const { storageState, token } = await logIn(server, credentials);
+  const context = await browser.newContext({ storageState });
+  // `token`: the user's bearer token for admin API calls.
+  await context.close();
+});
+```
+
+- **`logIn(server, { email, password })`** ([`fixtures/auth.ts`](./fixtures/auth.ts)) is the
+  login the role users get, for any admin user: `POST /admin/login`, then a storage state with the
+  access token and the guided tour off, and the token itself.
+- **`accessToken(storageStates.admin)`**: the bearer token saved in a role's storage state, for
+  admin API calls without another login.
+- **Rate limit**: `admin::rateLimit` allows 5 login attempts per email and IP in 5 minutes. Each
+  `logIn` is one, so give a seeded user a `unique` email.
 
 ## Environment variables
 
