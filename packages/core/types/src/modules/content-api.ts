@@ -12,17 +12,28 @@ type ZodScalarSchema = z.ZodType &
   (z.core.$ZodString | z.core.$ZodNumber | z.core.$ZodBoolean | z.core.$ZodEnum);
 
 /**
- * Allowed Zod schema types for addQueryParams: scalars (string, number, boolean, enum) or arrays of scalars.
- * Optional and default wrappers are allowed. Nested objects are not allowed for query params.
+ * A scalar, or `TInner` inside one `optional`, `default` or `array` wrapper: one level of the
+ * runtime check, which unwraps these three before it checks the scalar kind.
+ */
+type ZodWrappedSchema<TInner extends z.core.SomeType> =
+  ZodScalarSchema | z.ZodOptional<TInner> | z.ZodDefault<TInner> | z.ZodArray<TInner>;
+
+/**
+ * Allowed Zod schema types for addQueryParams: scalars (string, number, boolean, enum) inside any
+ * nesting of `optional`, `default` and `array`, e.g. `z.coerce.number().optional().default(10)` or
+ * `z.array(z.string().optional())`. Nested objects and other wrappers (e.g. `nullable`) are not
+ * allowed, as in the runtime check.
+ *
+ * The runtime check unwraps without a limit. This type follows up to 5 wrappers around the scalar:
+ * a type that recurses without a limit is too deep for TypeScript (TS2589). Real query params use
+ * fewer, e.g. `z.array(z.coerce.number().default(0)).optional()` uses 3.
  *
  * Query string values reach the schema as strings, so `addQueryParams` also requires a schema that
  * accepts a string (see {@link QueryStringSchema}).
  */
-export type ZodQueryParamSchema =
-  | ZodScalarSchema
-  | z.ZodOptional<ZodScalarSchema | z.ZodArray<ZodScalarSchema>>
-  | z.ZodDefault<ZodScalarSchema | z.ZodArray<ZodScalarSchema>>
-  | z.ZodArray<ZodScalarSchema>;
+export type ZodQueryParamSchema = ZodWrappedSchema<
+  ZodWrappedSchema<ZodWrappedSchema<ZodWrappedSchema<ZodWrappedSchema<ZodScalarSchema>>>>
+>;
 
 /** Zod namespace Strapi passes into `schema` factory callbacks. */
 export type ZodSchemaFactory = typeof z;
