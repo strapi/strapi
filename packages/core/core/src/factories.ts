@@ -5,6 +5,11 @@ import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
+import {
+  assertRouteRequest,
+  createValidatedInputParser,
+  parseRouteInput as parseInput,
+} from './services/server/validated-input';
 
 const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),
@@ -159,11 +164,148 @@ const createUploadProvider = <
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
 
+// The request a controller action receives, as `parseInput` accepts it.
+type RouteContext = Parameters<Core.MiddlewareHandler>[0];
+
+// The route keeps its `config` and a string handler as written, not widened to `Core.RouteConfig`
+// and `string`.
+type DefineRouteConfig<
+  TRequest extends Core.RouteRequest,
+  TConfig extends Core.RouteConfig,
+  THandler extends Core.HandlerReference,
+> = Omit<Core.RouteInput, 'handler' | 'request' | 'config'> & {
+  request?: TRequest;
+  config?: TConfig;
+  handler: THandler | Core.ValidatedRouteHandler<TRequest>;
+};
+
+type DefinedRoute<
+  TRequest extends Core.RouteRequest,
+  TConfig extends Core.RouteConfig,
+  THandler extends Core.HandlerReference,
+> = Omit<Core.RouteInput, 'handler' | 'request' | 'config'> & {
+  request: TRequest;
+  config?: TConfig;
+  handler: [THandler] extends [never] ? Core.MiddlewareHandler : THandler;
+  /**
+   * Parses the request with the route's current `request` schemas and returns the values, typed
+   * from the schemas' output. Throws a `ValidationError` (400) when the request does not match.
+   * Not enumerable: route listings, serialization and copies of the route do not carry it.
+   */
+  readonly parseInput: (ctx: RouteContext) => Core.ValidatedRouteInput<TRequest>;
+};
+
+/**
+ * Defines a route whose request is parsed with the route's `request` schemas, typed from the
+ * schemas' output. The same schemas document the route in OpenAPI.
+ *
+ * - With a function handler, the handler receives the parsed request on `ctx.input`.
+ * - With a controller action (`'api::order.order.pay'`), the route keeps the permission scope that
+ *   Strapi generates from the handler name, and the action parses with `route.parseInput(ctx)`.
+ *
+ * Opt-in and additive: `ctx.params`, `ctx.query` and `ctx.request.body` keep their raw values, and
+ * routes not defined with this helper are not parsed.
+ *
+ * - `params` and `query` values arrive as strings. Coerce them in the schema: `z.coerce.number()`,
+ *   `z.stringbool()` for booleans. Schemas that never accept a string, such as `z.number()`, and
+ *   schemas that OpenAPI cannot document, such as `.transform()`, throw here.
+ * - Unknown `params` and `query` keys are stripped from the parsed request.
+ * - The body schema is the one of the request media type. Another media type answers 415.
+ * - A request that does not match answers 400 with a `ValidationError`, after authentication,
+ *   policies and route middlewares ran.
+ * - The parse reads the route's current `request`, so the params that `addQueryParams` and
+ *   `addInputParams` merge at registration are parsed too. A route that declares no body never
+ *   requires one.
+ *
+ * @example
+ * // src/api/order/routes/order.ts
+ * import { factories } from '@strapi/strapi';
+ * import { z } from 'zod/v4';
+ *
+ * export const refundRoute = factories.defineRoute({
+ *   method: 'POST',
+ *   path: '/orders/:id/refunds',
+ *   request: {
+ *     params: { id: z.coerce.number().int() },
+ *     body: { 'application/json': z.object({ amount: z.number().positive() }) },
+ *   },
+ *   async handler(ctx) {
+ *     const { params, body } = ctx.input; // { id: number }, { amount: number }
+ *     return { orderId: params.id, amount: body.amount };
+ *   },
+ * });
+ *
+ * export const payRoute = factories.defineRoute({
+ *   method: 'POST',
+ *   path: '/orders/:id/pay',
+ *   handler: 'api::order.order.pay',
+ *   request: { params: { id: z.coerce.number().int() } },
+ * });
+ *
+ * export default { type: 'content-api', routes: [refundRoute, payRoute] };
+ *
+ * // src/api/order/controllers/order.ts
+ * export default factories.createCoreController('api::order.order', {
+ *   async pay(ctx) {
+ *     const { params } = payRoute.parseInput(ctx); // { id: number }
+ *   },
+ * });
+ */
+const defineRoute = <
+  const TRequest extends Core.RouteRequest = Record<never, never>,
+  const TConfig extends Core.RouteConfig = never,
+  const THandler extends Core.HandlerReference = never,
+>(
+  route: DefineRouteConfig<TRequest, TConfig, THandler>
+): DefinedRoute<TRequest, TConfig, THandler> => {
+  const { handler } = route;
+  const request = (route.request ?? {}) as TRequest;
+  const label = `defineRoute ${route.method} ${route.path}`;
+
+  if (typeof handler !== 'function' && typeof handler !== 'string') {
+    throw new TypeError(`${label}: the handler must be a function or a controller action name`);
+  }
+
+  try {
+    assertRouteRequest(request);
+    createValidatedInputParser(request);
+  } catch (error) {
+    if (error instanceof Error) {
+      error.message = `${label}: ${error.message}`;
+    }
+
+    throw error;
+  }
+
+  const definedRoute = { ...route, request } as DefinedRoute<TRequest, TConfig, THandler>;
+
+  // Reads `definedRoute.request` per request: registration can replace it to add extra params. A
+  // route that declares no body never requires one, even after `addInputParams` merged a body schema.
+  const bodyOptional = request.body === undefined;
+  const parse = (ctx: RouteContext) =>
+    parseInput(ctx, definedRoute, { bodyOptional }) as Core.ValidatedRouteInput<TRequest>;
+
+  Object.defineProperty(definedRoute, 'parseInput', { value: parse, enumerable: false });
+
+  if (typeof handler === 'function') {
+    const validatedHandler: Core.MiddlewareHandler = (ctx, next) => {
+      ctx.input = parse(ctx);
+
+      return handler(ctx as Core.ValidatedRouteContext<TRequest>, next);
+    };
+
+    Object.assign(definedRoute, { handler: validatedHandler });
+  }
+
+  return definedRoute;
+};
+
 export {
   createCoreController,
   createCoreService,
   createCoreRouter,
   createCoreValidator,
   createUploadProvider,
+  defineRoute,
   isCustomController,
 };
