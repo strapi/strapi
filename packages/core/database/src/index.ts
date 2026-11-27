@@ -91,6 +91,7 @@ interface Settings {
   queryTimeout?: number;
   migrations: {
     dir: string;
+    postDir?: string;
   };
   [key: string]: unknown;
 }
