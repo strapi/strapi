@@ -173,6 +173,49 @@ describe('relation-filtered query builder writes', () => {
   });
 
   test.each([
+    ['title desc', { title: 'desc' }, [10, 11, 10]],
+    ['title asc', { title: 'asc' }, [11, 10, 10]],
+    ['id desc', { id: 'desc' }, [10, 11, 10]],
+  ])('first() ordered by %s writes only the row it picks', async (_label, orderBy, views) => {
+    await strapi.db
+      .queryBuilder(ARTICLE_UID)
+      .init({ where: inCategoryA, orderBy })
+      .first()
+      .increment('views', 1)
+      .execute();
+
+    expect((await readArticles()).map((row) => row.views)).toEqual(views);
+  });
+
+  test.each([
+    ['limit 1', { limit: 1 }, [10, 11, 10]],
+    ['offset 1, limit 1', { offset: 1, limit: 1 }, [11, 10, 10]],
+  ])('title desc with %s writes only the rows it picks', async (_label, page, views) => {
+    await strapi.db
+      .queryBuilder(ARTICLE_UID)
+      .init({ where: inCategoryA, orderBy: { title: 'desc' }, ...page })
+      .increment('views', 1)
+      .execute();
+
+    expect((await readArticles()).map((row) => row.views)).toEqual(views);
+  });
+
+  test.each([
+    ['first()', (qb) => qb.first(), [10, 10, 11]],
+    ['limit 1', (qb) => qb.limit(1), [10, 10, 11]],
+    ['offset 1', (qb) => qb.offset(1), [11, 11, 10]],
+  ])('category name desc with %s writes only the rows it picks', async (_label, page, views) => {
+    const qb = strapi.db.queryBuilder(ARTICLE_UID).init({
+      where: { category: { name: { $in: ['A', 'B'] } } },
+      orderBy: { category: { name: 'desc' } },
+    });
+
+    await page(qb).increment('views', 1).execute();
+
+    expect((await readArticles()).map((row) => row.views)).toEqual(views);
+  });
+
+  test.each([
     ['increment', (qb) => qb.increment('views', 5)],
     ['update', (qb) => qb.update({ title: 'changed' })],
     ['delete', (qb) => qb.delete()],

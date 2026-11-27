@@ -134,6 +134,18 @@ export interface QueryBuilder {
 const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
   ['select', 'count', 'update', 'delete'].includes(type);
 
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+
+/**
+ * An update or delete that does not use ORDER BY to choose rows. `limit: -1` counts as no page,
+ * as `ensurePaginationOrderStability` does. The query still emits `LIMIT -1`.
+ */
+const isUnboundedWrite = (state: Pick<State, 'type' | 'limit' | 'offset' | 'first'>) =>
+  (state.type === 'update' || state.type === 'delete') &&
+  (state.limit == null || state.limit === -1) &&
+  state.offset == null &&
+  !state.first;
+
 const createQueryBuilder = (
   uid: string,
   db: Database,
@@ -141,6 +153,39 @@ const createQueryBuilder = (
 ): QueryBuilder => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
+
+  /**
+   * Drop relation sorts before processOrderBy. Those sorts add joins, and the joins pull a
+   * scalar-filtered write onto the subquery path even though an unbounded write does not use
+   * the order to choose rows. Scalar sorts stay, so MySQL can still emit UPDATE ... ORDER BY.
+   */
+  const omitRelationOrder = (orderBy: unknown): unknown => {
+    const { attributes } = meta;
+
+    if (typeof orderBy === 'string') {
+      return attributes[orderBy]?.type === 'relation' ? [] : orderBy;
+    }
+
+    if (Array.isArray(orderBy)) {
+      return orderBy.flatMap((entry) => {
+        const next = omitRelationOrder(entry);
+
+        if (isPlainRecord(next) && _.isEmpty(next)) {
+          return [];
+        }
+
+        return [next];
+      });
+    }
+
+    if (isPlainRecord(orderBy)) {
+      return Object.fromEntries(
+        Object.entries(orderBy).filter(([key]) => attributes[key]?.type !== 'relation')
+      );
+    }
+
+    return orderBy;
+  };
 
   const state: State = _.defaults({}, initialState, {
     type: 'select',
@@ -551,17 +596,40 @@ const createQueryBuilder = (
       if (db.dialect.client === 'postgres') {
         sub.state.forUpdate = false;
       }
-      // Postgres and MySQL reject ORDER BY on a column that is missing from the DISTINCT
-      // select list. Ordering only picks rows when the write has a limit, an offset or first().
-      // Scalar ORDER BY on a write with no joins stays on the outer query: MySQL uses
-      // UPDATE ... ORDER BY to shift a unique column.
-      if (state.limit == null && state.offset == null && !state.first) {
-        sub.state.orderBy = [];
-      }
       // The inner SELECT must not carry counters meant for the outer write.
       sub.state.increments = [];
       sub.state.decrements = [];
-      const subQB = sub.select('id').getKnexQuery();
+
+      const selected: Array<string | Knex.Raw> = [`${this.alias}.id`];
+
+      // Ordering only matters when it picks which rows are written: with a limit, an offset or
+      // first(). Otherwise drop it, as Postgres and MySQL reject an ORDER BY on a column missing
+      // from the DISTINCT select list.
+      if (state.limit == null && state.offset == null && !state.first) {
+        sub.state.orderBy = [];
+      } else {
+        // processOrderBy ran while the type was update/delete, so root columns are still bare:
+        // qualify them (a bare `id` is ambiguous next to the joined tables), then list every
+        // ORDER BY expression in the DISTINCT select, as processSelect does for a select.
+        sub.state.orderBy = state.orderBy.map((order) =>
+          'column' in order && !order.column.includes('.')
+            ? { ...order, column: `${this.alias}.${order.column}` }
+            : order
+        );
+
+        sub.state.orderBy.forEach((order) => {
+          if ('column' in order) {
+            selected.push(order.column);
+          } else {
+            selected.push(
+              helpers.buildStatusSortExpression(db, tableName, this.alias, order.isI18n)
+            );
+          }
+        });
+      }
+
+      // wrapWithDeepSort prefixes the select with its own alias, so it needs the bare id.
+      const subQB = sub.select(sub.shouldUseDeepSort() ? ['id'] : selected).getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
@@ -582,6 +650,10 @@ const createQueryBuilder = (
     processState() {
       if (this.state.processed) {
         return;
+      }
+
+      if (isUnboundedWrite(state)) {
+        state.orderBy = omitRelationOrder(state.orderBy) as State['orderBy'];
       }
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
