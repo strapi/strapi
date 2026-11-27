@@ -30,12 +30,22 @@ const formatResolverError = (originalError: unknown) => {
   return formatGraphqlError(wrapped.toJSON(), wrapped);
 };
 
+// The koa context of the request being formatted: the response of a client that is still there
+let request: { res: { destroyed: boolean; writableEnded: boolean } } | undefined;
+
 describe('formatGraphqlError', () => {
   const logError = vi.fn();
+  const logDebug = vi.fn();
 
   beforeEach(() => {
     logError.mockReset();
-    vi.stubGlobal('strapi', { log: { error: logError } });
+    logDebug.mockReset();
+    request = { res: { destroyed: false, writableEnded: false } };
+    vi.stubGlobal('strapi', {
+      log: { error: logError, debug: logDebug },
+      db: { config: { settings: { abortReadsOnRequestDisconnect: true } } },
+      requestContext: { get: () => request },
+    });
   });
 
   afterEach(() => {
@@ -83,6 +93,57 @@ describe('formatGraphqlError', () => {
 
       expect(logError).toHaveBeenCalledTimes(1);
       expect(logError).toHaveBeenCalledWith(internalError);
+    });
+  });
+
+  describe('errors from a request the client abandoned', () => {
+    const createAborted = () => {
+      const aborted = new Error('The request was aborted before the query completed');
+      aborted.name = 'QueryAbortedError';
+      return aborted;
+    };
+
+    it('logs a QueryAbortedError at debug when the client is gone, and still sends the generic 500', () => {
+      request = { res: { destroyed: true, writableEnded: false } };
+
+      const formatted = formatResolverError(createAborted());
+
+      expect(logError).not.toHaveBeenCalled();
+      expect(logDebug).toHaveBeenCalledTimes(1);
+      expect(formatted.message).toBe('Internal Server Error');
+    });
+
+    it('logs a QueryAbortedError as an error when the client is still connected', () => {
+      const aborted = createAborted();
+
+      const formatted = formatResolverError(aborted);
+
+      expect(logError).toHaveBeenCalledWith(aborted);
+      expect(logDebug).not.toHaveBeenCalled();
+      expect(formatted.message).toBe('Internal Server Error');
+    });
+
+    it('logs a QueryAbortedError as an error when the setting is off, even if the client is gone', () => {
+      vi.stubGlobal('strapi', {
+        log: { error: logError, debug: logDebug },
+        db: { config: { settings: {} } },
+        requestContext: { get: () => ({ res: { destroyed: true, writableEnded: false } }) },
+      });
+      const aborted = createAborted();
+
+      formatResolverError(aborted);
+
+      expect(logError).toHaveBeenCalledWith(aborted);
+      expect(logDebug).not.toHaveBeenCalled();
+    });
+
+    it('logs it as an error outside of a request', () => {
+      request = undefined;
+      const aborted = createAborted();
+
+      formatResolverError(aborted);
+
+      expect(logError).toHaveBeenCalledWith(aborted);
     });
   });
 

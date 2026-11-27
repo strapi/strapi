@@ -16,9 +16,23 @@ const createApp = (error: unknown) => {
   return app;
 };
 
+// Runs the middleware on a bare context: a real response can't be sent once the client is gone
+const runWithClient = async (error: unknown, { gone }: { gone: boolean }) => {
+  const ctx: any = { res: { destroyed: gone, writableEnded: false }, response: {} };
+
+  await errorMiddleware({}, { strapi: global.strapi })(ctx, async () => {
+    throw error;
+  });
+
+  return ctx;
+};
+
 describe('Errors middleware', () => {
   beforeEach(() => {
-    global.strapi = { log: { error: vi.fn() } } as any;
+    global.strapi = {
+      log: { error: vi.fn(), debug: vi.fn() },
+      db: { config: { settings: { abortReadsOnRequestDisconnect: true } } },
+    } as any;
   });
 
   test('_explicitStatus still exists', async () => {
@@ -72,5 +86,37 @@ describe('Errors middleware', () => {
 
     expect(res.status).toBe(500);
     expect(global.strapi.log.error).toHaveBeenCalledWith(error);
+  });
+
+  describe('QueryAbortedError', () => {
+    test('is logged at debug level when the setting is on and the client is gone', async () => {
+      const error = new databaseErrors.QueryAbortedError();
+
+      const ctx = await runWithClient(error, { gone: true });
+
+      expect(ctx.status).toBe(500);
+      expect(global.strapi.log.error).not.toHaveBeenCalled();
+      expect(global.strapi.log.debug).toHaveBeenCalledTimes(1);
+    });
+
+    test('is logged as an error when the client is still connected', async () => {
+      const error = new databaseErrors.QueryAbortedError();
+
+      const ctx = await runWithClient(error, { gone: false });
+
+      expect(ctx.status).toBe(500);
+      expect(global.strapi.log.error).toHaveBeenCalledWith(error);
+      expect(global.strapi.log.debug).not.toHaveBeenCalled();
+    });
+
+    test('is logged as an error when the setting is off, even if the client is gone', async () => {
+      global.strapi.db.config.settings.abortReadsOnRequestDisconnect = false;
+      const error = new databaseErrors.QueryAbortedError();
+
+      await runWithClient(error, { gone: true });
+
+      expect(global.strapi.log.error).toHaveBeenCalledWith(error);
+      expect(global.strapi.log.debug).not.toHaveBeenCalled();
+    });
   });
 });

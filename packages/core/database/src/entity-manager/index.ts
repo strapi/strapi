@@ -42,6 +42,7 @@ import {
 import { idsForInsertedRows, readAutoIncrementStep, splitByIdSource } from './inserted-ids';
 import { isDeadlockError, transactionCtx, waitForDeadlockRetry } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
+import { abortCtx } from '../abort-context';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID, RelationalAttribute, Relation } from '../types';
@@ -324,10 +325,43 @@ const processData = (
 
   return obj;
 };
+const WRITE_METHODS = [
+  'create',
+  'createMany',
+  'update',
+  'updateMany',
+  'delete',
+  'deleteMany',
+  'attachRelations',
+  'updateRelations',
+  'deleteRelations',
+  'deleteManyRelations',
+  'insertJoinTableRows',
+] as const satisfies ReadonlyArray<keyof EntityManager>;
+
+/**
+ * A write runs to completion even when the work that issued it was aborted (e.g. the client
+ * disconnected, see `settings.abortReadsOnRequestDisconnect`). A write method reads before it
+ * writes (`update` and `delete` select the row first) and after (`create` reads the row back),
+ * and runs lifecycles around it, so the whole method runs detached from the abort signal. The
+ * calling flow is marked as written, so the reads it makes after the write are not aborted either.
+ */
+const detachWritesFromAbort = (entityManager: EntityManager): EntityManager => {
+  for (const name of WRITE_METHODS) {
+    const method = entityManager[name] as (...args: unknown[]) => unknown;
+
+    Object.assign(entityManager, {
+      [name]: (...args: unknown[]) => abortCtx.detachWrite(() => method.apply(entityManager, args)),
+    });
+  }
+
+  return entityManager;
+};
+
 export const createEntityManager = (db: Database): EntityManager => {
   const repoMap: Record<string, Repository> = {};
 
-  return {
+  const entityManager: EntityManager = {
     async findOne(uid, params) {
       const states = await db.lifecycles.run('beforeFindOne', uid, { params });
 
@@ -2150,4 +2184,9 @@ export const createEntityManager = (db: Database): EntityManager => {
       return repoMap[uid];
     },
   };
+
+  // While the setting is off nothing is ever aborted: keep the methods as they are
+  return db.config?.settings?.abortReadsOnRequestDisconnect === true
+    ? detachWritesFromAbort(entityManager)
+    : entityManager;
 };

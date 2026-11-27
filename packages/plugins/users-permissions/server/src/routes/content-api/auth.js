@@ -13,6 +13,8 @@ module.exports = (strapi) => {
       config: {
         middlewares: ['plugin::users-permissions.rateLimit'],
         prefix: '',
+        // Writes on a GET (it also serves the provider's callback): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
     },
     {
@@ -47,6 +49,8 @@ module.exports = (strapi) => {
       handler: 'auth.callback',
       config: {
         prefix: '',
+        // Writes on a GET (creates or signs in the user): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
       request: {
         params: {
@@ -87,6 +91,8 @@ module.exports = (strapi) => {
       handler: 'auth.emailConfirmation',
       config: {
         prefix: '',
+        // Writes on a GET (confirms the user): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
     },
     {

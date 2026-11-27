@@ -1,6 +1,8 @@
 import type { Modules } from '@strapi/types';
 import type { Cron } from 'croner';
 
+import { isAbortReadsOnRequestDisconnectEnabled } from './server/client-abort';
+
 type RecurrenceSpecObjLit = Modules.Cron.RecurrenceSpecObjLit;
 type CronRuleOptions = Modules.Cron.CronRuleOptions;
 type CronSchedule = Modules.Cron.CronSchedule;
@@ -161,6 +163,18 @@ const toCronerArgs = (
   throw new Error('Unsupported cron schedule');
 };
 
+/**
+ * Cron jobs belong to the application, not to the request that happened to schedule them: the
+ * timer and every run must not inherit that request's database abort signal. Requests (and so
+ * abort signals) only exist once Strapi is loaded, and resolving `strapi.db` earlier would create
+ * the database before its config is final, so jobs added before then run as they are. While the
+ * setting is off, nothing is detached.
+ */
+const runDetached = <T>(cb: () => T): T =>
+  strapi.isLoaded && isAbortReadsOnRequestDisconnectEnabled(strapi)
+    ? strapi.db.runDetachedFromAbortSignal(cb)
+    : cb();
+
 const createCronService = () => {
   let jobsSpecs: JobSpec[] = [];
   let running = false;
@@ -172,7 +186,7 @@ const createCronService = () => {
       async run(self?: Cron): Promise<void> {
         const fireDate = nextFireDate ?? self?.currentRun() ?? new Date();
         nextFireDate = self?.nextRun(fireDate) ?? null;
-        await fn({ strapi }, fireDate);
+        await runDetached(() => fn({ strapi }, fireDate));
       },
       setNextRun(date: Date | null) {
         nextFireDate = date;
@@ -188,19 +202,22 @@ const createCronService = () => {
   ) => {
     const { Cron: CronCtor } = getCroner();
     const runner = createRunner(fn);
-    const job = new CronCtor(
-      pattern,
-      {
-        paused: !running,
-        // cron-parser (via node-schedule) accepted numeric-prefix stepping
-        // like `5/15` as `5-59/15`. Croner 10 rejects it unless this is set.
-        sloppyRanges: true,
-        ...cronerOptions,
-        catch(error: unknown) {
-          strapi.log.error(`Cron job "${jobLabel}" failed`, error);
-        },
-      },
-      runner.run
+    const job = runDetached(
+      () =>
+        new CronCtor(
+          pattern,
+          {
+            paused: !running,
+            // cron-parser (via node-schedule) accepted numeric-prefix stepping
+            // like `5/15` as `5-59/15`. Croner 10 rejects it unless this is set.
+            sloppyRanges: true,
+            ...cronerOptions,
+            catch(error: unknown) {
+              strapi.log.error(`Cron job "${jobLabel}" failed`, error);
+            },
+          },
+          runner.run
+        )
     );
     runner.setNextRun(job.nextRun());
     return job;
@@ -212,7 +229,7 @@ const createCronService = () => {
 
     const invoke = async () => {
       const fireDate = current.currentRun() ?? new Date();
-      return fn({ strapi }, fireDate);
+      return runDetached(() => fn({ strapi }, fireDate));
     };
 
     const cancel = () => {

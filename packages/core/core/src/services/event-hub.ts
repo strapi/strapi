@@ -16,10 +16,20 @@ export interface EventHub {
   hasListeners(eventName: string): boolean;
 }
 
+export interface EventHubOptions {
+  /**
+   * Runs a callback detached from the database abort signal of the emitting request, so listeners
+   * that read the database are not refused when the client of that request has disconnected.
+   */
+  detachFromAbortSignal?: <T>(cb: () => T) => T;
+}
+
 /**
  * The event hub is Strapi's event control center.
  */
-export default function createEventHub(): EventHub {
+export default function createEventHub({
+  detachFromAbortSignal = (cb) => cb(),
+}: EventHubOptions = {}): EventHub {
   const listeners = new Map();
 
   // Default subscriber to easily add listeners with the on() method
@@ -37,10 +47,14 @@ export default function createEventHub(): EventHub {
   const subscribers = [defaultSubscriber];
 
   const eventHub: EventHub = {
-    async emit(eventName, ...args) {
-      for (const subscriber of subscribers) {
-        await subscriber(eventName, ...args);
-      }
+    // Listeners may be fire-and-forget for the emitter (not awaited) and outlive its request, so
+    // they never inherit the request's abort signal
+    emit(eventName, ...args) {
+      return detachFromAbortSignal(async () => {
+        for (const subscriber of subscribers) {
+          await subscriber(eventName, ...args);
+        }
+      });
     },
 
     subscribe(subscriber) {

@@ -19,6 +19,9 @@ export default {
       config: {
         middlewares: [enableFeatureMiddleware('sso')],
         auth: false,
+        // Writes on a GET (it also serves the provider's callback, which creates or updates the
+        // user and its session): never aborted
+        abortReadsOnRequestDisconnect: false,
       },
     },
     {

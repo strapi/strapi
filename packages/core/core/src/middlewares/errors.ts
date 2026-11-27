@@ -1,8 +1,13 @@
 import { errors } from '@strapi/utils';
+import { errors as databaseErrors } from '@strapi/database';
 import type { Core } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
 import { isDatabaseInputError } from '../utils/database-input-errors';
+import {
+  isAbortReadsOnRequestDisconnectEnabled,
+  isClientDisconnected,
+} from '../services/server/client-abort';
 
 declare module 'koa' {
   interface BaseResponse {
@@ -42,7 +47,17 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
         return;
       }
 
-      strapi.log.error(error);
+      // The client is gone: nobody reads this response, and it is not a failure of the server. A
+      // QueryAbortedError while it is still there is unexpected, so it is logged as one.
+      if (
+        error instanceof databaseErrors.QueryAbortedError &&
+        isAbortReadsOnRequestDisconnectEnabled(strapi) &&
+        isClientDisconnected(ctx)
+      ) {
+        strapi.log.debug(`Request aborted before the query completed: ${error.message}`);
+      } else {
+        strapi.log.error(error);
+      }
 
       const { status, body } = formatInternalError(error);
       ctx.status = status;

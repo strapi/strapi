@@ -10,6 +10,7 @@ import { markRoutesRegistered } from './routes-registration';
 import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
+import { armClientAbortSignal, armReadOnlyRequestAbortSignal } from './client-abort';
 
 const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -24,7 +25,9 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     keys: strapi.config.get('server.app.keys'),
   });
 
-  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
+  app.use((ctx, next) =>
+    requestCtx.run(ctx, () => armReadOnlyRequestAbortSignal(strapi, ctx, () => next()))
+  );
 
   const router = new Router();
 
@@ -56,6 +59,10 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     use(...args) {
       app.use(...args);
       return this;
+    },
+
+    armClientAbortSignal(ctx, run) {
+      return armClientAbortSignal(strapi, ctx, run);
     },
 
     routes(routes: Core.Router | Omit<Core.Route, 'info'>[]) {

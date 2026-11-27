@@ -53,6 +53,9 @@ const routeSchema = yup.object({
           scope: yup.array().of(yup.string()).required(),
         });
       }),
+      // Only `false` has an effect. Any other value is kept and ignored, as unknown keys were
+      // before, so a route never fails to load because of it
+      abortReadsOnRequestDisconnect: yup.mixed().notRequired(),
       policies: yup
         .array()
         // FIXME: fixed in yup v1

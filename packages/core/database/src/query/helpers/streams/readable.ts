@@ -7,6 +7,7 @@ import type { Database } from '../../..';
 import { applyPopulate } from '../populate';
 import { fromRow } from '../transform';
 import { Meta } from '../../../metadata';
+import { abortCtx } from '../../../abort-context';
 
 const knexQueryDone = Symbol('knexQueryDone');
 const knexPerformingQuery = Symbol('knexPerformingQuery');
@@ -143,17 +144,22 @@ class ReadableStrapiQuery extends Readable {
 
     try {
       // Execute the query and store the results & count
-      results = await query;
+      const batch = await query;
+      results = batch;
 
       const { populate } = this._qb.state;
 
       // Applies the populate if needed
       if (populate) {
-        await applyPopulate(results, populate, {
-          qb: this._qb,
-          uid: this._uid,
-          db: this._db,
-        });
+        // A started stream is not cancelled when the request goes away (only starting one is
+        // refused), so its populate queries run detached from the request's abort signal
+        await abortCtx.exit(() =>
+          applyPopulate(batch, populate, {
+            qb: this._qb,
+            uid: this._uid,
+            db: this._db,
+          })
+        );
       }
 
       // Map results if asked to

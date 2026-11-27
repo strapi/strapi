@@ -3,6 +3,7 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
+import { createDetachWritesMiddleware } from './client-abort';
 
 import entityValidator from '../entity-validator';
 
@@ -30,6 +31,8 @@ export const createDocumentService = (
 
   // Manager to handle document service middlewares
   const middlewares = createMiddlewareManager();
+  // First, so it wraps every other middleware: they read before and after the write
+  middlewares.use(createDetachWritesMiddleware(strapi));
   middlewares.use(databaseErrorsMiddleware);
 
   const factory = function factory(uid: UID.ContentType) {

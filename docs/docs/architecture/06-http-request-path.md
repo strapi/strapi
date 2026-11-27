@@ -47,6 +47,8 @@ sequenceDiagram
 
 `createServer` in [`services/server/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/index.ts) creates the Koa app with the `server.proxy.*` settings and `server.app.keys`. It adds response helpers such as `ctx.send` and `ctx.notFound` (see [Response and errors](#response-and-errors)). The first middleware stores `ctx` in an `AsyncLocalStorage` (`services/request-context.ts`). Code that has no `ctx` argument can read the current request. For example, the core controller reads the `strapi-response-format` header this way.
 
+The same middleware arms `GET` and `HEAD` requests with a database abort signal when `database.settings.abortReadsOnRequestDisconnect` is `true` ([`services/server/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/client-abort.ts)). The signal aborts when the client disconnects before the response ended, and the reads of the request are then refused or cancelled until it writes. With the setting off (the default), it only calls `next`. See [Abort context](../packages/core/database/index.md#abort-context).
+
 In the bootstrap phase, `server.initMiddlewares()` reads the `middlewares` config (`config/middlewares.ts` in the app). Each entry is a name (`'strapi::cors'`), an object `{ name, config }`, or an object `{ resolve, config }` that loads a package or a path. Names come from the `middlewares` registry: `strapi::` for internal middlewares, `global::` for `src/middlewares`, and `plugin::` or `api::` for module middlewares. Each factory is called once as `factory(config, { strapi })`, and the result is added with `app.use()` in list order. The new-project template uses this order:
 
 | Middleware          | What it does                                                                                                                                           |
@@ -105,14 +107,15 @@ The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develo
 
 ## Route config
 
-| Key                   | Meaning                                                                                                                     |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `method`, `path`      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `ALL`) and Koa router path.                                           |
-| `handler`             | A string `'<controller>.<action>'`, a full UID such as `'api::article.article.find'`, a function, or an array of functions. |
-| `config.auth`         | `false` for a public route, or `{ scope?, strategies? }`.                                                                   |
-| `config.policies`     | Policy names or `{ name, config }` objects.                                                                                 |
-| `config.middlewares`  | Middleware UIDs, `{ name, config }` objects, or functions.                                                                  |
-| `request`, `response` | Zod schemas. See [Validation and sanitization](#validation-and-sanitization).                                               |
+| Key                                    | Meaning                                                                                                                                                                                                                                       |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `method`, `path`                       | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `ALL`) and Koa router path.                                                                                                                                                             |
+| `handler`                              | A string `'<controller>.<action>'`, a full UID such as `'api::article.article.find'`, a function, or an array of functions.                                                                                                                   |
+| `config.auth`                          | `false` for a public route, or `{ scope?, strategies? }`.                                                                                                                                                                                     |
+| `config.policies`                      | Policy names or `{ name, config }` objects.                                                                                                                                                                                                   |
+| `config.middlewares`                   | Middleware UIDs, `{ name, config }` objects, or functions.                                                                                                                                                                                    |
+| `config.abortReadsOnRequestDisconnect` | Only `false` has an effect. The route's reads are never refused or cancelled after a client disconnect, authentication included. For a `GET` route that writes. Has no effect while `database.settings.abortReadsOnRequestDisconnect` is off. |
+| `request`, `response`                  | Zod schemas. See [Validation and sanitization](#validation-and-sanitization).                                                                                                                                                                 |
 
 For a string handler, the generated scope is the handler prefixed with the module namespace, unless the handler already starts with it. In `src/api/article`, `article.find` gets the scope `api::article.article.find`. In the admin package, `admin.init` gets `admin::admin.init`. A scope set in the route wins. The scope has the same format as a Content API permission action, which is how the permission check matches a route.
 
@@ -121,12 +124,13 @@ For a string handler, the generated scope is the handler prefixed with the modul
 [`compose-endpoint.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts) builds one `koa-compose` chain per route, in this order:
 
 1. The route info middleware copies the route to `ctx.state.route`.
-2. `authenticate` runs the auth strategies.
-3. `authorize` calls `verify` on the strategy that authenticated the request.
-4. The policies middleware runs each policy in order.
-5. The route middlewares run in order.
-6. The return-body middleware waits for the controller and sets `ctx.body` from its return value if `ctx.body` is still empty.
-7. The controller action runs.
+2. Only for a route with `config.abortReadsOnRequestDisconnect: false`: a middleware runs the rest of the chain through `db.runWithoutAbortSignal`, so authentication and the controller read without the request's abort signal. It only calls `next` while the database setting is off.
+3. `authenticate` runs the auth strategies.
+4. `authorize` calls `verify` on the strategy that authenticated the request.
+5. The policies middleware runs each policy in order.
+6. The route middlewares run in order.
+7. The return-body middleware waits for the controller and sets `ctx.body` from its return value if `ctx.body` is still empty.
+8. The controller action runs.
 
 Strapi resolves the policies, the route middlewares and the controller action when it registers the route, not per request. Configuration errors show at boot, and the route chain does no registry lookup per request.
 

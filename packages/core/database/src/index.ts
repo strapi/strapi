@@ -10,6 +10,7 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
+import { abortCtx } from './abort-context';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import { appendCallerStack } from './utils/async-stack';
@@ -89,6 +90,13 @@ interface Settings {
    * example `env.int('DATABASE_QUERY_TIMEOUT')`).
    */
   queryTimeout?: number;
+  /**
+   * Refuse reads (and cancel the running one on postgres and mysql) for a `GET`, `HEAD` or GraphQL
+   * query request whose client disconnected before the response ended, until the request has
+   * written. Writes are never
+   * aborted. Off by default; set to true to enable it. Must be a boolean.
+   */
+  abortReadsOnRequestDisconnect?: boolean;
   migrations: {
     dir: string;
   };
@@ -122,6 +130,16 @@ const assertValidQueryTimeout = (queryTimeout: unknown) => {
 
     throw new Error(
       `Invalid database setting "queryTimeout": expected a positive number of milliseconds, received ${received}. Use env.int() when reading it from an environment variable.`
+    );
+  }
+};
+
+const assertValidAbortReadsOnRequestDisconnect = (value: unknown) => {
+  if (value !== undefined && typeof value !== 'boolean') {
+    throw new Error(
+      `Invalid database setting "abortReadsOnRequestDisconnect": expected a boolean, received ${
+        typeof value === 'string' ? JSON.stringify(value) : String(value)
+      }. Use env.bool() when reading it from an environment variable.`
     );
   }
 };
@@ -179,6 +197,7 @@ class Database {
     this.logger = config.logger ?? console;
 
     assertValidQueryTimeout(this.config.settings.queryTimeout);
+    assertValidAbortReadsOnRequestDisconnect(this.config.settings.abortReadsOnRequestDisconnect);
 
     this.dialect = getDialect(this);
 
@@ -295,6 +314,46 @@ class Database {
     } finally {
       this.phase = previous;
     }
+  }
+
+  /**
+   * Runs `cb` with `signal` as the abort signal of the work it starts. While the signal is
+   * aborted (or once it aborts), reads (`select`, `count`, `max`, `min`) issued from that flow are
+   * refused with a `QueryAbortedError`, and a running one is cancelled on clients that can
+   * (postgres, mysql). A read inside a transaction is aborted too, and the transaction rolls back.
+   * Once the flow writes (or locks rows with `forUpdate`), none of its later queries are aborted.
+   * Writes themselves are never aborted. A no-op when `settings.abortReadsOnRequestDisconnect` is
+   * not true.
+   */
+  runWithAbortSignal<T>(signal: AbortSignal, cb: () => T): T {
+    if (this.config.settings.abortReadsOnRequestDisconnect !== true) {
+      return cb();
+    }
+
+    return abortCtx.run(signal, cb);
+  }
+
+  /**
+   * Runs `cb` detached from the abort signal of the calling flow, so none of the queries it issues
+   * are refused or cancelled after a client disconnect, and marks the calling flow as written so
+   * nothing it does afterwards is aborted either. For units of work that must run to completion:
+   * writes, including the reads they make before and after them, and work with side effects
+   * outside the database (e.g. deleting a stored file, then its row).
+   */
+  runWithoutAbortSignal<T>(cb: () => T): T {
+    return abortCtx.detachWrite(cb);
+  }
+
+  /**
+   * Runs `cb` detached from the abort signal of the calling flow, WITHOUT marking that flow as
+   * written: the reads `cb` makes are never aborted, but the rest of the calling flow still is.
+   * For work that merely happens to be started from a request and must not inherit its signal
+   * (event hub listeners, cron jobs). Use `runWithoutAbortSignal` for work that writes.
+   *
+   * @internal
+   */
+  runDetachedFromAbortSignal<T>(cb: () => T): T {
+    return abortCtx.exit(cb);
   }
 
   /**

@@ -6,6 +6,7 @@ import Router from '@koa/router';
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
+import { isAbortReadsOnRequestDisconnectEnabled } from './client-abort';
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
@@ -23,6 +24,21 @@ const createRouteInfoMiddleware =
 
     ctx.state.route = route;
     return next();
+  };
+
+/**
+ * Runs the rest of the route (authentication included) detached from the request's database abort
+ * signal, for routes that opted out with `config.abortReadsOnRequestDisconnect: false`.
+ */
+const createDetachFromAbortMiddleware =
+  (strapi: Core.Strapi): Core.MiddlewareHandler =>
+  (ctx, next) => {
+    // Nothing to detach from while the setting is off
+    if (!isAbortReadsOnRequestDisconnectEnabled(strapi)) {
+      return next();
+    }
+
+    return strapi.db.runWithoutAbortSignal(() => next());
   };
 
 const getAuthConfig = property('config.auth');
@@ -84,6 +100,9 @@ export default (strapi: Core.Strapi) => {
 
       const routeHandler = compose([
         createRouteInfoMiddleware(route),
+        ...(route.config?.abortReadsOnRequestDisconnect === false
+          ? [createDetachFromAbortMiddleware(strapi)]
+          : []),
         authenticate,
         authorize,
         createPolicicesMiddleware(route, strapi),

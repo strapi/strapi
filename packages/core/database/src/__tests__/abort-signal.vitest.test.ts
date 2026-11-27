@@ -1,0 +1,563 @@
+import os from 'node:os';
+import path from 'node:path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Database } from '..';
+import * as errors from '../errors';
+import { abortCtx } from '../abort-context';
+import { getActiveAbortSignal } from '../utils/abort';
+
+/**
+ * Reproduction for strapi/strapi#28646: once the request that issued a query is gone, the query
+ * builder must stop issuing `select`s for it. Written ahead of the implementation: the names used
+ * here (`db.runWithAbortSignal(signal, cb)` and `QueryAbortedError`) come from the planned
+ * design and are the only things to adjust if the implementation names them differently.
+ */
+
+const ITEM_UID = 'api::item.item';
+
+const silentLogger = { info() {}, warn() {}, error() {}, debug() {} };
+
+const tempDbFile = () =>
+  path.join(
+    os.tmpdir(),
+    `strapi-abort-signal-${process.pid}-${Math.random().toString(36).slice(2)}.db`
+  );
+
+const createSqliteDb = (settings: Record<string, unknown> = {}) =>
+  new Database({
+    connection: {
+      client: 'sqlite',
+      connection: { filename: tempDbFile() },
+      useNullAsDefault: true,
+    },
+    settings: {
+      migrations: { dir: os.tmpdir() },
+      abortReadsOnRequestDisconnect: true,
+      ...settings,
+    },
+    logger: silentLogger,
+  });
+
+const abortedSignal = () => {
+  const controller = new AbortController();
+  controller.abort();
+  return controller.signal;
+};
+
+describe('abort signal on the query builder (#28646)', () => {
+  let db: Database;
+  let issued: string[];
+
+  // The planned entry point; reported as a missing behaviour until it exists
+  const runWithAbortSignal = <T>(signal: AbortSignal, cb: () => Promise<T> | T): Promise<T> | T => {
+    expect(typeof (db as any).runWithAbortSignal, 'db.runWithAbortSignal is not implemented').toBe(
+      'function'
+    );
+    return (db as any).runWithAbortSignal(signal, cb);
+  };
+
+  const expectQueryAborted = async (promiseOrFn: unknown) => {
+    expect(errors, 'QueryAbortedError is not exported from errors').toHaveProperty(
+      'QueryAbortedError'
+    );
+    const run = async () => (typeof promiseOrFn === 'function' ? promiseOrFn() : promiseOrFn);
+    await expect(run()).rejects.toBeInstanceOf((errors as any).QueryAbortedError);
+  };
+
+  const items = () => db.queryBuilder(ITEM_UID);
+  const selectItems = () => items().select('*').execute();
+
+  beforeEach(async () => {
+    db = createSqliteDb();
+    await db.init({
+      models: [
+        {
+          uid: ITEM_UID,
+          singularName: 'item',
+          tableName: 'items',
+          attributes: {
+            id: { type: 'increments' },
+            name: { type: 'string' },
+          },
+        },
+      ],
+    });
+    await db.connection.schema.createTable('items', (table) => {
+      table.increments('id');
+      table.string('name');
+    });
+    await items().insert({ name: 'first' }).execute();
+
+    issued = [];
+    db.connection.on('query', (data: { sql?: string }) => {
+      issued.push(data.sql ?? '');
+    });
+  });
+
+  afterEach(async () => {
+    await db.destroy();
+  });
+
+  it('runs selects normally while the signal is not aborted', async () => {
+    const controller = new AbortController();
+
+    const rows = await runWithAbortSignal(controller.signal, () => selectItems());
+
+    expect(rows).toEqual([{ id: 1, name: 'first' }]);
+  });
+
+  it('refuses a select with a QueryAbortedError when the signal is already aborted, without querying', async () => {
+    await expectQueryAborted(runWithAbortSignal(abortedSignal(), () => selectItems()));
+
+    expect(issued).toEqual([]);
+  });
+
+  it('refuses a select issued after the signal aborted later in the same async flow', async () => {
+    const controller = new AbortController();
+
+    await expectQueryAborted(
+      runWithAbortSignal(controller.signal, async () => {
+        await selectItems();
+        controller.abort();
+        await Promise.resolve();
+        return selectItems();
+      })
+    );
+
+    expect(issued).toHaveLength(1);
+  });
+
+  it('refuses a findOne style select (first) too', async () => {
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => items().select('*').first().execute())
+    );
+  });
+
+  it('refuses to start a stream when the signal is already aborted', async () => {
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), async () => items().select('*').stream())
+    );
+
+    expect(issued).toEqual([]);
+  });
+
+  it('does not affect selects outside runWithAbortSignal', async () => {
+    runWithAbortSignal(abortedSignal(), () => undefined);
+
+    await expect(selectItems()).resolves.toEqual([{ id: 1, name: 'first' }]);
+  });
+
+  describe('never aborts writes', () => {
+    it('still inserts, updates and deletes with an aborted signal', async () => {
+      await runWithAbortSignal(abortedSignal(), async () => {
+        await items().insert({ name: 'second' }).execute();
+        await items().update({ name: 'renamed' }).where({ name: 'second' }).execute();
+        await items().delete().where({ name: 'first' }).execute();
+      });
+
+      const rows = await db.connection('items').select('name');
+      expect(rows).toEqual([{ name: 'renamed' }]);
+    });
+  });
+
+  it('refuses count, max and min too', async () => {
+    await expectQueryAborted(runWithAbortSignal(abortedSignal(), () => items().count().execute()));
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => items().max('id').execute())
+    );
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => items().min('id').execute())
+    );
+
+    expect(issued).toEqual([]);
+  });
+
+  it('refuses a db.query() read (findMany, count) as well', async () => {
+    await expectQueryAborted(
+      runWithAbortSignal(abortedSignal(), () => db.query(ITEM_UID).findMany())
+    );
+    await expectQueryAborted(runWithAbortSignal(abortedSignal(), () => db.query(ITEM_UID).count()));
+  });
+
+  describe('stops aborting once the flow wrote', () => {
+    it('runs the selects that follow a write in the same flow', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), async () => {
+        await items().insert({ name: 'second' }).execute();
+        return selectItems();
+      });
+
+      expect(rows).toHaveLength(2);
+    });
+
+    it('runs the selects of a sibling branch once another branch wrote', async () => {
+      const controller = new AbortController();
+
+      const rows = await runWithAbortSignal(controller.signal, async () => {
+        await Promise.all([
+          items().insert({ name: 'second' }).execute(),
+          (async () => {
+            await Promise.resolve();
+            controller.abort();
+          })(),
+        ]);
+        return selectItems();
+      });
+
+      expect(rows).toHaveLength(2);
+    });
+
+    it('runs the selects that follow a row lock (forUpdate)', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), () =>
+        db.transaction(async () => {
+          await items().select('*').forUpdate().execute();
+          return selectItems();
+        })
+      );
+
+      expect(rows).toHaveLength(1);
+    });
+  });
+
+  describe('reads inside a transaction', () => {
+    it('refuses a select in a transaction that has not written, and the transaction rolls back', async () => {
+      await expectQueryAborted(
+        runWithAbortSignal(abortedSignal(), () => db.transaction(() => selectItems()))
+      );
+
+      expect(issued.some((sql) => /select/i.test(sql) && /items/.test(sql))).toBe(false);
+    });
+
+    it('refuses a db.query() findMany wrapped in a transaction (document service reads)', async () => {
+      await expectQueryAborted(
+        runWithAbortSignal(abortedSignal(), () =>
+          db.transaction(() => db.query(ITEM_UID).findMany())
+        )
+      );
+    });
+
+    it('still runs selects and writes in db.transaction once the transaction wrote', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), () =>
+        db.transaction(async () => {
+          await items().insert({ name: 'in trx' }).execute();
+          return selectItems();
+        })
+      );
+
+      expect(rows).toHaveLength(2);
+      expect(await db.connection('items').count({ count: '*' })).toEqual([{ count: 2 }]);
+    });
+
+    it('refuses a select bound to an explicit transaction (qb.transacting)', async () => {
+      const trx = await db.connection.transaction();
+      try {
+        await expectQueryAborted(
+          runWithAbortSignal(abortedSignal(), () => items().select('*').transacting(trx).execute())
+        );
+      } finally {
+        await trx.rollback();
+      }
+    });
+  });
+
+  describe('db.query() writes run to completion', () => {
+    // The entity manager opens its transactions through the global `strapi.db`
+    beforeEach(() => {
+      (globalThis as any).strapi = { db };
+    });
+
+    afterEach(() => {
+      delete (globalThis as any).strapi;
+    });
+
+    const subscribeAfter = () => {
+      const calls: string[] = [];
+      db.lifecycles.subscribe({
+        models: [ITEM_UID],
+        async afterCreate() {
+          calls.push('afterCreate');
+        },
+        async afterUpdate() {
+          calls.push('afterUpdate');
+        },
+        async afterDelete() {
+          calls.push('afterDelete');
+        },
+      });
+      return calls;
+    };
+
+    it('create commits, reads the row back and runs afterCreate', async () => {
+      const calls = subscribeAfter();
+
+      const created = await runWithAbortSignal(abortedSignal(), () =>
+        db.query(ITEM_UID).create({ data: { name: 'second' } })
+      );
+
+      expect(created).toMatchObject({ id: 2, name: 'second' });
+      expect(calls).toEqual(['afterCreate']);
+    });
+
+    it('update selects the row, writes it and runs afterUpdate', async () => {
+      const calls = subscribeAfter();
+
+      const updated = await runWithAbortSignal(abortedSignal(), () =>
+        db.query(ITEM_UID).update({ where: { id: 1 }, data: { name: 'renamed' } })
+      );
+
+      expect(updated).toMatchObject({ id: 1, name: 'renamed' });
+      expect(await db.connection('items').select('name')).toEqual([{ name: 'renamed' }]);
+      expect(calls).toEqual(['afterUpdate']);
+    });
+
+    it('delete selects the row, deletes it and runs afterDelete', async () => {
+      const calls = subscribeAfter();
+
+      await runWithAbortSignal(abortedSignal(), () =>
+        db.query(ITEM_UID).delete({ where: { id: 1 } })
+      );
+
+      expect(await db.connection('items').select('name')).toEqual([]);
+      expect(calls).toEqual(['afterDelete']);
+    });
+
+    it('runs the reads that follow a db.query() write in the same flow', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), async () => {
+        await db.query(ITEM_UID).create({ data: { name: 'second' } });
+        return db.query(ITEM_UID).findMany();
+      });
+
+      expect(rows).toHaveLength(2);
+    });
+  });
+
+  describe('work that outlives the request', () => {
+    it('runs the selects of work detached with runWithoutAbortSignal, before and after a write', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), () =>
+        db.runWithoutAbortSignal(async () => {
+          await selectItems();
+          await items().insert({ name: 'second' }).execute();
+          return selectItems();
+        })
+      );
+
+      expect(rows).toEqual([
+        { id: 1, name: 'first' },
+        { id: 2, name: 'second' },
+      ]);
+    });
+
+    it('does not abort the flow once it ran detached work', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), async () => {
+        await db.runWithoutAbortSignal(() => selectItems());
+        return selectItems();
+      });
+
+      expect(rows).toEqual([{ id: 1, name: 'first' }]);
+    });
+
+    it('runs a commit hook select even though the signal aborted', async () => {
+      const controller = new AbortController();
+      let hookRows: unknown;
+
+      await runWithAbortSignal(controller.signal, async () => {
+        await db.transaction(({ onCommit }) => {
+          onCommit(async () => {
+            hookRows = await selectItems();
+          });
+        });
+        controller.abort();
+      });
+      await db.transaction(async () => undefined);
+      await vi.waitFor(() => expect(hookRows).toEqual([{ id: 1, name: 'first' }]));
+    });
+
+    it('runs a commit hook select when the signal was aborted before the commit', async () => {
+      let hookRows: unknown;
+
+      await runWithAbortSignal(abortedSignal(), () =>
+        db.transaction(({ onCommit }) => {
+          onCommit(async () => {
+            hookRows = await selectItems();
+          });
+        })
+      );
+
+      await vi.waitFor(() => expect(hookRows).toEqual([{ id: 1, name: 'first' }]));
+    });
+
+    it('runs a savepoint rollback hook detached from the signal', async () => {
+      let hookRows: unknown;
+      await runWithAbortSignal(abortedSignal(), () =>
+        db.transaction(async ({ onRollback }) => {
+          await db
+            .savepoint(async () => {
+              onRollback(async () => {
+                hookRows = await selectItems().catch((e) => e);
+              });
+              throw new Error('undo');
+            })
+            .catch(() => undefined);
+        })
+      );
+
+      await vi.waitFor(() => expect(hookRows).toEqual([{ id: 1, name: 'first' }]));
+    });
+
+    it('runs a select detached from the signal without marking the flow as written', async () => {
+      const controller = new AbortController();
+
+      await runWithAbortSignal(controller.signal, async () => {
+        controller.abort();
+
+        const rows = await (db as any).runDetachedFromAbortSignal(() => selectItems());
+        expect(rows).toEqual([{ id: 1, name: 'first' }]);
+
+        // Unlike runWithoutAbortSignal, the rest of the flow is still aborted
+        await expectQueryAborted(selectItems());
+      });
+    });
+
+    it('does not apply the guard to a select that locks rows (forUpdate)', () => {
+      runWithAbortSignal(abortedSignal(), () => {
+        expect(getActiveAbortSignal(db, { type: 'select', forUpdate: true })).toBeUndefined();
+        expect(getActiveAbortSignal(db, { type: 'insert' })).toBeUndefined();
+        expect(getActiveAbortSignal(db, { type: 'count' })?.aborted).toBe(true);
+        expect(getActiveAbortSignal(db, { type: 'select' })?.aborted).toBe(true);
+      });
+    });
+  });
+
+  describe('a started stream', () => {
+    beforeEach(async () => {
+      await db.destroy();
+      db = createSqliteDb();
+      await db.init({
+        models: [
+          {
+            uid: ITEM_UID,
+            singularName: 'item',
+            tableName: 'items',
+            attributes: {
+              id: { type: 'increments' },
+              name: { type: 'string' },
+              parent: {
+                type: 'relation',
+                relation: 'manyToOne',
+                target: ITEM_UID,
+                joinColumn: { name: 'parent_id', referencedColumn: 'id' },
+              } as never,
+            },
+          },
+        ],
+      });
+      await db.connection.schema.createTable('items', (table) => {
+        table.increments('id');
+        table.string('name');
+        table.integer('parent_id');
+      });
+      await items().insert({ name: 'root' }).execute();
+      await db.connection('items').insert({ name: 'leaf', parent_id: 1 });
+    });
+
+    it('populates its batches even when the signal aborts after it started', async () => {
+      const controller = new AbortController();
+
+      const rows = await runWithAbortSignal(controller.signal, async () => {
+        const stream = items()
+          .select('*')
+          .where({ name: 'leaf' })
+          .populate({ parent: true })
+          .stream();
+        const read: any[] = [];
+
+        controller.abort();
+
+        for await (const row of stream) {
+          read.push(row);
+        }
+
+        return read;
+      });
+
+      expect(rows).toHaveLength(1);
+      expect(rows[0].parent).toMatchObject({ name: 'root' });
+    });
+  });
+
+  describe.each([
+    ['set to false', false],
+    ['unset (the default)', undefined],
+  ])('settings.abortReadsOnRequestDisconnect %s', (_label, value) => {
+    it('lets selects run after a disconnect', async () => {
+      await db.destroy();
+      db = createSqliteDb({ abortReadsOnRequestDisconnect: value });
+      await db.init({
+        models: [
+          {
+            uid: ITEM_UID,
+            singularName: 'item',
+            tableName: 'items',
+            attributes: { id: { type: 'increments' }, name: { type: 'string' } },
+          },
+        ],
+      });
+      await db.connection.schema.createTable('items', (table) => {
+        table.increments('id');
+        table.string('name');
+      });
+
+      await expect(runWithAbortSignal(abortedSignal(), () => selectItems())).resolves.toEqual([]);
+    });
+
+    it('leaves the entity manager write methods unwrapped, and never enters the abort context', async () => {
+      await db.destroy();
+      const detachWrite = vi.spyOn(abortCtx, 'detachWrite');
+      const run = vi.spyOn(abortCtx, 'run');
+      try {
+        db = createSqliteDb({ abortReadsOnRequestDisconnect: value });
+        await db.init({
+          models: [
+            {
+              uid: ITEM_UID,
+              singularName: 'item',
+              tableName: 'items',
+              attributes: { id: { type: 'increments' }, name: { type: 'string' } },
+            },
+          ],
+        });
+        await db.connection.schema.createTable('items', (table) => {
+          table.increments('id');
+          table.string('name');
+        });
+
+        // The entity manager opens its transactions through the global `strapi.db`
+        (globalThis as any).strapi = { db };
+        const created = await runWithAbortSignal(abortedSignal(), () =>
+          db.query(ITEM_UID).create({ data: { name: 'off' } })
+        );
+
+        expect(created).toMatchObject({ name: 'off' });
+        expect(detachWrite).not.toHaveBeenCalled();
+        expect(run).not.toHaveBeenCalled();
+      } finally {
+        delete (globalThis as any).strapi;
+        detachWrite.mockRestore();
+        run.mockRestore();
+      }
+    });
+  });
+
+  it('wraps the entity manager write methods when the setting is on', async () => {
+    const detachWrite = vi.spyOn(abortCtx, 'detachWrite');
+    (globalThis as any).strapi = { db };
+    try {
+      await db.query(ITEM_UID).create({ data: { name: 'on' } });
+
+      expect(detachWrite).toHaveBeenCalled();
+    } finally {
+      delete (globalThis as any).strapi;
+      detachWrite.mockRestore();
+    }
+  });
+});

@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import Module from 'node:module';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import createCronService from '../cron';
@@ -595,5 +596,81 @@ describe('Cron service', () => {
 
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
+  });
+
+  describe('abort signal detachment', () => {
+    const mockDatabase = (store: AsyncLocalStorage<string>, settingOn: boolean) => {
+      const detach = vi.fn(<T>(cb: () => T): T => store.exit(cb));
+      (global.strapi as any).isLoaded = true;
+      (global.strapi as any).db = {
+        config: { settings: { abortReadsOnRequestDisconnect: settingOn } },
+        runDetachedFromAbortSignal: detach,
+      };
+      return detach;
+    };
+
+    afterEach(() => {
+      delete (global.strapi as any).isLoaded;
+      delete (global.strapi as any).db;
+    });
+
+    it('creates jobs and runs their tasks detached from the abort signal of the caller', async () => {
+      const store = new AsyncLocalStorage<string>();
+      const detach = mockDatabase(store, true);
+      const seen: Array<string | undefined> = [];
+
+      store.run('request', () => {
+        cron.add({
+          detachedJob: {
+            async task() {
+              await Promise.resolve();
+              seen.push(store.getStore());
+            },
+            options: '0 0 * * *',
+          },
+        });
+      });
+
+      // The timer is created while detached (checked before any run)
+      expect(detach).toHaveBeenCalled();
+
+      await store.run('request', () => cron.jobs[0].job.invoke());
+
+      expect(seen).toEqual([undefined]);
+    });
+
+    it('does not detach anything while the setting is off', async () => {
+      const store = new AsyncLocalStorage<string>();
+      const detach = mockDatabase(store, false);
+      const seen: Array<string | undefined> = [];
+
+      store.run('request', () => {
+        cron.add({
+          attachedJob: {
+            async task() {
+              seen.push(store.getStore());
+            },
+            options: '0 0 * * *',
+          },
+        });
+      });
+      await store.run('request', () => cron.jobs[0].job.invoke());
+
+      expect(detach).not.toHaveBeenCalled();
+      expect(seen).toEqual(['request']);
+    });
+
+    it('does not resolve the database before Strapi is loaded', () => {
+      Object.defineProperty(global.strapi, 'db', {
+        configurable: true,
+        get() {
+          throw new Error('the database must not be resolved before load');
+        },
+      });
+
+      expect(() =>
+        cron.add({ earlyJob: { task: async () => undefined, options: '0 0 * * *' } })
+      ).not.toThrow();
+    });
   });
 });

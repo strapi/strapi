@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { Knex } from 'knex';
 
 import { SavepointError } from './errors';
+import { abortCtx } from './abort-context';
 
 /**
  * After the user calls the Knex transactor’s `commit` or `rollback` (e.g. via
@@ -158,6 +159,15 @@ const runCallbacks = async (callbacks: Callback[], options?: CallbackRunOptions)
   }
 };
 
+/**
+ * Runs the rollback callbacks of a savepoint that was rolled back. Like the hooks of a transaction,
+ * they are detached from the request's abort signal: they undo or report work, and must not see
+ * their reads refused because the client left.
+ */
+const runSavepointRollbackCallbacks = (callbacks: Callback[]) => {
+  abortCtx.exit(() => callbacks.forEach((callback) => callback()));
+};
+
 const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: CallbackRunOptions) => {
   if (!callbacks?.length) {
     return;
@@ -165,9 +175,13 @@ const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: Callback
 
   const owner = storage.getStore()?.owner ?? defaultHookOwner;
   const pending = hooksFor(owner);
-  const tracked = runCallbacks(callbacks, options).finally(() => {
-    pending.delete(tracked);
-  });
+  // Commit and rollback hooks outlive the request that triggered them (events, webhooks): they
+  // must not inherit its abort signal, or a client disconnect would make their reads fail
+  const tracked = abortCtx
+    .exit(() => runCallbacks(callbacks, options))
+    .finally(() => {
+      pending.delete(tracked);
+    });
   pending.add(tracked);
 };
 
@@ -325,7 +339,7 @@ const transactionCtx = {
       result = await storage.run(store, cb);
     } catch (error) {
       const rollbackError = await endSavepoint(trx, 'rollback');
-      store.rollbackCallbacks.forEach((callback) => callback());
+      runSavepointRollbackCallbacks(store.rollbackCallbacks);
       throw rollbackError
         ? new SavepointError('Failed to roll back to the savepoint', {
             cause: rollbackError,
@@ -336,7 +350,7 @@ const transactionCtx = {
 
     const releaseError = await endSavepoint(trx, 'commit');
     if (releaseError) {
-      store.rollbackCallbacks.forEach((callback) => callback());
+      runSavepointRollbackCallbacks(store.rollbackCallbacks);
       throw new SavepointError('Failed to release the savepoint', { cause: releaseError });
     }
     parent.commitCallbacks.push(...store.commitCallbacks);
