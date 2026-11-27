@@ -386,14 +386,21 @@ import { factories, type Core } from '@strapi/strapi';
 
 export type ControllerContract = Core.CoreAPI.Controller.ContentType<'api::article.article'> & {
   titles: Core.ControllerHandler<string[]>;
+  latest: Core.ControllerHandler;
 };
 
 export default factories.createCoreController('api::article.article', ({ strapi }) => ({
   async titles() {
     return strapi.service('api::article.article').findPublishedTitles();
   },
+  async latest(ctx) {
+    const articles = await strapi.documents('api::article.article').findMany({ limit: 5 });
+    return this.transformResponse(await this.sanitizeOutput(articles, ctx));
+  },
 })) satisfies Core.ControllerFactory<'api::article.article'>;
 ```
+
+An action can return a value computed from `this`, as `latest` does: the factory keeps every action. In such an action, `this` types the other custom actions as `Core.ControllerHandler`, so annotate its return type to return what another custom action returns through `this`.
 
 With strict types disabled, `Core.ControllerFactory` accepts a factory that returns any object, as develop has no controller factory type.
 

@@ -374,6 +374,14 @@ declare global {
   and `Core.ControllerFactory<uid>` does the same for a controller factory. With strict types
   disabled, `Core.ControllerFactory` accepts a factory that returns any object, because
   `Core.Controller` rejects what `createCoreController` returns.
+- A `createCoreController` or `createCoreService` config can return a value computed from `this`,
+  such as `return this.transformResponse(await this.sanitizeOutput(articles, ctx))`: the factory
+  keeps all its actions, and `satisfies Core.ControllerFactory<uid>` checks them. In a method whose
+  returned value reads `this`, `this` types the other custom members through `Generic`
+  (`Core.ControllerHandler` for a controller): to return what another custom action returns
+  through `this`, annotate the method's return type. The factories type `this` from a type
+  parameter that TypeScript does not infer (`TThis`, see
+  `Core.CoreAPI.Controller.FactoryConfig`). Do not pass it.
 - In an application, type generation registers the `ServiceContract` or `ControllerContract` type
   that a service or controller module exports. Check the module's factory against its own UID only
   with that export: without it, the registered type is inferred from the factory itself, so type

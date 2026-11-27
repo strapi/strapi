@@ -1,5 +1,5 @@
 import { omit, pick } from 'lodash';
-import type { Core, Providers, UID, Utils } from '@strapi/types';
+import type { Core, Providers, UID } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
@@ -15,9 +15,11 @@ type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S)
 const createCoreController = <
   TUID extends UID.ContentType,
   TController extends Core.CoreAPI.Controller.Extendable<TUID>,
+  // `this` of the actions, never inferred (see `Core.CoreAPI.Controller.FactoryConfig`).
+  TThis = TController,
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<Core.CoreAPI.Controller.FactoryConfig<TUID, TController>>
+  cfg?: WithStrapiCallback<Core.CoreAPI.Controller.FactoryConfig<TUID, TController, TThis>>
 ) => {
   return ({
     strapi,
@@ -58,6 +60,19 @@ type CoreServiceWithoutConfig<TUID extends UID.ContentType> = Core.IsStrict exte
   : Core.CoreAPI.Service.Extendable<TUID> & Core.CoreAPI.Service.ContentType<TUID>;
 
 /**
+ * A core service config: `this` is the service. With strict types, the overrides in `this` come from
+ * `TThis`, which defaults to `TService` and has no inference site, so a method that returns a value
+ * computed from `this` does not fix `TService` before the config's type is known (see
+ * `Core.CoreAPI.Controller.FactoryConfig`).
+ */
+type CoreServiceConfig<
+  TUID extends UID.ContentType,
+  TService extends Core.CoreAPI.Service.Extendable<TUID>,
+  TThis,
+> = Partial<Core.CoreAPI.Service.Extendable<TUID> & TService> &
+  ThisType<Core.CoreAPI.Service.Extendable<TUID> & (Core.IsStrict extends true ? TThis : TService)>;
+
+/**
  * Without config, as `strapi generate` writes a service, the factory has no override to infer:
  * `TService` would fall back to its constraint, whose legacy members win overload resolution over
  * the strict ones. A config that adds no member (`{}`, `() => ({})`, `undefined`) has none
@@ -71,17 +86,16 @@ function createCoreService<
   TService extends Core.CoreAPI.Service.Extendable<TUID> = Core.IsStrict extends true
     ? NonNullable<unknown>
     : Core.CoreAPI.Service.Extendable<TUID>,
+  TThis = TService,
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>
+  cfg?: WithStrapiCallback<CoreServiceConfig<TUID, TService, TThis>>
 ): ({ strapi }: { strapi: Core.Strapi }) => TService & Core.CoreAPI.Service.ContentType<TUID>;
 function createCoreService<
   TUID extends UID.ContentType,
   TService extends Core.CoreAPI.Service.Extendable<TUID>,
->(
-  uid: TUID,
-  cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>
-) {
+  TThis = TService,
+>(uid: TUID, cfg?: WithStrapiCallback<CoreServiceConfig<TUID, TService, TThis>>) {
   return ({
     strapi,
   }: {
