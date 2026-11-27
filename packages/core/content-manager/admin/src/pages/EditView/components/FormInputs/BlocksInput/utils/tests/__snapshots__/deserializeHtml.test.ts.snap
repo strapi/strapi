@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`deserializeHtml real clipboard content keeps all the text of google-docs 1`] = `
+[
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "heading",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "heading",
+  "paragraph",
+  "heading",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "heading",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "list",
+]
+`;
+
+exports[`deserializeHtml real clipboard content keeps all the text of word-online 1`] = `
+[
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "paragraph",
+  "heading",
+  "list",
+  "heading",
+  "heading",
+  "heading",
+  "paragraph",
+  "heading",
+  "heading",
+  "paragraph",
+  "heading",
+  "heading",
+  "heading",
+  "paragraph",
+  "heading",
+  "heading",
+  "paragraph",
+  "heading",
+  "paragraph",
+]
+`;
