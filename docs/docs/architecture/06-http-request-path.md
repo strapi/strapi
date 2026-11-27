@@ -227,7 +227,7 @@ Both parse inside the handler, so after the policies and the route middlewares (
 
 - It reads `route.request` when it parses and caches one parser per `request` object. Registration replaces `route.request` when it merges the params of `addQueryParams` and `addInputParams`, so these params are parsed too.
 - It strips unknown `params` and `query` keys and coerces only what the schema coerces.
-- It chooses the body schema by the request media type, without its parameters. A request without a body parses an `undefined` body with the first declared schema. A body of an undeclared media type gets a 415.
+- It chooses the body schema by the request media type, without its parameters. A request without a body, or with an empty one, parses an `undefined` body with the first declared schema. A body of an undeclared media type gets a 415. A route that declares no body never requires one: `addInputParams` merges a JSON body schema into every matched route, GET included, and the parser makes that body optional.
 - On failure, it throws a `ValidationError` (400) whose `details.errors[].path` starts with `params`, `query` or `body`.
 
 `defineRoute` also throws when a `params`, `query` or form body schema can never parse a string (such as `z.number()` or `z.coerce.boolean()`), when a body media type is not exact (such as `application/*`), and when OpenAPI cannot convert a schema (such as `.transform()`).
