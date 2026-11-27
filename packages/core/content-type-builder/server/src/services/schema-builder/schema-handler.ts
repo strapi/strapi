@@ -75,6 +75,8 @@ export default function createSchemaHandler<
 
   let modified = false;
   let deleted = false;
+  // Whether flush started to change the file: rollback restores only a file that it changed
+  let written = false;
 
   return {
     get modelName() {
@@ -279,6 +281,7 @@ export default function createSchemaHandler<
       const filePath = path.join(state.dir, state.filename);
 
       if (deleted) {
+        written = true;
         await fse.remove(initialPath);
 
         await removeDirectoryIfEmpty(initialState.dir);
@@ -289,6 +292,7 @@ export default function createSchemaHandler<
       if (modified) {
         if (!state.schema) return Promise.resolve();
 
+        written = true;
         await fse.ensureFile(filePath);
 
         await fse.writeJSON(
@@ -337,7 +341,9 @@ export default function createSchemaHandler<
         return;
       }
 
-      if (modified || deleted) {
+      // A save rejected before the write changed no file. Writing the initial schema would
+      // create a file that did not exist, e.g. the extension schema of a plugin content type
+      if (written && (modified || deleted)) {
         await fse.ensureFile(initialPath);
         await fse.writeJSON(initialPath, initialState.schema, { spaces: 2 });
 

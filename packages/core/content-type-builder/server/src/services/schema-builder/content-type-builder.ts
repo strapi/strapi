@@ -126,7 +126,11 @@ const toTargetAttributeFormat = (attribute: InternalAttribute): InternalAttribut
   const { inversedBy, mappedBy, ...relation } = attribute as InternalRelationAttribute;
 
   if (relation.targetAttribute !== undefined) {
-    return attribute;
+    // A body in the format of the GET response of the single-type route also has the stored
+    // `inversedBy` or `mappedBy`. `convertAttribute` writes the side for the relation kind from
+    // `targetAttribute`: the stored side would stay next to it when the save changes the kind
+    // (an `inversedBy` on a oneToMany fails the next boot)
+    return _.isNil(relation.targetAttribute) ? attribute : relation;
   }
 
   const targetAttribute = inversedBy || mappedBy;
@@ -279,7 +283,9 @@ export default function createComponentBuilder() {
      * save deletes its type or its target type (the relation is removed with that type):
      * - a later step of the save did not change or remove it (the payloads of two types do not
      *   agree);
-     * - the save does not remove its other side when that other side existed before the save.
+     * - the save does not remove its other side when that other side existed before the save;
+     * - when the save keeps the pair as it is (`setRelation` did not write it), its other side
+     *   still points back to it if it did before the save.
      *
      * For each of these relations whose other side `setRelation` wrote (a pair that the save
      * does not change is kept as it is, see `editContentType`):
@@ -299,6 +305,7 @@ export default function createComponentBuilder() {
       const builtPairs = new Set(
         (this.builtPairs as BuiltPair[]).map(({ uid, key }) => `${uid}.${key}`)
       );
+      const brokenKeptPairs: InstanceType<typeof ApplicationError>[] = [];
 
       for (const [uid, savedAttributes] of this.savedAttributes as Map<
         string,
@@ -341,16 +348,30 @@ export default function createComponentBuilder() {
             throw error(`the save removes ${name}, and keeps ${key}`);
           }
 
+          const isOwner = (relation as InternalRelationAttribute).inversedBy === name;
+          const pointsBackToRelation = (other: Schema.Attribute.AnyAttribute | undefined) =>
+            other !== undefined &&
+            isRelation(other) &&
+            (other as InternalRelationAttribute).target === uid &&
+            (isOwner
+              ? (other as InternalRelationAttribute).mappedBy === key
+              : (other as InternalRelationAttribute).inversedBy === key);
+          const pointsBack = pointsBackToRelation(counterpart);
+
           if (builtPairs.has(`${uid}.${key}`) === false) {
+            // The save keeps this pair as it is, so its other side must still point back. A
+            // save of a self relation that moves one side and keeps the other side as it was
+            // would leave that other side with no pair. Checked after the other checks, which
+            // name the cause of the error when they also reject the save
+            if (
+              pointsBack === false &&
+              pointsBackToRelation(targetCT?.initialSchema?.attributes?.[name])
+            ) {
+              brokenKeptPairs.push(error(`${name} is not a relation that points back to ${key}`));
+            }
+
             continue;
           }
-
-          const isOwner = (relation as InternalRelationAttribute).inversedBy === name;
-          const pointsBack =
-            counterpart !== undefined &&
-            isRelation(counterpart) &&
-            counterpart.target === uid &&
-            (isOwner ? counterpart.mappedBy === key : counterpart.inversedBy === key);
 
           if (pointsBack === false) {
             // Two relations of the save name the same other side: the last one written keeps
@@ -423,6 +444,10 @@ export default function createComponentBuilder() {
             throw error(`${name} is the other side of ${partnerName} of ${partnerUid}`);
           }
         }
+      }
+
+      if (brokenKeptPairs.length > 0) {
+        throw brokenKeptPairs[0];
       }
     },
 

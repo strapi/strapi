@@ -546,6 +546,77 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'tomes' });
   });
 
+  test('changes the owner to a oneToMany through the single-type route', async () => {
+    await createTypes();
+
+    // The GET response has the stored inversedBy next to targetAttribute
+    const res = await putBookFromGet((schema) => {
+      schema.attributes.shelf.relation = 'oneToMany';
+    });
+    expect(res.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      relation: 'oneToMany',
+      target: SHELF_UID,
+      mappedBy: 'books',
+    });
+    expect(attributesOf(BOOK_UID).shelf).not.toHaveProperty('inversedBy');
+    expect(attributesOf(SHELF_UID).books).toMatchObject({
+      relation: 'manyToOne',
+      target: BOOK_UID,
+      inversedBy: 'shelf',
+    });
+  });
+
+  test('rejects a save of Shelf alone that moves one side of a self relation and keeps the other side', async () => {
+    await createTypes();
+
+    // Shelf.parent owns Shelf.children
+    const selfPair = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+          attribute('create', 'parent', relation('manyToOne', SHELF_UID, 'children')),
+          attribute('create', 'children', relation('oneToMany', SHELF_UID, 'parent')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(selfPair.statusCode).toBe(200);
+    await restart();
+    const shelfFile = await fse.readJSON(schemaFile('rt-shelf'));
+
+    // parent moves to Book, and children stays as it was
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+          attribute('update', 'parent', relation('manyToOne', BOOK_UID, 'children')),
+          attribute('update', 'children', relation('oneToMany', SHELF_UID, 'parent')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toContain('parent is not a relation that points back to children');
+    expect(await fse.readJSON(schemaFile('rt-shelf'))).toEqual(shelfFile);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).parent).toMatchObject({
+      target: SHELF_UID,
+      inversedBy: 'children',
+    });
+    expect(attributesOf(SHELF_UID).children).toMatchObject({
+      target: SHELF_UID,
+      mappedBy: 'parent',
+    });
+  });
+
   test('retargets through the single-type route next to a non-configurable owner of the same inverse side', async () => {
     await createTypes();
 

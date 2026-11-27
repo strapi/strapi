@@ -84,6 +84,7 @@ describe('schema-handler flush', () => {
 
 describe('schema-handler rollback', () => {
   beforeEach(() => {
+    vi.mocked(fse.ensureFile).mockClear();
     vi.mocked(fse.writeJSON).mockClear();
     vi.mocked(fse.remove).mockClear();
   });
@@ -106,13 +107,45 @@ describe('schema-handler rollback', () => {
   it('restores the initial schema of an existing schema', async () => {
     const handler = createTestHandler();
     handler.setAttribute('extra', { type: 'string' });
+    await handler.flush();
 
     await handler.rollback();
 
-    expect(fse.writeJSON).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(fse.writeJSON).mock.calls[0][0]).toBe(
+    // the edit, then the rollback
+    expect(fse.writeJSON).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(fse.writeJSON).mock.calls[1][0]).toBe(
       '/tmp/api/test/content-types/test/schema.json'
     );
-    expect(vi.mocked(fse.writeJSON).mock.calls[0][1]).not.toHaveProperty('attributes.extra');
+    expect(vi.mocked(fse.writeJSON).mock.calls[1][1]).not.toHaveProperty('attributes.extra');
+  });
+
+  it('restores the initial schema of an existing schema whose write failed', async () => {
+    const handler = createTestHandler();
+    handler.setAttribute('extra', { type: 'string' });
+    vi.mocked(fse.writeJSON).mockRejectedValueOnce(new Error('EISDIR'));
+    await expect(handler.flush()).rejects.toThrow('EISDIR');
+
+    await handler.rollback();
+
+    expect(fse.writeJSON).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(fse.writeJSON).mock.calls[1][1]).not.toHaveProperty('attributes.extra');
+  });
+
+  it('writes nothing for an edited schema that was not written', async () => {
+    // A plugin content type has no file until a save writes its extension schema
+    const handler = createSchemaHandler({
+      uid: 'plugin::users-permissions.user',
+      plugin: 'users-permissions',
+      dir: '/tmp/extensions/users-permissions/content-types/user',
+      filename: 'schema.json',
+      schema: { info: {}, options: {}, attributes: {} } as any,
+    });
+    handler.setAttribute('articles', { type: 'relation', relation: 'oneToMany' });
+
+    await handler.rollback();
+
+    expect(fse.ensureFile).not.toHaveBeenCalled();
+    expect(fse.writeJSON).not.toHaveBeenCalled();
+    expect(fse.remove).not.toHaveBeenCalled();
   });
 });
