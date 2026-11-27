@@ -1,9 +1,9 @@
-import type { Modules } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 
 import { AUDITED_EVENTS } from './constants';
 
 interface LocaleEvent {
-  localeId: number;
+  localeId: Data.ID;
   name?: string;
   code: string;
 }
@@ -26,7 +26,7 @@ export interface UpdateDetails {
 }
 
 export interface LocaleRef {
-  id: number | null;
+  id: Data.ID | null;
   code: string;
 }
 

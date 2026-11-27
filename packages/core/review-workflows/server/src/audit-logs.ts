@@ -20,7 +20,7 @@ interface WorkflowResource extends Modules.AuditLogs.Resource {
 interface EntryResource extends Modules.AuditLogs.Resource {
   type: 'entry';
   uid: UID.ContentType;
-  id: string;
+  id: Data.DocumentID;
 }
 
 /** A stage as stored in the log: roles by name, sorted, so order alone is not a change. */
@@ -33,7 +33,7 @@ export interface StageSnapshot {
 
 export interface WorkflowSnapshot {
   name: string;
-  contentTypes: string[];
+  contentTypes: UID.ContentType[];
   stages: StageSnapshot[];
   stageRequiredToPublish: string | null;
 }
@@ -53,7 +53,7 @@ export type WorkflowChanges = {
 export interface WorkflowRow {
   id: Data.ID;
   name: string;
-  contentTypes?: string[] | null;
+  contentTypes?: UID.ContentType[] | null;
   stages?: Array<{
     name: string;
     color?: string | null;
@@ -80,7 +80,7 @@ export type WorkflowUpdateEvent = WorkflowEvent & WorkflowUpdateDetails;
 
 export interface EntryEvent {
   uid: UID.ContentType;
-  documentId: string;
+  documentId: Data.DocumentID;
   locale: string | null;
 }
 
@@ -104,7 +104,7 @@ export interface StageUpdateDetails {
 /** The payload of the existing review-workflows.updateEntryStage webhook event. */
 export interface StageUpdateEvent {
   uid: UID.ContentType;
-  entity: { documentId: string; locale?: string | null };
+  entity: { documentId: Data.DocumentID; locale?: string | null };
   workflow: { id: Data.ID; stages: { from: StageRef; to: StageRef } };
 }
 

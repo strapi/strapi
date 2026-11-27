@@ -1,13 +1,15 @@
+import type { Data } from '@strapi/types';
+
 /**
  * Index items by documentId for lookup
  *
  * @param items - Array of items with documentId property
  * @returns Map of documentId -> items array
  */
-export const indexByDocumentId = <T extends { documentId?: string | null }>(
+export const indexByDocumentId = <T extends { documentId?: Data.DocumentID | null }>(
   items: T[]
-): Map<string, T[]> => {
-  const map = new Map<string, T[]>();
+): Map<Data.DocumentID, T[]> => {
+  const map = new Map<Data.DocumentID, T[]>();
 
   for (const item of items) {
     const key = item.documentId;

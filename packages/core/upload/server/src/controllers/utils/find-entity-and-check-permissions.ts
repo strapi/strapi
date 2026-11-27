@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { errors, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { getService } from '../../utils';
 
 /**
@@ -18,8 +18,8 @@ import { getService } from '../../utils';
 const findEntityAndCheckPermissions = async (
   ability: unknown,
   action: string,
-  model: string,
-  id: string | number,
+  model: UID.ContentType,
+  id: Data.ID,
   strapiInstance: Core.Strapi = strapi
 ) => {
   const file = await getService('upload', strapiInstance).findOne(id, [

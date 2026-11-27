@@ -27,8 +27,10 @@ const createCustomOrderController = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const { userAbility } = ctx.state;
-      const { id } = ctx.params as CustomOrder.MoveDocument.Params;
-      const model = ctx.params.model as UID.CollectionType;
+      const {
+        id,
+        model,
+      }: { id: CustomOrder.MoveDocument.Params['id']; model: UID.CollectionType } = ctx.params;
       const { body } = ctx.request;
 
       const { before, after } = await validateMoveInput(body);

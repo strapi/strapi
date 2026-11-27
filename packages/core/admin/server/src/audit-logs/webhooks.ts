@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import type { Modules } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 
 export const AUDITED_EVENTS = {
   WEBHOOK_CREATE: 'webhook.create',
@@ -10,7 +10,7 @@ export const AUDITED_EVENTS = {
 type Webhook = Modules.WebhookStore.Webhook;
 
 export interface WebhookEvent {
-  webhookId: string;
+  webhookId: Data.ID;
   name: string;
 }
 

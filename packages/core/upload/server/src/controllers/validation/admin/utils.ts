@@ -1,6 +1,8 @@
+import type { Data } from '@strapi/types';
+
 import { getService } from '../../../utils';
 
-const folderExists = async (folderId: number) => {
+const folderExists = async (folderId: Data.ID) => {
   if (folderId == null) {
     return true;
   }

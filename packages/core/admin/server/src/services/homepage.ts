@@ -1,4 +1,4 @@
-import { Core } from '@strapi/types';
+import { Core, Data } from '@strapi/types';
 import { getService } from '../utils';
 import {
   HomepageLayout,
@@ -8,7 +8,7 @@ import {
 } from '../controllers/validation/schema';
 
 const DEFAULT_WIDTH = 6 as const;
-const keyFor = (userId: number) => `homepage-layout:${userId}`;
+const keyFor = (userId: Data.ID) => `homepage-layout:${userId}`;
 
 const isContentTypeVisible = (model: any) =>
   model?.pluginOptions?.['content-type-builder']?.visible !== false;
@@ -46,7 +46,7 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     };
   };
 
-  const getHomepageLayout = async (userId: number): Promise<HomepageLayout | null> => {
+  const getHomepageLayout = async (userId: Data.ID): Promise<HomepageLayout | null> => {
     const key = keyFor(userId);
     const value = await adminStore.get({ key });
     if (!value) {
@@ -57,7 +57,7 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     return HomepageLayoutSchema.parse(value);
   };
 
-  const updateHomepageLayout = async (userId: number, input: unknown): Promise<HomepageLayout> => {
+  const updateHomepageLayout = async (userId: Data.ID, input: unknown): Promise<HomepageLayout> => {
     const write: HomepageLayoutWrite = HomepageLayoutWriteSchema.parse(input);
 
     const key = keyFor(userId);

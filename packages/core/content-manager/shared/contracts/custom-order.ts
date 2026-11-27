@@ -1,4 +1,4 @@
-import type { Modules } from '@strapi/types';
+import type { Data } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -9,7 +9,7 @@ import { type errors } from '@strapi/utils';
  */
 export declare namespace MoveDocument {
   export interface Request {
-    body: { before: Modules.Documents.ID } | { after: Modules.Documents.ID };
+    body: { before: Data.DocumentID } | { after: Data.DocumentID };
     query: {
       locale?: string | null;
     };
@@ -17,12 +17,12 @@ export declare namespace MoveDocument {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    id: Data.DocumentID;
   }
 
   export type Response =
     | {
-        data: { documentId: Modules.Documents.ID };
+        data: { documentId: Data.DocumentID };
         error?: never;
       }
     | {

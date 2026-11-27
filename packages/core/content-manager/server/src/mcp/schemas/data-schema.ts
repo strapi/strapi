@@ -1,5 +1,5 @@
 import { contentTypes, z } from '@strapi/utils';
-import type { Core, Schema, Struct } from '@strapi/types';
+import type { Core, Schema, Struct, UID } from '@strapi/types';
 
 import { buildBlocksInputSchema } from './blocks-schema';
 import type { ContentManagerModelForMcp } from '../types';
@@ -28,7 +28,7 @@ const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
  */
 export function buildComponentInputSchema(
   strapi: Core.Strapi,
-  componentUid: string,
+  componentUid: UID.Component,
   visited: Set<string> = new Set()
 ): z.ZodTypeAny {
   if (visited.has(componentUid) === true) {
@@ -151,7 +151,7 @@ export const attributeToInputSchema = (
       const componentAttr = attr as unknown as {
         required?: boolean;
         repeatable?: boolean;
-        component?: string;
+        component?: UID.Component;
         min?: number;
         max?: number;
       };

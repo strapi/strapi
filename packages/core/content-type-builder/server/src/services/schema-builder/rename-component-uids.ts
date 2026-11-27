@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Internal } from '@strapi/types';
 
 /**
  * The pivot column of every `*_cmps` join table that stores a component uid
@@ -38,8 +38,8 @@ interface UIDColumn {
 }
 
 export interface ComponentUIDRename {
-  oldUID: string;
-  newUID: string;
+  oldUID: Internal.UID.Component;
+  newUID: Internal.UID.Component;
 }
 
 /**

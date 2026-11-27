@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import storeUtils from '../../services/utils/store';
@@ -7,7 +7,7 @@ import { createDocumentMiddleware } from './document-middleware';
 import { computeMove, type Placement } from './utils';
 
 interface StoredConfiguration {
-  uid?: string;
+  uid?: UID.ContentType;
   settings?: { customOrder?: boolean };
 }
 
@@ -20,7 +20,7 @@ const CONFIGURATION_KEY_PREFIX = 'plugin_content_manager_configuration_content_t
 
 const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
-    enabled: Set<string>;
+    enabled: Set<UID.ContentType>;
     loadedAt: number;
     refreshId: number;
     isRefreshing: boolean;
@@ -36,8 +36,8 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * Only the content types that received the position attribute at register can be ordered.
    */
-  const isOrderable = (uid: string) => {
-    const model = strapi.getModel(uid as UID.ContentType);
+  const isOrderable = (uid: UID.ContentType) => {
+    const model = strapi.getModel(uid);
 
     return model?.attributes?.[POSITION_ATTRIBUTE] !== undefined;
   };
@@ -145,7 +145,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
       .select(['id'])
       .where({ [POSITION_ATTRIBUTE]: { $null: true } })
       .first()
-      .execute<{ id: number } | undefined>();
+      .execute<{ id: Data.ID } | undefined>();
 
     return row !== undefined && row !== null;
   };
@@ -153,7 +153,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * Position of a document, or undefined if it has none (or does not exist).
    */
-  const getPosition = async (uid: UID.ContentType, documentId: string) => {
+  const getPosition = async (uid: UID.ContentType, documentId: Data.DocumentID) => {
     const row = await strapi.db
       .queryBuilder(uid)
       .select([POSITION_ATTRIBUTE])
@@ -278,7 +278,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const healMissingPositions = async () => {
     for (const uid of state.enabled) {
-      await assignMissingPositions(uid as UID.ContentType);
+      await assignMissingPositions(uid);
     }
   };
 
@@ -292,7 +292,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Whether the entries of a content type currently follow a custom order.
      */
-    isEnabled(uid: string) {
+    isEnabled(uid: UID.ContentType) {
       refreshInBackgroundIfStale();
 
       return state.enabled.has(uid);
@@ -331,7 +331,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
      * Makes sure every row of a document shares the document's position. Needed when a row
      * is created for an existing document, typically a new locale.
      */
-    async syncDocumentPosition(uid: UID.ContentType, documentId: string) {
+    async syncDocumentPosition(uid: UID.ContentType, documentId: Data.DocumentID) {
       await withOrderLock(uid, async () => {
         const position = (await getPosition(uid, documentId)) ?? (await getTopPosition(uid));
 
@@ -357,8 +357,8 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
       placement,
     }: {
       uid: UID.ContentType;
-      documentId: string;
-      anchorId: string;
+      documentId: Data.DocumentID;
+      anchorId: Data.DocumentID;
       placement: Placement;
     }) {
       const { positionColumn } = getTable(uid);

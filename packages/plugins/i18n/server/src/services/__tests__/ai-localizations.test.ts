@@ -521,7 +521,7 @@ describe('ai-localizations service', () => {
   });
 
   describe('generateDocumentLocalizations - issue #26579 (maxLength constraints)', () => {
-    const MODEL = 'api::article.article' as UID.ContentType;
+    const MODEL: UID.ContentType = 'api::article.article';
 
     const buildSchema = (): Schema.Schema =>
       ({
@@ -705,7 +705,7 @@ describe('ai-localizations service', () => {
    * - `create`/`update` with a `fields` selection that leaves out `locale`: no `locale` key
    */
   describe('documents without a string locale', () => {
-    const MODEL = 'api::article.article' as UID.ContentType;
+    const MODEL: UID.ContentType = 'api::article.article';
 
     const schema = {
       modelType: 'contentType',

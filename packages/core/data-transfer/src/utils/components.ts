@@ -478,8 +478,8 @@ const deleteComponent = async <TUID extends UID.Component>(
 
 interface IComponentIdMapping {
   uid: UID.Component;
-  oldID: number;
-  newID: number;
+  oldID: Data.ID;
+  newID: Data.ID;
 }
 
 /**

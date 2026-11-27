@@ -1,4 +1,4 @@
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Data, Modules, UID } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 
 import type { ReleaseCondition } from '../../shared/constants';
@@ -10,17 +10,17 @@ import { AUDITED_EVENTS } from './constants';
  */
 
 interface ReleaseEvent {
-  releaseId: number;
+  releaseId: Data.ID;
   name?: string;
   scheduledAt?: string | null;
   timezone?: string | null;
 }
 
 interface ReleaseEntryEvent {
-  releaseId: number;
+  releaseId: Data.ID;
   name?: string;
-  contentType: string;
-  entryDocumentId: string;
+  contentType: UID.ContentType;
+  entryDocumentId: Data.DocumentID;
   locale: string | null;
 }
 
@@ -113,8 +113,8 @@ export interface SettingsUpdateDetails {
 }
 
 interface EntryRef {
-  contentType: string;
-  documentId: string;
+  contentType: UID.ContentType;
+  documentId: Data.DocumentID;
   locale: string | null;
 }
 

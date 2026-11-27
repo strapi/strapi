@@ -7,26 +7,26 @@ import type { UID, Core } from '@strapi/types';
  * Go through component and dynamic zone attributes to find nested relations.
  */
 const collectRelationTargets = (
-  modelUid: string,
+  modelUid: UID.Schema,
   strapi: Core.Strapi,
-  visited = new Set<string>()
-): Set<string> => {
-  const targets = new Set<string>();
+  visited = new Set<UID.Schema>()
+): Set<UID.ContentType> => {
+  const targets = new Set<UID.ContentType>();
   if (visited.has(modelUid)) {
     return targets;
   }
   visited.add(modelUid);
 
-  const model = strapi.getModel(modelUid as UID.Schema);
+  const model = strapi.getModel(modelUid);
   if (!model?.attributes) {
     return targets;
   }
 
   for (const attribute of Object.values(model.attributes) as Array<{
     type?: string;
-    target?: string;
-    component?: string;
-    components?: string[];
+    target?: UID.ContentType;
+    component?: UID.Component;
+    components?: UID.Component[];
   }>) {
     if (attribute?.type === 'relation' && attribute.target) {
       targets.add(attribute.target);
@@ -75,10 +75,8 @@ export const getPublishOrderForContentTypes = (
       const relationTargets = collectRelationTargets(uid, strapi);
 
       for (const targetUid of relationTargets) {
-        const targetContentTypeUid = targetUid as UID.ContentType;
-        const isTargetInRelease =
-          uidSet.has(targetContentTypeUid) && targetContentTypeUid in strapi.contentTypes;
-        const targetModel = strapi.getModel(targetContentTypeUid);
+        const isTargetInRelease = uidSet.has(targetUid) && targetUid in strapi.contentTypes;
+        const targetModel = strapi.getModel(targetUid);
         const targetHasDraftAndPublish =
           targetModel && contentTypesUtils.hasDraftAndPublish(targetModel);
 
@@ -88,7 +86,7 @@ export const getPublishOrderForContentTypes = (
             dependencySet = new Set();
             dependencies.set(uid, dependencySet);
           }
-          dependencySet.add(targetContentTypeUid);
+          dependencySet.add(targetUid);
         }
       }
     }

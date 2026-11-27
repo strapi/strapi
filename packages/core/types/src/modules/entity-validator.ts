@@ -1,10 +1,11 @@
+import type * as Data from '../data';
 import type { ContentTypes } from '../schema';
 import type * as UID from '../uid';
 
 import type * as EntityService from './entity-service';
 
 export type Entity = {
-  id: number;
+  id: Data.ID;
   [key: string]: unknown;
 } | null;
 

@@ -112,7 +112,7 @@ const controller = {
 
   async getFillFromLocaleData(ctx) {
     const { userAbility } = ctx.state;
-    const { model } = ctx.params;
+    const { model }: { model: UID.ContentType } = ctx.params;
 
     await validateFillFromLocaleInput(ctx.query);
 
@@ -133,7 +133,7 @@ const controller = {
     const fillFromLocaleService = getService('fill-from-locale');
 
     const rawDocument = await fillFromLocaleService.fetchRawDocument(
-      model as UID.ContentType,
+      model,
       sourceLocale,
       documentId
     );
@@ -148,7 +148,7 @@ const controller = {
     // Transform relations to target locale, skipping those the user cannot read
     const data = await fillFromLocaleService.transformDocument(
       sanitizedDocument as Record<string, unknown>,
-      model as UID.ContentType,
+      model,
       targetLocale,
       userAbility
     );

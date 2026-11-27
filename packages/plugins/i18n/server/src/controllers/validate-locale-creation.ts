@@ -1,12 +1,12 @@
 import { errors } from '@strapi/utils';
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
 // TODO: v5 if implemented in the CM => delete this middleware
 const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
-  const { model } = ctx.params;
+  const { model }: { model: UID.ContentType } = ctx.params;
   const { query } = ctx.request;
 
   // Prevent empty body

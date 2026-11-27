@@ -7,7 +7,7 @@ import {
   relations as relationUtils,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
-import type { Core, Modules, Utils } from '@strapi/types';
+import type { Core, Modules, UID, Utils } from '@strapi/types';
 
 import { isDatabaseInputError } from '../../utils/database-input-errors';
 
@@ -20,7 +20,7 @@ type Decoratable<T> = T & {
 };
 
 const transformLoadParamsToQuery = (
-  uid: string,
+  uid: UID.Schema,
   field: string,
   params: Record<string, unknown>,
   pagination = {}

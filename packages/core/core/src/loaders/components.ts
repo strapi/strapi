@@ -8,7 +8,7 @@ type LoadedComponent = {
   collectionName: string;
   __filename__: string;
   __schema__: LoadedComponent;
-  uid: string;
+  uid: UID.Component;
   category: string;
   modelName: string;
   globalId: string;

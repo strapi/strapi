@@ -8,8 +8,8 @@ import { WORKFLOW_MODEL_UID } from '../constants/workflows';
 export interface ContentTypeTransfer {
   workflowId: Data.ID;
   name: string;
-  before: string[];
-  after: string[];
+  before: UID.ContentType[];
+  after: UID.ContentType[];
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {

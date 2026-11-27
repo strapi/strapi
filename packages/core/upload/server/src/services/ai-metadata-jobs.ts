@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
@@ -26,9 +26,9 @@ type AIMetadataJobUpdate = Partial<
 
 export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => {
   // The jobs this process runs, each with the timer that writes its heartbeat
-  const heartbeats = new Map<number, NodeJS.Timeout>();
+  const heartbeats = new Map<Data.ID, NodeJS.Timeout>();
 
-  const beat = async (jobId: number): Promise<void> => {
+  const beat = async (jobId: Data.ID): Promise<void> => {
     try {
       await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
         where: { id: jobId, status: 'processing' },
@@ -45,13 +45,13 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     }
   };
 
-  const stopHeartbeat = (jobId: number): void => {
+  const stopHeartbeat = (jobId: Data.ID): void => {
     clearInterval(heartbeats.get(jobId));
     heartbeats.delete(jobId);
   };
 
   return {
-    async createJob(): Promise<number> {
+    async createJob(): Promise<Data.ID> {
       const now = Date.now();
       const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
         data: {
@@ -64,13 +64,13 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
       return job.id;
     },
 
-    async getJob(jobId: number): Promise<AIMetadataJob | null> {
+    async getJob(jobId: Data.ID): Promise<AIMetadataJob | null> {
       return strapi.db.query(AI_METADATA_JOB_UID).findOne({
         where: { id: jobId },
       });
     },
 
-    async updateJob(jobId: number, updates: AIMetadataJobUpdate): Promise<void> {
+    async updateJob(jobId: Data.ID, updates: AIMetadataJobUpdate): Promise<void> {
       await strapi.db.query(AI_METADATA_JOB_UID).update({
         where: { id: jobId },
         data: updates,
@@ -82,14 +82,14 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
      * left as it is: once a server failed it as interrupted, the admin has shown that failure and
      * stopped polling, so a late result must not turn it back into a success unseen.
      */
-    async settleJob(jobId: number, status: 'completed' | 'failed'): Promise<void> {
+    async settleJob(jobId: Data.ID, status: 'completed' | 'failed'): Promise<void> {
       await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
         where: { id: jobId, status: 'processing' },
         data: { status, completedAt: new Date() },
       });
     },
 
-    async deleteJob(jobId: number): Promise<void> {
+    async deleteJob(jobId: Data.ID): Promise<void> {
       await strapi.db.query(AI_METADATA_JOB_UID).delete({
         where: { id: jobId },
       });
@@ -100,7 +100,7 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
      * `stopHeartbeat`, so that other servers on the same database see the job is still running.
      * The process that runs the job calls it; `createJob` writes the first heartbeat.
      */
-    startHeartbeat(jobId: number): void {
+    startHeartbeat(jobId: Data.ID): void {
       if (heartbeats.has(jobId) === true) {
         return;
       }

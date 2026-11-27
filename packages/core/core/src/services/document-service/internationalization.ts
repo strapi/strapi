@@ -178,7 +178,7 @@ const statusWhere = (
  */
 const copyNonLocalizedFields = async (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
-  documentId: string,
+  documentId: Modules.Documents.ID,
   dataToCreate: Record<string, any>,
   options: CopyNonLocalizedFieldsOptions = {}
 ): Promise<Record<string, any>> => {

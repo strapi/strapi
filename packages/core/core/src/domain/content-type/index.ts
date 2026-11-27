@@ -1,6 +1,6 @@
 import _, { cloneDeep } from 'lodash';
 import { yup, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import { validateContentTypeDefinition } from './validator';
 
 export type ContentTypeDefinition = {
@@ -18,7 +18,7 @@ const {
   UPDATED_BY_ATTRIBUTE,
 } = contentTypesUtils.constants;
 
-const createContentType = (uid: string, definition: ContentTypeDefinition) => {
+const createContentType = (uid: UID.ContentType, definition: ContentTypeDefinition) => {
   try {
     validateContentTypeDefinition(definition);
   } catch (e) {
@@ -57,7 +57,10 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
   return schema;
 };
 
-const warnDraftAndPublishReservedAttributes = (uid: string, schema: Schema.ContentType) => {
+const warnDraftAndPublishReservedAttributes = (
+  uid: UID.ContentType,
+  schema: Schema.ContentType
+) => {
   if (schema.options?.draftAndPublish !== true) {
     return;
   }

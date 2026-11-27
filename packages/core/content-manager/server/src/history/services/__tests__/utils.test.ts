@@ -1,6 +1,11 @@
 import type { Core, Schema } from '@strapi/types';
 
-import { createServiceUtils, toAuthor, type RequestContext } from '../utils';
+import {
+  createServiceUtils,
+  toAuthor,
+  type RequestContext,
+  type StoredAuthorReference,
+} from '../utils';
 
 const mockFindNames = jest.fn();
 
@@ -256,7 +261,7 @@ describe('History utils', () => {
   });
 
   describe('author helpers', () => {
-    const adminUser = (id: string | null) => ({
+    const adminUser = (id: string | null): StoredAuthorReference => ({
       type: 'person' as const,
       model: 'admin::user',
       id,

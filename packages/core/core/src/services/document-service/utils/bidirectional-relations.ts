@@ -1,10 +1,10 @@
 import { keyBy, omit } from 'lodash';
-import type { UID, Schema } from '@strapi/types';
+import type { Data, UID, Schema } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
 
 interface LoadContext {
-  oldVersions: { id: string; locale: string }[];
-  newVersions: { id: string; locale: string }[];
+  oldVersions: { id: Data.ID; locale: string }[];
+  newVersions: { id: Data.ID; locale: string }[];
 }
 
 interface RelationEntry {
@@ -307,8 +307,8 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
  * @param existingRelations - Array of join table data containing the relations to be updated
  */
 const sync = async (
-  oldEntries: { id: string; locale: string }[],
-  newEntries: { id: string; locale: string }[],
+  oldEntries: { id: Data.ID; locale: string }[],
+  newEntries: { id: Data.ID; locale: string }[],
   existingRelations: RelationEntry[]
 ) => {
   const newEntriesByLocale = keyBy(newEntries, 'locale');
@@ -322,11 +322,11 @@ const sync = async (
       acc[oldEntry.id] = newEntry.id;
       return acc;
     },
-    {} as Record<string, string>
+    {} as Record<string, Data.ID>
   );
 
   const republishedEntryIds = new Set(newEntries.map((e) => String(e.id)));
-  const isRepublishedEntry = (id: string | number) => republishedEntryIds.has(String(id));
+  const isRepublishedEntry = (id: Data.ID) => republishedEntryIds.has(String(id));
 
   await strapi.db.transaction(async ({ trx }) => {
     for (const {
@@ -350,7 +350,7 @@ const sync = async (
           originalOrder: relation[orderColumn],
           newSourceId: entryIdMapping[relation[sourceColumn] as string],
         }))
-        .filter((r): r is typeof r & { newSourceId: string } => Boolean(r.newSourceId));
+        .filter((r): r is typeof r & { newSourceId: Data.ID } => Boolean(r.newSourceId));
 
       if (!mappedRelations.length) continue;
 

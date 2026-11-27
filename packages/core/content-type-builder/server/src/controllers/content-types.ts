@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
 import type {} from 'koa-body';
-import type { Internal } from '@strapi/types';
+import type { Internal, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { formatValidationError } from '../utils/errors';
 import {
@@ -62,7 +62,7 @@ export default {
   },
 
   getContentType(ctx: Context) {
-    const { uid } = ctx.params;
+    const { uid }: { uid: UID.ContentType } = ctx.params;
 
     const contentType = strapi.contentTypes[uid];
 
@@ -127,7 +127,7 @@ export default {
   },
 
   async updateContentType(ctx: Context) {
-    const { uid } = ctx.params;
+    const { uid }: { uid: UID.ContentType } = ctx.params;
     const body = ctx.request.body as any;
 
     if (!_.has(strapi.contentTypes, uid)) {
@@ -164,7 +164,7 @@ export default {
   },
 
   async deleteContentType(ctx: Context) {
-    const { uid } = ctx.params;
+    const { uid }: { uid: UID.ContentType } = ctx.params;
 
     if (!_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);

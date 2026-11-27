@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
 /**
  * Builds an admin permissions manager for a media model bound to the MCP session's ability.
@@ -19,7 +19,7 @@ export const createMediaPermissionsManager = (
   strapi: Core.Strapi,
   context: Modules.MCP.McpHandlerContext,
   action: string,
-  model: string
+  model: UID.ContentType
 ) =>
   strapi.service('admin::permission').createPermissionsManager({
     ability: context.userAbility,
@@ -35,7 +35,7 @@ export const assertMediaPermission = (
   strapi: Core.Strapi,
   context: Modules.MCP.McpHandlerContext,
   action: string,
-  model: string
+  model: UID.ContentType
 ) => {
   const pm = createMediaPermissionsManager(strapi, context, action, model);
 

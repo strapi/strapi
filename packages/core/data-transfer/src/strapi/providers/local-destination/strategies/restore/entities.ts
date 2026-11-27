@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 import { ProviderTransferError } from '../../../../../errors/providers';
 import type { IEntity, Transaction } from '../../../../../types';
@@ -10,8 +10,8 @@ interface IEntitiesRestoreStreamOptions {
   strapi: Core.Strapi;
   updateMappingTable<TSchemaUID extends UID.Schema>(
     type: TSchemaUID,
-    oldID: number,
-    newID: number
+    oldID: Data.ID,
+    newID: Data.ID
   ): void;
   transaction?: Transaction;
 }

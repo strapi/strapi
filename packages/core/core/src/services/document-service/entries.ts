@@ -1,4 +1,4 @@
-import type { UID, Modules } from '@strapi/types';
+import type { Data, UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { omit } from 'lodash';
 
@@ -163,7 +163,7 @@ const createEntriesService = (
     return doc;
   }
 
-  async function deleteEntry(id: number, query = {} as any) {
+  async function deleteEntry(id: Data.ID, query = {} as any) {
     const componentsToDelete = await components.getComponents(uid, { id });
 
     const deletedEntry = await strapi.db.query(uid).delete({ ...query, where: { id } });

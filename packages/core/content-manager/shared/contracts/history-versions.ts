@@ -9,7 +9,7 @@ export type HistoryVersionAuthorType = (typeof HISTORY_VERSION_AUTHOR_TYPES)[num
 
 export interface HistoryVersionAuthorReference {
   type: HistoryVersionAuthorType;
-  model: string;
+  model: UID.ContentType;
   id: string;
 }
 
@@ -31,7 +31,7 @@ export interface HistoryVersionAuthor extends Omit<HistoryVersionAuthorReference
  */
 export interface CreateHistoryVersion {
   contentType: UID.ContentType;
-  relatedDocumentId: Data.ID;
+  relatedDocumentId: Data.DocumentID;
   locale: string | null;
   status: 'draft' | 'published' | 'modified' | null;
   data: Modules.Documents.AnyDocument;
@@ -89,7 +89,7 @@ export declare namespace GetHistoryVersions {
     };
     query: {
       contentType: UID.ContentType;
-      documentId?: Data.ID;
+      documentId?: Data.DocumentID;
       locale?: string;
     } & Partial<Pick<Pagination, 'page' | 'pageSize'>>;
   }
@@ -123,7 +123,7 @@ export declare namespace RestoreHistoryVersion {
   export type Response =
     | {
         data: {
-          documentId: HistoryVersionDataResponse['id'];
+          documentId: Data.DocumentID;
         };
         error?: never;
       }

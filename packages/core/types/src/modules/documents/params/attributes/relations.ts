@@ -5,7 +5,7 @@ import type { If } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
 
-type ShortHand = ID;
+type ShortHand = ID | DocumentID;
 type LongHandEntity = { id: ID };
 type LongHandDocument = { documentId: DocumentID; locale?: string };
 type LongHand = LongHandEntity | LongHandDocument;

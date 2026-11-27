@@ -1,4 +1,4 @@
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 import type { OpenAPIV3 } from 'openapi-types';
 
 export interface Config {
@@ -17,7 +17,7 @@ export type PluginConfig = OpenAPIV3.Document & {
 };
 
 export interface ApiInfo {
-  uid: string;
+  uid: UID.ContentType;
   routeInfo: Core.Router;
   attributes: Struct.SchemaAttributes;
   uniqueName: string;

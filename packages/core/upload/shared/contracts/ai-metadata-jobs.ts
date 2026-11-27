@@ -1,3 +1,5 @@
+import type { Data } from '@strapi/types';
+
 /**
  * AI Metadata Job types shared between admin and server
  */
@@ -11,7 +13,7 @@
  * it existed.
  */
 export interface AIMetadataJob {
-  id: number;
+  id: Data.ID;
   status: 'processing' | 'completed' | 'failed';
   createdAt: string;
   completedAt: string | null;

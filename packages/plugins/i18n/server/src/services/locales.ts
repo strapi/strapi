@@ -1,3 +1,4 @@
+import type { Data } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
@@ -5,7 +6,7 @@ import { getService, getCoreStore } from '../utils';
 const find = (params: any = {}) =>
   strapi.db.query('plugin::i18n.locale').findMany({ where: params });
 
-const findById = (id: any) => strapi.db.query('plugin::i18n.locale').findOne({ where: { id } });
+const findById = (id: Data.ID) => strapi.db.query('plugin::i18n.locale').findOne({ where: { id } });
 
 const findByCode = (code: any) =>
   strapi.db.query('plugin::i18n.locale').findOne({ where: { code } });
@@ -50,7 +51,7 @@ const update = async (params: any, updates: any) => {
   return result;
 };
 
-const deleteFn = async ({ id }: any) => {
+const deleteFn = async ({ id }: { id: Data.ID }) => {
   const localeToDelete = await findById(id);
 
   if (localeToDelete) {

@@ -1,5 +1,5 @@
 import { contentTypes, errors } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { FILE_MODEL_UID, FOLDER_MODEL_UID } from './constants';
 import { resolveFileId } from './services/upload';
@@ -127,7 +127,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
           },
 
           // GraphQL `ID` arrives as a string: a numeric id or a documentId
-          async resolve(parent: unknown, args: { id: string; info: any }) {
+          async resolve(parent: unknown, args: { id: Data.ID | Data.DocumentID; info: any }) {
             const { id, info } = args;
 
             const fileId = await resolveFileId(strapi, id);
@@ -150,7 +150,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
             id: nonNull('ID'),
           },
 
-          async resolve(parent: unknown, args: { id: string }) {
+          async resolve(parent: unknown, args: { id: Data.ID | Data.DocumentID }) {
             const { id } = args;
 
             const fileId = await resolveFileId(strapi, id);

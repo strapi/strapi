@@ -46,7 +46,7 @@ type PublishActionRef = DraftRef & Pick<ReleaseAction, 'id' | 'type'>;
 
 // Identifies an entry in one locale (or the only one, for a content type that isn't localized)
 export const getEntryKey = (
-  contentType: string,
+  contentType: UID.ContentType,
   documentId: string | undefined,
   locale?: string | null
 ) => JSON.stringify([contentType, documentId, locale ?? null]);

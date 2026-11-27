@@ -10,7 +10,7 @@ import { shapeRelationsForMcp } from './sanitizers/shape-relations';
  * content-type name differ, so both are kept to stay unique within the api);
  * `plugin::i18n.locale` → `plugin-i18n_locale`.
  */
-export const slugifyUidForMcpToolName = (uid: string): string => {
+export const slugifyUidForMcpToolName = (uid: UID.ContentType): string => {
   const [namespace, modelName] = uid.split('::');
   const parts = modelName.split('.').map((part) => part.toLowerCase());
 
@@ -73,7 +73,7 @@ export const ok = (
  */
 export const describeTool = (params: {
   apiID: string;
-  uid: string;
+  uid: UID.ContentType;
   operation: string;
 }): { title: string; description: string } => {
   const { apiID, uid, operation } = params;

@@ -1,3 +1,5 @@
+import type * as Data from '../data';
+
 export interface Webhook {
   id: string;
   name: string;
@@ -20,8 +22,8 @@ export interface WebhookStore {
   listAllowedEvents(): string[];
   getAllowedEvent(key: string): string | undefined;
   findWebhooks(): Promise<Webhook[]>;
-  findWebhook(id: string): Promise<Webhook | null>;
+  findWebhook(id: Data.ID): Promise<Webhook | null>;
   createWebhook(data: Webhook): Promise<Webhook>;
-  updateWebhook(id: string, data: Webhook): Promise<Webhook | null>;
-  deleteWebhook(id: string): Promise<Webhook | null>;
+  updateWebhook(id: Data.ID, data: Webhook): Promise<Webhook | null>;
+  deleteWebhook(id: Data.ID): Promise<Webhook | null>;
 }

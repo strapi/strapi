@@ -8,7 +8,7 @@ import {
   parseHasPublishedVersionQueryParam,
   hasPublishedVersionBooleanToPublicationFilterMode,
 } from '@strapi/utils';
-import type { Modules, UID } from '@strapi/types';
+import type { Data, Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
@@ -30,7 +30,7 @@ const getDocumentIdsByDraftPublishRelation = async (
     locale?: string | string[] | null;
     type: 'modified' | 'unmodified';
   }
-): Promise<string[]> => {
+): Promise<Data.DocumentID[]> => {
   const schema = strapi.getModel(uid);
   if (!contentTypes.hasDraftAndPublish(schema)) {
     return [];
@@ -57,7 +57,7 @@ const getDocumentIdsByDraftPublishRelation = async (
     publishedByKey.set(key, { updatedAt: p.updatedAt as string });
   }
 
-  const ids: string[] = [];
+  const ids: Data.DocumentID[] = [];
   const wantModified = opts.type === 'modified';
   for (const d of drafts) {
     const key = `${d.documentId}\t${String(d?.locale ?? '')}`;
@@ -67,7 +67,7 @@ const getDocumentIdsByDraftPublishRelation = async (
       const pUpdated = pub?.updatedAt ? new Date(pub.updatedAt).getTime() : 0;
       const isModified = dUpdated > pUpdated;
       if (isModified === wantModified) {
-        ids.push(d.documentId as string);
+        ids.push(d.documentId as Data.DocumentID);
       }
     }
   }
@@ -120,7 +120,7 @@ const normalizeStatusFromFilters = (query: Record<string, unknown>): void => {
 /** Returns filters object that merges existing $and with a documentId $in filter. */
 const mergeDocumentIdFilter = (
   existingFilters: Record<string, unknown> | undefined,
-  documentIds: string[]
+  documentIds: Data.DocumentID[]
 ): Record<string, unknown> => {
   const documentIdFilter = {
     documentId: documentIds.length > 0 ? { $in: documentIds } : { $in: [] },
@@ -752,7 +752,7 @@ export default {
 
   async bulkFindForValidation(ctx: any) {
     const { userAbility } = ctx.state;
-    const { model } = ctx.params;
+    const { model }: { model: UID.CollectionType } = ctx.params;
     const { documentIds, locale, sort } = ctx.request.body;
 
     await validateBulkActionInput(ctx.request.body);
@@ -763,9 +763,9 @@ export default {
       return ctx.forbidden();
     }
 
-    const populate = await buildDeepPopulate(model as UID.CollectionType);
+    const populate = await buildDeepPopulate(model);
 
-    const documents = await strapi.documents(model as UID.CollectionType).findMany({
+    const documents = await strapi.documents(model).findMany({
       populate,
       filters: { documentId: { $in: documentIds } } as any,
       locale,
@@ -1071,7 +1071,7 @@ export default {
 
   async countManyEntriesDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
-    const ids = ctx.request.query.documentIds as string[];
+    const ids = ctx.request.query.documentIds as Data.DocumentID[];
     const locale = ctx.request.query.locale as string[];
     const { model } = ctx.params;
 

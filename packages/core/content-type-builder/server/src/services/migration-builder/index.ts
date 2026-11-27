@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 /**
  * The CTB-level attribute definition of the *new* side of a rename hop (the
@@ -43,7 +43,7 @@ export type UnsupportedRenameReason =
   | 'target-occupied';
 
 export interface UnsupportedRename {
-  uid: string;
+  uid: UID.Schema;
   oldName: string;
   newName: string;
   reason: UnsupportedRenameReason;
@@ -249,12 +249,12 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // produced; the value records how that field resolves to a physical artifact
   // and its current `from` identifier, so a continuation hop replays from the
   // right place instead of being treated as a brand-new, unknown attribute.
-  const inFlight = new Map<string, Map<string, Resolved>>();
+  const inFlight = new Map<UID.Schema, Map<string, Resolved>>();
 
   // CTB-level definition of each in-flight field (per uid, by logical name), so
   // a continuation hop can still be checked for a storage change against the
   // definition the chain started from.
-  const inFlightDefinitions = new Map<string, Map<string, RenameAttributeDefinition>>();
+  const inFlightDefinitions = new Map<UID.Schema, Map<string, RenameAttributeDefinition>>();
 
   // Logical names vacated by an earlier accepted hop of this batch (per uid). A
   // refused hop never vacates its source: the artifact stays live until schema
@@ -264,16 +264,16 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // not happened yet, so renaming onto it would collide and the runtime guard
   // would silently skip the hop. Refusing it here surfaces the problem (e.g. a
   // truncated chain sent by a client) instead of losing data.
-  const vacated = new Map<string, Set<string>>();
+  const vacated = new Map<UID.Schema, Set<string>>();
 
-  const isTargetOccupied = (uid: string, newName: string): boolean => {
+  const isTargetOccupied = (uid: UID.Schema, newName: string): boolean => {
     if (inFlight.get(uid)?.has(newName)) {
       return true;
     }
     return Boolean(schemaAttributeOf(uid, newName)) && !(vacated.get(uid)?.has(newName) ?? false);
   };
 
-  const trackVacated = (uid: string, oldName: string, newName: string): void => {
+  const trackVacated = (uid: UID.Schema, oldName: string, newName: string): void => {
     let names = vacated.get(uid);
     if (!names) {
       names = new Set<string>();
@@ -284,7 +284,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     names.delete(newName);
   };
 
-  const markInFlight = (uid: string, name: string, resolved: Resolved): void => {
+  const markInFlight = (uid: UID.Schema, name: string, resolved: Resolved): void => {
     let entries = inFlight.get(uid);
     if (!entries) {
       entries = new Map<string, Resolved>();
@@ -294,9 +294,9 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   };
 
   // Per uid, logical origin name -> current name, folded over every received hop.
-  const origins = new Map<string, Map<string, string>>();
+  const origins = new Map<UID.Schema, Map<string, string>>();
 
-  const trackOrigin = (uid: string, oldName: string, newName: string): void => {
+  const trackOrigin = (uid: UID.Schema, oldName: string, newName: string): void => {
     let byOrigin = origins.get(uid);
     if (!byOrigin) {
       byOrigin = new Map<string, string>();
@@ -321,7 +321,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     typeof attribute.relation === 'string' && attribute.relation.startsWith('morph');
 
   const schemaModelOf = (
-    uid: string
+    uid: UID.Schema
   ): { attributes?: Record<string, RenameAttributeDefinition> } | undefined => {
     const contentTypes = strapi.contentTypes as Record<string, unknown> | undefined;
     const components = strapi.components as Record<string, unknown> | undefined;
@@ -329,8 +329,10 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       { attributes?: Record<string, RenameAttributeDefinition> } | undefined;
   };
 
-  const schemaAttributeOf = (uid: string, name: string): RenameAttributeDefinition | undefined =>
-    schemaModelOf(uid)?.attributes?.[name];
+  const schemaAttributeOf = (
+    uid: UID.Schema,
+    name: string
+  ): RenameAttributeDefinition | undefined => schemaModelOf(uid)?.attributes?.[name];
 
   /**
    * The type an attribute is stored as. Custom fields are sent by the admin as
@@ -352,7 +354,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
   };
 
-  const schemaTypeOf = (uid: string, name: string): string | undefined =>
+  const schemaTypeOf = (uid: UID.Schema, name: string): string | undefined =>
     schemaAttributeOf(uid, name)?.type;
 
   // Resolves the shared upload morph table (e.g. `files_related_morphs`) and its
@@ -385,7 +387,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * they inherit their classification from the in-flight map.
    */
   const classifyMedia = (
-    uid: string,
+    uid: UID.Schema,
     oldName: string,
     joinTable: JoinTableMeta | undefined,
     upload: ReturnType<typeof resolveUploadMorphTable>
@@ -468,7 +470,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * workflow stages…) are also in the metadata and would otherwise be renamed
    * away, only for sync to re-add them empty.
    */
-  const isRenamableAttribute = (uid: string, name: string): boolean => {
+  const isRenamableAttribute = (uid: UID.Schema, name: string): boolean => {
     const schemaAttribute = schemaAttributeOf(uid, name);
     // Same rule as payload validation applies to a hop's old name: `status` is
     // only reserved with draft and publish, and a legacy field may carry it.
@@ -483,7 +485,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     return !contentTypesUtils.getNonVisibleAttributes(model as SchemaModel).includes(name);
   };
 
-  const classify = (uid: string, oldName: string): Resolved => {
+  const classify = (uid: UID.Schema, oldName: string): Resolved => {
     if (!schemaAttributeOf(uid, oldName)) {
       return { kind: 'unsupported', reason: 'attribute-not-found' };
     }
@@ -527,7 +529,12 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * Computes the destination identifier for a resolved artifact given the new
    * field name, and the next in-flight state (with `from` advanced to `to`).
    */
-  const advance = (uid: string, resolved: Resolved, oldName: string, newName: string): Resolved => {
+  const advance = (
+    uid: UID.Schema,
+    resolved: Resolved,
+    oldName: string,
+    newName: string
+  ): Resolved => {
     const meta = db.metadata.get(uid);
     const comment = `${uid}: rename field "${oldName}" -> "${newName}"`;
 
@@ -596,7 +603,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * targets an occupied artifact, so no synthetic temporary name is ever needed
    * (a "swap" is already expressed by the user's own intermediate-name hop).
    */
-  const addRename = (uid: string, { oldName, newName, newAttribute }: RenameNames): void => {
+  const addRename = (uid: UID.Schema, { oldName, newName, newAttribute }: RenameNames): void => {
     // `metadata.get` throws when the model is unknown, so guard with `has` first.
     if (!db.metadata.has(uid)) {
       unsupported.push({ uid, oldName, newName, reason: 'model-not-found' });
@@ -660,7 +667,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   };
 
   return {
-    addRenameAttribute(uid: string, names: RenameNames): void {
+    addRenameAttribute(uid: UID.Schema, names: RenameNames): void {
       addRename(uid, names);
     },
 

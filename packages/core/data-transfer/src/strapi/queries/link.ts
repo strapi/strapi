@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 import { clone } from 'lodash';
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 import { ILink } from '../../types';
 
@@ -21,7 +21,7 @@ const getMetadataTableName = (strapi: Core.Strapi, uid: string) => {
   return metadata.tableName;
 };
 
-const refKey = (ref: number | string) => `${typeof ref}:${ref}`;
+const refKey = (ref: number | Data.DocumentID) => `${typeof ref}:${ref}`;
 
 /**
  * Batch-load which refs exist for a content type. Handles numeric `id` refs and
@@ -30,7 +30,7 @@ const refKey = (ref: number | string) => `${typeof ref}:${ref}`;
 const loadExistingRefs = async (
   strapi: Core.Strapi,
   uid: string,
-  refs: Array<number | string>
+  refs: Array<number | Data.DocumentID>
 ): Promise<Set<string>> => {
   const existing = new Set<string>();
 
@@ -41,7 +41,7 @@ const loadExistingRefs = async (
 
   const uniqueRefs = [...new Set(refs)];
   const numericIds = uniqueRefs.filter((ref): ref is number => typeof ref === 'number');
-  const documentIds = uniqueRefs.filter((ref): ref is string => typeof ref === 'string');
+  const documentIds = uniqueRefs.filter((ref): ref is Data.DocumentID => typeof ref === 'string');
 
   for (let i = 0; i < numericIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
     const chunk = numericIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
@@ -64,7 +64,7 @@ const loadExistingRefs = async (
 
     for (const row of rows) {
       if (row.documentId != null) {
-        existing.add(refKey(row.documentId as string));
+        existing.add(refKey(row.documentId as Data.DocumentID));
       }
     }
   }
@@ -141,7 +141,10 @@ export const createLinkQuery = (
       return schemaName ? `${schemaName}.${tableName}` : tableName;
     };
 
-    async function* generateAllForAttribute(uid: string, fieldName: string): AsyncGenerator<ILink> {
+    async function* generateAllForAttribute(
+      uid: UID.Schema,
+      fieldName: string
+    ): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
       if (!metadata) {
@@ -464,7 +467,7 @@ export const createLinkQuery = (
       }
     }
 
-    async function* generateAll(uid: string): AsyncGenerator<ILink> {
+    async function* generateAll(uid: UID.Schema): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
       if (!metadata) {
@@ -607,7 +610,7 @@ export const filterValidRelationalAttributes = (attributes: Record<string, any>)
     .reduce<Record<string, any>>((acc, [key, attribute]) => ({ ...acc, [key]: attribute }), {});
 };
 
-const getLinkKind = (attribute: any, uid: string): ILink['kind'] => {
+const getLinkKind = (attribute: any, uid: UID.Schema): ILink['kind'] => {
   if (attribute.relation.startsWith('morph')) {
     return 'relation.morph';
   }

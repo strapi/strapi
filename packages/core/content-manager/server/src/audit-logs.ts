@@ -8,13 +8,13 @@ export const AUDITED_EVENTS = {
 interface EntryResource extends Modules.AuditLogs.Resource {
   type: 'entry';
   uid: UID.ContentType;
-  id: string;
+  id: Data.DocumentID;
 }
 
 /** The payload of the existing entry.draft-discard event, emitted by the document service. */
 export interface DraftDiscardEvent {
   uid: UID.ContentType;
-  entry: { documentId: string; locale?: string | null };
+  entry: { documentId: Data.DocumentID; locale?: string | null };
 }
 
 export interface DraftDiscardDetails {
@@ -23,7 +23,7 @@ export interface DraftDiscardDetails {
 
 export interface HistoryRestoreEvent {
   uid: UID.ContentType;
-  documentId: string;
+  documentId: Data.DocumentID;
   locale: string | null;
   versionId: Data.ID;
   versionCreatedAt: string;

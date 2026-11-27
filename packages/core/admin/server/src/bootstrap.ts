@@ -1,6 +1,6 @@
 import { map, merge, difference, isEmpty } from 'lodash';
 
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { async, quoteForLog } from '@strapi/utils';
 import { getService } from './utils';
 import {
@@ -85,11 +85,11 @@ export const registerModelHooks = () => {
         where: { roles: { id: role.id } },
         select: ['id'],
       });
-      event.state.affectedUserIds = users.map((u: { id: unknown }) => u.id);
+      event.state.affectedUserIds = users.map((u: { id: Data.ID }) => u.id);
     },
     async afterDelete(event) {
-      for (const userId of (event.state.affectedUserIds as unknown[]) ?? []) {
-        await getService('api-token-admin').syncPermissionsForUser(userId as string | number);
+      for (const userId of (event.state.affectedUserIds as Data.ID[]) ?? []) {
+        await getService('api-token-admin').syncPermissionsForUser(userId);
       }
     },
   });

@@ -1,9 +1,9 @@
-import type { UID } from '@strapi/types';
+import type { Data as StrapiData, UID } from '@strapi/types';
 import type { ID } from './relations/utils/types';
 
 export type Data = {
   id?: ID | object;
-  documentId?: ID | object;
+  documentId?: StrapiData.DocumentID | object;
   [key: string]: any;
 };
 

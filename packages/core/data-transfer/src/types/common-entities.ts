@@ -23,7 +23,7 @@ export interface IEntity<T extends UID.ContentType = UID.ContentType> {
    * Reference of the entity.
    * Might be deprecated and replaced by a "ref" or "reference" property in the future
    */
-  id: number;
+  id: Data.ID;
 
   /**
    * The entity data (attributes value)
@@ -64,7 +64,7 @@ interface IDefaultLink {
     /**
      * Reference ID of the entity (numeric row id, or document id for joinColumn targets)
      */
-    ref: number | string;
+    ref: number | Data.DocumentID;
     /**
      * Field used to hold the link in the entity
      */
@@ -88,7 +88,7 @@ interface IDefaultLink {
     /**
      * Reference ID of the entity (numeric row id, or document id for joinColumn targets)
      */
-    ref: number | string;
+    ref: number | Data.DocumentID;
     /**
      * Field used to hold the link in the entity
      */
@@ -130,7 +130,7 @@ export interface IConfiguration<T = unknown> {
 }
 
 export interface IFile {
-  id: number;
+  id: Data.ID;
   name: string;
   alternativeText?: string;
   caption?: string;

@@ -274,7 +274,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     entityId,
   }: HistoryOriginAuthor): Promise<string | null> => {
     const author: { documentId: string } | null = await strapi.db
-      .query(model as UID.Schema)
+      .query(model)
       .findOne({ select: ['documentId'], where: { id: entityId } });
 
     return author?.documentId ?? null;
@@ -495,7 +495,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const buildRelationReponse = async (
     values: {
-      documentId: string;
+      documentId: Data.DocumentID;
       locale: string | null;
     }[],
     attributeSchema: Schema.Attribute.RelationWithTarget

@@ -1,11 +1,12 @@
-// TODO: Shorthand id should only be a string on documents.
-// It's also a number here to make it works with existing V4 types.
-export type ID = string | number;
-export type ShortHand = ID;
+import type { Data } from '@strapi/types';
+
+export type ID = Data.ID;
+// Shorthand is a document ID, or a numeric entry id (see `isNumeric` in map-relation)
+export type ShortHand = Data.ID | Data.DocumentID;
 // Relation can be connected either with an id or document ID
 export type LongHandEntity = { id: ID; position?: object };
 export type LongHandDocument = {
-  documentId: ID;
+  documentId: Data.DocumentID;
   locale?: string;
   status?: 'draft' | 'published';
   position?: object;
