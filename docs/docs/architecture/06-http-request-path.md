@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.
   - The statement that `strapi::session` adds `koa-session` before every listed middleware comes from reading `registerApplicationMiddlewares` and the session factory. No test confirms it.
   - The page does not cover the GraphQL plugin request path or the upload plugin `/uploads` route.
-  - The `factories.defineRoute` and `factories.parseRouteInput` paragraphs in "Validation and sanitization" describe a spike. They need a review when the design is settled.
+  - The `factories.defineRoute` paragraphs in "Validation and sanitization" describe a spike. They need a review when the design is settled.
 ---
 
 This page follows one HTTP request through the server, from the Koa app to the response body. It covers the Content API (`/api/...`) and the admin API. What happens inside the Document Service is in [Document write path](./05-document-write-path.md). Tokens and sessions are in [Sessions and JWT](./08-authentication.md).
@@ -218,10 +218,10 @@ Validation runs first, so a client gets a clear 400 for bad input. Sanitization 
 
 The Zod schemas in `route.request` and `route.response` are not a request validator. `createCoreRouter` builds them with `CoreContentTypeRouteValidator` from the content type schema. At runtime, Strapi only uses them to validate or sanitize the extra params added with `addQueryParams` and `addInputParams`, and to accept those keys in strict mode. `@strapi/openapi` uses them to generate the OpenAPI document.
 
-Two opt-in helpers in [`factories.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts) parse a request with the `request` schemas of its route:
+A route opts in to request parsing when it is defined with `factories.defineRoute` ([`factories.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts)). The helper checks the schemas when the route is defined and returns the route with a `parseInput(ctx)` function that is not enumerable, so route listings, serialization and copies of the route do not carry it.
 
-- `factories.defineRoute(route)` wraps the function handler of the route. The wrapper puts the parsed request on `ctx.input`, then calls the handler. It checks the schemas when the route is defined.
-- `factories.parseRouteInput(ctx, route)` returns the parsed request to a controller action that a route references by name. Such a route keeps the scope Strapi generates from its handler (see [Route config](#route-config)), which a function handler does not get. The schemas are checked on the first request.
+- With a function handler, the helper wraps the handler. The wrapper puts the parsed request on `ctx.input`, then calls the handler.
+- With a string handler, the route keeps the scope Strapi generates from the handler name (see [Route config](#route-config)), which a function handler does not get. The controller action calls `route.parseInput(ctx)` with the route it imports from the routes file.
 
 Both parse inside the handler, so after the policies and the route middlewares (step 7 of [the route chain](#the-route-chain)). A request that fails authentication gets its 401 or 403 before any 400. The parser in [`services/server/validated-input.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/validated-input.ts) works as follows:
 
@@ -232,7 +232,7 @@ Both parse inside the handler, so after the policies and the route middlewares (
 
 `defineRoute` also throws when a `params`, `query` or form body schema can never parse a string (such as `z.number()` or `z.coerce.boolean()`), when a body media type is not exact (such as `application/*`), and when OpenAPI cannot convert a schema (such as `.transform()`).
 
-`ctx.params`, `ctx.query` and `ctx.request.body` keep their raw values. Routes that use neither helper are not parsed.
+`ctx.params`, `ctx.query` and `ctx.request.body` keep their raw values. Routes not defined with the helper are not parsed.
 
 The Document Service runs the entity validator on every write. See [Document write path](./05-document-write-path.md#validation).
 
