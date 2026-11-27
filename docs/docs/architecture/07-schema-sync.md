@@ -55,6 +55,8 @@ flowchart TD
 | `component`      | `oneToOne` (single) or `oneToMany` (repeatable) to the component UID     | The `<collection>_cmps` join table                                                |
 | `dynamiczone`    | `morphToMany`                                                            | The same `<collection>_cmps` table. `component_type` holds the component UID.     |
 
+Before the transform, `Strapi.bootstrap()` calls [`validateDynamicZoneComponents()`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/validate-dynamic-zone-components.ts). The `morphToMany` of a dynamic zone has no target, so the database metadata never checks the component UIDs it lists. A `component` attribute has a target, and `loadModels()` throws `Metadata for "<uid>" not found` when it is missing. The check gives dynamic zones the same guarantee: when a dynamic zone lists a component that is not registered, boot stops with `Dynamic zone attribute "<attribute>" of "<schema uid>" references an unknown component: "<component uid>"`.
+
 The transform also does these things:
 
 - It adds `id` (`increments`) to every model and `documentId` to each content type. Components have no `documentId`.

@@ -106,7 +106,7 @@ The `admin` `register` runs before any plugin or API `register`, because provide
 `strapi.bootstrap()` runs these steps:
 
 1. It configures the global HTTP proxy from `server.proxy`.
-2. It builds the database models from all content types and components, plus the entries of the `models` registry.
+2. It checks that every component listed by a dynamic zone is registered, and throws if one is not. Then it builds the database models from all content types and components, plus the entries of the `models` registry.
 3. It calls `strapi.db.init({ models })`.
 4. It reads the previous content-type schemas from the core store, if the core store table exists.
 5. It calls the `strapi::content-types.beforeSync` hook with `{ oldContentTypes, contentTypes }`.

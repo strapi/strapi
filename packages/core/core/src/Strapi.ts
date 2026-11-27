@@ -475,11 +475,12 @@ class Strapi extends Container implements Core.Strapi {
   async bootstrap() {
     this.configureGlobalProxy();
 
+    const schemas = [...Object.values(this.contentTypes), ...Object.values(this.components)];
+
+    utils.validateDynamicZoneComponents(schemas, this.components);
+
     const models = [
-      ...utils.transformContentTypesToModels(
-        [...Object.values(this.contentTypes), ...Object.values(this.components)],
-        this.db.metadata.identifiers
-      ),
+      ...utils.transformContentTypesToModels(schemas, this.db.metadata.identifiers),
       ...this.get('models').get(),
     ];
 
