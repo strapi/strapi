@@ -22,6 +22,7 @@ import type {
 import type { Release } from '../../../shared/contracts/releases';
 
 export const COLLAPSED_ENTRIES_COUNT = 10;
+export const MAX_LOADED_SKIPPED_ENTRIES = 1000;
 
 /**
  * The query for the skipped entries the panel lists. The details page sends the same one, so
@@ -61,12 +62,26 @@ export const CreateReleaseFromSkippedDrawer = ({
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [createRelease, { isLoading: isSubmitting }] = useCreateReleaseFromSkippedEntriesMutation();
-  const {
-    data: skippedData,
-    isLoading: isLoadingEntries,
-    isError: isEntriesError,
-    error: entriesError,
-  } = useGetReleaseActionsQuery(getSkippedEntriesQuery(release.id), { skip: !open });
+  const firstPage = useGetReleaseActionsQuery(getSkippedEntriesQuery(release.id), { skip: !open });
+  const total = firstPage.data?.meta.pagination.total ?? 0;
+  // Past the first page, every skipped entry is loaded in one request, up to a limit: the server
+  // populates each entry deeply, one query per entry
+  const canLoadEveryEntry =
+    firstPage.data !== undefined &&
+    !hasLoadedEveryEntry(firstPage.data) &&
+    total <= MAX_LOADED_SKIPPED_ENTRIES;
+  const everyEntry = useGetReleaseActionsQuery(
+    { ...getSkippedEntriesQuery(release.id), pageSize: total },
+    { skip: !open || !canLoadEveryEntry }
+  );
+  // Without every entry (too many, or the request failed), the first page is listed and the
+  // release is still created from every skipped entry: only removing them needs the full list
+  const skippedData = (canLoadEveryEntry && everyEntry.data) || firstPage.data;
+  const isEntriesError = firstPage.isError;
+  const entriesError = firstPage.error;
+  const isLoadingEntries =
+    firstPage.isLoading ||
+    (canLoadEveryEntry && everyEntry.data === undefined && !everyEntry.isError);
   const { data: settings } = useGetReleaseSettingsQuery(undefined, { skip: !open });
   const [removedIds, setRemovedIds] = React.useState<Set<FormattedReleaseAction['id']>>(new Set());
   const [isExpanded, setIsExpanded] = React.useState(false);
@@ -192,6 +207,14 @@ export const CreateReleaseFromSkippedDrawer = ({
                 </TextButton>
               )}
             </div>
+            {!canRemoveEntries && (
+              <p className="pb-3 text-xs text-muted-foreground">
+                {formatMessage({
+                  id: 'content-releases.skipped-drawer.entries.not-all-listed',
+                  defaultMessage: "Not every entry could be listed, so entries can't be removed.",
+                })}
+              </p>
+            )}
             <ul id={entriesListId} className="flex flex-col gap-2">
               {visibleEntries.map((action) => (
                 <CarriedOverEntry
