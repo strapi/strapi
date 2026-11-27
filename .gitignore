@@ -180,6 +180,7 @@ CLAUDE.local.md
 ############################
 # Strapi
 ############################
+/.enterprise
 examples/**/types/generated
 .nx/cache
 .nx/workspace-data
