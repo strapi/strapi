@@ -2,6 +2,7 @@ import { test, expect } from '../../../fixtures';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetFiles } from '../../../utils/file-reset';
 import { login, loginWithApi } from '../../../utils/login';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
@@ -545,10 +546,20 @@ test.describe('Edit view', () => {
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
   });
+});
 
-  test('As a user I want to see non translatable fields pre-filled when creating a new locale of a document', async ({
-    page,
-  }) => {
+test.describe('Edit view non-localized fields', () => {
+  test.describe.configure({ timeout: 500000 });
+
+  test.beforeAll(async ({ browser }) => {
+    const baseURL = test.info().project.use.baseURL!;
+    const context = await browser.newContext({ baseURL });
+    const page = await context.newPage();
+
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
+    await page.goto('/admin');
+
     await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
     await page.getByRole('button', { name: /add another field to this collection type/i }).click();
     await page
@@ -561,7 +572,21 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
 
-    // Create a new entry in the english locale
+    await context.close();
+  });
+
+  test.afterAll(async () => {
+    await resetFiles();
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await loginWithApi({ page });
+    await page.goto('/admin');
+  });
+
+  test('As a user I want to see non translatable fields pre-filled when creating a new locale of a document', async ({
+    page,
+  }) => {
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.getByRole('link', { name: 'Create new entry' }).first().click();
     await page.getByLabel('name').fill('Translatable name (only for this locale)');
@@ -569,24 +594,15 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Saved Document');
 
-    // Switch to french locale
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'French (fr)' }).click();
 
-    // The non translatable field should be pre-filled with the value from the english locale
     await expect(page.getByLabel('nonTranslatableField')).toHaveValue(
       'Non translatable value (for all locales)'
     );
-    // The translatable field should be empty though
     await expect(page.getByLabel('name')).toHaveValue('');
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Saved Document');
-
-    // Remove the field from the content type
-    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
-    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
-    await page.getByRole('button', { name: 'Save' }).click();
-    await waitForRestart(page);
   });
 
   /**
@@ -597,20 +613,6 @@ test.describe('Edit view', () => {
   test('non-localized fields remain pre-filled when revisiting an unsaved locale draft', async ({
     page,
   }) => {
-    // Add a non-localized field to the Products content type
-    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
-    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
-    await page
-      .getByRole('button', { name: 'Text Small or long text like title or description' })
-      .click();
-    await page.getByLabel('Name', { exact: true }).fill('nonTranslatableField');
-    await page.getByRole('tab', { name: 'Advanced settings' }).click();
-    await page.getByLabel('Enable localization for this').click();
-    await page.getByRole('button', { name: 'Finish' }).click();
-    await page.getByRole('button', { name: 'Save' }).click();
-    await waitForRestart(page);
-
-    // Create and save a new entry in the English locale
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.getByRole('link', { name: 'Create new entry' }).first().click();
     await page.getByLabel('name').fill('Revisit product');
@@ -618,13 +620,11 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Saved Document');
 
-    // Go to the unsaved French locale draft; non-localized field should be inherited
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'French (fr)' }).click();
     await expect(page.getByLabel('nonTranslatableField')).toHaveValue('Shared across locales');
     await expect(page.getByLabel('name')).toHaveValue('');
 
-    // Switch back to English without saving French draft
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'English (en)' }).click();
     await page
@@ -633,22 +633,10 @@ test.describe('Edit view', () => {
       .click();
     await expect(page.getByLabel('name')).toHaveValue('Revisit product');
 
-    // Switch again to French locale; non-localized field should still be pre-filled
     // Previously this would fail—field would be empty because prefill effect didn't rerun
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'French (fr)' }).click();
     await expect(page.getByLabel('nonTranslatableField')).toHaveValue('Shared across locales');
     await expect(page.getByLabel('name')).toHaveValue('');
-
-    // Cleanup: remove the non-localized field so other tests are not affected
-    await page.locator('role=link[name^="Content-Type Builder"]').last().click();
-    await page
-      .getByRole('alertdialog', { name: 'Confirmation' })
-      .getByRole('button', { name: 'Confirm' })
-      .click();
-    await navToHeader(page, ['Products'], 'Products');
-    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
-    await page.getByRole('button', { name: 'Save' }).click();
-    await waitForRestart(page);
   });
 });
