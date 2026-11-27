@@ -1,4 +1,4 @@
-import { describe, it, test, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it, test, expect, vi } from 'vitest';
 import { errors as databaseErrors } from '@strapi/database';
 import { errors } from '@strapi/utils';
 
@@ -107,5 +107,51 @@ describe('databaseErrorsMiddleware', () => {
     const next = vi.fn(() => Promise.reject(error));
 
     await expect(databaseErrorsMiddleware({} as any, next)).rejects.toBe(error);
+  });
+
+  describe('once Strapi is destroyed', () => {
+    const globalWithStrapi = global as unknown as { strapi?: unknown };
+    const ctx = { uid: 'api::article.article', action: 'findMany', params: {} };
+    let previousStrapi: unknown;
+
+    beforeEach(() => {
+      previousStrapi = globalWithStrapi.strapi;
+    });
+
+    afterEach(() => {
+      globalWithStrapi.strapi = previousStrapi;
+    });
+
+    test('says Strapi is not available instead of "strapi is not defined"', async () => {
+      delete globalWithStrapi.strapi;
+      const error = new ReferenceError('strapi is not defined');
+      const next = vi.fn(() => Promise.reject(error));
+
+      const result = databaseErrorsMiddleware(ctx, next);
+
+      await expect(result).rejects.toThrow(
+        new Error(
+          "Cannot run strapi.documents('api::article.article').findMany(): Strapi is not available " +
+            '(it was destroyed or never created). The document service needs a loaded Strapi instance.'
+        )
+      );
+      await expect(result).rejects.toHaveProperty('cause', error);
+    });
+
+    test('rethrows an unrelated reference error unchanged', async () => {
+      delete globalWithStrapi.strapi;
+      const error = new ReferenceError('foo is not defined');
+      const next = vi.fn(() => Promise.reject(error));
+
+      await expect(databaseErrorsMiddleware(ctx, next)).rejects.toBe(error);
+    });
+
+    test('rethrows a reference error unchanged while Strapi is available', async () => {
+      globalWithStrapi.strapi = {};
+      const error = new ReferenceError('foo is not defined');
+      const next = vi.fn(() => Promise.reject(error));
+
+      await expect(databaseErrorsMiddleware(ctx, next)).rejects.toBe(error);
+    });
   });
 });

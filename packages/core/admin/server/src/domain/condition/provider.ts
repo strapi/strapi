@@ -20,7 +20,9 @@ const createConditionProvider = () => {
 
     async register(conditionAttributes: CreateConditionPayload) {
       if (strapi.isLoaded) {
-        throw new Error(`You can't register new conditions outside of the bootstrap function.`);
+        throw new Error(
+          `You can't register new conditions after Strapi has loaded. Register conditions in a register or bootstrap function.`
+        );
       }
 
       const condition = domain.create(conditionAttributes);

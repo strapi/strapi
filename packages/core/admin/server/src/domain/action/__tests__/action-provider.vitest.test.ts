@@ -82,7 +82,7 @@ describe('Action Provider', () => {
         const register = () => actionProvider.register(attributes);
 
         await expect(register()).rejects.toThrowError(
-          `You can't register new actions outside of the bootstrap function.`
+          `You can't register new actions after Strapi has loaded. Register actions in a register or bootstrap function.`
         );
       });
 
@@ -282,7 +282,7 @@ describe('Action Provider', () => {
           ]);
 
         await expect(registerAll()).rejects.toThrowError(
-          `You can't register new actions outside of the bootstrap function.`
+          `You can't register new actions after Strapi has loaded. Register actions in a register or bootstrap function.`
         );
         expect(actionProvider.size()).toBe(0);
       });

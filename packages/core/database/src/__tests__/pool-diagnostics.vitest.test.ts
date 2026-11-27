@@ -193,17 +193,25 @@ describe('Database pool timeout diagnostics', () => {
     await database.connection.destroy();
   });
 
-  it('removes the wrapper on destroy', async () => {
+  it('stops describing pool timeouts after destroy', async () => {
     const logger = createLogger();
     const database = createDb(logger);
-    expect(
-      Object.prototype.hasOwnProperty.call(database.connection.client, 'acquireConnection')
-    ).toBe(true);
 
     await database.destroy();
+    // A new pool on the same client: a timeout on it reaches no diagnostics wrapper
+    database.connection.initialize();
 
-    expect(
-      Object.prototype.hasOwnProperty.call(database.connection.client, 'acquireConnection')
-    ).toBe(false);
+    try {
+      const error = (await queryOutsideTheTransaction(database).catch(
+        (e: Error) => e
+      )) as Annotated;
+
+      expect(error).toBeInstanceOf(knex.KnexTimeoutError);
+      expect(error.message).toBe(ACQUIRE_TIMEOUT_MESSAGE);
+      expect(error.details).toBeUndefined();
+      expect(blocks(logger)).toHaveLength(0);
+    } finally {
+      await database.connection.destroy();
+    }
   });
 });
