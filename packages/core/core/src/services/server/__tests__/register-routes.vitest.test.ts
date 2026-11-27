@@ -73,20 +73,23 @@ describe('registerPluginRoutes', () => {
       expect(second.config?.auth).toEqual({ scope: ['plugin::my-plugin.controller.findOne'] });
     });
 
-    test('passes the same route array to applyExtraParamsToRoutes and server.routes', () => {
-      const { serverRoutes, applyExtraParamsToRoutes, first, second } = setup();
+    test('registers the same route objects as one admin router', () => {
+      const { serverRoutes, first, second } = setup();
 
-      expect(applyExtraParamsToRoutes).toHaveBeenCalledTimes(1);
       expect(serverRoutes).toHaveBeenCalledTimes(1);
 
-      const [extraParamsRoutes] = applyExtraParamsToRoutes.mock.calls[0];
       const [router] = serverRoutes.mock.calls[0];
 
-      expect(router.routes).toBe(extraParamsRoutes);
       expect(router.routes[0]).toBe(first);
       expect(router.routes[1]).toBe(second);
       expect(router.type).toBe('admin');
       expect(router.prefix).toBe('/my-plugin');
+    });
+
+    test('does not merge content API extra params into the admin routes', () => {
+      const { applyExtraParamsToRoutes } = setup();
+
+      expect(applyExtraParamsToRoutes).not.toHaveBeenCalled();
     });
   });
 
@@ -147,13 +150,18 @@ describe('registerPluginRoutes', () => {
     });
 
     test('registers each instantiated router and its routes', () => {
-      const { serverRoutes, applyExtraParamsToRoutes, declared, built } = setup();
+      const { serverRoutes, declared, built } = setup();
 
       expect(serverRoutes.mock.calls.map(([router]) => router)).toEqual([declared, built]);
       expect(serverRoutes.mock.calls[0][0]).toBe(declared);
       expect(serverRoutes.mock.calls[1][0]).toBe(built);
+    });
+
+    test('merges content API extra params into content-api routers only', () => {
+      const { applyExtraParamsToRoutes, declared } = setup();
+
+      expect(applyExtraParamsToRoutes).toHaveBeenCalledTimes(1);
       expect(applyExtraParamsToRoutes.mock.calls[0][0]).toBe(declared.routes);
-      expect(applyExtraParamsToRoutes.mock.calls[1][0]).toBe(built.routes);
     });
   });
 });

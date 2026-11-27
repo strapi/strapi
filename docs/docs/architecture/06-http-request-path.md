@@ -95,7 +95,7 @@ For each route, the registration step also:
 
 - sets `route.info` to `{ apiName }` or `{ pluginName }` (`pluginName: 'admin'` for the admin package);
 - generates `config.auth.scope` when the handler is a string (see [Route config](#route-config));
-- for API and plugin routes, merges the extra params from `strapi.contentAPI.addQueryParams()` and `addInputParams()` into `route.request`.
+- for `content-api` routers of APIs and plugins, merges the extra params from `strapi.contentAPI.addQueryParams()` and `addInputParams()` into `route.request`. Admin routers, including a plugin router declared as a plain array, never get them.
 
 So the routers of a module change shape at this step: before it, a router is an object or a factory; after it, every router is an object. A plugin router declared as a plain array stays an array, and so does an API router file that exports an array of routes. Strapi passes such an API array to `strapi.server.routes()` as is, so its routes go on the root router: no `/api` prefix, no `apiName` and no generated scope. To read the routes of a module router in any phase, use `routesOf` and `isBuiltRouter` from [`@strapi/utils`](https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/module-routers.ts). `routesOf` returns an array of routes as is and never calls a factory: it returns the routes a factory exposes as `.routes` (the factories of `createContentApiRoutesFactory` do), or none. For a router object without routes, such as a router file that exports `{}`, it returns none.
 

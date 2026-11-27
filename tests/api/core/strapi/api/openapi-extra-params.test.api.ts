@@ -52,4 +52,11 @@ describe('OpenAPI – extra params from contentAPI.addQueryParams', () => {
     expect(Object.keys(document.paths ?? {}).length).toBeGreaterThan(0);
     expect(hasQueryParamInSpec(document, 'search')).toBe(true);
   });
+
+  it('does not add a content API query param to the admin spec', () => {
+    const { document } = generate(strapi, { type: 'admin' });
+
+    expect(Object.keys(document.paths ?? {}).length).toBeGreaterThan(0);
+    expect(hasQueryParamInSpec(document, 'search')).toBe(false);
+  });
 });

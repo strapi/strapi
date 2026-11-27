@@ -64,8 +64,8 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
         generateRouteScope(route);
         return Object.assign(route, { info: { pluginName } });
       });
-      strapi.contentAPI.applyExtraParamsToRoutes(routes);
 
+      // An array of routes is an admin router: content API extra params do not apply to it
       strapi.server.routes({
         type: 'admin',
         prefix: `/${pluginName}`,
@@ -84,7 +84,10 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
           generateRouteScope(route);
           route.info = { pluginName };
         });
-        strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
+        // Extra params from contentAPI.addQueryParams/addInputParams are for content API routes only
+        if (router.type === 'content-api') {
+          strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
+        }
 
         strapi.server.routes(router);
       }
