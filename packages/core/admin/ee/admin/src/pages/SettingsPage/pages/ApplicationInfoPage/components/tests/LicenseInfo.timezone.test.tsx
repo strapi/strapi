@@ -42,6 +42,6 @@ describe('LicenseInfoEE west of UTC', () => {
   it('shows a UTC-midnight expiry as the same calendar day', async () => {
     render(<LicenseInfoEE />);
 
-    expect(await screen.findByText('License valid until 2026/12/31')).toBeInTheDocument();
+    expect(await screen.findByText('License valid until December 31, 2026')).toBeInTheDocument();
   });
 });
