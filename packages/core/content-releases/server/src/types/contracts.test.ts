@@ -136,7 +136,19 @@ type FormattedAction = Awaited<
 export type GroupActionsContractAssertions = [
   Expect<Equal<['release' extends keyof GroupedPageRow ? true : false], [false]>>,
   Expect<Equal<[GroupedPageRow['locale']], [FormattedAction['locale']]>>,
-  Expect<Equal<[GroupedPageRow['contentType']], [FormattedAction['contentType']]>>,
+  // Written out: the published declaration prints the inferred `mainFieldValue` as `any`.
+  Expect<
+    Equal<
+      [GroupedPageRow['contentType']],
+      [{ uid: UID.ContentType; displayName: string; mainFieldValue?: unknown }]
+    >
+  >,
+  Expect<
+    Equal<
+      [FormattedAction['contentType'] extends GroupedPageRow['contentType'] ? true : false],
+      [true]
+    >
+  >,
   Expect<Equal<[GroupedPageRow['entry']], [PageRowEntry | null]>>,
   Expect<Equal<[GroupedPageRow['status']], [ReleaseAction['status']]>>,
 ];
