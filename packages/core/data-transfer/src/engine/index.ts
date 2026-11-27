@@ -853,8 +853,8 @@ class TransferEngine<
     this.#closed = false;
 
     // A failed stream package load happens before any provider runs, so it must skip rollback
-    // and close: providers never bootstrapped, and file/directory rollback deletes an existing
-    // --file target.
+    // and close: providers never bootstrapped, and rollback deletes an archive or the export
+    // written at an existing --file path.
     let streamDepsLoaded = false;
 
     try {
