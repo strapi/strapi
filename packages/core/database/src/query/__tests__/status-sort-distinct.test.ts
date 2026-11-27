@@ -23,9 +23,15 @@ type BuildDbOptions = {
   uid?: string;
   tableName?: string;
   i18n?: boolean;
+  customStatus?: boolean;
 };
 
-const buildDb = ({ uid = UID, tableName = 'articles', i18n = false }: BuildDbOptions = {}) => {
+const buildDb = ({
+  uid = UID,
+  tableName = 'articles',
+  i18n = false,
+  customStatus = false,
+}: BuildDbOptions = {}) => {
   // Real pg knex instance — used purely to render the SQL string (no connection).
   const connection = knex({ client: 'pg' });
 
@@ -39,6 +45,10 @@ const buildDb = ({ uid = UID, tableName = 'articles', i18n = false }: BuildDbOpt
 
   if (i18n) {
     attributes.locale = { type: 'string', columnName: 'locale' };
+  }
+
+  if (customStatus) {
+    attributes.status = { type: 'string', columnName: 'status' };
   }
 
   const meta = {
@@ -101,6 +111,25 @@ const extractStatusCase = (clause: string) => {
 
   return match?.[0] ?? '';
 };
+
+describe('Sorting a custom status attribute', () => {
+  it.each([
+    ['a string sort', 'status', 'asc'],
+    ['an ascending object sort', { status: 'asc' }, 'asc'],
+    ['a descending object sort', { status: 'desc' }, 'desc'],
+  ] as const)('uses the status column for %s', (_description, orderBy, direction) => {
+    const { db, uid } = buildDb({ customStatus: true });
+    const qb = createQueryBuilder(uid, db);
+
+    qb.init({ orderBy, limit: 10, offset: 0 });
+
+    const { sql, orderClause } = getSqlParts(qb);
+
+    expect(orderClause).toContain(`"t0"."status" ${direction}`);
+    expect(sql).not.toContain('case when');
+    expect(orderClause).toContain('"t0"."id" asc');
+  });
+});
 
 describe('Status sort with DISTINCT (issue #26746)', () => {
   it('includes the status CASE expression in the SELECT list when DISTINCT is applied', () => {
