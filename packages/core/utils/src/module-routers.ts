@@ -56,7 +56,7 @@ export const isBuiltRouter = <
  * the factory. The routes a factory returns are known once Strapi registered the routes.
  *
  * A router file may also export an array of routes. It stays an array in every phase, and is
- * returned as is.
+ * returned as is. A router object without routes has none.
  */
 export const routesOf = <TRoute>(router: ModuleRouterLike<TRoute>): TRoute[] => {
   if (Array.isArray(router) === true) {
@@ -64,7 +64,8 @@ export const routesOf = <TRoute>(router: ModuleRouterLike<TRoute>): TRoute[] => 
   }
 
   if (isBuiltRouter(router) === true) {
-    return router.routes;
+    // A router file may export an object without routes, e.g. `module.exports = {}`
+    return router.routes ?? [];
   }
 
   return router.routes ?? [];
