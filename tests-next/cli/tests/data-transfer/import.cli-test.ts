@@ -29,7 +29,9 @@ const counts = ({ entities }: ExportContent) => ({
 const seeded = { articles: 3, categories: 2, files: 2 };
 
 const ids = (content: ExportContent, type: string) =>
-  ofType(content.entities, type).map((entity) => entity.id);
+  ofType(content.entities, type)
+    .map((entity) => entity.id)
+    .sort((a, b) => a - b);
 
 let exportCount = 0;
 
