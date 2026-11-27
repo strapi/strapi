@@ -3,7 +3,14 @@ import type { IsStrict } from '../../../core/strictness';
 import type * as Params from '../params/document-engine';
 import type { Pick as ParamsPick } from '../params';
 
-import type { PublicationStatus, Result, StrictResult } from '.';
+import type {
+  IsOpenParams,
+  PublicationStatus,
+  Result,
+  StrictClosedResult,
+  StrictOpenResult,
+  StrictResult,
+} from '.';
 import type { ID } from '..';
 
 export type CountResult = { count: number };
@@ -31,7 +38,9 @@ type FixedStatusEntry<
   TStatus extends PublicationStatus,
 > = IsStrict extends false
   ? Result<TContentTypeUID, TParams>
-  : StrictResult<TContentTypeUID, Omit<TParams, 'status'>, TStatus>;
+  : IsOpenParams<TParams> extends true
+    ? StrictOpenResult<TContentTypeUID, TStatus>
+    : StrictClosedResult<TContentTypeUID, Omit<TParams, 'status'>, TStatus>;
 
 /** Document Service reads default to drafts (`status: 'draft'`). */
 export type FindMany<

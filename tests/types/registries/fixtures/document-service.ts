@@ -1,7 +1,14 @@
 // Document Service types on registered schemas. Its own program: the entries narrow every lookup.
 // Known gaps are `@ts-expect-error` cases with a comment: fixing one makes its directive unused.
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { factories, type Core, type Data, type Schema, type Struct } from '@strapi/strapi';
+import {
+  factories,
+  type Core,
+  type Data,
+  type Modules,
+  type Schema,
+  type Struct,
+} from '@strapi/strapi';
 
 interface ArticleSchema extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
@@ -262,6 +269,35 @@ declare const coreChecks: [
   Expect<Equal<keyof NonNullable<Awaited<typeof coreSelected>>, 'id' | 'documentId' | 'title'>>,
 ];
 coreChecks satisfies unknown;
+
+// Params only known at runtime (`ctx.query`, `sanitizeQuery()` output) type an index signature: the
+// client sets `fields`, `populate` and `status`, so every attribute is optional and `publishedAt`
+// may be either status.
+declare const requestQuery: { [key: string]: unknown };
+declare const sanitizedQuery: Record<string, unknown>;
+const openMany = pages.findMany(requestQuery);
+const openFirst = pages.findFirst(sanitizedQuery);
+const openCore = pageService.find(sanitizedQuery);
+const openCoreOne = pageService.findOne('a', requestQuery);
+// A spread drops the index signature: the result follows the literal keys only.
+const openSpread = pages.findOne({ ...requestQuery, documentId: 'a' });
+type Open = Result<typeof openMany>;
+type IsAny<T> = 0 extends 1 & T ? true : false;
+type MiddlewareNext = Parameters<Modules.Documents.Middleware.Middleware>[1];
+declare const openChecks: [
+  Expect<Equal<Open['publishedAt'], string | null | undefined>>,
+  Expect<Equal<Open['title'], string | null | undefined>>,
+  Expect<Equal<keyof Open, keyof Page | 'tags' | 'seo' | 'blocks'>>,
+  Expect<Equal<Open['id'], Data.ID>>,
+  Expect<Equal<null extends Open['tags'] ? true : false, false>>,
+  Expect<Equal<NonNullable<Awaited<typeof openFirst>>, Open>>,
+  Expect<Equal<Awaited<typeof openCore>['results'][number], Open>>,
+  Expect<Equal<NonNullable<Awaited<typeof openCoreOne>>, Open>>,
+  Expect<Equal<NonNullable<Awaited<typeof openSpread>>['publishedAt'], null>>,
+  // `ReturnType` instantiates the params with `any`: a document middleware's `next()` stays typed.
+  Expect<Equal<IsAny<Awaited<ReturnType<MiddlewareNext>>>, false>>,
+];
+openChecks satisfies unknown;
 
 // The core service passes its other params to the Document Service as they are: `filters`, `sort`,
 // `locale`, and for `find` the REST `pagination`. `fields`, `populate` and `status` still narrow.

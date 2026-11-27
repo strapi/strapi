@@ -267,8 +267,12 @@ context keeps its types in both modes:
 - `ctx.request.body`, `ctx.params` and `ctx.state.user` are `any`. Request data passes every strict
   contract unchecked: `service.create({ data: ctx.request.body.data })` compiles, while a wrong
   literal, such as `{ data: { title: 1 } }`, is a type error.
-- `ctx.query` is the index signature of the `qs` parse result. A result type computed from it, as in
-  `findMany(ctx.query)`, does not follow the `status` or `populate` that the client sends.
+- `ctx.query` is the index signature of the `qs` parse result. Passed as is, as in
+  `findMany(ctx.query)` or `service.find(await this.sanitizeQuery(ctx))`, it gives the open result
+  (see [Document results](#document-results)). A spread, as in
+  `findOne({ ...ctx.query, documentId })`, drops the index signature: the result then follows the
+  literal keys only, not the `status` or `populate` that the client sends. Document Service methods
+  that need a `documentId` always take such a spread.
 
 Parse or validate request input before passing it on, and sanitize it: with strict types,
 `sanitizeInput` returns the type of its data, so its result passes on where the raw body does. Typed
@@ -984,6 +988,14 @@ types what the runtime returns, not what the schema asks for:
   `packages/core/core/src/services/entity-validator/blocks-validator.ts`). Writes that skip the
   entity validator, such as `strapi.db.query`, can store other shapes. Without strict types it stays
   `any`.
+- Params whose type has a string index signature, such as `ctx.query` and the result of
+  `sanitizeQuery()`, are only known at runtime: the client sets `fields`, `populate` and `status`.
+  Passed as is to `findMany` or `findFirst` of the Document Service, or to `find` or `findOne` of a
+  core service, they give `Modules.Documents.StrictOpenResult`: `id` and `documentId`, every other
+  attribute optional, populatable ones included, and `publishedAt` of either status. Two forms do
+  not get it. A spread with other keys, such as `findOne({ ...ctx.query, documentId })`, drops the
+  index signature, and its result follows the literal keys. `any` params keep the result of the
+  method's constraint, so that `ReturnType` of a method stays typed.
 
 The JSDoc on each type gives the runtime reason. Without strict types, results keep develop's
 `Result` type.
