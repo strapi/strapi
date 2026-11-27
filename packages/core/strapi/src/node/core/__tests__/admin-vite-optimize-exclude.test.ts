@@ -162,10 +162,12 @@ describe('admin vite optimize exclude heuristics', () => {
     );
   });
 
-  it('requires allowlist or opt-in on top of the UI-kit shape (#27136)', () => {
+  it('excludes by allowlist or opt-in only — never by package shape (#27136)', () => {
     expect(
       isEligibleForOptimizeDepsExclude('strapi-design-extended', strapiDesignExtendedLike)
     ).toBe(true);
+    // Allowlisted even when package metadata is missing (exports often omit package.json)
+    expect(isEligibleForOptimizeDepsExclude('strapi-design-extended', null)).toBe(true);
     expect(
       isEligibleForOptimizeDepsExclude('@_sh/strapi-plugin-ckeditor', ckeditorPluginLike)
     ).toBe(false);
@@ -177,13 +179,18 @@ describe('admin vite optimize exclude heuristics', () => {
         })
       )
     ).toBe(true);
+    // Opt-in alone is enough — shape is not required
     expect(
-      isEligibleForOptimizeDepsExclude('opted-in-but-cjs', {
-        name: 'opted-in-but-cjs',
+      isEligibleForOptimizeDepsExclude('opted-in-cjs', {
+        name: 'opted-in-cjs',
         main: 'index.js',
         peerDependencies: { react: '^18.0.0' },
         strapi: { admin: { vite: { optimizeDepsExclude: true } } },
       } as PackageJsonLike)
+    ).toBe(true);
+    // Shape without declare is never enough
+    expect(
+      isEligibleForOptimizeDepsExclude('shape-only-kit', preBuiltReactPeerPackage('shape-only-kit'))
     ).toBe(false);
   });
 });
@@ -256,6 +263,42 @@ describe('collectAdminOptimizeDepsExclude', () => {
     });
 
     await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([]);
+  });
+
+  it('excludes allowlisted packages even when getModule cannot read package.json', async () => {
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          'strapi-design-extended': '^0.0.13',
+        },
+      },
+    });
+
+    getModuleMock.mockResolvedValue(null);
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([
+      'strapi-design-extended',
+    ]);
+  });
+
+  it('does not exclude shape-matching packages without allowlist or opt-in', async () => {
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          'shape-only-kit': '^1.0.0',
+        },
+      },
+    });
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === 'shape-only-kit') {
+        return preBuiltReactPeerPackage('shape-only-kit');
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
   });
 
   it('excludes packages that opt in via strapi.admin.vite.optimizeDepsExclude', async () => {
