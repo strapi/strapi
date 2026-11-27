@@ -26,6 +26,11 @@ export type SafeCapabilityRegistrationConfig<THandler, TErrorResult, TRegistered
   createFallbackHandler: (errorMessage: string) => NoInfer<THandler>;
   createErrorResult: (error: Error, args: unknown[]) => TErrorResult;
   registerWithSdk: (safeHandler: THandler) => TRegistered;
+  /**
+   * Reports a level-3 registration failure. Defaults to logging every failure; a registry can
+   * pass its own to log a failure that repeats on every request only once.
+   */
+  reportRegistrationError?: (message: string) => void;
 };
 
 /**
@@ -52,6 +57,10 @@ export const createSafeCapabilityRegistration = <THandler, TErrorResult, TRegist
     createFallbackHandler,
     createErrorResult,
     registerWithSdk,
+    reportRegistrationError = (message) =>
+      strapi.log.error(
+        `[MCP] Failed to register ${capabilityType.toLowerCase()} "${name}" with MCP server: ${message}`
+      ),
   } = config;
 
   try {
@@ -82,9 +91,7 @@ export const createSafeCapabilityRegistration = <THandler, TErrorResult, TRegist
   } catch (error) {
     // Level 3: Catch MCP SDK registration errors — prevent one broken capability from aborting all others
     const message = error instanceof Error ? error.message : String(error);
-    strapi.log.error(
-      `[MCP] Failed to register ${capabilityType.toLowerCase()} "${name}" with MCP server: ${message}`
-    );
+    reportRegistrationError(message);
     return FAILED_REGISTERED_CAPABILITY as unknown as TRegistered;
   }
 };
