@@ -379,6 +379,53 @@ describe('diffSchemas', () => {
       });
     });
 
+    test.each([
+      ['NULL', null],
+      ['null', undefined],
+      ["'Draft'", 'draft'],
+      ['DRAFT', 'draft'],
+    ])('treats a %s database default as unchanged for %s', async (dbDefault, userDefault) => {
+      const column = { name: 'test_column', type: 'text', notNullable: false };
+      const table = (defaultTo: unknown) => ({
+        name: 'my_table',
+        indexes: [],
+        foreignKeys: [],
+        columns: [{ ...column, defaultTo }],
+      });
+
+      const databaseSchema = { tables: [table(dbDefault)] } as Schema;
+      const userSchema = { tables: [table(userDefault)] } as Schema;
+
+      const { status } = await diffSchemas({
+        databaseSchema,
+        userSchema,
+        previousSchema: databaseSchema,
+      });
+
+      expect(status).toBe('UNCHANGED');
+    });
+
+    test('reports a changed default as updated', async () => {
+      const column = { name: 'test_column', type: 'text', notNullable: false };
+      const table = (defaultTo: unknown) => ({
+        name: 'my_table',
+        indexes: [],
+        foreignKeys: [],
+        columns: [{ ...column, defaultTo }],
+      });
+
+      const databaseSchema = { tables: [table("'draft'")] } as Schema;
+      const userSchema = { tables: [table('published')] } as Schema;
+
+      const { status } = await diffSchemas({
+        databaseSchema,
+        userSchema,
+        previousSchema: databaseSchema,
+      });
+
+      expect(status).toBe('CHANGED');
+    });
+
     test('removed column', async () => {
       const testColumn = {
         name: 'test_column',

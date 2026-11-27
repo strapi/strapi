@@ -91,7 +91,7 @@ module.exports = {
       [UPDATED_BY_ATTRIBUTE]: admin.id,
     };
 
-    user.email = _.toLower(user.email);
+    user.email = String(user.email ?? '').toLowerCase();
 
     try {
       const data = await strapi
@@ -149,13 +149,13 @@ module.exports = {
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
-        .findOne({ where: { email: _.toLower(email) } });
+        .findOne({ where: { email: String(email ?? '').toLowerCase() } });
 
       if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(user.id)) {
         throw new ApplicationError('Email already taken');
       }
 
-      body.email = _.toLower(body.email);
+      body.email = String(body.email ?? '').toLowerCase();
     }
 
     const sanitizedData = await pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });

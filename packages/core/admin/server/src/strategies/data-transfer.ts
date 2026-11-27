@@ -96,9 +96,13 @@ export const verify = async (auth: any, config: any = {}) => {
     throw new ForbiddenError();
   }
 
-  const scopes = castArray(config.scope ?? []);
+  // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
+  // A hole becomes undefined, and Strapi's ability.can throws a TypeError on a nullish action, so reject it first.
+  const scopes: unknown[] = Array.from(castArray(config.scope ?? []));
 
-  const isAllowed = scopes.every((scope) => ability.can(scope));
+  const isAllowed = scopes.every(
+    (scope) => scope !== undefined && scope !== null && ability.can(scope)
+  );
 
   if (!isAllowed) {
     throw new ForbiddenError();
