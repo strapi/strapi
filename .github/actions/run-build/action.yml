@@ -33,8 +33,14 @@ runs:
       run: |
         node "$GITHUB_ACTION_PATH/nx-cache-server.mjs" .nx/remote-cache 4555 &
         server=$!
-        trap 'kill "$server"' EXIT
-        until curl -s -o /dev/null http://127.0.0.1:4555; do sleep 0.1; done
+        trap 'kill "$server" 2>/dev/null || true' EXIT
+        # Wait for the server: fail as soon as it exits, or after 100 attempts.
+        for attempt in $(seq 100); do
+          curl -s --max-time 1 -o /dev/null http://127.0.0.1:4555 && break
+          kill -0 "$server" 2>/dev/null || { echo "::error::Nx cache server exited before listening"; exit 1; }
+          [ "$attempt" -lt 100 ] || { echo "::error::Nx cache server did not answer after 100 attempts"; exit 1; }
+          sleep 0.1
+        done
         yarn nx run-many --targets build --nx-ignore-cycles
       env:
         NX_SELF_HOSTED_REMOTE_CACHE_SERVER: http://127.0.0.1:4555

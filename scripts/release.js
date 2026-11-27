@@ -67,14 +67,19 @@ const yargs = require('yargs');
    * (`preserveMatchingDependencyRanges`, on by default), so stable releases leave internal
    * peerDependencies such as `^5.0.0` alone.
    *
-   * Experimental/nightly versions (`0.0.0-experimental.<sha>`) can never satisfy those ranges:
-   * semver prerelease matching is tuple-locked. With the option on, Nx refuses to version; with it
-   * off, Nx pins every internal dependency, peers included, to the exact prerelease version, which
-   * is what an install of an experimental build needs.
+   * Prerelease versions (`5.65.0-rc.0` from `--version preminor --preid rc`, or experimental
+   * `0.0.0-experimental.<sha>`) can never satisfy those ranges: semver only matches a prerelease
+   * against a range with the same major.minor.patch. With the option on, Nx refuses to version;
+   * there is no setting that leaves peers untouched. With it off, Nx pins every internal
+   * dependency, peers included, to the exact prerelease version, which is also what an install of
+   * a prerelease needs (`^5.0.0` would not accept `5.65.0-rc.0`).
    */
-  const isZeroPrerelease = options.version !== undefined && /^0\.0\.0-.+/.test(options.version);
+  const isPrerelease =
+    options.preid !== undefined ||
+    (options.version !== undefined &&
+      (options.version.startsWith('pre') || /^\d+\.\d+\.\d+-/.test(options.version)));
   const { releaseChangelog, releasePublish, releaseVersion } = new ReleaseClient(
-    isZeroPrerelease ? { version: { preserveMatchingDependencyRanges: false } } : {}
+    isPrerelease ? { version: { preserveMatchingDependencyRanges: false } } : {}
   );
 
   let workspaceVersion, projectsVersionData;
