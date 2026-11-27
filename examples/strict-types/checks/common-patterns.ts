@@ -31,6 +31,9 @@ factories.createCoreController('api::article.article', ({ strapi }) => ({
   async titles() {
     return strapi.service('api::article.article').findPublishedTitles();
   },
+  async latest(ctx) {
+    return this.transformResponse(await this.sanitizeOutput([], ctx));
+  },
 })) satisfies Core.ControllerFactory<'api::article.article'>;
 
 // A core controller override that sanitizes the request body before it writes it. The sanitized
