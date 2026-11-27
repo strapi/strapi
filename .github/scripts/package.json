@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test issue-template-check.test.ts"
+    "test": "node --experimental-strip-types --test issue-template-check.test.ts community-pr-cla.test.ts"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
