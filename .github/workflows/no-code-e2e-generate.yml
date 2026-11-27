@@ -23,8 +23,12 @@ on:
         required: false
         default: ''
 
+# A new push cancels the run in progress, except the app's own push: its run is skipped anyway,
+# and sharing the group would cancel the run that pushed, during its last steps.
 concurrency:
-  group: no-code-e2e-generate-${{ github.head_ref || github.ref_name }}
+  group: >-
+    no-code-e2e-generate-${{ github.head_ref || github.ref_name }}${{
+    endsWith(github.actor, '[bot]') && format('-bot-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:

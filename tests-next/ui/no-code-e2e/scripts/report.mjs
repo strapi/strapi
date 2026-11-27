@@ -101,7 +101,12 @@ export const renderReport = (report) => {
     }
     lines.push('', `**Total cost: ${money(totalCost(report))}**`, '');
   } else if (!lintErrors.length) {
-    lines.push('Nothing to do: every spec is up to date.', '');
+    lines.push(
+      report.mode === 'generate'
+        ? 'Nothing to do: every spec is up to date.'
+        : 'Every generated spec passes.',
+      ''
+    );
   }
 
   if (report.suite.ran) {
@@ -144,7 +149,7 @@ const upsertComment = (
   const endpoint = previous
     ? [`repos/${repo}/issues/comments/${previous.id}`, '--method', 'PATCH']
     : [`repos/${repo}/issues/${pr}/comments`, '--method', 'POST'];
-  execFileSync('gh', ['api', ...endpoint, '--input', file], { stdio: 'inherit' });
+  execFileSync('gh', ['api', ...endpoint, '--input', file, '--silent'], { stdio: 'inherit' });
 };
 
 const isMain =
