@@ -1,3 +1,5 @@
+export { ApiTokenPage } from './settings/api-token-page';
+export { ApiTokensPage } from './settings/api-tokens-page';
 export { ContentTypeBuilderPage } from './content-type-builder/content-type-builder-page';
 export { EditViewPage } from './content-manager/edit-view-page';
 export { HomePage } from './home-page';
