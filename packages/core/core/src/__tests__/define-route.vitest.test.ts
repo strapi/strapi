@@ -75,9 +75,39 @@ const payRoute = defineRoute({
   },
 });
 
+// Routes that declare no body, before `addInputParams` merges a JSON body schema into them.
+const showRoute = defineRoute({
+  method: 'GET',
+  path: '/orders/:id',
+  request: { params: { id: z.coerce.number().int() } },
+  handler: echo,
+});
+
+const statusRoute = defineRoute({
+  method: 'GET',
+  path: '/orders/:id/status',
+  handler: 'api::order.order.status',
+  request: { params: { id: z.coerce.number().int() } },
+});
+
+const cancelRoute = defineRoute({
+  method: 'POST',
+  path: '/orders/:id/cancel',
+  request: { params: { id: z.coerce.number().int() } },
+  handler: echo,
+});
+
+// As registration does for an app that calls `addInputParams` without `matchRoute`.
+const contentAPI = createContentAPI({} as Core.Strapi);
+contentAPI.addInputParams({ clientMutationId: { schema: z.string().max(100).optional() } });
+contentAPI.applyExtraParamsToRoutes([showRoute, statusRoute, cancelRoute] as Core.Route[]);
+
 const orderController = {
   pay(ctx: any) {
     return { input: payRoute.parseInput(ctx) };
+  },
+  status(ctx: any) {
+    return { input: statusRoute.parseInput(ctx) };
   },
 };
 
@@ -128,6 +158,9 @@ describe('factories.defineRoute', () => {
         },
         payRoute,
         searchRoute,
+        showRoute,
+        statusRoute,
+        cancelRoute,
       ],
       { 'api::order.order': orderController }
     );
@@ -222,6 +255,37 @@ describe('factories.defineRoute', () => {
   test('authenticates before it parses', async () => {
     await request(app).post('/orders/abc/refunds').send({ amount: '5' }).expect(401);
     await request(app).post('/orders/abc/pay').send({ amount: '5' }).expect(401);
+  });
+
+  describe('when addInputParams merged a JSON body into a route that declares none', () => {
+    test('a GET request passes', async () => {
+      expect(showRoute.request.body).toBeDefined();
+
+      const res = await request(app).get('/orders/7').set('Authorization', 'Bearer ok').expect(200);
+
+      expect(res.body.input).toMatchObject({ params: { id: 7 } });
+    });
+
+    test('a GET request to a controller action passes', async () => {
+      const res = await request(app)
+        .get('/orders/7/status')
+        .set('Authorization', 'Bearer ok')
+        .expect(200);
+
+      expect(res.body.input).toMatchObject({ params: { id: 7 } });
+    });
+
+    test('a POST request without a body passes, and a body is parsed', async () => {
+      await request(app).post('/orders/7/cancel').set('Authorization', 'Bearer ok').expect(200);
+
+      const res = await request(app)
+        .post('/orders/7/cancel')
+        .set('Authorization', 'Bearer ok')
+        .send({ clientMutationId: 'abc' })
+        .expect(200);
+
+      expect(res.body.input).toEqual({ params: { id: 7 }, body: { clientMutationId: 'abc' } });
+    });
   });
 
   test('leaves routes defined without the helper unchanged', async () => {

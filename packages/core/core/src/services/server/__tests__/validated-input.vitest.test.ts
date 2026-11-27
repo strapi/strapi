@@ -226,6 +226,23 @@ describe('createValidatedInputParser', () => {
       expect(error.details).toMatchObject({ errors: [{ path: ['body'] }] });
     });
 
+    test('parses a missing body as valid when the body is optional', () => {
+      const request = { body: { 'application/json': z.object({ clientMutationId: z.string() }) } };
+
+      expect(() => createValidatedInputParser(request)(createContext({ body: {} }))).toThrow();
+      expect(
+        createValidatedInputParser(request, { bodyOptional: true })(createContext({ body: {} }))
+      ).toEqual({ body: undefined });
+    });
+
+    test('treats an empty body as no body', () => {
+      const ctx = createContext({ body: {}, contentType: 'text/plain' });
+      const emptyCtx = { ...ctx, request: { ...ctx.request, length: 0 } };
+
+      expect(() => parse(ctx)).toThrow('Request body must be sent as');
+      expect(() => parse(emptyCtx)).toThrow('Invalid input: expected object, received undefined');
+    });
+
     test('rejects a media type declared twice', () => {
       expect(() =>
         createValidatedInputParser({

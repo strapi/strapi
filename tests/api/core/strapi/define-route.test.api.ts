@@ -15,6 +15,7 @@ import { createStrapiInstance } from 'api-tests/strapi';
 const API_NAME = 'validated-order';
 const UID = `api::${API_NAME}.${API_NAME}`;
 const PAY_ACTION = `${UID}.pay`;
+const STATUS_ACTION = `${UID}.status`;
 
 const files = {
   [`content-types/${API_NAME}/schema.json`]: JSON.stringify({
@@ -73,11 +74,33 @@ const files = {
       },
     });
 
-    module.exports = { payRoute, routes: [refundRoute, privateRefundRoute, payRoute] };
+    // Routes that declare no body. The app registers an input param without \`matchRoute\`, which
+    // merges a JSON body schema into them.
+    const showRoute = factories.defineRoute({
+      method: 'GET',
+      path: '/validated-orders/:id',
+      request: { params: { id: z.coerce.number().int() } },
+      config: { auth: false },
+      handler: echo,
+    });
+
+    const statusRoute = factories.defineRoute({
+      method: 'GET',
+      path: '/validated-orders/:id/status',
+      handler: '${STATUS_ACTION}',
+      request: { params: { id: z.coerce.number().int() } },
+      config: { auth: false },
+    });
+
+    module.exports = {
+      payRoute,
+      statusRoute,
+      routes: [refundRoute, privateRefundRoute, payRoute, showRoute, statusRoute],
+    };
   `,
   [`controllers/${API_NAME}.js`]: `
     const { factories } = require('@strapi/strapi');
-    const { payRoute } = require('../routes/${API_NAME}');
+    const { payRoute, statusRoute } = require('../routes/${API_NAME}');
 
     module.exports = factories.createCoreController('${UID}', () => ({
       async pay(ctx) {
@@ -85,6 +108,9 @@ const files = {
         const sanitized = await this.sanitizeInput(input.body.data, ctx);
 
         return { input, sanitized };
+      },
+      async status(ctx) {
+        return { input: statusRoute.parseInput(ctx) };
       },
     }));
   `,
@@ -126,6 +152,10 @@ describe('Routes defined with factories.defineRoute', () => {
             schema: (z) => z.string().max(10).optional(),
             matchRoute: (route) => route.path.startsWith('/validated-orders'),
           },
+        });
+        // No `matchRoute`: merged into the body schema of every content API route, GET included.
+        s.contentAPI.addInputParams({
+          clientMutationId: { schema: (z) => z.string().max(100).optional() },
         });
       },
     });
@@ -193,6 +223,27 @@ describe('Routes defined with factories.defineRoute', () => {
         .send({ amount: '5' });
 
       expect(res.status).toBe(401);
+    });
+  });
+
+  describe('with a route that declares no body', () => {
+    test('a GET request passes, although addInputParams merged a body schema', async () => {
+      const route = strapi.apis[API_NAME].routes[API_NAME].routes.find(
+        ({ path: routePath }) => routePath === '/validated-orders/:id'
+      );
+      expect(route.request.body).toBeDefined();
+
+      const res = await agent.get('/api/validated-orders/7');
+
+      expect(res.status).toBe(200);
+      expect(res.body.input).toEqual({ params: { id: 7 }, query: {} });
+    });
+
+    test('a GET request to a controller action passes', async () => {
+      const res = await agent.get('/api/validated-orders/7/status');
+
+      expect(res.status).toBe(200);
+      expect(res.body.input).toEqual({ params: { id: 7 }, query: {} });
     });
   });
 

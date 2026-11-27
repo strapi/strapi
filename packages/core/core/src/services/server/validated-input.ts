@@ -5,12 +5,20 @@ import { validateZodSchema, z } from '@strapi/utils';
 type RequestContext = {
   params?: Record<string, string>;
   query?: unknown;
-  request: { body?: unknown; is(types: string[]): string | false | null };
+  request: { body?: unknown; length?: number; is(types: string[]): string | false | null };
 };
 
 type InputPart = 'params' | 'query' | 'body';
 
 type Parser = (ctx: RequestContext) => Record<string, unknown>;
+
+type ParserOptions = {
+  /**
+   * Parses a missing body as valid. For a route that declares no body: `addInputParams` merges a
+   * JSON body schema into every matched route, and that schema must not make a body required.
+   */
+  bodyOptional?: boolean;
+};
 
 // Request bodies whose values arrive as strings, like params and query values.
 const FORM_MEDIA_TYPES = new Set(['multipart/form-data', 'application/x-www-form-urlencoded']);
@@ -150,14 +158,17 @@ export const assertRouteRequest = (request: Core.RouteRequest) => {
  * - `params` and `query` are parsed as objects: unknown keys are stripped, and no value is coerced
  *   unless its schema coerces it (`z.coerce.number()`, `z.stringbool()`).
  * - The body schema is the one of the request media type, matched without parameters. A request
- *   without a body parses `undefined` with the first declared schema, so an optional body passes.
- *   A body of an undeclared media type answers 415.
+ *   without a body, or with an empty one, parses `undefined` with the first declared schema, so an
+ *   optional body passes. A body of an undeclared media type answers 415.
  * - On failure, throws a `ValidationError` (400) whose `details.errors[].path` starts with the part.
  *
  * koa-body parses no body for GET, HEAD and DELETE by default, so a body declared on these methods
  * always parses `undefined`.
  */
-export const createValidatedInputParser = (request: Core.RouteRequest): Parser => {
+export const createValidatedInputParser = (
+  request: Core.RouteRequest,
+  { bodyOptional = false }: ParserOptions = {}
+): Parser => {
   const shape: Record<string, z.ZodType> = {};
 
   for (const part of ['params', 'query'] as const) {
@@ -191,12 +202,18 @@ export const createValidatedInputParser = (request: Core.RouteRequest): Parser =
   const schemasByMediaType = new Map(
     mediaTypes.map((mediaType) => [
       mediaType,
-      z.object({ ...shape, body: bodySchemas.get(mediaType) as z.ZodType }),
+      z.object({
+        ...shape,
+        body: bodyOptional
+          ? (bodySchemas.get(mediaType) as z.ZodType).optional()
+          : (bodySchemas.get(mediaType) as z.ZodType),
+      }),
     ])
   );
 
   return (ctx) => {
-    const matched = ctx.request.is(mediaTypes);
+    // Koa's `is()` counts a `Content-Length: 0` request as having a body.
+    const matched = ctx.request.length === 0 ? null : ctx.request.is(mediaTypes);
     const hasBody = matched !== null;
     const mediaType = hasBody ? matched : mediaTypes[0];
     const schema = typeof mediaType === 'string' ? schemasByMediaType.get(mediaType) : undefined;
@@ -216,9 +233,10 @@ export const createValidatedInputParser = (request: Core.RouteRequest): Parser =
   };
 };
 
-// One parser per `request` object. Registration replaces `route.request` when it merges the params
-// of `addQueryParams` and `addInputParams`, so the next parse builds a parser that includes them.
-const parsers = new WeakMap<Core.RouteRequest, Parser>();
+// One parser per `request` object and body option. Registration replaces `route.request` when it
+// merges the params of `addQueryParams` and `addInputParams`, so the next parse builds a parser that
+// includes them.
+const parsers = { required: new WeakMap<Core.RouteRequest, Parser>(), optional: new WeakMap() };
 const NO_REQUEST: Core.RouteRequest = {};
 
 /**
@@ -227,14 +245,17 @@ const NO_REQUEST: Core.RouteRequest = {};
  */
 export const parseRouteInput = (
   ctx: RequestContext,
-  route: { request?: Core.RouteRequest }
+  route: { request?: Core.RouteRequest },
+  options: ParserOptions = {}
 ): Record<string, unknown> => {
   const request = route.request ?? NO_REQUEST;
-  let parse = parsers.get(request);
+  const cache: WeakMap<Core.RouteRequest, Parser> =
+    options.bodyOptional === true ? parsers.optional : parsers.required;
+  let parse = cache.get(request);
 
   if (parse === undefined) {
-    parse = createValidatedInputParser(request);
-    parsers.set(request, parse);
+    parse = createValidatedInputParser(request, options);
+    cache.set(request, parse);
   }
 
   return parse(ctx);

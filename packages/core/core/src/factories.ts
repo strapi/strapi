@@ -214,7 +214,8 @@ type DefinedRoute<
  * - A request that does not match answers 400 with a `ValidationError`, after authentication,
  *   policies and route middlewares ran.
  * - The parse reads the route's current `request`, so the params that `addQueryParams` and
- *   `addInputParams` merge at registration are parsed too.
+ *   `addInputParams` merge at registration are parsed too. A route that declares no body never
+ *   requires one.
  *
  * @example
  * // src/api/order/routes/order.ts
@@ -278,9 +279,11 @@ const defineRoute = <
 
   const definedRoute = { ...route, request } as DefinedRoute<TRequest, TConfig, THandler>;
 
-  // Reads `definedRoute.request` per request: registration can replace it to add extra params.
+  // Reads `definedRoute.request` per request: registration can replace it to add extra params. A
+  // route that declares no body never requires one, even after `addInputParams` merged a body schema.
+  const bodyOptional = request.body === undefined;
   const parse = (ctx: RouteContext) =>
-    parseInput(ctx, definedRoute) as Core.ValidatedRouteInput<TRequest>;
+    parseInput(ctx, definedRoute, { bodyOptional }) as Core.ValidatedRouteInput<TRequest>;
 
   Object.defineProperty(definedRoute, 'parseInput', { value: parse, enumerable: false });
 
