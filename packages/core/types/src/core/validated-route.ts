@@ -24,13 +24,14 @@ export type ValidatedRouteInput<TRequest extends RouteRequest> = {
 };
 
 /**
- * The parsed request of a route object, as `factories.parseRouteInput(ctx, route)` returns it.
+ * The parsed request of a route, as `route.parseInput(ctx)` returns it for a route defined with
+ * `factories.defineRoute`.
  *
  * @example
- * export const refundRoute = { method: 'POST', path: '/refunds/:id', handler: 'api::order.order.refund',
- *   request: { params: { id: z.coerce.number() } } } satisfies Core.RouteInput;
+ * export const payRoute = factories.defineRoute({ method: 'POST', path: '/orders/:id/pay',
+ *   handler: 'api::order.order.pay', request: { params: { id: z.coerce.number() } } });
  *
- * type RefundInput = Core.ValidatedRouteInputOf<typeof refundRoute>; // { params: { id: number } }
+ * type PayInput = Core.ValidatedRouteInputOf<typeof payRoute>; // { params: { id: number } }
  */
 export type ValidatedRouteInputOf<TRoute extends { request?: RouteRequest }> = ValidatedRouteInput<
   NonNullable<TRoute['request']>

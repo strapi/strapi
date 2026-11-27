@@ -6,7 +6,7 @@
 import type { Core } from '@strapi/types';
 import { z } from 'zod/v4';
 
-import { defineRoute, parseRouteInput } from '../factories';
+import { createCoreController, defineRoute } from '../factories';
 
 type Assert<T extends true> = T;
 type IsEqual<Left, Right> =
@@ -100,9 +100,62 @@ true satisfies Assert<
   IsEqual<NonNullable<(typeof configuredRoute)['config']>['policies'], ['global::is-owner']>
 >;
 
+// A route whose handler is a controller action keeps the action name, so Strapi generates its
+// permission scope. The action parses with the route's own `parseInput`.
+export const payRoute = defineRoute({
+  method: 'POST',
+  path: '/orders/:id/pay',
+  handler: 'api::order.order.pay',
+  request: {
+    params: { id: z.coerce.number().int() },
+    body: { 'application/json': z.object({ data: z.object({ amount: z.number() }) }) },
+  },
+});
+
+true satisfies Assert<IsEqual<(typeof payRoute)['handler'], 'api::order.order.pay'>>;
+
+type PayInput = { params: { id: number }; body: { data: { amount: number } } };
+
+// In a plain controller object.
+export const orderController = {
+  async pay(ctx) {
+    const input = payRoute.parseInput(ctx);
+
+    true satisfies Assert<IsEqual<typeof input, PayInput>>;
+    true satisfies Assert<IsEqual<typeof input, Core.ValidatedRouteInputOf<typeof payRoute>>>;
+
+    // @ts-expect-error no query declared
+    input.query satisfies unknown;
+    // @ts-expect-error the id is a number
+    input.params.id satisfies string;
+
+    return input.body.data.amount;
+  },
+} satisfies Core.Controller;
+
+// In a core controller, next to the sanitize helpers.
+export const coreOrderController = createCoreController('api::order.order', {
+  async pay(ctx) {
+    const { params, body } = payRoute.parseInput(ctx);
+    const data = await this.sanitizeInput(body.data, ctx);
+
+    true satisfies Assert<IsEqual<typeof params, { id: number }>>;
+
+    return this.transformResponse({ id: params.id, data });
+  },
+});
+
+// A function-handler route has the same parser.
+true satisfies Assert<
+  IsEqual<
+    ReturnType<(typeof refundRoute)['parseInput']>,
+    Core.ValidatedRouteInputOf<typeof refundRoute>
+  >
+>;
+
 export const router: Core.RouterInput = {
   type: 'content-api',
-  routes: [refundRoute, listRoute, pingRoute, uploadRoute, configuredRoute],
+  routes: [refundRoute, listRoute, pingRoute, uploadRoute, configuredRoute, payRoute],
 };
 
 // The defined route keeps its `request` for reuse.
@@ -114,33 +167,6 @@ defineRoute({
   method: 'GET',
   path: '/orders/:id',
   request: { params: { id: z.coerce.number() } },
-  // @ts-expect-error a controller action referenced by name parses with parseRouteInput instead
-  handler: 'api::order.order.findOne',
+  // @ts-expect-error a handler is a function or a controller action name
+  handler: ['api::order.order.findOne'],
 });
-
-// A route whose handler is a controller action: the action parses with `parseRouteInput`.
-export const payRoute = {
-  method: 'POST',
-  path: '/orders/:id/pay',
-  handler: 'api::order.order.pay',
-  request: {
-    params: { id: z.coerce.number().int() },
-    body: { 'application/json': z.object({ amount: z.number() }) },
-  },
-} satisfies Core.RouteInput;
-
-export const orderController = {
-  async pay(ctx) {
-    const input = parseRouteInput(ctx, payRoute);
-
-    true satisfies Assert<
-      IsEqual<typeof input, { params: { id: number }; body: { amount: number } }>
-    >;
-    true satisfies Assert<IsEqual<typeof input, Core.ValidatedRouteInputOf<typeof payRoute>>>;
-
-    // @ts-expect-error no query declared
-    input.query satisfies unknown;
-
-    return input.body.amount;
-  },
-} satisfies Core.Controller;

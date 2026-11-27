@@ -164,80 +164,105 @@ const createUploadProvider = <
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
 
-// The route keeps its `config` as written, not widened to `Core.RouteConfig`.
-type DefineRouteConfig<TRequest extends Core.RouteRequest, TConfig extends Core.RouteConfig> = Omit<
-  Core.RouteInput,
-  'handler' | 'request' | 'config'
-> & {
+// The request a controller action receives, as `parseInput` accepts it.
+type RouteContext = Parameters<Core.MiddlewareHandler>[0];
+
+// The route keeps its `config` and a string handler as written, not widened to `Core.RouteConfig`
+// and `string`.
+type DefineRouteConfig<
+  TRequest extends Core.RouteRequest,
+  TConfig extends Core.RouteConfig,
+  THandler extends Core.HandlerReference,
+> = Omit<Core.RouteInput, 'handler' | 'request' | 'config'> & {
   request?: TRequest;
   config?: TConfig;
-  handler: Core.ValidatedRouteHandler<TRequest>;
+  handler: THandler | Core.ValidatedRouteHandler<TRequest>;
 };
 
-type DefinedRoute<TRequest extends Core.RouteRequest, TConfig extends Core.RouteConfig> = Omit<
-  Core.RouteInput,
-  'handler' | 'request' | 'config'
-> & {
+type DefinedRoute<
+  TRequest extends Core.RouteRequest,
+  TConfig extends Core.RouteConfig,
+  THandler extends Core.HandlerReference,
+> = Omit<Core.RouteInput, 'handler' | 'request' | 'config'> & {
   request: TRequest;
   config?: TConfig;
-  handler: Core.MiddlewareHandler;
+  handler: [THandler] extends [never] ? Core.MiddlewareHandler : THandler;
+  /**
+   * Parses the request with the route's current `request` schemas and returns the values, typed
+   * from the schemas' output. Throws a `ValidationError` (400) when the request does not match.
+   * Not enumerable: route listings, serialization and copies of the route do not carry it.
+   */
+  readonly parseInput: (ctx: RouteContext) => Core.ValidatedRouteInput<TRequest>;
 };
 
 /**
- * Defines a route whose handler receives the request parsed with the route's `request` schemas, on
- * `ctx.input`, typed from the schemas' output. The same schemas document the route in OpenAPI.
+ * Defines a route whose request is parsed with the route's `request` schemas, typed from the
+ * schemas' output. The same schemas document the route in OpenAPI.
  *
- * Opt-in and additive: only the handler of this route changes. `ctx.params`, `ctx.query` and
- * `ctx.request.body` keep their raw values, and routes not defined with this helper are not parsed.
+ * - With a function handler, the handler receives the parsed request on `ctx.input`.
+ * - With a controller action (`'api::order.order.pay'`), the route keeps the permission scope that
+ *   Strapi generates from the handler name, and the action parses with `route.parseInput(ctx)`.
+ *
+ * Opt-in and additive: `ctx.params`, `ctx.query` and `ctx.request.body` keep their raw values, and
+ * routes not defined with this helper are not parsed.
  *
  * - `params` and `query` values arrive as strings. Coerce them in the schema: `z.coerce.number()`,
  *   `z.stringbool()` for booleans. Schemas that never accept a string, such as `z.number()`, and
  *   schemas that OpenAPI cannot document, such as `.transform()`, throw here.
- * - Unknown `params` and `query` keys are stripped from `ctx.input`.
+ * - Unknown `params` and `query` keys are stripped from the parsed request.
  * - The body schema is the one of the request media type. Another media type answers 415.
  * - A request that does not match answers 400 with a `ValidationError`, after authentication,
  *   policies and route middlewares ran.
- *
- * The handler must be a function. A route whose handler is a controller action (`'api::x.x.pay'`)
- * keeps its permission scope: its action calls `factories.parseRouteInput(ctx, route)` instead.
+ * - The parse reads the route's current `request`, so the params that `addQueryParams` and
+ *   `addInputParams` merge at registration are parsed too.
  *
  * @example
+ * // src/api/order/routes/order.ts
  * import { factories } from '@strapi/strapi';
  * import { z } from 'zod/v4';
  *
- * export default {
- *   type: 'content-api',
- *   routes: [
- *     factories.defineRoute({
- *       method: 'POST',
- *       path: '/orders/:id/refunds',
- *       request: {
- *         params: { id: z.coerce.number().int() },
- *         query: { notify: z.stringbool().optional() },
- *         body: { 'application/json': z.object({ amount: z.number().positive() }) },
- *       },
- *       handler: async (ctx) => {
- *         const { params, query, body } = ctx.input; // { id: number }, { notify?: boolean }, { amount: number }
- *         return { orderId: params.id, amount: body.amount, notify: query.notify ?? false };
- *       },
- *     }),
- *   ],
- * };
+ * export const refundRoute = factories.defineRoute({
+ *   method: 'POST',
+ *   path: '/orders/:id/refunds',
+ *   request: {
+ *     params: { id: z.coerce.number().int() },
+ *     body: { 'application/json': z.object({ amount: z.number().positive() }) },
+ *   },
+ *   async handler(ctx) {
+ *     const { params, body } = ctx.input; // { id: number }, { amount: number }
+ *     return { orderId: params.id, amount: body.amount };
+ *   },
+ * });
+ *
+ * export const payRoute = factories.defineRoute({
+ *   method: 'POST',
+ *   path: '/orders/:id/pay',
+ *   handler: 'api::order.order.pay',
+ *   request: { params: { id: z.coerce.number().int() } },
+ * });
+ *
+ * export default { type: 'content-api', routes: [refundRoute, payRoute] };
+ *
+ * // src/api/order/controllers/order.ts
+ * export default factories.createCoreController('api::order.order', {
+ *   async pay(ctx) {
+ *     const { params } = payRoute.parseInput(ctx); // { id: number }
+ *   },
+ * });
  */
 const defineRoute = <
   const TRequest extends Core.RouteRequest = Record<never, never>,
   const TConfig extends Core.RouteConfig = never,
+  const THandler extends Core.HandlerReference = never,
 >(
-  route: DefineRouteConfig<TRequest, TConfig>
-): DefinedRoute<TRequest, TConfig> => {
+  route: DefineRouteConfig<TRequest, TConfig, THandler>
+): DefinedRoute<TRequest, TConfig, THandler> => {
   const { handler } = route;
   const request = (route.request ?? {}) as TRequest;
   const label = `defineRoute ${route.method} ${route.path}`;
 
-  if (typeof handler !== 'function') {
-    throw new TypeError(
-      `${label}: the handler must be a function. For a controller action, call factories.parseRouteInput(ctx, route) in the action.`
-    );
+  if (typeof handler !== 'function' && typeof handler !== 'string') {
+    throw new TypeError(`${label}: the handler must be a function or a controller action name`);
   }
 
   try {
@@ -251,51 +276,25 @@ const defineRoute = <
     throw error;
   }
 
-  const definedRoute: DefinedRoute<TRequest, TConfig> = {
-    ...route,
-    request,
-    handler(ctx, next) {
-      // Reads `definedRoute.request` per request: registration can replace it to add extra params.
-      ctx.input = parseInput(ctx, definedRoute);
+  const definedRoute = { ...route, request } as DefinedRoute<TRequest, TConfig, THandler>;
+
+  // Reads `definedRoute.request` per request: registration can replace it to add extra params.
+  const parse = (ctx: RouteContext) =>
+    parseInput(ctx, definedRoute) as Core.ValidatedRouteInput<TRequest>;
+
+  Object.defineProperty(definedRoute, 'parseInput', { value: parse, enumerable: false });
+
+  if (typeof handler === 'function') {
+    const validatedHandler: Core.MiddlewareHandler = (ctx, next) => {
+      ctx.input = parse(ctx);
 
       return handler(ctx as Core.ValidatedRouteContext<TRequest>, next);
-    },
-  };
+    };
+
+    Object.assign(definedRoute, { handler: validatedHandler });
+  }
 
   return definedRoute;
-};
-
-/**
- * Parses the request with the `request` schemas of `route` and returns the parsed values, typed
- * from the schemas' output, with the same rules and errors as `defineRoute`.
- *
- * For a controller action that a route references by name. Such a route keeps the permission scope
- * Strapi generates from its handler, which a function handler has not. TypeScript cannot link the
- * action to its route, so the action names the route it parses for.
- *
- * Unlike `defineRoute`, the schemas are checked on the first request, not at definition.
- *
- * @example
- * // src/api/order/routes/order.ts
- * export const refundRoute = {
- *   method: 'POST',
- *   path: '/orders/:id/refunds',
- *   handler: 'api::order.order.refund',
- *   request: { params: { id: z.coerce.number().int() } },
- * } satisfies Core.RouteInput;
- *
- * // src/api/order/controllers/order.ts
- * export default factories.createCoreController('api::order.order', {
- *   async refund(ctx) {
- *     const { params } = factories.parseRouteInput(ctx, refundRoute); // { id: number }
- *   },
- * });
- */
-const parseRouteInput = <TRoute extends { request?: Core.RouteRequest }>(
-  ctx: Parameters<Core.ControllerHandler>[0],
-  route: TRoute
-): Core.ValidatedRouteInputOf<TRoute> => {
-  return parseInput(ctx, route) as Core.ValidatedRouteInputOf<TRoute>;
 };
 
 export {
@@ -306,5 +305,4 @@ export {
   createUploadProvider,
   defineRoute,
   isCustomController,
-  parseRouteInput,
 };

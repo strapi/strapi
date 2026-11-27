@@ -1,14 +1,17 @@
+import os from 'os';
 import Router from '@koa/router';
 import { generate } from '@strapi/openapi';
 import type { Core } from '@strapi/types';
-import { z } from '@strapi/utils';
+import { sanitizeRouteForSerialization, z } from '@strapi/utils';
 import request from 'supertest';
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { defineRoute, parseRouteInput } from '../factories';
+import { defineRoute } from '../factories';
 import { body } from '../middlewares/body';
 import { errors } from '../middlewares/errors';
 import { query } from '../middlewares/query';
+import createContentAPI from '../services/content-api';
+import { createServer } from '../services/server';
 import composeEndpoint from '../services/server/compose-endpoint';
 import createKoaApp from '../services/server/koa';
 
@@ -61,8 +64,8 @@ const echo = (ctx: any) => ({
   raw: { params: ctx.params, query: ctx.query, body: ctx.request.body },
 });
 
-// A route whose handler is a controller action: the action parses with `parseRouteInput`.
-const payRoute = {
+// A route whose handler is a controller action: the action parses with the route's `parseInput`.
+const payRoute = defineRoute({
   method: 'POST',
   path: '/orders/:id/pay',
   handler: 'api::order.order.pay',
@@ -70,11 +73,11 @@ const payRoute = {
     params: { id: z.coerce.number().int() },
     body: { 'application/json': z.object({ amount: z.number() }) },
   },
-} satisfies Core.RouteInput;
+});
 
 const orderController = {
   pay(ctx: any) {
-    return { input: parseRouteInput(ctx, payRoute) };
+    return { input: payRoute.parseInput(ctx) };
   },
 };
 
@@ -189,7 +192,7 @@ describe('factories.defineRoute', () => {
     });
   });
 
-  test('parses for a controller action that calls parseRouteInput', async () => {
+  test('parses for a controller action that calls route.parseInput', async () => {
     const res = await request(app)
       .post('/orders/7/pay')
       .set('Authorization', 'Bearer ok')
@@ -218,6 +221,7 @@ describe('factories.defineRoute', () => {
 
   test('authenticates before it parses', async () => {
     await request(app).post('/orders/abc/refunds').send({ amount: '5' }).expect(401);
+    await request(app).post('/orders/abc/pay').send({ amount: '5' }).expect(401);
   });
 
   test('leaves routes defined without the helper unchanged', async () => {
@@ -287,13 +291,99 @@ describe('factories.defineRoute', () => {
     });
   });
 
-  test('rejects a handler referenced by name', () => {
+  test('checks the schemas of a controller-action route when it is defined', () => {
+    expect(() =>
+      defineRoute({
+        method: 'GET',
+        path: '/orders/:id',
+        handler: 'api::order.order.findOne',
+        request: { params: { id: z.number() } },
+      })
+    ).toThrow('defineRoute GET /orders/:id: request.params.id: params values are strings');
+  });
+
+  test('rejects a handler that is neither a function nor an action name', () => {
     expect(() =>
       defineRoute({
         method: 'GET',
         path: '/orders',
-        handler: 'api::order.order.find' as any,
+        handler: [echo] as any,
       })
-    ).toThrow('defineRoute GET /orders: the handler must be a function');
+    ).toThrow(
+      'defineRoute GET /orders: the handler must be a function or a controller action name'
+    );
+  });
+});
+
+describe('route listing, serialization and OpenAPI', () => {
+  // A Strapi app reduced to what route registration, `getRoutesMap` and OpenAPI read. Its routes go
+  // through the real `server.initRouting()`.
+  const createRegisteredApp = (routes: Core.RouteInput[]) => {
+    const app: any = {
+      config: {
+        get(key: string, defaultValue?: unknown) {
+          if (key === 'api.rest.prefix') return '/api';
+          if (key === 'info') return { name: 'app', version: '0.0.0' };
+          return defaultValue;
+        },
+      },
+      get: (name: string) => (name === 'policies' ? { resolve: () => [] } : undefined),
+      log: { error: () => undefined },
+      dirs: { app: { root: os.tmpdir() } },
+      admin: { routes: {} },
+      plugins: {},
+      apis: { order: { routes: { order: { type: 'content-api', routes } } } },
+      controller(uid: string) {
+        return uid === 'api::order.order' ? orderController : undefined;
+      },
+      contentAPISchemaRegistry: new Map(),
+    };
+
+    app.api = (name: string) => app.apis[name];
+    app.contentAPI = createContentAPI(app);
+    app.server = createServer(app);
+    app.server.initRouting();
+
+    return app;
+  };
+
+  test('do not carry parseInput', async () => {
+    const route = defineRoute({
+      method: 'POST',
+      path: '/orders/:id/pay',
+      handler: 'api::order.order.pay',
+      request: { params: { id: z.coerce.number().int() } },
+    });
+
+    expect(typeof route.parseInput).toBe('function');
+    expect(Object.keys(route)).not.toContain('parseInput');
+    expect({ ...route }).not.toHaveProperty('parseInput');
+    expect(sanitizeRouteForSerialization(route)).not.toHaveProperty('parseInput');
+
+    const app = createRegisteredApp([route]);
+
+    try {
+      const routesMap = await app.contentAPI.getRoutesMap();
+
+      // Registration generates the permission scope from the action name.
+      expect(routesMap['api::order']).toEqual([
+        expect.objectContaining({
+          method: 'POST',
+          path: '/api/orders/:id/pay',
+          handler: 'api::order.order.pay',
+          config: { auth: { scope: ['api::order.order.pay'] } },
+        }),
+      ]);
+      expect(JSON.stringify(routesMap)).not.toContain('parseInput');
+
+      const { document } = generate(app, { type: 'content-api' });
+
+      expect(document.paths?.['/orders/{id}/pay']?.post?.parameters).toMatchObject([
+        { name: 'id', in: 'path', schema: { type: 'integer' } },
+      ]);
+      expect(JSON.stringify(document)).not.toContain('parseInput');
+    } finally {
+      await app.server.destroy();
+    }
   });
 });
