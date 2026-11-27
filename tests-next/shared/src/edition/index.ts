@@ -2,14 +2,18 @@ import { PROBE_TIMEOUT } from '../app/config';
 import type { Server } from '../app/server';
 
 /**
- * The edition contract (RFC D6): one module decides whether a run is CE or EE, for every suite.
+ * The edition contract: one module decides whether a run is CE or EE, for every tests-next
+ * suite. See the Edition section of tests-next/README.md.
  *
- * - `STRAPI_TEST_EDITION=ce|ee`, default `ce`. It replaces `RUN_EE`, `STRAPI_E2E_EDITION` and
- *   `STRAPI_DISABLE_EE` in the test env.
+ * - `STRAPI_TEST_EDITION=ce|ee`, default `ce`, for the tests-next suites only. Until the cutover,
+ *   `/tests` still reads `STRAPI_E2E_EDITION` and `STRAPI_DISABLE_EE`, and its CI actions
+ *   `RUN_EE`. The suites only set `STRAPI_DISABLE_EE` in the app env, for Strapi (`editionEnv`).
  * - EE needs `STRAPI_LICENSE`: without it, or when Strapi rejects it and boots as CE, the run
  *   fails instead of silently testing CE.
  * - Features and future flags are read from the running instance (test plugin), never from env.
- * - A test that needs a feature or flag the instance doesn't have fails instead of skipping.
+ * - A test that needs a feature or flag the instance doesn't have fails instead of skipping. In
+ *   the ui suite, a block with a `beforeAll` fails its first test and Playwright reports the
+ *   others as "did not run".
  */
 
 export type Edition = 'ce' | 'ee';
@@ -115,7 +119,7 @@ export const requireFeatures = (features: InstanceFeatures, requirements: Requir
   ];
   if (missing.length > 0) {
     throw new Error(
-      `This test needs ${missing.join(', ')}, which the ${features.edition.toUpperCase()} instance doesn't have. Tests fail instead of skipping when a requirement is missing.`
+      `This test needs ${missing.join(', ')}, which the ${features.edition.toUpperCase()} instance doesn't have. A missing requirement fails the run instead of skipping.`
     );
   }
 };

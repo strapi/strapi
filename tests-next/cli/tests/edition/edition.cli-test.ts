@@ -11,12 +11,15 @@ import {
   stopAllServers,
   type Server,
 } from '@strapi/tests-shared';
-import { describeEE } from '@strapi/tests-shared/vitest';
+import { describeEE, isFilteredRun } from '@strapi/tests-shared/vitest';
 
 // The edition contract in the cli suite: same module and helpers as the api suite.
 const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 
 let server: Server;
+// The EE block records that it ran. After it, an EE run fails when it was skipped, a CE run when
+// it ran. A filtered run (-t, .only) may leave it out: no check.
+let eeBlockRan = false;
 
 beforeAll(async () => {
   const app = await generateApp({ name: `cli-edition-${worker}` });
@@ -25,8 +28,14 @@ beforeAll(async () => {
   server = await startServer(app, { port: appPort('cli', worker - 1) });
 });
 
-afterAll(async () => {
+// Vitest passes the suite second; the first argument must be a pattern.
+// eslint-disable-next-line no-empty-pattern
+afterAll(async ({}, file) => {
   await stopAllServers();
+  if (isFilteredRun(file)) {
+    return;
+  }
+  expect(eeBlockRan, 'the EE block ran').toBe(editionFromEnv() === 'ee');
 });
 
 test('the app runs in the edition of the run', async () => {
@@ -34,7 +43,9 @@ test('the app runs in the edition of the run', async () => {
 });
 
 describeEE('EE-only block', () => {
-  test('runs only in EE runs', () => {
-    expect(server.edition).toBe('ee');
+  test('runs only in EE runs, on an EE instance', async () => {
+    eeBlockRan = true;
+    // The edition the instance reports, not the one the run asked for (server.edition).
+    expect((await getInstanceFeatures(server)).edition).toBe('ee');
   });
 });

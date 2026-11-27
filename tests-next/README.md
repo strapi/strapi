@@ -59,7 +59,7 @@ on Chromium locally and on Chromium and WebKit in CI. See the [ui README](ui/REA
     bootstrap) and the custom-order cache (which content types have custom order on). That cache
     is stale-while-revalidate: once it is 10 s old, the next read still answers from it and
     refreshes it in the background. The list is in `shared/src/db/snapshot.ts`.
-- **Edition** (RFC D6): `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
+- **Edition**: `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
   (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
   Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run
   removes any license from the app env. See [Edition](#edition).
@@ -125,9 +125,15 @@ never from env vars. A test that needs one the instance doesn't have **fails**, 
 - **ui (Playwright):** tag EE-only tests `@ee`; CE runs leave them out. EE runs replay the
   `@ee` and `@smoke` tests only. Declare requirements with
   `test.use({ requires: { ee: ['cms-content-releases'], future: ['someFlag'] } })`, and read
-  the instance with the `features` fixture.
+  the instance with the `features` fixture. When one is missing, a block with a `beforeAll`
+  fails its first test and Playwright reports the others as "did not run".
 - **api and cli (Vitest):** `describeEE()` and `describeIfFeature()` from
   `@strapi/tests-shared/vitest` run only in EE runs, and `describeIfFeature()` fails when the
   feature is missing. `requireFeatures(features, { future: [...] })` checks future flags.
 
 Set future flags with `scaffoldConfig(app, 'features', { future: { someFlag: true } })`.
+
+`STRAPI_TEST_EDITION` is for these suites only: until the cutover, `/tests` still reads
+`STRAPI_E2E_EDITION` and `STRAPI_DISABLE_EE`, and its CI actions `RUN_EE`. CI runs the suites in
+CE only for now; EE runs in CI, with a license, come later. Run EE locally with
+`STRAPI_TEST_EDITION=ee STRAPI_LICENSE=…`.

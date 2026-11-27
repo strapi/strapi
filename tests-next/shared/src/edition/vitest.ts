@@ -1,4 +1,4 @@
-import { beforeAll, describe } from 'vitest';
+import { beforeAll, describe, type RunnerTask } from 'vitest';
 
 import type { Server } from '../app/server';
 import { editionFromEnv, getInstanceFeatures, requireFeatures } from './index';
@@ -8,9 +8,32 @@ import { editionFromEnv, getInstanceFeatures, requireFeatures } from './index';
  * `@strapi/tests-shared/vitest`, so the Playwright suite doesn't load Vitest.
  */
 
+declare module 'vitest' {
+  interface TaskMeta {
+    /**
+     * Set by `describeEE` on its block, and so on its tests, in every run: `true` only when the
+     * block is skipped because the run is CE, `false` in EE runs.
+     */
+    skippedForEdition?: boolean;
+  }
+}
+
 /** A block that only runs in EE runs (STRAPI_TEST_EDITION=ee). CE runs skip it. */
-export const describeEE = (name: string, fn: () => void) =>
-  describe.skipIf(editionFromEnv() !== 'ee')(`${name} [EE]`, fn);
+export const describeEE = (name: string, fn: () => void) => {
+  const skip = editionFromEnv() !== 'ee';
+  describe.skipIf(skip)(`${name} [EE]`, { meta: { skippedForEdition: skip } }, fn);
+};
+
+/**
+ * True when the run left out a test of this file for another reason than its edition: a `-t`, a
+ * `.only` or a line filter. A filter can leave the EE blocks out, so a check that they ran
+ * doesn't hold. Pass the suite an `afterAll` receives. A `test.skip` also counts as a filter.
+ */
+export const isFilteredRun = (task: Readonly<RunnerTask>): boolean => {
+  const filtered = (t: Readonly<RunnerTask>): boolean =>
+    t.type === 'suite' ? t.tasks.some(filtered) : t.mode === 'skip' && !t.meta.skippedForEdition;
+  return filtered(task.file);
+};
 
 /**
  * The check `describeIfFeature` runs before its tests: fails when the instance doesn't have the
