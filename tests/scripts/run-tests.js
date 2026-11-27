@@ -10,13 +10,45 @@ const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/run
 const { buildAdmin, piwiRunLabel, runPlaywright } = require('../utils/runners/browser-runner');
 const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
 const { selectRunnableDomains } = require('../utils/runners/e2e-domains');
-const {
-  loadDomainConfigs,
-  calculateTestAppsRequired,
-  buildForwardedRunnerArgs,
-  runCLI,
-} = require('../utils/runners/cli-runner');
 const { createConfig } = require('../../playwright.base.config');
+
+/**
+ * The runner parses its flags with yargs before invoking Playwright. Unknown options (e.g.
+ * `--grep=…`) become plain properties on the parsed object and are omitted from `_`, so they
+ * never reached Playwright unless the user put them after `--`. Re-serialize those properties as
+ * argv fragments for Playwright.
+ *
+ * @param {Record<string, unknown>} testYargs - yargs parse() result for args after `--type`
+ * @returns {string[]}
+ */
+const buildForwardedRunnerArgs = (testYargs) => {
+  /** Keys owned by this runner (not for Playwright). */
+  const runnerKeys = new Set(['_', '$0', 'concurrency', 'c', 'domains', 'd', 'setup', 'f']);
+
+  const args = [...testYargs._];
+
+  for (const key of Object.keys(testYargs)) {
+    if (runnerKeys.has(key) || key.startsWith('$')) {
+      continue;
+    }
+    const value = testYargs[key];
+    if (value === undefined || value === false) {
+      continue;
+    }
+    const flag = `--${key}`;
+    if (value === true) {
+      args.push(flag);
+    } else if (Array.isArray(value)) {
+      for (const item of value) {
+        args.push(flag, String(item));
+      }
+    } else {
+      args.push(`${flag}=${String(value)}`);
+    }
+  }
+
+  return args;
+};
 
 /**
  * Rough share of e2e time per domain, measured on CI (Oct 2026). Only the order matters:
@@ -79,10 +111,7 @@ const cwd = path.resolve(__dirname, '../..');
 const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
 
 // These domains need setup that the default runs do not have, so they run only when named with `--domains`.
-const OPT_IN_DOMAINS_BY_TYPE = {
-  e2e: ['enterprise-plugins'],
-  cli: [],
-};
+const OPT_IN_DOMAINS = ['enterprise-plugins'];
 
 const pathExists = async (filePath) => {
   try {
@@ -99,14 +128,14 @@ yargs
   })
   .command({
     command: '*',
-    description: 'run the test suite (e2e or cli)',
+    description: 'run the e2e test suite',
     builder(yarg) {
       yarg.option('type', {
         alias: 't',
         type: 'string',
-        choices: ['e2e', 'cli'],
+        choices: ['e2e'],
         demandOption: true,
-        describe: 'Type of tests to run (e2e or cli)',
+        describe: 'Type of tests to run',
       });
 
       return yarg;
@@ -121,21 +150,16 @@ yargs
       const templateDir = path.join(cwd, 'tests', 'app-template');
 
       try {
-        // Load dotenv for e2e tests
-        if (type === 'e2e' && (await pathExists(path.join(testRoot, '.env')))) {
+        if (await pathExists(path.join(testRoot, '.env'))) {
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
-        if (type === 'e2e') {
-          const { applyE2eEditionEnv } = require('../utils/e2e-edition.ts');
-          applyE2eEditionEnv();
-        }
+        const { applyE2eEditionEnv } = require('../utils/e2e-edition.ts');
+        applyE2eEditionEnv();
 
         // Read domains
         const domains = await fs.readdir(testDomainRoot);
-        const defaultDomains = domains.filter(
-          (domain) => !OPT_IN_DOMAINS_BY_TYPE[type].includes(domain)
-        );
+        const defaultDomains = domains.filter((domain) => !OPT_IN_DOMAINS.includes(domain));
 
         // Parse test-specific arguments - need to reconstruct the full argv without --type
         // The outer yargs already parsed --type, so we need to get the remaining args
@@ -154,7 +178,7 @@ yargs
             alias: 'c',
             type: 'number',
             default: defaultDomains.length,
-            describe: `Number of concurrent test ${type === 'cli' ? 'domains' : 'apps'} to run`,
+            describe: 'Number of concurrent test apps to run',
           })
           .option('domains', {
             alias: 'd',
@@ -169,20 +193,14 @@ yargs
             type: 'boolean',
             default: false,
           })
-          .option('updateSnapshot', {
-            alias: 'u',
-            describe: 'Pass -u to Jest to update snapshots',
-            type: 'boolean',
-            default: false,
-          })
           .parse();
 
-        const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
+        const { concurrency, domains: selectedDomains, setup } = testYargs;
 
         const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
         // Locally, e2e runs Chromium only unless a --project is passed. CI passes one per job.
-        if (type === 'e2e' && !process.env.CI && !extractShardArgs(forwardedRunnerArgs).project) {
+        if (!process.env.CI && !extractShardArgs(forwardedRunnerArgs).project) {
           console.log(
             'Running e2e tests on Chromium only. Pass `-- --project=webkit` to run another browser.'
           );
@@ -194,29 +212,14 @@ yargs
          */
         await publishYalc(cwd);
 
-        // Load domain configs for CLI tests
-        let domainConfigs = null;
-        let testAppsRequired;
-        if (type === 'cli') {
-          domainConfigs = await loadDomainConfigs(testDomainRoot, selectedDomains, testYargs);
-          testAppsRequired = calculateTestAppsRequired(domainConfigs, concurrency);
-        } else {
-          // For e2e: we don't need more apps than domains, but respect concurrency
-          testAppsRequired = Math.min(selectedDomains.length, concurrency);
-        }
-
-        // CLI domains may use testApps: 0 (e.g. create-strapi-app scaffolds to tmp, not TEST_APPS).
-        let testAppPaths;
+        // No more apps than domains, but respect concurrency
+        const testAppsRequired = Math.min(selectedDomains.length, concurrency);
         if (testAppsRequired === 0) {
-          if (type !== 'cli') {
-            throw new Error('No test apps to spawn');
-          }
-          testAppPaths = [];
-        } else {
-          testAppPaths = Array.from({ length: testAppsRequired }, (_, i) =>
-            path.join(testAppDirectory, `test-app-${i}`)
-          );
+          throw new Error('No test apps to spawn');
         }
+        const testAppPaths = Array.from({ length: testAppsRequired }, (_, i) =>
+          path.join(testAppDirectory, `test-app-${i}`)
+        );
 
         const currentTestApps = await getCurrentTestApps(testAppDirectory);
 
@@ -229,7 +232,7 @@ yargs
           templateDir,
           setup,
           currentTestApps: currentTestApps.map((appPath) => path.basename(appPath)),
-          commitE2eBaseline: type === 'e2e',
+          commitE2eBaseline: true,
         });
 
         if (wasSetup) {
@@ -244,199 +247,139 @@ yargs
           );
         }
 
-        /**
-         * Run the appropriate test runner
-         */
-        if (type === 'e2e') {
-          // Git baseline: single commit during `setupTestApps` when apps are generated (`commitE2eBaseline`).
-          // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
+        // Git baseline: single commit during `setupTestApps` when apps are generated (`commitE2eBaseline`).
+        // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
 
-          // Every domain starts its app with `--no-build-admin`, so build the panel once here,
-          // with the same environment (edition, feature flags) the app will run with.
-          await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
+        // Every domain starts its app with `--no-build-admin`, so build the panel once here,
+        // with the same environment (edition, feature flags) the app will run with.
+        await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
 
-          const failedDomains = [];
+        const failedDomains = [];
 
-          // A domain whose specs are all gated off for this run would start Strapi only to skip
-          // every test (see tests/utils/runners/e2e-domains.js).
-          const { runnable: runnableDomains, skipped: skippedDomains } = selectRunnableDomains(
-            selectedDomains,
-            {
-              isCE: process.env.STRAPI_DISABLE_EE === 'true',
-              mediaLibrarySuite: process.env.E2E_MEDIA_LIBRARY,
-            }
-          );
-          for (const { domain, reason } of skippedDomains) {
-            console.log(`Skipping ${domain} e2e tests: ${reason}`);
+        // A domain whose specs are all gated off for this run would start Strapi only to skip
+        // every test (see tests/utils/runners/e2e-domains.js).
+        const { runnable: runnableDomains, skipped: skippedDomains } = selectRunnableDomains(
+          selectedDomains,
+          {
+            isCE: process.env.STRAPI_DISABLE_EE === 'true',
+            mediaLibrarySuite: process.env.E2E_MEDIA_LIBRARY,
           }
+        );
+        for (const { domain, reason } of skippedDomains) {
+          console.log(`Skipping ${domain} e2e tests: ${reason}`);
+        }
 
-          const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
+        const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
 
-          // Without a CI label, the reporter would give every local process the same
-          // `hostname|project` id, and parallel domains would cancel each other's run. One base
-          // per invocation keeps the shard, domain and lane suffixes working locally too.
-          const piwiBaseLabel = process.env.PIWI_RUN_LABEL || `local-${Date.now()}`;
+        // Without a CI label, the reporter would give every local process the same
+        // `hostname|project` id, and parallel domains would cancel each other's run. One base
+        // per invocation keeps the shard, domain and lane suffixes working locally too.
+        const piwiBaseLabel = process.env.PIWI_RUN_LABEL || `local-${Date.now()}`;
 
-          const runDomain = async ({ domain, testAppPath, port, testArgs, lane }) => {
-            const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
+        const runDomain = async ({ domain, testAppPath, port, testArgs, lane }) => {
+          const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
-            console.log(
-              `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
-            );
+          console.log(`Creating playwright config for domain: ${domain}, at path: ${testAppPath}`);
 
-            const config = createConfig({
-              testDir: path.join(testDomainRoot, domain),
-              port,
-              appDir: testAppPath,
-              reportFileName: `playwright-${domain}-${port}.xml`,
-              domain,
-            });
+          const config = createConfig({
+            testDir: path.join(testDomainRoot, domain),
+            port,
+            appDir: testAppPath,
+            reportFileName: `playwright-${domain}-${port}.xml`,
+            domain,
+          });
 
-            // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
-            // canonical port is `E2E_PORT_BASE + j` below, the same as baseURL / webServer;
-            // helpers read PORT.
-            // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
-            // embeds a numeric literal; Node coerces env values to strings on read.
-            const configFileTemplate = `
+          // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
+          // canonical port is `E2E_PORT_BASE + j` below, the same as baseURL / webServer;
+          // helpers read PORT.
+          // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
+          // embeds a numeric literal; Node coerces env values to strings on read.
+          const configFileTemplate = `
 process.env.PORT = ${JSON.stringify(port)};
 const config = ${JSON.stringify(config)}
 
 module.exports = config
                 `;
 
-            await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
+          await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
-            console.log(`Running ${domain} e2e tests`);
+          console.log(`Running ${domain} e2e tests`);
 
-            try {
-              await runPlaywright({
-                configPath: pathToPlaywrightConfig,
-                cwd,
-                port,
-                testAppPath,
-                testArgs,
-                runLabel: piwiRunLabel({
-                  baseLabel: piwiBaseLabel,
-                  shard,
-                  domain,
-                  lane,
-                }),
-              });
-            } catch (err) {
-              console.error(`${domain} e2e tests failed`);
-              failedDomains.push(domain);
-            }
-          };
-
-          // With measured durations and a --shard, split the spec files by duration across the
-          // shards and the test apps of this shard (see tests/utils/runners/shard-plan.js).
-          // Otherwise each test app takes the next whole domain as soon as it is free, heaviest
-          // first. Either way a failing domain doesn't stop the others: every domain runs and the
-          // run fails at the end, like the CLI runner.
-          const weights = shard
-            ? loadShardWeights({ edition: process.env.STRAPI_E2E_EDITION, project })
-            : null;
-
-          if (shard && weights) {
-            const lanePlans = planShard({
-              weights,
-              units: await listSpecFiles(testDomainRoot, runnableDomains),
-              shard,
-              lanes: testAppPaths.length,
+          try {
+            await runPlaywright({
+              configPath: pathToPlaywrightConfig,
+              cwd,
+              port,
+              testAppPath,
+              testArgs,
+              runLabel: piwiRunLabel({
+                baseLabel: piwiBaseLabel,
+                shard,
+                domain,
+                lane,
+              }),
             });
-
-            await Promise.all(
-              testAppPaths.map(async (testAppPath, j) => {
-                for (const run of lanePlans[j]) {
-                  await runDomain({
-                    domain: run.domain,
-                    testAppPath,
-                    port: E2E_PORT_BASE + j,
-                    lane: j,
-                    testArgs: [
-                      ...argsWithoutShard,
-                      ...run.files.map((file) =>
-                        toFileFilter(path.join(testDomainRoot, run.domain, file))
-                      ),
-                    ],
-                  });
-                }
-              })
-            );
-          } else {
-            const pendingDomains = sortDomainsByExpectedDuration(runnableDomains);
-
-            await Promise.all(
-              testAppPaths.map(async (testAppPath, j) => {
-                while (pendingDomains.length > 0) {
-                  await runDomain({
-                    domain: pendingDomains.shift(),
-                    testAppPath,
-                    port: E2E_PORT_BASE + j,
-                    lane: j,
-                    testArgs: forwardedRunnerArgs,
-                  });
-                }
-              })
-            );
+          } catch (err) {
+            console.error(`${domain} e2e tests failed`);
+            failedDomains.push(domain);
           }
+        };
 
-          if (failedDomains.length > 0) {
-            throw new Error(`e2e tests failed for: ${failedDomains.join(', ')}`);
-          }
+        // With measured durations and a --shard, split the spec files by duration across the
+        // shards and the test apps of this shard (see tests/utils/runners/shard-plan.js).
+        // Otherwise each test app takes the next whole domain as soon as it is free, heaviest
+        // first. Either way a failing domain doesn't stop the others: every domain runs and the
+        // run fails at the end.
+        const weights = shard
+          ? loadShardWeights({ edition: process.env.STRAPI_E2E_EDITION, project })
+          : null;
+
+        if (shard && weights) {
+          const lanePlans = planShard({
+            weights,
+            units: await listSpecFiles(testDomainRoot, runnableDomains),
+            shard,
+            lanes: testAppPaths.length,
+          });
+
+          await Promise.all(
+            testAppPaths.map(async (testAppPath, j) => {
+              for (const run of lanePlans[j]) {
+                await runDomain({
+                  domain: run.domain,
+                  testAppPath,
+                  port: E2E_PORT_BASE + j,
+                  lane: j,
+                  testArgs: [
+                    ...argsWithoutShard,
+                    ...run.files.map((file) =>
+                      toFileFilter(path.join(testDomainRoot, run.domain, file))
+                    ),
+                  ],
+                });
+              }
+            })
+          );
         } else {
-          // CLI orchestration: batch domains, assign test apps, then run tests
-          const availableTestApps = [...testAppPaths];
-          const batches = [];
+          const pendingDomains = sortDomainsByExpectedDuration(runnableDomains);
 
-          for (let i = 0; i < selectedDomains.length; i += concurrency) {
-            batches.push(selectedDomains.slice(i, i + concurrency));
-          }
+          await Promise.all(
+            testAppPaths.map(async (testAppPath, j) => {
+              while (pendingDomains.length > 0) {
+                await runDomain({
+                  domain: pendingDomains.shift(),
+                  testAppPath,
+                  port: E2E_PORT_BASE + j,
+                  lane: j,
+                  testArgs: forwardedRunnerArgs,
+                });
+              }
+            })
+          );
+        }
 
-          // eslint-disable-next-line no-plusplus
-          for (let i = 0; i < batches.length; i++) {
-            const batch = batches[i];
-            let failingTests = 0;
-
-            await Promise.all(
-              batch.map(async (domain) => {
-                const config = domainConfigs[domain];
-                // Must not call splice(0): that deletes the entire pool. Use splice only when n > 0.
-                const neededApps =
-                  typeof config.testApps === 'number' && config.testApps >= 0 ? config.testApps : 1;
-
-                if (availableTestApps.length < neededApps) {
-                  console.error('Not enough test apps available; aborting');
-                  process.exit(1);
-                }
-
-                const testApps = neededApps > 0 ? availableTestApps.splice(-neededApps) : [];
-
-                try {
-                  const domainDir = path.join(testDomainRoot, domain);
-                  const jestConfigPath = path.join(cwd, 'jest.config.cli.js');
-
-                  // Run Jest - this is the only line that differs!
-                  await runCLI({
-                    domainDir,
-                    jestConfigPath,
-                    testApps,
-                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...forwardedRunnerArgs],
-                    domain,
-                  });
-                } catch (err) {
-                  console.error('Test suite failed for', domain);
-                  failingTests += 1;
-                }
-
-                availableTestApps.push(...testApps);
-              })
-            );
-
-            if (failingTests > 0) {
-              throw new Error(`${failingTests} tests failed`);
-            }
-          }
+        if (failedDomains.length > 0) {
+          throw new Error(`e2e tests failed for: ${failedDomains.join(', ')}`);
         }
       } catch (err) {
         console.error(chalk.red(`Error running ${type} tests:`));
@@ -456,9 +399,9 @@ module.exports = config
       yarg.option('type', {
         alias: 't',
         type: 'string',
-        choices: ['e2e', 'cli'],
+        choices: ['e2e'],
         demandOption: true,
-        describe: 'Type of tests to clean (e2e or cli)',
+        describe: 'Type of tests to clean',
       });
       return yarg;
     },

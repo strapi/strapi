@@ -1,17 +1,10 @@
-import fs from 'node:fs';
-import path from 'node:path';
-
-import { strapiBin, type App, type Database } from '@strapi/tests-shared';
+import type { App, Database } from '@strapi/tests-shared';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { createApp, runStrapi } from '../helpers';
+import { createApp, runStrapi, strapiVersion } from '../helpers';
 
 let app: App;
 let database: Database;
-
-const strapiVersion = () =>
-  JSON.parse(fs.readFileSync(path.join(path.dirname(strapiBin()), '..', 'package.json'), 'utf8'))
-    .version;
 
 describe('version', () => {
   beforeAll(async () => {

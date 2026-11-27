@@ -16,7 +16,7 @@ packages/utils/      # Shared tooling: logger, eslint-config, tsconfig, vitest-c
 packages/cli/        # CLI tools: create-strapi-app, cloud-cli
 examples/            # Dev sandboxes only — not published, not for production fixes
 docs/                # Contributor docs site (contributor.strapi.io); package docs mirror packages/ under docs/docs/packages/
-tests/               # Integration, E2E, and CLI test infrastructure
+tests/               # Integration and E2E test infrastructure
 tests-next/          # New test suites being built (Test Infrastructure Overhaul), renamed tests/ at cutover:
                      #   shared/ (@strapi/tests-shared), ui/ (@strapi/tests-e2e, *.ui-test.ts),
                      #   api/ (@strapi/tests-api, *.api-test.ts), cli/ (@strapi/tests-cli, *.cli-test.ts)
@@ -159,12 +159,12 @@ yarn test:api -u             # update snapshots
 
 ### CLI tests
 
-CLI tests live in `tests/cli/`.
+CLI tests live in `tests-next/cli/` (Vitest, `*.cli-test.ts`). Run `yarn build` first: the generated apps run the workspace packages from their `dist`.
 
 ```bash
-yarn test:cli
-yarn test:cli:debug          # with debug output
-yarn test:cli:update         # update snapshots
+yarn nx run @strapi/tests-cli:test                            # SQLite
+TESTS_DATABASE=postgres yarn nx run @strapi/tests-cli:test
+TESTS_DATABASE=mysql yarn nx run @strapi/tests-cli:test
 ```
 
 ### E2E tests (Playwright)

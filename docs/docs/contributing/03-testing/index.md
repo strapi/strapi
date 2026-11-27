@@ -51,12 +51,14 @@ Set `API_TEST_PROFILE` to a file path to get one JSON line per timed step (each 
 
 ## CLI tests
 
-The CLI tests live in `tests/cli/`. They use Jest. They share the app template, the utilities and the runner (`tests/scripts/run-tests.js`) with the E2E tests.
+The CLI tests live in `tests-next/cli/`. They use Vitest and run the CLI in a child process. Each test file generates its own empty app, adds content types with the scaffolders and data with the seeders of `@strapi/tests-shared`. See the [tests-next README](https://github.com/strapi/strapi/blob/develop/tests-next/README.md).
+
+Run `yarn build` first: the generated apps run the workspace packages from their `dist`.
 
 ```bash
-yarn test:cli
-yarn test:cli:debug    # with debug output
-yarn test:cli:update   # update snapshots
+yarn nx run @strapi/tests-cli:test                            # SQLite
+TESTS_DATABASE=postgres yarn nx run @strapi/tests-cli:test
+TESTS_DATABASE=mysql yarn nx run @strapi/tests-cli:test
 ```
 
 ## E2E tests
