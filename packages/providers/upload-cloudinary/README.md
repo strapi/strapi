@@ -25,7 +25,7 @@ npm install @strapi/provider-upload-cloudinary --save
 
 - `provider` defines the name of the provider
 - `providerOptions` is passed down during the construction of the provider. (ex: `cloudinary.config`). [Complete list of options](https://cloudinary.com/documentation/cloudinary_sdks#configuration_parameters)
-- `actionOptions` is passed directly to each method respectively allowing for custom options. You can find the complete list of [upload/ uploadStream options](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters) and [delete options](https://cloudinary.com/documentation/image_upload_api_reference#destroy_optional_parameters)
+- `actionOptions` is passed directly to each method respectively allowing for custom options. You can find the complete list of [upload/ uploadStream options](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters) and [delete options](https://cloudinary.com/documentation/image_upload_api_reference#destroy_optional_parameters). A replace from the Media Library reads `replaceStream` for the stored file and for the formats the old image already had. A format the old image did not have, and a file that another provider stored, go through `upload` or `uploadStream` and read those entries. So set options such as `folder` under `uploadStream`, `upload` and `replaceStream` alike. `replace` and `replaceStream` always overwrite the asset and invalidate the CDN cache. An asset stored at its hash, with no folder, is overwritten where it is: `folder` and the file's folder path do not move it on a replace.
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
@@ -47,6 +47,8 @@ module.exports = ({ env }) => ({
       actionOptions: {
         upload: {},
         uploadStream: {},
+        replace: {},
+        replaceStream: {},
         delete: {},
       },
     },

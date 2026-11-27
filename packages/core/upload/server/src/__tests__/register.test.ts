@@ -13,6 +13,7 @@ jest.mock('sharp', () => {
 
 /* eslint-disable import/first -- mock runs before `sharp` import */
 import sharp from 'sharp';
+import { errors } from '@strapi/utils';
 import { register } from '../register';
 import createProviderService from '../services/provider';
 /* eslint-enable import/first */
@@ -34,15 +35,19 @@ const exampleMiddlewaresConfig = [
   },
 ];
 
+let mockProviderInstance: Record<string, unknown> | undefined;
+
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
     global.strapi.config.set('middlewares', exampleMiddlewaresConfig);
 
-    return {
-      uploadStream: jest.fn(),
-      upload: jest.fn(),
-      delete: jest.fn(),
-    };
+    return (
+      mockProviderInstance ?? {
+        uploadStream: jest.fn(),
+        upload: jest.fn(),
+        delete: jest.fn(),
+      }
+    );
   },
 }));
 
@@ -67,18 +72,19 @@ jest.mock(
   { virtual: true }
 );
 
-const createStrapiMock = (uploadConfig: unknown): any => ({
-  dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
-  plugins: { upload: {} },
-  db: { migrations: { providers: { internal: { register: jest.fn() } } } },
-  server: { app: { on: jest.fn() }, routes: jest.fn() },
-  admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
-  config: {
-    get: jest.fn().mockReturnValue(uploadConfig),
-    set: jest.fn(),
-  },
-  get: jest.fn().mockReturnValue({ add: jest.fn() }),
-});
+const mockStrapi = (uploadConfig: Record<string, unknown>, uploadPlugin: Record<string, unknown>) =>
+  ({
+    dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+    plugins: { upload: uploadPlugin },
+    db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+    server: { app: { on: jest.fn() }, routes: jest.fn() },
+    admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+    config: {
+      get: jest.fn().mockReturnValue(uploadConfig),
+      set: jest.fn(),
+    },
+    get: jest.fn().mockReturnValue({ add: jest.fn() }),
+  }) as any;
 
 describe('Upload plugin register', () => {
   describe('routes and provider middlewares', () => {
@@ -273,7 +279,7 @@ describe('Upload plugin register', () => {
   describe('provider methods', () => {
     test('a method the provider declares as undefined is not exposed as a function', async () => {
       const emitWarning = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
-      global.strapi = createStrapiMock({ provider: 'upload-only-with-undefined-stream' });
+      global.strapi = mockStrapi({ provider: 'upload-only-with-undefined-stream' }, {});
 
       await register({ strapi });
 
@@ -294,6 +300,272 @@ describe('Upload plugin register', () => {
       expect(provider.upload).toEqual(expect.any(Function));
 
       emitWarning.mockRestore();
+    });
+  });
+
+  describe('provider wrapper', () => {
+    const file = { name: 'a.png' } as any;
+    const oldFile = { name: 'old.png' } as any;
+
+    const registerWithProvider = async (
+      instance: Record<string, unknown>,
+      actionOptions: Record<string, unknown> = {}
+    ) => {
+      mockProviderInstance = instance;
+      const uploadPlugin: Record<string, any> = {};
+      global.strapi = mockStrapi({ provider: 'local', actionOptions }, uploadPlugin);
+
+      await register({ strapi });
+
+      return uploadPlugin.provider;
+    };
+
+    afterEach(() => {
+      mockProviderInstance = undefined;
+    });
+
+    test.each(['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'])(
+      '%s(file, options) defaults options to its actionOptions',
+      async (name) => {
+        const method = jest.fn().mockReturnValue('result');
+        const instance = { upload: jest.fn(), delete: jest.fn(), [name]: method };
+
+        const provider = await registerWithProvider(instance, {
+          [name]: { fromConfig: true },
+          other: { shouldNotBeUsed: true },
+        });
+
+        const result = provider[name](file);
+        expect(result).toBeInstanceOf(Promise);
+        await expect(result).resolves.toBe('result');
+        expect(method).toHaveBeenLastCalledWith(file, { fromConfig: true });
+        expect(method.mock.contexts[0]).toBe(instance);
+
+        await provider[name](file, { custom: true });
+        expect(method).toHaveBeenLastCalledWith(file, { custom: true });
+      }
+    );
+
+    test.each(['replace', 'replaceStream'])(
+      '%s(newFile, oldFile, options) defaults options to its actionOptions',
+      async (name) => {
+        const method = jest.fn().mockReturnValue('result');
+        const instance = { upload: jest.fn(), delete: jest.fn(), [name]: method };
+
+        const provider = await registerWithProvider(instance, { [name]: { fromConfig: true } });
+
+        const result = provider[name](file, oldFile);
+        expect(result).toBeInstanceOf(Promise);
+        await expect(result).resolves.toBe('result');
+        expect(method).toHaveBeenLastCalledWith(file, oldFile, { fromConfig: true });
+        expect(method.mock.contexts[0]).toBe(instance);
+
+        await provider[name](file, oldFile, { custom: true });
+        expect(method).toHaveBeenLastCalledWith(file, oldFile, { custom: true });
+      }
+    );
+
+    test('isPrivate() is called without arguments and resolves its value', async () => {
+      const isPrivate = jest.fn().mockReturnValue(true);
+      const instance = { upload: jest.fn(), delete: jest.fn(), isPrivate };
+
+      const provider = await registerWithProvider(instance, { isPrivate: { ignored: true } });
+
+      const result = provider.isPrivate();
+      expect(result).toBeInstanceOf(Promise);
+      await expect(result).resolves.toBe(true);
+      expect(isPrivate).toHaveBeenCalledWith();
+      expect(isPrivate.mock.contexts[0]).toBe(instance);
+    });
+
+    test('a sync throw from a wrapped method becomes a rejection', async () => {
+      const error = new Error('too large');
+      const provider = await registerWithProvider({
+        upload: jest.fn(),
+        delete: jest.fn(),
+        checkFileSize() {
+          throw error;
+        },
+      });
+
+      await expect(provider.checkFileSize(file, { sizeLimit: 1 })).rejects.toBe(error);
+    });
+
+    test.each([
+      ['delete', { upload: jest.fn(), delete: true }, 'delete method'],
+      ['upload and uploadStream', { upload: 'yes', uploadStream: 1, delete: jest.fn() }, 'upload'],
+    ])('a non-function %s fails register like an omitted one', async (_name, instance, message) => {
+      await expect(registerWithProvider(instance)).rejects.toThrow(message);
+    });
+
+    test('reads contract methods from the prototype of a class-based provider', async () => {
+      const upload = jest.fn();
+      const del = jest.fn();
+      class ClassProvider {
+        upload(...args: unknown[]) {
+          return upload(this, ...args);
+        }
+
+        delete(...args: unknown[]) {
+          return del(this, ...args);
+        }
+
+        isPrivate() {
+          return true;
+        }
+      }
+      const instance = new ClassProvider();
+
+      const provider = await registerWithProvider(instance as any, {
+        upload: { fromUpload: true },
+        delete: { fromDelete: true },
+      });
+
+      await provider.upload(file);
+      expect(upload).toHaveBeenCalledWith(instance, file, { fromUpload: true });
+      await provider.delete(file);
+      expect(del).toHaveBeenCalledWith(instance, file, { fromDelete: true });
+      await expect(provider.isPrivate()).resolves.toBe(true);
+    });
+
+    test('optional contract methods the provider does not implement stay undefined', async () => {
+      const provider = await registerWithProvider({ uploadStream: jest.fn(), delete: jest.fn() });
+
+      expect(provider.upload).toBeUndefined();
+      expect(provider.replace).toBeUndefined();
+      expect(provider.replaceStream).toBeUndefined();
+    });
+
+    test('keeps provider-specific methods and properties untouched', async () => {
+      const providerConfig = { bucket: 'b' };
+      const uploadIfMatch = jest.fn();
+      const getProviderConfig = jest.fn().mockReturnValue(providerConfig);
+      const instance = {
+        upload: jest.fn(),
+        delete: jest.fn(),
+        getProviderConfig,
+        uploadIfMatch,
+        version: 2,
+      };
+
+      const provider = await registerWithProvider(instance, {
+        uploadIfMatch: { shouldNotBeUsed: true },
+      });
+
+      expect(provider.getProviderConfig()).toBe(providerConfig);
+      expect(getProviderConfig.mock.contexts[0]).toBe(instance);
+      expect(provider.version).toBe(2);
+
+      // Helpers get exactly the arguments they are called with: no actionOptions, no cut-off.
+      await provider.uploadIfMatch(file);
+      expect(uploadIfMatch).toHaveBeenLastCalledWith(file);
+      expect(uploadIfMatch.mock.contexts[0]).toBe(instance);
+
+      await provider.uploadIfMatch(file, oldFile, 'etag');
+      expect(uploadIfMatch).toHaveBeenLastCalledWith(file, oldFile, 'etag');
+    });
+
+    test('provider methods calling this.upload get the raw method, without actionOptions', async () => {
+      const upload = jest.fn();
+      const provider = await registerWithProvider(
+        {
+          upload,
+          delete: jest.fn(),
+          uploadTwice(this: { upload: (f: unknown) => unknown }, f: unknown) {
+            return this.upload(f);
+          },
+        },
+        { upload: { fromConfig: true } }
+      );
+
+      await provider.uploadTwice(file);
+
+      expect(upload).toHaveBeenCalledWith(file);
+    });
+
+    describe('base provider defaults', () => {
+      test('isPrivate returns false', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+
+        expect(provider.isPrivate()).toBe(false);
+      });
+
+      test('getSignedUrl returns the file', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+
+        expect(provider.getSignedUrl(file)).toBe(file);
+      });
+
+      test('checkFileSize throws only when the file exceeds sizeLimit', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+        // file.size is in KB, sizeLimit in bytes
+        const bigFile = { name: 'big.png', size: 2 } as any;
+
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 1000 })).toThrow(
+          errors.PayloadTooLargeError
+        );
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 4000 })).not.toThrow();
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 0 })).not.toThrow();
+      });
+
+      test('extend adds properties to the provider', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+        const extra = jest.fn();
+
+        provider.extend({ extra });
+
+        expect(provider.extra).toBe(extra);
+      });
+
+      test('apply when the provider declares the method as undefined', async () => {
+        const provider = await registerWithProvider({
+          upload: jest.fn(),
+          delete: jest.fn(),
+          isPrivate: undefined,
+          checkFileSize: undefined,
+          getSignedUrl: undefined,
+        });
+        const bigFile = { name: 'big.png', size: 2 } as any;
+
+        expect(provider.isPrivate()).toBe(false);
+        expect(provider.getSignedUrl(file)).toBe(file);
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 1000 })).toThrow(
+          errors.PayloadTooLargeError
+        );
+        expect(Object.keys(provider)).not.toContain('isPrivate');
+      });
+
+      test('apply when the provider declares the method as null or false', async () => {
+        const provider = await registerWithProvider({
+          upload: jest.fn(),
+          delete: jest.fn(),
+          isPrivate: false,
+          checkFileSize: null,
+          getSignedUrl: null,
+        });
+        const bigFile = { name: 'big.png', size: 2 } as any;
+
+        expect(provider.isPrivate()).toBe(false);
+        expect(provider.getSignedUrl(file)).toBe(file);
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 1000 })).toThrow(
+          errors.PayloadTooLargeError
+        );
+        expect(Object.keys(provider)).not.toContain('isPrivate');
+      });
+
+      test('optional contract methods declared as null stay missing', async () => {
+        const provider = await registerWithProvider({
+          upload: jest.fn(),
+          uploadStream: null,
+          delete: jest.fn(),
+          replace: false,
+          replaceStream: null,
+        });
+
+        expect(provider.uploadStream).toBeUndefined();
+        expect(provider.replace).toBeUndefined();
+        expect(provider.replaceStream).toBeUndefined();
+      });
     });
   });
 });

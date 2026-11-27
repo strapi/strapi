@@ -29,7 +29,13 @@ const providerModule = {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 
-    const upload = (file: File, customConfig = {}): Promise<void> => {
+    // `pinnedConfig` comes after the caller options, so they cannot override it. A `folder: undefined`
+    // there removes the folder, which also drops a folder set from `file.path`.
+    const upload = (
+      file: File,
+      customConfig = {},
+      pinnedConfig: Partial<UploadApiOptions> = {}
+    ): Promise<void> => {
       return new Promise((resolve, reject) => {
         const config: Partial<UploadApiOptions> = {
           resource_type: 'auto',
@@ -54,7 +60,16 @@ const providerModule = {
             ? cloudinary.uploader.upload_stream
             : cloudinary.uploader.upload_chunked_stream;
 
-        const uploadStream = uploadMethod({ ...config, ...customConfig }, (err, image) => {
+        const uploadConfig: Partial<UploadApiOptions> = {
+          ...config,
+          ...customConfig,
+          ...pinnedConfig,
+        };
+        if ('folder' in pinnedConfig && pinnedConfig.folder === undefined) {
+          delete uploadConfig.folder;
+        }
+
+        const uploadStream = uploadMethod(uploadConfig, (err, image) => {
           if (err) {
             if (err.message.includes('File size too large')) {
               reject(new utils.errors.PayloadTooLargeError());
@@ -101,25 +116,45 @@ const providerModule = {
       const { public_id: oldPublicId, resource_type: oldResourceType } =
         oldFile.provider_metadata ?? {};
 
-      // If the public_id is preserved, we can overwrite in place and invalidate
-      // the CDN cache in a single call.
+      // A replace must overwrite the bytes and invalidate the CDN cache wherever the new asset
+      // lands, including on the old public_id through options such as `folder`, where the old
+      // asset is not destroyed below. These flags come after the options so they cannot be
+      // overridden.
+      const replaceConfig = { overwrite: true, invalidate: true };
+
+      // If the public_id is preserved, overwrite in place. `public_id` comes after the options so
+      // it cannot be overridden, and `folder` (from the options or `file.path`) is dropped, so the
+      // asset never moves. A move would destroy the old asset below before the upload plugin
+      // updates the file row, and a failed sibling format replace would then leave the row on a
+      // destroyed asset. On the other branch `resource_type` stays `auto`, so a type change makes
+      // the new asset a different one and the old asset is destroyed below.
       if (oldPublicId && newFile.hash === oldPublicId) {
-        return upload(newFile, {
-          public_id: oldPublicId as string,
-          overwrite: true,
-          invalidate: true,
-          ...(oldResourceType ? { resource_type: oldResourceType } : {}),
-          ...customConfig,
-        });
+        await upload(
+          newFile,
+          {
+            ...(oldResourceType ? { resource_type: oldResourceType } : {}),
+            ...customConfig,
+          },
+          { public_id: oldPublicId as string, folder: undefined, ...replaceConfig }
+        );
+      } else {
+        await upload(newFile, customConfig, replaceConfig);
       }
 
-      // The public_id differs — upload the new file first, then destroy the old.
-      await upload(newFile, customConfig);
-
-      if (oldPublicId) {
+      // Cloudinary identifies an asset by its public_id and resource_type together. Options such
+      // as `folder` prefix the public_id (`folder/hash`), and a new mime can change the
+      // resource_type, so the new asset can land on the old one or next to it. Destroy the old
+      // asset only when it is a different one, or the new asset would be deleted.
+      const { public_id: newPublicId, resource_type: newResourceType } =
+        newFile.provider_metadata ?? {};
+      const oldAssetResourceType = oldResourceType || 'image';
+      if (
+        oldPublicId &&
+        (newPublicId !== oldPublicId || newResourceType !== oldAssetResourceType)
+      ) {
         try {
           await cloudinary.uploader.destroy(`${oldPublicId}`, {
-            resource_type: (oldResourceType || 'image') as string,
+            resource_type: oldAssetResourceType as string,
             invalidate: true,
           });
         } catch (error) {

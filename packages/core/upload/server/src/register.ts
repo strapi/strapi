@@ -104,34 +104,83 @@ const createProvider = (config: Config) => {
   }
 
   const providerInstance = provider.init(providerOptions);
+  // A contract member that is not a function counts as omitted, here and in the wrapper.
+  const implementsMethod = (name: string) => typeof providerInstance[name] === 'function';
 
-  if (!providerInstance.delete) {
+  if (!implementsMethod('delete')) {
     throw new Error(`The upload provider "${providerName}" doesn't implement the delete method.`);
   }
 
-  if (!providerInstance.upload && !providerInstance.uploadStream) {
+  if (!implementsMethod('upload') && !implementsMethod('uploadStream')) {
     throw new Error(
       `The upload provider "${providerName}" doesn't implement the uploadStream nor the upload method.`
     );
   }
 
-  if (!providerInstance.uploadStream) {
+  if (!implementsMethod('uploadStream')) {
     process.emitWarning(
       `The upload provider "${providerName}" doesn't implement the uploadStream function. Strapi will fallback on the upload method. Some performance issues may occur.`
     );
   }
 
-  // Wrap only real methods: a key declared as `undefined` (e.g. `uploadStream: undefined`) must stay
-  // missing, so callers fall back on `upload` and the base provider defaults still apply.
-  const providerMethods = _.pickBy(providerInstance, (method) => typeof method === 'function');
+  return Object.assign(
+    Object.create(baseProvider),
+    wrapWithActionOptions(providerInstance, actionOptions)
+  );
+};
 
-  const wrappedProvider = _.mapValues(providerMethods, (method, methodName) => {
-    return async (file: File, options = actionOptions[methodName]) =>
-      // Every member is called as a method, contract or not
-      (providerInstance[methodName] as (file: File, options: unknown) => unknown)(file, options);
-  });
+// Contract methods whose last (options) argument defaults to `actionOptions[methodName]`,
+// grouped by arity: (file, options) and (newFile, oldFile, options).
+// Other methods of the provider (e.g. provider-specific helpers) keep their signature.
+// The provider's own methods run with `this` bound to the provider instance, so a call like
+// `this.upload(file)` inside the provider does not receive `actionOptions`.
+const TWO_ARG_METHODS = ['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'];
+const THREE_ARG_METHODS = ['replace', 'replaceStream'];
+const CONTRACT_METHODS = new Set([...TWO_ARG_METHODS, ...THREE_ARG_METHODS, 'isPrivate', 'extend']);
 
-  return Object.assign(Object.create(baseProvider), wrappedProvider);
+const wrapWithActionOptions = (
+  providerInstance: Record<string, unknown>,
+  actionOptions: Config['actionOptions']
+) => {
+  // A contract method declared with a non-function value (e.g. `uploadStream: undefined`,
+  // `isPrivate: false`, `getSignedUrl: null`) must stay missing, so callers fall back on `upload`
+  // and the base provider defaults still apply. Other members set to `undefined` are dropped too;
+  // other data members (e.g. `version: 2`) are kept.
+  const definedMembers = _.omitBy(
+    providerInstance,
+    (value, key) =>
+      value === undefined || (CONTRACT_METHODS.has(key) && typeof value !== 'function')
+  );
+  const wrapped: Record<string, unknown> = _.mapValues(definedMembers, (value) =>
+    typeof value === 'function' ? value.bind(providerInstance) : value
+  );
+  const methodOf = (name: string) => {
+    const method = providerInstance[name];
+    return typeof method === 'function' ? (method as (...args: unknown[]) => unknown) : undefined;
+  };
+
+  for (const name of TWO_ARG_METHODS) {
+    const method = methodOf(name);
+    if (method) {
+      wrapped[name] = async (file: File, options = actionOptions[name]) =>
+        method.call(providerInstance, file, options);
+    }
+  }
+
+  for (const name of THREE_ARG_METHODS) {
+    const method = methodOf(name);
+    if (method) {
+      wrapped[name] = async (newFile: File, oldFile: File, options = actionOptions[name]) =>
+        method.call(providerInstance, newFile, oldFile, options);
+    }
+  }
+
+  const isPrivate = methodOf('isPrivate');
+  if (isPrivate) {
+    wrapped.isPrivate = async () => isPrivate.call(providerInstance);
+  }
+
+  return wrapped;
 };
 
 const baseProvider = {
