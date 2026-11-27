@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
 import {
   validateRoleCreateInput,
@@ -13,11 +14,18 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx: Context) {
-    await validateRoleCreateInput(ctx.request.body);
+    const { data: body, save } = await getService('form-extensions').internal_prepare('role', {
+      body: ctx.request.body,
+      user: ctx.state.user,
+    });
+    await validateRoleCreateInput(body);
 
     const roleService = getService('role');
 
-    const role = await roleService.create(ctx.request.body);
+    const role = await save(
+      () => roleService.create(body),
+      (created: { id: Data.ID }) => roleService.deleteByIds([created.id])
+    );
     const sanitizedRole = roleService.sanitizeRole(role);
 
     ctx.created({ data: sanitizedRole });

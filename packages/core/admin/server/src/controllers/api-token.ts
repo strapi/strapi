@@ -4,6 +4,7 @@ import { strings, errors } from '@strapi/utils';
 import { has } from 'lodash';
 
 import { getService } from '../utils';
+import { parseRouteId } from '../utils/route-id';
 import {
   validateApiTokenCreationInput,
   validateApiTokenUpdateInput,
@@ -18,8 +19,11 @@ export default {
   // Create
   // -------------------------------------------------------------------------
   async create(ctx: Context) {
-    const { body } = ctx.request as Create.Request;
     const apiTokenService = getService('api-token-content-api');
+    const { data: body, save } = await getService('form-extensions').internal_prepare(
+      'content-api-token',
+      { body: (ctx.request as Create.Request).body, user: ctx.state.user }
+    );
 
     const attributes = {
       kind: 'content-api' as const,
@@ -37,7 +41,10 @@ export default {
       throw new ApplicationError('Name already taken');
     }
 
-    const apiToken = await apiTokenService.create(attributes, ctx.state.user);
+    const apiToken = await save(
+      () => apiTokenService.create(attributes, ctx.state.user),
+      (created) => apiTokenService.revoke(created.id)
+    );
     ctx.created({ data: apiToken } satisfies Create.Response);
   },
 
@@ -99,9 +106,17 @@ export default {
   // Update
   // -------------------------------------------------------------------------
   async update(ctx: Context) {
-    const { body } = ctx.request as Update.Request;
-    const { id } = ctx.params as Update.Params;
+    const id = parseRouteId((ctx.params as Update.Params).id);
     const apiTokenService = getService('api-token-content-api');
+
+    if (id === null || !(await apiTokenService.getById(id))) {
+      return ctx.notFound('API Token not found');
+    }
+
+    const { data: body, save } = await getService('form-extensions').internal_prepare(
+      'content-api-token',
+      { body: (ctx.request as Update.Request).body, user: ctx.state.user, entityId: id }
+    );
 
     const mutableBody = body as Record<string, unknown>;
     if (has(mutableBody, 'name')) {
@@ -113,11 +128,6 @@ export default {
 
     await validateApiTokenUpdateInput(body);
 
-    const existingToken = await apiTokenService.getById(id);
-    if (!existingToken) {
-      return ctx.notFound('API Token not found');
-    }
-
     if (has(body, 'name')) {
       const nameAlreadyTaken = await apiTokenService.getByName(body.name!);
       if (nameAlreadyTaken !== null && !strings.isEqual(nameAlreadyTaken.id, id)) {
@@ -125,7 +135,7 @@ export default {
       }
     }
 
-    const apiToken = await apiTokenService.update(id, body);
+    const apiToken = await save(() => apiTokenService.update(id, body));
     ctx.send({ data: apiToken } satisfies Update.Response);
   },
 };

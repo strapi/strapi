@@ -1,10 +1,12 @@
 import _, { pick } from 'lodash';
 import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
 import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
+import { parseRouteId } from '../../../../server/src/utils/route-id';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
 
@@ -36,7 +38,10 @@ export default {
       throw new ForbiddenError('Your license user limit is reached. You cannot create a new user.');
     }
 
-    const { body } = ctx.request;
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: ctx.request.body,
+      user: ctx.state.user,
+    });
     const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
@@ -54,7 +59,15 @@ export default {
       Object.assign(attributes, { registrationToken: null, isActive: true });
     }
 
-    const createdUser = await getService('user').create(attributes);
+    // Checked again after the plugin steps: another user may have taken the last seat meanwhile
+    if (!(await hasAdminSeatsAvaialble())) {
+      throw new ForbiddenError('License seat limit reached. You cannot create a new user');
+    }
+
+    const createdUser = await save(
+      () => getService('user').create(attributes),
+      (created: { id: Data.ID }) => getService('user').deleteById(created.id)
+    );
     const userInfo = getService('user').sanitizeUser(createdUser);
 
     // Note: We need to assign manually the registrationToken to the
@@ -65,8 +78,18 @@ export default {
   },
 
   async update(ctx: Context) {
-    const { id } = ctx.params;
-    const data = normalizeEmail(ctx.request.body);
+    const id = parseRouteId(ctx.params.id);
+
+    if (id === null || !(await getService('user').exists({ id }))) {
+      return ctx.notFound('User does not exist');
+    }
+
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: ctx.request.body,
+      user: ctx.state.user,
+      entityId: id,
+    });
+    const data = normalizeEmail(body);
 
     await validateUserUpdateInput(data);
 
@@ -81,6 +104,7 @@ export default {
       }
     }
 
+    // Read after the plugin steps: the user may have been deactivated meanwhile
     const user = await getService('user').findOne(id, null);
 
     if (user === null) {
@@ -93,7 +117,7 @@ export default {
       );
     }
 
-    const updatedUser = await getService('user').updateById(id, data);
+    const updatedUser = await save(() => getService('user').updateById(id, data));
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

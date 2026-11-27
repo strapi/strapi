@@ -4,6 +4,8 @@
  * Many admin server tests assign a plain object to `global.strapi` and rely on the
  * `strapi.service('admin::…')` / `strapi.plugin()` helpers being attached on assignment.
  */
+import formExtensionsService from './server/src/services/form-extensions';
+
 type Registry = Record<string, any>;
 
 let strapiInstance: any;
@@ -31,9 +33,18 @@ Object.defineProperty(globalThis, 'strapi', {
     strapiInstance.api = (name: string) => strapiInstance.apis[name];
     decorate(strapiInstance.api);
 
+    // Controllers run every save through the form extensions: tests that do not mock them get
+    // the real service with no plugin params, which saves the core values as they are
+    const formExtensions = formExtensionsService();
+
     strapiInstance.service = (name = '') => {
       if (name.startsWith('admin::')) {
-        return strapiInstance.admin.services[name.split('admin::')[1]];
+        const serviceName = name.split('admin::')[1];
+
+        return (
+          strapiInstance.admin.services[serviceName] ??
+          (serviceName === 'form-extensions' ? formExtensions : undefined)
+        );
       }
     };
   },

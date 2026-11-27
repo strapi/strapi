@@ -7,6 +7,7 @@ import {
   validateUserUpdateInput,
   validateUsersDeleteInput,
 } from '../validation/user';
+import { parseRouteId } from '../utils/route-id';
 import { getService } from '../utils';
 import { normalizeEmail } from '../utils/normalize-email';
 import {
@@ -23,7 +24,10 @@ const { ApplicationError } = errors;
 
 export default {
   async create(ctx: Context) {
-    const { body } = ctx.request as Create.Request;
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: (ctx.request as Create.Request).body,
+      user: ctx.state.user,
+    });
     const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
@@ -44,7 +48,10 @@ export default {
       throw new ApplicationError('Email already taken');
     }
 
-    const createdUser = await getService('user').create(attributes);
+    const createdUser = await save(
+      () => getService('user').create(attributes),
+      (created) => getService('user').deleteById(created.id)
+    );
 
     const userInfo = getService('user').sanitizeUser(createdUser);
 
@@ -93,8 +100,18 @@ export default {
   },
 
   async update(ctx: Context) {
-    const { id } = ctx.params as Update.Params;
-    const data = normalizeEmail((ctx.request as Update.Request).body);
+    const id = parseRouteId((ctx.params as Update.Params).id);
+
+    if (id === null || !(await getService('user').exists({ id }))) {
+      return ctx.notFound('User does not exist');
+    }
+
+    const { data: body, save } = await getService('form-extensions').internal_prepare('user', {
+      body: (ctx.request as Update.Request).body,
+      user: ctx.state.user,
+      entityId: id,
+    });
+    const data = normalizeEmail(body);
 
     await validateUserUpdateInput(data);
 
@@ -109,7 +126,7 @@ export default {
       }
     }
 
-    const updatedUser = await getService('user').updateById(id, data);
+    const updatedUser = await save(() => getService('user').updateById(id, data));
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

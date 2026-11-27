@@ -8,6 +8,7 @@ import {
 } from '../validation/role';
 import { validatedUpdatePermissionsInput } from '../validation/permission';
 import constants from '../services/constants';
+import { parseRouteId } from '../utils/route-id';
 import { getService } from '../utils';
 import type {
   Create,
@@ -31,12 +32,18 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx: Context) {
-    const { body } = ctx.request as Create.Request;
+    const { data: body, save } = await getService('form-extensions').internal_prepare('role', {
+      body: (ctx.request as Create.Request).body,
+      user: ctx.state.user,
+    });
     await validateRoleCreateInput(body);
 
     const roleService = getService('role');
 
-    const role = await roleService.create(body);
+    const role = await save(
+      () => roleService.create(body),
+      (created) => roleService.deleteByIds([created.id])
+    );
     const sanitizedRole = roleService.sanitizeRole(role) as Omit<AdminRole, 'users' | 'permission'>;
 
     ctx.created({ data: sanitizedRole } satisfies Create.Response);
@@ -86,16 +93,12 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async update(ctx: Context) {
-    const { id } = ctx.params as Update.Request['params'];
-    const { body } = ctx.request as Omit<Update.Request, 'params'>;
-
+    const id = parseRouteId((ctx.params as Update.Request['params']).id);
     const roleService = getService('role');
 
-    await validateRoleUpdateInput(body);
+    const role = id === null ? null : await roleService.findOne({ id });
 
-    const role = await roleService.findOne({ id });
-
-    if (!role) {
+    if (id === null || !role) {
       return ctx.notFound('role.notFound');
     }
 
@@ -103,7 +106,15 @@ export default {
       throw new ApplicationError("Super admin can't be edited.");
     }
 
-    const updatedRole = await roleService.update({ id }, body);
+    const { data: body, save } = await getService('form-extensions').internal_prepare('role', {
+      body: (ctx.request as Omit<Update.Request, 'params'>).body,
+      user: ctx.state.user,
+      entityId: id,
+    });
+
+    await validateRoleUpdateInput(body);
+
+    const updatedRole = await save(() => roleService.update({ id }, body));
     const sanitizedRole = roleService.sanitizeRole(updatedRole) as Omit<
       AdminRole,
       'users' | 'permission'

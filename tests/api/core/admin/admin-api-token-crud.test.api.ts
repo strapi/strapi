@@ -878,9 +878,11 @@ describe('Admin Content API Token CRUD (api)', () => {
       description: 'api-token_tests-description',
       type: 'invalid-type',
     };
+    // An existing token: a missing id answers 404 before the body is validated
+    const token = await createValidToken();
 
     const res = await rq({
-      url: '/admin/api-tokens/1',
+      url: `/admin/api-tokens/${token.id}`,
       method: 'PUT',
       body,
     });

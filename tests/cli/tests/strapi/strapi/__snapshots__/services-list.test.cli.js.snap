@@ -102,6 +102,7 @@ exports[`services:list should output list of services 1`] = `
 │ admin::transfer                                      │
 │ admin::project-settings                              │
 │ admin::encryption                                    │
+│ admin::form-extensions                               │
 │ admin::homepage                                      │
 │ admin::debug-dump                                    │"
 `;

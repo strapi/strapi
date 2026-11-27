@@ -35,3 +35,9 @@ if (strapi.EE) {
 }
 
 export default admin;
+export type {
+  ExtensibleForm as unstable_ExtensibleForm,
+  FormContext as unstable_FormContext,
+  FormExtensionsService as unstable_FormExtensionsService,
+  FormInputParam as unstable_FormInputParam,
+} from './services/form-extensions';
