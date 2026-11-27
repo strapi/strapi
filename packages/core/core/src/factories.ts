@@ -5,6 +5,7 @@ import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
+import { createValidatedInputParser } from './services/server/validated-input';
 
 const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),
@@ -159,11 +160,99 @@ const createUploadProvider = <
   module: TModule & Providers.Upload.Factory<TOptions>
 ): TModule => module;
 
+type DefineRouteConfig<TRequest extends Core.RouteRequest> = Omit<
+  Core.RouteInput,
+  'handler' | 'request'
+> & {
+  request?: TRequest;
+  handler: Core.ValidatedRouteHandler<TRequest>;
+};
+
+type DefinedRoute<TRequest extends Core.RouteRequest> = Omit<
+  Core.RouteInput,
+  'handler' | 'request'
+> & {
+  request?: TRequest;
+  handler: Core.MiddlewareHandler;
+};
+
+/**
+ * Defines a route whose handler receives the request parsed with the route's `request` schemas, on
+ * `ctx.input`, typed from the schemas' output. The same schemas document the route in OpenAPI.
+ *
+ * Opt-in and additive: only the handler of this route changes. `ctx.params`, `ctx.query` and
+ * `ctx.request.body` keep their raw values, and routes not defined with this helper are not parsed.
+ *
+ * - `params` and `query` values arrive as strings. Coerce them in the schema: `z.coerce.number()`,
+ *   `z.stringbool()` for booleans. `z.number()`, `z.boolean()` and `z.coerce.boolean()` throw here.
+ * - Unknown `params` and `query` keys are stripped from `ctx.input`.
+ * - The body schema is chosen by the request content type.
+ * - A request that does not match answers 400 with a `ValidationError`, after authentication,
+ *   policies and route middlewares ran.
+ *
+ * The handler must be a function. A controller action referenced by name (`'api::x.x.find'`) is
+ * not supported.
+ *
+ * @example
+ * import { factories } from '@strapi/strapi';
+ * import { z } from 'zod/v4';
+ *
+ * export default {
+ *   type: 'content-api',
+ *   routes: [
+ *     factories.defineRoute({
+ *       method: 'POST',
+ *       path: '/orders/:id/refunds',
+ *       request: {
+ *         params: { id: z.coerce.number().int() },
+ *         query: { notify: z.stringbool().optional() },
+ *         body: { 'application/json': z.object({ amount: z.number().positive() }) },
+ *       },
+ *       handler: async (ctx) => {
+ *         const { params, query, body } = ctx.input; // { id: number }, { notify?: boolean }, { amount: number }
+ *         return { orderId: params.id, amount: body.amount, notify: query.notify ?? false };
+ *       },
+ *     }),
+ *   ],
+ * };
+ */
+const defineRoute = <const TRequest extends Core.RouteRequest = Record<never, never>>(
+  route: DefineRouteConfig<TRequest>
+): DefinedRoute<TRequest> => {
+  const { handler, request = {} } = route;
+  const label = `defineRoute ${route.method} ${route.path}`;
+
+  if (typeof handler !== 'function') {
+    throw new TypeError(`${label}: the handler must be a function`);
+  }
+
+  let parse: ReturnType<typeof createValidatedInputParser>;
+
+  try {
+    parse = createValidatedInputParser(request);
+  } catch (error) {
+    if (error instanceof Error) {
+      error.message = `${label}: ${error.message}`;
+    }
+
+    throw error;
+  }
+
+  const validatedHandler: Core.MiddlewareHandler = (ctx, next) => {
+    ctx.input = parse(ctx);
+
+    return handler(ctx as Core.ValidatedRouteContext<TRequest>, next);
+  };
+
+  return { ...route, handler: validatedHandler };
+};
+
 export {
   createCoreController,
   createCoreService,
   createCoreRouter,
   createCoreValidator,
   createUploadProvider,
+  defineRoute,
   isCustomController,
 };
