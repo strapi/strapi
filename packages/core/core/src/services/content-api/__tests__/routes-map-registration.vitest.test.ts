@@ -1,5 +1,5 @@
 import os from 'os';
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createContentApiRoutesFactory } from '@strapi/utils';
 
 import createContentAPI from '..';
@@ -10,6 +10,7 @@ type TestApp = {
   apis: Record<string, { routes: unknown }>;
   contentAPI: ReturnType<typeof createContentAPI>;
   server: ReturnType<typeof createServer>;
+  log: { warn: ReturnType<typeof vi.fn>; error: () => void };
 };
 
 const route = (path: string) => ({ method: 'GET', path, handler: () => undefined });
@@ -26,11 +27,16 @@ const createApp = ({
 }: Pick<Partial<TestApp>, 'plugins' | 'apis'> = {}): TestApp => {
   const app: any = {
     config: {
-      get: (key: string, defaultValue?: unknown) =>
-        key === 'api.rest.prefix' ? '/api' : defaultValue,
+      get(key: string, defaultValue?: unknown) {
+        if (key === 'api.rest.prefix') {
+          return '/api';
+        }
+
+        return key === 'environment' ? 'development' : defaultValue;
+      },
     },
     get: (name: string) => (name === 'policies' ? { resolve: () => [] } : undefined),
-    log: { error: () => undefined },
+    log: { warn: vi.fn(), error: () => undefined },
     dirs: { app: { root: os.tmpdir() } },
     admin: { routes: {} },
     plugins,
@@ -77,9 +83,10 @@ describe('getRoutesMap and route registration', () => {
         info: { pluginName: 'foo', type: 'content-api' },
       }),
     ]);
+    expect(app.log.warn).not.toHaveBeenCalled();
   });
 
-  test('skips a route pushed into a plugin router after initRouting: it is never served', async () => {
+  test('skips and warns once about a route pushed into a plugin router after initRouting: it is never served', async () => {
     const app = createApp({
       plugins: {
         foo: { routes: { 'content-api': createContentApiRoutesFactory(() => [route('/bar')]) } },
@@ -90,11 +97,16 @@ describe('getRoutesMap and route registration', () => {
     (app.plugins.foo.routes as any)['content-api'].routes.push(route('/late'));
 
     const routesMap = await app.contentAPI.getRoutesMap();
+    await app.contentAPI.getRoutesMap();
 
     expect(routesMap['plugin::foo'].map((r) => r.path)).toEqual(['/api/foo/bar']);
+    expect(app.log.warn).toHaveBeenCalledTimes(1);
+    expect(app.log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Route "GET /late" of plugin::foo (router "content-api")')
+    );
   });
 
-  test('skips a route pushed into an API router after initRouting: it is never served', async () => {
+  test('skips and warns once about a route pushed into an API router after initRouting: it is never served', async () => {
     const app = createApp({
       apis: {
         article: { routes: { article: { type: 'content-api', routes: [route('/articles')] } } },
@@ -105,8 +117,13 @@ describe('getRoutesMap and route registration', () => {
     (app.apis.article.routes as any).article.routes.push(route('/late'));
 
     const routesMap = await app.contentAPI.getRoutesMap();
+    await app.contentAPI.getRoutesMap();
 
     expect(routesMap['api::article'].map((r) => r.path)).toEqual(['/api/articles']);
+    expect(app.log.warn).toHaveBeenCalledTimes(1);
+    expect(app.log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Route "GET /late" of api::article (router "article")')
+    );
   });
 
   test('reads an API router declared as an array of routes, which is served on the root router', async () => {

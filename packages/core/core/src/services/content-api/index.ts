@@ -12,6 +12,7 @@ import type { Core, Modules, UID } from '@strapi/types';
 
 import { inspectZodSchema, isZodType } from '../../utils/zod';
 import { areRoutesRegistered } from '../server/routes-registration';
+import { warnAboutRoutesAddedAfterRouting } from '../server/late-routes';
 
 import instantiatePermissionsUtilities from './permissions';
 
@@ -215,6 +216,9 @@ const createContentAPI = (strapi: Core.Strapi) => {
         'contentAPI.getRoutesMap() called before routes are registered. Strapi registers them in the bootstrap phase, before the bootstrap function of plugins and APIs: call it from a bootstrap function or later.'
       );
     }
+
+    // The routes it skips below, added after the routes were registered
+    warnAboutRoutesAddedAfterRouting(strapi);
 
     const routesMap: Record<string, Core.Route[]> = {};
 
