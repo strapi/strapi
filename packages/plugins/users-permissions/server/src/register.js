@@ -16,7 +16,7 @@ module.exports = ({ strapi }) => {
     strategy: 'users-permissions',
     type: 'person',
     model: 'plugin::users-permissions.user',
-    getRecordId(credentials) {
+    getRecordId({ credentials }) {
       return credentials?.id;
     },
     async findNames(documentIds) {

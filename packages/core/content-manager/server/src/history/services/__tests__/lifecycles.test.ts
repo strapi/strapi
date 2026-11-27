@@ -7,7 +7,11 @@ jest.mock('../../utils', () => ({
     createVersion: mockCreateVersion,
     findProviderByStrategy: (strategy: string) =>
       strategy === 'admin'
-        ? { type: 'person', model: 'admin::user', getRecordId: (user: { id: string }) => user.id }
+        ? {
+            type: 'person',
+            model: 'admin::user',
+            getRecordId: ({ user }: { user: { id: string } }) => user.id,
+          }
         : undefined,
   }),
 }));

@@ -127,7 +127,13 @@ const isContentManagerRoute = ({ state }: RequestContext) =>
 
 const isContentApiRoute = ({ state }: RequestContext) => state.route?.info?.type === 'content-api';
 
+const isMcpRequest = ({ state }: RequestContext) => state.auth?.strategy?.name === 'mcp';
+
 const resolveSource = (requestContext: RequestContext): HistoryVersionSource | null => {
+  if (isMcpRequest(requestContext)) {
+    return 'mcp';
+  }
+
   if (isContentManagerRoute(requestContext)) {
     switch (requestContext.state.auth?.strategy?.name) {
       case 'admin-token':
@@ -543,9 +549,11 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     // An admin panel write is authored by the logged-in admin, whatever the admin strategy
     const isAdminPanel = source === 'admin-panel';
     const strategyName = isAdminPanel ? 'admin' : state.auth?.strategy?.name;
-    const credentials = isAdminPanel ? state.user : state.auth?.credentials;
     const provider = strategyName ? historyAuthors.findProviderByStrategy(strategyName) : undefined;
-    const recordId = provider?.getRecordId(credentials);
+    const recordId = provider?.getRecordId({
+      credentials: state.auth?.credentials,
+      user: state.user,
+    });
 
     if (!provider || recordId === null || recordId === undefined) {
       return null;

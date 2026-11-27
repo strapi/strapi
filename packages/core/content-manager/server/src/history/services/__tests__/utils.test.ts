@@ -7,13 +7,13 @@ const mockFindNames = jest.fn();
 const mockKnownProvider = {
   type: 'person',
   model: 'plugin::fake.user',
-  getRecordId: (credentials: { id?: number } | null) => credentials?.id,
+  getRecordId: ({ credentials }: { credentials?: { id?: number } | null }) => credentials?.id,
 };
 
 const mockAdminProvider = {
   type: 'person',
   model: 'admin::user',
-  getRecordId: (credentials: { id?: number } | null) => credentials?.id,
+  getRecordId: ({ user }: { user?: { id?: number } | null }) => user?.id,
 };
 
 jest.mock('../../utils', () => ({
@@ -358,6 +358,10 @@ describe('History utils', () => {
       expect(resolveHistoryOrigin(createCtx('content-manager', 'admin-token'))?.source).toBe(
         'admin-api'
       );
+    });
+
+    it('resolves the MCP strategy to the MCP source', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'mcp', 'api'))?.source).toBe('mcp');
     });
 
     it('resolves a plugin admin strategy on a Content Manager route to the admin panel source, with the admin as author', () => {
