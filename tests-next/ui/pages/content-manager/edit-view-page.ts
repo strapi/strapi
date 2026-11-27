@@ -14,6 +14,24 @@ export class EditViewPage {
     this.publishButton = page.getByRole('button', { name: 'Publish', exact: true });
   }
 
+  /** Fills the title field. */
+  async fillTitle(title: string) {
+    await this.page.getByRole('textbox', { name: 'title' }).fill(title);
+  }
+
+  /** Publishes the entry. */
+  async publish() {
+    await this.publishButton.click();
+  }
+
+  /** The success notification shown after an action. */
+  notification(text: string | RegExp) {
+    return this.page
+      .getByRole('region', { name: /^Notifications/ })
+      .getByRole('status')
+      .filter({ hasText: text });
+  }
+
   /** The entry's title: the value of its main field. */
   heading(title: string) {
     return this.page.getByRole('heading', { name: title, level: 1 });
