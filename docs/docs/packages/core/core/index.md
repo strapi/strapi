@@ -44,6 +44,8 @@ The `server` service wraps a Koa app. It builds the route managers for the admin
 
 `createCoreController`, `createCoreService`, `createCoreRouter` and `createCoreValidator` in `src/factories.ts` build the default controller, service, router and validator of a content type. A user extends the default with a config object or callback. `createUploadProvider`, also in `src/factories.ts`, types an upload provider module that an application writes and returns it unchanged (see [Providers](../upload/01-backend/00-providers.md)). The exports are available as `factories` from `@strapi/strapi`. Code: [`src/core-api`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/core-api).
 
+`defineRoute`, also in `src/factories.ts`, defines a route whose request is parsed with its zod `request` schemas: a function handler reads the parsed request on `ctx.input`, and a controller action calls `route.parseInput(ctx)`. See [HTTP request path](../../../architecture/06-http-request-path.md#validation-and-sanitization).
+
 ### Enterprise Edition gate
 
 `strapi.EE` reads `utils.ee.isEE`. The license check runs in `bootstrap()`, after the schema sync. Code: [`src/ee`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/ee). Read [Enterprise Edition](../../../architecture/09-enterprise-edition.md).
