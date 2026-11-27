@@ -1,3 +1,7 @@
 {
-  "extends": "./tsconfig"
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "include": ["tests", "fixtures", "setup", "playwright.config.ts", "no-code-e2e/scripts/**/*.mjs"]
 }

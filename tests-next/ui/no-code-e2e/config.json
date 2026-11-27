@@ -1,0 +1,72 @@
+{
+  "paths": {
+    "suite": "tests-next/ui",
+    "scenarios": "tests-next/ui/scenarios",
+    "generated": "tests-next/ui/tests/generated",
+    "scratch": "tests-next/ui/tests/generated/_scratch"
+  },
+  "allowedPaths": {
+    "generate": [
+      "tests-next/ui/tests/generated/**",
+      "tests-next/ui/pages/**",
+      "tests-next/ui/components/**",
+      "tests-next/ui/setup/schema.ts"
+    ],
+    "heal": [
+      "tests-next/ui/tests/generated/**",
+      "tests-next/ui/pages/**",
+      "tests-next/ui/components/**"
+    ]
+  },
+  "nonRegressionPaths": [
+    "tests-next/ui/pages/**",
+    "tests-next/ui/components/**",
+    "tests-next/ui/setup/**"
+  ],
+  "models": {
+    "generate": "sonnet",
+    "escalate": "opus",
+    "heal": "sonnet",
+    "triage": "haiku"
+  },
+  "maxTurns": {
+    "generate": 40,
+    "escalate": 30,
+    "heal": 20,
+    "triage": 8
+  },
+  "maxBudgetUsd": {
+    "generate": 3,
+    "escalate": 6,
+    "heal": 2,
+    "triage": 0.3
+  },
+  "attempts": {
+    "generate": 2
+  },
+  "project": "chromium",
+  "repeatEach": 3,
+  "allowedEnv": [],
+  "tiers": ["critical", "extended", "release"],
+  "editions": {
+    "supported": ["CE"],
+    "known": ["CE", "EE"]
+  },
+  "outOfScopeKeywords": [
+    "api rest",
+    "rest api",
+    "l'api rest",
+    "graphql",
+    "/api/",
+    "document service",
+    "strapi transfer",
+    "data transfer",
+    "mcp server",
+    "créer un content type",
+    "create a content type"
+  ],
+  "linear": {
+    "teamId": "75301c65-b974-417d-9edf-5179f3156e8e",
+    "projectId": "940e8253-1a41-4de3-8e31-c012362b721f"
+  }
+}
