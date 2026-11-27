@@ -14,7 +14,7 @@
  *
  * Fixes are local commits: the workflow pushes them to a branch and opens a PR.
  */
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -81,7 +81,18 @@ const save = () => {
 const log = (/** @type {string} */ message) => console.log(`[no-code-e2e] ${message}`);
 let failed = false;
 
-// 1. The generated specs.
+// 1. The generated specs. None yet (the generation hasn't run): nothing to heal, and Playwright
+// would fail on "No tests found".
+const hasSpecs = (/** @type {string} */ dir) =>
+  existsSync(dir) &&
+  readdirSync(dir, { recursive: true }).some((name) => String(name).endsWith('.ui-test.ts'));
+if (!values.only?.length && !hasSpecs(path.join(REPO_ROOT, config.paths.generated))) {
+  report.notes.push('Aucune spec générée pour l’instant : rien à vérifier.');
+  save();
+  console.log(renderReport(report));
+  process.exit(0);
+}
+
 const jsonOutput = path.join(tmpdir(), 'no-code-e2e-heal.json');
 const first = await runSpecs({
   specs: values.only?.length ? values.only : [config.paths.generated],
