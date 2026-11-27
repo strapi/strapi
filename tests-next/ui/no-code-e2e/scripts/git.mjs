@@ -14,8 +14,23 @@ export const git = (...args) =>
 
 export const head = () => git('rev-parse', 'HEAD');
 
-/** Changes between `base` and the working tree, untracked files included. */
-export const changesSince = (/** @type {string} */ base) => {
+/** @type {Set<string>} */
+let baseline = new Set();
+
+/**
+ * Records the paths already changed when a script starts, such as the `dist` of the repo's
+ * actions that `yarn build` rewrites: not the agents' doing, so `changesSince` leaves them out.
+ */
+export const markBaseline = () => {
+  baseline = new Set(allChangesSince('HEAD').map((change) => change.path));
+  return baseline;
+};
+
+/** Changes between `base` and the working tree, untracked files included, minus the baseline. */
+export const changesSince = (/** @type {string} */ base) =>
+  allChangesSince(base).filter((change) => !baseline.has(change.path));
+
+const allChangesSince = (/** @type {string} */ base) => {
   // Intent-to-add makes untracked files show up in `git diff` without staging their content.
   git('add', '--intent-to-add', '--all');
   /** @type {Map<string, import('./lib.mjs').FileChange['status']>} */

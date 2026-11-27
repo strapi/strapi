@@ -20,7 +20,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { editingTools, prompt, readOnlyTools, runClaude } from './claude.mjs';
-import { changesSince, commit, git, head, resetTo } from './git.mjs';
+import { changesSince, commit, git, head, markBaseline, resetTo } from './git.mjs';
 import { reportIssue } from './linear.mjs';
 import { checkChanges, loadConfig, readSpecHeader, REPO_ROOT } from './lib.mjs';
 import { lintChanged } from './lint.mjs';
@@ -60,6 +60,9 @@ if (!values.report) {
 const config = loadConfig();
 const suitePaths = [config.paths.suite];
 const base = head();
+const baseline = markBaseline();
+if (baseline.size)
+  console.log(`[no-code-e2e] Ignored, changed before the run: ${[...baseline].join(', ')}`);
 const runUrl = process.env.GITHUB_RUN_ID
   ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : '';
