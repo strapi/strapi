@@ -99,7 +99,12 @@ const renderPage = (search = '') =>
     { initialEntries: [`/${search}`] }
   );
 
-const findHeading = () => screen.findByRole('heading', { level: 1 });
+/**
+ * Pass the accessible name when the page can still show the "Loading..." heading:
+ * the loaded title replaces it with a new element, so the first h1 found can be the
+ * detached loading one.
+ */
+const findHeading = (name?: string | RegExp) => screen.findByRole('heading', { level: 1, name });
 
 const RESULT_COUNT_PATTERN = /^\d+ results?$/;
 
@@ -704,9 +709,7 @@ describe('AssetsPage search', () => {
     it('does not offer "Search all media" inside a folder without a search term', async () => {
       renderPage('?folder=1');
 
-      // On mobile the loaded folder title replaces the "Loading..." heading with a
-      // new element, so wait for the heading by name instead of holding the first one.
-      expect(await screen.findByRole('heading', { level: 1, name: /test/ })).toBeInTheDocument();
+      expect(await findHeading(/test/)).toBeInTheDocument();
       expect(screen.queryByRole('switch', { name: 'Search all media' })).not.toBeInTheDocument();
     });
 
@@ -819,7 +822,7 @@ describe('AssetsPage mobile folder breadcrumb', () => {
     const { user } = renderPage('?folder=1');
 
     const breadcrumb = await findBreadcrumb();
-    expect(await findHeading()).toHaveAccessibleName('Photos');
+    expect(await findHeading('Photos')).toBeInTheDocument();
     expect(screen.getByText('2 items')).toBeInTheDocument();
     expect(
       within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
@@ -836,7 +839,7 @@ describe('AssetsPage mobile folder breadcrumb', () => {
     const { user } = renderPage('?folder=3');
 
     const breadcrumb = await findBreadcrumb();
-    expect(await findHeading()).toHaveAccessibleName('Paris');
+    expect(await findHeading('Paris')).toBeInTheDocument();
     expect(screen.getByText('2 items')).toBeInTheDocument();
 
     await user.click(within(breadcrumb).getByRole('button', { name: 'Show more folders' }));
@@ -873,7 +876,7 @@ describe('AssetsPage mobile folder breadcrumb', () => {
     const { user } = renderPage('?folder=3');
 
     const breadcrumb = await findBreadcrumb();
-    expect(await findHeading()).toHaveAccessibleName('Paris');
+    expect(await findHeading('Paris')).toBeInTheDocument();
     expect(
       within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
     ).not.toBeInTheDocument();
