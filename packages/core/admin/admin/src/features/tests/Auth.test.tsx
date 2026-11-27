@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 
 import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedDispatch } from '../../core/store/hooks';
@@ -992,6 +992,77 @@ describe('AuthProvider', () => {
       });
       expect(await screen.findByRole('alertdialog')).toHaveTextContent(
         /session has ended and can't be resumed/i
+      );
+    });
+  });
+
+  describe('redirect target after logout', () => {
+    const DEEP_LINK = '/content-manager/collection-types/api::article.article/abc?page=2';
+    const LOGIN_WITH_DEEP_LINK =
+      '/auth/login?redirectTo=%2Fcontent-manager%2Fcollection-types%2Fapi%3A%3Aarticle.article%2Fabc%3Fpage%3D2';
+
+    const LocationProbe = () => {
+      const { pathname, search } = useLocation();
+      const logout = useAuth('LocationProbe', (state) => state.logout);
+
+      return (
+        <>
+          <button type="button" onClick={() => void logout()}>
+            Log out
+          </button>
+          <span data-testid="location">{`${pathname}${search}`}</span>
+        </>
+      );
+    };
+
+    it('sends the user back to the page they were on when the session ends', async () => {
+      render(<LocationProbe />, { initialEntries: [DEEP_LINK] });
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('location')).toHaveTextContent(LOGIN_WITH_DEEP_LINK)
+      );
+    });
+
+    it('keeps the page once the user confirms the session-ended warning', async () => {
+      registerUnsavedChangesCheck('form', () => true);
+      const { user } = render(<LocationProbe />, { initialEntries: [DEEP_LINK] });
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
+      });
+
+      await screen.findByRole('alertdialog');
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('location')).toHaveTextContent(LOGIN_WITH_DEEP_LINK)
+      );
+    });
+
+    it('sends the user to the plain login page when the session ends on the home page', async () => {
+      render(<LocationProbe />, { initialEntries: ['/'] });
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('location')).toHaveTextContent(/^\/auth\/login$/)
+      );
+    });
+
+    it('does not keep the page when the user logs out on purpose', async () => {
+      server.use(http.post('*/admin/logout', () => HttpResponse.json({ data: {} })));
+      const { user } = render(<LocationProbe />, { initialEntries: [DEEP_LINK] });
+
+      await user.click(screen.getByRole('button', { name: /log out/i }));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('location')).toHaveTextContent(/^\/auth\/login$/)
       );
     });
   });

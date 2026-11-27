@@ -11,6 +11,7 @@ import { useTypedDispatch, useTypedSelector, useTypedStore } from '../core/store
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
+import { getRedirectToSearch } from '../pages/Auth/utils';
 import { getStoredToken, logout as logoutAction, setLocale, setToken } from '../reducer';
 import { resetAdminApiState } from '../services/admin';
 import { adminApi } from '../services/api';
@@ -254,23 +255,33 @@ const AuthProvider = ({
     []
   );
 
-  const performGlobalLogout = React.useCallback(() => {
-    void (async () => {
-      try {
-        const { post } = getFetchClient();
-        await post('/admin/logout');
-      } catch {
-        // The session may already be invalid.
-      }
-    })();
+  const performGlobalLogout = React.useCallback(
+    (redirectToSearch?: string) => {
+      void (async () => {
+        try {
+          const { post } = getFetchClient();
+          await post('/admin/logout');
+        } catch {
+          // The session may already be invalid.
+        }
+      })();
 
-    dispatch(adminApi.util.resetApiState());
-    dispatch(logoutAction());
-    navigate('/auth/login');
-  }, [dispatch, navigate]);
+      dispatch(adminApi.util.resetApiState());
+      dispatch(logoutAction());
+      navigate({ pathname: '/auth/login', search: redirectToSearch });
+    },
+    [dispatch, navigate]
+  );
 
+  /**
+   * The session ended under the user, not by their choice: keep the page they were on so that
+   * logging in again brings them back to it, as `PrivateRoute` does for a fresh visit.
+   */
   const clearStateAndLogout = React.useCallback(() => {
-    runLogoutWithGuard(performGlobalLogout, 'session-dead');
+    runLogoutWithGuard(
+      () => performGlobalLogout(getRedirectToSearch(locationRef.current)),
+      'session-dead'
+    );
   }, [performGlobalLogout, runLogoutWithGuard]);
 
   const handleSessionDead = React.useCallback(

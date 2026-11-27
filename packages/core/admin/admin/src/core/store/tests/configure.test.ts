@@ -6,8 +6,8 @@ import { configureStore } from '../configure';
  * jsdom refuses real navigations, so swap `window.location` for a plain object
  * we can assert on. The middleware only ever writes `href`.
  */
-const stubLocation = () => {
-  const location = { href: '' };
+const stubLocation = (pathname = '/', search = '') => {
+  const location = { href: '', pathname, search };
 
   Object.defineProperty(window, 'location', {
     configurable: true,
@@ -80,6 +80,38 @@ describe('configureStore / unauthorized middleware', () => {
 
     expect(store.getState().admin_app.token).toBeNull();
     expect(location.href).toContain('/auth/login');
+  });
+
+  it('keeps the current page as redirectTo when falling back to the login page', () => {
+    const originalAdminPath = process.env.ADMIN_PATH;
+    process.env.ADMIN_PATH = '/admin';
+    const location = stubLocation('/admin/content-manager/collection-types/api::a.a/1', '?page=2');
+    setOnSessionExpired(null);
+
+    const store = configureStore();
+    store.dispatch(setToken('a-token'));
+
+    store.dispatch(rejectedWith(401));
+    process.env.ADMIN_PATH = originalAdminPath;
+
+    expect(location.href).toBe(
+      '/admin/auth/login?redirectTo=%2Fcontent-manager%2Fcollection-types%2Fapi%3A%3Aa.a%2F1%3Fpage%3D2'
+    );
+  });
+
+  it('does not add a redirectTo when the browser is outside the admin basename', () => {
+    const originalAdminPath = process.env.ADMIN_PATH;
+    process.env.ADMIN_PATH = '/admin';
+    const location = stubLocation('/elsewhere', '?x=1');
+    setOnSessionExpired(null);
+
+    const store = configureStore();
+    store.dispatch(setToken('a-token'));
+
+    store.dispatch(rejectedWith(401));
+    process.env.ADMIN_PATH = originalAdminPath;
+
+    expect(location.href).toBe('/admin/auth/login');
   });
 
   it('leaves non-401 rejections alone', () => {

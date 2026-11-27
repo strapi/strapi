@@ -8,6 +8,7 @@ import {
   isRejected,
 } from '@reduxjs/toolkit';
 
+import { getRedirectToSearch } from '../../pages/Auth/utils';
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
 import { triggerSessionExpired } from '../../utils/getFetchClient';
@@ -93,6 +94,20 @@ const configureStoreImpl = (
 };
 
 /**
+ * The admin route the browser is on, without the admin basename, so it can be handed back to
+ * the router as a `redirectTo` target.
+ */
+const getCurrentAdminLocation = (basename: string) => {
+  const { pathname, search } = window.location;
+
+  if (!pathname.startsWith(basename)) {
+    return { pathname: '/', search: '' };
+  }
+
+  return { pathname: pathname.slice(basename.length) || '/', search };
+};
+
+/**
  * A 401 here means the fetch layer already tried to refresh the access token and
  * the server refused: the session is over. Hand that to `AuthProvider`, which
  * can warn about unsaved changes before clearing auth state. Reloading the page
@@ -112,7 +127,8 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     if (isRejected(action) && action.payload?.status === 401 && !triggerSessionExpired()) {
       dispatch(logout());
       const basename = getBasename();
-      window.location.href = `${basename}/auth/login`;
+      const redirectToSearch = getRedirectToSearch(getCurrentAdminLocation(basename)) ?? '';
+      window.location.href = `${basename}/auth/login${redirectToSearch}`;
       return;
     }
 

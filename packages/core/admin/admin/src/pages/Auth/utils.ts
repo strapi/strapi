@@ -17,6 +17,25 @@ const isSameAppPath = (value: string): boolean =>
   value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\');
 
 /**
+ * Builds the `?redirectTo` search string that sends the user back to `location` once they log in
+ * again. Returns `undefined` for the home page, which is already the default, and for the auth
+ * pages themselves, which would only bring the user back to the login form.
+ */
+export const getRedirectToSearch = ({
+  pathname,
+  search,
+}: {
+  pathname: string;
+  search: string;
+}): string | undefined => {
+  if (pathname === '/' || pathname.startsWith('/auth/')) {
+    return undefined;
+  }
+
+  return `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`;
+};
+
+/**
  * Reads the `?redirectTo` the user was sent to the auth pages with, so that logging in from a
  * deep link returns them to where they started instead of the home page.
  *
