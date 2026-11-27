@@ -33,9 +33,9 @@ The object `init` returns has the following methods:
 - `isPrivate()` (optional): whether files need a signed URL. Without it, files are public.
 - `getSignedUrl(file)` (optional): returns `{ url }`, called only when `isPrivate()` returns `true`. Besides stored files, it signs the URLs the plugin finds in rich text and blocks. For those, the file has only `url`, `hash`, `ext` and `provider`, taken from the URL.
 
-Each method can answer synchronously or with a promise. `upload`, `uploadStream`, `delete` and `getSignedUrl` get the method's entry of the `actionOptions` config as their second argument. `checkFileSize` gets `{ sizeLimit }` instead, and `replace` and `replaceStream` get the old file. Members outside this list are allowed. The plugin wraps every member of the object in an async function, so `strapi.plugin('upload').provider` is not the object `init` returns.
+Each method can answer synchronously or with a promise. `upload`, `uploadStream`, `delete` and `getSignedUrl` get the method's entry of the `actionOptions` config as their second argument. `checkFileSize` gets `{ sizeLimit }` instead, and `replace` and `replaceStream` get the old file. Members outside this list are allowed. The plugin wraps every member that is a function in an async function and ignores the other members, so `strapi.plugin('upload').provider` is not the object `init` returns.
 
-Omit the members you do not implement, and never set one to `undefined`, as in `uploadStream: canStream ? uploadStream : undefined`. The plugin wraps every own key of the object, so an `undefined` member becomes a function that throws when called, and it hides the plugin's default for `isPrivate`, `getSignedUrl` and `checkFileSize`.
+Omit the members you do not implement, and never set one to `undefined`, as in `uploadStream: canStream ? uploadStream : undefined`. The plugin ignores a member that is not a function, so an `undefined` member is treated as missing: a missing `uploadStream` falls back on `upload`, and the plugin keeps its default for `isPrivate`, `getSignedUrl` and `checkFileSize`. Omitting the member states that intent directly and keeps the object's type honest.
 
 ### Typing a provider
 
