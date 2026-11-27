@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import Strapi from '../Strapi';
+import { areDatabaseModelsBuilt } from '../registries/database-models';
 
 describe('Strapi.destroy', () => {
   afterEach(() => {
@@ -105,5 +106,37 @@ describe('Strapi.destroy', () => {
     expect(db.destroy).toHaveBeenCalledTimes(2);
     expect(instance.release).not.toHaveBeenCalled();
     expect(instance.add).not.toHaveBeenCalled();
+  });
+});
+
+describe('Strapi.bootstrap', () => {
+  it('marks the database models built before it initializes the database', async () => {
+    const instance = Object.create(Strapi.prototype) as Strapi;
+    const extraModels = [{ uid: 'plugin::foo.job', singularName: 'job', tableName: 'jobs' }];
+    const modelsBuiltAtInit: boolean[] = [];
+    const db = {
+      metadata: { identifiers: {} },
+      init: vi.fn(async () => {
+        modelsBuiltAtInit.push(areDatabaseModelsBuilt(instance));
+        // Stops the bootstrap: the rest of it is out of this test's scope
+        throw new Error('stop after db.init');
+      }),
+    };
+    const services = {
+      config: { get: vi.fn() },
+      'content-types': { getAll: () => ({}) },
+      components: { getAll: () => ({}) },
+      db,
+      models: { get: () => extraModels },
+    };
+
+    Object.assign(instance, {
+      get: vi.fn((name: keyof typeof services) => services[name]),
+    });
+
+    expect(areDatabaseModelsBuilt(instance)).toBe(false);
+    await expect(instance.bootstrap()).rejects.toThrow('stop after db.init');
+    expect(db.init).toHaveBeenCalledWith({ models: extraModels });
+    expect(modelsBuiltAtInit).toEqual([true]);
   });
 });

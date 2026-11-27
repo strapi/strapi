@@ -1,6 +1,8 @@
 import { has, pickBy } from 'lodash';
-import type { UID, Struct } from '@strapi/types';
+import type { Core, UID, Struct } from '@strapi/types';
 import { createContentType, ContentTypeDefinition } from '../domain/content-type';
+import { warnLateRegistration } from '../utils/late-registration';
+import { areDatabaseModelsBuilt, databaseModelsWindow } from './database-models';
 import { addNamespace, hasNamespace } from './namespace';
 
 type ContentTypesInput = Record<string, ContentTypeDefinition>;
@@ -18,7 +20,7 @@ const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
   }
 };
 
-const contentTypesRegistry = () => {
+const contentTypesRegistry = (strapi: Core.Strapi) => {
   const contentTypes: Record<string, Struct.ContentTypeSchema> = {};
 
   return {
@@ -65,6 +67,16 @@ const contentTypesRegistry = () => {
         }
 
         contentTypes[uid] = createContentType(uid, newContentTypes[rawCtName]);
+
+        if (areDatabaseModelsBuilt(strapi) === true) {
+          warnLateRegistration(strapi, {
+            ...databaseModelsWindow,
+            surface: 'content-types',
+            key: uid,
+            subject: `Content type "${uid}"`,
+            effect: `the registry lists it, but the database does not know it, so Strapi creates no table for it and its queries throw "Model ${uid} not found"`,
+          });
+        }
       }
     },
 
@@ -79,6 +91,17 @@ const contentTypesRegistry = () => {
       }
 
       extendFn(currentContentType);
+
+      if (areDatabaseModelsBuilt(strapi) === true) {
+        warnLateRegistration(strapi, {
+          ...databaseModelsWindow,
+          surface: 'content-types.extend',
+          key: ctUID,
+          subject: `Change to content type "${ctUID}"`,
+          effect:
+            'the registry has the changed schema, but the database keeps the previous one, so Strapi creates no column for a new attribute and queries that use it fail',
+        });
+      }
 
       return this;
     },

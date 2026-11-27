@@ -35,6 +35,7 @@ import { createDocumentService } from './services/document-service';
 import { createLocalizationService } from './services/localization';
 import { createContentSourceMapsService } from './services/content-source-maps';
 import { warnAboutRoutesAddedAfterRouting } from './services/server/late-routes';
+import { markDatabaseModelsBuilt } from './registries/database-models';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
@@ -483,6 +484,9 @@ class Strapi extends Container implements Core.Strapi {
       ),
       ...this.get('models').get(),
     ];
+
+    // Content types, components and models registered from now on do not reach the database
+    markDatabaseModelsBuilt(this);
 
     await this.db.init({ models });
 
