@@ -71,12 +71,12 @@ describe('createRestClient', () => {
   it('serialises a body for a write', async () => {
     const { request, calls } = stubRequest([response()]);
 
-    await createRestClient('t', request).send('PATCH', '/repos/a/b/milestones/1', {
-      title: '5.53.0',
+    await createRestClient('t', request).send('PATCH', '/repos/a/b/pulls/1', {
+      title: 'Release 5.53.0',
     });
 
     assert.equal(calls[0]?.method, 'PATCH');
-    assert.equal(calls[0]?.body, '{"title":"5.53.0"}');
+    assert.equal(calls[0]?.body, '{"title":"Release 5.53.0"}');
   });
 
   it('surfaces the API message on a failure', async () => {
@@ -96,7 +96,7 @@ describe('createRestClient', () => {
     ]);
 
     await assert.rejects(
-      () => createRestClient('t', request).send('PATCH', '/repos/a/b/milestones/430', {}),
+      () => createRestClient('t', request).send('PATCH', '/repos/a/b/pulls/430', {}),
       (error: unknown) => classifyFailure(error) === 'failed'
     );
   });
@@ -107,7 +107,7 @@ describe('createRestClient', () => {
     ]);
 
     await assert.rejects(
-      () => createRestClient('t', request).send('PATCH', '/repos/a/b/milestones/430', {}),
+      () => createRestClient('t', request).send('PATCH', '/repos/a/b/pulls/430', {}),
       (error: unknown) => classifyFailure(error) === 'indeterminate'
     );
   });
@@ -129,12 +129,12 @@ describe('createRestClient', () => {
       response({ payload: [{ number: 2 }] }),
     ]);
 
-    const items = await createRestClient('t', request).paginate('/repos/a/b/milestones');
+    const items = await createRestClient('t', request).paginate('/repos/a/b/pulls');
 
     assert.deepEqual(items, [{ number: 1 }, { number: 2 }]);
     assert.deepEqual(
       calls.map((call) => call.url),
-      ['https://api.github.com/repos/a/b/milestones', 'https://api.github.com/next-page']
+      ['https://api.github.com/repos/a/b/pulls', 'https://api.github.com/next-page']
     );
   });
 });
@@ -153,14 +153,6 @@ describe('createGithubAdapter', () => {
     );
   });
 
-  it('asks for every milestone item in any state', async () => {
-    const { request, calls } = stubRequest([response({ payload: [] })]);
-
-    await createGithubAdapter('t', coords, request).listMilestoneItems(430);
-
-    assert.match(calls[0]?.url ?? '', /\/issues\?milestone=430&state=all&per_page=100$/u);
-  });
-
   it('opens the release pull request as a draft', async () => {
     const { request, calls } = stubRequest([response({ payload: { number: 1 } })]);
 
@@ -172,14 +164,6 @@ describe('createGithubAdapter', () => {
     });
 
     assert.equal(JSON.parse(calls[0]?.body ?? '{}').draft, true);
-  });
-
-  it('clears a milestone by sending null', async () => {
-    const { request, calls } = stubRequest([response()]);
-
-    await createGithubAdapter('t', coords, request).setIssueMilestone(27601, null);
-
-    assert.equal(calls[0]?.body, '{"milestone":null}');
   });
 
   it('adds labels through the labels endpoint', async () => {

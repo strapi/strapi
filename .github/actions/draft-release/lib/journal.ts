@@ -39,8 +39,8 @@ export function classifyFailure(
  * `indeterminate`. Only an `applied` entry is worth undoing.
  *
  * A dry run fills the same structure without calling the API, which is the rehearsal: a reviewable,
- * line-by-line list of every milestone rename, pull request reassignment and ref push the real run
- * would perform. Its entries stay `planned`.
+ * line-by-line list of every ref push, pull request write and comment the real run would perform.
+ * Its entries stay `planned`.
  */
 export function createJournal(options: {
   apply: boolean;

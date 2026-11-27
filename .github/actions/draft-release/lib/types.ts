@@ -48,11 +48,6 @@ export type IgnoreReason = (typeof IGNORE_REASONS)[number];
 export const JOURNAL_OPS = [
   'branch.delete',
   'branch.push',
-  'issue.milestone.clear',
-  'issue.milestone.set',
-  'milestone.close',
-  'milestone.create',
-  'milestone.rename',
   'pr.body',
   'pr.close',
   'pr.comment',
@@ -88,10 +83,6 @@ export type JournalEntryState = (typeof JOURNAL_ENTRY_STATES)[number];
 export const RELEASE_MODES = ['draft', 'refresh', 'redraft'] as const;
 
 export type ReleaseMode = (typeof RELEASE_MODES)[number];
-
-export const CLEANUP_ACTIONS = ['keep', 'move', 'clear'] as const;
-
-export type CleanupAction = (typeof CLEANUP_ACTIONS)[number];
 
 /** A stable `x.y.z` release version, parsed. */
 export type StableVersion = {
@@ -148,7 +139,6 @@ export type PullPayload = {
     repo?: { full_name?: string | null } | null;
   } | null;
   user?: { login?: string | null } | null;
-  milestone?: { number?: number | null; title?: string | null } | null;
 };
 
 /** A pull request the API reports as merged, produced only by the `isMerged` guard. */
@@ -162,8 +152,6 @@ export type PullSummary = {
   url: string;
   baseRef: string;
   headRef: string;
-  milestone: string | null;
-  milestoneNumber: number | null;
   /**
    * When the pull request landed, ISO 8601, from `merged_at`.
    *
@@ -234,75 +222,6 @@ export type BumpClassification = {
   unparsed: { sha: string; pr: number | null; subject: string }[];
 };
 
-/** A GitHub milestone, as far as this action cares. */
-export type Milestone = {
-  number: number;
-  title: string;
-  state?: string;
-};
-
-/**
- * One milestone the run has to end up with, and how it gets there.
- *
- * `number` and `currentTitle` are `null` only with `create`, where the milestone does not exist
- * until the run applies.
- */
-export type MilestoneTarget = {
-  action: 'create' | 'keep' | 'rename';
-  number: number | null;
-  currentTitle: string | null;
-  title: string;
-};
-
-export type MilestonePlan = {
-  shipping: MilestoneTarget & {
-    /**
-     * Whether the run still has to close it.
-     *
-     * `false` on a refresh, where the milestone was already closed by the run that drafted the
-     * candidate. A closed milestone still accepts item assignments through the REST API, which is
-     * what lets a refresh keep filling it without reopening it first.
-     */
-    close: boolean;
-  };
-  next: MilestoneTarget;
-};
-
-/**
- * A pull request whose milestone disagrees with what history says.
- *
- * History is the authority: a pull request merged inside the range ships in this release whatever
- * milestone its author picked, so the milestone is corrected rather than obeyed.
- */
-export type RealignItem = {
-  number: number;
-  fromNumber: number | null;
-  fromTitle: string | null;
-  toTitle: string;
-};
-
-/** An issue or pull request carrying a milestone, as returned by the issues endpoint. */
-export type MilestoneItem = {
-  number: number;
-  title?: string | null;
-  state?: string;
-  pull_request?: { merged_at?: string | null } | null;
-};
-
-export type CleanupItem = {
-  number: number;
-  title: string;
-  kind: 'issue' | 'pull';
-  action: CleanupAction;
-  to: number | null;
-  reason: string;
-};
-
-export type Reconciliation = {
-  inHistoryNotInMilestone: number[];
-  inMilestoneNotInHistory: number[];
-};
-
 /** What a mutation intends to do, before it is attempted. */
 export type JournalIntent = {
   op: JournalOp;
@@ -356,7 +275,7 @@ export type PinnedRange = {
  * The pull request is the only artifact whose lifecycle matches the candidate's, and only one whose
  * head lives in this repository qualifies. A release branch
  * outlives it, because the ruleset that protects release branches forbids deleting them without a
- * bypass, and a milestone is renamed by this very action.
+ * bypass.
  */
 export type Candidate = {
   /** The version the candidate was cut under, as its branch name spells it. */
@@ -387,7 +306,6 @@ export type ReleasePlan = {
   pullRequests: AttributedPull[];
   attention: AttentionRecord[];
   warnings: string[];
-  milestones: MilestonePlan;
   branch: string;
   /** `false` when the branch already points at the pinned head, so nothing has to be pushed. */
   branchAdvances: boolean;
@@ -398,21 +316,17 @@ export type ReleasePlan = {
    * preflight fails the delete instead of being lost.
    */
   candidateHeadSha: string | null;
-  realignment: RealignItem[];
 };
 
 /**
  * What the writes produced that the plan could not know.
  *
- * The numbers GitHub assigned to whatever this run created, and the milestone drift read once the
- * realignment had run. Every field is `null` on a dry run that would have created the thing.
+ * The pull request GitHub assigned to this run. Both fields are `null` on a dry run that would have
+ * created it.
  */
 export type ReleaseOutcome = {
-  shippingNumber: number | null;
-  nextNumber: number | null;
   pullNumber: number | null;
   pullUrl: string | null;
-  reconciliation: Reconciliation;
 };
 
 /** The machine-readable payload embedded in the release pull request body. */
@@ -457,20 +371,6 @@ export type ReleasePayload = {
   };
   pullRequests: AttributedPull[];
   attention: AttentionRecord[];
-  milestones: {
-    shipping: {
-      number: number | null;
-      title: string;
-      renamedFrom: string | null;
-      state: 'closed';
-    };
-    next: {
-      number: number | null;
-      title: string;
-      created: boolean;
-    };
-  };
-  reconciliation: Reconciliation;
 };
 
 export type RepositoryMergeSettings = {
@@ -523,14 +423,6 @@ export type GithubAdapter = {
   getPull: (pullNumber: number) => Promise<PullPayload>;
   listPulls: (input: { state: 'open' | 'closed' | 'all'; base: string }) => Promise<PullPayload[]>;
   listPullCommits: (pullNumber: number) => Promise<PullCommit[]>;
-  listMilestones: (state: 'open' | 'closed' | 'all') => Promise<Milestone[]>;
-  createMilestone: (title: string) => Promise<Milestone>;
-  updateMilestone: (
-    milestoneNumber: number,
-    patch: { title?: string; state?: 'open' | 'closed' }
-  ) => Promise<Milestone>;
-  listMilestoneItems: (milestoneNumber: number) => Promise<MilestoneItem[]>;
-  setIssueMilestone: (issueNumber: number, milestoneNumber: number | null) => Promise<void>;
   createPull: (input: {
     head: string;
     base: string;

@@ -2,11 +2,11 @@ name: 'Draft release'
 
 # Prepares a release candidate: pins the range against the published npm baseline, decides the
 # version from the commits that landed, cuts `releases/x.y.z`, opens the draft PR against `main`,
-# attributes every shipping PR, and reconciles milestones.
+# and attributes every shipping PR. GitHub milestones play no part: the commits decide the version.
 #
 # Runs as many times as a release window needs. A second run folds whatever landed on `develop`
-# since into the same candidate: it advances the release branch, refills the shipping milestone, and
-# rewrites the report on the pull request already open. When the new commits change the version, it
+# since into the same candidate: it advances the release branch and rewrites the report on the pull
+# request already open. When the new commits change the version, it
 # redrafts the candidate under the version they decided.
 #
 # Defaults to a dry run. A dry run performs no write at all and reports the exact list of writes the

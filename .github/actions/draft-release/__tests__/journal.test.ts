@@ -13,11 +13,11 @@ describe('createJournal', () => {
     const performed: string[] = [];
 
     const result = await journal.write(
-      { op: 'milestone.rename', target: 'milestone/430', before: '5.52.4', after: '5.53.0' },
+      { op: 'pr.close', target: 'pulls/27600', before: 'open', after: 'closed' },
       async () => {
-        performed.push('rename');
+        performed.push('close');
 
-        return { number: 430 };
+        return { number: 27600 };
       }
     );
 
@@ -27,10 +27,10 @@ describe('createJournal', () => {
       mode: 'planned',
       entries: [
         {
-          op: 'milestone.rename',
-          target: 'milestone/430',
-          before: '5.52.4',
-          after: '5.53.0',
+          op: 'pr.close',
+          target: 'pulls/27600',
+          before: 'open',
+          after: 'closed',
           detail: null,
           at: '2026-09-06T17:57:00Z',
           state: 'planned',
@@ -89,7 +89,7 @@ describe('createJournal', () => {
     const journal = createJournal({ apply: true, clock });
 
     await assert.rejects(() =>
-      journal.write({ op: 'milestone.rename', target: 'milestone/430' }, async () => {
+      journal.write({ op: 'pr.close', target: 'pulls/27600' }, async () => {
         throw mutationFailure('GitHub PATCH failed: 422 already_exists', 'refused');
       })
     );
