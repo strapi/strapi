@@ -29,7 +29,7 @@ import * as inverseMorphRelations from './utils/inverse-morph-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
-import { createStrapiDestroyedError, isStrapiDestroyedError } from './middlewares/errors';
+import { createStrapiUnavailableError, isStrapiUnavailableError } from './middlewares/errors';
 import {
   applyDeferredCloneRelationCopies,
   applyPostCloneRelationUpdates,
@@ -61,14 +61,14 @@ const assertDocumentIdProvided = (documentId: unknown, action: string) => {
 /**
  * Reads the content type from `global.strapi`. A repository is created on the first
  * `strapi.documents(uid)` call for a uid, before any document middleware runs, so this call
- * explains a destroyed Strapi itself.
+ * explains a missing Strapi itself.
  */
 const getContentType = (uid: UID.ContentType) => {
   try {
     return strapi.contentType(uid);
   } catch (error) {
-    if (isStrapiDestroyedError(error) === true) {
-      throw createStrapiDestroyedError(`strapi.documents('${uid}')`, error);
+    if (isStrapiUnavailableError(error) === true) {
+      throw createStrapiUnavailableError(`strapi.documents('${uid}')`, error);
     }
 
     throw error;

@@ -1,16 +1,22 @@
+import { rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, describe, expect, it } from 'vitest';
 
 import { Database } from '..';
 import type { Model } from '../types';
 
+const tempDbFiles: string[] = [];
+
 // The SQLite dialect resolves the filename to an absolute path, so use a real temporary file
-const tempDbFile = () =>
-  path.join(
+const tempDbFile = () => {
+  const file = path.join(
     os.tmpdir(),
     `strapi-lifecycle-errors-${process.pid}-${Math.random().toString(36).slice(2)}.db`
   );
+  tempDbFiles.push(file);
+  return file;
+};
 
 const silentLogger = { info() {}, warn() {}, error() {}, debug() {} };
 
@@ -28,14 +34,14 @@ const models: Model[] = [
   },
 ];
 
-const createSqliteDb = () =>
+const createSqliteDb = (settings: { poolTimeoutDiagnostics?: boolean } = {}) =>
   new Database({
     connection: {
       client: 'sqlite',
       connection: { filename: tempDbFile() },
       useNullAsDefault: true,
     },
-    settings: { migrations: { dir: os.tmpdir() } },
+    settings: { migrations: { dir: os.tmpdir() }, ...settings },
     logger: silentLogger,
   });
 
@@ -45,6 +51,14 @@ describe('Database errors outside of its lifecycle', () => {
   afterEach(async () => {
     await db?.destroy();
     db = undefined;
+  });
+
+  afterAll(() => {
+    for (const file of tempDbFiles) {
+      for (const suffix of ['', '-wal', '-shm', '-journal']) {
+        rmSync(`${file}${suffix}`, { force: true });
+      }
+    }
   });
 
   describe('query() before init()', () => {
@@ -117,6 +131,22 @@ describe('Database errors outside of its lifecycle', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect((error as Error).cause).toEqual(new Error('Unable to acquire a connection'));
+    });
+
+    it.each([
+      ['with pool timeout diagnostics', {}],
+      ['without pool timeout diagnostics', { poolTimeoutDiagnostics: false }],
+    ])('explains a query once after a second destroy(), %s', async (_, settings) => {
+      const destroyed = createSqliteDb(settings);
+      await destroyed.init({ models });
+      await destroyed.destroy();
+      await destroyed.destroy();
+
+      const error = await destroyed.connection.raw('select 1').catch((e: unknown) => e);
+
+      expect(error).toEqual(new Error(destroyedMessage));
+      expect((error as Error).cause).toEqual(new Error('Unable to acquire a connection'));
+      expect((error as Error).cause).not.toHaveProperty('cause');
     });
   });
 });

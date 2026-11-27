@@ -122,7 +122,7 @@ describe('databaseErrorsMiddleware', () => {
       globalWithStrapi.strapi = previousStrapi;
     });
 
-    test('says Strapi was destroyed instead of "strapi is not defined"', async () => {
+    test('says Strapi is not available instead of "strapi is not defined"', async () => {
       delete globalWithStrapi.strapi;
       const error = new ReferenceError('strapi is not defined');
       const next = vi.fn(() => Promise.reject(error));
@@ -131,8 +131,8 @@ describe('databaseErrorsMiddleware', () => {
 
       await expect(result).rejects.toThrow(
         new Error(
-          "Cannot run strapi.documents('api::article.article').findMany(): Strapi was destroyed. " +
-            'The document service needs a loaded Strapi instance.'
+          "Cannot run strapi.documents('api::article.article').findMany(): Strapi is not available " +
+            '(it was destroyed or never created). The document service needs a loaded Strapi instance.'
         )
       );
       await expect(result).rejects.toHaveProperty('cause', error);

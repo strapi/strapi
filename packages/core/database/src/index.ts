@@ -138,12 +138,19 @@ const afterCreate =
     });
   };
 
+const afterDestroyWrappers = new WeakSet<() => Promise<unknown>>();
+
 /**
  * Once the pool is closed, knex rejects every query with "Unable to acquire a connection". Add
  * why to that message. Only the rejection changes: a query that gets a connection, for example
  * after `connection.initialize()` re-created the pool, runs as before.
  */
 const explainQueriesAfterDestroy = (client: Knex.Client) => {
+  // A second destroy() must not wrap the wrapper: the knex error has to stay the `cause`
+  if (afterDestroyWrappers.has(client.acquireConnection) === true) {
+    return;
+  }
+
   const acquireConnection: () => Promise<unknown> = client.acquireConnection;
 
   client.acquireConnection = async function acquireConnectionAfterDestroy(this: Knex.Client) {
@@ -161,6 +168,7 @@ const explainQueriesAfterDestroy = (client: Knex.Client) => {
       throw error;
     }
   };
+  afterDestroyWrappers.add(client.acquireConnection);
 };
 
 class Database {
