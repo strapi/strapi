@@ -11,6 +11,7 @@ import * as z from 'zod/v4';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { inspectZodSchema, isZodType } from '../../utils/zod';
+import { warnLateRegistration } from '../../utils/late-registration';
 import { areRoutesRegistered } from '../server/routes-registration';
 import { warnAboutRoutesAddedAfterRouting } from '../server/late-routes';
 
@@ -127,6 +128,45 @@ const mergeOneInputParamIntoRoute = (
   route.request = { ...route.request, body };
 };
 
+/**
+ * Development only: warns once per param about a param added after the routes were registered.
+ * `server.initRouting()` merges the extra params into the routes once (`applyExtraParamsToRoutes`),
+ * so no route gets a param added afterwards.
+ */
+const warnIfParamAddedAfterRouting = (
+  strapi: Core.Strapi,
+  kind: 'query' | 'input',
+  param: string
+): void => {
+  if (areRoutesRegistered(strapi) === false) {
+    return;
+  }
+
+  const { label, method, effect } =
+    kind === 'query'
+      ? {
+          label: 'Query',
+          method: 'addQueryParams',
+          effect:
+            'Strapi adds it to no route, so requests treat it as an unknown key (with api.rest.strictParams, a 400 "Invalid key")',
+        }
+      : {
+          label: 'Input',
+          method: 'addInputParams',
+          effect: 'Strapi adds it to no route, so requests that send it get a 400 "Invalid key"',
+        };
+
+  warnLateRegistration(strapi, {
+    surface: `content-api-${kind}-params`,
+    key: param,
+    subject: `${label} param "${param}" (contentAPI.${method})`,
+    closedBy:
+      'Strapi registered the routes (server.initRouting(), in the bootstrap phase, before the bootstrap functions of plugins and APIs)',
+    effect,
+    registerIn: 'from a register function',
+  });
+};
+
 /** Stored options with schema always resolved (never a function). */
 type ResolvedQueryParamEntry = {
   param: string;
@@ -159,6 +199,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       throw new Error(`contentAPI.addQueryParams: param "${param}" has already been added`);
     }
     extraQueryParams.push({ param, schema, matchRoute });
+    warnIfParamAddedAfterRouting(strapi, 'query', param);
     // Params are merged into routes when initRouting() runs (applyExtraParamsToRoutes).
     // We do not merge here: at register() time routes may not exist yet (lazy creation), and
     // merging here would cause double-merge when initRouting runs and 400 "invalid param" or
@@ -177,6 +218,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       throw new Error(`contentAPI.addInputParams: param "${param}" has already been added`);
     }
     extraInputParams.push({ param, schema, matchRoute });
+    warnIfParamAddedAfterRouting(strapi, 'input', param);
     // Params are merged into routes when initRouting() runs (applyExtraParamsToRoutes).
   };
 
