@@ -1,5 +1,7 @@
 export { EditViewPage } from './content-manager/edit-view-page';
+export { HomePage } from './home-page';
 export { ListViewPage } from './content-manager/list-view-page';
+export { LoginPage } from './login-page';
 export { RolePage } from './settings/role-page';
 export { RolesPage } from './settings/roles-page';
 export { SettingsPage } from './settings/settings-page';
