@@ -45,16 +45,6 @@ e2e:
   - 'tests/app-template/**'
   - 'tests/scripts/generate-test-app.js'
   - '.github/actions/run-e2e-tests/**'
-cli:
-  - 'tests/scripts/run-cli-tests.js'
-  - 'tests/scripts/run-tests.js'
-  - 'tests/cli/**'
-  - 'tests/utils/**'
-  - 'tests/helpers/**'
-  - 'tests/app-template/**'
-  - 'tests/scripts/generate-test-app.js'
-  - 'tests/setup/jest-cli.setup.js'
-  - 'jest.config.cli.js'
 # New test suites (Test Infrastructure Overhaul): linted (ESLint in `lint` and OxLint in
 # `lint_oxlint`, which have no filter), type checked, and run by the `tests_next_*` jobs. Until a
 # suite holds a migrated domain, those jobs run on this filter and on `global` only (CMS-2242).

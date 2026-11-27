@@ -1,6 +1,6 @@
 # End-to-End Playwright Tests
 
-Playwright specs live under **`tests/e2e/tests/`** (each top-level folder is a **domain**). E2E shares app generation and the unified runner (`tests/scripts/run-tests.js`) with CLI tests.
+Playwright specs live under **`tests/e2e/tests/`** (each top-level folder is a **domain**). The runner is `tests/scripts/run-tests.js`.
 
 **Do not duplicate setup here.** Use the contributor documentation:
 
@@ -13,8 +13,6 @@ Playwright specs live under **`tests/e2e/tests/`** (each top-level folder is a *
 
 For scripted or agent-driven runs from the repo root, see **[AGENTS.md](../../AGENTS.md)**.
 
-The main difference is that e2e tests use Playwright for browser automation, while CLI tests use Jest for command-line testing.
-
 ## Running the tests
 
 Run `yarn test:e2e` to begin. The command will generate test applications from the shared app-template and run Playwright tests.
@@ -23,11 +21,11 @@ The `-c X` option can be used to limit the number of concurrent test apps, where
 
 If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:e2e:clean` before running the tests.
 
-Options meant for Playwright (for example `--grep`) are forwarded by the unified runner after the runner-only flags (`-d`, `-c`, `-f`). With **npm**, pass them after `--`: `npm run test:e2e -- -d settings --grep "My test"`. See `tests/cli/README.md` for the same pattern on CLI/Jest.
+Options meant for Playwright (for example `--grep`) are forwarded by the unified runner after the runner-only flags (`-d`, `-c`, `-f`). With **npm**, pass them after `--`: `npm run test:e2e -- -d settings --grep "My test"`.
 
 ### Environment variables
 
-Playwright is spawned from `tests/utils/runners/browser-runner.js` with a **small** `env` override (`PORT`, `HOST`, `TEST_APP_PATH`). **execa** merges that with the parent environment by default, so other variables you export before `yarn test:e2e` still reach Playwright and the app under test. The edition (`STRAPI_E2E_EDITION`, `STRAPI_DISABLE_EE`) comes from that parent environment: `applyE2eEditionEnv()` in `tests/utils/e2e-edition.ts` sets it when `tests/scripts/run-tests.js` starts. Details and the parallel Jest behaviour are in `tests/cli/README.md` → **Environment variables**.
+Playwright is spawned from `tests/utils/runners/browser-runner.js` with a **small** `env` override (`PORT`, `HOST`, `TEST_APP_PATH`). **execa** merges that with the parent environment by default, so other variables you export before `yarn test:e2e` still reach Playwright and the app under test. The edition (`STRAPI_E2E_EDITION`, `STRAPI_DISABLE_EE`) comes from that parent environment: `applyE2eEditionEnv()` in `tests/utils/e2e-edition.ts` sets it when `tests/scripts/run-tests.js` starts.
 
 ## Additional Documentation
 

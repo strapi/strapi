@@ -159,12 +159,12 @@ yarn test:api -u             # update snapshots
 
 ### CLI tests
 
-CLI tests live in `tests/cli/`.
+CLI tests live in `tests-next/cli/` (Vitest, `*.cli-test.ts`). Run `yarn build` first: the generated apps run the workspace packages from their `dist`.
 
 ```bash
-yarn test:cli
-yarn test:cli:debug          # with debug output
-yarn test:cli:update         # update snapshots
+yarn nx run @strapi/tests-cli:test                            # SQLite
+TESTS_DATABASE=postgres yarn nx run @strapi/tests-cli:test
+TESTS_DATABASE=mysql yarn nx run @strapi/tests-cli:test
 ```
 
 ### E2E tests (Playwright)

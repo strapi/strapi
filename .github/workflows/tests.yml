@@ -32,7 +32,6 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       api: ${{ steps.filter.outputs.api }}
       e2e: ${{ steps.filter.outputs.e2e }}
-      cli: ${{ steps.filter.outputs.cli }}
       migrations: ${{ steps.filter.outputs.migrations }}
       tests_next: ${{ steps.filter.outputs.tests_next }}
       docs: ${{ steps.filter.outputs.docs }}
@@ -726,32 +725,6 @@ jobs:
       - name: Run migration integration test
         run: timeout 25m yarn test:migrations --initial legacy --initial-node 20 --database ${{ matrix.database }} --skip-build
 
-  cli:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
-    timeout-minutes: 60
-    needs: [conditions, build]
-    name: 'CLI Tests (node: ${{ matrix.node }})'
-    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [22, 24, 26]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ matrix.node }}
-
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
-
-      - name: Run CLI tests
-        run: yarn test:cli
-
   api_ce_pg:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
@@ -1142,7 +1115,7 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  # Holds migrated CLI tests, so it also runs on `backend` changes, like the old `cli` job.
+  # Holds the CLI tests, so it also runs on `backend` changes.
   tests_next_cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
@@ -1230,7 +1203,6 @@ jobs:
         e2e_media_library,
         e2e_media_library_legacy,
         e2e_enterprise_plugins,
-        cli,
         migration_v5,
         api_ce_pg,
         api_ce_mysql,

@@ -10,7 +10,7 @@ const {
     providers: { createLocalDirectorySourceProvider },
   },
   strapi: {
-    providers: { createRemoteStrapiDestinationProvider, createLocalStrapiDestinationProvider },
+    providers: { createRemoteStrapiDestinationProvider },
     isProtectedRemotePushType,
   },
   engine: { createTransferEngine },
@@ -166,86 +166,6 @@ export const resetDatabaseAndImportDataFromPath = async (
   }
 };
 
-/**
- * Reset the DB and import data from a DTS backup programmatically
- * This version works with a loaded Strapi instance (no HTTP server required)
- * Use this for CLI tests where Strapi is loaded but not running as a server
- * The function handles loading and destroying the Strapi instance internally
- *
- * @param appPath - Path to the Strapi app directory
- * @param file - Name or path of an unpacked export directory or `.tar` under tests/e2e/data (or absolute)
- * @param modifiedContentTypesFn - Optional function to modify content types
- * @param configuration - Restore configuration
- */
-export const resetDatabaseAndImportDataFromPathProgrammatic = async (
-  appPath: string,
-  file: string,
-  modifiedContentTypesFn: (cts: string[]) => string[] = (cts) => cts,
-  configuration: RestoreConfiguration = { coreStore: true }
-) => {
-  // Load environment variables from the test app's .env file
-  const { loadTestAppEnv } = require('./helpers');
-  await loadTestAppEnv(appPath);
-
-  // Load Strapi instance
-  const { createStrapi } = require('@strapi/core');
-  const strapiInstance = createStrapi({
-    appDir: appPath,
-    distDir: appPath,
-  });
-  await strapiInstance.load();
-
-  try {
-    // If file is already an absolute path, use it; otherwise resolve relative to e2e/data
-    const filePath =
-      file.startsWith('/') || file.includes('\\') ? file : resolve(__dirname, '../e2e/data/', file);
-    const source = createSourceProvider(filePath);
-    const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES);
-    const destination = createLocalDestinationProvider(
-      strapiInstance,
-      includedTypes,
-      configuration
-    );
-
-    const engine = createTransferEngine(source, destination, {
-      versionStrategy: 'ignore',
-      schemaStrategy: 'ignore',
-      transforms: {
-        links: [
-          {
-            // only transfer relations to+from requested content types
-            filter(link: any) {
-              return (
-                includedTypes.includes(link.left.type) &&
-                (includedTypes.includes(link.right.type) || link.right.type === undefined)
-              );
-            },
-          },
-        ],
-        entities: [
-          {
-            // only include entities of requested content types
-            filter(entity: any) {
-              return includedTypes.includes(entity.type);
-            },
-          },
-        ],
-      },
-    });
-
-    engine.diagnostics.onDiagnostic((diagnostic: any) => {
-      if (diagnostic.kind !== 'info') console.log(diagnostic);
-    });
-
-    await engine.transfer();
-  } catch (err) {
-    console.error('Import process failed:', err);
-    throw err;
-  } finally {
-    await strapiInstance.destroy();
-  }
-};
-
 // Script execution: only run if this file is executed directly (not imported)
 const importData = async () => {
   const args = process.argv.slice(2);
@@ -303,27 +223,6 @@ const createRemoteDestinationProvider = (
   return createRemoteStrapiDestinationProvider({
     url: new URL('/admin', getStrapiTestBaseUrl()),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
-    strategy: 'restore',
-    restore: {
-      assets: true,
-      entities: {
-        include: includedTypes,
-      },
-      configuration,
-    },
-  });
-};
-
-const createLocalDestinationProvider = (
-  strapiInstance: any,
-  includedTypes: any[] = [],
-  configuration: RestoreConfiguration
-) => {
-  return createLocalStrapiDestinationProvider({
-    async getStrapi() {
-      return strapiInstance;
-    },
-    autoDestroy: false,
     strategy: 'restore',
     restore: {
       assets: true,

@@ -15704,17 +15704,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"coffee@npm:5.5.1":
-  version: 5.5.1
-  resolution: "coffee@npm:5.5.1"
-  dependencies:
-    cross-spawn: "npm:^6.0.5"
-    debug: "npm:^4.1.0"
-    is-type-of: "npm:^1.2.1"
-  checksum: 10c0/4891c50b55717b06f711b0033da1bfe6df2296d50cc90aca95911dcf32c03d6251094634a61e043d09d7ac254a2c5ce30bf9ae3bf24f694606bd3361a0e602f1
-  languageName: node
-  linkType: hard
-
 "collect-v8-coverage@npm:^1.0.0":
   version: 1.0.1
   resolution: "collect-v8-coverage@npm:1.0.1"
@@ -16181,7 +16170,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-util-is@npm:^1.0.2, core-util-is@npm:~1.0.0":
+"core-util-is@npm:~1.0.0":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
   checksum: 10c0/90a0e40abbddfd7618f8ccd63a74d88deea94e77d0e8dbbea059fa7ebebb8fbb4e2909667fe26f3a467073de1a542ebe6ae4c73a73745ac5833786759cd906c9
@@ -20838,13 +20827,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-class-hotfix@npm:~0.0.6":
-  version: 0.0.6
-  resolution: "is-class-hotfix@npm:0.0.6"
-  checksum: 10c0/722da72c30fb986fafc752e94b7bbf6e69359d7a5af74dd78152b3b45a5ae0adf34acfd86b98917769bc740cb0cd46dff890756e28661daee13dc91c8ced31e0
-  languageName: node
-  linkType: hard
-
 "is-core-module@npm:^2.16.1, is-core-module@npm:^2.16.2":
   version: 2.16.2
   resolution: "is-core-module@npm:2.16.2"
@@ -21203,17 +21185,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-type-of@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "is-type-of@npm:1.2.1"
-  dependencies:
-    core-util-is: "npm:^1.0.2"
-    is-class-hotfix: "npm:~0.0.6"
-    isstream: "npm:~0.1.2"
-  checksum: 10c0/6b800a7f226692750f9dde3fd6c806f2cc2567ae830302096f0272cb05ac7f15d987bc143e3e4577909555e4ef6b17e063ce3e97304c8212355ae90c3a781050
-  languageName: node
-  linkType: hard
-
 "is-type-of@npm:^2.2.0":
   version: 2.2.0
   resolution: "is-type-of@npm:2.2.0"
@@ -21374,13 +21345,6 @@ __metadata:
     node-fetch: "npm:^2.6.1"
     unfetch: "npm:^4.2.0"
   checksum: 10c0/d3b61fca06304db692b7f76bdfd3a00f410e42cfa7403c3b250546bf71589d18cf2f355922f57198e4cc4a9872d3647b20397a5c3edf1a347c90d57c83cf2a89
-  languageName: node
-  linkType: hard
-
-"isstream@npm:~0.1.2":
-  version: 0.1.2
-  resolution: "isstream@npm:0.1.2"
-  checksum: 10c0/a6686a878735ca0a48e0d674dd6d8ad31aedfaf70f07920da16ceadc7577b46d67179a60b313f2e6860cb097a2c2eb3cbd0b89e921ae89199a59a17c3273d66f
   languageName: node
   linkType: hard
 
@@ -29230,7 +29194,6 @@ __metadata:
     ajv-formats: "npm:3.0.1"
     chalk: "npm:4.1.2"
     chokidar: "npm:3.6.0"
-    coffee: "npm:5.5.1"
     commander: "npm:8.3.0"
     core-js: "npm:3.36.0"
     create-strapi-app: "workspace:*"
