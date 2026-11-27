@@ -1,6 +1,9 @@
 import { test, expect } from '../../../fixtures';
 import { login, loginWithApi } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import {
+  resetDatabaseAndImportDataFromPath,
+  resyncSuperAdminPermissionsAfterImport,
+} from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
@@ -68,6 +71,7 @@ test.describe('Home as super admin — key statistics', () => {
     didWriteSchemaFiles = false;
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await resyncSuperAdminPermissionsAfterImport();
     await loginWithApi({ page });
     await page.goto('/admin');
   });
