@@ -563,3 +563,33 @@ describe('User Controller', () => {
     });
   });
 });
+
+describe('User controller | plugin list filters', () => {
+  test('Leaves the plugins param out of the users query', async () => {
+    const findPage = vi.fn(() => ({ results: [], pagination: {} }));
+    const validateQuery = vi.fn();
+    const ctx = createContext({
+      query: { _q: 'foo', plugins: { spaces: { space: 'france' } } },
+    }) as any;
+    ctx.state = { userAbility: {} };
+
+    global.strapi = {
+      admin: {
+        services: {
+          user: { findPage, sanitizeUser: vi.fn() },
+          permission: {
+            createPermissionsManager: () => ({
+              validateQuery,
+              sanitizeQuery: (query: any) => query,
+            }),
+          },
+        },
+      },
+    } as any;
+
+    await userController.find(ctx);
+
+    expect(validateQuery).toHaveBeenCalledWith({ _q: 'foo' });
+    expect(findPage).toHaveBeenCalledWith({ _q: 'foo' });
+  });
+});

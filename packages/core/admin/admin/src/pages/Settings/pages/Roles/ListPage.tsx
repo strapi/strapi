@@ -18,20 +18,31 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Filters, toApiFilters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { SearchInput } from '../../../../components/SearchInput';
+import { SettingsListToolbarFilters } from '../../../../components/SettingsListToolbarFilters';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useFetchClient } from '../../../../hooks/useFetchClient';
-import { useQueryParams } from '../../../../hooks/useQueryParams';
+import { deepEncodeQueryValues, useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
+import {
+  useSettingsListFilters,
+  useSettingsListHeaders,
+  useSettingsListPluginParams,
+  type InjectableSettingsListFilter,
+  type InjectableSettingsListHeader,
+} from '../../../../hooks/useSettingsListExtensions';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isFetchError } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
+
+import type { FindRoles } from '../../../../../../shared/contracts/roles';
 
 const ListPage = () => {
   const { formatMessage } = useIntl();
@@ -39,14 +50,33 @@ const ListPage = () => {
   const { formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = React.useState(false);
-  const [{ query }] = useQueryParams<{ _q?: string }>();
+  const [{ query }] = useQueryParams<{ _q?: string; filters?: { $and?: unknown } }>();
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(permissions.settings?.roles);
 
+  const headers = useSettingsListHeaders('roles', TABLE_HEADERS);
+  const { filters: filterOptions, toolbarFilters } = useSettingsListFilters(
+    'roles',
+    NO_CORE_FILTERS
+  );
+  const { plugins } = useSettingsListPluginParams(toolbarFilters);
+  const searchFilter = query?._q ? { name: { $containsi: query._q } } : undefined;
+  // Without a popover the page ignores URL filters, as it did before plugins could add one
+  const urlFilters =
+    filterOptions.length > 0 ? toApiFilters(query?.filters, filterOptions)?.$and : undefined;
+  const popoverFilters = Array.isArray(urlFilters) ? urlFilters : [];
   const { roles, refetch: refetchRoles } = useAdminRoles(
-    { filters: query?._q ? { name: { $containsi: query._q } } : undefined },
+    {
+      // The fetch client does not encode params. The server validates them against the role model
+      filters: deepEncodeQueryValues(
+        popoverFilters.length > 0
+          ? { $and: [...(searchFilter ? [searchFilter] : []), ...popoverFilters] }
+          : searchFilter
+      ) as RoleFilters | undefined,
+      plugins,
+    },
     {
       refetchOnMountOrArgChange: true,
       skip: isLoadingForPermissions || !canRead,
@@ -113,7 +143,7 @@ const ListPage = () => {
   };
 
   const rowCount = roles.length + 1;
-  const colCount = 6;
+  const colCount = headers.length + 3;
 
   if (isLoadingForPermissions) {
     return <Page.Loading />;
@@ -151,18 +181,32 @@ const ListPage = () => {
       />
       {canRead && (
         <Layouts.Action
+          endActions={
+            toolbarFilters.length > 0 ? (
+              <SettingsListToolbarFilters filters={toolbarFilters} />
+            ) : undefined
+          }
           startActions={
-            <SearchInput
-              label={formatMessage(
-                { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                {
-                  target: formatMessage({
-                    id: 'global.roles',
-                    defaultMessage: 'roles',
-                  }),
-                }
+            <>
+              <SearchInput
+                label={formatMessage(
+                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                  {
+                    target: formatMessage({
+                      id: 'global.roles',
+                      defaultMessage: 'roles',
+                    }),
+                  }
+                )}
+              />
+              {filterOptions.length > 0 && (
+                <Filters.Root options={filterOptions}>
+                  <Filters.Trigger />
+                  <Filters.Popover zIndex={499} />
+                  <Filters.List />
+                </Filters.Root>
               )}
-            />
+            </>
           }
         />
       )}
@@ -184,30 +228,13 @@ const ListPage = () => {
           >
             <Thead>
               <Tr aria-rowindex={1}>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'global.name',
-                      defaultMessage: 'Name',
-                    })}
-                  </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'global.description',
-                      defaultMessage: 'Description',
-                    })}
-                  </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({
-                      id: 'global.users',
-                      defaultMessage: 'Users',
-                    })}
-                  </Typography>
-                </Th>
+                {headers.map((header) => (
+                  <Th key={header.name}>
+                    <Typography variant="sigma" textColor="neutral600">
+                      {header.label}
+                    </Typography>
+                  </Th>
+                ))}
                 <Th>
                   <VisuallyHidden>
                     {formatMessage({
@@ -223,10 +250,8 @@ const ListPage = () => {
                 <RoleRow
                   cursor="pointer"
                   key={role.id}
-                  id={role.id}
-                  name={role.name}
-                  description={role.description}
-                  usersCount={role.usersCount}
+                  role={role}
+                  headers={headers}
                   icons={
                     [
                       canCreate &&
@@ -266,6 +291,16 @@ const ListPage = () => {
     </Page.Main>
   );
 };
+
+type RoleFilters = NonNullable<FindRoles.Request['query']['filters']>;
+
+const NO_CORE_FILTERS: InjectableSettingsListFilter[] = [];
+
+const TABLE_HEADERS: InjectableSettingsListHeader<AdminRole>[] = [
+  { name: 'name', label: { id: 'global.name', defaultMessage: 'Name' } },
+  { name: 'description', label: { id: 'global.description', defaultMessage: 'Description' } },
+  { name: 'usersCount', label: { id: 'global.users', defaultMessage: 'Users' } },
+];
 
 /* -------------------------------------------------------------------------------------------------
  * Reducer

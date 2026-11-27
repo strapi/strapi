@@ -68,7 +68,10 @@ export declare namespace FindRole {
  */
 export declare namespace FindRoles {
   export interface Request {
-    query: Modules.EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'>;
+    query: Modules.EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'> & {
+      /** The values of the plugin filters on the list, by plugin id. Core does not read them */
+      plugins?: Record<string, unknown>;
+    };
     body: {};
   }
 

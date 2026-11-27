@@ -104,57 +104,83 @@ const Table = ({
               token.name === 'Read Only' ? tours.apiTokens.ManageAPIToken : React.Fragment;
             return (
               <TableImpl.Row key={token.id} onClick={handleRowClick(token.id)}>
-                <TableImpl.Cell maxWidth="25rem">
-                  <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                    {token.name}
-                  </Typography>
-                </TableImpl.Cell>
-                <TableImpl.Cell maxWidth="25rem">
-                  <Typography textColor="neutral800" ellipsis>
-                    {token.description}
-                  </Typography>
-                </TableImpl.Cell>
-                <TableImpl.Cell>
-                  <Typography textColor="neutral800">
-                    {/* @ts-expect-error One of the tokens doesn't have createdAt */}
-                    <RelativeTime timestamp={new Date(token.createdAt)} />
-                  </Typography>
-                </TableImpl.Cell>
-                <TableImpl.Cell>
-                  {token.lastUsedAt && (
-                    <Typography textColor="neutral800">
-                      <RelativeTime
-                        timestamp={new Date(token.lastUsedAt)}
-                        customIntervals={[
-                          {
-                            unit: 'hours',
-                            threshold: 1,
-                            text: formatMessage({
-                              id: 'Settings.apiTokens.lastHour',
-                              defaultMessage: 'last hour',
-                            }),
-                          },
-                        ]}
-                      />
-                    </Typography>
-                  )}
-                </TableImpl.Cell>
-                {showOwner === true &&
-                  (() => {
-                    const apiToken = token as ApiToken;
-                    const owner = apiToken.kind === 'admin' ? apiToken.adminUserOwner : undefined;
-                    const ownerName =
-                      owner !== undefined && owner !== null && typeof owner === 'object'
-                        ? formatAdminUserName(owner)
-                        : '';
-                    return (
-                      <TableImpl.Cell maxWidth="20rem">
-                        <Typography textColor="neutral800" ellipsis>
-                          {ownerName}
-                        </Typography>
-                      </TableImpl.Cell>
-                    );
-                  })()}
+                {headers.map((header) => {
+                  switch (header.name) {
+                    case 'name':
+                      return (
+                        <TableImpl.Cell key={header.name} maxWidth="25rem">
+                          <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                            {token.name}
+                          </Typography>
+                        </TableImpl.Cell>
+                      );
+                    case 'description':
+                      return (
+                        <TableImpl.Cell key={header.name} maxWidth="25rem">
+                          <Typography textColor="neutral800" ellipsis>
+                            {token.description}
+                          </Typography>
+                        </TableImpl.Cell>
+                      );
+                    case 'createdAt':
+                      return (
+                        <TableImpl.Cell key={header.name}>
+                          <Typography textColor="neutral800">
+                            {/* @ts-expect-error One of the tokens doesn't have createdAt */}
+                            <RelativeTime timestamp={new Date(token.createdAt)} />
+                          </Typography>
+                        </TableImpl.Cell>
+                      );
+                    case 'lastUsedAt':
+                      return (
+                        <TableImpl.Cell key={header.name}>
+                          {token.lastUsedAt && (
+                            <Typography textColor="neutral800">
+                              <RelativeTime
+                                timestamp={new Date(token.lastUsedAt)}
+                                customIntervals={[
+                                  {
+                                    unit: 'hours',
+                                    threshold: 1,
+                                    text: formatMessage({
+                                      id: 'Settings.apiTokens.lastHour',
+                                      defaultMessage: 'last hour',
+                                    }),
+                                  },
+                                ]}
+                              />
+                            </Typography>
+                          )}
+                        </TableImpl.Cell>
+                      );
+                    case 'adminUserOwner': {
+                      if (!showOwner) {
+                        return null;
+                      }
+
+                      const apiToken = token as ApiToken;
+                      const owner = apiToken.kind === 'admin' ? apiToken.adminUserOwner : undefined;
+                      const ownerName =
+                        owner !== undefined && owner !== null && typeof owner === 'object'
+                          ? formatAdminUserName(owner)
+                          : '';
+
+                      return (
+                        <TableImpl.Cell key={header.name} maxWidth="20rem">
+                          <Typography textColor="neutral800" ellipsis>
+                            {ownerName}
+                          </Typography>
+                        </TableImpl.Cell>
+                      );
+                    }
+                    default:
+                      return (
+                        <TableImpl.Cell key={header.name}>
+                          {header.cellFormatter?.(token, header)}
+                        </TableImpl.Cell>
+                      );
+                  }
+                })}
                 {canUpdate || canRead || canDelete ? (
                   <TableImpl.Cell>
                     <Flex justifyContent="end">

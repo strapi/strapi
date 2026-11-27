@@ -8,11 +8,12 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
-import { Filters } from '../../../../components/Filters';
+import { Filters, toApiFilters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
+import { SettingsListToolbarFilters } from '../../../../components/SettingsListToolbarFilters';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAuth } from '../../../../features/Auth';
@@ -20,11 +21,18 @@ import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
+import {
+  useSettingsListFilters,
+  useSettingsListHeaders,
+  useSettingsListPluginParams,
+} from '../../../../hooks/useSettingsListExtensions';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';
 
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
+
+import type { FindAll } from '../../../../../../shared/contracts/user';
 
 /* -------------------------------------------------------------------------------------------------
  * ListPageCE
@@ -43,7 +51,17 @@ const ListPageCE = () => {
   const { search } = useLocation();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
-  const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
+  const { filters: filterOptions, toolbarFilters } = useSettingsListFilters('users', FILTERS);
+  const pluginParams = useSettingsListPluginParams(toolbarFilters);
+  const { plugins: _plugins, ...urlParams } = qs.parse(search, { ignoreQueryPrefix: true });
+  const { data, isError, isLoading } = useAdminUsers({
+    ...urlParams,
+    filters: toApiFilters(
+      urlParams.filters as { $and?: unknown } | undefined,
+      filterOptions
+    ) as FindAll.Request['query']['filters'],
+    ...pluginParams,
+  });
   const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
 
@@ -63,10 +81,7 @@ const ListPageCE = () => {
       ).LicenseLimitBanner
   );
 
-  const headers = TABLE_HEADERS.map((header) => ({
-    ...header,
-    label: formatMessage(header.label),
-  }));
+  const headers = useSettingsListHeaders('users', TABLE_HEADERS);
 
   const title = formatMessage({
     id: 'global.users',
@@ -152,12 +167,17 @@ const ListPageCE = () => {
                 { target: title }
               )}
             />
-            <Filters.Root options={FILTERS}>
+            <Filters.Root options={filterOptions}>
               <Filters.Trigger />
               <Filters.Popover zIndex={499} />
               <Filters.List />
             </Filters.Root>
           </>
+        }
+        endActions={
+          toolbarFilters.length > 0 ? (
+            <SettingsListToolbarFilters filters={toolbarFilters} />
+          ) : undefined
         }
       />
       <Layouts.Content>

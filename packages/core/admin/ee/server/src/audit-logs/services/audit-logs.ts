@@ -1,3 +1,4 @@
+import { AsyncResource } from 'async_hooks';
 import { Readable } from 'stream';
 
 import type { Core } from '@strapi/types';
@@ -238,6 +239,18 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
 
       const partUpperBound = nextCursor ?? untilId;
 
+      // Koa reads the stream after the request's middlewares returned. Its queries run in the
+      // request's async context, so query scopes and strapi.requestContext still apply
+      const findPartRows = AsyncResource.bind((afterId: number, limit: number): Promise<any[]> =>
+        strapi.db.query('admin::audit-log').findMany({
+          select: ['id', 'action', 'date', 'payload'],
+          populate: { user: { select: EXPORT_USER_COLUMNS } },
+          where: buildExportWhere(filtersWhere, partUpperBound, afterId),
+          orderBy: { id: 'asc' },
+          limit,
+        })
+      );
+
       async function* csvChunks() {
         if (isNewExport) {
           yield CSV_BOM + serializeCsvLine(EXPORT_CSV_COLUMNS);
@@ -248,13 +261,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
 
         while (remaining > 0) {
           const batchLimit = Math.min(EXPORT_BATCH_SIZE, remaining);
-          const rows: any[] = await strapi.db.query('admin::audit-log').findMany({
-            select: ['id', 'action', 'date', 'payload'],
-            populate: { user: { select: EXPORT_USER_COLUMNS } },
-            where: buildExportWhere(filtersWhere, partUpperBound, lastId),
-            orderBy: { id: 'asc' },
-            limit: batchLimit,
-          });
+          const rows = await findPartRows(lastId, batchLimit);
 
           if (rows.length === 0) {
             break;

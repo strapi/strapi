@@ -125,6 +125,22 @@ export const HOOKS = {
   INJECT_LIST_VIEW_FILTERS: 'Admin/CM/pages/ListView/inject-in-filters',
 
   /**
+   * Hook that allows to mutate the displayed headers of the API tokens, roles, users and audit logs lists
+   * Experimental: it can change in a minor release
+   * @constant
+   * @type {string}
+   */
+  INJECT_COLUMN_IN_SETTINGS_TABLE: 'Admin/Settings/pages/ListPage/unstable_inject-column-in-table',
+
+  /**
+   * Hook that allows to mutate the displayed filters of the API tokens, roles, users and audit logs lists
+   * Experimental: it can change in a minor release
+   * @constant
+   * @type {string}
+   */
+  INJECT_SETTINGS_LIST_FILTERS: 'Admin/Settings/pages/ListPage/unstable_inject-in-filters',
+
+  /**
    * Hook that allows to mutate the CM's collection types links pre-set filters
    * @constant
    * @type {string}

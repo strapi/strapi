@@ -3,7 +3,15 @@ import { render, screen, server, waitFor } from '@tests/utils';
 import { delay, http, HttpResponse } from 'msw';
 import { Link } from 'react-router-dom';
 
+import {
+  DATE_FILTER,
+  DAY_BOUNDS,
+  settingsListHooks,
+  SPACE_FILTER,
+} from '../../../../../../../../admin/tests/settingsListHooks';
 import { ListPage, ProtectedListPage } from '../ListPage';
+
+import type { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
 
 const anchorClick = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
@@ -514,5 +522,100 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
       expect(await screen.findByRole('heading', { name: 'Audit Logs' })).toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Page not found' })).not.toBeInTheDocument();
     });
+  });
+});
+
+const providerOptions = {
+  runHookWaterfall: settingsListHooks({
+    after: 'action',
+    column: {
+      name: 'space',
+      label: 'Space',
+      cellFormatter: (log: AuditLog) => <span>space of log {log.id}</span>,
+    },
+    filter: SPACE_FILTER,
+  }),
+};
+
+describe('ADMIN | Pages | AUDIT LOGS | ListPage | plugin columns and filters', () => {
+  it('sends a plugin date filter as the bounds of its day', async () => {
+    const listRequests: Record<string, string>[] = [];
+    server.use(
+      // Returns nothing: the default handler answers
+      http.get('/admin/audit-logs', ({ request }) => {
+        listRequests.push(
+          Object.fromEntries(
+            [...new URL(request.url).searchParams.entries()].filter(([key]) =>
+              key.startsWith('filters')
+            )
+          )
+        );
+      })
+    );
+
+    render(<ListPage />, {
+      providerOptions: {
+        runHookWaterfall: settingsListHooks({
+          after: 'action',
+          column: { name: 'space', label: 'Space' },
+          filter: DATE_FILTER,
+        }),
+      },
+      initialEntries: ['/?filters[$and][0][reviewedAt][$eq]=2023-10-31'],
+    });
+
+    await waitFor(() =>
+      expect(listRequests.at(-1)).toEqual({
+        'filters[$and][0][reviewedAt][$gte]': DAY_BOUNDS.$gte,
+        'filters[$and][0][reviewedAt][$lt]': DAY_BOUNDS.$lt,
+      })
+    );
+  });
+
+  it('shows the plugin column after the core column it names', async () => {
+    render(<ListPage />, {
+      providerOptions,
+    });
+
+    await screen.findByText('space of log 1');
+
+    const cells = screen.getAllByRole('gridcell').map((cell) => cell.textContent);
+
+    // The header row comes first
+    expect(cells.indexOf('Space')).toBe(cells.indexOf('Action') + 1);
+  });
+
+  it('sends the plugin filter value with the list and the export requests', async () => {
+    const listRequests: URL[] = [];
+    const exportRequests: URL[] = [];
+
+    server.use(
+      http.get('/admin/audit-logs', ({ request }) => {
+        listRequests.push(new URL(request.url));
+
+        return HttpResponse.json({ results: [], pagination: { page: 1, total: 1 } });
+      }),
+      http.get('/admin/audit-logs/export', ({ request }) => {
+        exportRequests.push(new URL(request.url));
+
+        return new HttpResponse('id\r\n', {
+          headers: { 'Content-Type': 'text/csv; charset=utf-8' },
+        });
+      })
+    );
+
+    const { user } = render(<ListPage />, {
+      providerOptions,
+      initialEntries: ['/?plugins[spaces][space]=france'],
+    });
+
+    expect(await screen.findByRole('combobox', { name: 'Space' })).toHaveTextContent('France');
+    await waitFor(() => expect(listRequests.length).toBeGreaterThan(0));
+    expect(listRequests.at(-1)!.searchParams.get('plugins[spaces][space]')).toBe('france');
+
+    await user.click(await screen.findByRole('button', { name: 'Export as CSV' }));
+
+    await waitFor(() => expect(exportRequests).toHaveLength(1));
+    expect(exportRequests[0].searchParams.get('plugins[spaces][space]')).toBe('france');
   });
 });

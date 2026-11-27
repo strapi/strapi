@@ -29,6 +29,7 @@ export * from './components/Table';
 export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
+export { SettingsListToolbarSelect as unstable_SettingsListToolbarSelect } from './components/SettingsListToolbarFilters';
 
 /** @internal */
 export { tours } from './components/GuidedTour/Tours';
@@ -92,6 +93,20 @@ export type { StrapiApp, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
 export type { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from './core/apis/router';
+export type {
+  InjectSettingsListColumnsArgs as unstable_InjectSettingsListColumnsArgs,
+  InjectSettingsListFiltersArgs as unstable_InjectSettingsListFiltersArgs,
+  InjectableSettingsListFilter as unstable_InjectableSettingsListFilter,
+  InjectableSettingsListHeader as unstable_InjectableSettingsListHeader,
+  InjectableSettingsListToolbarFilter as unstable_InjectableSettingsListToolbarFilter,
+  SettingsList as unstable_SettingsList,
+  SettingsListRows as unstable_SettingsListRows,
+  SettingsListToolbarFilterProps as unstable_SettingsListToolbarFilterProps,
+} from './hooks/useSettingsListExtensions';
+export type {
+  SettingsListToolbarSelectOption as unstable_SettingsListToolbarSelectOption,
+  SettingsListToolbarSelectProps as unstable_SettingsListToolbarSelectProps,
+} from './components/SettingsListToolbarFilters';
 export type {
   SanitizedAdminUser,
   AdminUser,
