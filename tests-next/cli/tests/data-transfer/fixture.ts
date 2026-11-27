@@ -39,7 +39,7 @@ export const scaffoldContentTypes = (app: App) => {
 export const mediaContent = (index: number) =>
   Array.from({ length: 4000 }, (_, line) => `file ${index} line ${line}`).join('\n');
 
-/** Seed `count` text files to the Media Library. Returns their names. */
+/** Write `count` text files to `dir`. Returns their paths. */
 const writeMediaFiles = (dir: string, count: number, prefix: string) =>
   Array.from({ length: count }, (_, index) => {
     const file = path.join(dir, `${prefix}${index}.txt`);

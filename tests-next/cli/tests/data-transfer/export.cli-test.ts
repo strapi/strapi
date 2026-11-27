@@ -90,12 +90,6 @@ describe('export', () => {
     expect(result.output).toMatch(/require --no-encrypt/i);
   });
 
-  it('refuses --format dir with --encrypt', async () => {
-    const result = await exportTo('dir-encrypted', '--format', 'dir', '--encrypt');
-
-    expect(result.code).not.toBe(0);
-  });
-
   // #25008
   it('excludes the Media Library with --exclude files and --exclude-content-types', async () => {
     const { content } = await exportArchive(

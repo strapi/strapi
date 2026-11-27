@@ -52,7 +52,7 @@ const transfer = async (direction: 'from' | 'to') => {
         '--force',
       ],
       // A transfer of this fixture takes about a second.
-      { database, timeout: 30_000 }
+      { database, timeout: 20_000 }
     );
     const logs = `${result.output}\n--- remote server\n${server.logs().slice(-5000)}`;
     expect(result.code, logs).toBe(0);
