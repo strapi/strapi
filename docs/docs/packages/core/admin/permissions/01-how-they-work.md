@@ -61,6 +61,10 @@ _above: Screenshot of the RBAC edit page showing the where are located the secti
 
 Arrays may hold `undefined` items. String values must be primitive strings: a boxed string (`new String('…')`) is rejected, unlike with the yup schema used before. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. `strapi develop` and `strapi build` print them in a `Details:` box; `strapi start` does not.
 
+With strict types, `register` and `registerMany` take the input type of this schema (`ActionRegistration` in `server/src/types/index.ts`), so most shapes the schema rejects also fail to compile. A key the action's section does not have fails to compile too, as the strict schema rejects it at boot. Read [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
+
+With strict types, the action provider hooks (`willRegister`, `didRegister`, `willDelete`, `didDelete` and `appliesPropertyToSubject`), the section handlers and matchers, `get` and `values` receive the action as the provider stores it (`StoredAction` in `server/src/domain/action/index.ts`). That is the registration without its `uid`, with its `actionId`, an `options.applyToProperties` that defaults to `null`, and, in the `settings` and `plugins` sections only, a `subCategory` that defaults to `'general'`. It has one type per section, so code checks `section` before it reads `category`, `subjects`, `pluginName` or `subCategory`. `getAllowedActionsForRole` of the `admin::action` service returns the same type, and `getPermissionsWithNestedFields` of the `admin::content-type` service accepts it.
+
 :::note
 `uid` and `pluginName` are used to create a global unique id.
 
@@ -73,10 +77,12 @@ An action can be registered in the backend during the `register` or `bootstrap` 
 
 Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions that have an unregistered action, a subject the action does not list, or neither a role nor an admin token. It also deletes a role permission when every property its action lists applies to the subject and is missing. A `null` or `undefined` property counts as missing, except `locales: null`, which means every locale and counts as set unless another applicable property is missing. It keeps the other permissions and cleans their `fields`: fields that left the schema are removed, a stored parent path is replaced by its nested fields, and the permission is updated only when its fields changed. It logs one warning with the count, reasons, actions, subjects and owners of the deleted permissions. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions. The super admin reset, and the default Editor and Author roles created on the first boot, create no permission for a `contentTypes` action without subjects, or, when the action applies to `fields`, for a subject that is not a loaded content type.
 
+With strict types, a package or application also declares the IDs it registers in `Strapi.Registries.PermissionActions`, so that typed `hasPermissions` configs and action provider calls accept them. See [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
+
 Example:
 
 ```ts
-// bootstrap.ts
+// a plugin's bootstrap.ts
 module.exports = async () => {
   const actions = [
     {

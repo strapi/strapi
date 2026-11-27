@@ -83,7 +83,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       mergeSchema: { schema: schemaWithResolvers },
 
       // Apply user-defined plugins
-      plugins: extension.plugins,
+      // The extension keeps develop's published `PluginConfig[]` type for its plugins.
+      plugins: extension.plugins as unknown as Nexus.core.NexusPlugin[],
 
       // Whether to generate artifacts (GraphQL schema, TS types definitions) or not.
       // By default, we generate artifacts only on development environment

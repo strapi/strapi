@@ -1,8 +1,10 @@
 import type Koa from 'koa';
 
 import type * as UID from '../uid';
+import type { SuggestedString } from '../utils/string';
 
 import type { Strapi } from './strapi';
+import type { IsOptionalReferenceConfig, IsStrict, RegisteredRecord } from './strictness';
 
 export type MiddlewareFactory<T = any> = (
   config: T,
@@ -17,6 +19,119 @@ export type MiddlewareConfig = {
   config?: unknown | undefined;
 };
 
-export type MiddlewareHandler = Koa.Middleware;
+/**
+ * A Koa middleware. With strict types, its result and what `next()` resolves to are `unknown`: Koa
+ * ignores the result, and `next()` resolves to whatever the next middleware returns (koa-compose).
+ * Each position is gated on its own: the context stays the one `Koa.Middleware` gives.
+ */
+export type MiddlewareHandler = (
+  context: Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, any>,
+  next: IsStrict extends false ? Koa.Next : () => Promise<unknown>
+) => IsStrict extends false ? any : unknown;
 
 export type Middleware = MiddlewareHandler | MiddlewareFactory;
+
+/** Middleware UIDs that have a registered config contract. */
+export type RegisteredMiddlewareName =
+  keyof Strapi.Registries.AppMiddlewares | keyof Strapi.Registries.PackageMiddlewares;
+
+/** Resolves application overrides before package defaults. */
+export type MiddlewareConfigFor<TName extends RegisteredMiddlewareName> =
+  TName extends keyof Strapi.Registries.AppMiddlewares
+    ? Strapi.Registries.AppMiddlewares[TName]
+    : TName extends keyof Strapi.Registries.PackageMiddlewares
+      ? Strapi.Registries.PackageMiddlewares[TName]
+      : never;
+
+/**
+ * Middlewares keyed by UID, e.g. `strapi.middlewares`. With strict types enabled, registered UIDs
+ * resolve to a factory that receives their config contract. Other keys, literal or dynamic, resolve to
+ * a factory whose config is `unknown`: they have no config contract.
+ */
+export type MiddlewareMap = IsStrict extends false
+  ? Record<string, MiddlewareFactory>
+  : Readonly<
+      RegisteredRecord<
+        { [TName in RegisteredMiddlewareName]: MiddlewareFactory<MiddlewareConfigFor<TName>> },
+        MiddlewareFactory<unknown>
+      >
+    >;
+
+/**
+ * A name accepted by `strapi.middleware(name)`. Runtime resolves it as an exact name.
+ * Registered names are listed for completion.
+ */
+export type MiddlewareLookupName = SuggestedString<RegisteredMiddlewareName>;
+
+/**
+ * Return type of `strapi.middleware<T>(name)`: `T` without strict types, and when the name kept its
+ * wide default, which happens when the caller passes an explicit type argument or a dynamic name.
+ * A registered name resolves to a factory that receives its config contract, like
+ * `strapi.middlewares`. Other literal names resolve to `T`, `unknown` by default.
+ */
+export type MiddlewareLookup<TName extends string, T> = IsStrict extends false
+  ? T
+  : MiddlewareLookupName extends TName
+    ? T
+    : TName extends RegisteredMiddlewareName
+      ? MiddlewareFactory<MiddlewareConfigFor<TName>>
+      : T;
+
+/**
+ * The config a route reference passes, `unknown` when the registered config is `any`. A contract whose
+ * import does not resolve in the consumer, e.g. third-party types missing under `skipLibCheck`, is an
+ * error type: a conditional type over it is an error type too, which would accept any reference.
+ * Tuples keep the error type out of the checked and extends positions.
+ */
+type ReferenceConfig<TConfig> = [0] extends [1 & TConfig] ? unknown : TConfig;
+
+/** A reference to a registered middleware: its name alone only when its config is optional. */
+type RegisteredMiddlewareReference<
+  TName extends RegisteredMiddlewareName,
+  TConfig = ReferenceConfig<MiddlewareConfigFor<TName>>,
+> =
+  IsOptionalReferenceConfig<TConfig> extends true
+    ? TName | { name: TName; config?: TConfig }
+    : { name: TName; config: TConfig };
+
+/**
+ * An entry of `config/middlewares.ts` ({@link Config.Middlewares}) that names a registered middleware,
+ * with its config contract, as in a route reference: its name alone only when its config is optional.
+ */
+export type RegisteredMiddlewareEntry = {
+  [TName in RegisteredMiddlewareName]: RegisteredMiddlewareReference<TName>;
+}[RegisteredMiddlewareName];
+
+/** Any middleware name. Registered names are listed for completion. */
+type SuggestedMiddlewareName = SuggestedString<RegisteredMiddlewareName>;
+
+/** A middleware resolved from a package name or a path relative to the application `dist` directory. */
+type ResolvedMiddlewareReference = { resolve: string; config?: unknown };
+
+/**
+ * A middleware reference in a typed route config: an inline handler, a `{ resolve, config }` entry,
+ * or a middleware name, alone or as `{ name, config }`. Runtime resolves names exactly, without a
+ * route namespace.
+ * With strict types disabled, any middleware name is accepted; registered names are listed for
+ * completion.
+ * With strict types enabled, only registered middlewares are accepted by name and their `config` is
+ * checked, as for policy references. Without registered middlewares, no name is
+ * accepted.
+ *
+ * With strict types enabled, a `{ resolve, config }` entry takes no `name`, so `{ name, config }` is
+ * checked against the registered config alone and editors list its keys.
+ *
+ * With strict types enabled, editors list no name inside `{ name: '' }`: the inline handler member
+ * has `Function.name: string`, which matches any string being typed, so the object literal is typed
+ * as the handler. Bare names are listed.
+ */
+export type MiddlewareReference = IsStrict extends false
+  ? | SuggestedMiddlewareName
+    | MiddlewareHandler
+    | { name: SuggestedMiddlewareName; config?: unknown }
+    | ResolvedMiddlewareReference
+  : | MiddlewareHandler
+    | (ResolvedMiddlewareReference & { name?: never })
+    | {
+        [TName in RegisteredMiddlewareName]: RegisteredMiddlewareReference<TName>;
+      }[RegisteredMiddlewareName];

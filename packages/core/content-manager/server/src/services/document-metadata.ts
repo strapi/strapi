@@ -3,14 +3,18 @@ import { groupBy, pick } from 'lodash';
 import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
-import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+import type {
+  AvailableLocaleDocument,
+  DocumentMetadata,
+} from '../../../shared/contracts/collection-types';
+import type { DocumentMetadataService } from '../types/services';
 
 const { getScalarAttributes, getMediaAttributes } = contentTypes;
 
 export interface DocumentVersion {
   id: string | number;
   documentId: Modules.Documents.ID;
-  locale?: string;
+  locale?: Core.IsStrict extends true ? string | null : string;
   localizations?: DocumentVersion[];
   updatedAt?: string | null | Date;
   publishedAt?: string | null | Date;
@@ -98,7 +102,7 @@ const CONTENT_MANAGER_STATUS = {
   PUBLISHED: 'published',
   DRAFT: 'draft',
   MODIFIED: 'modified',
-};
+} as const;
 
 /**
  * Controls the metadata properties to be returned
@@ -132,7 +136,7 @@ const getIsVersionLatestModification = (
   return versionUpdatedAt > otherUpdatedAt;
 };
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
+export default (({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available locales of a document for the current status.
    *
@@ -148,8 +152,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    */
   async getAvailableLocales(
     uid: UID.ContentType,
-    version: DocumentVersion,
-    allVersions: DocumentVersion[]
+    version: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['getAvailableLocales']>[1]
+      : DocumentVersion,
+    allVersions: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['getAvailableLocales']>[2]
+      : DocumentVersion[]
   ) {
     // Group all versions by locale
     const versionsByLocale = groupBy(allVersions, 'locale');
@@ -166,7 +174,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const mappingResult = await async.map(
       Object.values(versionsByLocale),
-      async (localeVersions: DocumentVersion[]) => {
+      async (
+        localeVersions: Core.IsStrict extends true
+          ? Parameters<DocumentMetadataService['getAvailableLocales']>[2]
+          : DocumentVersion[]
+      ) => {
         if (!contentTypes.hasDraftAndPublish(model)) {
           return localeVersions[0];
         }
@@ -180,14 +192,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
         return {
           ...draftVersion,
-          status: this.getStatus(draftVersion, otherVersions as any),
+          status: this.getStatus(draftVersion, otherVersions),
         };
       }
     );
 
-    const filtered = mappingResult.filter(Boolean) as unknown as NonNullable<
-      DocumentMetadata['availableLocales']
-    >;
+    const filtered = mappingResult.filter(Boolean) as unknown as Core.IsStrict extends true
+      ? Awaited<ReturnType<DocumentMetadataService['getAvailableLocales']>>
+      : NonNullable<DocumentMetadata['availableLocales']>;
 
     // Sort the default locale first so `availableLocales[0]` is the canonical
     // source for non-localized field inheritance in the admin. Without a
@@ -201,7 +213,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     // The provider may resolve `undefined` at runtime when no default locale is stored
     if (defaultLocaleCode === null || defaultLocaleCode === undefined || defaultLocaleCode === '') {
-      return filtered as DocumentMetadata['availableLocales'];
+      return filtered as Core.IsStrict extends true
+        ? Awaited<ReturnType<DocumentMetadataService['getAvailableLocales']>>
+        : DocumentMetadata['availableLocales'];
     }
 
     // Stable partition: move the default locale entry to the front, keep the
@@ -209,13 +223,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const defaultEntries = filtered.filter((entry) => entry.locale === defaultLocaleCode);
     const otherEntries = filtered.filter((entry) => entry.locale !== defaultLocaleCode);
 
-    return [...defaultEntries, ...otherEntries] as DocumentMetadata['availableLocales'];
+    return [...defaultEntries, ...otherEntries] as Core.IsStrict extends true
+      ? Awaited<ReturnType<DocumentMetadataService['getAvailableLocales']>>
+      : DocumentMetadata['availableLocales'];
   },
 
   /**
    * Returns available status of a document for the current locale
    */
-  getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableStatus(
+    version: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['getAvailableStatus']>[0]
+      : DocumentVersion,
+    allVersions: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['getAvailableStatus']>[1]
+      : DocumentVersion[]
+  ) {
     // Find the other status of the document
     const status =
       version.publishedAt !== null
@@ -241,7 +264,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: UID.ContentType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(
+    uid: UID.ContentType,
+    documents: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['getManyAvailableStatus']>[1]
+      : DocumentVersion[]
+  ) {
     if (!documents.length) return [];
 
     // The status and locale of all documents should be the same
@@ -276,7 +304,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     });
   },
 
-  getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
+  getStatus(
+    version: DocumentVersion,
+    otherDocumentStatuses?: DocumentMetadata['availableStatus']
+  ): Core.IsStrict extends true ? ReturnType<DocumentMetadataService['getStatus']> : string {
     let draftVersion: DocumentVersion | undefined;
     let publishedVersion: DocumentVersion | undefined;
 
@@ -309,7 +340,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   // needed. e.g. in the bulk locale action modal.
   async getMetadata(
     uid: UID.ContentType,
-    version: DocumentVersion,
+    version: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['getMetadata']>[1]
+      : DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
     const model = strapi.getModel(uid);
@@ -492,11 +525,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const versions = await strapi.db.query(uid).findMany(dbParams);
 
     // TODO: Remove use of available locales and use localizations instead
-    const availableLocalesResult = availableLocales
+    const availableLocalesResult: Core.IsStrict extends true
+      ? Awaited<ReturnType<DocumentMetadataService['getAvailableLocales']>>
+      : DocumentMetadata['availableLocales'] = availableLocales
       ? await this.getAvailableLocales(uid, version, versions)
       : [];
 
-    const availableStatusResult = availableStatus
+    const availableStatusResult: Core.IsStrict extends true
+      ? ReturnType<DocumentMetadataService['getAvailableStatus']> | null
+      : Partial<DocumentVersion> | undefined | null = availableStatus
       ? this.getAvailableStatus(version, versions)
       : null;
 
@@ -515,9 +552,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    */
   async formatDocumentWithMetadata(
     uid: UID.ContentType,
-    document: DocumentVersion,
+    document: Core.IsStrict extends true
+      ? Parameters<DocumentMetadataService['formatDocumentWithMetadata']>[1]
+      : DocumentVersion,
     opts: GetMetadataOptions = {}
-  ) {
+  ): Promise<
+    Core.IsStrict extends true
+      ? Awaited<ReturnType<DocumentMetadataService['formatDocumentWithMetadata']>>
+      : {
+          data: {
+            status: string | undefined;
+            id: string | number;
+            documentId: Modules.Documents.ID;
+            locale?: string;
+            localizations?: DocumentVersion[];
+            updatedAt?: string | null | Date;
+            publishedAt?: string | null | Date;
+          };
+          meta:
+            | {
+                availableLocales: never[];
+                availableStatus: Pick<any, string>[];
+                defaultLocale: string | null;
+              }
+            | {
+                availableLocales: AvailableLocaleDocument[];
+                availableStatus: Partial<DocumentVersion>[];
+                defaultLocale: string | null;
+              };
+        }
+  > {
     if (!document) {
       return {
         data: document,
@@ -544,7 +608,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         // Find the counterpart version (same documentId + locale, opposite publishedAt) from
         // the already-fetched versions array, avoiding an extra DB query.
         const counterpart = versions.find(
-          (v) =>
+          (v: Awaited<ReturnType<DocumentMetadataService['getMetadata']>>['versions'][number]) =>
             v.documentId === d.documentId &&
             v.locale === d.locale &&
             (d.publishedAt === null) !== (v.publishedAt === null)
@@ -560,11 +624,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       data: {
         ...document,
         // Add status to the document only if draft and publish is enabled
-        status: hasDraftAndPublish
-          ? this.getStatus(document, meta.availableStatus as any)
-          : undefined,
+        status: hasDraftAndPublish ? this.getStatus(document, meta.availableStatus) : undefined,
       },
       meta,
     };
   },
-});
+  // `formatDocumentWithMetadata` is not checked: its contract is generic over the document, and
+  // the implementation is not.
+})) satisfies (params: {
+  strapi: Core.Strapi;
+}) => Core.Implements<Omit<DocumentMetadataService, 'formatDocumentWithMetadata'>>;

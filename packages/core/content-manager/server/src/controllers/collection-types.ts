@@ -8,7 +8,8 @@ import {
   parseHasPublishedVersionQueryParam,
   hasPublishedVersionBooleanToPublicationFilterMode,
 } from '@strapi/utils';
-import type { Modules, UID } from '@strapi/types';
+import type { Context } from 'koa';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
@@ -18,6 +19,7 @@ import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
 import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
+import type { CollectionTypesController } from '../types/controllers';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -208,7 +210,7 @@ const removeStatusFromSort = (sort: unknown): unknown => {
  * @param opts.populate - Populate options of the returned document.
  *                        By default documentManager will populate all relations.
  */
-const createDocument = async (ctx: any, opts?: Options) => {
+const createDocument = async (ctx: Context, opts?: Options) => {
   const { userAbility, user } = ctx.state;
   const { model } = ctx.params;
   const { body } = ctx.request;
@@ -250,7 +252,7 @@ const createDocument = async (ctx: any, opts?: Options) => {
  * @param opts - Options
  * @param opts.populate - Populate options of the returned document
  */
-const updateDocument = async (ctx: any, opts?: Options) => {
+const updateDocument = async (ctx: Context, opts?: Options) => {
   const { userAbility, user } = ctx.state;
   const { id, model } = ctx.params;
   const { body } = ctx.request;
@@ -309,7 +311,7 @@ const updateDocument = async (ctx: any, opts?: Options) => {
 };
 
 export default {
-  async find(ctx: any) {
+  async find(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query } = ctx.request;
@@ -440,7 +442,7 @@ export default {
     };
   },
 
-  async findOne(ctx: any) {
+  async findOne(ctx) {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
@@ -499,7 +501,7 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
-  async create(ctx: any) {
+  async create(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
@@ -525,7 +527,7 @@ export default {
     }
   },
 
-  async update(ctx: any) {
+  async update(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
@@ -539,10 +541,10 @@ export default {
     }
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion!);
   },
 
-  async clone(ctx: any) {
+  async clone(ctx) {
     const { userAbility, user } = ctx.state;
     const { model, sourceId: id } = ctx.params;
     const { body } = ctx.request;
@@ -579,7 +581,11 @@ export default {
     // Clone with the request locale, which has no null or empty value, like the lookup above
     const clonedDocument = await documentManager.clone(
       document.documentId,
-      { ...sanitizedBody, locale },
+      // `async.pipe` types its result as its first stage's, here the request body as `unknown`.
+      {
+        ...(sanitizedBody as Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>),
+        locale,
+      },
       model
     );
 
@@ -589,14 +595,14 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,
     });
   },
 
-  async autoClone(ctx: any) {
+  async autoClone(ctx) {
     const { model } = ctx.params;
 
     // Check if the model has fields that prevent auto cloning
@@ -615,7 +621,7 @@ export default {
     await this.clone(ctx);
   },
 
-  async delete(ctx: any) {
+  async delete(ctx) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
 
@@ -655,7 +661,7 @@ export default {
    * Publish a document version.
    * Supports creating/saving a document and publishing it in one request.
    */
-  async publish(ctx: any) {
+  async publish(ctx) {
     const { userAbility } = ctx.state;
     // If id does not exist, the document has to be created
     const { id, model } = ctx.params;
@@ -750,7 +756,7 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
-  async bulkFindForValidation(ctx: any) {
+  async bulkFindForValidation(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { documentIds, locale, sort } = ctx.request.body;
@@ -773,12 +779,14 @@ export default {
       status: 'draft',
     });
 
-    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+    const results = await Promise.all(
+      documents.map((document) => permissionChecker.sanitizeOutput(document))
+    );
 
     ctx.body = { results };
   },
 
-  async bulkPublish(ctx: any) {
+  async bulkPublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
@@ -824,7 +832,7 @@ export default {
     ctx.body = { count };
   },
 
-  async bulkUnpublish(ctx: any) {
+  async bulkUnpublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
@@ -865,7 +873,7 @@ export default {
     ctx.body = { count };
   },
 
-  async unpublish(ctx: any) {
+  async unpublish(ctx) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
     const {
@@ -922,7 +930,7 @@ export default {
     });
   },
 
-  async discard(ctx: any) {
+  async discard(ctx) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
     const { body } = ctx.request;
@@ -962,7 +970,7 @@ export default {
     )(document);
   },
 
-  async bulkDelete(ctx: any) {
+  async bulkDelete(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query, body } = ctx.request;
@@ -1010,7 +1018,7 @@ export default {
     ctx.body = { count };
   },
 
-  async countDraftRelations(ctx: any) {
+  async countDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
@@ -1069,7 +1077,7 @@ export default {
     };
   },
 
-  async countManyEntriesDraftRelations(ctx: any) {
+  async countManyEntriesDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const ids = ctx.request.query.documentIds as string[];
     const locale = ctx.request.query.locale as string[];
@@ -1096,4 +1104,4 @@ export default {
       data: number,
     };
   },
-};
+} satisfies Core.Implements<CollectionTypesController>;

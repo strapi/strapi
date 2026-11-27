@@ -5,9 +5,23 @@ import type { Core } from '@strapi/types';
 
 const { PolicyError } = errors;
 
+/**
+ * A resolved policy as the GraphQL resolvers run it. `Core.PolicyContext` describes the Koa context
+ * of a REST route, while the GraphQL policy context has `parent`, `args`, `context`, `info`, `state`
+ * and `http` (`createGraphQLPolicyContext`), so the handler's context is typed loosely here. The
+ * handler is declared as a method, whose parameters TypeScript compares bivariantly, so the policies
+ * the registry resolves are assignable to it.
+ */
+type GraphQLResolvedPolicy = {
+  handler: {
+    handler(ctx: unknown, config: unknown, opts: { strapi: Core.Strapi }): unknown;
+  }['handler'];
+  config: unknown;
+};
+
 const createPoliciesMiddleware = (resolverConfig: any, { strapi }: { strapi: Core.Strapi }) => {
   const resolverPolicies = get(resolverConfig, 'policies', []);
-  const policies = strapi.get('policies').resolve(resolverPolicies, {});
+  const policies: GraphQLResolvedPolicy[] = strapi.get('policies').resolve(resolverPolicies, {});
 
   return async (
     resolve: GraphQLFieldResolver<any, any>,
@@ -23,7 +37,10 @@ const createPoliciesMiddleware = (resolverConfig: any, { strapi }: { strapi: Cor
     for (const { handler, config } of policies) {
       const result = await handler(policyContext, config, { strapi });
 
-      if (![true, undefined].includes(result)) {
+      // A policy passes when it returns `true` or nothing
+      const passingResults: unknown[] = [true, undefined];
+
+      if (passingResults.includes(result) === false) {
         throw new PolicyError();
       }
     }

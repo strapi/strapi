@@ -1,8 +1,11 @@
 import fs from 'fs';
 import { pick } from 'lodash';
 import { emitAudit, file as fileUtils } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { AUDITED_EVENTS, getProjectSettingsChanges } from '../audit-logs/project-settings';
+import type { ImageManipulationService, UploadService } from '../types/plugin-services';
+import { hasUploadProviderMethod } from '../utils/upload-provider';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
@@ -43,7 +46,7 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
       // Add formated data for the upload provider
       formatedFilesData[inputName] = await strapi
         .plugin('upload')
-        .service('upload')
+        .service<UploadService<Partial<UploadFile>>>('upload')
         .formatFileInfo({
           filename: file.originalFilename,
           type: file.mimetype,
@@ -53,7 +56,10 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
       // Add image dimensions
       Object.assign(
         formatedFilesData[inputName]!,
-        await strapi.plugin('upload').service('image-manipulation').getDimensions({ getStream })
+        await strapi
+          .plugin('upload')
+          .service<ImageManipulationService>('image-manipulation')
+          .getDimensions({ getStream })
       );
 
       // Add file path, and stream
@@ -81,8 +87,7 @@ const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
 
   const projectSettings = {
     ...defaultProjectSettings,
-    // @ts-expect-error spread can be applied to return value
-    ...(await store.get({ key: 'project-settings' })),
+    ...((await store.get({ key: 'project-settings' })) as object | null),
   };
 
   // Filter file input fields
@@ -109,7 +114,7 @@ type NewLogoFile = Partial<UploadFile> & Pick<UploadFile, 'stream'>;
 const uploadFile = async (file: NewLogoFile) => {
   const provider = strapi.plugin('upload').provider;
 
-  if (typeof provider.uploadStream === 'function') {
+  if (hasUploadProviderMethod(provider, 'uploadStream') === true) {
     return provider.uploadStream(file);
   }
 
@@ -118,6 +123,10 @@ const uploadFile = async (file: NewLogoFile) => {
   const bufferedFile: Partial<UploadFile> = file;
   bufferedFile.buffer = await fileUtils.streamToBuffer(file.stream);
   delete bufferedFile.stream;
+
+  if (hasUploadProviderMethod(provider, 'upload') === false) {
+    throw new TypeError('The upload provider implements neither uploadStream nor upload');
+  }
 
   return provider.upload(bufferedFile);
 };
@@ -131,7 +140,19 @@ const uploadFiles = async (files: LogoFiles = {}) => {
   );
 };
 
-const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
+/**
+ * Deletes the stored logos that the update replaces or removes. `updateProjectSettings` passes the
+ * stored settings, `null` when the store has no row, and the settings it is about to store.
+ */
+const deleteOldFiles = async ({
+  previousSettings,
+  newSettings,
+}: Core.IsStrict extends true
+  ? {
+      previousSettings: Strapi.Registries.Stores['core_admin_project-settings'] | null;
+      newSettings: Parameters<typeof updateProjectSettings>[0];
+    }
+  : any) => {
   return Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
       // Skip if the store doesn't contain project settings
@@ -163,7 +184,13 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
       // Remove the previous file. A failed delete only leaves an orphan file in the storage:
       // log it rather than failing the settings update or leaving an unhandled rejection.
       try {
-        await strapi.plugin('upload').provider.delete(previousSettings[inputName]);
+        const provider = strapi.plugin('upload').provider;
+
+        if (hasUploadProviderMethod(provider, 'delete') === false) {
+          throw new TypeError('The upload provider does not implement delete');
+        }
+
+        await provider.delete(previousSettings[inputName]);
       } catch (error) {
         strapi.log.warn(`Could not delete the previous ${inputName} file`, { error });
       }

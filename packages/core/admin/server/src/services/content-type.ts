@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Modules, Struct, UID } from '@strapi/types';
+import type { Core, Modules, Schema, Struct, UID } from '@strapi/types';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import type { Action } from '../domain/action';
@@ -13,17 +13,23 @@ interface FieldOptions {
   requiredOnly?: boolean; // only returns required nestedFields
   existingFields?: string[]; // fields that are already selected, meaning that some sub-fields may be required
   restrictedSubjects?: string[]; // subjectsId to ignore
-  components?: {
-    // components where components attributes can be found
-    [key: string]: any;
-  };
+  // With strict types, every caller passes `strapi.components` (or the recursion its own map).
+  components?: Core.IsStrict extends true
+    ? Schema.Components
+    : {
+        // components where components attributes can be found
+        [key: string]: any;
+      };
 }
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
  */
 const getNestedFields = (
-  model: Struct.ContentTypeSchema,
+  // With strict types, the recursion passes the component schemas of component attributes.
+  model: Core.IsStrict extends true
+    ? Struct.ContentTypeSchema | Struct.ComponentSchema
+    : Struct.ContentTypeSchema,
   {
     prefix = '',
     nestingLevel = 15,
@@ -81,7 +87,10 @@ const getNestedFields = (
  * Creates an array of paths to the fields and nested fields, with path nodes
  */
 const getNestedFieldsWithIntermediate = (
-  model: Struct.ContentTypeSchema,
+  // With strict types, the recursion passes the component schemas of component attributes.
+  model: Core.IsStrict extends true
+    ? Struct.ContentTypeSchema | Struct.ComponentSchema
+    : Struct.ContentTypeSchema,
   { prefix = '', nestingLevel = 15, components = {} }: FieldOptions
 ): string[] => {
   if (nestingLevel === 0) {
@@ -123,13 +132,23 @@ const isContentTypeUID = (subject: string): subject is UID.ContentType => {
 };
 
 /**
+ * What {@link getPermissionsWithNestedFields} reads from an action. With strict types, both a stored
+ * action (`actionProvider.values()` and `get`) and an {@link Action} are accepted.
+ */
+type NestedFieldsAction = {
+  actionId: string;
+  subjects?: readonly (string | undefined)[] | undefined;
+  options: { applyToProperties: readonly (string | undefined)[] | null };
+};
+
+/**
  * Creates an array of permissions with the "properties.fields" attribute filled.
  * An action without subjects and an undefined subject create no permission. When the action
  * applies to fields, a subject that is not a loaded content type creates no permission either,
  * since its fields cannot be resolved.
  */
 const getPermissionsWithNestedFields = (
-  actions: readonly Action[],
+  actions: readonly (Core.IsStrict extends true ? NestedFieldsAction : Action)[],
   { nestingLevel, restrictedSubjects = [] }: FieldOptions = {}
 ): Modules.Permissions.PermissionRule[] => {
   return actions.reduce<Modules.Permissions.PermissionRule[]>((permissions, action) => {

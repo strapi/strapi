@@ -1,4 +1,5 @@
 import type * as Schema from '../../../../schema';
+import type { IsStrict } from '../../../../core/strictness';
 
 import type * as UID from '../../../../uid';
 import type {
@@ -12,7 +13,7 @@ import type {
 } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
-import type { OmitRelationsWithoutTarget, RelationInputValue } from './relations';
+import type { MediaInputValue, OmitRelationsWithoutTarget, RelationInputValue } from './relations';
 
 export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
 export type FilterableKind = Exclude<Schema.Attribute.Kind, NonFilterableKind>;
@@ -91,15 +92,28 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?:
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: InputValue<
+      TSchemaUID,
       | GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
-      | NullableInput<Schema.AttributeByName<TSchemaUID, TKey>>;
+      | NullableInput<Schema.AttributeByName<TSchemaUID, TKey>>
+    >;
   } & {
-    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
-      Schema.AttributeByName<TSchemaUID, TKey>
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: InputValue<
+      TSchemaUID,
+      GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
     >;
   }
 >;
+
+/**
+ * An attribute input value. With strict types, `unknown` for a content type whose schema is not
+ * registered. Component inputs keep their values.
+ */
+type InputValue<TSchemaUID extends UID.Schema, TValue> = IsStrict extends false
+  ? TValue
+  : TSchemaUID extends UID.ContentType
+    ? If<Constants.IsSchemaRegistered<TSchemaUID>, TValue, unknown>
+    : TValue;
 
 /**
  * Attribute.GetValue override with extended values
@@ -110,6 +124,22 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
   IsNotNever<TAttribute>,
   MatchFirst<
     [
+      // Media, with strict types: the relation input formats. Without them, the fallback below keeps
+      // develop's loose value. The branch resolves to no entry without strict types, so the tuple
+      // stays develop's.
+      ...(IsStrict extends false
+        ? []
+        : [
+            [
+              Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+              TAttribute extends Schema.Attribute.Media<
+                Schema.Attribute.MediaKind | undefined,
+                infer TMultiple
+              >
+                ? MediaInputValue<TMultiple>
+                : never,
+            ],
+          ]),
       // Relation
       [
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,

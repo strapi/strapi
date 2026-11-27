@@ -134,18 +134,9 @@ export const getTokenChanges = (previous: TokenSnapshot, next: TokenSnapshot): T
 const toIso = (value: string | number | Date | null | undefined): string | null =>
   value == null ? null : new Date(value).toISOString();
 
-/**
- * The part of the audit-logs lifecycle service used here.
- * The full service type lives in the Admin EE package.
- */
-interface AuditLogsLifecycle {
-  registerEvent<TDetails>(
-    name: string,
-    transform: Modules.AuditLogs.EventTransformer<TDetails>
-  ): void;
-}
-
-export const registerTokenAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
+export const registerTokenAuditEvents = (
+  auditLogsLifecycle: Pick<Modules.AuditLogs.AuditLogsLifecycleService, 'registerEvent'>
+) => {
   const tokenResource = (event: TokenEvent): TokenResource => ({
     type: event.kind,
     id: event.tokenId,

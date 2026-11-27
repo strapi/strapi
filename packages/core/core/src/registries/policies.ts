@@ -12,6 +12,11 @@ interface PolicyInfo {
 
 type PolicyConfig = string | PolicyInfo;
 
+/** What `resolve` returns for a policy: with strict types, its handler function, as at runtime. */
+type ResolvedPolicy = Core.IsStrict extends true
+  ? ReturnType<Core.PoliciesRegistry['resolve']>[number]['handler']
+  : Core.Policy;
+
 interface NamespaceInfo {
   pluginName?: string;
   apiName?: string;
@@ -69,15 +74,18 @@ const policiesRegistry = () => {
     return name;
   };
 
-  function resolveHandler(policyConfig: PolicyConfig, namespaceInfo?: NamespaceInfo): Core.Policy;
+  function resolveHandler(
+    policyConfig: PolicyConfig,
+    namespaceInfo?: NamespaceInfo
+  ): ResolvedPolicy;
   function resolveHandler(
     policyConfig: PolicyConfig[],
     namespaceInfo?: NamespaceInfo
-  ): Core.Policy[];
+  ): ResolvedPolicy[];
   function resolveHandler(
     policyConfig: PolicyConfig | PolicyConfig[],
     namespaceInfo?: NamespaceInfo
-  ): Core.Policy | Core.Policy[] {
+  ): ResolvedPolicy | ResolvedPolicy[] {
     if (Array.isArray(policyConfig)) {
       return policyConfig.map((config) => {
         return resolveHandler(config, namespaceInfo);
@@ -137,7 +145,7 @@ const policiesRegistry = () => {
     /**
      * Returns a map with all the policies in a namespace
      */
-    getAll(namespace: string) {
+    getAll(namespace?: string) {
       return pickBy(Object.fromEntries(policies), (_, uid) => hasNamespace(uid, namespace));
     },
 

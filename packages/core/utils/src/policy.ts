@@ -24,7 +24,11 @@ const createPolicy = (options: Options) => {
   };
 };
 
-const createPolicyContext = (type: string, ctx: object) => {
+/**
+ * Builds a policy context: the own properties of `ctx`, with `type` and `is(type)`. The result keeps
+ * the type of `ctx`, so a Koa context builds a `Core.PolicyContext`.
+ */
+const createPolicyContext = <TContext extends object>(type: string, ctx: TContext) => {
   return Object.assign(
     {
       is: (otherType: unknown) => type === otherType,

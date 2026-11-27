@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 
@@ -7,9 +7,10 @@ import {
   validateCheckUIDAvailabilityInput,
   validateUIDField,
 } from './validation';
+import type { UIDController } from '../types/controllers';
 
 export default {
-  async generateUID(ctx: any) {
+  async generateUID(ctx) {
     const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
 
     const { query = {} } = ctx.request;
@@ -20,11 +21,16 @@ export default {
     const uidService = getService('uid');
 
     ctx.body = {
-      data: await uidService.generateUIDField({ contentTypeUID, field, data, locale }),
+      data: await uidService.generateUIDField({
+        contentTypeUID: contentTypeUID as UID.ContentType,
+        field,
+        data,
+        locale,
+      }),
     };
   },
 
-  async checkUIDAvailability(ctx: any) {
+  async checkUIDAvailability(ctx) {
     const { contentTypeUID, field, value } = await validateCheckUIDAvailabilityInput(
       ctx.request.body
     );
@@ -37,7 +43,7 @@ export default {
     const uidService = getService('uid');
 
     const isAvailable = await uidService.checkUIDAvailability({
-      contentTypeUID,
+      contentTypeUID: contentTypeUID as UID.ContentType,
       field,
       value,
       locale,
@@ -46,8 +52,13 @@ export default {
     ctx.body = {
       isAvailable,
       suggestion: !isAvailable
-        ? await uidService.findUniqueUID({ contentTypeUID, field, value, locale })
+        ? await uidService.findUniqueUID({
+            contentTypeUID: contentTypeUID as UID.ContentType,
+            field,
+            value,
+            locale,
+          })
         : null,
     };
   },
-};
+} satisfies Core.Implements<UIDController>;

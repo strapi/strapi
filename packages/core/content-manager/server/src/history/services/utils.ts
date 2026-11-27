@@ -150,6 +150,12 @@ const resolveSource = (requestContext: RequestContext): HistoryVersionSource | n
   return null;
 };
 
+/**
+ * A relation entry stored in a history version: `{ documentId, locale, publishedAt }`,
+ * with a `null` locale for a non-localized target (see `getDeepPopulate`).
+ */
+type VersionRelationEntry = Modules.Documents.AnyDocument & { locale?: string | null };
+
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   const historyAuthors = getService(strapi, 'history-authors');
 
@@ -203,7 +209,9 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * The relation if it exists or null
    */
   const getRelationRestoreValue = async (
-    versionRelationData: Modules.Documents.AnyDocument | Modules.Documents.AnyDocument[],
+    versionRelationData: Core.IsStrict extends true
+      ? VersionRelationEntry | VersionRelationEntry[]
+      : Modules.Documents.AnyDocument | Modules.Documents.AnyDocument[],
     attribute: Schema.Attribute.RelationWithTarget
   ) => {
     if (Array.isArray(versionRelationData)) {
@@ -351,7 +359,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
     return computeRetentionDays(
       typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
-      strapi.config.get('admin.history.retentionDays')
+      strapi.config.get<number | null | undefined>('admin.history.retentionDays')
     );
   };
 
@@ -360,7 +368,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    document: Modules.Documents.AnyDocument | null
+    document: Modules.Documents.AnyDocument
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
     const meta = await documentMetadataService.getMetadata(contentTypeUid, document, {

@@ -55,7 +55,12 @@ function createController({
     },
 
     async sanitizeInput(data, ctx) {
-      return strapi.contentAPI.sanitize.input(data, contentType, getContentAPIOptions(ctx));
+      // The sanitizer removes keys the requester cannot write; the data keeps its type.
+      return strapi.contentAPI.sanitize.input(
+        data,
+        contentType,
+        getContentAPIOptions(ctx)
+      ) as Promise<typeof data>;
     },
 
     async sanitizeQuery(ctx) {

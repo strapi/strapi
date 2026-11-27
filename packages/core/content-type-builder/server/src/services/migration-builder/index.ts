@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 /**
  * The CTB-level attribute definition of the *new* side of a rename hop (the
@@ -323,9 +323,9 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   const schemaModelOf = (
     uid: string
   ): { attributes?: Record<string, RenameAttributeDefinition> } | undefined => {
-    const contentTypes = strapi.contentTypes as Record<string, unknown> | undefined;
+    const contentTypes: Partial<Record<UID.ContentType, unknown>> | undefined = strapi.contentTypes;
     const components = strapi.components as Record<string, unknown> | undefined;
-    return (contentTypes?.[uid] ?? components?.[uid]) as
+    return (contentTypes?.[uid as UID.ContentType] ?? components?.[uid]) as
       { attributes?: Record<string, RenameAttributeDefinition> } | undefined;
   };
 
@@ -343,8 +343,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     try {
-      const customField = strapi.get('custom-fields').get(attribute.customField as string) as
-        { type?: string } | undefined;
+      const customFields: Core.CustomFieldsRegistry = strapi.get('custom-fields');
+      const customField = customFields.get(attribute.customField as string);
       return customField?.type ?? attribute.type;
     } catch {
       // Unknown custom field (e.g. its plugin was removed).

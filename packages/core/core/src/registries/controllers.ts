@@ -39,7 +39,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
     /**
      * Returns a map with all the controller in a namespace
      */
-    getAll(namespace: string) {
+    getAll(namespace?: string) {
       const filteredControllers = pickBy(controllers, (_, uid) => hasNamespace(uid, namespace));
 
       const map = {};

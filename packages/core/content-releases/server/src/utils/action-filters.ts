@@ -1,14 +1,16 @@
-import type { Modules } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 import type { Release } from '../../../shared/contracts/releases';
 import { RELEASED_OUTCOMES } from '../../../shared/constants';
 import type { ReleaseActionFilter } from '../../../shared/constants';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
 
-// A filter on release actions, in the filter syntax the query engine's `where` takes
-export type ReleaseActionWhere = Modules.Documents.Params.Filters.Any<
-  typeof RELEASE_ACTION_MODEL_UID
->;
+// A filter on release actions, in the filter syntax the query engine's `where` takes. With strict
+// types, the Document Service filters of the declared schema take neither a relation id nor a
+// `null` locale, so it is the query engine's object `where`. Without, as on develop.
+export type ReleaseActionWhere = Core.IsStrict extends true
+  ? Record<string, unknown>
+  : Modules.Documents.Params.Filters.Any<typeof RELEASE_ACTION_MODEL_UID>;
 
 // An action of a planned release. The relation filter is a left join: the id check keeps out
 // actions whose release no longer exists.

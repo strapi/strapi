@@ -1,3 +1,4 @@
+import type { Ability } from '@casl/ability';
 import type { Core, Data, Modules, Schema } from '@strapi/types';
 import { emitAudit, errors, traverseEntity } from '@strapi/utils';
 import { omit } from 'lodash';
@@ -36,6 +37,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return {
+    /** @internal */
     async createVersion({ author, ...historyVersionData }: HistoryVersions.CreateHistoryVersion) {
       await query.create({
         data: {
@@ -134,8 +136,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               }
 
               const permissionChecker = getContentManagerService('permission-checker').create({
-                userAbility: params.state.userAbility,
-                model: options.attribute.target,
+                // The shared request contract types the ability as `{}`; the controller passes
+                // `ctx.state.userAbility`, a CASL `Ability`.
+                userAbility: params.state.userAbility as Ability,
+                // Morph relations are excluded above, so the relation has a target.
+                model: (options.attribute as Schema.Attribute.RelationWithTarget).target,
               });
 
               const response = await serviceUtils.buildRelationReponse(
@@ -154,7 +159,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             if (options.attribute.type === 'media') {
               const permissionChecker = getContentManagerService('permission-checker').create({
-                userAbility: params.state.userAbility,
+                userAbility: params.state.userAbility as Ability,
                 model: 'plugin::upload.file',
               });
 
@@ -206,6 +211,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       };
     },
 
+    /** @internal */
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
 

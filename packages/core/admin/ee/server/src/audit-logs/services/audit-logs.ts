@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 
 import type { Core } from '@strapi/types';
+import type { queryParams } from '@strapi/utils';
 
 import {
   AUDIT_LOG_EXPORT_EVENT,
@@ -27,7 +28,8 @@ const EXPORT_BATCH_SIZE = 5000;
 
 interface Event {
   action: string;
-  date: Date;
+  // ISO 8601, as the lifecycles service records it
+  date: string;
   // Null for actions no person performed, such as a scheduled job
   userId: string | number | null;
   payload: Record<string, unknown>;
@@ -130,7 +132,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       return this;
     },
 
-    async findMany(query: unknown) {
+    async findMany(query: queryParams.Params) {
       // NOTE: We get the IDs first because sorting full rows runs MySQL/MariaDB out of sort memory
       // See: https://github.com/strapi/strapi/issues/27399
       const { results: logRows, pagination } = await strapi.db.query('admin::audit-log').findPage({

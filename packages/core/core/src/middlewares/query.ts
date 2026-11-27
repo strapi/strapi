@@ -2,7 +2,7 @@ import qs from 'qs';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';
 
-type Config = Parameters<typeof qs.parse>[1];
+export type Config = Parameters<typeof qs.parse>[1];
 
 const defaults: Config = {
   strictNullHandling: true,

@@ -10,7 +10,11 @@ interface API {
   destroy: () => void | Promise<void>;
   register: () => void | Promise<void>;
   config: Record<string, unknown>;
-  routes: Record<string, Core.Router>;
+  /**
+   * The routers of the API's router files, as declared. An API without a `routes` folder holds an
+   * empty array until the routes are registered, read as an empty map.
+   */
+  routes: Core.ModuleRoutes;
   controllers: Record<string, Core.Controller>;
   services: Record<string, Core.Service>;
   policies: Record<string, Core.Policy>;
@@ -29,7 +33,10 @@ const DEFAULT_CONTENT_TYPE = {
 };
 
 // to handle names with numbers in it we first check if it is already in kebabCase
-const normalizeName = (name: string) => (strings.isKebabCase(name) ? name : _.kebabCase(name));
+// The type generators of @strapi/typescript-utils mirror this rule (generators/common/sources.ts):
+// both run the cases of tests/fixtures/kebab-names.json
+export const normalizeName = (name: string) =>
+  strings.isKebabCase(name) ? name : _.kebabCase(name);
 
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');

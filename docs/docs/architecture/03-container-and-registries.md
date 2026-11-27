@@ -33,12 +33,12 @@ Controlled replacement happens one level down, in the registries. See [Registry 
 
 ### Container keys
 
-| Origin                              | Keys                                                                                                                                                                                                                                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Strapi.registerInternalServices()` | `config`, `query-params`, `content-api`, `content-api-schema-registry`, `auth`, `server`, `fs`, `eventHub`, `startupLogger`, `logger`, `fetch`, `features`, `requestContext`, `customFields`, `entityValidator`, `entityService`, `documents`, `db`, `reload`, `content-source-maps` |
-| `registries` provider               | `content-types`, `components`, `services`, `policies`, `middlewares`, `hooks`, `controllers`, `modules`, `plugins`, `custom-fields`, `apis`, `models`, `sanitizers`, `validators`                                                                                                    |
-| Other internal providers            | `admin`, `ai`, `content-structure`, `coreStore`, `sessionManager`, `webhookStore`, `webhookRunner`, `telemetry`, `cron`, `ai.mcp`                                                                                                                                                    |
-| `@strapi/admin` server `register`   | `ai.admin`                                                                                                                                                                                                                                                                           |
+| Origin                              | Keys                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Strapi.registerInternalServices()` | `config`, `query-params`, `content-api`, `content-api-schema-registry`, `auth`, `server`, `fs`, `eventHub`, `startupLogger`, `logger`, `fetch`, `features`, `requestContext`, `customFields`, `entityValidator`, `entityService`, `documents`, `localization`, `db`, `reload`, `content-source-maps` |
+| `registries` provider               | `content-types`, `components`, `services`, `policies`, `middlewares`, `hooks`, `controllers`, `modules`, `plugins`, `custom-fields`, `apis`, `models`, `sanitizers`, `validators`                                                                                                                    |
+| Other internal providers            | `admin`, `ai`, `content-structure`, `coreStore`, `sessionManager`, `webhookStore`, `webhookRunner`, `telemetry`, `cron`, `ai.mcp`                                                                                                                                                                    |
+| `@strapi/admin` server `register`   | `ai.admin`, and with EE audit logs enabled `audit-logs` and `audit-logs-lifecycle`                                                                                                                                                                                                                   |
 
 The key style is mixed: camelCase (`eventHub`), kebab-case (`content-types`) and dotted (`ai.mcp`). The container treats a dot as a normal character.
 
@@ -53,6 +53,12 @@ Many `strapi.*` getters read a container key, and some names differ:
 | `strapi.ai.mcp`       | `ai.mcp`                                                       |
 
 Some getters read a registry instead: `strapi.services`, `strapi.controllers`, `strapi.contentTypes`, `strapi.components`, `strapi.policies`, `strapi.middlewares`, `strapi.plugins`, `strapi.hooks` and `strapi.apis` call `getAll()` on the matching registry.
+
+### Types
+
+`Strapi.Registries.ContainerEntries` maps a container key to the value `get` returns. `@strapi/types` registers the keys above in `core/container.ts`, except `audit-logs`, which `@strapi/admin` registers. A key a getter reads has the getter's type. The registries are marked `@internal`.
+
+With strict types, `strapi.get(name)` resolves a registered key to its value and any other key to `unknown`, and `strapi.add(name, resolver)` checks the resolver of a registered key: a factory that returns the value, or the value itself when it is not a function. For `coreStore`, `hooks` and `db`, `add` checks the implementation's contract, and `get` returns the strict view. Without strict types, `get` returns `any` and `add` takes any resolver. Read [Container contracts](../contributing/05-typescript.md#container-contracts).
 
 ## Registries
 
@@ -90,7 +96,7 @@ For `services` and `controllers`, `set` after `extend` drops the extension, beca
 :::
 
 :::caution
-In the `sanitizers` and `validators` registries, `add(path, fn)` pushes to the list at `path`. If no list exists at `path`, `get` returns a new empty array that is not stored, and the entry is lost. The loaders create the `content-api` lists before any plugin code runs.
+In the `sanitizers` and `validators` registries, `add(path, fn)` pushes to the list at `path`. If no list exists at `path`, `get` returns a new empty array that is not stored, and the entry is lost. The loaders create the `content-api` lists before any plugin code runs: `set('content-api', { input: [], output: [], query: [] })` stores a map of lists at a lodash path, which the strict `set` contract accepts.
 :::
 
 ## Namespaces and UIDs

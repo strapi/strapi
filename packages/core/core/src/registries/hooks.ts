@@ -42,7 +42,7 @@ const hooksRegistry = () => {
     /**
      * Returns a map with all the hooks in a namespace
      */
-    getAll(namespace: string) {
+    getAll(namespace?: string) {
       return pickBy(hooks, (_, uid) => hasNamespace(uid, namespace));
     },
 

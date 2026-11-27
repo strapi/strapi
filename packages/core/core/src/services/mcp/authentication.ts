@@ -40,9 +40,12 @@ export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
       return { authenticated: false, reason: 'missing_token' };
     }
 
-    const authResult = (await strapi
-      .service('admin::api-token-admin')
-      .authenticateAdminToken(token)) as McpAdminTokenAuthResult;
+    // `@strapi/core` does not see the admin contracts: with strict types, this read is `unknown`
+    const authResult = (await (
+      strapi.service('admin::api-token-admin') as {
+        authenticateAdminToken(token: string): Promise<unknown>;
+      }
+    ).authenticateAdminToken(token)) as McpAdminTokenAuthResult;
 
     if (authResult.authenticated === false) {
       return {

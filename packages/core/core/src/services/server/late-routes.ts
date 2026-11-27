@@ -4,7 +4,8 @@ import type { Core } from '@strapi/types';
 import { warnLateRegistration } from '../../utils/late-registration';
 import { areRoutesRegistered } from './routes-registration';
 
-type ModuleRoutes = Core.Plugin['routes'];
+/** The routes of an API or a plugin, which differ with strict types (`Core.ModuleRoutes`). */
+type ModuleRoutes = Core.Plugin['routes'] | Core.ModuleRoutes;
 
 /** The routes of a module, with the key of the router that holds them (none for an array of routes). */
 const routerEntriesOf = (routes: ModuleRoutes): Array<[string | undefined, Core.RouteInput[]]> => {
