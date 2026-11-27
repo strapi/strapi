@@ -33,11 +33,18 @@ const FOLDER_MODEL_UID = 'plugin::upload.folder';
 const FILE_MODEL_UID = 'plugin::upload.file';
 const API_UPLOAD_FOLDER_BASE_NAME = 'API Uploads';
 
+/**
+ * Future flag gating the asset usage features of the Media Library.
+ * While it is off, the files endpoint behaves as before.
+ */
+const ASSET_USAGE_FUTURE_FLAG = 'unstableMediaLibraryAssetUsage';
+
 export {
   ACTIONS,
   FOLDER_MODEL_UID,
   FILE_MODEL_UID,
   API_UPLOAD_FOLDER_BASE_NAME,
+  ASSET_USAGE_FUTURE_FLAG,
   ALLOWED_SORT_STRINGS,
   ALLOWED_WEBHOOK_EVENTS,
   // Re-exported from `shared/` so the admin panel can gate on the same values.

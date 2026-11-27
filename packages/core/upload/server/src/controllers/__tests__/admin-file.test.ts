@@ -329,3 +329,100 @@ describe('Admin File Controller - createAIMetadataJob', () => {
     expect(mockAiMetadataJobsService.createJob).not.toHaveBeenCalled();
   });
 });
+
+describe('Admin File Controller - find', () => {
+  let ctx: Partial<Context>;
+  let pm: Record<string, jest.Mock | boolean>;
+  let isFutureFlagEnabled: jest.Mock;
+  let mockUploadService: { findPage: jest.Mock };
+  let mockFileService: { signFileUrls: jest.Mock; getUsedFileIdsSubquery: jest.Mock };
+
+  const usedFileIdsSubquery = { usedFileIds: true };
+  const folderScope = { folder: { id: { $null: true } } };
+
+  const call = () => adminFileController.find(ctx as Context);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockUploadService = {
+      findPage: jest.fn().mockResolvedValue({ results: [], pagination: {} }),
+    };
+    mockFileService = {
+      signFileUrls: jest.fn((file) => file),
+      getUsedFileIdsSubquery: jest.fn().mockReturnValue(usedFileIdsSubquery),
+    };
+
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'upload') return mockUploadService as any;
+      if (serviceName === 'file') return mockFileService as any;
+      return {} as any;
+    });
+
+    pm = {
+      isAllowed: true,
+      validateQuery: jest.fn(),
+      sanitizeQuery: jest.fn((query) => query),
+      addPermissionsQueryTo: jest.fn((query) => query),
+      sanitizeOutput: jest.fn((output) => output),
+    };
+
+    isFutureFlagEnabled = jest.fn().mockReturnValue(true);
+
+    global.strapi = {
+      admin: {
+        services: {
+          permission: { createPermissionsManager: jest.fn().mockReturnValue(pm) },
+        },
+      },
+      features: { future: { isEnabled: isFutureFlagEnabled } },
+    } as any;
+
+    ctx = { state: { userAbility: {} }, query: {} } as any;
+  });
+
+  it('leaves isUsed in the query for validation when the future flag is off', async () => {
+    isFutureFlagEnabled.mockReturnValue(false);
+    ctx.query = { filters: { $and: [folderScope, { isUsed: { $eq: 'true' } }] } } as any;
+
+    await call();
+
+    expect(isFutureFlagEnabled).toHaveBeenCalledWith('unstableMediaLibraryAssetUsage');
+    expect(pm.validateQuery).toHaveBeenCalledWith(ctx.query);
+    expect(mockFileService.getUsedFileIdsSubquery).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['$eq', '$in'],
+    ['$ne', '$notIn'],
+  ])(
+    'validates the query without isUsed and filters with %s through %s',
+    async (operator, dbOperator) => {
+      ctx.query = {
+        filters: { $and: [folderScope, { isUsed: { [operator]: 'true' } }] },
+      } as any;
+
+      await call();
+
+      expect(pm.validateQuery).toHaveBeenCalledWith({ filters: { $and: [folderScope] } });
+      expect(mockUploadService.findPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: {
+            $and: [{ $and: [folderScope] }, { id: { [dbOperator]: usedFileIdsSubquery } }],
+          },
+        })
+      );
+    }
+  );
+
+  it('does not add a usage filter when the query has no isUsed', async () => {
+    ctx.query = { filters: { $and: [folderScope] } } as any;
+
+    await call();
+
+    expect(mockFileService.getUsedFileIdsSubquery).not.toHaveBeenCalled();
+    expect(mockUploadService.findPage).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: { $and: [folderScope] } })
+    );
+  });
+});

@@ -321,5 +321,33 @@ const signFileUrls = async (file: File) => {
   return signedFile;
 };
 
+/**
+ * Ids of the files referenced by at least one entry or component, whatever its status or
+ * locale. It is a knex subquery, to be used as an `$in` / `$notIn` filter value, so the usage
+ * is resolved by the database without loading the relations.
+ *
+ * A component row left behind by a deleted entry still counts as a usage, because its
+ * references stay in the join table.
+ */
+const getUsedFileIdsSubquery = () => {
+  const { related } = strapi.db.metadata.get(FILE_MODEL_UID).attributes;
+
+  if (!('joinTable' in related) || !related.joinTable) {
+    throw new ApplicationError('The related attribute of the file model has no join table');
+  }
+
+  const { joinTable } = related;
+  const fileIdColumn = joinTable.joinColumn.name;
+
+  // `NOT IN` matches nothing when the subquery returns a NULL, so they are excluded.
+  return strapi.db.getConnection(joinTable.name).select(fileIdColumn).whereNotNull(fileIdColumn);
+};
+
 export type { UrlFetchedFile, FetchUrlResult, UrlFetchProgress };
-export default { getFolderPath, deleteByIds, signFileUrls, fetchUrlToInputFile };
+export default {
+  getFolderPath,
+  deleteByIds,
+  signFileUrls,
+  fetchUrlToInputFile,
+  getUsedFileIdsSubquery,
+};

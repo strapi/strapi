@@ -4,9 +4,21 @@ import { async } from '@strapi/utils';
 import type { Context } from 'koa';
 
 import { getService } from '../utils';
-import { ACTIONS, FILE_MODEL_UID } from '../constants';
+import { ACTIONS, ASSET_USAGE_FUTURE_FLAG, FILE_MODEL_UID } from '../constants';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
+import { extractIsUsedFilter } from './utils/is-used-filter';
 import { validateGenerateAIMetadataBody } from './validation/admin/ai-metadata';
+
+const addUsageFilter = <TQuery extends { filters?: object }>(query: TQuery, isUsed: boolean) => {
+  const usageFilter = {
+    id: { [isUsed ? '$in' : '$notIn']: getService('file').getUsedFileIdsSubquery() },
+  };
+
+  return {
+    ...query,
+    filters: query.filters ? { $and: [query.filters, usageFilter] } : usageFilter,
+  };
+};
 
 export default {
   async find(ctx: Context) {
@@ -26,8 +38,12 @@ export default {
       return ctx.forbidden();
     }
 
+    const { query: userQuery, isUsed } = strapi.features.future.isEnabled(ASSET_USAGE_FUTURE_FLAG)
+      ? extractIsUsedFilter(ctx.query)
+      : { query: ctx.query, isUsed: undefined };
+
     // validate the incoming user query params
-    await pm.validateQuery(ctx.query);
+    await pm.validateQuery(userQuery);
 
     const query = await async.pipe(
       // Start by sanitizing the incoming query
@@ -35,8 +51,10 @@ export default {
       // Add the default query which should not be validated or sanitized
       (q) => merge({}, defaultQuery, q),
       // Add the dynamic filters based on permissions' conditions
-      (q) => pm.addPermissionsQueryTo(q)
-    )(ctx.query);
+      (q) => pm.addPermissionsQueryTo(q),
+      // Added after validation and sanitization because the value is a knex subquery
+      (q) => (isUsed === undefined ? q : addUsageFilter(q, isUsed))
+    )(userQuery);
 
     const { results: files, pagination } = await getService('upload').findPage(query);
 

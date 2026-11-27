@@ -55,6 +55,12 @@ The `image-manipulation` service uses `sharp`. It checks that a file is a valid 
 
 A provider can return `true` from `isPrivate()` and implement `getSignedUrl(file)`. In that case, `signFileUrlsOnDocumentService` adds a document service middleware. The middleware signs the file URLs in the results and removes signatures from the data that callers write.
 
+### Asset usage
+
+An asset is used when at least one row of the join table of the file `related` relation (`files_related_mph` by default) references it. This covers media fields of content types, and media fields inside components and dynamic zones, because each component has its own row. Drafts, published versions and every locale count, and the permissions of the viewer are ignored. `getUsedFileIdsSubquery` in `server/src/services/file.ts` holds this definition. With the `unstableMediaLibraryAssetUsage` [future flag](../../../architecture/10-future-flags.md), the admin files list accepts an `isUsed` filter that uses it.
+
+A component row that outlives its entry keeps its media references, so its assets still count as used. The Document Service cleans them up when it deletes an entry, but `strapi.db.query(uid).deleteMany` does not ([#25852](https://github.com/strapi/strapi/pull/25852)), and existing databases can already hold such rows. Whether usage should ignore them must be decided before the future flag is removed.
+
 ### Admin part
 
 The admin entry adds the Media Library menu link and its settings page, registers the `media` field input, and registers the `media-library` dialog component. `bootstrap` on the server registers the permission actions, for example `plugin::upload.assets.create`, and the webhook events. The redesigned Media Library is the default. The `useLegacyMediaLibrary` key in `config/features` selects the legacy one from `admin/src/legacy`.
