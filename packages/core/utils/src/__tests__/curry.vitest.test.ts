@@ -62,7 +62,9 @@ describe('curry', () => {
 
     expect(curried(1, 2)).toBe(3);
     expect(curried(1)(2)).toBe(3);
+    // @ts-expect-error -- `Curry` types the arity only, not the arguments passed beyond it
     expect(curried(1, 2, { scale: 10 })).toBe(30);
+    // @ts-expect-error -- `Curry` types the arity only, not the arguments passed beyond it
     expect(curried(1)(2, { scale: 10 })).toBe(30);
   });
 
@@ -70,7 +72,9 @@ describe('curry', () => {
     const variadic = (...args: number[]) => args;
     const curried = curry(variadic, 2);
 
+    // @ts-expect-error -- `Curry` ignores an explicit arity
     expect(curried(1)(2)).toEqual([1, 2]);
+    // @ts-expect-error -- `Curry` ignores an explicit arity
     expect(curried(1, 2, 3)).toEqual([1, 2, 3]);
   });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { createContentApiRoutesFactory } from '../content-api-router';
+import type { ContentApiRoutesFactory } from '../content-api-router';
 
 describe('createContentApiRoutesFactory', () => {
   it('builds content-api routes lazily and caches them', () => {
@@ -19,7 +20,9 @@ describe('createContentApiRoutesFactory', () => {
   });
 
   it('exposes mutable routes property for legacy extensions', () => {
-    const factory = createContentApiRoutesFactory(() => [{ method: 'GET', path: '/original' }]);
+    const factory = createContentApiRoutesFactory(() => [
+      { method: 'GET', path: '/original' },
+    ]) as ContentApiRoutesFactory<{ method: string; path: string }[]>;
 
     expect(factory.routes).toEqual([{ method: 'GET', path: '/original' }]);
 

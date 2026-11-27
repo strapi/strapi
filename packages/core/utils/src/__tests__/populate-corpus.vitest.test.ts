@@ -75,7 +75,10 @@ const changes = (before: unknown, after: unknown) => {
 
 const queryLayer = (uid: string, populate: unknown) => {
   try {
-    return hash(transformQueryParams(uid, { populate }));
+    // The corpus feeds any sanitized populate value, including invalid ones, so the type is cast.
+    return hash(
+      transformQueryParams(uid, { populate } as Parameters<typeof transformQueryParams>[1])
+    );
   } catch (error) {
     return `throws ${(error as Error).message}`;
   }

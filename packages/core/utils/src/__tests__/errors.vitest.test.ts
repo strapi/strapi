@@ -51,7 +51,7 @@ describe('instanceof on Strapi errors', () => {
   });
 
   it('does not match non-objects', () => {
-    expect(null instanceof errors.ApplicationError).toBe(false);
+    expect((null as unknown) instanceof errors.ApplicationError).toBe(false);
     expect((undefined as unknown) instanceof errors.ApplicationError).toBe(false);
     expect(('ForbiddenError' as unknown) instanceof errors.ForbiddenError).toBe(false);
   });

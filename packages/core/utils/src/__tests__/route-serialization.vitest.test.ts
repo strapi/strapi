@@ -44,6 +44,7 @@ describe('route-serialization', () => {
       other: 'passthrough',
     };
 
+    // @ts-expect-error -- a non-array value is not a valid input, but it is passed through as is
     expect(sanitizeRoutesMapForSerialization(map)).toEqual({
       'api::article.article': [{ method: 'GET', path: '/articles' }],
       other: 'passthrough',
