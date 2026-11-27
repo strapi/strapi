@@ -52,6 +52,21 @@ export const logger = {
 
     process.exit(1);
   },
+  /**
+   * Like `fatal`, but exits only after stderr accepted everything written to it before.
+   * When stderr is a pipe, Node writes to it asynchronously and `process.exit` drops queued output.
+   */
+  async fatalAfterFlush(message: string | string[]): Promise<never> {
+    const prefix = badge('Error', chalk.bgRed);
+    const text = `\n${prefix}  ${textIndent(message, false)}\n\n`;
+
+    // Writes to a stream are done in order, so this callback also waits for earlier writes
+    await new Promise<void>((resolve) => {
+      process.stderr.write(text, () => resolve());
+    });
+
+    process.exit(1);
+  },
   error(message: string | string[]): void {
     const prefix = badge('Error', chalk.bgRed);
     console.error(`\n${prefix}  ${textIndent(message, false)}\n`);
