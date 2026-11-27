@@ -16,6 +16,10 @@ describe('Action Domain', () => {
       expect(domain.appliesToProperty('fields')(action)).toBe(false);
     });
 
+    test('returns false for an undefined action', () => {
+      expect(domain.appliesToProperty('fields', undefined)).toBe(false);
+    });
+
     test('Should return false when action.options.applyToProperties is Nil', () => {
       const action: any = { options: {} };
       const property: any = 'foo';
