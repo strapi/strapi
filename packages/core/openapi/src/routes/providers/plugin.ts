@@ -33,6 +33,10 @@ export class PluginRoutesProvider extends AbstractRoutesProvider {
         ? routes
         : Object.values(routes).flatMap((router: Core.Router) => {
             return router.routes.map((route: Core.Route) => {
+              if (route.info.type === 'content-api') {
+                return this.withContentApiPrefix(route, router.prefix);
+              }
+
               const hasOwnPrefix =
                 route.config != null &&
                 Object.prototype.hasOwnProperty.call(route.config, 'prefix');

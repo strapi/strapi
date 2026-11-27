@@ -12,6 +12,11 @@ strapi openapi generate
 
 This command generates a `content-api` specification by default.
 
+Generated Content API paths include the configured REST prefix (`/api` by default).
+If you previously added that prefix to `openapi.servers[].url` as a workaround,
+remove it from the server URL because it is now part of each path. Generated
+operation IDs also include the prefix. Regenerating an SDK may rename its methods.
+
 ## Expose `/openapi.json` from the server
 
 Strapi can expose a generated OpenAPI document over HTTP. Both endpoints are

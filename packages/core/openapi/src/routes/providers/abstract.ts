@@ -31,6 +31,27 @@ export abstract class AbstractRoutesProvider implements RoutesProvider {
    */
   public abstract get routes(): Core.Route[];
 
+  protected withContentApiPrefix(route: Core.Route, routerPrefix = ''): Core.Route {
+    if (route.info.type !== 'content-api') {
+      return route;
+    }
+
+    const apiPrefix = this._strapi.config.get<string>('api.rest.prefix', '/api');
+    const prefix = Object.prototype.hasOwnProperty.call(route.config ?? {}, 'prefix')
+      ? ''
+      : routerPrefix;
+    // Koa prefixes nested paths as registered, preserving any slash in the prefix.
+    const path = [prefix, apiPrefix].reduce((path, prefix) => {
+      if (!prefix) {
+        return path;
+      }
+
+      return path === '/' ? prefix : `${prefix}${path}`;
+    }, route.path);
+
+    return { ...route, path };
+  }
+
   /**
    * Iterator to traverse the routes.
    *
