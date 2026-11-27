@@ -9,8 +9,10 @@ import { factories, type Core } from '@strapi/strapi';
 
 import articleLifecycles from '../src/api/article/content-types/article/lifecycles';
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 
 declare const strapi: Core.Strapi;
 

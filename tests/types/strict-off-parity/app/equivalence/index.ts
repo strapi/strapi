@@ -5,8 +5,10 @@
 import type { Core, Public, Schema, UID } from '@strapi/strapi';
 
 type MutuallyAssignable<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<A, B> =
-  (<V>() => V extends A ? 1 : 2) extends <V>() => V extends B ? 1 : 2 ? true : false;
+  (<V>() => V extends [A] ? 1 : 2) extends <V>() => V extends [B] ? 1 : 2 ? true : false;
 type Lookup<TKey extends keyof Core.Strapi> = Core.Strapi[TKey] extends (
   name: infer TName
 ) => unknown

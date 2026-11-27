@@ -6,8 +6,10 @@ import type { ServiceContract as ArticleService } from '../src/api/article/servi
 import type { ControllerContract as ArticleController } from '../src/api/article/controllers/article';
 import type { ServiceContract as StatsService } from '../src/api/stats/services/stats';
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 
 declare const strapi: Core.Strapi;
 

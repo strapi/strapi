@@ -63,8 +63,10 @@ const legacyPluralServices: typeof app.services = pluralServices;
 legacyPluralServices satisfies Record<string, Core.Service>;
 
 // Policy and API module lookups keep their previous types without the switch.
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 const adminPolicy = app.policy('admin::isAuthenticatedAdmin');
 const unregisteredPolicy = app.policy('global::unregistered');

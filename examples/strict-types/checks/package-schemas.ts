@@ -1,8 +1,10 @@
 // Type checks only, run by `yarn test:ts`. Packages declare their content-type schemas by hand; this
 // app extends none of them, so each declaration must equal the schema type generation writes from
 // the runtime. A package that starts declaring one is checked here once it is installed in this app.
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 
 type Declared = Strapi.Registries.PackageContentTypeSchemas;
 type Generated = Strapi.Registries.AppContentTypeSchemas;

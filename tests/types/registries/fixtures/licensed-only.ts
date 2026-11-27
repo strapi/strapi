@@ -1,8 +1,10 @@
 import type { Core, Schema, UID } from '@strapi/strapi';
 import type { EEUsersService, SeatsService } from './licensed-provider';
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 type HasUndefined<T> = undefined extends T ? true : false;
 
 /** The licensed attributes of `licensed-schemas.d.ts` a content type has. */
