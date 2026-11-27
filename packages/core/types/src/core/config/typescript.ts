@@ -17,7 +17,8 @@ export interface TypeScript {
    * level contracts and the opt-in to the strict core contracts.
    *
    * Unset or `false` keeps the previous behaviour.
-   * Enabled by default in projects created with `create-strapi-app`.
+   * In beta and off by default: projects created with `create-strapi-app` write `false`. Set it to
+   * `true` and run `strapi ts:generate-types` to turn it on.
    */
   strictTypes?: boolean;
 
