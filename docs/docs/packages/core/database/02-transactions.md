@@ -124,6 +124,8 @@ await strapi.db.transaction(async ({ trx, rollback, commit }) => {
 });
 ```
 
+With `strapi.db.queryBuilder(uid).transacting(trx)`, `execute()` runs the main query on `trx` only outside a `strapi.db.transaction` block. Inside one, `execute()` runs on the block's transaction and ignores `.transacting(trx)`. `stream()` does not read the block's transaction for its main query: it uses `trx` when `.transacting(trx)` is called, and a pool connection otherwise. A select that sorts on a relation attribute (a deep sort) is an exception for both `execute()` and `stream()`. The wrapping query is built from `db.getConnection()` and runs on a pool connection. `populate` queries do not inherit `.transacting(trx)`: they use the block's transaction inside a `strapi.db.transaction` block, and a pool connection outside one.
+
 ## When to use transactions
 
 Transactions should be used when several database operations must succeed or fail together. For example, creating a user and the profile row that belongs to them. If creating the profile throws, the user insert is rolled back too.
