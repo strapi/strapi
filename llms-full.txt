@@ -1468,12 +1468,19 @@ The `admin` `register` runs before any plugin or API `register`, because provide
 14. It runs the `bootstrap` function of each provider.
 15. It runs `strapi.app.bootstrap({ strapi })`, if the application defines it.
 16. It calls the `strapi::app.afterBootstrap` hook. The admin uses it to lock the action provider, reset the super admin permissions and delete the stored permissions whose action is not registered.
+17. In development, it warns about the routes added to a module router after step 11. Strapi does not serve them.
 
 :::note
 The sync hooks run in steps 5 and 9, before module `bootstrap`. Add sync hook handlers in `register`. A handler that a module adds in `bootstrap` does not run during the current boot.
 :::
 
 Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootstrap` runs, the webhook runner has not read the stored webhooks, the cron service has not started, and the admin `bootstrap` has not run.
+
+#### Late registrations
+
+Many registration APIs accept a call in any phase, but a fixed step reads what they hold. A registration that arrives after that step has no effect, or only part of it. For example, a route pushed into a module router after `server.initRouting()` is never served.
+
+Such a call does not throw, so that an app that never noticed the problem keeps working. Instead, `warnLateRegistration` in [`late-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/late-registration.ts) logs one warning per app and registration, in the `development` environment only. The warning says what was registered, which step closed its window, and where to register it instead. The caller decides that the window is closed, with a flag that the closing step sets, such as `areRoutesRegistered`. Do not use `strapi.isLoaded` for this: it stays `false` until the bootstrap phase ends.
 
 ### Start and listen
 
@@ -2139,7 +2146,7 @@ For each route, the registration step also:
 
 So the routers of a module change shape at this step: before it, a router is an object or a factory; after it, every router is an object. A plugin router declared as a plain array stays an array, and so does an API router file that exports an array of routes. Strapi passes such an API array to `strapi.server.routes()` as is, so its routes go on the root router: no `/api` prefix, no `apiName` and no generated scope. To read the routes of a module router in any phase, use `routesOf` and `isBuiltRouter` from [`@strapi/utils`](https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/module-routers.ts). `routesOf` returns an array of routes as is and never calls a factory: it returns the routes a factory exposes as `.routes` (the factories of `createContentApiRoutesFactory` do), or none. For a router object without routes, such as a router file that exports `{}`, it returns none.
 
-A route added to a module router after `initRouting()` is never served. It has no `route.info` unless it was copied from a registered route, which keeps its `info`. `strapi.contentAPI.getRoutesMap()`, which backs `GET /admin/content-api/routes`, lists only routes whose `info.type` is `content-api`: it skips a new route added late, but still lists a copied one, although Strapi does not serve it. It throws `contentAPI.getRoutesMap() called before routes are registered` when `initRouting()` has not completed, because the map would be incomplete. `initRouting()` sets the flag it checks ([`routes-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routes-registration.ts)). `strapi.isLoaded` cannot tell, since it stays `false` during the whole bootstrap phase.
+A route added to a module router after `initRouting()` is never served. It has no `route.info` unless it was copied from a registered route, which keeps its `info`. `strapi.contentAPI.getRoutesMap()`, which backs `GET /admin/content-api/routes`, lists only routes whose `info.type` is `content-api`: it skips a new route added late, but still lists a copied one, although Strapi does not serve it. In development, Strapi logs one warning per late route without `info`, at the end of the bootstrap phase and when `getRoutesMap()` runs ([`late-routes.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/late-routes.ts)). A copied route keeps its `info`, so it gets no warning. It throws `contentAPI.getRoutesMap() called before routes are registered` when `initRouting()` has not completed, because the map would be incomplete. `initRouting()` sets the flag it checks ([`routes-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routes-registration.ts)). `strapi.isLoaded` cannot tell, since it stays `false` during the whole bootstrap phase.
 
 The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routing.ts) validates each route with a Yup schema and adds `info.type` from the API router (`api` on the root router). An invalid route stops the boot with `Invalid route config`. An unknown handler, policy or middleware stops it with `Error creating endpoint <METHOD> <path>`.
 
