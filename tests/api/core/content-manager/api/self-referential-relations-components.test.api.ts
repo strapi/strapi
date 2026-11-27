@@ -233,15 +233,13 @@ describe('CM API - Self-referential relations inside components with Draft & Pub
     const { joinTable } = linkMeta.attributes.page;
 
     await strapi.db
-      .getConnection()(joinTable.name)
+      .getConnection(joinTable.name)
       .where({ [joinTable.joinColumn.name]: published.link.id })
       .del();
-    await strapi.db
-      .getConnection()(joinTable.name)
-      .insert({
-        [joinTable.joinColumn.name]: published.link.id,
-        [joinTable.inverseJoinColumn.name]: published.id,
-      });
+    await strapi.db.getConnection(joinTable.name).insert({
+      [joinTable.joinColumn.name]: published.link.id,
+      [joinTable.inverseJoinColumn.name]: published.id,
+    });
 
     await runAction(home, 'publish');
 
