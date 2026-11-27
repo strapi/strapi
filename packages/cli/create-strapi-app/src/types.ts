@@ -26,6 +26,15 @@ export interface Options {
   interactive?: boolean;
   templateBranch?: string;
   templatePath?: string;
+  adminEmail?: string;
+  adminPassword?: string;
+  adminFirstname?: string;
+}
+
+export interface AdminUser {
+  email: string;
+  password: string;
+  firstname: string;
 }
 
 export type DBClient = 'mysql' | 'postgres' | 'sqlite';
@@ -67,6 +76,8 @@ export interface Scope {
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
+  /** Super admin to create after the install. `null` or missing: the project has no admin. */
+  admin?: AdminUser | null;
   /**
    * @deprecated The Growth SSO trial was removed. This field is ignored and kept only so
    * existing callers that still pass it keep compiling.

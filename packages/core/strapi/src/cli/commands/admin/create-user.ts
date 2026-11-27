@@ -130,6 +130,10 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     ({ email, password, firstname, lastname } = inquiry);
   }
 
+  // `--password` wins. The environment keeps the password out of the shell history and the
+  // process list, for example when create-strapi-app creates the first admin.
+  password = password || process.env.STRAPI_ADMIN_PASSWORD || undefined;
+
   try {
     await adminCreateSchema.validate({ email, password, firstname, lastname });
   } catch (err) {
@@ -151,7 +155,10 @@ const command: StrapiCommand = () => {
     .alias('admin:create')
     .description('Create a new admin')
     .option('-e, --email <email>', 'Email of the new admin')
-    .option('-p, --password <password>', 'Password of the new admin')
+    .option(
+      '-p, --password <password>',
+      'Password of the new admin. Without it, the STRAPI_ADMIN_PASSWORD environment variable is used'
+    )
     .option('-f, --firstname <first name>', 'First name of the new admin')
     .option('-l, --lastname <last name>', 'Last name of the new admin')
     .action(runAction('admin:create-user', action));

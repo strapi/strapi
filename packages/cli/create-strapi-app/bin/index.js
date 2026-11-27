@@ -21,6 +21,7 @@ process.on('SIGINT', () => {
 });
 
 run(process.argv).then(
-  () => process.exit(0),
+  // keep an exit code set during the run, such as a failed admin step
+  () => process.exit(process.exitCode ?? 0),
   () => process.exit(1)
 );

@@ -17,6 +17,7 @@ import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
 import type { Options, Scope } from './types';
 import { logger } from './utils/logger';
+import { DEFAULT_ADMIN_FIRSTNAME, parseAdminOptions } from './utils/admin-command';
 
 const { version } = fse.readJSONSync(join(__dirname, '..', 'package.json'));
 
@@ -80,6 +81,20 @@ const command = new commander.Command('create-strapi-app')
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--skip-db', 'Skip database configuration')
+
+  // Admin user options
+  .option(
+    '--admin-email <email>',
+    'Email of the first admin user. Needs --admin-password or STRAPI_ADMIN_PASSWORD'
+  )
+  .option(
+    '--admin-password <password>',
+    'Password of the first admin user. Needs --admin-email. To keep it out of your shell history, set STRAPI_ADMIN_PASSWORD instead'
+  )
+  .option(
+    '--admin-firstname <first name>',
+    `First name of the first admin user (default: "${DEFAULT_ADMIN_FIRSTNAME}")`
+  )
 
   .option('--template <template>', 'Specify a Strapi template')
   .option('--template-branch <templateBranch>', 'Specify a branch for the template')
@@ -145,6 +160,22 @@ async function run(args: string[]): Promise<void> {
       `You cannot use both ${chalk.bold('--interactive')} and ${chalk.bold(
         '--non-interactive'
       )} flags together`
+    );
+  }
+
+  const adminOptions = parseAdminOptions(options);
+
+  if (!adminOptions.ok) {
+    return logger.fatal(adminOptions.error);
+  }
+
+  const { admin } = adminOptions;
+
+  if (admin && options.install === false) {
+    logger.fatal(
+      `You cannot use ${chalk.bold('--admin-email')} with ${chalk.bold(
+        '--no-install'
+      )}: the admin user is created with the installed dependencies`
     );
   }
 
@@ -256,6 +287,16 @@ async function run(args: string[]): Promise<void> {
       '@types/react-dom': '^18',
     };
   }
+
+  if (admin && !scope.installDependencies) {
+    logger.fatal(
+      `The admin user from ${chalk.bold(
+        '--admin-email'
+      )} is created with the installed dependencies. Install the dependencies, or remove the admin flags.`
+    );
+  }
+
+  scope.admin = admin;
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 

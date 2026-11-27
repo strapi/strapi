@@ -43,6 +43,27 @@ When you pass `--template`, the CLI does not add `typescript` or `@types/*` depe
 
 `detectInvocation()` and `resolvePromptMode()` read the same CI and terminal facts from `readEnvironment()`. The two results can still differ. For example, an agent that has a terminal gets `agent` and the prompts, and `--interactive` in CI gives `ci` and the prompts.
 
+## Admin user
+
+The CLI never asks for the admin user. By default, it creates the project with no admin user.
+
+To create a super admin, pass `--admin-email` and `--admin-password`. Instead of `--admin-password`, you can set the `STRAPI_ADMIN_PASSWORD` environment variable, which keeps the password out of the shell history and the process list. If you pass both, `--admin-password` wins. `--admin-firstname` is optional, and its default value is `Admin`.
+
+`utils/admin-command.ts` checks the values before the CLI creates the project folder. It uses the same password rules as `strapi admin:create-user`, and a copy of the `EMAIL_REGEX` pattern from `@strapi/utils`. A test checks that the copy stays identical. The CLI stops with an error in these cases:
+
+- A value is not correct.
+- `--admin-email` has no password, from the flag or from the environment.
+- `--admin-password` or `--admin-firstname` has no `--admin-email`.
+- You use the admin flags with `--no-install`, or you answer "no" to the install prompt. The admin flags need the dependencies.
+
+`STRAPI_ADMIN_PASSWORD` alone does not ask for an admin user. If the variable stays set in a shell, other runs still work.
+
+After the install and the seed, the CLI runs `strapi admin:create-user` in the project, with stdin closed. The email and the first name go as flags, so the command does not prompt. The password goes through `STRAPI_ADMIN_PASSWORD`, so it is never in the command arguments. `admin:create-user` reads this variable when `--password` is missing.
+
+If the command fails, the CLI keeps the project. It logs the first error line of the command output, and the command to run again with the email and first name filled in. It does not log "No admin user yet.", and it does not start the app. The CLI then exits with code 1, because the run did not create the admin user that you asked for.
+
+Without an admin user, the CLI logs "No admin user yet." and the exact `admin:create-user` command, with quoted placeholders. When the invocation is not `human`, it also tells AI agents to ask the developer for the values and not to invent them.
+
 ## Telemetry
 
 The CLI sends project-creation events through `src/utils/usage.ts`. Each event carries `invocation` and `agentName` in `eventProperties`.
