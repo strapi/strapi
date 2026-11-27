@@ -25,7 +25,22 @@ const allowedOperations = [
   '$elemMatch',
 ] as const;
 
-const operations = pick(sift, allowedOperations);
+const operations = {
+  ...pick(sift, allowedOperations),
+  // sift's `$exists` only checks whether the key is present, so `{ price: null }` matches
+  // `$exists: true`. List queries map `$exists` to SQL `$notNull` instead, so treat null and
+  // undefined as absent here too, to keep single-entity checks consistent with lists.
+  $exists: (
+    params: boolean,
+    ownerQuery: unknown,
+    options: Parameters<typeof sift.createEqualsOperation>[2]
+  ) =>
+    sift.createEqualsOperation(
+      (value: unknown) => (value != null) === Boolean(params),
+      ownerQuery,
+      options
+    ),
+};
 
 /**
  * Match an RBAC condition query against an entity in memory with sift.
