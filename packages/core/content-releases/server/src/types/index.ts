@@ -1,4 +1,4 @@
-import type { Core, Data, Modules, Struct } from '@strapi/types';
+import type { Core, Data, Modules, Schema, Struct } from '@strapi/types';
 import type { queryParams } from '@strapi/utils';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
@@ -29,14 +29,30 @@ type ReleaseValidationService = Omit<
   ): ReturnType<ReleaseValidationImplementation['validateScheduledAtIsLaterThanNow']>;
 };
 
+/** A call that populates no relation. */
+type NoPopulate = Record<never, never>;
+
 /**
  * A release action as the query engine returns it: its columns, without the relations
  * (`tests/api/core/content-releases/content-releases-service-results.test.api.ts`). `locale` is
- * `null` for a content type without i18n.
+ * `null` for a content type without i18n. With strict types, the row of the registered schema
+ * (`./content-types.ts`), every column possibly `null` (`Modules.Documents.StrictResult`, as admin
+ * rows read it), with the domain types of `ReleaseAction` for `contentType`, `entryDocumentId` and
+ * `reason`: the service writes the first two on every action, and `reason` is a JSON column.
  */
-type ReleaseActionRow = Omit<ReleaseAction, 'entry' | 'locale' | 'release' | 'status'> & {
-  locale: string | null;
-};
+type ReleaseActionRow = Core.IsStrict extends true
+  ? Omit<
+      Modules.Documents.StrictResult<
+        'plugin::content-releases.release-action',
+        NoPopulate,
+        'published'
+      >,
+      'contentType' | 'entryDocumentId' | 'reason'
+    > &
+      Pick<ReleaseAction, 'contentType' | 'entryDocumentId' | 'reason'>
+  : Omit<ReleaseAction, 'entry' | 'locale' | 'release' | 'status'> & {
+      locale: string | null;
+    };
 
 /** A written release action, with the ID of its release. */
 type CreatedReleaseAction = ReleaseActionRow & { release: Pick<Release, 'id'> };
@@ -54,12 +70,34 @@ type CountActionsFilters =
   ReleaseActionFilters | (Omit<ReleaseActionFilters, 'release'> & { release: Release['id'] });
 
 /**
+ * The entry of a `findPage` row with strict types: the deep-populated document, its `locale` `null`
+ * for a content type without i18n, as for the action row
+ * (`tests/api/core/content-releases/content-releases-service-shapes.test.api.ts`).
+ * `ReleaseActionEntry` is restated rather than `Omit`ted, which would drop the keys its index
+ * signature covers.
+ */
+type StrictReleaseActionPageEntry = Modules.Documents.AnyDocument & {
+  [key: string]: Schema.Attribute.AnyAttribute;
+} & { locale?: string | null };
+
+/**
+ * A `findPage` row: the action row with its `entry` (the deep-populated document, the draft for a
+ * publish action) and its `status`, both `null` when the content type or the entry no longer exists.
+ */
+type ReleaseActionPageRow = Core.IsStrict extends true
+  ? ReleaseActionRow & {
+      entry: StrictReleaseActionPageEntry | null;
+      status: ReleaseAction['status'];
+    }
+  : ReleaseActionRow & Pick<ReleaseAction, 'entry' | 'status'>;
+
+/**
  * What `groupActions` reads of an action: its content type, its locale (`null` without i18n) and
  * the main field of its entry, when it has one. The rows of `findPage` have no `release`.
  */
 type GroupableReleaseAction = Pick<ReleaseAction, 'contentType'> & {
   locale?: string | null | undefined;
-  entry?: ReleaseAction['entry'] | undefined;
+  entry?: StrictReleaseActionPageEntry | null | undefined;
 };
 
 /** A grouped action: the action with its `locale` and `contentType` resolved. */
@@ -125,7 +163,7 @@ type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServ
    * are `null` when the content type or the entry no longer exists.
    */
   findPage(...args: Parameters<ReleaseActionService['findPage']>): Promise<{
-    results: Array<ReleaseActionRow & Pick<ReleaseAction, 'entry' | 'status'>>;
+    results: ReleaseActionPageRow[];
     pagination: Pagination;
   }>;
   countActions(query: {
@@ -138,9 +176,18 @@ type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServ
 
 /**
  * A release as the query engine returns it: its columns, without the relations
- * (`tests/api/core/content-releases/content-releases-service-results.test.api.ts`).
+ * (`tests/api/core/content-releases/content-releases-service-results.test.api.ts`). With strict
+ * types, the row of the registered schema (`./content-types.ts`), every other column possibly
+ * `null`, a required one included: the database does not enforce `required`.
  */
-type ReleaseRow = Omit<Release, 'actions'>;
+type ReleaseRow = Core.IsStrict extends true
+  ? Omit<
+      Modules.Documents.StrictResult<'plugin::content-releases.release', NoPopulate, 'published'>,
+      'name'
+    > &
+      // The create and update validation requires a trimmed name (`controllers/validation/release.ts`).
+      Pick<Release, 'name'>
+  : Omit<Release, 'actions'>;
 
 /** The populate of a release read. */
 type ReleasePopulate = queryParams.Params['populate'];
@@ -190,7 +237,7 @@ type PopulateByRelation<TPopulate> = 0 extends 1 & TPopulate
  * contracts do not import `@strapi/admin`, which is not a dependency of this package.
  */
 type AdminUserRow = Core.IsStrict extends true
-  ? Modules.Documents.StrictResult<'admin::user', Record<never, never>, 'published'>
+  ? Modules.Documents.StrictResult<'admin::user', NoPopulate, 'published'>
   : Omit<NonNullable<Awaited<ReturnType<Core.ServiceFor<'admin::user'>['findOne']>>>, 'roles'>;
 
 /**
