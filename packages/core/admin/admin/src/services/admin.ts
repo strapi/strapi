@@ -8,7 +8,10 @@ import {
   type GetLicenseLimitInformation,
   GetGuidedTourMeta,
   type DebugDump,
+  type GetPasswordPolicy,
+  type UpdatePasswordPolicy,
 } from '../../../shared/contracts/admin';
+import { DEFAULT_PASSWORD_POLICY } from '../utils/passwordPolicy';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
 import { adminApi } from './api';
@@ -26,7 +29,7 @@ interface ConfigurationLogo {
 
 const admin = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft'],
+    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft', 'PasswordPolicy'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -99,6 +102,34 @@ const admin = adminApi
           },
         }),
         invalidatesTags: ['ProjectSettings'],
+      }),
+      getPasswordPolicy: builder.query<
+        { policy: GetPasswordPolicy.Response['data'] } & GetPasswordPolicy.Response['meta'],
+        void
+      >({
+        query: () => ({
+          url: '/admin/password-policy',
+          method: 'GET',
+        }),
+        transformResponse(res: GetPasswordPolicy.Response) {
+          // A server without the floor (or a proxy dropping `meta`) gets the default one
+          return { policy: res.data, floor: res.meta?.floor ?? DEFAULT_PASSWORD_POLICY };
+        },
+        providesTags: ['PasswordPolicy'],
+      }),
+      updatePasswordPolicy: builder.mutation<
+        UpdatePasswordPolicy.Response['data'],
+        UpdatePasswordPolicy.Request['body']
+      >({
+        query: (data) => ({
+          url: '/admin/password-policy',
+          method: 'PUT',
+          data,
+        }),
+        transformResponse(res: UpdatePasswordPolicy.Response) {
+          return res.data;
+        },
+        invalidatesTags: ['PasswordPolicy'],
       }),
       getPlugins: builder.query<Plugins.Response, void>({
         query: () => ({
@@ -173,6 +204,8 @@ const {
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
   useLazyGetDebugDumpQuery,
+  useGetPasswordPolicyQuery,
+  useUpdatePasswordPolicyMutation,
 } = admin;
 
 export {
@@ -186,6 +219,8 @@ export {
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
   useLazyGetDebugDumpQuery,
+  useGetPasswordPolicyQuery,
+  useUpdatePasswordPolicyMutation,
   resetAdminApiState,
 };
 

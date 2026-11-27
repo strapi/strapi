@@ -20,7 +20,6 @@ import type {
   SanitizedAdminRole,
   AdminUserUpdatePayload,
 } from '../../../shared/contracts/shared';
-import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
 import constants from './constants';
 import type { AdminRoleWithUsersCount } from './role';
@@ -224,6 +223,24 @@ const updateById = async (
 };
 
 /**
+ * Check a password against the password policy configured in the admin settings.
+ * @param password - the password to check
+ * @throws ValidationError listing every broken rule. If the policy cannot be read, the store
+ * error is thrown as is, so callers do not mistake it for a password the user can fix.
+ */
+const assertPasswordIsValid = async (password: string) => {
+  const passwordPolicyService = getService('password-policy');
+  const policy = await passwordPolicyService.getPolicy();
+  const violations = passwordPolicyService.getViolations(password, policy);
+
+  if (violations.length > 0) {
+    const reasons = violations.map((violation) => `The password ${violation.message}.`);
+
+    throw new ValidationError(`Invalid password. ${reasons.join(' ')}`);
+  }
+};
+
+/**
  * Reset a user password by email. (Used in admin:reset CLI)
  * @param email - user email
  * @param password - new password
@@ -237,13 +254,7 @@ const resetPasswordByEmail = async (email: string, password: string) => {
     throw new Error(`User not found for email: ${email}`);
   }
 
-  try {
-    await passwordValidator.validate(password);
-  } catch {
-    throw new ValidationError(
-      'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
-    );
-  }
+  await assertPasswordIsValid(password);
 
   await updateById(user.id, { password });
 };
@@ -550,6 +561,7 @@ export default {
   count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
+  assertPasswordIsValid,
   resetPasswordByEmail,
   getLanguagesInUse,
   isFirstSuperAdminUser,

@@ -85,4 +85,61 @@ describe('admin:create-user', () => {
       await app.destroy();
     }
   });
+
+  it('should reject a password breaking the stored password policy', async () => {
+    const email = 'test.policy@strapi.io';
+
+    await loadTestAppEnv(appPath);
+
+    const setPolicy = async (policy) => {
+      const app = createStrapi({ appDir: appPath, distDir: appPath });
+
+      await app.load();
+
+      try {
+        return await app.service('admin::password-policy').updatePolicy(policy);
+      } finally {
+        await app.destroy();
+      }
+    };
+
+    await setPolicy({ minLength: 20 });
+
+    try {
+      await coffee
+        .spawn(
+          'npm',
+          [
+            'run',
+            '-s',
+            'strapi',
+            '--',
+            'admin:create-user',
+            '--email',
+            email,
+            // Complies with the default policy, not with the stored one
+            '--password',
+            testPassword,
+            '--firstname',
+            testFirstname,
+          ],
+          { cwd: appPath }
+        )
+        .expect('code', 1)
+        .expect('stderr', /The password must be at least 20 characters/)
+        .end();
+    } finally {
+      await setPolicy({ minLength: 8 });
+    }
+
+    const app = createStrapi({ appDir: appPath, distDir: appPath });
+
+    await app.load();
+
+    try {
+      expect(await app.admin.services.user.exists({ email })).toBe(false);
+    } finally {
+      await app.destroy();
+    }
+  });
 });

@@ -42,7 +42,7 @@ The `ee/admin` and `ee/server` folders hold the Enterprise code, with their own 
 
 ### Built-in features
 
-The admin part ships features that plugins can use or extend. The [guided tour](./guided-tour.md) teaches new users the panel. The [NPS survey](./features/nps.md) collects feedback. The [admin telemetry](./features/telemetry.md) sends usage events from the browser with `useTracking`. The home page shows widgets, and plugins add their own with `app.widgets.register`.
+The admin part ships features that plugins can use or extend. The [guided tour](./guided-tour.md) teaches new users the panel. The [NPS survey](./features/nps.md) collects feedback. The [admin telemetry](./features/telemetry.md) sends usage events from the browser with `useTracking`. The [password policy](./features/password-policy.md) makes the password rules of admin users configurable. The home page shows widgets, and plugins add their own with `app.widgets.register`.
 
 ## Related
 

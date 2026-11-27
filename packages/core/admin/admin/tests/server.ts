@@ -264,6 +264,20 @@ export const server: SetupServer = setupServer(
       },
     });
   }),
+  http.get('/admin/password-policy', () => {
+    const policy = {
+      minLength: 8,
+      requireLowercase: true,
+      requireUppercase: true,
+      requireNumber: true,
+      requireSpecialCharacter: false,
+    };
+
+    return HttpResponse.json({ data: policy, meta: { floor: policy } });
+  }),
+  http.put('/admin/password-policy', async ({ request }) =>
+    HttpResponse.json({ data: await request.json() })
+  ),
   http.get('/admin/transfer/tokens', () => {
     return HttpResponse.json({
       data: [

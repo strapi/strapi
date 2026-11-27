@@ -17,33 +17,36 @@ import { useNotification } from '../features/Notifications';
 import { useTracking } from '../features/Tracking';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useIsDesktop } from '../hooks/useMediaQuery';
+import { usePasswordPolicy } from '../hooks/usePasswordPolicy';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { translatedErrors } from '../utils/translatedErrors';
 import { getDisplayName } from '../utils/users';
 
-import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
+import { createCommonUserSchema } from './Settings/pages/Users/utils/validation';
 
 import type { UpdateMe } from '../../../shared/contracts/users';
+import type { PasswordSchema } from '../utils/passwordPolicy';
 
-const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
-  ...COMMON_USER_SCHEMA,
-  currentPassword: yup
-    .string()
-    // @ts-expect-error – no idea why this is failing.
-    .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
-      return password || confirmPassword
-        ? passSchema
-            .required({
-              id: translatedErrors.required.id,
-              defaultMessage: 'This field is required',
-            })
-            .nullable()
-        : passSchema;
-    }),
-  preferedLanguage: yup.string().nullable(),
-});
+const getProfileValidationSchema = (passwordSchema: PasswordSchema) =>
+  yup.object().shape({
+    ...createCommonUserSchema(passwordSchema),
+    currentPassword: yup
+      .string()
+      // @ts-expect-error – no idea why this is failing.
+      .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
+        return password || confirmPassword
+          ? passSchema
+              .required({
+                id: translatedErrors.required.id,
+                defaultMessage: 'This field is required',
+              })
+              .nullable()
+          : passSchema;
+      }),
+    preferedLanguage: yup.string().nullable(),
+  });
 
 /* -------------------------------------------------------------------------------------------------
  * ProfilePage
@@ -82,6 +85,11 @@ const ProfilePage = () => {
   } = useAPIErrorHandler();
 
   const user = useAuth('ProfilePage', (state) => state.user);
+  const { schema: passwordSchema } = usePasswordPolicy();
+  const validationSchema = React.useMemo(
+    () => getProfileValidationSchema(passwordSchema),
+    [passwordSchema]
+  );
 
   React.useEffect(() => {
     if (user) {
@@ -201,7 +209,7 @@ const ProfilePage = () => {
           method="PUT"
           onSubmit={handleSubmit}
           initialValues={initialData}
-          validationSchema={PROFILE_VALIDTION_SCHEMA}
+          validationSchema={validationSchema}
         >
           {({ isSubmitting, modified }) => (
             <>
@@ -249,6 +257,7 @@ const ProfilePage = () => {
 
 const PasswordSection = () => {
   const { formatMessage } = useIntl();
+  const { hint: passwordHint } = usePasswordPolicy();
 
   return (
     <Panel>
@@ -273,6 +282,7 @@ const PasswordSection = () => {
         [
           {
             autoComplete: 'new-password',
+            hint: passwordHint,
             label: formatMessage({
               id: 'global.password',
               defaultMessage: 'Password',

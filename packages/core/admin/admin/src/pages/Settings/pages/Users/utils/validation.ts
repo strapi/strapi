@@ -2,10 +2,13 @@ import * as yup from 'yup';
 
 import { translatedErrors } from '../../../../../utils/translatedErrors';
 
+import type { PasswordSchema } from '../../../../../utils/passwordPolicy';
+
 /**
- * @description This needs wrapping in `yup.object().shape()` before use.
+ * @description This needs wrapping in `yup.object().shape()` before use. The password rules come
+ * from the configurable password policy, see `usePasswordPolicy`.
  */
-const COMMON_USER_SCHEMA = {
+const createCommonUserSchema = (passwordSchema: PasswordSchema) => ({
   firstname: yup.string().trim().required({
     id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
@@ -19,66 +22,13 @@ const COMMON_USER_SCHEMA = {
     .string()
     .transform((value) => (value === '' ? undefined : value))
     .nullable(),
-  password: yup
-    .string()
+  password: passwordSchema
     .transform((value) => (value === '' || value === null ? undefined : value))
-    .nullable()
-    .min(8, {
-      ...translatedErrors.minLength,
-      values: { min: 8 },
-    })
-    .test(
-      'max-bytes',
-      {
-        id: 'components.Input.error.contain.maxBytes',
-        defaultMessage: 'Password must be less than 73 bytes',
-      },
-      function (value) {
-        if (!value) return true;
-        return new TextEncoder().encode(value).length <= 72;
-      }
-    )
-    .test(
-      'lowercase',
-      {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least one lowercase character',
-      },
-      (value) => {
-        if (!value) return true;
-        return /[a-z]/.test(value);
-      }
-    )
-    .test(
-      'uppercase',
-      {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least one uppercase character',
-      },
-      (value) => {
-        if (!value) return true;
-        return /[A-Z]/.test(value);
-      }
-    )
-    .test(
-      'number',
-      {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least one number',
-      },
-      (value) => {
-        if (!value) return true;
-        return /\d/.test(value);
-      }
-    ),
+    .nullable(),
   confirmPassword: yup
     .string()
     .transform((value) => (value === '' ? null : value))
     .nullable()
-    .min(8, {
-      ...translatedErrors.minLength,
-      values: { min: 8 },
-    })
     .oneOf([yup.ref('password'), null], {
       id: 'components.Input.error.password.noMatch',
       defaultMessage: 'Passwords must match',
@@ -93,6 +43,6 @@ const COMMON_USER_SCHEMA = {
             .nullable()
         : passSchema;
     }),
-};
+});
 
-export { COMMON_USER_SCHEMA };
+export { createCommonUserSchema };
