@@ -172,19 +172,17 @@ describe('Cloudinary provider', () => {
       expect(destroy).not.toHaveBeenCalled();
     });
 
-    test('destroys the old asset when a folder moves an in-place replace', async () => {
-      mockUploadStream();
+    test('ignores a folder on an in-place replace, so the asset does not move', async () => {
+      const uploadStream = mockUploadStream();
       const destroy = vi.spyOn(cloudinary.uploader, 'destroy').mockResolvedValue({ result: 'ok' });
       const provider = cloudinaryProvider.init({ cloud_name: 'demo' });
       const { newFile, oldFile } = createFiles('photo_123');
 
       await provider.replaceStream(newFile, oldFile, { folder: 'assets' });
 
-      expect(newFile).toMatchObject({ provider_metadata: { public_id: 'assets/photo_123' } });
-      expect(destroy).toHaveBeenCalledWith('photo_123', {
-        resource_type: 'image',
-        invalidate: true,
-      });
+      expect(uploadStream.mock.calls[0][0]).not.toHaveProperty('folder');
+      expect(newFile).toMatchObject({ provider_metadata: { public_id: 'photo_123' } });
+      expect(destroy).not.toHaveBeenCalled();
     });
 
     test('overwrites and invalidates when the file path makes it land on the old public_id', async () => {
@@ -204,8 +202,8 @@ describe('Cloudinary provider', () => {
       expect(destroy).not.toHaveBeenCalled();
     });
 
-    test('destroys the old asset when the file path moves an in-place replace', async () => {
-      mockUploadStream();
+    test('ignores the file path on an in-place replace, so the asset does not move', async () => {
+      const uploadStream = mockUploadStream();
       const destroy = vi.spyOn(cloudinary.uploader, 'destroy').mockResolvedValue({ result: 'ok' });
       const provider = cloudinaryProvider.init({ cloud_name: 'demo' });
       const { newFile, oldFile } = createFiles('photo_123');
@@ -213,11 +211,49 @@ describe('Cloudinary provider', () => {
 
       await provider.replaceStream(newFile, oldFile);
 
-      expect(newFile).toMatchObject({ provider_metadata: { public_id: 'assets/photo_123' } });
-      expect(destroy).toHaveBeenCalledWith('photo_123', {
-        resource_type: 'image',
-        invalidate: true,
-      });
+      expect(uploadStream.mock.calls[0][0]).not.toHaveProperty('folder');
+      expect(newFile).toMatchObject({ provider_metadata: { public_id: 'photo_123' } });
+      expect(destroy).not.toHaveBeenCalled();
+    });
+
+    // The upload plugin replaces the main file and its formats in one Promise.all and updates the
+    // file row only when all of them resolve, so a failed format must leave every asset in place.
+    test('a failed format replace keeps the asset the file row points at', async () => {
+      const stored = new Set(['photo_123', 'thumbnail_photo_123']);
+      vi.spyOn(cloudinary.uploader, 'upload_stream').mockImplementation(
+        ((options: { folder?: string; public_id: string }, callback: UploadCallback) =>
+          new Writable({
+            write: (_chunk, _encoding, done) => done(),
+            final(done) {
+              const publicId = options.folder
+                ? `${options.folder}/${options.public_id}`
+                : options.public_id;
+              if (publicId.endsWith('thumbnail_photo_123')) {
+                callback(new Error('network error'), undefined);
+              } else {
+                stored.add(publicId);
+                callback(null, { public_id: publicId, resource_type: 'image', secure_url: 'url' });
+              }
+              done();
+            },
+          })) as unknown as typeof cloudinary.uploader.upload_stream
+      );
+      vi.spyOn(cloudinary.uploader, 'destroy').mockImplementation((async (publicId: string) => ({
+        result: stored.delete(publicId) ? 'ok' : 'not found',
+      })) as unknown as typeof cloudinary.uploader.destroy);
+      const provider = cloudinaryProvider.init({ cloud_name: 'demo' });
+      const main = createFiles('photo_123');
+      const thumbnail = createFiles('thumbnail_photo_123');
+      thumbnail.newFile.hash = 'thumbnail_photo_123';
+      main.newFile.path = 'assets';
+
+      const results = await Promise.allSettled([
+        provider.replaceStream(main.newFile, main.oldFile, { folder: 'assets' }),
+        provider.replaceStream(thumbnail.newFile, thumbnail.oldFile, { folder: 'assets' }),
+      ]);
+
+      expect(results.map((result) => result.status)).toEqual(['fulfilled', 'rejected']);
+      expect(stored).toEqual(new Set(['photo_123', 'thumbnail_photo_123']));
     });
 
     test('keeps the stored resource_type when it overwrites in place', async () => {

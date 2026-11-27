@@ -29,7 +29,13 @@ const providerModule = {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 
-    const upload = (file: File, customConfig = {}): Promise<void> => {
+    // `pinnedConfig` comes after the caller options, so they cannot override it. A `folder: undefined`
+    // there removes the folder, which also drops a folder set from `file.path`.
+    const upload = (
+      file: File,
+      customConfig = {},
+      pinnedConfig: Partial<UploadApiOptions> = {}
+    ): Promise<void> => {
       return new Promise((resolve, reject) => {
         const config: Partial<UploadApiOptions> = {
           resource_type: 'auto',
@@ -54,7 +60,16 @@ const providerModule = {
             ? cloudinary.uploader.upload_stream
             : cloudinary.uploader.upload_chunked_stream;
 
-        const uploadStream = uploadMethod({ ...config, ...customConfig }, (err, image) => {
+        const uploadConfig: Partial<UploadApiOptions> = {
+          ...config,
+          ...customConfig,
+          ...pinnedConfig,
+        };
+        if ('folder' in pinnedConfig && pinnedConfig.folder === undefined) {
+          delete uploadConfig.folder;
+        }
+
+        const uploadStream = uploadMethod(uploadConfig, (err, image) => {
           if (err) {
             if (err.message.includes('File size too large')) {
               reject(new utils.errors.PayloadTooLargeError());
@@ -108,17 +123,22 @@ const providerModule = {
       const replaceConfig = { overwrite: true, invalidate: true };
 
       // If the public_id is preserved, overwrite in place. `public_id` comes after the options so
-      // it cannot be overridden. On the other branch `resource_type` stays `auto`, so a type
-      // change makes the new asset a different one and the old asset is destroyed below.
+      // it cannot be overridden, and `folder` (from the options or `file.path`) is dropped, so the
+      // asset never moves. A move would destroy the old asset below before the upload plugin
+      // updates the file row, and a failed sibling format replace would then leave the row on a
+      // destroyed asset. On the other branch `resource_type` stays `auto`, so a type change makes
+      // the new asset a different one and the old asset is destroyed below.
       if (oldPublicId && newFile.hash === oldPublicId) {
-        await upload(newFile, {
-          ...(oldResourceType ? { resource_type: oldResourceType } : {}),
-          ...customConfig,
-          public_id: oldPublicId as string,
-          ...replaceConfig,
-        });
+        await upload(
+          newFile,
+          {
+            ...(oldResourceType ? { resource_type: oldResourceType } : {}),
+            ...customConfig,
+          },
+          { public_id: oldPublicId as string, folder: undefined, ...replaceConfig }
+        );
       } else {
-        await upload(newFile, { ...customConfig, ...replaceConfig });
+        await upload(newFile, customConfig, replaceConfig);
       }
 
       // Cloudinary identifies an asset by its public_id and resource_type together. Options such
