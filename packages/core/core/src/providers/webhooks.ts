@@ -1,12 +1,20 @@
 import { defineProvider } from './provider';
 import { createWebhookStore, webhookModel } from '../services/webhook-store';
 import createWebhookRunner from '../services/webhook-runner';
+import { BODY_TEMPLATE_FUTURE_FLAG, type ContentTypes } from '../services/webhook-body';
 
 export default defineProvider({
   init(strapi) {
     strapi.get('models').add(webhookModel);
 
-    strapi.add('webhookStore', () => createWebhookStore({ db: strapi.db }));
+    const isBodyTemplateEnabled = () => strapi.features.future.isEnabled(BODY_TEMPLATE_FUTURE_FLAG);
+    // The registry type has no string index signature, so a plain cast fails (TS2352). Only the
+    // `attributes` and `options` of each content type are read.
+    const getContentTypes = () => strapi.contentTypes as unknown as ContentTypes;
+
+    strapi.add('webhookStore', () =>
+      createWebhookStore({ db: strapi.db, isBodyTemplateEnabled, getContentTypes })
+    );
     strapi.add('webhookRunner', () =>
       createWebhookRunner({
         eventHub: strapi.eventHub,
@@ -14,6 +22,8 @@ export default defineProvider({
         logger: strapi.log,
         configuration: strapi.config.get('server.webhooks', {}),
         fetch: strapi.fetch,
+        isBodyTemplateEnabled,
+        getContentTypes,
       })
     );
   },

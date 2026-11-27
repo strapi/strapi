@@ -2,9 +2,12 @@
  * Webhook store is the implementation of webhook storage over the core_store
  */
 
+import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Model, Database } from '@strapi/database';
 import type { Modules } from '@strapi/types';
+
+import { validateWebhookBody } from './webhook-body';
 
 const { ValidationError } = errors;
 
@@ -28,6 +31,9 @@ const webhookModel: Model = {
     events: {
       type: 'json',
     },
+    body: {
+      type: 'json',
+    },
     contentTypeEvents: {
       type: 'json',
     },
@@ -38,9 +44,11 @@ const webhookModel: Model = {
 };
 
 type Webhook = Modules.WebhookStore.Webhook;
-type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'contentTypeEvents'> & {
+type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'body' | 'contentTypeEvents'> & {
   id: string | number;
   enabled: boolean;
+  // null for the default payload, also for webhooks saved before the body could be customized
+  body?: Webhook['body'];
   // null for webhooks saved before events could be selected per content type
   contentTypeEvents?: Webhook['contentTypeEvents'] | null;
 };
@@ -67,6 +75,7 @@ const toDBObject = (data: Webhook): DBInput => {
     url: data.url,
     headers: data.headers,
     events: data.events,
+    body: data.body ?? null,
     contentTypeEvents: toContentTypeEvents(data),
     enabled: data.isEnabled,
   };
@@ -79,6 +88,7 @@ const fromDBObject = (row: DBOutput): Webhook => {
     url: row.url,
     headers: row.headers,
     events: row.events,
+    body: row.body ?? null,
     contentTypeEvents: row.contentTypeEvents ?? {},
     isEnabled: row.enabled,
   };
@@ -109,7 +119,17 @@ export interface WebhookStore {
   deleteWebhook(id: string): Promise<Webhook | null>;
 }
 
-const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
+interface WebhookStoreOptions {
+  db: Database;
+  isBodyTemplateEnabled?: () => boolean;
+  getContentTypes?: () => Parameters<typeof validateWebhookBody>[1];
+}
+
+const createWebhookStore = ({
+  db,
+  isBodyTemplateEnabled = () => false,
+  getContentTypes = () => ({}),
+}: WebhookStoreOptions): WebhookStore => {
   return {
     allowedEvents: new Map([
       ['ENTRY_CREATE', 'entry.create'],
@@ -143,19 +163,45 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
     async createWebhook(data) {
       await webhookEventValidator(this.allowedEvents, getEvents(data));
 
+      if (isBodyTemplateEnabled()) {
+        validateWebhookBody(data, getContentTypes());
+      }
+
+      const row = toDBObject({ ...data, isEnabled: true });
+
       return db
         .query('strapi::webhook')
         .create({
-          data: toDBObject({ ...data, isEnabled: true }),
+          data: isBodyTemplateEnabled() ? row : { ...row, body: null },
         })
         .then(fromDBObject);
     },
     async updateWebhook(id, data) {
       await webhookEventValidator(this.allowedEvents, getEvents(data));
 
+      // A missing `body` keeps the saved template, like the flag-off path and unlike `null`
+      const keepsBody = !isBodyTemplateEnabled() || data.body === undefined;
+
+      if (isBodyTemplateEnabled()) {
+        const saved = await this.findWebhook(id);
+        const body = data.body === undefined ? saved?.body : data.body;
+        const isSavedBody = saved !== null && _.isEqual(body, saved.body);
+
+        // Checked in full against the events and content types it will be sent with, which a
+        // disabled save or a save with the flag off may have changed. Not when the saved template
+        // stays and the webhook ends disabled: a webhook whose template no longer validates (a
+        // field it uses was removed, for example) can always be turned off.
+        if (body && !(isSavedBody && data.isEnabled === false)) {
+          validateWebhookBody({ ...data, body }, getContentTypes());
+        }
+      }
+
+      const row = toDBObject(data);
+
       const webhook = await db.query('strapi::webhook').update({
         where: { id },
-        data: toDBObject(data),
+        // Without the flag, a saved template is neither sent nor changed
+        data: keepsBody ? _.omit(row, 'body') : row,
       });
 
       return webhook ? fromDBObject(webhook) : null;

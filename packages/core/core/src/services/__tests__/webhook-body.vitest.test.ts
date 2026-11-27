@@ -1,0 +1,587 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import type { Modules } from '@strapi/types';
+
+import {
+  MAX_TEMPLATE_BYTES,
+  WebhookBodyTooLargeError,
+  createSampleEvent,
+  getMaxRenderedBytes,
+  renderWebhookBody,
+  validateWebhookBody,
+} from '../webhook-body';
+
+type Webhook = Modules.WebhookStore.Webhook;
+
+const payload = {
+  event: 'entry.publish',
+  createdAt: new Date('2026-10-20T10:00:00.000Z'),
+  model: 'article',
+  uid: 'api::article.article',
+  entry: {
+    id: 1,
+    documentId: 'abc',
+    title: 'Hello',
+    views: 12,
+    featured: true,
+    summary: null,
+    tags: [{ name: 'news' }, { name: 'tech' }],
+  },
+};
+
+/** `api.responses.privateAttributes`, read by the sanitizer's `isPrivateAttribute`. */
+let globalPrivateAttributes: string[] = [];
+
+beforeEach(() => {
+  globalPrivateAttributes = [];
+  global.strapi = {
+    config: {
+      get: (key: string, fallback?: unknown) =>
+        key === 'api.responses.privateAttributes' ? globalPrivateAttributes : fallback,
+    },
+  } as any;
+});
+
+const ARTICLE_UID = 'api::article.article';
+const PAGE_UID = 'api::page.page';
+
+const contentTypes = {
+  [ARTICLE_UID]: {
+    attributes: {
+      title: { type: 'string' },
+      views: { type: 'integer' },
+      secret: { type: 'string', private: true },
+      password: { type: 'password' },
+      tags: { type: 'relation' },
+      cover: { type: 'media' },
+      seo: { type: 'component' },
+      blocks: { type: 'dynamiczone' },
+    },
+  },
+  [PAGE_UID]: { attributes: { slug: { type: 'uid' }, title: { type: 'string' } } },
+} as any;
+
+const createWebhook = (webhook: Partial<Webhook> = {}): Webhook => ({
+  id: '1',
+  name: 'webhook',
+  url: 'https://example.com/hook',
+  headers: {},
+  events: [],
+  contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+  isEnabled: true,
+  ...webhook,
+});
+
+describe('renderWebhookBody', () => {
+  test('Copies a template without placeholders as is', () => {
+    const template = { ref: 'main', inputs: { env: 'production' }, retries: 3, dryRun: false };
+
+    expect(renderWebhookBody(template, payload)).toEqual(template);
+  });
+
+  test('Replaces a single placeholder with the raw value', () => {
+    expect(
+      renderWebhookBody(
+        {
+          event: '{{ event }}',
+          entry: '{{ entry }}',
+          documentId: '{{ documentId }}',
+          views: '{{entry.views}}',
+          featured: '{{ entry.featured }}',
+          summary: '{{ entry.summary }}',
+          createdAt: '{{ createdAt }}',
+        },
+        payload
+      )
+    ).toEqual({
+      event: 'entry.publish',
+      entry: payload.entry,
+      documentId: 'abc',
+      views: 12,
+      featured: true,
+      summary: null,
+      createdAt: payload.createdAt,
+    });
+  });
+
+  test('Replaces the placeholders of a longer string with their text', () => {
+    expect(
+      renderWebhookBody(
+        {
+          text: '{{ entry.title }} ({{ uid }}) has {{ entry.views }} views, featured: {{ entry.featured }}',
+          at: 'at {{ createdAt }}',
+          tags: 'tags: {{ entry.tags }}',
+        },
+        payload
+      )
+    ).toEqual({
+      text: 'Hello (api::article.article) has 12 views, featured: true',
+      at: 'at 2026-10-20T10:00:00.000Z',
+      tags: 'tags: [{"name":"news"},{"name":"tech"}]',
+    });
+  });
+
+  test('Renders nested objects and arrays', () => {
+    expect(
+      renderWebhookBody(
+        {
+          client_payload: {
+            uid: '{{ uid }}',
+            entries: ['{{ documentId }}', { title: '{{ entry.title }}' }],
+          },
+        },
+        payload
+      )
+    ).toEqual({
+      client_payload: { uid: 'api::article.article', entries: ['abc', { title: 'Hello' }] },
+    });
+  });
+
+  test('Treats a placeholder with text around its braces, even whitespace, as text', () => {
+    expect(
+      renderWebhookBody(
+        {
+          a: ' {{ entry.title }} ',
+          b: '{{ entry.views }}\n',
+          c: 'n={{ entry.views }}',
+          d: '{{ entry.views }}',
+        },
+        payload
+      )
+    ).toEqual({ a: ' Hello ', b: '12\n', c: 'n=12', d: 12 });
+  });
+
+  test('Stops before building a body over the limit', () => {
+    const entry = { description: 'x'.repeat(10 * 1024) };
+    const big = { ...payload, entry };
+    const template = { text: '{{ entry }}'.repeat(1000) };
+
+    // About 10 MB once rendered: stopped at the first placeholder over 1 MB, not after
+    expect(() => renderWebhookBody(template, big, undefined, 1024 * 1024)).toThrow(
+      WebhookBodyTooLargeError
+    );
+    // The same limit counts embedded objects, not only text
+    expect(() =>
+      renderWebhookBody({ list: Array(200).fill('{{ entry }}') }, big, undefined, 1024 * 1024)
+    ).toThrow('larger than 1048576 bytes once rendered');
+    expect(renderWebhookBody({ entry: '{{ entry }}' }, big, undefined, 1024 * 1024)).toEqual({
+      entry,
+    });
+  });
+
+  test('Reports a missing variable once, however many times the template uses it', () => {
+    const onMissing = vi.fn();
+
+    renderWebhookBody({ a: '{{ entry.gone }}', b: 'x {{ entry.gone }}' }, payload, onMissing);
+
+    expect(onMissing).toHaveBeenCalledTimes(1);
+  });
+
+  test('Allows twice the default payload, and at least 1 MiB', () => {
+    expect(getMaxRenderedBytes(100)).toBe(1024 * 1024);
+    expect(getMaxRenderedBytes(4 * 1024 * 1024)).toBe(8 * 1024 * 1024);
+  });
+
+  test('Gives null for a missing single placeholder and an empty string inside a string', () => {
+    expect(
+      renderWebhookBody(
+        { missing: '{{ entry.unknown }}', text: 'value: {{ entry.unknown }}!' },
+        payload
+      )
+    ).toEqual({ missing: null, text: 'value: !' });
+  });
+
+  test('Reports the variables without a value, not the ones holding null', () => {
+    const onMissing = vi.fn();
+
+    renderWebhookBody(
+      { a: '{{ entry.unknown }}', b: 'x{{ media }}y', c: '{{ entry.summary }}', d: '{{ uid }}' },
+      payload,
+      onMissing
+    );
+
+    expect(onMissing.mock.calls).toEqual([['entry.unknown'], ['media']]);
+  });
+
+  test('Only resolves the listed variables, not paths into the payload', () => {
+    expect(
+      renderWebhookBody(
+        {
+          nested: '{{ entry.tags.0.name }}',
+          other: '{{ media }}',
+          proto: '{{ entry.__proto__ }}',
+          constructor: '{{ entry.constructor }}',
+          date: '{{ createdAt.getTime }}',
+        },
+        { ...payload, media: { id: 1 } }
+      )
+    ).toEqual({ nested: null, other: null, proto: null, constructor: null, date: null });
+  });
+
+  test('Leaves keys and malformed placeholders untouched', () => {
+    expect(
+      renderWebhookBody(
+        { '{{ event }}': '{{ event', single: '{{ }}', spaced: '{{ entry title }}' },
+        payload
+      )
+    ).toEqual({ '{{ event }}': '{{ event', single: '{{ }}', spaced: '{{ entry title }}' });
+  });
+});
+
+describe('validateWebhookBody', () => {
+  const validate = (body: Webhook['body'], webhook: Partial<Webhook> = {}) =>
+    validateWebhookBody(createWebhook({ body, ...webhook }), contentTypes);
+
+  test.each([[null], [undefined], [{}], [{ ref: 'main', retries: 3 }]])(
+    'Accepts a template without variables (%j)',
+    (body) => {
+      expect(() => validate(body)).not.toThrow();
+      expect(() =>
+        validate(body, { events: ['media.create'], contentTypeEvents: {} })
+      ).not.toThrow();
+    }
+  );
+
+  test.each([[['ref']], ['{"ref":"main"}'], [42]])('Rejects %j, not a JSON object', (body) => {
+    expect(() => validate(body as any)).toThrow('Webhook body must be a JSON object');
+  });
+
+  test('Accepts every variable, nested in the template', () => {
+    expect(() =>
+      validate({
+        event: '{{ event }}',
+        nested: {
+          list: ['{{ createdAt }}', '{{ model }} {{ uid }}'],
+          id: '{{ documentId }}',
+          entry: '{{ entry }}',
+          field: 'Title: {{ entry.title }}',
+        },
+      })
+    ).not.toThrow();
+  });
+
+  test.each([
+    'media',
+    'entry.title.length',
+    'entry.tags.0.name',
+    'entity',
+    'a b',
+    'entry title',
+    '',
+  ])('Rejects the unknown variable or path %j', (variable) => {
+    expect(() => validate({ text: `value: {{ ${variable} }}` })).toThrow();
+  });
+
+  test.each(['{{ entry.title', 'Title: {{ event }} {{ uid', 'event }}', '{{ event }} }}', '{{'])(
+    'Rejects %j, a "{{" or "}}" outside of a placeholder',
+    (value) => {
+      expect(() => validate({ text: value })).toThrow(
+        'do not open and close a variable placeholder'
+      );
+      expect(() => validate({ nested: [{ text: value }] })).toThrow('do not open and close');
+    }
+  );
+
+  test('Rejects an unterminated placeholder in a key', () => {
+    expect(() => validate({ '{{ event': 'x' })).toThrow("keys can't hold a variable");
+  });
+
+  test('Rejects a variable in a key', () => {
+    expect(() => validate({ '{{ event }}': 'x' })).toThrow("keys can't hold a variable");
+  });
+
+  test.each(['tags', 'cover', 'seo', 'blocks', 'secret', 'password'])(
+    'Rejects the field %s, which is not a scalar field that is always sent',
+    (field) => {
+      expect(() => validate({ value: `{{ entry.${field} }}` })).toThrow(
+        `entry.${field} is not a scalar, non-private field of ${ARTICLE_UID}`
+      );
+    }
+  );
+
+  test.each(['unknown', 'constructor'])('Rejects %s, which is not a field at all', (field) => {
+    expect(() => validate({ value: `{{ entry.${field} }}` })).toThrow(
+      `entry.${field} is not a field of ${ARTICLE_UID}`
+    );
+  });
+
+  test('Checks a field against every content type the webhook targets', () => {
+    const contentTypeEvents = { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] };
+
+    expect(() => validate({ value: '{{ entry.title }}' }, { contentTypeEvents })).not.toThrow();
+    expect(() => validate({ value: '{{ entry.views }}' }, { contentTypeEvents })).toThrow(
+      `entry.views is not a field of ${PAGE_UID}`
+    );
+  });
+
+  test('Ignores a targeted content type that was deleted', () => {
+    expect(() =>
+      validate(
+        { value: '{{ entry.title }}' },
+        { contentTypeEvents: { 'api::deleted.deleted': ['entry.create'] } }
+      )
+    ).not.toThrow();
+  });
+
+  test('Only accepts the common fields when the events are selected for every content type', () => {
+    const webhook = { events: ['entry.create'], contentTypeEvents: {} };
+
+    expect(() =>
+      validate(
+        {
+          id: '{{ entry.id }}',
+          documentId: '{{ entry.documentId }}',
+          createdAt: '{{ entry.createdAt }}',
+          updatedAt: '{{ entry.updatedAt }}',
+          // Every content type gets publishedAt, draft and publish or not
+          publishedAt: '{{ entry.publishedAt }}',
+        },
+        webhook
+      )
+    ).not.toThrow();
+    expect(() => validate({ value: '{{ entry.title }}' }, webhook)).toThrow(
+      'can only be used when the events are selected per content type'
+    );
+  });
+
+  test.each(['entry', 'uid', 'model', 'documentId', 'entry.id'])(
+    'Rejects {{ %s }} on a webhook that listens to another kind of event',
+    (variable) => {
+      expect(() =>
+        validate(
+          { value: `{{ ${variable} }}` },
+          { events: ['entry.create', 'media.create'], contentTypeEvents: {} }
+        )
+      ).toThrow(`not available for the event media.create`);
+    }
+  );
+
+  test('Accepts the event variables on every event', () => {
+    expect(() =>
+      validate(
+        { event: '{{ event }}', at: '{{ createdAt }}' },
+        { events: ['media.create'], contentTypeEvents: {} }
+      )
+    ).not.toThrow();
+  });
+});
+
+describe('validateWebhookBody: what the event payload sanitizer removes', () => {
+  // A fresh schema per test: `isPrivateAttribute` caches the private fields of each schema
+  const noteContentTypes = () =>
+    ({
+      [ARTICLE_UID]: {
+        attributes: { title: { type: 'string' }, secretNote: { type: 'string' } },
+        options: { privateAttributes: ['secretNote'] },
+      },
+    } as any);
+
+  test('Rejects a field made private by the content type options', () => {
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({ body: { s: '{{ entry.secretNote }}' } }),
+        noteContentTypes()
+      )
+    ).toThrow(`entry.secretNote is not a scalar, non-private field of ${ARTICLE_UID}`);
+  });
+
+  test('Rejects a field made private by api.responses.privateAttributes', () => {
+    globalPrivateAttributes = ['title'];
+
+    expect(() =>
+      validateWebhookBody(createWebhook({ body: { t: '{{ entry.title }}' } }), noteContentTypes())
+    ).toThrow(`entry.title is not a scalar, non-private field of ${ARTICLE_UID}`);
+  });
+
+  test.each([
+    ['per content type', {}],
+    ['for every content type', { events: ['entry.create'], contentTypeEvents: {} }],
+  ])('Rejects a common field made private by the global config, events %s', (_, webhook) => {
+    globalPrivateAttributes = ['createdAt'];
+
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({ body: { c: '{{ entry.createdAt }}' }, ...webhook }),
+        noteContentTypes()
+      )
+    ).toThrow('entry.createdAt is a private field');
+  });
+
+  test('Leaves the private fields out of the test trigger sample', () => {
+    globalPrivateAttributes = ['updatedAt'];
+
+    const { entry } = createSampleEvent(createWebhook(), noteContentTypes()) as {
+      entry: Record<string, unknown>;
+    };
+
+    expect(entry).toHaveProperty('title');
+    expect(entry).not.toHaveProperty('secretNote');
+    expect(entry).not.toHaveProperty('updatedAt');
+  });
+});
+
+describe('validateWebhookBody: limits and messages', () => {
+  const validate = (body: Webhook['body'], webhook: Partial<Webhook> = {}) =>
+    validateWebhookBody(createWebhook({ body, ...webhook }), contentTypes);
+
+  const nest = (levels: number) => {
+    let body: any = { leaf: '{{ event }}' };
+    for (let i = 0; i < levels; i += 1) body = { n: i % 2 ? body : [body] };
+    return body;
+  };
+
+  test('Rejects a body nested too deeply with a validation error, not a stack overflow', () => {
+    expect(() => validate(nest(2000))).toThrow("can't be nested more than 32 levels deep");
+    // About 22 levels: every other wrapper adds an array
+    expect(() => validate(nest(15))).not.toThrow();
+  });
+
+  test.each([
+    [{ v: '{{ unknown }}' }, {}],
+    [{ v: '{{ entry.title' }, {}],
+    [{ '{{ event }}': 'x' }, {}],
+    [{ v: '{{ entry.tags }}' }, {}],
+    [{ v: '{{ entry.title }}' }, { events: ['entry.create'], contentTypeEvents: {} }],
+    [{ v: '{{ entry.title }}' }, { events: ['media.create'], contentTypeEvents: {} }],
+  ])('Writes %j errors without braces, which the admin reads as ICU syntax', (body, webhook) => {
+    expect(() => validate(body, webhook)).toThrow(/^[^{}]*$/);
+  });
+
+  test('Points its errors at the body field, so the admin shows them under the input', () => {
+    try {
+      validate({ v: '{{ unknown }}' });
+      throw new Error('expected a validation error');
+    } catch (error: any) {
+      expect(error.details).toEqual({
+        errors: [expect.objectContaining({ path: ['body'], message: error.message })],
+      });
+    }
+  });
+
+  test('Rejects a field gone from its content type', () => {
+    expect(() => validate({ v: '{{ entry.removed }}' })).toThrow('entry.removed is not a field');
+  });
+
+  test(`Rejects a template larger than ${MAX_TEMPLATE_BYTES / 1024} KB`, () => {
+    // Static text, so only the size can make it fail
+    const text = (length: number) => ({ t: 'x'.repeat(length - JSON.stringify({ t: '' }).length) });
+
+    expect(() => validate(text(MAX_TEMPLATE_BYTES))).not.toThrow();
+    expect(() => validate(text(MAX_TEMPLATE_BYTES + 1))).toThrow("can't be larger than 64 KB");
+  });
+
+  test('Rejects one level deeper than the limit, not the limit itself', () => {
+    const atDepth = (levels: number) => {
+      let body: any = '{{ event }}';
+      for (let i = 0; i < levels; i += 1) body = { n: body };
+      return body;
+    };
+
+    expect(() => validate(atDepth(32))).not.toThrow();
+    expect(() => validate(atDepth(33))).toThrow("can't be nested more than 32 levels deep");
+  });
+
+  test('Checks a common field against every content type when events are for all of them', () => {
+    const privateCreatedAt = {
+      [ARTICLE_UID]: { attributes: {}, options: { privateAttributes: ['createdAt'] } },
+    } as any;
+
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({
+          body: { c: '{{ entry.createdAt }}' },
+          events: ['entry.create'],
+          contentTypeEvents: {},
+        }),
+        privateCreatedAt
+      )
+    ).toThrow('entry.createdAt is a private field');
+  });
+});
+
+describe('createSampleEvent', () => {
+  test('Gives a value to every variable a valid template can use', () => {
+    const webhook = createWebhook();
+    const template = {
+      model: '{{ model }}',
+      uid: '{{ uid }}',
+      documentId: '{{ documentId }}',
+      title: '{{ entry.title }}',
+      views: '{{ entry.views }}',
+      updatedAt: '{{ entry.updatedAt }}',
+      publishedAt: '{{ entry.publishedAt }}',
+    };
+
+    validateWebhookBody({ ...webhook, body: template }, contentTypes);
+
+    const onMissing = vi.fn();
+    const rendered = renderWebhookBody(
+      template,
+      { event: 'trigger-test', ...createSampleEvent(webhook, contentTypes) },
+      onMissing
+    );
+
+    expect(onMissing).not.toHaveBeenCalled();
+    expect(rendered).toEqual({
+      model: 'article',
+      uid: ARTICLE_UID,
+      documentId: 'sample-document-id',
+      title: 'Sample title',
+      views: 1,
+      updatedAt: expect.any(String),
+      publishedAt: expect.any(String),
+    });
+  });
+
+  test('Uses the JSON types a real delivery sends', () => {
+    const typed = {
+      [ARTICLE_UID]: {
+        attributes: {
+          views: { type: 'biginteger' },
+          content: { type: 'blocks' },
+          status: { type: 'enumeration', enum: ['draft', 'live'] },
+          score: { type: 'decimal' },
+        },
+      },
+    } as any;
+
+    const { entry } = createSampleEvent(createWebhook(), typed) as {
+      entry: Record<string, unknown>;
+    };
+
+    expect(entry.views).toBe('1');
+    expect(entry.content).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'Sample content' }] },
+    ]);
+    expect(entry.status).toBe('draft');
+    expect(entry.score).toBe(1);
+  });
+
+  test('Leaves out what an event would not send', () => {
+    const { entry } = createSampleEvent(createWebhook(), contentTypes) as {
+      entry: Record<string, unknown>;
+    };
+
+    ['secret', 'password', 'tags', 'cover', 'seo', 'blocks'].forEach((field) => {
+      expect(entry).not.toHaveProperty(field);
+    });
+  });
+
+  test('Only has the common fields when no content type is targeted', () => {
+    const sample = createSampleEvent(
+      createWebhook({ events: ['entry.create'], contentTypeEvents: {} }),
+      contentTypes
+    );
+
+    expect(sample).toEqual({
+      model: 'sample',
+      uid: 'api::sample.sample',
+      entry: {
+        id: 1,
+        documentId: 'sample-document-id',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        publishedAt: expect.any(String),
+      },
+    });
+  });
+});
