@@ -1205,15 +1205,33 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # In this workflow so aggregate_test_result cannot go green before versions are checked.
+  # That aggregate job is the required merge check; this one is not its own ruleset context.
+  check-package-versions:
+    name: Package version alignment
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Install dependencies
+        uses: ./.github/actions/yarn-nm-install
+      - name: Check package versions
+        run: yarn version:check
+
   test_result:
     if: ${{ always() }}
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     name: aggregate_test_result
     # `conditions` is listed too: when it fails, every job gated on its outputs is skipped, not
     # failed, so without it this job would pass with no test run.
+    # `check-package-versions` is listed so a version mismatch fails the required merge check,
+    # and so that check cannot pass while alignment is still running.
     needs:
       [
         conditions,
+        check-package-versions,
         pretty,
         lint,
         lint_oxlint,
