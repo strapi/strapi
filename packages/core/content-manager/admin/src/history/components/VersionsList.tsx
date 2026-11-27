@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
 import { AccessibleIcon, Box, Flex, Status, Tooltip, Typography } from '@strapi/design-system';
-import { Key, User } from '@strapi/icons';
+import { KeyIcon, UserIcon } from '@strapi/icons/regular';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -95,8 +95,8 @@ const TruncatedName = ({
  * -----------------------------------------------------------------------------------------------*/
 
 const AUTHOR_TYPE_ICONS: Record<HistoryVersions.HistoryVersionAuthorType, React.ElementType> = {
-  person: User,
-  token: Key,
+  person: UserIcon,
+  token: KeyIcon,
 };
 
 const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
@@ -144,7 +144,7 @@ const VersionAuthorName = ({
     <Flex tag="span" gap={1} minWidth={0}>
       <Flex tag="span" shrink={0}>
         <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
-          <Icon />
+          <Icon width="1em" height="1em" />
         </AccessibleIcon>
       </Flex>
       <TruncatedName
@@ -228,7 +228,7 @@ const VersionSource = ({ source }: { source: HistoryVersions.HistoryVersionSourc
 
   return (
     <Status variant="neutral" size="XS">
-      <Typography tag="span" variant="omega" fontWeight="bold">
+      <Typography tag="span" variant="pi" fontWeight="bold">
         {formatMessage(SOURCE_LABELS[source])}
       </Typography>
     </Status>
@@ -311,7 +311,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
         </VersionDescription>
       </Flex>
       <Flex gap={2} wrap="wrap">
-        {version.status && <DocumentStatus status={version.status} size="XS" />}
+        {version.status && <DocumentStatus status={version.status} size="XS" textVariant="pi" />}
         <VersionSource source={version.source} />
       </Flex>
     </Flex>
