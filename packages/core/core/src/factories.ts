@@ -165,8 +165,6 @@ const createUploadProvider = <
 ): TModule => module;
 
 // The route keeps its `config` as written, not widened to `Core.RouteConfig`.
-// TODO @Nico when strict types land, widen the constraint to `Core.RouteConfig | Core.RouteConfigFor`
-// so a defined route also fits `Core.RouterInputFor`, which checks policy and middleware names.
 type DefineRouteConfig<TRequest extends Core.RouteRequest, TConfig extends Core.RouteConfig> = Omit<
   Core.RouteInput,
   'handler' | 'request' | 'config'
@@ -297,7 +295,6 @@ const parseRouteInput = <TRoute extends { request?: Core.RouteRequest }>(
   ctx: Parameters<Core.ControllerHandler>[0],
   route: TRoute
 ): Core.ValidatedRouteInputOf<TRoute> => {
-  // TODO @Nico check the schemas when the route is registered, not on the first request.
   return parseInput(ctx, route) as Core.ValidatedRouteInputOf<TRoute>;
 };
 

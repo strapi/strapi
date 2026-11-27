@@ -43,7 +43,7 @@ const WRAPPER_TYPES = new Set([
  * Returns why a schema can never parse the string values of a request correctly, or `undefined`.
  * Walks wrappers, pipes, arrays, objects and unions (a union passes when one option passes).
  *
- * TODO @Nico `z.lazy`, records, tuples and intersections are not walked.
+ * `z.lazy`, records, tuples and intersections are not walked.
  */
 const findStringIssue = (schema: z.ZodType, part: InputPart): string | undefined => {
   const def = schema._zod.def as unknown as SchemaDef;
@@ -154,8 +154,8 @@ export const assertRouteRequest = (request: Core.RouteRequest) => {
  *   A body of an undeclared media type answers 415.
  * - On failure, throws a `ValidationError` (400) whose `details.errors[].path` starts with the part.
  *
- * TODO @Nico koa-body parses no body for GET, HEAD and DELETE by default, so a body declared on these
- * methods always parses `undefined`.
+ * koa-body parses no body for GET, HEAD and DELETE by default, so a body declared on these methods
+ * always parses `undefined`.
  */
 export const createValidatedInputParser = (request: Core.RouteRequest): Parser => {
   const shape: Record<string, z.ZodType> = {};
