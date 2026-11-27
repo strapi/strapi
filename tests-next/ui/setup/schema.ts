@@ -15,4 +15,13 @@ export const scaffoldUiSchema = (app: App) => {
     draftAndPublish: true,
     attributes: { title: { type: 'string' } },
   });
+
+  // Content Manager: validation of required fields on save.
+  scaffoldContentType(app, {
+    singularName: 'product',
+    attributes: {
+      name: { type: 'string', required: true },
+      price: { type: 'decimal', required: true },
+    },
+  });
 };
