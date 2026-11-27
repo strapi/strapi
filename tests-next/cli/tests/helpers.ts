@@ -29,6 +29,7 @@ export interface RunOptions {
   input?: string;
 }
 
+/** stdout and stderr are plain text: colors depend on the env (Nx sets FORCE_COLOR). */
 export interface RunResult {
   code: number | null;
   stdout: string;
@@ -61,7 +62,9 @@ export const run = (
 
     child.on('error', reject);
     child.on('close', (code) => {
-      resolve({ code, stdout, stderr, output: `${stdout}${stderr}` });
+      const out = stripVTControlCharacters(stdout);
+      const err = stripVTControlCharacters(stderr);
+      resolve({ code, stdout: out, stderr: err, output: `${out}${err}` });
     });
 
     child.stdin.end(input);
@@ -101,7 +104,7 @@ export const runStrapi = (
 
 /** The rows of a table the CLI prints, keyed by the header cells. */
 export const parseTable = (output: string): Array<Record<string, string>> => {
-  const [header = [], ...rows] = stripVTControlCharacters(output)
+  const [header = [], ...rows] = output
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.startsWith('│') && line.endsWith('│'))
