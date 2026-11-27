@@ -1,3 +1,4 @@
+export { ContentTypeBuilderPage } from './content-type-builder/content-type-builder-page';
 export { EditViewPage } from './content-manager/edit-view-page';
 export { HomePage } from './home-page';
 export { ListViewPage } from './content-manager/list-view-page';
