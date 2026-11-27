@@ -1,4 +1,4 @@
-import type { Core, Data, Modules, Schema, Struct } from '@strapi/types';
+import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { queryParams } from '@strapi/utils';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
@@ -100,12 +100,15 @@ type GroupableReleaseAction = Pick<ReleaseAction, 'contentType'> & {
   entry?: StrictReleaseActionPageEntry | null | undefined;
 };
 
-/** A grouped action: the action with its `locale` and `contentType` resolved. */
+/**
+ * A grouped action: the action with its `locale` and `contentType` resolved. `contentType` is
+ * written out: `mainFieldValue` is the entry's main field, whatever it holds, and the published
+ * declaration prints the implementation's inferred value as `any`.
+ */
 type GroupedReleaseAction<TAction> = Omit<TAction, 'locale' | 'contentType'> &
-  Pick<
-    Awaited<ReturnType<ReleaseActionService['groupActions']>>[string][number],
-    'locale' | 'contentType'
-  >;
+  Pick<Awaited<ReturnType<ReleaseActionService['groupActions']>>[string][number], 'locale'> & {
+    contentType: { uid: UID.ContentType; displayName: string; mainFieldValue?: unknown };
+  };
 
 /** The groupings of `groupActions`: the implementation's, or the controller's query `sort`. */
 type ReleaseActionGrouping =

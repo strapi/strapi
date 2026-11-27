@@ -31,11 +31,6 @@
       "tracking": "passport types",
       "paths": ["=>.Array<0>"]
     },
-    "PackageServices plugin::content-releases.release-action groupActions": {
-      "reason": "Fix pending: `GroupedReleaseAction` picks `contentType` from the inferred result, whose `mainFieldValue` reads `entry[mainField]` and prints as `any` in the emitted declaration.",
-      "tracking": "fix pending",
-      "paths": ["=>.Promise<0>.[index].Array<0>.contentType.mainFieldValue"]
-    },
     "PackageServices plugin::graphql.builders get": {
       "reason": "Nexus builder types.",
       "tracking": "GraphQL precise types",
