@@ -1,0 +1,145 @@
+name: 'No-code E2E: generate'
+
+# Turns the QA scenarios of tests-next/ui/scenarios into Playwright specs, with Claude Code (see
+# tests-next/ui/no-code-e2e/README.md). The scenarios become prompts run with secrets: only PRs
+# from branches of this repository run it, never forks or bots.
+#
+# Secrets: NO_CODE_E2E_ANTHROPIC_API_KEY, NO_CODE_E2E_APP_PRIVATE_KEY.
+# Variables: NO_CODE_E2E_APP_ID (the strapi-no-code-e2e GitHub App: contents and pull requests
+# write, no workflows permission, no bypass of branch rules).
+
+on:
+  pull_request:
+    paths:
+      - 'tests-next/ui/scenarios/**'
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Scenario ids, space-separated. Empty: every scenario whose spec is missing or out of date.'
+        required: false
+        default: ''
+      model:
+        description: 'Generation model (haiku, sonnet, opus). Empty: the one of config.json.'
+        required: false
+        default: ''
+
+concurrency:
+  group: no-code-e2e-generate-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CLAUDE_CODE_VERSION: '2.1.326'
+  # Under test-apps/ (gitignored): the scripts reset tracked and untracked files, not ignored ones.
+  REPORT: test-apps/no-code-e2e/report.json
+
+jobs:
+  # Lints the scenarios and says whether anything needs generating, without installing anything:
+  # a commit of the app itself (its specs, hashes up to date) stops here.
+  plan:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       !endsWith(github.actor, '[bot]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      generate: ${{ steps.plan.outputs.generate }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Lint the scenarios and plan the run
+        id: plan
+        run: node tests-next/ui/no-code-e2e/scripts/scenarios.mjs
+
+  generate:
+    needs: plan
+    if: needs.plan.outputs.generate == 'true'
+    runs-on: ubuntu-latest
+    # One scenario at a time: later scenarios reuse the Page Objects earlier ones created.
+    timeout-minutes: 150
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.NO_CODE_E2E_APP_ID }}
+          private-key: ${{ secrets.NO_CODE_E2E_APP_PRIVATE_KEY }}
+
+      # The app's token, so its push runs the PR's workflows again (a GITHUB_TOKEN push doesn't).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Git identity of the app
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${user_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Install Chromium
+        run: yarn playwright install --with-deps chromium
+      - name: Install Claude Code
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Generate the specs
+        id: generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.NO_CODE_E2E_ANTHROPIC_API_KEY }}
+          ONLY: ${{ inputs.only }}
+          MODEL: ${{ inputs.model }}
+        run: |
+          args=(--report "$REPORT")
+          for id in $ONLY; do args+=(--only "$id"); done
+          if [ -n "$MODEL" ]; then args+=(--model "$MODEL"); fi
+          node tests-next/ui/no-code-e2e/scripts/generate.mjs "${args[@]}"
+
+      # Green scenarios are committed one by one, so a failure elsewhere doesn't lose them.
+      - name: Push the generated specs
+        if: ${{ !cancelled() }}
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if [ -z "$(git log --oneline "origin/$BRANCH..HEAD")" ]; then
+            echo "Nothing to push."
+            exit 0
+          fi
+          git push origin "HEAD:refs/heads/$BRANCH"
+
+      - name: Report
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          [ -f "$REPORT" ] || exit 0
+          node tests-next/ui/no-code-e2e/scripts/report.mjs "$REPORT" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$PR_NUMBER" ]; then
+            node tests-next/ui/no-code-e2e/scripts/report.mjs "$REPORT" --comment "$PR_NUMBER"
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: no-code-e2e-generate
+          path: |
+            test-apps/no-code-e2e/report.json
+            tests-next/ui/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
