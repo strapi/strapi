@@ -2,14 +2,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-jest.mock('sort-package-json', () => ({
-  sortPackageJson: (pkg: Record<string, unknown>) => pkg,
-}));
+import { describe, expect, it } from 'vitest';
 
-import { createPackageJSON } from '../../../../packages/cli/create-strapi-app/src/utils/package-json';
-import type { Scope } from '../../../../packages/cli/create-strapi-app/src/types';
-
-const repoRoot = path.resolve(__dirname, '../../../..');
+import { createPackageJSON } from '../package-json';
+import type { Scope } from '../../types';
 
 function mkProjectDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-pkg-json-test-'));
@@ -38,13 +34,6 @@ function readPkg(rootPath: string) {
 }
 
 describe('createPackageJSON', () => {
-  beforeAll(() => {
-    const pkgJsonPath = path.join(repoRoot, 'packages/cli/create-strapi-app/package.json');
-    if (!fs.existsSync(pkgJsonPath)) {
-      throw new Error(`create-strapi-app package missing at ${pkgJsonPath}`);
-    }
-  });
-
   it('writes pnpm-workspace.yaml allowBuilds for pnpm 11 instead of package.json pnpm config', async () => {
     const projectDir = mkProjectDir();
 

@@ -1,4 +1,4 @@
-export { APPS_DIR, HOST, PORT_BASE, appPort } from './config';
+export { APPS_DIR, HOST, PORT_BASE, appPort, createStrapiAppBin } from './config';
 export type { Suite } from './config';
 export { appEnv } from './env';
 export type { AppEnvOptions } from './env';
