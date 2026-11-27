@@ -104,18 +104,20 @@ const createProvider = (config: Config) => {
   }
 
   const providerInstance = provider.init(providerOptions);
+  // A contract member that is not a function counts as omitted, here and in the wrapper.
+  const implementsMethod = (name: string) => typeof providerInstance[name] === 'function';
 
-  if (!providerInstance.delete) {
+  if (!implementsMethod('delete')) {
     throw new Error(`The upload provider "${providerName}" doesn't implement the delete method.`);
   }
 
-  if (!providerInstance.upload && !providerInstance.uploadStream) {
+  if (!implementsMethod('upload') && !implementsMethod('uploadStream')) {
     throw new Error(
       `The upload provider "${providerName}" doesn't implement the uploadStream nor the upload method.`
     );
   }
 
-  if (!providerInstance.uploadStream) {
+  if (!implementsMethod('uploadStream')) {
     process.emitWarning(
       `The upload provider "${providerName}" doesn't implement the uploadStream function. Strapi will fallback on the upload method. Some performance issues may occur.`
     );

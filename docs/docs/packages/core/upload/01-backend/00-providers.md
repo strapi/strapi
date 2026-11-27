@@ -37,7 +37,7 @@ Each method can answer synchronously or with a promise. `upload`, `uploadStream`
 
 The plugin calls `replaceStream` when the provider implements it, with `actionOptions.replaceStream`, and `replace` otherwise, with `actionOptions.replace`. Neither reads the `upload` or `uploadStream` entries, so options such as a Cloudinary `folder` must be repeated under the replace entries. When the provider implements neither, the plugin calls `delete` and then `upload` or `uploadStream`, which read their own entries.
 
-A contract member that is not a function, as in `uploadStream: canStream ? uploadStream : undefined` or `isPrivate: false`, counts as omitted: the plugin falls back on `upload`, or on its default for `isPrivate`, `getSignedUrl` and `checkFileSize`. Other members set to `undefined` are dropped too.
+A contract member that is not a function, as in `uploadStream: canStream ? uploadStream : undefined` or `isPrivate: false`, counts as omitted: the plugin falls back on `upload`, or on its default for `isPrivate`, `getSignedUrl` and `checkFileSize`. Register fails when `delete`, or both `upload` and `uploadStream`, are not functions. Other members set to `undefined` are dropped too.
 
 ### Typing a provider
 

@@ -391,6 +391,43 @@ describe('Upload plugin register', () => {
       await expect(provider.checkFileSize(file, { sizeLimit: 1 })).rejects.toBe(error);
     });
 
+    test.each([
+      ['delete', { upload: jest.fn(), delete: true }, 'delete method'],
+      ['upload and uploadStream', { upload: 'yes', uploadStream: 1, delete: jest.fn() }, 'upload'],
+    ])('a non-function %s fails register like an omitted one', async (_name, instance, message) => {
+      await expect(registerWithProvider(instance)).rejects.toThrow(message);
+    });
+
+    test('reads contract methods from the prototype of a class-based provider', async () => {
+      const upload = jest.fn();
+      const del = jest.fn();
+      class ClassProvider {
+        upload(...args: unknown[]) {
+          return upload(this, ...args);
+        }
+
+        delete(...args: unknown[]) {
+          return del(this, ...args);
+        }
+
+        isPrivate() {
+          return true;
+        }
+      }
+      const instance = new ClassProvider();
+
+      const provider = await registerWithProvider(instance as any, {
+        upload: { fromUpload: true },
+        delete: { fromDelete: true },
+      });
+
+      await provider.upload(file);
+      expect(upload).toHaveBeenCalledWith(instance, file, { fromUpload: true });
+      await provider.delete(file);
+      expect(del).toHaveBeenCalledWith(instance, file, { fromDelete: true });
+      await expect(provider.isPrivate()).resolves.toBe(true);
+    });
+
     test('optional contract methods the provider does not implement stay undefined', async () => {
       const provider = await registerWithProvider({ uploadStream: jest.fn(), delete: jest.fn() });
 
