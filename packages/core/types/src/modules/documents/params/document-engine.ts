@@ -72,8 +72,8 @@ type DraftAndPublishOption<TContentTypeUID extends UID.ContentType> = NonNullabl
 /**
  * Publication status accepted by `delete`.
  *
- * With draft and publish enabled, deleting the draft version alone throws `Cannot delete a draft
- * document`, so only `published` is accepted. The runtime ignores it: every version is deleted.
+ * With draft and publish enabled, deleting the draft version alone throws a `ValidationError`,
+ * so only `published` is accepted. The runtime ignores it: every version is deleted.
  *
  * Any other content type keeps both statuses, including a UID only known at runtime and apps
  * without generated types. Code generic over the UID can pass `published`.
