@@ -174,6 +174,10 @@ dispatchTransferStep(action:"stream", step, data)
 dispatchTransferStep(action:"end", step)
 ```
 
+**Pull Streaming**
+
+On a pull, the server sends the stage data itself. It answers `start` with the `id` of the stage stream, then sends the data in messages that carry this `id`. It sends the next message only after the client answers the previous one with its `uuid`. The last message has `ended: true`. The server does not resend these messages. The first one can arrive in the same socket read as the answer to `start`, so the client listens for them before it sends `start`.
+
 **Retry Mechanism**
 During data transfer:
 

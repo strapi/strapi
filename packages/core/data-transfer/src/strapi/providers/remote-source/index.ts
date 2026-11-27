@@ -97,32 +97,20 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       this.#cachedAssetsTotals = undefined;
     }
 
-    const startResult = await this.#startStep(stage);
-
-    if (startResult instanceof Error) {
-      throw startResult;
-    }
-
-    const { id: processID, totals } = startResult as {
-      id: string;
-      totals?: StageTotalsEstimate;
-    };
-
-    if (stage === 'assets' && totals && (totals.totalBytes != null || totals.totalCount != null)) {
-      this.#cachedAssetsTotals = totals;
-    }
-
     // Default object-mode HWM (~16 chunks). Do not await `drain` on manual `push` while `pipe()`
     // is attached — drain/`readableLength` races reliably deadlock after a few 1MiB asset frames.
     // Backpressure for pull assets is enforced by the Writable below (`highWaterMark: 1`).
     const stream = new PassThrough({ objectMode: true });
 
-    const listener = async (raw: Buffer) => {
+    let processID: string | undefined;
+    const earlyMessages: Buffer[] = [];
+    let handling = Promise.resolve();
+
+    const handle = async (raw: Buffer) => {
       const parsed = JSON.parse(raw.toString());
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
-        this.ws?.once('message', listener);
-        return;
+        return false;
       }
 
       const { uuid, data: message } = parsed;
@@ -131,7 +119,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       if (error) {
         await this.#respond(uuid);
         stream.destroy(error);
-        return;
+        return true;
       }
 
       if (ended) {
@@ -139,19 +127,58 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         await this.#endStep(stage);
 
         stream.end();
-        return;
+        return true;
       }
 
       for (const item of Array.isArray(data) ? data : [data]) {
         stream.push(item as Parameters<PassThrough['push']>[0]);
       }
 
-      this.ws?.once('message', listener);
-
       await this.#respond(uuid);
+      return false;
     };
 
-    this.ws?.once('message', listener);
+    const onMessage = (raw: Buffer) => {
+      if (processID === undefined) {
+        earlyMessages.push(raw);
+        return;
+      }
+
+      handling = handling
+        .then(() => handle(raw))
+        .then((stageEnded) => {
+          if (stageEnded) {
+            this.ws?.off('message', onMessage);
+          }
+        })
+        .catch((error: Error) => {
+          this.ws?.off('message', onMessage);
+          stream.destroy(error);
+        });
+    };
+
+    // The server streams as soon as it answers `start`: its first message can arrive in the same
+    // socket read as the response, before `await` returns. Listen before sending `start`.
+    this.ws?.on('message', onMessage);
+
+    const startResult = await this.#startStep(stage);
+
+    if (startResult instanceof Error) {
+      this.ws?.off('message', onMessage);
+      throw startResult;
+    }
+
+    const { id, totals } = startResult as {
+      id: string;
+      totals?: StageTotalsEstimate;
+    };
+
+    if (stage === 'assets' && totals && (totals.totalBytes != null || totals.totalCount != null)) {
+      this.#cachedAssetsTotals = totals;
+    }
+
+    processID = id;
+    earlyMessages.splice(0).forEach(onMessage);
 
     return stream;
   }
