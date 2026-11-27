@@ -1,8 +1,11 @@
-import { keyBy, omit } from 'lodash';
+import { chunk, keyBy, omit } from 'lodash';
 
 import type { Data, UID, Schema } from '@strapi/types';
 
 import type { JoinTable } from '@strapi/database';
+
+// Stays under the bound parameter limit of every supported database
+const ID_CHUNK_SIZE = 500;
 
 interface LoadContext {
   oldVersions: { id: Data.ID; locale: string }[];
@@ -155,6 +158,36 @@ const load = async (
 };
 
 /**
+ * Returns the ids of the link sources that still exist, or null when the source table is unknown.
+ *
+ * A link loaded before the old entries were deleted can lose its source: a component of an old
+ * entry is deleted with it (the new entry gets its own copy). Re-inserting that link would fail
+ * on its foreign key.
+ */
+const getExistingSourceIds = async (
+  trx: any,
+  joinTable: JoinTable,
+  relations: Record<string, any>[]
+): Promise<Set<string> | null> => {
+  const { referencedTable, referencedColumn, name: sourceColumn } = joinTable.joinColumn;
+
+  if (!referencedTable) {
+    return null;
+  }
+
+  const sourceIds = [...new Set(relations.map((relation) => relation[sourceColumn]))];
+  const existingIds = new Set<string>();
+
+  for (const ids of chunk(sourceIds, ID_CHUNK_SIZE)) {
+    const rows = await trx(referencedTable).select(referencedColumn).whereIn(referencedColumn, ids);
+
+    rows.forEach((row: Record<string, unknown>) => existingIds.add(String(row[referencedColumn])));
+  }
+
+  return existingIds;
+};
+
+/**
  * Updates uni directional relations to target the right entries when overriding published or draft entries.
  *
  * This function:
@@ -192,10 +225,22 @@ const sync = async (
       // Update old ids with the new ones
       const column = joinTable.inverseJoinColumn.name;
 
-      const newRelations = relations.map((relation) => {
-        const newId = oldEntriesMap[relation[column]];
-        return { ...relation, [column]: newId };
-      });
+      const existingSourceIds = await getExistingSourceIds(trx, joinTable, relations);
+
+      const newRelations = relations
+        .filter(
+          (relation) =>
+            existingSourceIds === null ||
+            existingSourceIds.has(String(relation[joinTable.joinColumn.name]))
+        )
+        .map((relation) => {
+          const newId = oldEntriesMap[relation[column]];
+          return { ...relation, [column]: newId };
+        });
+
+      if (newRelations.length === 0) {
+        continue;
+      }
 
       const batchSize = strapi.db.dialect.getBatchInsertSize();
       await trx.batchInsert(joinTable.name, newRelations, batchSize);

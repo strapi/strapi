@@ -54,6 +54,7 @@ describe('self-referential-relations', () => {
       const chain = createChainedQuery([]);
 
       (global as any).strapi = {
+        getModel: vi.fn().mockReturnValue({ attributes: {} }),
         db: {
           metadata: {
             get: vi.fn().mockReturnValue({
@@ -84,6 +85,7 @@ describe('self-referential-relations', () => {
 
     it('should skip relations without join table', async () => {
       (global as any).strapi = {
+        getModel: vi.fn().mockReturnValue({ attributes: {} }),
         db: {
           metadata: {
             get: vi.fn().mockReturnValue({
@@ -275,6 +277,93 @@ describe('self-referential-relations', () => {
       });
       expect(mockKnexChain.update).toHaveBeenCalledWith({ inv_category_order: 2 });
       expect(mockBatchInsert).not.toHaveBeenCalled();
+    });
+
+    it('should map component instances of the copied entries to the new ones', async () => {
+      const models: Record<string, any> = {
+        'api::page.page': {
+          attributes: {
+            link: { type: 'component', component: 'default.link' },
+            blocks: { type: 'dynamiczone', components: ['default.link', 'default.section'] },
+          },
+        },
+        'default.link': { attributes: { label: { type: 'string' } } },
+        'default.section': {
+          attributes: { links: { type: 'component', component: 'default.link' } },
+        },
+      };
+
+      const findMany = vi.fn().mockResolvedValue([
+        {
+          id: 20,
+          locale: 'en',
+          link: { id: 200 },
+          blocks: [
+            { __component: 'default.link', id: 201 },
+            { __component: 'default.section', id: 300, links: [{ id: 202 }] },
+          ],
+        },
+      ]);
+
+      (global as any).strapi = {
+        getModel: vi.fn((uid: string) => models[uid]),
+        db: {
+          query: vi.fn().mockReturnValue({ findMany }),
+          metadata: { identifiers: { ID_COLUMN } },
+          dialect: { getBatchInsertSize: vi.fn().mockReturnValue(BATCH_SIZE) },
+          transaction: createMockTransaction(),
+        },
+      };
+
+      const copiedEntry = {
+        id: 10,
+        locale: 'en',
+        link: { id: 100 },
+        blocks: [
+          { __component: 'default.link', id: 101 },
+          { __component: 'default.section', id: 150, links: [{ id: 102 }] },
+        ],
+      };
+
+      const joinTable = {
+        ...createJoinTable(),
+        name: 'components_default_links_page_lnk',
+        joinColumn: { name: 'link_id', referencedColumn: 'id' },
+        inverseJoinColumn: { name: 'page_id', referencedColumn: 'id' },
+      };
+
+      const relationData: RelationData = [
+        {
+          joinTable,
+          relations: [
+            { id: 1, link_id: 100, page_id: 10 },
+            { id: 2, link_id: 101, page_id: 10 },
+            { id: 3, link_id: 102, page_id: 10 },
+            // Not one of the copied instances: dropped
+            { id: 4, link_id: 999, page_id: 10 },
+          ],
+          remap: { source: true, target: true },
+          sourceComponent: 'default.link' as any,
+        },
+      ];
+
+      await sync([copiedEntry], [{ id: 20, locale: 'en' }], relationData, {
+        uid: 'api::page.page' as any,
+        copiedEntries: [copiedEntry],
+      });
+
+      expect(findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: { $in: [20] } } })
+      );
+      expect(mockBatchInsert).toHaveBeenCalledWith(
+        'components_default_links_page_lnk',
+        [
+          { link_id: 200, page_id: 20 },
+          { link_id: 201, page_id: 20 },
+          { link_id: 202, page_id: 20 },
+        ],
+        1000
+      );
     });
 
     it('should do nothing when relationData is empty', async () => {

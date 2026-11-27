@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { load } from '../unidirectional-relations';
+import { load, sync } from '../unidirectional-relations';
 
 const createChainedQuery = (result: any[]) => {
   const chain: any = {};
@@ -176,6 +176,58 @@ describe('unidirectional-relations', () => {
 
       // whereNotIn was called with the old version ids so only source=99 passes through
       expect(chain.whereNotIn).toHaveBeenCalledWith('node_id', [10]);
+    });
+  });
+
+  describe('sync', () => {
+    it('should not re-insert relations whose source was deleted with the old entries', async () => {
+      const sourceQuery = {
+        select: vi.fn().mockReturnThis(),
+        // Component 5 still exists, component 6 was deleted with the old published entry
+        whereIn: vi.fn().mockResolvedValue([{ id: 5 }]),
+      };
+      const batchInsert = vi.fn();
+      const trx = Object.assign(vi.fn().mockReturnValue(sourceQuery), { batchInsert });
+      const syncTrxContext = { trx };
+
+      (global as any).strapi = {
+        db: {
+          dialect: { getBatchInsertSize: vi.fn().mockReturnValue(1000) },
+          transaction: vi.fn(async (cb: any) => cb(syncTrxContext)),
+        },
+      };
+
+      const joinTable = {
+        name: 'components_default_links_page_lnk',
+        joinColumn: {
+          name: 'link_id',
+          referencedColumn: 'id',
+          referencedTable: 'components_links',
+        },
+        inverseJoinColumn: { name: 'page_id', referencedColumn: 'id' },
+      };
+
+      await sync(
+        [{ id: 10, locale: 'en' }],
+        [{ id: 20, locale: 'en' }],
+        [
+          {
+            joinTable,
+            relations: [
+              { id: 1, link_id: 5, page_id: 10 },
+              { id: 2, link_id: 6, page_id: 10 },
+            ],
+          },
+        ]
+      );
+
+      expect(trx).toHaveBeenCalledWith('components_links');
+      expect(sourceQuery.whereIn).toHaveBeenCalledWith('id', [5, 6]);
+      expect(batchInsert).toHaveBeenCalledWith(
+        'components_default_links_page_lnk',
+        [{ id: 1, link_id: 5, page_id: 20 }],
+        1000
+      );
     });
   });
 });

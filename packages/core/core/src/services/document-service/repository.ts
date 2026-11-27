@@ -717,6 +717,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     // Transform draft entry data and create published versions. One at a time:
     // each publish loads components on this transaction's connection.
     const publishedEntries: any[] = [];
+    const entriesToPublish: any[] = [];
     for (const draft of updatedDraft) {
       const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
       const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
@@ -734,6 +735,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         });
       }
 
+      entriesToPublish.push(entryToPublish);
       publishedEntries.push(await entries.publish(entryToPublish, queryParams));
     }
 
@@ -756,7 +758,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     await selfReferentialRelations.sync(
       [...oldPublishedVersions, ...updatedDraft],
       publishedEntries,
-      selfRelationsToSync
+      selfRelationsToSync,
+      { uid, copiedEntries: entriesToPublish }
     );
 
     // The published entries were read back on create (with the caller's fields and populate),
@@ -880,7 +883,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     await selfReferentialRelations.sync(
       [...oldDrafts, ...versionsToDraft],
       draftEntries,
-      selfRelationsToSync
+      selfRelationsToSync,
+      { uid, copiedEntries: versionsToDraft }
     );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
