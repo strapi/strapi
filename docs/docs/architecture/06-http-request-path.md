@@ -6,6 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.
   - The statement that `strapi::session` adds `koa-session` before every listed middleware comes from reading `registerApplicationMiddlewares` and the session factory. No test confirms it.
   - The page does not cover the GraphQL plugin request path or the upload plugin `/uploads` route.
+  - The `factories.defineRoute` and `factories.parseRouteInput` paragraphs in "Validation and sanitization" describe a spike. They need a review when the design is settled.
 ---
 
 This page follows one HTTP request through the server, from the Koa app to the response body. It covers the Content API (`/api/...`) and the admin API. What happens inside the Document Service is in [Document write path](./05-document-write-path.md). Tokens and sessions are in [Sessions and JWT](./08-authentication.md).
@@ -216,6 +217,22 @@ The core controller helpers call `strapi.contentAPI.validate` and `strapi.conten
 Validation runs first, so a client gets a clear 400 for bad input. Sanitization then removes what the caller may not read or write. Plugins add steps through the `sanitizers` registry (`content-api.input`, `content-api.output`) and the `validators` registry (`content-api.input`).
 
 The Zod schemas in `route.request` and `route.response` are not a request validator. `createCoreRouter` builds them with `CoreContentTypeRouteValidator` from the content type schema. At runtime, Strapi only uses them to validate or sanitize the extra params added with `addQueryParams` and `addInputParams`, and to accept those keys in strict mode. `@strapi/openapi` uses them to generate the OpenAPI document.
+
+Two opt-in helpers in [`factories.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts) parse a request with the `request` schemas of its route:
+
+- `factories.defineRoute(route)` wraps the function handler of the route. The wrapper puts the parsed request on `ctx.input`, then calls the handler. It checks the schemas when the route is defined.
+- `factories.parseRouteInput(ctx, route)` returns the parsed request to a controller action that a route references by name. Such a route keeps the scope Strapi generates from its handler (see [Route config](#route-config)), which a function handler does not get. The schemas are checked on the first request.
+
+Both parse inside the handler, so after the policies and the route middlewares (step 7 of [the route chain](#the-route-chain)). A request that fails authentication gets its 401 or 403 before any 400. The parser in [`services/server/validated-input.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/validated-input.ts) works as follows:
+
+- It reads `route.request` when it parses and caches one parser per `request` object. Registration replaces `route.request` when it merges the params of `addQueryParams` and `addInputParams`, so these params are parsed too.
+- It strips unknown `params` and `query` keys and coerces only what the schema coerces.
+- It chooses the body schema by the request media type, without its parameters. A request without a body parses an `undefined` body with the first declared schema. A body of an undeclared media type gets a 415.
+- On failure, it throws a `ValidationError` (400) whose `details.errors[].path` starts with `params`, `query` or `body`.
+
+`defineRoute` also throws when a `params`, `query` or form body schema can never parse a string (such as `z.number()` or `z.coerce.boolean()`), when a body media type is not exact (such as `application/*`), and when OpenAPI cannot convert a schema (such as `.transform()`).
+
+`ctx.params`, `ctx.query` and `ctx.request.body` keep their raw values. Routes that use neither helper are not parsed.
 
 The Document Service runs the entity validator on every write. See [Document write path](./05-document-write-path.md#validation).
 
