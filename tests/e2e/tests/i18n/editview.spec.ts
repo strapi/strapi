@@ -552,6 +552,8 @@ test.describe('Edit view non-localized fields', () => {
   test.describe.configure({ timeout: 500000 });
 
   test.beforeAll(async ({ browser }) => {
+    await resetFiles();
+
     const baseURL = test.info().project.use.baseURL!;
     const context = await browser.newContext({ baseURL });
     const page = await context.newPage();
