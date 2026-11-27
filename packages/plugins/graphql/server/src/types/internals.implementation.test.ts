@@ -4,8 +4,10 @@ import type createInternals from '../services/internals';
 import type createUtils from '../services/utils';
 import type { TypeRegistry } from './services';
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 type IsAssignable<T, U> = [T] extends [U] ? true : false;
 

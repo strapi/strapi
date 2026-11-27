@@ -48,8 +48,10 @@ declare global {
   }
 }
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+  (<T>() => T extends [A] ? 1 : 2) extends <T>() => T extends [B] ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 
 // 1. Per-model lifecycles file (src/api/article/content-types/article/lifecycles.ts)

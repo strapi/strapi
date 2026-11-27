@@ -78,8 +78,10 @@ if (typeof lookedUpPolicy === 'function') {
 }
 
 // `ReturnType` / `Parameters` of lookup members, as helpers and wrappers write them.
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
+  (<T>() => T extends [X] ? 1 : 2) extends <T>() => T extends [Y] ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 /** Mutual assignability: a suggested-name parameter accepts the same values as develop's. */
 type SameValues<X, Y> = [X] extends [Y] ? ([Y] extends [X] ? true : false) : false;

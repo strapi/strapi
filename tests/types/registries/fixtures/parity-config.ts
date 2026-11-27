@@ -56,8 +56,10 @@ const has: boolean = strapi.config.has('server.port');
 const indexed = strapi.config.anything;
 
 // `ReturnType` / `Parameters` of `get`: the same signature as the module and plugin `config`.
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
+  (<T>() => T extends [X] ? 1 : 2) extends <T>() => T extends [Y] ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 type ConfigGetParams = Parameters<Core.ConfigProvider['get']>;
 declare const checks: [

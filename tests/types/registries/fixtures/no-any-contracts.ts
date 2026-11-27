@@ -12,8 +12,10 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 //   `strapi::responses` and `strapi::session` middlewares, and `PackageConfigs['middlewares']`,
 //   which re-exposes their configs.
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
 type Service<TUID extends string> = Core.ServiceFor<TUID>;
@@ -46,9 +48,12 @@ type OpaqueUnions =
   | [NonNullable<Schema.Attribute.Attribute['conditions']>['visible']]
   // CASL
   | [Modules.Permissions.PermissionRule['subject']];
+// Bare identity: the recursive `HasAny` walk exceeds TS's instantiation depth (TS2589) with `Equal`.
+type RawEqual<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type IsOpaqueUnion<T, TUnions = OpaqueUnions> = true extends (
   TUnions extends [infer U]
-    ? Equal<Exclude<T, null | undefined>, Exclude<U, null | undefined>>
+    ? RawEqual<Exclude<T, null | undefined>, Exclude<U, null | undefined>>
     : never
 )
   ? true

@@ -1,8 +1,10 @@
 // Type checks only, run by `yarn test:ts` (see contracts.ts).
 import type { Core } from '@strapi/strapi';
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 
 // Edge cases kept on purpose to test type generation (see the comment of each module): a JS policy
 // and a JS middleware register the config their JSDoc declares, with `allowJs` in tsconfig.json.

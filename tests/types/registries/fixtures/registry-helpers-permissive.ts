@@ -3,8 +3,10 @@ import type {} from '@strapi/content-manager/strapi-server';
 import type { Core } from '@strapi/strapi';
 import type {} from '@strapi/i18n/strapi-server';
 
+// Operands wrapped in a tuple: TypeScript's error type (an unresolved type, printed as `any`)
+// would otherwise make the comparison true for any other operand.
 type Equal<T, U> =
-  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+  (<V>() => V extends [T] ? 1 : 2) extends <V>() => V extends [U] ? 1 : 2 ? true : false;
 
 // Without strict types, factories may return any service, as on develop, and any UID is accepted.
 declare const checks: [
