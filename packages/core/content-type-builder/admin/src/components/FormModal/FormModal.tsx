@@ -1321,18 +1321,18 @@ export const FormModal = () => {
                 <Box>
                   <Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.enum-change-warning',
+                      id: getTrad('popUpWarning.bodyMessage.delete-attribute-with-conditions'),
                       defaultMessage:
                         'The following fields have conditions that depend on this field: ',
                     })}
                     <Typography fontWeight="bold">{fieldNames}</Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.enum-change-warning-values',
+                      id: getTrad('form.attribute.condition.enum-change-warning-values'),
                       defaultMessage: '. Changing or removing the enum values ',
                     })}
                     <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.enum-change-warning-end',
+                      id: getTrad('form.attribute.condition.enum-change-warning-end'),
                       defaultMessage: ' will break these conditions. Do you want to proceed?',
                     })}
                   </Typography>

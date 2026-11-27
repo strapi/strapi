@@ -233,6 +233,7 @@
   "modelPage.attribute.relation-polymorphic": "Relation (polymorphique)",
   "modelPage.attribute.relationWith": "Relation avec",
   "modelPage.attribute.with": "avec",
+  "modelPage.attribute.conditional": "conditionnel",
   "notification.error.dynamiczone-min.validation": "Au moins un composant est requis dans une zone dynamique pour pouvoir enregistrer un type de contenu",
   "notification.info.autoreaload-disable": "Strapi est en mode production, l'édition des types de contenu est désactivée. Veuillez passer en mode développement en démarrant votre serveur avec strapi develop.",
   "notification.info.creating.notSaved": "Veuillez enregistrer votre travail avant de créer un nouveau type de collection ou composant",

@@ -1,6 +1,10 @@
 import * as yup from 'yup';
 
+import { pluginId } from '../../../../pluginId';
+import en from '../../../../translations/en.json';
 import { formsAPI as ctbFormsAPI } from '../../../../utils/formAPI';
+import { getTrad } from '../../../../utils/getTrad';
+import { prefixPluginTranslations } from '../../../../utils/prefixPluginTranslations';
 import { SchemaParams, forms } from '../forms';
 
 const mockBaseCustomField = {
@@ -226,7 +230,7 @@ describe('customField forms', () => {
         },
         {
           sectionTitle: {
-            id: 'form.attribute.condition.section',
+            id: getTrad('form.attribute.condition.label'),
             defaultMessage: 'Conditions',
           },
           items: [
@@ -269,7 +273,7 @@ describe('customField forms', () => {
         },
         {
           sectionTitle: {
-            id: 'form.attribute.condition.section',
+            id: getTrad('form.attribute.condition.label'),
             defaultMessage: 'Conditions',
           },
           items: [
@@ -349,7 +353,7 @@ describe('customField forms', () => {
         },
         {
           sectionTitle: {
-            id: 'form.attribute.condition.section',
+            id: getTrad('form.attribute.condition.label'),
             defaultMessage: 'Conditions',
           },
           items: [
@@ -391,6 +395,16 @@ describe('customField forms', () => {
 
       expect(result.sections.length).toBe(3);
       expect(result).toStrictEqual({ sections: expected });
+    });
+
+    it('looks up the condition section title with an id registered by the plugin', () => {
+      const { sections } = forms.customField.form.advanced({
+        customField: mockBaseCustomField,
+        extensions: { ...ctbFormsAPI, getAdvancedForm: jest.fn() },
+      });
+      const sectionTitle = sections.find((section) => section.sectionTitle)?.sectionTitle;
+
+      expect(Object.keys(prefixPluginTranslations(en, pluginId))).toContain(sectionTitle?.id);
     });
   });
 });
