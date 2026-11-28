@@ -62,10 +62,90 @@ describe('getLabelAction (history)', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not throw when a shared-field lock action has no title', () => {
-    const LockAction = () => <span>lock</span>;
+  it('mounts the i18n action for a localized field with history wording', () => {
+    const LocalizedFieldAction = ({ title }: { title: { id: string; defaultMessage: string } }) => (
+      <span>{title.defaultMessage}</span>
+    );
 
-    expect(getLabelAction(<LockAction />)).toBeTruthy();
+    const action = getLabelAction(
+      <LocalizedFieldAction
+        title={{
+          id: 'i18n.Field.localized',
+          defaultMessage: 'This value is specific to this locale',
+        }}
+      />
+    );
+
+    if (!React.isValidElement(action)) {
+      throw new Error('Expected a valid localized-field label action');
+    }
+    renderRTL(action);
+
+    expect(
+      screen.getByText(/This value is specific to this locale. If you restore this version/i)
+    ).toBeInTheDocument();
+  });
+
+  it('returns untouched when labelAction is undefined or null', () => {
+    expect(getLabelAction(undefined)).toBeUndefined();
+    expect(getLabelAction(null)).toBeNull();
+  });
+
+  it('does not throw and returns untouched when labelAction.title is undefined', () => {
+    const ActionWithoutTitle = () => <span>lock</span>;
+    const element = <ActionWithoutTitle />;
+
+    expect(getLabelAction(element)).toBe(element);
+  });
+
+  it('does not throw and returns untouched when labelAction.title is a plain string', () => {
+    const ActionWithStringTitle = ({ title }: { title: string }) => <span>{title}</span>;
+    const element = <ActionWithStringTitle title="Custom action title" />;
+
+    const result = getLabelAction(element);
+    expect(result).toBe(element);
+    if (!React.isValidElement(result)) {
+      throw new Error('Expected a valid label action element');
+    }
+    renderRTL(result);
+    expect(screen.getByText('Custom action title')).toBeInTheDocument();
+  });
+
+  it('does not throw and returns untouched when labelAction.title is a custom object without an id', () => {
+    const ActionWithCustomTitle = ({ title }: { title: { text: string } }) => (
+      <span>{title.text}</span>
+    );
+    const element = <ActionWithCustomTitle title={{ text: 'Plugin custom label' }} />;
+
+    const result = getLabelAction(element);
+    expect(result).toBe(element);
+    if (!React.isValidElement(result)) {
+      throw new Error('Expected a valid label action element');
+    }
+    renderRTL(result);
+    expect(screen.getByText('Plugin custom label')).toBeInTheDocument();
+  });
+
+  it('does not throw and returns untouched when labelAction.title is an object with an unrelated id', () => {
+    const CustomPluginAction = ({ title }: { title: { id: string; defaultMessage: string } }) => (
+      <span>{title.defaultMessage}</span>
+    );
+    const element = (
+      <CustomPluginAction
+        title={{
+          id: 'custom.plugin.action',
+          defaultMessage: 'Plugin action wording',
+        }}
+      />
+    );
+
+    const result = getLabelAction(element);
+    expect(result).toBe(element);
+    if (!React.isValidElement(result)) {
+      throw new Error('Expected a valid label action element');
+    }
+    renderRTL(result);
+    expect(screen.getByText('Plugin action wording')).toBeInTheDocument();
   });
 });
 
