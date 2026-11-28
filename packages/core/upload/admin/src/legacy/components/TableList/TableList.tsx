@@ -105,7 +105,7 @@ export const TableList = ({
             const isUp = sortOrder === 'ASC';
             const tableHeaderLabel = formatMessage(label);
             const sortLabel = formatMessage(
-              { id: 'list.table.header.sort', defaultMessage: 'Sort on {label}' },
+              { id: getTrad('list.table.header.sort'), defaultMessage: 'Sort on {label}' },
               { label: tableHeaderLabel }
             );
 
