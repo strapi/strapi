@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Alert, Button, Flex, Typography } from '@strapi/design-system';
+import { Alert, Badge, Button, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { Panel } from '../../components/Panel';
@@ -8,7 +8,7 @@ import { formatMfaNotice } from '../../features/MfaNotices';
 import { useNotification } from '../../features/Notifications';
 import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
-  useGetMfaNoticesQuery,
+  useGetMfaRecentEventsQuery,
   useGetMfaStatusQuery,
   useMarkMfaNoticesSeenMutation,
 } from '../../services/mfa';
@@ -20,7 +20,7 @@ import { Passkeys } from './Passkeys';
 import { ReAuthDialog } from './ReAuthDialog';
 import { TrustedDevices } from './TrustedDevices';
 
-import type { Me, MfaEventNotice } from '../../../../shared/contracts/mfa';
+import type { Me, MfaRecentEvent } from '../../../../shared/contracts/mfa';
 
 /** Below this many unused recovery codes the section nags. */
 export const LOW_RECOVERY_CODES_THRESHOLD = 3;
@@ -86,17 +86,17 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
 };
 
 /**
- * Lists the same unseen `admin::mfa-event` rows the next-login security notice (`MfaNotices`)
- * summarised, so nothing is lost if that notice was closed or never seen because it showed on a
- * different device. "Mark all as seen" clears every unseen notice at once (an absent `ids` in the
- * request body, per `MarkNoticesSeen.Request`), unlike closing the notice, which only marks the
- * ones it announced.
+ * The account's newest security events, seen or not, including the ones this login caused (a
+ * recovery-code login, a passkey added here), which the security notice (`MfaNotices`) rightly
+ * leaves out. Rows the notice would announce carry a "New" badge, and "Mark all as seen" (an absent
+ * `ids`, per `MarkNoticesSeen.Request`) is offered only while there is one, because the server
+ * never lets a login clear its own events (the other logins still need them).
  */
 const RecentSecurityEvents = ({
   notices,
   onMarkAllSeen,
 }: {
-  notices: MfaEventNotice[];
+  notices: MfaRecentEvent[];
   onMarkAllSeen: () => void;
 }) => {
   const { formatMessage, formatDate } = useIntl();
@@ -111,19 +111,31 @@ const RecentSecurityEvents = ({
       </Typography>
       <Flex tag="ul" role="list" direction="column" alignItems="stretch" gap={1}>
         {notices.map((notice) => (
-          <Typography key={`${notice.id}`} tag="li" textColor="neutral600">
-            {formatMfaNotice(notice, formatMessage, formatDate)}
-          </Typography>
+          <Flex key={`${notice.id}`} tag="li" gap={2} alignItems="baseline">
+            <Typography textColor="neutral600">
+              {formatMfaNotice(notice, formatMessage, formatDate)}
+            </Typography>
+            {notice.isNew ? (
+              <Badge>
+                {formatMessage({
+                  id: 'Settings.profile.form.section.mfa.notices.new',
+                  defaultMessage: 'New',
+                })}
+              </Badge>
+            ) : null}
+          </Flex>
         ))}
       </Flex>
-      <Flex>
-        <Button variant="tertiary" onClick={onMarkAllSeen}>
-          {formatMessage({
-            id: 'Settings.profile.form.section.mfa.notices.markSeen',
-            defaultMessage: 'Mark all as seen',
-          })}
-        </Button>
-      </Flex>
+      {notices.some((notice) => notice.isNew) ? (
+        <Flex>
+          <Button variant="tertiary" onClick={onMarkAllSeen}>
+            {formatMessage({
+              id: 'Settings.profile.form.section.mfa.notices.markSeen',
+              defaultMessage: 'Mark all as seen',
+            })}
+          </Button>
+        </Flex>
+      ) : null}
     </Flex>
   );
 };
@@ -135,7 +147,7 @@ const TwoFactorSection = () => {
   const toMessage = useMfaErrorMessage();
   // Skipped until the status says the feature exists, as `MfaNotices` does: otherwise every profile
   // view with the kill switch on fires one request that can only 404.
-  const { data: notices } = useGetMfaNoticesQuery(undefined, {
+  const { data: notices } = useGetMfaRecentEventsQuery(undefined, {
     skip: isLoading || isMfaNotFoundError(error),
   });
   const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();

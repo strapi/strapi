@@ -17,6 +17,7 @@ import type {
   MfaAuditOnlyNotice,
   MfaEventNotice,
   MfaEventType,
+  MfaRecentEvent,
 } from '../../../shared/contracts/mfa';
 import {
   readMfaEnforcement,
@@ -55,6 +56,9 @@ const RECOVERY_CODE_LENGTH = 10;
  * `isAccountThrottled` relies on. */
 export const MAX_EVENTS_PER_USER = 500;
 
+/** How many rows the profile's "Recent security events" lists. */
+export const RECENT_EVENTS_LIMIT = 20;
+
 export type { MfaEventType };
 
 /** Every field is optional, so an undeclared key is only rejected in a literal passed directly.
@@ -84,7 +88,9 @@ export interface AttemptReservation {
 }
 
 export type EnforceOutcome =
-  { outcome: 'none' } | { outcome: 'grace'; graceUntil: Date } | { outcome: 'refused' };
+  | { outcome: 'none' }
+  | { outcome: 'grace'; graceUntil: Date }
+  | { outcome: 'refused' };
 
 /** Roles are optional: the login path does not populate them, so the resolver loads them rather
  * than read "not populated" as "no roles". */
@@ -181,7 +187,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const adminStore = strapi.store({ type: 'core', name: 'admin' });
     const auth = (await adminStore.get({ key: 'auth' })) as
-      { providers?: { ssoLockedRoles?: Array<string | number> } } | null | undefined;
+      | { providers?: { ssoLockedRoles?: Array<string | number> } }
+      | null
+      | undefined;
     return auth?.providers?.ssoLockedRoles ?? [];
   };
 
@@ -306,7 +314,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     let enrolled = 0;
 
     for (const user of users) {
-      // eslint-disable-next-line no-await-in-loop -- roles are populated above, so this reads nothing
       if (await isExemptGiven(user, lockedRoles)) {
         continue;
       }
@@ -378,7 +385,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const syncFeatureState = async (): Promise<void> => {
     const store = strapi.store({ type: 'core', name: 'admin' });
     const stored = (await store.get({ key: FEATURE_STATE_KEY })) as
-      { enabled?: unknown } | null | undefined;
+      | { enabled?: unknown }
+      | null
+      | undefined;
     const enabled = isEnabled();
 
     if (enabled && stored?.enabled !== true) {
@@ -824,7 +833,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     for (const candidate of candidates) {
       // Sequential: no reason to burn every bcrypt comparison once one matches.
-      // eslint-disable-next-line no-await-in-loop
+
       const matches = await auth.validatePassword(normalised, candidate.codeHash);
       if (!matches) {
         continue;
@@ -957,7 +966,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * the account holder is about to find out.
    */
   type MfaChangeNotice =
-    | Exclude<MfaEventType, 'recovery_code_used' | 'recovery_codes_issued' | 'grace_started'>
+    | Exclude<
+        MfaEventType,
+        | 'recovery_code_used'
+        | 'recovery_codes_issued'
+        | 'recovery_codes_regenerated'
+        | 'grace_started'
+      >
     | MfaAuditOnlyNotice;
 
   /** Written out rather than derived, so a new hub-only notice cannot start demanding an email
@@ -1165,6 +1180,35 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       metadata: row.metadata ?? {},
       createdAt: new Date(row.createdAt).toISOString(),
       seenAt: row.seenAt ? new Date(row.seenAt).toISOString() : null,
+    }));
+  };
+
+  /**
+   * The newest events on the account for the profile's "Recent security events", seen or not, and
+   * *including* the caller's own login's: the profile is the account's history, so a recovery-code
+   * login or a passkey added from this very session belongs there even though the notices feed
+   * (`unseenEvents`) rightly leaves them out. `isNew` is `unseenEvents`' own rule, so the profile
+   * never offers to clear a row `markEventsSeen` would refuse to clear for this login.
+   */
+  const recentEvents = async (
+    userId: string,
+    currentSessionId?: string
+  ): Promise<MfaRecentEvent[]> => {
+    const family = await sessionFamily(currentSessionId);
+    const ownFamily = family?.familyId ?? currentSessionId;
+    const rows = await eventQuery().findMany({
+      where: { userId: String(userId), type: NOT_ACKNOWLEDGEMENT_MARKER },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      limit: RECENT_EVENTS_LIMIT,
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      type: row.type,
+      metadata: row.metadata ?? {},
+      createdAt: new Date(row.createdAt).toISOString(),
+      seenAt: row.seenAt ? new Date(row.seenAt).toISOString() : null,
+      isNew: !row.seenAt && !(ownFamily && row.sessionId === ownFamily),
     }));
   };
 
@@ -1597,7 +1641,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     let removed = 0;
     for (const uid of [RECOVERY_CODE_UID, CHALLENGE_UID, TRUSTED_DEVICE_UID, PASSKEY_UID]) {
-      // eslint-disable-next-line no-await-in-loop -- four statements, run once at boot
       const result = await strapi.db.query(uid).deleteMany({ where: notIn(enrolledIds) });
       removed += result?.count ?? 0;
     }
@@ -1701,6 +1744,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     sendNotice,
     pruneEvents,
     unseenEvents,
+    recentEvents,
     sessionFamily,
     claimRequestEvents,
     markEventsSeen,

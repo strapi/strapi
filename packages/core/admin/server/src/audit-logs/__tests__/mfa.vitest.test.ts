@@ -54,6 +54,7 @@ describe('every second-factor notice reaches the audit log', () => {
     challenge_failed: true,
     recovery_code_used: false,
     recovery_codes_issued: false,
+    recovery_codes_regenerated: false,
     grace_started: false,
     locked: true,
     unlocked: true,

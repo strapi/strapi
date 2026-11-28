@@ -29,6 +29,7 @@ import type {
   RegenerateRecoveryCodes,
   Disable,
   Notices,
+  RecentEvents,
   MarkNoticesSeen,
   ListTrustedDevices,
   RevokeTrustedDevice,
@@ -159,6 +160,10 @@ export default {
 
     await mfa.assertPasswordAndFactor(userId, password, code);
     const recoveryCodes = await mfa.issueRecoveryCodes(userId);
+    // Its own row rather than the `recovery_codes_issued` marker that `issueRecoveryCodes` writes:
+    // the marker's `seenAt` is the acknowledgement, so it can never double as a notice. Enrolment
+    // issues codes too, but records `enabled`/`authenticator_replaced` instead of this.
+    await mfa.recordEvent(userId, 'recovery_codes_regenerated');
 
     ctx.body = { data: { recoveryCodes } } satisfies RegenerateRecoveryCodes.Response;
   },
@@ -235,6 +240,14 @@ export default {
     ctx.body = {
       data: await mfa.unseenEvents(String(ctx.state.user.id), currentSessionIdOf(ctx)),
     } satisfies Notices.Response;
+  },
+
+  async recentEvents(ctx: Context) {
+    const mfa = mfaService();
+
+    ctx.body = {
+      data: await mfa.recentEvents(String(ctx.state.user.id), currentSessionIdOf(ctx)),
+    } satisfies RecentEvents.Response;
   },
 
   async markNoticesSeen(ctx: Context) {

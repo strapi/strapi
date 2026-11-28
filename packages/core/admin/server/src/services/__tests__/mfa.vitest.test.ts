@@ -4,7 +4,7 @@ import { errors, getDeviceName } from '@strapi/utils';
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
-import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
+import createMfaService, { MAX_EVENTS_PER_USER, RECENT_EVENTS_LIMIT } from '../mfa';
 import { base32Decode, base32Encode, generateTotp, generateTotpSecret } from '../../utils/totp';
 import { hashTrustToken, MAX_TRUSTED_DEVICES_PER_USER } from '../mfa-trusted-devices';
 import { PASSKEY_UID, PASSKEY_CAP_MESSAGE, MAX_PASSKEYS_PER_USER } from '../mfa-passkeys';
@@ -1911,10 +1911,8 @@ describe('mfa service: challenge lifecycle', () => {
     let spent = 0;
 
     while (spent < perAccount) {
-      // eslint-disable-next-line no-await-in-loop
       const { token } = await service.createChallenge('1');
       for (let i = 0; i < perChallenge && spent < perAccount; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
         const outcome = await service.verifyChallenge(token, '000000');
         expect(outcome).toEqual({ ok: false, reason: 'invalid' });
         spent += 1;
@@ -2088,7 +2086,6 @@ describe('mfa service: challenge lifecycle', () => {
     const { token } = await service.createChallenge('1');
 
     for (let i = 0; i < cap; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
         ok: false,
         reason: 'invalid',
@@ -2570,6 +2567,96 @@ describe('mfa service: events from the current login', () => {
   });
 });
 
+describe('mfa service: recentEvents (the profile history)', () => {
+  /** Same request/session wiring as "events from the current login", trimmed to what this needs. */
+  const setup = () => {
+    const fixture = buildMfaFixture();
+    const request: { state: Record<string, unknown> } = { state: {} };
+    const sessions = new Map<string, Record<string, unknown>>();
+    const baseQuery = fixture.strapi.db.query;
+    (fixture.strapi as any).db.query = (uid: string) =>
+      uid === 'admin::session'
+        ? {
+            findOne: vi.fn(async ({ where }: any) => {
+              const row = sessions.get(where.sessionId);
+              return row ? { ...row } : null;
+            }),
+          }
+        : baseQuery(uid);
+    (fixture.strapi as any).requestContext = { get: () => request };
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    const login = (sessionId: string, familyId: string) => {
+      sessions.set(sessionId, {
+        sessionId,
+        origin: 'admin',
+        userId: '1',
+        createdAt: new Date(),
+        metadata: { familyId, loginAt: new Date().toISOString() },
+      });
+    };
+    const act = async (sessionId: string | undefined, run: () => Promise<unknown>) => {
+      request.state = sessionId ? { session: { id: sessionId } } : {};
+      await run();
+    };
+    return { ...fixture, service, login, act };
+  };
+
+  test("lists the caller's own recovery-code login and passkey, which the notices feed leaves out", async () => {
+    // Round-3 bug: after a recovery-code login, and after adding a passkey, the profile's "Recent
+    // security events" showed neither, because it read `unseenEvents`, which hides what the
+    // caller's own login did.
+    const { service, login, act } = setup();
+    await act(undefined, () => service.recordEvent('1', 'recovery_code_used'));
+    await service.claimRequestEvents('family-a');
+    login('session-a', 'family-a');
+    await act('session-a', () =>
+      service.recordEvent('1', 'passkey_registered', { deviceName: 'YubiKey' })
+    );
+
+    expect(await service.unseenEvents('1', 'session-a')).toEqual([]);
+
+    const events = await service.recentEvents('1', 'session-a');
+    expect(events.map((e) => e.type).sort()).toEqual(['passkey_registered', 'recovery_code_used']);
+    // The caller already knows: listed, but nothing for "Mark all as seen" to clear.
+    expect(events.every((e) => e.isNew === false)).toBe(true);
+    expect(events[0]).not.toHaveProperty('sessionId');
+  });
+
+  test("marks another login's unseen events as new, and seen ones as not new", async () => {
+    const { service, events: rows, login, act } = setup();
+    login('session-a', 'family-a');
+    login('session-b', 'family-b');
+    await act('session-b', () => service.recordEvent('1', 'challenge_failed'));
+    await act('session-b', () => service.recordEvent('1', 'device_trusted'));
+    rows.find((e) => e.type === 'device_trusted')!.seenAt = new Date();
+
+    const events = await service.recentEvents('1', 'session-a');
+
+    expect(Object.fromEntries(events.map((e) => [e.type, e.isNew]))).toEqual({
+      challenge_failed: true,
+      device_trusted: false,
+    });
+  });
+
+  test('never lists the acknowledgement marker, lists newest first, and caps the list', async () => {
+    const { service, events: rows } = setup();
+    await service.issueRecoveryCodes('1');
+    for (let i = 0; i < RECENT_EVENTS_LIMIT + 5; i += 1) {
+      await service.recordEvent('1', 'challenge_failed');
+    }
+    rows.forEach((row, index) => {
+      row.createdAt = new Date(Date.UTC(2026, 0, 1, 0, index));
+    });
+
+    const events = await service.recentEvents('1');
+
+    expect(events).toHaveLength(RECENT_EVENTS_LIMIT);
+    expect(events.some((e) => (e.type as string) === 'recovery_codes_issued')).toBe(false);
+    const times = events.map((e) => Date.parse(e.createdAt));
+    expect([...times].sort((a, b) => b - a)).toEqual(times);
+  });
+});
+
 describe('mfa service: notices and acknowledgement', () => {
   const setup = () => {
     const fixture = buildMfaFixture();
@@ -2893,7 +2980,6 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       const cap = MFA_DEFAULTS.maxUserAttempts;
 
       for (let i = 0; i < cap; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(
           service.assertPasswordAndFactor('1', CORRECT_PASSWORD, '000000')
         ).rejects.toThrow(/invalid code/i);
@@ -3638,7 +3724,7 @@ describe('mfa service: enforce', () => {
     } = {}
   ) => {
     const storeGet = vi.fn(async ({ key }: { key: string }) =>
-      key === 'security-settings' ? (options.stored ?? { mfa: { mode: 'required' } }) : null
+      key === 'security-settings' ? options.stored ?? { mfa: { mode: 'required' } } : null
     );
     const invalidateRefreshToken = vi.fn(() => Promise.resolve());
     const sessionManager = Object.assign(
@@ -4101,7 +4187,7 @@ describe('mfa service: trusted devices', () => {
     const tokens: string[] = [];
     for (let i = 0; i <= MAX_TRUSTED_DEVICES_PER_USER; i += 1) {
       vi.setSystemTime(now + i * 1000);
-      // eslint-disable-next-line no-await-in-loop
+
       tokens.push((await service.trustDevice('1', {}))!.token);
     }
 

@@ -71,6 +71,7 @@ export default [
   authenticated('POST', '/mfa/recovery-codes/ack', 'mfa.acknowledgeRecoveryCodes'),
   credentialGuarded('POST', '/mfa/disable', 'mfa.disable'),
   authenticated('GET', '/mfa/notices', 'mfa.notices'),
+  authenticated('GET', '/mfa/events', 'mfa.recentEvents'),
   authenticated('POST', '/mfa/notices/seen', 'mfa.markNoticesSeen'),
   authenticated('GET', '/mfa/trusted-devices', 'mfa.listTrustedDevices'),
   authenticated('DELETE', '/mfa/trusted-devices', 'mfa.revokeAllTrustedDevices'),

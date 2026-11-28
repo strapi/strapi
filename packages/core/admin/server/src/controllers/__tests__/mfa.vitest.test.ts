@@ -674,6 +674,43 @@ describe('mfa controller', () => {
     expect(issueRecoveryCodes).not.toHaveBeenCalled();
   });
 
+  test('regenerating codes records a recovery_codes_regenerated event, not the acknowledgement marker', async () => {
+    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const issueRecoveryCodes = vi.fn(() => Promise.resolve(['aaaa-bbbb']));
+    const recordEvent = vi.fn(() => Promise.resolve(1));
+    setStrapi({
+      admin: {
+        services: {
+          mfa: {
+            isEnabled: vi.fn(() => true),
+            assertPasswordAndFactor,
+            issueRecoveryCodes,
+            recordEvent,
+          },
+        },
+      },
+    });
+    const { ctx } = buildCtx({ password: 'Password123', code: '123456' }, { id: 7 });
+
+    await mfaController.regenerateRecoveryCodes(ctx);
+
+    expect(recordEvent).toHaveBeenCalledWith('7', 'recovery_codes_regenerated');
+    expect(ctx.body).toEqual({ data: { recoveryCodes: ['aaaa-bbbb'] } });
+  });
+
+  test("events lists the account's history, scoped to the caller and their session", async () => {
+    const recentEvents = vi.fn(() => Promise.resolve([]));
+    setStrapi({
+      admin: { services: { mfa: { isEnabled: vi.fn(() => true), recentEvents } } },
+    });
+    const { ctx } = buildCtx({}, { id: 7 }, { session: { id: 'session-a' } });
+
+    await mfaController.recentEvents(ctx);
+
+    expect(recentEvents).toHaveBeenCalledWith('7', 'session-a');
+    expect(ctx.body).toEqual({ data: [] });
+  });
+
   test("notices leaves out what the caller's own session did", async () => {
     const unseenEvents = vi.fn(() => Promise.resolve([]));
     setStrapi({

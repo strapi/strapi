@@ -83,6 +83,7 @@ describe('Admin MFA with the feature off', () => {
     ['GET', '/admin/mfa/me'],
     ['POST', '/admin/mfa/enrol'],
     ['GET', '/admin/mfa/notices'],
+    ['GET', '/admin/mfa/events'],
     ['GET', '/admin/mfa/passkeys'],
     ['GET', '/admin/security-settings'],
     ['GET', '/admin/security-settings/mfa-impact?mode=required'],

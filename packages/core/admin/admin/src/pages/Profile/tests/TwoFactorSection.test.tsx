@@ -5,7 +5,7 @@ import { createIntl } from 'react-intl';
 import { formatMfaNotice } from '../../../features/MfaNotices';
 import { TwoFactorSection } from '../TwoFactorSection';
 
-import type { MfaEventNotice } from '../../../../../shared/contracts/mfa';
+import type { MfaEventNotice, MfaRecentEvent } from '../../../../../shared/contracts/mfa';
 
 /**
  * A standalone `IntlShape` (no `messages`, so every id falls back to its `defaultMessage`,
@@ -113,7 +113,7 @@ describe('TwoFactorSection', () => {
     await waitFor(() => expect(root).toBeEmptyDOMElement());
   });
 
-  it('does not ask for notices on an instance where the feature is off', async () => {
+  it('does not ask for security events on an instance where the feature is off', async () => {
     // `MfaNotices` already skips this; the profile section fired it anyway, so every profile view
     // on a flag-off instance left a 404 in the network tab for whoever was debugging something else.
     let noticesRequested = false;
@@ -127,7 +127,7 @@ describe('TwoFactorSection', () => {
           { status: 404 }
         )
       ),
-      http.get('/admin/mfa/notices', () => {
+      http.get('/admin/mfa/events', () => {
         noticesRequested = true;
         return HttpResponse.json(
           {
@@ -277,14 +277,15 @@ describe('TwoFactorSection', () => {
     ).toBeInTheDocument();
   });
 
-  it('lists unseen security events when enrolled and marks them all as seen', async () => {
-    const notices: MfaEventNotice[] = [
+  it('lists new security events when enrolled and marks them all as seen', async () => {
+    const notices: MfaRecentEvent[] = [
       {
         id: 1,
         type: 'challenge_failed',
         metadata: {},
         createdAt: '2026-09-01T10:00:00.000Z',
         seenAt: null,
+        isNew: true,
       },
       {
         id: 2,
@@ -292,6 +293,7 @@ describe('TwoFactorSection', () => {
         metadata: {},
         createdAt: '2026-09-01T11:00:00.000Z',
         seenAt: null,
+        isNew: true,
       },
     ];
     let seenBody: unknown;
@@ -302,7 +304,7 @@ describe('TwoFactorSection', () => {
         recoveryCodesRemaining: 7,
         codesAcknowledged: true,
       }),
-      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: notices })),
+      http.get('/admin/mfa/events', () => HttpResponse.json({ data: notices })),
       http.post('/admin/mfa/notices/seen', async ({ request }) => {
         seenBody = await request.json();
         return new HttpResponse(null, { status: 204 });
@@ -315,22 +317,67 @@ describe('TwoFactorSection', () => {
     ).toBeInTheDocument();
     expect(screen.getByText(expectFormattedNotice(notices[0]))).toBeInTheDocument();
     expect(screen.getByText(expectFormattedNotice(notices[1]))).toBeInTheDocument();
+    expect(screen.getAllByText('New')).toHaveLength(2);
 
     await user.click(screen.getByRole('button', { name: 'Mark all as seen' }));
     await waitFor(() => expect(seenBody).toEqual({}));
   });
 
+  /**
+   * Round-3 bug: after a recovery-code login, and after adding a passkey, neither event showed in
+   * "Recent security events", because the list read the notices feed, which leaves out what the
+   * caller's own login did. The list now reads the account's history; such rows are listed but
+   * not new, so there is nothing for "Mark all as seen" to clear.
+   */
+  it('lists the events this login caused, without offering to mark them seen', async () => {
+    const events: MfaRecentEvent[] = [
+      {
+        id: 3,
+        type: 'passkey_registered',
+        metadata: { deviceName: 'YubiKey' },
+        createdAt: '2026-09-01T12:00:00.000Z',
+        seenAt: null,
+        isNew: false,
+      },
+      {
+        id: 2,
+        type: 'recovery_code_used',
+        metadata: {},
+        createdAt: '2026-09-01T11:00:00.000Z',
+        seenAt: null,
+        isNew: false,
+      },
+    ];
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 9,
+        codesAcknowledged: true,
+      }),
+      http.get('/admin/mfa/events', () => HttpResponse.json({ data: events })),
+      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: [] }))
+    );
+    renderSection();
+
+    expect(await screen.findByText(expectFormattedNotice(events[0]))).toBeInTheDocument();
+    expect(screen.getByText(expectFormattedNotice(events[1]))).toBeInTheDocument();
+    expect(screen.queryByText('New')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Mark all as seen' })).not.toBeInTheDocument();
+  });
+
   it('says so when marking the events as seen fails, instead of looking broken', async () => {
-    const notice: MfaEventNotice = {
+    const notice: MfaRecentEvent = {
       id: 1,
       type: 'challenge_failed',
       metadata: {},
       createdAt: '2026-09-01T10:00:00.000Z',
       seenAt: null,
+      isNew: true,
     };
     server.use(
       status({ enabled: true, enabledAt: '2026-09-01T10:14:00.000Z', codesAcknowledged: true }),
-      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: [notice] })),
+      http.get('/admin/mfa/events', () => HttpResponse.json({ data: [notice] })),
       http.post('/admin/mfa/notices/seen', () =>
         HttpResponse.json(
           { error: { status: 500, name: 'InternalServerError', message: 'boom', details: {} } },
@@ -352,17 +399,18 @@ describe('TwoFactorSection', () => {
    * why, and "Mark all as seen" was unreachable.
    */
   it('lists security events even when not currently enrolled (e.g. after a reset)', async () => {
-    const notice: MfaEventNotice = {
+    const notice: MfaRecentEvent = {
       id: 1,
       type: 'reset',
       metadata: {},
       createdAt: '2026-09-01T10:00:00.000Z',
       seenAt: null,
+      isNew: true,
     };
     let seenBody: unknown;
     server.use(
       status(),
-      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: [notice] })),
+      http.get('/admin/mfa/events', () => HttpResponse.json({ data: [notice] })),
       http.post('/admin/mfa/notices/seen', async ({ request }) => {
         seenBody = await request.json();
         return new HttpResponse(null, { status: 204 });

@@ -88,7 +88,7 @@ describe('MfaNotices', () => {
     expect(screen.queryByText(/security events on your account/i)).not.toBeInTheDocument();
   });
 
-  it('shows one inline warning summarising unseen notices and marks them seen on close', async () => {
+  it('shows one banner summarising unseen notices and marks them seen on close', async () => {
     let seenBody: unknown;
     server.use(
       status(),
@@ -105,6 +105,40 @@ describe('MfaNotices', () => {
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(seenBody).toEqual({ ids: [1, 2] }));
+  });
+
+  it('is a warning when at least one unseen event is risky', async () => {
+    server.use(
+      status(),
+      http.get('/admin/mfa/notices', () =>
+        HttpResponse.json({
+          data: [{ ...NOTICES[0], type: 'device_trusted' }, NOTICES[1]],
+        })
+      )
+    );
+    render(<MfaNotices />);
+
+    await screen.findByText(/2 security events on your account/i);
+    expect(screen.getByTestId('mfa-security-notice')).toHaveAttribute('data-variant', 'warning');
+  });
+
+  it('is informational, with the same text, when every unseen event is info', async () => {
+    server.use(
+      status(),
+      http.get('/admin/mfa/notices', () =>
+        HttpResponse.json({
+          data: [
+            { ...NOTICES[0], type: 'device_trusted' },
+            { ...NOTICES[1], type: 'passkey_removed' },
+          ],
+        })
+      )
+    );
+    render(<MfaNotices />);
+
+    await screen.findByText(/2 security events on your account/i);
+    expect(screen.getByTestId('mfa-security-notice')).toHaveAttribute('data-variant', 'default');
+    expect(screen.getByText('Security notice')).toBeInTheDocument();
   });
 
   /** The design system's permanent `#live-region-alert` node always carries `role="alert"` even
@@ -311,5 +345,25 @@ describe('formatMfaNotice (passkey notices)', () => {
     expect(
       format({ ...base, type: 'passkey_removed', metadata: { deviceName: 'MacBook Touch ID' } })
     ).toMatch(/^A passkey was removed from your account \(/);
+  });
+});
+
+describe('formatMfaNotice (recovery codes)', () => {
+  const intl = createIntl({ locale: 'en', messages: {} });
+
+  it('announces a regeneration', () => {
+    expect(
+      formatMfaNotice(
+        {
+          id: 1,
+          type: 'recovery_codes_regenerated',
+          metadata: {},
+          createdAt: '2026-09-09T10:00:00.000Z',
+          seenAt: null,
+        },
+        intl.formatMessage,
+        intl.formatDate
+      )
+    ).toMatch(/^New recovery codes were generated \(/);
   });
 });

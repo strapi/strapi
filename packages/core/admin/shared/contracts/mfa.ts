@@ -309,6 +309,7 @@ export type MfaEventType =
   | 'challenge_failed'
   | 'recovery_code_used'
   | 'recovery_codes_issued'
+  | 'recovery_codes_regenerated'
   | 'grace_started'
   | 'locked'
   | 'unlocked'
@@ -322,7 +323,10 @@ export type MfaEventType =
  * of a factor would bury the ones that report a change to it. */
 export type MfaAuditOnlyNotice = 'trusted_device_used' | 'passkey_used';
 
-/** `recovery_codes_issued` is a row type but not a notice: it is the acknowledgement marker. An
+/** `recovery_codes_issued` is a row type but not a notice: it is the acknowledgement marker, whose
+ * `seenAt` means "the user saved these codes", and it is also written on enrolment, where a notice
+ * would only repeat what the user just did. A regeneration is announced by its own row,
+ * `recovery_codes_regenerated`, so marking that notice seen can never acknowledge the codes. An
  * `Exclude` rather than a second list, so a new row type cannot leave the feed's type behind. */
 export type MfaNoticeType = Exclude<MfaEventType, 'recovery_codes_issued'>;
 
@@ -337,6 +341,23 @@ export interface MfaEventNotice {
 export declare namespace Notices {
   export interface Response {
     data: MfaEventNotice[];
+  }
+}
+
+/**
+ * One row of the profile's "Recent security events": the newest events on the account, seen or
+ * not, including the ones the caller's own login caused (a recovery-code login, a passkey added),
+ * which the notices feed leaves out. `isNew` is true only for what `Notices` would return, so
+ * "Mark all as seen" is offered exactly when it has something to clear.
+ */
+export interface MfaRecentEvent extends MfaEventNotice {
+  isNew: boolean;
+}
+
+/** GET /mfa/events */
+export declare namespace RecentEvents {
+  export interface Response {
+    data: MfaRecentEvent[];
   }
 }
 

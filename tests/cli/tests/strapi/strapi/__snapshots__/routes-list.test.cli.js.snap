@@ -155,6 +155,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /admin/mfa/recovery-codes/ack                                                   │
 │ POST               │ /admin/mfa/disable                                                              │
 │ HEAD|GET           │ /admin/mfa/notices                                                              │
+│ HEAD|GET           │ /admin/mfa/events                                                               │
 │ POST               │ /admin/mfa/notices/seen                                                         │
 │ HEAD|GET           │ /admin/mfa/trusted-devices                                                      │
 │ DELETE             │ /admin/mfa/trusted-devices                                                      │

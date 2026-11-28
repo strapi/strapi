@@ -13,6 +13,7 @@ import type {
   Me,
   Notices,
   PasskeyRegistrationOptions,
+  RecentEvents,
   RegenerateRecoveryCodes,
   RegisterPasskey,
   RevokeTrustedDevice,
@@ -72,7 +73,8 @@ const mfaService = adminApi
         transformResponse(res: RegenerateRecoveryCodes.Response) {
           return res.data;
         },
-        invalidatesTags: ['Mfa'],
+        // `MfaNotices`: a regeneration records a `recovery_codes_regenerated` event.
+        invalidatesTags: ['Mfa', 'MfaNotices'],
       }),
       // `void` rather than the empty body type, so callers invoke it as `acknowledge()`.
       acknowledgeRecoveryCodes: builder.mutation<void, void>({
@@ -86,6 +88,15 @@ const mfaService = adminApi
       getMfaNotices: builder.query<Notices.Response['data'], void>({
         query: () => ({ method: 'GET', url: '/admin/mfa/notices' }),
         transformResponse(res: Notices.Response) {
+          return res.data;
+        },
+        providesTags: ['MfaNotices'],
+      }),
+      /** The profile's history. Shares the `MfaNotices` tag, so everything that adds or clears a
+       * notice refreshes it too. */
+      getMfaRecentEvents: builder.query<RecentEvents.Response['data'], void>({
+        query: () => ({ method: 'GET', url: '/admin/mfa/events' }),
+        transformResponse(res: RecentEvents.Response) {
           return res.data;
         },
         providesTags: ['MfaNotices'],
@@ -229,6 +240,7 @@ const {
   useAcknowledgeRecoveryCodesMutation,
   useDisableMfaMutation,
   useGetMfaNoticesQuery,
+  useGetMfaRecentEventsQuery,
   useMarkMfaNoticesSeenMutation,
   useResetUserMfaMutation,
   useUnlockUserMfaMutation,
@@ -253,6 +265,7 @@ export {
   useAcknowledgeRecoveryCodesMutation,
   useDisableMfaMutation,
   useGetMfaNoticesQuery,
+  useGetMfaRecentEventsQuery,
   useMarkMfaNoticesSeenMutation,
   useResetUserMfaMutation,
   useUnlockUserMfaMutation,

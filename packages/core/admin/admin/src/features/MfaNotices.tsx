@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { Alert, Box, Link } from '@strapi/design-system';
+import { Link } from '@strapi/design-system';
 import { type IntlFormatters, useIntl } from 'react-intl';
 import { NavLink, useMatch } from 'react-router-dom';
 
+import { GlobalBanner } from '../components/GlobalBanner';
 import {
   useGetMfaNoticesQuery,
   useGetMfaStatusQuery,
@@ -11,6 +12,7 @@ import {
 } from '../services/mfa';
 import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
 import { isMfaNotFoundError } from '../utils/mfaFeature';
+import { hasRiskyNotice } from '../utils/mfaNoticeSeverity';
 
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
 
@@ -35,6 +37,10 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
   recovery_code_used: {
     id: 'Settings.profile.form.section.mfa.notice.recovery_code_used',
     defaultMessage: 'A recovery code was used to log in',
+  },
+  recovery_codes_regenerated: {
+    id: 'Settings.profile.form.section.mfa.notice.recovery_codes_regenerated',
+    defaultMessage: 'New recovery codes were generated',
   },
   grace_started: {
     id: 'Settings.profile.form.section.mfa.notice.grace_started',
@@ -132,9 +138,10 @@ export const formatMfaNotice = (
 const PROFILE_PATH = '/me';
 
 /**
- * Unseen notice rows become one inline warning, rendered by the authenticated layout directly
- * under the two-factor grace banner (see `MfaBanners`), so the two can never overlap. Closing it
- * marks the announced notices seen. "profile page" in the message links to the profile.
+ * Unseen notice rows become one full-width strip in the global banner stack, directly under the
+ * two-factor grace banner (see `MfaBanners`), so the two can never overlap. `warning` when any of
+ * them is risky (`MFA_NOTICE_SEVERITY`), otherwise `default`; the text is the same either way.
+ * Closing it marks the announced notices seen. "profile page" in the message links to the profile.
  *
  * Never on the profile page itself, which lists the same events in its two-factor section with its
  * own "Mark all as seen": landing there (from the link or otherwise) hides the notice without
@@ -187,33 +194,32 @@ const MfaNotices = () => {
   };
 
   return (
-    <Box paddingTop={4} paddingLeft={6} paddingRight={6} data-testid="mfa-security-notice">
-      <Alert
-        variant="warning"
-        closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-        title={formatMessage({
-          id: 'Settings.profile.form.section.mfa.notice.title',
-          defaultMessage: 'Security notice',
-        })}
-        onClose={handleClose}
-      >
-        {formatMessage(
-          {
-            id: 'Settings.profile.form.section.mfa.notice.summary',
-            defaultMessage:
-              '{count, plural, one {# security event} other {# security events}} on your account since your last visit. Review them on your <link>profile page</link>.',
-          },
-          {
-            count: shown.length,
-            link: (chunks: React.ReactNode) => (
-              <Link tag={NavLink} to={PROFILE_PATH} isExternal={false}>
-                {chunks}
-              </Link>
-            ),
-          }
-        )}
-      </Alert>
-    </Box>
+    <GlobalBanner
+      variant={hasRiskyNotice(shown) ? 'warning' : 'default'}
+      data-testid="mfa-security-notice"
+      closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+      title={formatMessage({
+        id: 'Settings.profile.form.section.mfa.notice.title',
+        defaultMessage: 'Security notice',
+      })}
+      onClose={handleClose}
+    >
+      {formatMessage(
+        {
+          id: 'Settings.profile.form.section.mfa.notice.summary',
+          defaultMessage:
+            '{count, plural, one {# security event} other {# security events}} on your account since your last visit. Review them on your <link>profile page</link>.',
+        },
+        {
+          count: shown.length,
+          link: (chunks: React.ReactNode) => (
+            <Link tag={NavLink} to={PROFILE_PATH} isExternal={false}>
+              {chunks}
+            </Link>
+          ),
+        }
+      )}
+    </GlobalBanner>
   );
 };
 
