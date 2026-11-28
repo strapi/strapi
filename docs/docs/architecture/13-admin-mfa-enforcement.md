@@ -277,16 +277,18 @@ password-less administrator into a dialog they cannot complete.
   its own line: the roles no longer required (by name), "no longer required for everyone", the new
   grace or trust period against the old one, and the number of passkeys deleted. Leaving the page
   with unsaved changes asks for confirmation
-- **Settings > Users**, list: a two-factor column ("Enabled", "Set up by {date}", "Locked",
-  "Required, not set up", "Not enabled"), shown to holders of `admin::users.update` while the flag
-  is on. "Required, not set up" is a required account whose grace period starts at its next login
-- **Settings > Users**, per user (`pages/Settings/pages/Users/components/TwoFactorPanel.tsx`):
-  enrolment state, lock state, the unlock and reset actions, plus trusted-device and passkey counts.
-  An unlocked account has no lock and no grace, like one that never started. A required account
-  with no grace yet reads "Required, not set up. A {n}-day grace period starts at their next
-  login.", with the configured days when the viewer may read the security settings. Right after an
-  unlock made on that page it reads "Not set up. A new {n}-day grace period starts at their next
-  login." instead
+- **Settings > Users**, list: the User status column reads Active, Inactive or Locked (a lock
+  stops password login and wins over Active). A two-factor column, shown to holders of
+  `admin::users.update` while the flag is on, reads only Enabled or Not set up, with the requirement
+  as a small line under it: "Required from next login" (required, grace not started), "Required,
+  {n} days left", or "Required" once locked. No line when it is not required
+  (`utils/mfaRequirement.ts` derives it for the list and the user page)
+- **Settings > Users**, per user: the lock and its Unlock action sit with the account status in
+  Details (`components/UserLockStatus.tsx`); `TwoFactorPanel.tsx` shows only the two-factor state
+  (Enabled, or Not set up with the same requirement line and the deadline), the reset action, and
+  trusted-device and passkey counts. An unlocked account has no lock and no grace, like one that
+  never started, so right after an unlock made on that page the panel reads "Required from next
+  login" even when the viewer cannot read the security settings
 - **Settings > Roles**, per role (`pages/Settings/pages/Roles/components/RoleTwoFactorRequirement.tsx`):
   a "Require two-factor authentication for this role" checkbox on `admin::role.mfaRequired`, shown
   to holders of `admin::security-settings.read` and `.update` while the feature is on. It saves on

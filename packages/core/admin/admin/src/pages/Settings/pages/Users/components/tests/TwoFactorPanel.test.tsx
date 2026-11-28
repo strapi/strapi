@@ -166,17 +166,19 @@ describe('TwoFactorPanel', () => {
     expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
   });
 
-  it('offers both Reset and Unlock for a locked account', async () => {
+  // The lock is a login state: it lives with the account status (UserLockStatus), not here.
+  it('offers Reset but no lock or Unlock for a locked account', async () => {
     renderPanel({ mfaLockedAt: '2026-02-01T00:00:00.000Z' });
 
     expect(await screen.findByRole('button', { name: 'Reset' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Unlock' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Locked/)).not.toBeInTheDocument();
   });
 
   it('offers no Reset for an account that was never enrolled', async () => {
     renderPanel({ mfaEnabledAt: null });
 
-    expect(await screen.findByText('Not enabled')).toBeInTheDocument();
+    expect(await screen.findByText('Not set up')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
   });
 
@@ -298,40 +300,6 @@ describe('TwoFactorPanel', () => {
     expect(screen.queryByText('Two-factor authentication reset.')).not.toBeInTheDocument();
   });
 
-  describe('unlock', () => {
-    const locked = { mfaLockedAt: '2026-02-01T00:00:00.000Z' };
-
-    it('confirms, unlocks the account and says so', async () => {
-      const calls: string[] = [];
-      server.use(
-        http.post('/admin/mfa/users/:id/unlock', ({ params }) => {
-          calls.push(String(params.id));
-          return new HttpResponse(null, { status: 204 });
-        })
-      );
-      const { user } = renderPanel(locked);
-
-      await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      expect(await screen.findByText('Unlock this account?')).toBeInTheDocument();
-      expect(calls).toHaveLength(0);
-      await confirmWithCredentials(user, 'Unlock');
-
-      await waitFor(() => expect(calls).toEqual(['3']));
-      expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
-    });
-
-    it('says why an unlock failed', async () => {
-      server.use(http.post('/admin/mfa/users/:id/unlock', () => failWith('Unlock refused')));
-      const { user } = renderPanel(locked);
-
-      await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      await confirmWithCredentials(user, 'Unlock');
-
-      expect(await screen.findByText('Unlock refused')).toBeInTheDocument();
-      expect(screen.queryByText('Account unlocked.')).not.toBeInTheDocument();
-    });
-  });
-
   describe('trusted devices', () => {
     it('revokes every trusted browser after confirmation', async () => {
       counts({ trusted: 2 });
@@ -414,20 +382,15 @@ describe('TwoFactorPanel', () => {
       expect(screen.queryByText('Passkeys removed.')).not.toBeInTheDocument();
     });
   });
-  describe('required but not set up', () => {
-    // A required user who never had a grace period is starting their first, not a new one. The page
-    // says so, with the configured length, whenever the settings require it of this user.
-    it('says a grace period of the configured length starts at the next login', async () => {
+  describe('not set up', () => {
+    it('says the requirement starts at the next login when the settings require it of this user', async () => {
       settings({ mode: 'optional', requiredRoles: ['2'] });
       render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
         providerOptions: withSecurityRead(),
       });
 
-      expect(
-        await screen.findByText(
-          'Required, not set up. A 5-day grace period starts at their next login.'
-        )
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
     });
 
     it("trusts the server's mfaRequired over the settings, so an exempt account is not called required", async () => {
@@ -437,66 +400,55 @@ describe('TwoFactorPanel', () => {
       });
 
       await waitFor(() => expect(reads.count).toBe(1));
-      expect(await screen.findByText('Not enabled')).toBeInTheDocument();
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      expect(screen.queryByText(/Required/)).not.toBeInTheDocument();
     });
 
-    it('says the required account starts a grace period even without settings to read', async () => {
+    it('says required from next login even without settings to read', async () => {
       render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaRequired: true }} canUpdate />);
 
-      expect(
-        await screen.findByText('Required, not set up. A grace period starts at their next login.')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
     });
 
-    // An unlock clears the lock and the grace period; the next login starts a new one.
-    it('says a new grace period of the configured length starts after an unlock made here', async () => {
-      settings({ mode: 'optional', requiredRoles: ['2'] });
-      server.use(
-        http.post('/admin/mfa/users/:id/unlock', () => new HttpResponse(null, { status: 204 }))
-      );
-      const locked = { ...NOT_ENROLLED, mfaLockedAt: '2026-02-01T00:00:00.000Z' };
-      const { user, rerender } = render(<TwoFactorPanel user={locked} canUpdate />, {
-        providerOptions: withSecurityRead(),
-      });
-
-      await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      await confirmWithCredentials(user, 'Unlock');
-      await screen.findByText('Account unlocked.');
-      rerender(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />);
-
-      expect(
-        await screen.findByText('Not set up. A new 5-day grace period starts at their next login.')
-      ).toBeInTheDocument();
-    });
-
-    it('reads as not enabled when none of their roles is required', async () => {
+    it('reads as only not set up when none of their roles is required', async () => {
       const reads = settings({ mode: 'optional', requiredRoles: ['1'] });
       render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
         providerOptions: withSecurityRead(),
       });
 
-      // Wait for the settings to be read, so this is not just the first paint.
       await waitFor(() => expect(reads.count).toBe(1));
-      expect(await screen.findByText('Not enabled')).toBeInTheDocument();
-      expect(screen.queryByText(/grace period starts/)).not.toBeInTheDocument();
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      expect(screen.queryByText(/Required/)).not.toBeInTheDocument();
     });
 
-    it('says a new grace period starts after an unlock made here, without settings to read', async () => {
-      server.use(
-        http.post('/admin/mfa/users/:id/unlock', () => new HttpResponse(null, { status: 204 }))
+    it('says required from next login after an unlock, even without settings to read', async () => {
+      render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate justUnlocked />);
+
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
+    });
+
+    it('shows the days left and the deadline for an account in its grace period', async () => {
+      const graceUntil = new Date(Date.now() + 4.5 * 24 * 60 * 60 * 1000).toISOString();
+      render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaGraceUntil: graceUntil }} canUpdate />);
+
+      expect(await screen.findByText('Required, 5 days left')).toBeInTheDocument();
+      expect(screen.getByText(/^Set up before .*\d{1,2}:\d{2}/)).toBeInTheDocument();
+    });
+
+    it('says only Required for a locked account, with no deadline', async () => {
+      render(
+        <TwoFactorPanel
+          user={{
+            ...NOT_ENROLLED,
+            mfaGraceUntil: '2026-02-01T00:00:00.000Z',
+            mfaLockedAt: '2026-02-02T00:00:00.000Z',
+          }}
+          canUpdate
+        />
       );
-      const locked = { ...NOT_ENROLLED, mfaLockedAt: '2026-02-01T00:00:00.000Z' };
-      const { user, rerender } = render(<TwoFactorPanel user={locked} canUpdate />);
 
-      await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      await confirmWithCredentials(user, 'Unlock');
-      await screen.findByText('Account unlocked.');
-      // What the refetched user looks like after the unlock.
-      rerender(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />);
-
-      expect(
-        await screen.findByText('Not set up. A new grace period starts at their next login.')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Required')).toBeInTheDocument();
+      expect(screen.queryByText(/Set up before/)).not.toBeInTheDocument();
     });
   });
 });

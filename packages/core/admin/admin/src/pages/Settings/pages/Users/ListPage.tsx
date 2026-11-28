@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Typography, Status, IconButton, Dialog } from '@strapi/design-system';
+import { Flex, Typography, IconButton, Dialog } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -26,6 +26,7 @@ import { getDisplayName } from '../../../../utils/users';
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
 import { TwoFactorStatus } from './components/TwoFactorStatus';
+import { UserStatus } from './components/UserStatus';
 
 import type { AdminUserMfaState } from '../../../../../../shared/contracts/user';
 
@@ -54,7 +55,9 @@ const ListPageCE = () => {
     CreateActionCE,
     async () =>
       (
-        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE')
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE'
+        )
       ).CreateActionEE
   );
 
@@ -291,16 +294,8 @@ const TABLE_HEADERS: Array<
       defaultMessage: 'User status',
     },
     sortable: false,
-    cellFormatter({ isActive }) {
-      return (
-        <Flex>
-          <Status size="S" variant={isActive ? 'success' : 'danger'}>
-            <Typography tag="span" variant="omega" fontWeight="bold">
-              {isActive ? 'Active' : 'Inactive'}
-            </Typography>
-          </Status>
-        </Flex>
-      );
+    cellFormatter(user) {
+      return <UserStatus user={user as SanitizedAdminUser & AdminUserMfaState} />;
     },
   },
 ];

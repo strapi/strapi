@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { render, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -22,10 +23,100 @@ describe('Users | ListPage', () => {
     expect(screen.queryByText('Two-factor')).not.toBeInTheDocument();
   });
 
-  /**
-   * The server appends enforcement state for callers who can act on it, while the feature is on.
-   */
-  it('shows each account’s two-factor state when the rows carry it', async () => {
+  describe('with the two-factor feature on', () => {
+    const originalFuture = window.strapi.future;
+
+    beforeEach(() => {
+      window.strapi.future = { isEnabled: (name) => name === 'unstableAdminMfa' };
+    });
+
+    afterEach(() => {
+      window.strapi.future = originalFuture;
+    });
+
+    const day = 24 * 60 * 60 * 1000;
+    const row = (id: number, lastname: string, extra: Record<string, unknown>) => ({
+      id,
+      firstname: 'U',
+      lastname,
+      roles: [],
+      isActive: true,
+      mfaEnabledAt: null,
+      mfaGraceUntil: null,
+      mfaLockedAt: null,
+      ...extra,
+    });
+    const rowsOf = (...rows: unknown[]) =>
+      server.use(
+        http.get('/admin/users', () =>
+          HttpResponse.json({ data: { results: rows, pagination: { page: 1 } } })
+        )
+      );
+    /** The cells of the row for a last name: [user status, two-factor]. */
+    const cellsOf = async (lastname: string) => {
+      const row = await screen.findByRole('row', { name: new RegExp(lastname) });
+      const cells = within(row).getAllByRole('gridcell');
+      return { status: cells[cells.length - 3], twoFactor: cells[cells.length - 2] };
+    };
+
+    it('shows only Enabled or Not set up in the two-factor column, never Locked', async () => {
+      rowsOf(
+        row(1, 'Enrolled', { mfaEnabledAt: '2026-09-01T10:00:00.000Z' }),
+        row(2, 'Lockee', { mfaLockedAt: '2026-09-12T10:00:00.000Z' }),
+        row(3, 'Never', {})
+      );
+      render(<ListPageCE />);
+
+      expect(await screen.findByText('Two-factor')).toBeInTheDocument();
+      expect((await cellsOf('Enrolled')).twoFactor).toHaveTextContent('Enabled');
+      const locked = await cellsOf('Lockee');
+      expect(locked.twoFactor).toHaveTextContent('Not set up');
+      expect(locked.twoFactor).not.toHaveTextContent('Locked');
+      expect((await cellsOf('Never')).twoFactor).toHaveTextContent('Not set up');
+    });
+
+    it('gives the user status Active, Inactive or Locked, Locked taking precedence', async () => {
+      rowsOf(
+        row(1, 'Alpha', {}),
+        row(2, 'Beta', { isActive: false }),
+        row(3, 'Lockee', { mfaLockedAt: '2026-09-12T10:00:00.000Z' }),
+        row(4, 'Both', { isActive: false, mfaLockedAt: '2026-09-12T10:00:00.000Z' })
+      );
+      render(<ListPageCE />);
+
+      expect((await cellsOf('Alpha')).status).toHaveTextContent('Active');
+      expect((await cellsOf('Beta')).status).toHaveTextContent('Inactive');
+      expect((await cellsOf('Lockee')).status).toHaveTextContent('Locked');
+      expect((await cellsOf('Both')).status).toHaveTextContent('Locked');
+    });
+
+    it('words the requirement under the state', async () => {
+      rowsOf(
+        row(1, 'Enrolled', { mfaEnabledAt: '2026-09-01T10:00:00.000Z', mfaRequired: true }),
+        row(2, 'NotRequired', { mfaRequired: false }),
+        row(3, 'NextLogin', { mfaRequired: true }),
+        row(4, 'FiveDays', {
+          mfaRequired: true,
+          mfaGraceUntil: new Date(Date.now() + 4.5 * day).toISOString(),
+        }),
+        row(5, 'OneDay', {
+          mfaRequired: true,
+          mfaGraceUntil: new Date(Date.now() + 0.5 * day).toISOString(),
+        }),
+        row(6, 'Lockee', { mfaRequired: true, mfaLockedAt: '2026-09-12T10:00:00.000Z' })
+      );
+      render(<ListPageCE />);
+
+      expect((await cellsOf('Enrolled')).twoFactor).not.toHaveTextContent('Required');
+      expect((await cellsOf('NotRequired')).twoFactor).not.toHaveTextContent('Required');
+      expect((await cellsOf('NextLogin')).twoFactor).toHaveTextContent('Required from next login');
+      expect((await cellsOf('FiveDays')).twoFactor).toHaveTextContent('Required, 5 days left');
+      expect((await cellsOf('OneDay')).twoFactor).toHaveTextContent('Required, 1 day left');
+      expect((await cellsOf('Lockee')).twoFactor).toHaveTextContent(/Not set upRequired$/);
+    });
+  });
+
+  it('does not show Locked in the user status when the feature is off', async () => {
     server.use(
       http.get('/admin/users', () =>
         HttpResponse.json({
@@ -33,49 +124,13 @@ describe('Users | ListPage', () => {
             results: [
               {
                 id: 1,
-                firstname: 'Set',
-                lastname: 'Up',
+                firstname: 'U',
+                lastname: 'Lockee',
                 roles: [],
-                mfaEnabledAt: '2026-09-01T10:00:00.000Z',
-                mfaGraceUntil: null,
-                mfaLockedAt: null,
-              },
-              {
-                id: 2,
-                firstname: 'On',
-                lastname: 'Clock',
-                roles: [],
-                mfaEnabledAt: null,
-                mfaGraceUntil: '2026-09-11T10:00:00.000Z',
-                mfaLockedAt: null,
-              },
-              {
-                id: 3,
-                firstname: 'Was',
-                lastname: 'Out',
-                roles: [],
+                isActive: true,
                 mfaEnabledAt: null,
                 mfaGraceUntil: null,
                 mfaLockedAt: '2026-09-12T10:00:00.000Z',
-              },
-              {
-                id: 4,
-                firstname: 'Never',
-                lastname: 'Asked',
-                roles: [],
-                mfaEnabledAt: null,
-                mfaGraceUntil: null,
-                mfaLockedAt: null,
-              },
-              {
-                id: 5,
-                firstname: 'Not',
-                lastname: 'Started',
-                roles: [],
-                mfaEnabledAt: null,
-                mfaGraceUntil: null,
-                mfaLockedAt: null,
-                mfaRequired: true,
               },
             ],
             pagination: { page: 1 },
@@ -85,13 +140,8 @@ describe('Users | ListPage', () => {
     );
     render(<ListPageCE />);
 
-    await screen.findByText('Was');
-    expect(screen.getByText('Two-factor')).toBeInTheDocument();
-    expect(screen.getByText('Enabled')).toBeInTheDocument();
-    expect(screen.getByText(/^Set up by .+\d{1,2}:\d{2}/)).toBeInTheDocument();
-    expect(screen.getByText('Locked')).toBeInTheDocument();
-    expect(screen.getByText('Not enabled')).toBeInTheDocument();
-    // Required, but the grace period has not started: it starts at their next login.
-    expect(screen.getByText('Required, not set up')).toBeInTheDocument();
+    const row = await screen.findByRole('row', { name: /Lockee/ });
+    expect(within(row).getByText('Active')).toBeInTheDocument();
+    expect(within(row).queryByText('Locked')).not.toBeInTheDocument();
   });
 });

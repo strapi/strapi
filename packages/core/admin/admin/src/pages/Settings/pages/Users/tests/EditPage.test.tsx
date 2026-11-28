@@ -80,12 +80,12 @@ describe('Users | EditPage', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('shows Not enabled', async () => {
+    it('shows Not set up', async () => {
       server.use(userWith({ mfaEnabledAt: null, mfaGraceUntil: null, mfaLockedAt: null }));
       renderEdit();
 
       await screen.findByRole('heading', { name: 'Two-factor authentication' });
-      expect(screen.getByText('Not enabled')).toBeInTheDocument();
+      expect(screen.getByText('Not set up')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
     });
 
@@ -112,12 +112,13 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      const line = await screen.findByText(/^Not enabled\. Must be set up before/);
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      const line = await screen.findByText(/^Set up before/);
       expect(line).toHaveTextContent(/2026/);
       expect(line).toHaveTextContent(/\d{1,2}:\d{2}/);
     });
 
-    it('shows the lock (for password login, with the SSO caveat) and unlocks after confirmation', async () => {
+    it('shows the lock with the account status, not in the two-factor panel, and unlocks after confirmation', async () => {
       let unlocked = false;
       server.use(
         http.get('/admin/users/1', () =>
@@ -144,14 +145,19 @@ describe('Users | EditPage', () => {
       expect(await screen.findByText(/^Locked for password login since/)).toBeInTheDocument();
       expect(screen.getByText(/Single sign-on logins are not affected/)).toBeInTheDocument();
 
+      // One badge and one Unlock (getBy throws on duplicates), so the two-factor panel carries
+      // neither; it only says Not set up and Required.
+      expect(screen.getByText('Locked')).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: 'Unlock' })).toHaveLength(1);
+      expect(screen.getByText('Not set up')).toBeInTheDocument();
+      expect(screen.getByText('Required')).toBeInTheDocument();
+
       await user.click(screen.getByRole('button', { name: 'Unlock' }));
       expect(screen.getByRole('dialog', { name: 'Unlock this account?' })).toBeInTheDocument();
       await confirmWithCredentials(user, 'Unlock');
 
       expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
-      expect(
-        await screen.findByText('Not set up. A new grace period starts at their next login.')
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
     });
 
@@ -264,7 +270,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      await screen.findByText('Not enabled');
+      await screen.findByText('Not set up');
       expect(screen.queryByText(/trusted device/)).not.toBeInTheDocument();
       expect(called).toBe(false);
     });
@@ -373,7 +379,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      await screen.findByText('Not enabled');
+      await screen.findByText('Not set up');
       expect(screen.queryByText(/passkey/)).not.toBeInTheDocument();
       expect(called).toBe(false);
     });

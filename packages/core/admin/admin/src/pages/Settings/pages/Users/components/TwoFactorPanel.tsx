@@ -17,14 +17,17 @@ import {
   useGetUserTrustedDevicesQuery,
   useResetUserMfaMutation,
   useRevokeUserTrustedDevicesMutation,
-  useUnlockUserMfaMutation,
 } from '../../../../../services/mfa';
 import { useGetSecuritySettingsQuery } from '../../../../../services/securitySettings';
 import { MFA_DATE_TIME_FORMAT } from '../../../../../utils/mfaDates';
+import { getMfaRequirement } from '../../../../../utils/mfaRequirement';
 import {
   ConfirmDowngradeDialog,
   type DowngradeCredentials,
 } from '../../Security/components/ConfirmDowngradeDialog';
+
+import { ReauthDescription, runWithCredentials } from './MfaReauth';
+import { MfaRequirementText } from './TwoFactorStatus';
 
 import type { AdminUserListItem } from '../../../../../services/users';
 
@@ -34,24 +37,23 @@ interface TwoFactorPanelProps {
     'id' | 'mfaEnabledAt' | 'mfaGraceUntil' | 'mfaLockedAt' | 'mfaRequired' | 'roles'
   >;
   canUpdate: boolean;
+  /** The account was just unlocked from this page: its grace period starts at the next login. */
+  justUnlocked?: boolean;
 }
 
 /**
  * "Two-factor authentication" on the user edit page. The server appends the three mfa fields to
  * `GET /admin/users/:id` only for callers with `admin::users.update` and only while the feature
- * is on, and `EditPage` renders this panel only when they are present. One of four states, in
- * priority order: locked, enrolled, in grace, not enrolled. A lock stops *password* login only:
- * SSO logins are exempt from enforcement, and the copy says so.
+ * is on, and `EditPage` renders this panel only when they are present. It shows the two-factor
+ * state only: enabled, or not set up with its requirement and deadline. The lock is a login state
+ * and, with Unlock, lives with the account status (`UserLockStatus`).
  *
- * Reset, unlock and removing passkeys each lower this user's protection, so the server asks the
- * acting administrator for their own password, plus a code when they have a second factor
+ * Reset and removing passkeys each lower this user's protection, so the server asks the acting
+ * administrator for their own password, plus a code when they have a second factor
  * (`assertActorReauth`), and only a super admin may do them to a super admin. They use
  * `ConfirmDowngradeDialog`, which collects exactly what `/mfa/me` says the viewer owes: nothing for
  * an SSO-only administrator, the password alone for one without a second factor. Revoking trusted
  * devices only forces the second factor back on, so it stays a plain confirmation.
- *
- * Unlock restores password login without starting a new grace period (the user's next login does
- * that, so an unlock while they are away cannot re-lock them unseen).
  *
  * Reset is the only destructive one: it strips the factor entirely and logs the user out
  * everywhere. Offered for any enrolled account rather than only a locked one,
@@ -61,38 +63,21 @@ interface TwoFactorPanelProps {
  *
  * An unlocked account reads like one that never started: not enrolled, no grace, no lock. The
  * enforcement settings tell the two apart from "not required at all" -- when the viewer may read
- * them -- so the page can say a new grace period starts at the user's next login, and for how
- * many days. Without them, only an unlock made on this page is known to have that effect.
+ * them -- so the page can say the requirement starts at the user's next login. Without them, only
+ * an unlock made on the page (`justUnlocked`) is known to have that effect.
  */
-const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
+const TwoFactorPanel = ({ user, canUpdate, justUnlocked = false }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
   const toMessage = useMfaErrorMessage();
-  const [unlock, { isLoading }] = useUnlockUserMfaMutation();
   const [resetMfa, { isLoading: isResetting }] = useResetUserMfaMutation();
   const [resetOpen, setResetOpen] = React.useState(false);
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const [justUnlocked, setJustUnlocked] = React.useState(false);
 
   // What the viewer owes to re-authenticate (see the component comment). Until it loads, the
   // dialogs ask for both, which is what most administrators owe; the server decides either way.
   const { data: viewerMfa } = useGetMfaStatusQuery();
   const requiresPassword = viewerMfa?.hasLocalPassword ?? true;
   const requiresCode = viewerMfa?.enabled ?? true;
-
-  /** Runs one re-authenticated action; resolves a message to show in the dialog, or nothing. */
-  const runWithCredentials = async (
-    action: (credentials: DowngradeCredentials | Record<string, never>) => Promise<unknown>,
-    credentials: DowngradeCredentials | undefined,
-    onSuccess: () => void
-  ): Promise<string | undefined> => {
-    const res = (await action(credentials ?? {})) as { error?: unknown };
-    if (res && 'error' in res && res.error) {
-      return toMessage(res.error as Parameters<typeof toMessage>[0]);
-    }
-    onSuccess();
-    return undefined;
-  };
 
   const permissions = useTypedSelector(selectAdminPermissions);
   const {
@@ -137,23 +122,6 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
 
   const dateTime = (value: string | Date) => formatDate(value, MFA_DATE_TIME_FORMAT);
 
-  const handleUnlock = (credentials?: DowngradeCredentials) =>
-    runWithCredentials(
-      (body) => unlock({ id: user.id, ...body }),
-      credentials,
-      () => {
-        setConfirmOpen(false);
-        setJustUnlocked(true);
-        toggleNotification({
-          type: 'success',
-          message: formatMessage({
-            id: 'Settings.permissions.users.mfa.unlock.success',
-            defaultMessage: 'Account unlocked.',
-          }),
-        });
-      }
-    );
-
   const handleReset = (credentials?: DowngradeCredentials) =>
     runWithCredentials(
       (body) => resetMfa({ id: user.id, ...body }),
@@ -167,7 +135,8 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
             defaultMessage: 'Two-factor authentication reset.',
           }),
         });
-      }
+      },
+      toMessage
     );
 
   const handleRevokeTrustedDevices = async () => {
@@ -202,112 +171,53 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
             defaultMessage: 'Passkeys removed.',
           }),
         });
-      }
+      },
+      toMessage
     );
 
-  const reauthDescription = (body: string) => (
-    <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography>{body}</Typography>
-      <Typography textColor="neutral600">
+  const reauthDescription = (body: string) => <ReauthDescription body={body} />;
+
+  // Only the two-factor state and its deadline. The lock is a login state and lives with the
+  // account status above.
+  const requirement = getMfaRequirement(user, {
+    requiredFallback: requiredBySettings || (justUnlocked && requiredBySettings === undefined),
+  });
+  const state: React.ReactNode = user.mfaEnabledAt ? (
+    <Typography>
+      {formatMessage(
+        {
+          id: 'Settings.permissions.users.mfa.state.enrolled',
+          defaultMessage: 'Enabled since {date}',
+        },
+        { date: formatDate(user.mfaEnabledAt, { dateStyle: 'medium' }) }
+      )}
+    </Typography>
+  ) : (
+    <Flex direction="column" alignItems="flex-start" gap={1}>
+      <Typography>
         {formatMessage({
-          id: 'Settings.permissions.users.mfa.reauth.description',
-          defaultMessage: "This lowers another user's protection, so confirm it is you.",
+          id: 'Settings.permissions.users.mfa.status.notSetUp',
+          defaultMessage: 'Not set up',
         })}
       </Typography>
-    </Flex>
-  );
-
-  let state: React.ReactNode;
-  if (user.mfaLockedAt) {
-    state = (
-      <Flex direction="column" alignItems="flex-start" gap={1}>
-        <Typography textColor="danger600">
+      {requirement.kind !== 'none' ? (
+        <Typography variant="pi" textColor="neutral600">
+          <MfaRequirementText requirement={requirement} />
+        </Typography>
+      ) : null}
+      {!user.mfaLockedAt && user.mfaGraceUntil ? (
+        <Typography variant="pi" textColor="neutral600">
           {formatMessage(
             {
-              id: 'Settings.permissions.users.mfa.state.locked',
-              defaultMessage: 'Locked for password login since {datetime}',
+              id: 'Settings.permissions.users.mfa.state.deadline',
+              defaultMessage: 'Set up before {datetime}',
             },
-            { datetime: dateTime(user.mfaLockedAt) }
+            { datetime: dateTime(user.mfaGraceUntil) }
           )}
         </Typography>
-        <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: 'Settings.permissions.users.mfa.state.locked.hint',
-            defaultMessage:
-              'Two-factor authentication was not set up before the deadline. Single sign-on logins are not affected.',
-          })}
-        </Typography>
-      </Flex>
-    );
-  } else if (user.mfaEnabledAt) {
-    state = (
-      <Typography>
-        {formatMessage(
-          {
-            id: 'Settings.permissions.users.mfa.state.enrolled',
-            defaultMessage: 'Enabled since {date}',
-          },
-          { date: formatDate(user.mfaEnabledAt, { dateStyle: 'medium' }) }
-        )}
-      </Typography>
-    );
-  } else if (user.mfaGraceUntil) {
-    state = (
-      <Typography>
-        {formatMessage(
-          {
-            id: 'Settings.permissions.users.mfa.state.grace',
-            defaultMessage: 'Not enabled. Must be set up before {datetime}',
-          },
-          { datetime: dateTime(user.mfaGraceUntil) }
-        )}
-      </Typography>
-    );
-  } else if (requiredBySettings || (justUnlocked && requiredBySettings === undefined)) {
-    // "A new" grace period only after an unlock made here: a required user who never had one is
-    // starting their first.
-    const days = settings?.mfa.graceDays;
-    let message: string;
-    if (days === undefined) {
-      message = justUnlocked
-        ? formatMessage({
-            id: 'Settings.permissions.users.mfa.state.pending.unknownDays',
-            defaultMessage: 'Not set up. A new grace period starts at their next login.',
-          })
-        : formatMessage({
-            id: 'Settings.permissions.users.mfa.state.required.unknownDays',
-            defaultMessage: 'Required, not set up. A grace period starts at their next login.',
-          });
-    } else {
-      message = justUnlocked
-        ? formatMessage(
-            {
-              id: 'Settings.permissions.users.mfa.state.pending',
-              defaultMessage:
-                'Not set up. A new {days, plural, one {#-day} other {#-day}} grace period starts at their next login.',
-            },
-            { days }
-          )
-        : formatMessage(
-            {
-              id: 'Settings.permissions.users.mfa.state.required',
-              defaultMessage:
-                'Required, not set up. A {days, plural, one {#-day} other {#-day}} grace period starts at their next login.',
-            },
-            { days }
-          );
-    }
-    state = <Typography>{message}</Typography>;
-  } else {
-    state = (
-      <Typography textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.permissions.users.mfa.state.none',
-          defaultMessage: 'Not enabled',
-        })}
-      </Typography>
-    );
-  }
+      ) : null}
+    </Flex>
+  );
 
   return (
     <Panel>
@@ -353,43 +263,6 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
                   id: 'Settings.permissions.users.mfa.reset.body',
                   defaultMessage:
                     'Their authenticator app, recovery codes, passkeys and trusted devices are all removed, and they are logged out everywhere. They log in with their password alone until they set up two-factor authentication again. Use this when a user has lost their authenticator and their recovery codes.',
-                })
-              )}
-            />
-          </>
-        ) : null}
-        {user.mfaLockedAt ? (
-          <>
-            <Button
-              variant="secondary"
-              disabled={!canUpdate}
-              loading={isLoading}
-              onClick={() => setConfirmOpen(true)}
-            >
-              {formatMessage({
-                id: 'Settings.permissions.users.mfa.unlock',
-                defaultMessage: 'Unlock',
-              })}
-            </Button>
-            <ConfirmDowngradeDialog
-              open={confirmOpen}
-              onClose={() => setConfirmOpen(false)}
-              onConfirm={handleUnlock}
-              requiresPassword={requiresPassword}
-              requiresCode={requiresCode}
-              title={formatMessage({
-                id: 'Settings.permissions.users.mfa.unlock.title',
-                defaultMessage: 'Unlock this account?',
-              })}
-              confirmLabel={formatMessage({
-                id: 'Settings.permissions.users.mfa.unlock',
-                defaultMessage: 'Unlock',
-              })}
-              description={reauthDescription(
-                formatMessage({
-                  id: 'Settings.permissions.users.mfa.unlock.body',
-                  defaultMessage:
-                    'The user can log in with their password again. A new grace period to set up two-factor authentication starts at their next login.',
                 })
               )}
             />

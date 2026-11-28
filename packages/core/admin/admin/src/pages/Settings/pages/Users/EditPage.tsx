@@ -28,6 +28,7 @@ import { getDisplayName } from '../../../../utils/users';
 import { MagicLinkCE } from './components/MagicLinkCE';
 import { SelectRoles } from './components/SelectRoles';
 import { TwoFactorPanel } from './components/TwoFactorPanel';
+import { UserLockStatus } from './components/UserLockStatus';
 import { COMMON_USER_SCHEMA } from './utils/validation';
 
 const EDIT_VALIDATION_SCHEMA = yup.object().shape({
@@ -61,7 +62,9 @@ const EditPage = () => {
     MagicLinkCE,
     async () =>
       (
-        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE')
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE'
+        )
       ).MagicLinkEE
   );
   const {
@@ -80,6 +83,7 @@ const EditPage = () => {
   });
 
   const [updateUser] = useUpdateUserMutation();
+  const [justUnlocked, setJustUnlocked] = React.useState(false);
 
   const {
     data,
@@ -262,6 +266,14 @@ const EditPage = () => {
                           })
                         )}
                       </Grid.Root>
+                      {isMfaFeatureEnabled() && user.mfaLockedAt ? (
+                        <UserLockStatus
+                          userId={user.id}
+                          lockedAt={user.mfaLockedAt}
+                          canUpdate={canUpdate}
+                          onUnlocked={() => setJustUnlocked(true)}
+                        />
+                      ) : null}
                     </Flex>
                   </Box>
                   <Box
@@ -288,7 +300,7 @@ const EditPage = () => {
                     </Flex>
                   </Box>
                   {isMfaFeatureEnabled() && user.mfaEnabledAt !== undefined ? (
-                    <TwoFactorPanel user={user} canUpdate={canUpdate} />
+                    <TwoFactorPanel user={user} canUpdate={canUpdate} justUnlocked={justUnlocked} />
                   ) : null}
                 </Flex>
               </Layouts.Content>
