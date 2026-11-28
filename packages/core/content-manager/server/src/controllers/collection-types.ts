@@ -858,7 +858,9 @@ export default {
       }
     }
 
-    const entitiesIds = entities.map((document) => document.documentId);
+    // findLocales returns one row per locale, so the same documentId can appear several times.
+    // Unpublish each document once: a single call already covers every requested locale.
+    const entitiesIds = [...new Set(entities.map((document) => document.documentId))];
 
     const { count } = await documentManager.unpublishMany(entitiesIds, model, { locale });
 
