@@ -54,6 +54,7 @@ describe('handlePost', () => {
     };
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockAuthenticationStrategy = {
+      name: 'mcp',
       authenticate: vi.fn().mockResolvedValue({
         // Distinct ids so assertions can tell the token owner (user) apart
         // from the token itself (credentials).
@@ -391,6 +392,11 @@ describe('handlePost', () => {
     // user (id 42), not credentials (id 7) — the actor is the token owner.
     expect(ctx.state.user).toEqual({ id: 42 });
     expect(ctx.state.auditSource).toBe('mcp');
+    expect(ctx.state.auth).toEqual({
+      strategy: mockAuthenticationStrategy,
+      credentials: { id: 7 },
+      ability: expect.objectContaining({ can: expect.any(Function) }),
+    });
   });
 
   test('should call withTimeout with connectTimeoutMs for connect and requestTimeoutMs for handleRequest', async () => {

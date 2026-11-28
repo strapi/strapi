@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { trimStart } from 'lodash';
 
 /**
  * Returns a path (as an array) from a file path
@@ -14,7 +13,7 @@ export const filePathToPropPath = (
 
   const parts = cleanPath
     .split(new RegExp(`[\\${path.win32.sep}|${path.posix.sep}]`, 'g'))
-    .map((part) => trimStart(part, '.'))
+    .map((part) => part.replace(/^\.+/, ''))
     // Dots can also delimit properties within a path segment.
     .join('.')
     .split('.');

@@ -3,6 +3,7 @@ import { getListQueryKey } from '../listQueryKey';
 const baseInput = {
   folderId: 1,
   search: '',
+  searchAll: false,
   sort: null,
   filter: null,
 };
@@ -35,6 +36,13 @@ describe('getListQueryKey', () => {
   it('returns different keys for different search', () => {
     const keyA = getListQueryKey(baseInput);
     const keyB = getListQueryKey({ ...baseInput, search: 'logo' });
+
+    expect(keyA).not.toBe(keyB);
+  });
+
+  it('returns different keys when the search widens to all media', () => {
+    const keyA = getListQueryKey({ ...baseInput, search: 'logo' });
+    const keyB = getListQueryKey({ ...baseInput, search: 'logo', searchAll: true });
 
     expect(keyA).not.toBe(keyB);
   });

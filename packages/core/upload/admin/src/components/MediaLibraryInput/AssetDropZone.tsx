@@ -88,8 +88,8 @@ interface AssetDropZoneProps {
 }
 
 /**
- * The field's own drop target. It only takes drops: browsing and picking files
- * go through the "Add asset" menu, so the field has one way in, not two.
+ * The field's own drop target. It only takes drops, and a click does nothing:
+ * browsing and picking files go through the "Add asset" menu.
  *
  * Deliberately not the Media Library page's
  * `UploadDropZoneProvider`: that one covers a whole route and paints a

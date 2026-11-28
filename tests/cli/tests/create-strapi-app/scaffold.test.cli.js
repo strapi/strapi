@@ -12,8 +12,12 @@ const bin = path.join(repoRoot, 'packages/cli/create-strapi-app/bin/index.js');
 const baseScaffoldArgs = ['--non-interactive', '--no-install', '--no-git-init'];
 
 // Every flag that would otherwise open a prompt, so a run without --non-interactive completes
-// only if no other prompt (such as the removed Strapi Cloud login) is asked
+// only if no other prompt (such as the removed Strapi Cloud login) is asked.
+// The child process has no terminal, so `--interactive` keeps the prompts on: without it the CLI
+// switches to non-interactive mode and an unanswered prompt would go unnoticed.
+// Run these args with spawnCsaWithoutAnswers so that an unanswered prompt fails the test.
 const promptFreeArgs = [
+  '--interactive',
   '--typescript',
   '--no-example',
   '--skip-db',
@@ -23,10 +27,20 @@ const promptFreeArgs = [
 
 const cloudPromptPattern = /log in|sign up|strapi cloud|strapi servers|trial/i;
 
-function spawnCsa(args, env = {}) {
+function spawnCsa(args, env = {}, cwd = repoRoot) {
+  return coffee.spawn(process.execPath, [bin, ...args], {
+    cwd,
+    env: { ...process.env, ...env },
+  });
+}
+
+// coffee closes stdin only after input queued with .write(), so without input a prompt waits forever.
+// An empty stdin makes a prompt read end-of-file at once: the CLI then exits with an error.
+function spawnCsaWithoutAnswers(args) {
   return coffee.spawn(process.execPath, [bin, ...args], {
     cwd: repoRoot,
-    env: { ...process.env, ...env },
+    env: process.env,
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
 }
 
@@ -280,7 +294,7 @@ describe('create-strapi-app', () => {
     const projectDir = mkProjectDir();
     try {
       // No --non-interactive and no --skip-cloud: this combination used to open the cloud login prompt
-      const { stdout, stderr } = await spawnCsa([projectDir, ...promptFreeArgs])
+      const { stdout, stderr } = await spawnCsaWithoutAnswers([projectDir, ...promptFreeArgs])
         .expect('code', 0)
         .end();
 
@@ -295,7 +309,11 @@ describe('create-strapi-app', () => {
   it('accepts the legacy --skip-cloud flag as a no-op', async () => {
     const projectDir = mkProjectDir();
     try {
-      const { stdout, stderr } = await spawnCsa([projectDir, ...promptFreeArgs, '--skip-cloud'])
+      const { stdout, stderr } = await spawnCsaWithoutAnswers([
+        projectDir,
+        ...promptFreeArgs,
+        '--skip-cloud',
+      ])
         .expect('code', 0)
         .end();
 
@@ -321,6 +339,126 @@ describe('create-strapi-app', () => {
 
     const out = `${stdout}${stderr}`;
     expect(out).toMatch(/non-interactive|directory/i);
+  });
+
+  it('switches to non-interactive mode without a terminal', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout } = await spawnCsa([projectDir, '--no-install', '--no-git-init'], {
+        CI: 'false',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toMatch(/not a terminal/i);
+      expect(stdout).toContain('Your application was created');
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('switches to non-interactive mode with --quickstart and no terminal', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout, stderr } = await spawnCsa(
+        [projectDir, '--quickstart', '--no-run', '--no-install', '--no-git-init'],
+        { CI: 'false' }
+      )
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toMatch(/not a terminal/i);
+      expect(`${stdout}${stderr}`).not.toMatch(cloudPromptPattern);
+      expect(stdout).toContain('Your application was created');
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each(['false', 'true'])(
+    'preserves custom template devDependencies in automatic prompt mode (CI=%s)',
+    async (ci) => {
+      const tempDir = mkProjectDir();
+      const templateDir = path.join(tempDir, 'template');
+      const projectDir = path.join(tempDir, 'project');
+      const devDependencies = { typescript: '5.8.3', '@types/node': '24.0.0' };
+
+      try {
+        fs.mkdirSync(templateDir);
+        fs.writeFileSync(
+          path.join(templateDir, 'package.json'),
+          JSON.stringify({ devDependencies })
+        );
+
+        const { stdout } = await spawnCsa(
+          [projectDir, '--template', templateDir, '--no-install', '--no-git-init'],
+          { CI: ci }
+        )
+          .expect('code', 0)
+          .end();
+
+        expect(stdout).toMatch(ci === 'true' ? /A CI environment was detected/ : /not a terminal/i);
+
+        const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+        expect(pkg.devDependencies).toEqual(devDependencies);
+      } finally {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it('shows the prompts with --interactive when there is no terminal', async () => {
+    const tempDir = mkProjectDir();
+    const projectDir = path.join(tempDir, 'app');
+    try {
+      const { stdout } = await spawnCsa(
+        [
+          '--interactive',
+          '--no-install',
+          '--no-git-init',
+          '--typescript',
+          '--no-example',
+          '--skip-db',
+        ],
+        { CI: 'true' },
+        tempDir
+      )
+        .write(`${projectDir}\n`)
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('What is the name of your project?');
+      expect(stdout).not.toMatch(/not a terminal|CI environment was detected/i);
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails without a directory when there is no terminal', async () => {
+    const { stderr, stdout } = await spawnCsa([], { CI: 'false' }).expect('code', 1).end();
+
+    const out = `${stdout}${stderr}`;
+    expect(out).toMatch(/directory/i);
+    expect(out).toMatch(/not a terminal/i);
+  });
+
+  it('fails when --interactive and --non-interactive are both set', async () => {
+    const tempDir = mkProjectDir();
+    const projectDir = path.join(tempDir, 'my-app');
+    try {
+      const { stderr, stdout } = await spawnCsa([projectDir, '--interactive', '--non-interactive'])
+        .expect('code', 1)
+        .end();
+
+      const out = `${stdout}${stderr}`;
+      expect(out).toMatch(/--interactive.*--non-interactive/i);
+      expect(fs.existsSync(projectDir)).toBe(false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it('fails when --typescript and --javascript are both set', async () => {

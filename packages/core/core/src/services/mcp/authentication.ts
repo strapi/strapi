@@ -32,6 +32,7 @@ const extractBearerToken = (ctx: Context): string | null => {
 };
 
 export type McpAuthenticationStrategy = {
+  name: string;
   authenticate(ctx: Context): Promise<McpAdminTokenAuthResult>;
 };
 
@@ -59,6 +60,9 @@ export const createMcpAuthenticationStrategy = (
   const adminTokenAuthenticator = createMcpAdminTokenAuthenticator(strapi);
 
   return {
+    // One strategy name for both token kinds: the handler stores this strategy in
+    // ctx.state.auth, and content history reads the name to tag a write as coming from MCP.
+    name: adminTokenAuthenticator.name,
     async authenticate(ctx: Context): Promise<McpAdminTokenAuthResult> {
       const token = extractBearerToken(ctx);
 
@@ -76,6 +80,7 @@ export const createMcpAuthenticationStrategy = (
 };
 
 export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
+  name: 'mcp',
   async authenticate(ctx: Context): Promise<McpAdminTokenAuthResult> {
     const token = extractBearerToken(ctx);
 

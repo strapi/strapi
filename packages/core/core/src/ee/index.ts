@@ -11,6 +11,11 @@ import {
   PLAN_FEATURE_CATALOG,
 } from './license';
 import { createEntitlementsRegistry, parseNumericString } from './entitlements';
+import {
+  getAdminUsersAcrossInstances,
+  reportActiveAdminUsers,
+  watchAdminUsers,
+} from './admin-users';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
@@ -138,12 +143,17 @@ const init = (licenseDir: string, logger?: Logger) => {
   }
 };
 
+// Read when a report runs, so a license disabled after the watcher started stops the reports
+const getActiveLicenseKey = () => (ee.enabled ? ee.licenseInfo.licenseKey : undefined);
+
 /**
  * Contact the license registry to update the license to its latest state.
  *
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
+  let registryAnswered = false;
+
   const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
 
@@ -192,9 +202,12 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     const license = shouldContactRegistry
-      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(
-          fallback
-        )
+      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid'))
+          .then((fetchedLicense) => {
+            registryAnswered = true;
+            return fetchedLicense;
+          })
+          .catch(fallback)
       : storedInfo.license;
 
     if (license) {
@@ -244,6 +257,11 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     // Example of errors: SQLite does not support FOR UPDATE
     await rollback();
   }
+
+  // Not awaited: it must not delay startup
+  if (registryAnswered) {
+    reportActiveAdminUsers(strapi, getActiveLicenseKey).catch(() => {});
+  }
 };
 
 const validateInfo = () => {
@@ -275,6 +293,8 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
         options: shiftCronExpression('0 0 */12 * * *'),
       },
     });
+
+    watchAdminUsers(strapi, getActiveLicenseKey);
   } else {
     if (!ee.licenseInfo.expireAt) {
       return disable('Your license does not have offline support.');
@@ -339,6 +359,7 @@ export default Object.freeze({
   init,
   checkLicense,
   getTrialEndDate,
+  getAdminUsersAcrossInstances,
 
   get isEE() {
     return ee.enabled;

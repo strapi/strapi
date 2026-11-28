@@ -16,6 +16,8 @@ interface GetAssetsParams {
   folder?: number | null;
   sort?: string;
   search?: string;
+  /** Folder path a search is limited to, subfolders included. Ignored when not searching. */
+  searchFolderPath?: string;
   /** Extra `filters[$and]` entries (list filters), AND-ed with the folder/search scope. */
   filters?: Record<string, unknown>[];
 }
@@ -44,18 +46,36 @@ const assetsApi = uploadApi.injectEndpoints({
       query: (params = {}) => {
         // `search` is destructured out so it never reaches the server as-is —
         // it is re-added below as the `_q` the API actually understands.
-        const { folder, search, filters = [], ...rest } = params as GetAssetsParams;
+        const {
+          folder,
+          search,
+          searchFolderPath,
+          filters = [],
+          ...rest
+        } = params as GetAssetsParams;
 
         const queryParams: Record<string, unknown> = { ...rest };
 
         // List filters apply in BOTH modes: search composes with them (a
-        // filtered search), only the folder scope is dropped while searching.
+        // filtered search). While searching, the direct-children folder scope
+        // gives way to the searched subtree, or to nothing for a global search.
         if (search) {
-          // Search is global: folder scoping is intentionally dropped so results span the whole library.
           queryParams['_q'] = encodeSearchQuery(search);
 
-          if (filters.length > 0) {
-            queryParams['filters'] = { $and: [...filters] };
+          const clauses = searchFolderPath
+            ? [
+                {
+                  $or: [
+                    { folderPath: searchFolderPath },
+                    { folderPath: { $startsWith: `${searchFolderPath}/` } },
+                  ],
+                },
+                ...filters,
+              ]
+            : filters;
+
+          if (clauses.length > 0) {
+            queryParams['filters'] = { $and: clauses };
           }
         } else {
           const folderScope =

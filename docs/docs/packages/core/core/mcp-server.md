@@ -92,7 +92,7 @@ An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) 
 1. Extract `Authorization: Bearer <token>` — missing/malformed header → `missing_token`.
 2. If the token is JWT-shaped (contains two `.`) **and** `server.mcp.oauth.enabled` is on, it is treated as an MCP OAuth access token (`oauth/accessTokenAuthenticator.ts`): validated against the `mcp` session-manager origin, requiring an active session row, an active non-blocked admin user, and a freshly computed `generateUserAbility`. Admin API tokens are long random hex strings that can never contain a dot, so the dispatch is unambiguous.
 3. Otherwise it validates through `strapi.service('admin::api-token-admin').authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
-4. On success, the handler receives the caller's CASL `ability` and owning `user`.
+4. On success, the handler receives the caller's CASL `ability` and owning `user`, and saves this authentication data in the `state` of the request. Both paths report the strategy name `mcp`, which is how content history tags the write.
 
 There is no separate "MCP token" type — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`, or an MCP client obtains an OAuth token through the flow below.
 
@@ -303,6 +303,8 @@ one of these excluded fields fails the TypeScript check instead of receiving `un
 1. **Factory errors** — if `createHandler(strapi)` throws while building the handler, a fallback handler is substituted that always returns an error result to the client.
 2. **Runtime errors** — if the handler throws while executing, `wrapSafeHandler` catches it and returns a capability-shaped error result (`isError: true` for tools) instead of crashing the request.
 3. **SDK registration errors** — if the MCP SDK itself rejects the registration call, the capability is replaced with a permanently-disabled no-op instead of aborting the whole registration loop.
+
+The SDK does not convert a prompt's `argsSchema` to JSON Schema at registration. It converts every enabled prompt while serving `prompts/list`, unguarded, so one unconvertible schema (`z.date()`, `z.bigint()`, `z.custom()`, a non-object root…) would fail the whole list. The prompt registry therefore probes the registered schema with `assertSchemaConvertsToJsonSchema` (`services/mcp/utils/assertSchemaConvertsToJsonSchema.ts`), which mirrors the SDK's list-time conversion, and a failure is handled as an SDK registration error (layer 3): the prompt is logged and disabled, and sibling prompts stay listed. Tool schemas are not probed; an unconvertible tool schema still fails `tools/list`.
 
 ## Built-in tools (core)
 

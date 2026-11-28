@@ -37,7 +37,7 @@ export interface CreateHistoryVersion {
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
   source: HistoryVersionSource;
-  author: HistoryVersionAuthorReference;
+  author: HistoryVersionAuthorReference | null;
 }
 
 export interface Locale {

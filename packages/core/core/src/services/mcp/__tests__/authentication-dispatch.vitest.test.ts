@@ -45,6 +45,10 @@ describe('createMcpAuthenticationStrategy', () => {
   const JWT_SHAPED = 'aaaa.bbbb.cccc';
   const HEX_TOKEN = 'deadbeef'.repeat(32);
 
+  test('reports the mcp strategy name, which content history reads from ctx.state.auth', () => {
+    expect(strategy.name).toBe('mcp');
+  });
+
   test('returns missing_token without a bearer header', async () => {
     await expect(strategy.authenticate(makeCtx())).resolves.toEqual({
       authenticated: false,
