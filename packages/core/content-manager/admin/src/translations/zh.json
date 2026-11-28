@@ -90,7 +90,7 @@
   "containers.List.errorFetchRecords": "錯誤",
   "containers.List.published": "已發布",
   "containers.list.displayedFields": "顯示欄位",
-  "containers.list.items": "{number, plural, =0 {項} one {項} other {項}}",
+  "containers.list.items": "{number} 項",
   "containers.list.table-headers.publishedAt": "狀態",
   "containers.ListSettingsView.modal-form.edit-label": "編輯 {fieldName}",
   "containers.SettingPage.add.field": "插入其他欄位",
