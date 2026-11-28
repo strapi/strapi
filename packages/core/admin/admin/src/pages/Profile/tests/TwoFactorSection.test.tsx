@@ -156,6 +156,28 @@ describe('TwoFactorSection', () => {
     expect(screen.queryByText(/recovery codes/i)).not.toBeInTheDocument();
   });
 
+  it('gives the status block the same header row as the other blocks', async () => {
+    server.use(status());
+    renderSection();
+
+    const header = await screen.findByRole('group', { name: 'Two-factor authentication' });
+    expect(
+      within(header).getByRole('heading', { level: 2, name: 'Two-factor authentication' })
+    ).toBeInTheDocument();
+    expect(
+      within(header).getByText(
+        'Protect your account with a code from an authenticator app each time you log in.'
+      )
+    ).toBeInTheDocument();
+    // The button group is the block's body, below the header, not a header action.
+    expect(
+      within(header).queryByRole('button', { name: 'Set up two-factor authentication' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Set up two-factor authentication' })
+    ).toBeInTheDocument();
+  });
+
   it('shows enabled-since and the recovery code count when enrolled', async () => {
     server.use(
       status({

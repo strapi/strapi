@@ -11,14 +11,16 @@ interface MfaBlockHeaderProps {
   description?: React.ReactNode;
   /** The block's single action, shown on the right and aligned with the title. */
   action?: React.ReactNode;
+  /** `h2` for the section's own block (the status), `h3` for the blocks under it. */
+  headingTag?: 'h2' | 'h3';
 }
 
 /**
- * The header every block of the profile's Two-factor section shares (Trusted devices, Passkeys,
- * Recent security events): title and description on the left, the block's action on the right,
- * vertically centred on the title row.
+ * The header every block of the profile's Two-factor section shares (status, Trusted devices,
+ * Passkeys, Recent security events): title and description on the left, the block's action on the
+ * right, vertically centred on the title row.
  */
-const MfaBlockHeader = ({ title, description, action }: MfaBlockHeaderProps) => {
+const MfaBlockHeader = ({ title, description, action, headingTag = 'h3' }: MfaBlockHeaderProps) => {
   const titleId = React.useId();
 
   return (
@@ -32,7 +34,7 @@ const MfaBlockHeader = ({ title, description, action }: MfaBlockHeaderProps) => 
     >
       <Flex direction="column" alignItems="flex-start" gap={1}>
         <Flex alignItems="center" minHeight={HEADER_ROW_MIN_HEIGHT}>
-          <Typography id={titleId} variant="delta" tag="h3">
+          <Typography id={titleId} variant="delta" tag={headingTag}>
             {title}
           </Typography>
         </Flex>

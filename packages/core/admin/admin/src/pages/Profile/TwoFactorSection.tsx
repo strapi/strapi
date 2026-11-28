@@ -224,19 +224,22 @@ const TwoFactorSection = () => {
   return (
     <Panel gap={7}>
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" tag="h2">
-          {formatMessage({
+        {/*
+         * The same header row as the other blocks. Its actions are a group of buttons with a
+         * hierarchy, not a single action, so they stay below as the block's body.
+         */}
+        <MfaBlockHeader
+          headingTag="h2"
+          title={formatMessage({
             id: 'Settings.profile.form.section.mfa.title',
             defaultMessage: 'Two-factor authentication',
           })}
-        </Typography>
-        <Typography textColor="neutral600">
-          {formatMessage({
+          description={formatMessage({
             id: 'Settings.profile.form.section.mfa.description',
             defaultMessage:
               'Protect your account with a code from an authenticator app each time you log in.',
           })}
-        </Typography>
+        />
         {showAckWarning ? (
           <Alert
             variant="warning"
