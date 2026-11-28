@@ -33,7 +33,11 @@ export const buildStatusSortExpression = (
   tableAlias: string,
   isI18n = false
 ): knex.Knex.Raw => {
-  const localeCondition = isI18n ? ` AND sub.locale = ${tableAlias}.locale` : '';
+  // Content types without i18n still have a nullable `locale` column, so compare NULL-safely:
+  // `NULL = NULL` is never true and would rank every row as draft.
+  const localeCondition = isI18n
+    ? ` AND (sub.locale = ${tableAlias}.locale OR (sub.locale IS NULL AND ${tableAlias}.locale IS NULL))`
+    : '';
 
   return db.connection.raw(
     `CASE WHEN NOT EXISTS(SELECT 1 FROM ?? sub WHERE sub.document_id = ${tableAlias}.document_id AND sub.published_at IS NOT NULL${localeCondition}) THEN 0 WHEN ${tableAlias}.updated_at > (SELECT MAX(sub.updated_at) FROM ?? sub WHERE sub.document_id = ${tableAlias}.document_id AND sub.published_at IS NOT NULL${localeCondition}) THEN 1 ELSE 2 END`,
