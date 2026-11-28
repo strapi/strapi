@@ -12,6 +12,7 @@ describe('createStorage', () => {
       getSchemaConnection: jest.fn().mockReturnValue({
         hasTable: jest.fn().mockResolvedValue(false),
         createTable: jest.fn().mockResolvedValue(undefined),
+        alterTable: jest.fn().mockResolvedValue(undefined),
       }),
       getConnection: jest.fn().mockReturnValue({
         insert: jest.fn().mockReturnValue({
@@ -30,6 +31,29 @@ describe('createStorage', () => {
 
     tableName = 'migrations';
     storage = createStorage({ db, tableName });
+  });
+
+  describe('tryClaimMigration', () => {
+    it('returns true when the migration name can be inserted', async () => {
+      const name = '20220101120000_create_users_table';
+
+      await expect(storage.tryClaimMigration({ name })).resolves.toBe(true);
+
+      expect(db.getConnection().insert).toHaveBeenCalledWith(
+        expect.objectContaining({ name, time: expect.any(Date) })
+      );
+    });
+
+    it('returns false when the migration name is already claimed', async () => {
+      const name = '20220101120000_create_users_table';
+      const duplicateError = Object.assign(new Error('UNIQUE constraint failed'), {
+        code: 'SQLITE_CONSTRAINT_UNIQUE',
+      });
+
+      (db.getConnection().insert({}).into as jest.Mock).mockRejectedValueOnce(duplicateError);
+
+      await expect(storage.tryClaimMigration({ name })).resolves.toBe(false);
+    });
   });
 
   describe('logMigration', () => {
