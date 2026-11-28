@@ -48,7 +48,7 @@ const useDeleteReleaseAction = ({ releaseId, actionId }: DeleteReleaseActionItem
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
   const {
     allowedActions: { canDeleteAction },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(Object.values(PERMISSIONS).flat());
 
   const handleDeleteAction = async () => {
     const response = await deleteReleaseAction({
@@ -169,7 +169,7 @@ interface RootProps {
 const Root = ({ children }: RootProps) => {
   const { formatMessage } = useIntl();
 
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(Object.values(PERMISSIONS).flat());
 
   return (
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release

@@ -161,7 +161,7 @@ const EditPage = () => {
   );
   const {
     allowedActions: { canDelete, canUpdate, canCreate },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
 
   const [savePrompts, setSavePrompts] = React.useState<{
     hasDeletedServerStages?: boolean;

@@ -648,7 +648,7 @@ const ReleasesPage = () => {
   const maximumReleases = getMaximumReleases(getFeature('cms-content-releases')?.maximumReleases);
   const {
     allowedActions: { canCreate },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(Object.values(PERMISSIONS).flat());
 
   const { isLoading: isLoadingReleases, isFetching, isError } = response;
   // `currentData` is cleared while another page loads; the last result keeps the header steady
