@@ -23,6 +23,7 @@ const createStrapiMock = (provider = 'sendmail') => {
       }),
     },
     log: { warn },
+    db: { lifecycles: { subscribe: vi.fn() }, query: vi.fn() },
     plugin: vi.fn((name: string) => {
       if (name === 'email') {
         return emailPlugin;

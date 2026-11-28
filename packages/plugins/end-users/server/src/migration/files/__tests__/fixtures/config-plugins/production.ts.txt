@@ -1,0 +1,8 @@
+export default ({ env }) => ({
+  'users-permissions': {
+    config: {
+      jwtSecret: env('PROD_JWT_SECRET'),
+      ratelimit: { max: 3 },
+    },
+  },
+});

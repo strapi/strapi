@@ -351,6 +351,33 @@ describe('Content API - Permissions', () => {
       );
     });
 
+    it('a second instance merges its params into routes a first one already merged into', () => {
+      // Route definitions are module objects: a second Strapi instance in the same process (tests,
+      // scripts) gets them as the first one left them
+      const route = contentAPIRoute({ method: 'POST', request: { query: { own: z.string() } } });
+
+      for (let instance = 0; instance < 2; instance += 1) {
+        const api = createContentAPI(global.strapi);
+
+        api.addQueryParams({ explain: { schema: z.enum(['true', 'false']).optional() } });
+        api.addInputParams({ clientMutationId: { schema: z.string() } });
+
+        expect(() => api.applyExtraParamsToRoutes([route])).not.toThrow();
+      }
+
+      expect(Object.keys(route.request.query)).toEqual(['own', 'explain']);
+      expect(Object.keys((route.request.body as any)['application/json'].shape)).toEqual([
+        'clientMutationId',
+      ]);
+
+      // A param the route declares itself is still refused, on the first instance as on later ones
+      const api = createContentAPI(global.strapi);
+
+      api.addQueryParams({ own: { schema: z.string() } });
+
+      expect(() => api.applyExtraParamsToRoutes([route])).toThrow(/param "own" already exists/);
+    });
+
     it('addQueryParams throws when the same param name is added twice', () => {
       contentAPI.addQueryParams({ search: { schema: z.string() } });
       expect(() => contentAPI.addQueryParams({ search: { schema: z.number() } })).toThrow(

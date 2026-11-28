@@ -10,14 +10,31 @@ export interface Action {
 
 export interface SubjectProperty {
   children?: SubjectProperty[];
+  /**
+   * Ids of the actions whose cell is off and disabled for this property. A property with children
+   * passes it on to every one of them.
+   */
+  disabledActions?: string[];
   isDefault?: boolean;
   label: string;
   required?: boolean;
   value: string;
 }
 
+/**
+ * A property the role never sets, shown without a checkbox.
+ */
+export interface SubjectLockedRow {
+  label: string;
+  note: string;
+}
+
 export interface Subject {
   label: string;
+  /**
+   * Rows without checkboxes, listed under the matrix.
+   */
+  locked?: SubjectLockedRow[];
   properties: SubjectProperty[];
   uid: string;
 }

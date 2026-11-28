@@ -19,6 +19,13 @@ export default (context: Context) => {
 
   const extension = getGraphQLService('extension');
 
+  // When a plugin opted in (end-users, outside migration check mode), a field the caller's role
+  // cannot read is null, and so is a required one: an output type that kept it non-null would turn
+  // a hidden field into an error that nulls its whole parent. Input types keep `required`, and
+  // `documentId` stays non-null. This is read once per schema build (a builders instance is made
+  // for each), so the schema is the same for every request.
+  const relaxRequired = extension.isRequiredOutputRelaxed();
+
   /**
    * Add a scalar attribute to the type definition
    *
@@ -163,7 +170,9 @@ export default (context: Context) => {
         type: nonNull(list(typeName)),
         async resolve(...args: unknown[]) {
           const res = await resolve(...args);
-          return res.nodes ?? [];
+          // A relation the parent's field rules hide resolves to null: an empty list here, so a
+          // non-null list doesn't null the whole parent
+          return res?.nodes ?? [];
         },
         args,
       });
@@ -172,7 +181,8 @@ export default (context: Context) => {
         type: typeName,
         async resolve(...args: unknown[]) {
           const res = await resolve(...args);
-          return res.value;
+          // A relation the parent's field rules hide resolves to null
+          return res?.value ?? null;
         },
         args,
       });
@@ -273,7 +283,9 @@ export default (context: Context) => {
         type: nonNull(list(typeName)),
         async resolve(...args: unknown[]) {
           const res = await resolve(...args);
-          return res.nodes ?? [];
+          // A relation the parent's field rules hide resolves to null: an empty list here, so a
+          // non-null list doesn't null the whole parent
+          return res?.nodes ?? [];
         },
         args,
       });
@@ -282,7 +294,8 @@ export default (context: Context) => {
         type: typeName,
         async resolve(...args: unknown[]) {
           const res = await resolve(...args);
-          return res.value;
+          // A relation the parent's field rules hide resolves to null
+          return res?.value ?? null;
         },
         args,
       });
@@ -389,7 +402,7 @@ export default (context: Context) => {
               // rules only on the current attribute (eg: nonNull, list, ...)
               let builder: any = t;
 
-              if (attribute.required) {
+              if (attribute.required && !relaxRequired) {
                 builder = builder.nonNull;
               }
 

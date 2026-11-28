@@ -6,12 +6,18 @@ const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as c
 const sanitizePermissionFields = <T extends Partial<Permission>>(permission: T) =>
   _.pick(permission, PERMISSION_FIELDS);
 
+/**
+ * How a permission names a condition: by its name (admin RBAC), or by its name and the params it
+ * is bound to (Content API permissions)
+ */
+export type ConditionRef = string | { name: string; params?: Record<string, unknown> };
+
 export interface Permission {
   action: string;
   actionParameters?: Record<string, unknown>;
   subject?: string | object | null;
   properties?: Record<string, any>;
-  conditions?: string[];
+  conditions?: ConditionRef[];
 }
 
 /**

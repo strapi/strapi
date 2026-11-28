@@ -18,6 +18,7 @@ import {
 } from '../utils/createPermissionChecker';
 
 import type {
+  GlobalActionScope,
   OnChangeCollectionTypeGlobalActionCheckboxAction,
   OnChangeCollectionTypeRowLeftCheckboxAction,
   OnChangeConditionsAction,
@@ -38,10 +39,15 @@ export interface PermissionsDataManagerContextValue extends Pick<State, 'modifie
   onChangeConditions: (conditions: OnChangeConditionsAction['conditions']) => void;
   onChangeSimpleCheckbox: (event: { target: { name: string; value: boolean } }) => void;
   onChangeParentCheckbox: (event: { target: { name: string; value: boolean } }) => void;
+  /**
+   * Ticks or unticks the column of an action. With a `scope` it changes the content types it lists
+   * and, when the consumer asked for it (`confirmBulkChange`), waits for the answer first.
+   */
   onChangeCollectionTypeGlobalActionCheckbox: (
     collectionTypeKind: OnChangeCollectionTypeGlobalActionCheckboxAction['collectionTypeKind'],
     actionId: OnChangeCollectionTypeGlobalActionCheckboxAction['actionId'],
-    value: OnChangeCollectionTypeGlobalActionCheckboxAction['value']
+    value: OnChangeCollectionTypeGlobalActionCheckboxAction['value'],
+    scope?: GlobalActionScope
   ) => void;
   userPermissions?: AuthPermission[];
   /**

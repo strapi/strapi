@@ -1,0 +1,41 @@
+/**
+ * The admin RBAC actions the plugin's server registers (`server/src/admin-actions.ts`), as the
+ * `{ action, subject }` lists the settings links, `useRBAC` and `Page.Protect` take.
+ */
+export const PERMISSIONS = {
+  roles: {
+    read: [{ action: 'plugin::end-users.roles.read', subject: null }],
+    create: [{ action: 'plugin::end-users.roles.create', subject: null }],
+    update: [{ action: 'plugin::end-users.roles.update', subject: null }],
+    delete: [{ action: 'plugin::end-users.roles.delete', subject: null }],
+  },
+  conditions: {
+    read: [{ action: 'plugin::end-users.conditions.read', subject: null }],
+    update: [{ action: 'plugin::end-users.conditions.update', subject: null }],
+  },
+  providers: {
+    read: [{ action: 'plugin::end-users.providers.read', subject: null }],
+    update: [{ action: 'plugin::end-users.providers.update', subject: null }],
+    /** Custom providers and "trust for linking": what can sign in as another user */
+    custom: [{ action: 'plugin::end-users.providers.custom', subject: null }],
+  },
+  /** The Security panel of an end user in the Content Manager */
+  security: {
+    manage: [{ action: 'plugin::end-users.security.manage', subject: null }],
+  },
+  settings: {
+    read: [{ action: 'plugin::end-users.settings.read', subject: null }],
+    update: [{ action: 'plugin::end-users.settings.update', subject: null }],
+  },
+};
+
+/** The email plugin's templates page, filtered to the templates this plugin registers */
+export const EMAIL_TEMPLATES_PATH = 'email/templates?prefix=end-users.';
+
+/** What an administrator needs to read the email plugin's templates (owned by that plugin) */
+export const EMAIL_TEMPLATES_PERMISSIONS = [
+  { action: 'plugin::email.templates.read', subject: null },
+];
+
+/** The Migration section of the Advanced page */
+export const MIGRATION_PATH = '/settings/end-users/advanced#migration';

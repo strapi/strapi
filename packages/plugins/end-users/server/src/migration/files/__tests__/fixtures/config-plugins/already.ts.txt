@@ -1,0 +1,10 @@
+export default ({ env }) => ({
+  'users-permissions': {
+    enabled: false,
+    config: { jwtSecret: env('JWT_SECRET') },
+  },
+  'end-users': {
+    enabled: true,
+    config: { secret: env('END_USERS_SECRET'), legacy: 'old' },
+  },
+});

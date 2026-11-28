@@ -13,6 +13,8 @@ export default {
     },
     'content-type-builder': {
       visible: false,
+      // Relations to admin users are one-way: they have no counterpart on the user
+      restrictRelationsTo: ['oneWay', 'manyWay'],
     },
   },
   attributes: {

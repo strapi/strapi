@@ -1,0 +1,9 @@
+node_modules
+dist
+*.local
+.env
+*.log
+
+# Playwright
+test-results
+playwright-report

@@ -11,10 +11,12 @@ export default ({ strapi }: Context) => ({
 
     await strapi.contentAPI.validate.query(args, contentType, {
       auth: ctx?.state?.auth,
+      action: 'find',
     });
 
     const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
       auth: ctx?.state?.auth,
+      action: 'find',
     });
 
     const { publicationFilter } = mergePublicationFilterFromGraphQLArgs(

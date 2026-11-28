@@ -4,4 +4,6 @@ export const PERMISSIONS = {
   // And also if the plugin is accessible. This use case is found when a user types the url of the
   // plugin directly in the browser
   settings: [{ action: 'plugin::email.settings.read', subject: null }],
+  templatesRead: [{ action: 'plugin::email.templates.read', subject: null }],
+  templatesUpdate: [{ action: 'plugin::email.templates.update', subject: null }],
 };

@@ -1,0 +1,6 @@
+import shared from './shared';
+
+export default ({ env }) => ({
+  ...shared,
+  'users-permissions': { config: { jwtSecret: env('JWT_SECRET') } },
+});

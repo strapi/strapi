@@ -6,3 +6,6 @@ export { default as throwDynamicZones } from './throw-dynamic-zones';
 export { default as throwDisallowedFields } from './throw-disallowed-fields';
 export { default as throwRestrictedFields } from './throw-restricted-fields';
 export { default as throwUnrecognizedFields } from './throw-unrecognized-fields';
+export { default as throwConditionedRelationSort } from './throw-conditioned-relation-sort';
+export { default as throwConditionedRelationUnderNot } from './throw-conditioned-relation-under-not';
+export { default as throwUnauthorizedFields } from './throw-unauthorized-fields';

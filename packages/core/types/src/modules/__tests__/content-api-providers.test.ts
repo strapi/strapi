@@ -18,12 +18,16 @@ type Providers = Modules.ContentAPI.PermissionUtilities['providers'];
 declare const condition: Providers['condition'];
 declare const action: Providers['action'];
 
-// The condition provider registers a condition object, keyed by its name.
-export const registeredCondition = condition.register({ name: 'isOwner', handler: () => true });
+// The condition provider registers a condition definition, keyed by its name.
+export const registeredCondition = condition.register({
+  name: 'api::is-owner',
+  displayName: 'Is owner',
+  query: { author: { documentId: '$user.documentId' } },
+});
 
 // The base provider's `register(key, item)` is not available: at runtime, `'isOwner'` would be
 // taken as the condition and the condition would be registered under an `undefined` name.
-// @ts-expect-error - register takes a single condition object
+// @ts-expect-error - register takes a single condition definition
 export const conditionWithKey = condition.register('isOwner', { name: 'isOwner' });
 
 // The action provider registers an action with a record payload.

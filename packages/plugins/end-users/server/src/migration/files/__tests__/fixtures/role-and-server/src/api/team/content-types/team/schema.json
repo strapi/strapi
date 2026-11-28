@@ -1,0 +1,8 @@
+{
+  "kind": "collectionType",
+  "collectionName": "teams",
+  "info": { "singularName": "team", "pluralName": "teams", "displayName": "Team" },
+  "attributes": {
+    "defaultRole": { "type": "relation", "relation": "oneToOne", "target": "plugin::users-permissions.role" }
+  }
+}

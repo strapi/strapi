@@ -17,6 +17,7 @@ describe('Upload GraphQL extension', () => {
     getNamePaths: jest.Mock;
   };
   let resolvers: Record<string, Resolver>;
+  let isActive: jest.Mock;
   let isFolderCRUDEnabled: boolean;
   let model: { uid: string; attributes?: Record<string, { private?: boolean }> };
   let types: Array<{ name?: string; type?: string }>;
@@ -30,6 +31,7 @@ describe('Upload GraphQL extension', () => {
       getNamePaths: jest.fn(),
     };
     resolvers = {};
+    isActive = jest.fn().mockReturnValue(false);
 
     const nexus = {
       inputObjectType: jest.fn((config) => config),
@@ -58,6 +60,7 @@ describe('Upload GraphQL extension', () => {
     };
 
     const strapi = {
+      contentAPI: { permissions: { checker: { isActive } } },
       getModel: jest.fn(() => model),
       db: { query: jest.fn().mockReturnValue({ findOne: mockDbFindOne }) },
       plugin(name: string) {
@@ -163,6 +166,55 @@ describe('Upload GraphQL extension', () => {
 
       expect(result).toBeNull();
       expect(mockUploadService.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a caller whose permissions carry data rules (end-users)', () => {
+    const context = { state: { auth: { strategy: 'end-users' } } };
+
+    beforeEach(() => {
+      isActive.mockReturnValue(true);
+    });
+
+    it('refuses updateUploadFile and changes nothing', async () => {
+      await expect(
+        resolvers.updateUploadFile(null, { id: '7', info: { name: 'x' } }, context)
+      ).rejects.toMatchObject({ name: 'ForbiddenError' });
+
+      expect(isActive).toHaveBeenCalledWith(context.state.auth);
+      expect(mockDbFindOne).not.toHaveBeenCalled();
+      expect(mockUploadService.updateFileInfo).not.toHaveBeenCalled();
+    });
+
+    it('refuses deleteUploadFile and removes nothing', async () => {
+      await expect(resolvers.deleteUploadFile(null, { id: '7' }, context)).rejects.toMatchObject({
+        name: 'ForbiddenError',
+      });
+
+      expect(mockUploadService.findOne).not.toHaveBeenCalled();
+      expect(mockUploadService.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('every other caller (API token, Users & Permissions, admin)', () => {
+    const context = { state: { auth: { strategy: 'api-token' } } };
+
+    it('still updates a file by id', async () => {
+      mockUploadService.updateFileInfo.mockResolvedValue(file);
+
+      await resolvers.updateUploadFile(null, { id: '7', info: { name: 'x' } }, context);
+
+      expect(isActive).toHaveBeenCalledWith(context.state.auth);
+      expect(mockUploadService.updateFileInfo).toHaveBeenCalledWith('7', { name: 'x' });
+    });
+
+    it('still deletes a file by id', async () => {
+      mockUploadService.findOne.mockResolvedValue(file);
+      mockUploadService.remove.mockResolvedValue(file);
+
+      await resolvers.deleteUploadFile(null, { id: '7' }, context);
+
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
     });
   });
 

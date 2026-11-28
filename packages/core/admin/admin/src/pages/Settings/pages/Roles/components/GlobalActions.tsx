@@ -21,14 +21,28 @@ interface GlobalActionsProps {
   actions: Action[];
   isFormDisabled?: boolean;
   kind: Extract<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
+  /**
+   * The uids of the content types a search lists. A column then shows and changes these only.
+   * Every content type when absent.
+   */
+  listedSubjects?: string[];
 }
 
-const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: GlobalActionsProps) => {
+const GlobalActions = ({
+  actions = EMPTY_ACTIONS,
+  isFormDisabled,
+  kind,
+  listedSubjects,
+}: GlobalActionsProps) => {
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox, checkUserHasPermission } =
     usePermissionsDataManager();
 
   const displayedActions = actions.filter(({ subjects }) => subjects && subjects.length);
+  const listed = React.useMemo(
+    () => (listedSubjects === undefined ? undefined : new Set(listedSubjects)),
+    [listedSubjects]
+  );
 
   const checkboxesState = React.useMemo(() => {
     const actionsIds = displayedActions.map(({ actionId }) => actionId);
@@ -38,6 +52,10 @@ const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: Global
     const relatedActionsData = actionsIds.reduce<Record<string, RecursiveRecordOfBooleans>>(
       (acc, actionId) => {
         Object.keys(data).forEach((ctUid) => {
+          if (listed && !listed.has(ctUid)) {
+            return;
+          }
+
           const actionIdData = get(data, [ctUid, actionId]);
 
           const actionIdState = { [ctUid]: removeConditionKeyFromData(actionIdData)! };
@@ -69,16 +87,24 @@ const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: Global
     }, {});
 
     return checkboxesState;
-  }, [modifiedData, displayedActions, kind]);
+  }, [modifiedData, displayedActions, kind, listed]);
 
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
       <Flex gap={0}>
         {displayedActions.map(({ label, actionId, subjects }) => {
           const allSubjects = subjects || [];
+          // A search limits the column to the content types it lists
+          const columnSubjects = listed
+            ? allSubjects.filter((subject) => listed.has(subject))
+            : allSubjects;
           const userHasPermissionForAll =
-            allSubjects.length > 0 &&
-            allSubjects.every((subject) => checkUserHasPermission(actionId, subject));
+            columnSubjects.length > 0 &&
+            columnSubjects.every((subject) => checkUserHasPermission(actionId, subject));
+          const actionLabel = formatMessage({
+            id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+            defaultMessage: label,
+          });
 
           return (
             <Flex
@@ -91,19 +117,22 @@ const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: Global
               gap={3}
             >
               <Typography variant="sigma" textColor="neutral500">
-                {formatMessage({
-                  id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-                  defaultMessage: label,
-                })}
+                {actionLabel}
               </Typography>
               <UnheldPermissionTooltip
                 isFormDisabled={isFormDisabled}
-                userHasPermission={userHasPermissionForAll}
+                // A column no listed content type has the action in is off, not out of the user's reach
+                userHasPermission={userHasPermissionForAll || columnSubjects.length === 0}
               >
                 <Checkbox
                   disabled={isFormDisabled || !userHasPermissionForAll}
                   onCheckedChange={(value) => {
-                    onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);
+                    onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value, {
+                      // The content types that have the action and are listed
+                      subjects: columnSubjects.filter((subject) => subject in modifiedData[kind]),
+                      label: actionLabel,
+                      filtered: listed !== undefined,
+                    });
                   }}
                   name={actionId}
                   aria-label={formatMessage(
@@ -111,12 +140,7 @@ const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: Global
                       id: `Settings.permissions.select-all-by-permission`,
                       defaultMessage: 'Select all {label} permissions',
                     },
-                    {
-                      label: formatMessage({
-                        id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-                        defaultMessage: label,
-                      }),
-                    }
+                    { label: actionLabel }
                   )}
                   checked={
                     get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)

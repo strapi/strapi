@@ -4,8 +4,11 @@ import type { Core } from '@strapi/types';
 import { FILE_MODEL_UID, FOLDER_MODEL_UID } from './constants';
 import { resolveFileId } from './services/upload';
 import { assertNoFileRelations } from './utils/folder-query';
+import { refuseFileById } from './utils/refuse-file-by-id';
 
 const { NotFoundError } = errors;
+
+type GraphQLContext = { state?: { auth?: unknown } };
 
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 
@@ -127,7 +130,13 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
           },
 
           // GraphQL `ID` arrives as a string: a numeric id or a documentId
-          async resolve(parent: unknown, args: { id: string; info: any }) {
+          async resolve(
+            parent: unknown,
+            args: { id: string; info: any },
+            context?: GraphQLContext
+          ) {
+            refuseFileById(strapi, context?.state?.auth);
+
             const { id, info } = args;
 
             const fileId = await resolveFileId(strapi, id);
@@ -150,7 +159,9 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
             id: nonNull('ID'),
           },
 
-          async resolve(parent: unknown, args: { id: string }) {
+          async resolve(parent: unknown, args: { id: string }, context?: GraphQLContext) {
+            refuseFileById(strapi, context?.state?.auth);
+
             const { id } = args;
 
             const fileId = await resolveFileId(strapi, id);

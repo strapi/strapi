@@ -2,6 +2,7 @@
 
 exports[`content-types:list should output list of content-types 1`] = `
 "│ Name                                                 │
+│ plugin::email.template                               │
 │ plugin::upload.file                                  │
 │ plugin::upload.folder                                │
 │ plugin::i18n.locale                                  │

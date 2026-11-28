@@ -246,6 +246,18 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
+                "action": "plugin::email.templates.read",
+                "displayName": "Read email templates",
+                "plugin": "email",
+                "subCategory": "templates",
+              },
+              {
+                "action": "plugin::email.templates.update",
+                "displayName": "Edit, reset and test email templates",
+                "plugin": "email",
+                "subCategory": "templates",
+              },
+              {
                 "action": "plugin::upload.assets.copy-link",
                 "displayName": "Copy link",
                 "plugin": "upload",
@@ -878,6 +890,18 @@ describe('Role CRUD End to End', () => {
                 "displayName": "Update and delete",
                 "plugin": "documentation",
                 "subCategory": "general",
+              },
+              {
+                "action": "plugin::email.templates.read",
+                "displayName": "Read email templates",
+                "plugin": "email",
+                "subCategory": "templates",
+              },
+              {
+                "action": "plugin::email.templates.update",
+                "displayName": "Edit, reset and test email templates",
+                "plugin": "email",
+                "subCategory": "templates",
               },
               {
                 "action": "plugin::upload.assets.copy-link",

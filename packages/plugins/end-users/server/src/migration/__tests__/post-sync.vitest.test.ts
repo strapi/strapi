@@ -1,0 +1,208 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Core } from '@strapi/types';
+
+import type { MigrationRecord } from '../record';
+import * as records from '../record';
+import { POST_SYNC_STEPS, runPostSync } from '../post-sync';
+
+vi.mock('../record', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../record')>()),
+  readRecord: vi.fn(),
+  updateRecord: vi.fn(),
+  claimMigration: vi.fn(),
+  releaseMigration: vi.fn(),
+  lastClaimOwner: vi.fn(),
+}));
+
+const OWNER = 'start-1';
+
+const record = (patch: Partial<MigrationRecord> = {}): MigrationRecord => ({
+  status: 'in-progress',
+  cutoverAt: null,
+  attempt: 1,
+  startedAt: '2026-11-09T00:00:00.000Z',
+  completedAt: null,
+  rolledBackAt: null,
+  cleanedUpAt: null,
+  completedSteps: ['pre-sync'],
+  staged: {},
+  carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+  rollbackStartedAt: null,
+  claim: { by: OWNER, until: '2999-01-01T00:00:00.000Z' },
+  ...patch,
+});
+
+const clearCutoverCache = vi.fn();
+const strapi = {
+  log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  store: () => ({ get: async () => null, set: async () => undefined }),
+  plugin: () => ({ service: () => ({ clearCutoverCache }) }),
+} as unknown as Core.Strapi;
+
+/** The record as the store holds it: updates are merged in, as `updateRecord` does */
+const store = (initial: MigrationRecord) => {
+  let current = initial;
+
+  vi.mocked(records.readRecord).mockImplementation(async () => current);
+  vi.mocked(records.updateRecord).mockImplementation(async (_strapi, patch) => {
+    current = { ...current, ...patch };
+
+    return current;
+  });
+
+  return () => current;
+};
+
+describe('runPostSync', () => {
+  const ran: string[] = [];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    ran.length = 0;
+    vi.mocked(records.lastClaimOwner).mockReturnValue(OWNER);
+    vi.mocked(records.claimMigration).mockResolvedValue(true);
+
+    for (const step of POST_SYNC_STEPS) {
+      vi.spyOn(step, 'run').mockImplementation(async () => {
+        ran.push(step.name);
+      });
+    }
+  });
+
+  it('runs only the steps the record has not done, in order', async () => {
+    const current = store(record({ completedSteps: ['pre-sync', 'users', 'roles'] }));
+
+    await runPostSync(strapi);
+
+    expect(ran).toEqual(['permissions', 'profiles', 'accounts', 'stores', 'admin']);
+    expect(current().completedSteps).toEqual([
+      'pre-sync',
+      'users',
+      'roles',
+      'permissions',
+      'profiles',
+      'accounts',
+      'stores',
+      'admin',
+    ]);
+    expect(records.releaseMigration).toHaveBeenCalledWith(strapi, OWNER);
+  });
+
+  it('finishes the migration after the last step: completed, with the cutover, and the cache cleared', async () => {
+    const current = store(record({ cutoverAt: '2026-11-09T01:00:00.000Z' }));
+
+    await runPostSync(strapi);
+
+    expect(current()).toMatchObject({
+      status: 'completed',
+      cutoverAt: '2026-11-09T01:00:00.000Z',
+      completedAt: expect.any(String),
+    });
+    expect(clearCutoverCache).toHaveBeenCalledTimes(1);
+  });
+
+  it('finishes a migration whose steps were all recorded before a stop', async () => {
+    const current = store(
+      record({
+        completedSteps: ['pre-sync', ...POST_SYNC_STEPS.map((step) => step.name)],
+      })
+    );
+
+    await runPostSync(strapi);
+
+    expect(ran).toEqual([]);
+    expect(current().status).toBe('completed');
+  });
+
+  it('skips everything unless the pre-sync is recorded', async () => {
+    store(record({ completedSteps: [] }));
+    await runPostSync(strapi);
+
+    store(record({ status: 'completed' }));
+    await runPostSync(strapi);
+
+    vi.mocked(records.readRecord).mockResolvedValue(null);
+    await runPostSync(strapi);
+
+    expect(ran).toEqual([]);
+    expect(records.claimMigration).not.toHaveBeenCalled();
+  });
+
+  it('stops without writing when another start has taken the migration', async () => {
+    const current = store(record());
+
+    vi.mocked(records.claimMigration).mockResolvedValueOnce(true).mockResolvedValue(false);
+
+    await expect(runPostSync(strapi)).rejects.toThrow(/no longer holds the migration/);
+    expect(ran).toEqual([]);
+    expect(current().completedSteps).toEqual(['pre-sync']);
+  });
+
+  it('logs a failed step by name and error code, and rethrows without the query', async () => {
+    store(record());
+    vi.spyOn(POST_SYNC_STEPS[0], 'run').mockRejectedValue(
+      Object.assign(new Error('insert into "eu_accounts" values ($1) - secret-value'), {
+        code: '23505',
+        sql: 'insert into "eu_accounts" values ($1)',
+      })
+    );
+
+    const error = await runPostSync(strapi).catch((caught: Error) => caught);
+
+    expect((error as Error).message).toBe(
+      'The migration step "users" failed (error code 23505). Nothing was recorded for it.'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.not.stringContaining('secret-value'));
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('"users"'));
+    expect(records.releaseMigration).toHaveBeenCalled();
+  });
+});
+
+describe('the roles step', () => {
+  it('retypes the roles and records the step in one transaction', async () => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.mocked(records.claimMigration).mockResolvedValue(true);
+
+    const events: string[] = [];
+    const update = vi.fn(async () => {
+      events.push('retype');
+    });
+    const trx = vi.fn(() => ({ whereNotIn: () => ({ update }) }));
+    const transaction = vi.fn(async (run: (args: { trx: unknown }) => Promise<void>) => {
+      events.push('begin');
+      await run({ trx });
+      events.push('commit');
+    });
+    const db = {
+      getSchemaName: () => null,
+      metadata: {
+        get: () => ({ tableName: 'eu_roles', attributes: { type: { columnName: 'type' } } }),
+      },
+      getConnection: () => ({
+        where: () => ({ orderBy: () => ({ first: async () => ({ document_id: 'doc-1' }) }) }),
+      }),
+      transaction,
+    };
+    const withDb = {
+      ...strapi,
+      db,
+      store: () => ({ get: async () => ({ default_role: 'authenticated' }) }),
+      contentTypes: {},
+    } as unknown as Core.Strapi;
+
+    store(record());
+    vi.mocked(records.updateRecord).mockImplementation(async (_strapi, patch) => {
+      events.push(`record:${(patch.completedSteps ?? []).join(',')}`);
+
+      return record(patch);
+    });
+
+    const step = POST_SYNC_STEPS.find(({ name }) => name === 'roles')!;
+    const patch = await step.run(withDb, record(), OWNER);
+
+    expect(events).toEqual(['begin', 'retype', 'record:pre-sync,roles', 'commit']);
+    expect(update).toHaveBeenCalledWith({ type: 'custom' });
+    expect(patch).toMatchObject({ carried: { defaultRoleDocumentId: 'doc-1' } });
+  });
+});

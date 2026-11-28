@@ -59,6 +59,18 @@ interface FitlersContextValue {
   setOpen: (open: boolean) => void;
   editingFilter: EditingFilter | null;
   setEditingFilter: (filter: EditingFilter | null) => void;
+  /**
+   * The applied filters: the `filters` prop when `Root` is controlled, the URL query otherwise.
+   */
+  filters: Filters.Query['filters'];
+  /**
+   * Writes the next filters: to `onFiltersChange` when `Root` is controlled, to the URL query otherwise.
+   * `replace` swaps the current history entry instead of pushing a new one; it only matters for the URL.
+   */
+  setFilters: (
+    filters: NonNullable<Filters.Query['filters']>,
+    options?: { replace?: boolean }
+  ) => void;
 }
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
@@ -93,12 +105,58 @@ const getFilterDetails = (
 interface RootProps
   extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>, Popover.Props {
   children: React.ReactNode;
+  /**
+   * Makes the component controlled: the list and the popover read and write these filters and never
+   * touch the URL query. Leave it out and they are driven by the URL query.
+   * Values are strings, as they are in the URL.
+   */
+  filters?: Filters.Query['filters'];
+  /**
+   * Called with the next filters whenever one is added, edited or removed. Only used when `filters` is given.
+   */
+  onFiltersChange?: (filters: NonNullable<Filters.Query['filters']>) => void;
 }
+
+/**
+ * The only place that knows where the filters live. `filters` given means the caller owns them,
+ * otherwise they live in the URL query.
+ */
+const useFiltersState = ({
+  filters,
+  onFiltersChange,
+}: Pick<RootProps, 'filters' | 'onFiltersChange'>): Pick<
+  FitlersContextValue,
+  'filters' | 'setFilters'
+> => {
+  // A hook can't be called conditionally, so it is always called and only read when not controlled.
+  const [{ query }, setQuery] = useQueryParams<Filters.Query>();
+  const isControlled = filters !== undefined;
+
+  const setFilters = React.useCallback<FitlersContextValue['setFilters']>(
+    (nextFilters, { replace = false } = {}) => {
+      if (isControlled) {
+        onFiltersChange?.(nextFilters);
+        return;
+      }
+
+      setQuery(
+        withEncodedUserParams(query, { filters: deepEncodeQueryValues(nextFilters), page: 1 }),
+        'push',
+        replace
+      );
+    },
+    [isControlled, onFiltersChange, query, setQuery]
+  );
+
+  return { filters: isControlled ? filters : query.filters, setFilters };
+};
 
 const Root = ({
   children,
   disabled = false,
+  filters: filtersProp,
   onChange,
+  onFiltersChange,
   options = EMPTY_OPTIONS,
   onOpenChange,
   open: openProp,
@@ -106,6 +164,7 @@ const Root = ({
   ...restProps
 }: RootProps) => {
   const [editingFilter, setEditingFilter] = React.useState<EditingFilter | null>(null);
+  const { filters, setFilters } = useFiltersState({ filters: filtersProp, onFiltersChange });
 
   const handleChange = (data: FilterFormData) => {
     if (onChange) {
@@ -134,6 +193,8 @@ const Root = ({
         options={options}
         editingFilter={editingFilter}
         setEditingFilter={setEditingFilter}
+        filters={filters}
+        setFilters={setFilters}
       >
         {children}
       </FiltersProvider>
@@ -177,9 +238,10 @@ const Trigger = React.forwardRef<HTMLButtonElement, Filters.TriggerProps>(
  * it's causing the issue of appearing behind the Popover.
  */
 const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
-  const [{ query }, setQuery] = useQueryParams<Filters.Query>();
   const { formatMessage } = useIntl();
   const options = useFilters('Popover', ({ options }) => options);
+  const filters = useFilters('Popover', ({ filters }) => filters);
+  const setFilters = useFilters('Popover', ({ setFilters }) => setFilters);
   const onChange = useFilters('Popover', ({ onChange }) => onChange);
   const setOpen = useFilters('Popover', ({ setOpen }) => setOpen);
   const editingFilter = useFilters('Popover', ({ editingFilter }) => editingFilter);
@@ -239,25 +301,21 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           : operatorValuePairing,
     };
 
-    const existingFilters = getAppliedFilters(query);
+    const existingFilters = getAppliedFilters(filters);
 
     const newFilterQuery = editingFilter
       ? {
-          ...query.filters,
+          ...filters,
           $and: existingFilters.map((filter, i) =>
             i === editingFilter.index ? newFilterEntry : filter
           ),
         }
       : {
-          ...query.filters,
+          ...filters,
           $and: [...existingFilters, newFilterEntry],
         };
 
-    setQuery(
-      withEncodedUserParams(query, { filters: deepEncodeQueryValues(newFilterQuery), page: 1 }),
-      'push',
-      true
-    );
+    setFilters(newFilterQuery, { replace: true });
     setOpen(false);
     setEditingFilter(null);
   };
@@ -368,10 +426,10 @@ const toValueInputProps = ({
 }: Filters.Filter): Omit<Filters.ValueInputProps, 'aria-label'> => filter;
 
 /**
- * The `$and` array of the URL, or nothing: a hand-edited URL can make it a string or an object
+ * The applied `$and` array, or nothing: a hand-edited URL can make it a string or an object
  */
-const getAppliedFilters = (query: Filters.Query | undefined) =>
-  Array.isArray(query?.filters?.$and) ? query.filters.$and : [];
+const getAppliedFilters = (filters: Filters.Query['filters'] | undefined) =>
+  Array.isArray(filters?.$and) ? filters.$and : [];
 
 /**
  * Depending on the selected field find the possible filters to apply
@@ -424,10 +482,10 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
  * -----------------------------------------------------------------------------------------------*/
 
 const List = () => {
-  const [{ query }, setQuery] = useQueryParams<Filters.Query>();
-
   const options = useFilters('List', ({ options }) => options);
-  const queryFilters = getAppliedFilters(query);
+  const filters = useFilters('List', ({ filters }) => filters);
+  const setFilters = useFilters('List', ({ setFilters }) => setFilters);
+  const queryFilters = getAppliedFilters(filters);
   /**
    * One stable key per list slot, kept in a ref. The write happens during
    * render, but it is driven by the list length and not by the number of render
@@ -467,12 +525,7 @@ const List = () => {
     const nextFilters = queryFilters.filter((_, i) => i !== index);
 
     filterKeys.current.splice(index, 1);
-    setQuery(
-      withEncodedUserParams(query, {
-        filters: deepEncodeQueryValues({ $and: nextFilters }),
-        page: 1,
-      })
-    );
+    setFilters({ $and: nextFilters });
   };
 
   if (queryFilters.length === 0) {
