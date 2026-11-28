@@ -51,6 +51,27 @@ describe('Metrics', () => {
     expect(debug).toHaveBeenCalledWith(expect.stringContaining('Timeout acquiring a connection'));
   });
 
+  test('sendDidInviteUser does not reject when Strapi is destroyed before a count fails', async () => {
+    // Deleting the global removes the accessor vitest.setup.ts defines, so put it back afterwards
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'strapi')!;
+    const countUsers = vi.fn(() => {
+      // Strapi.destroy() deletes the global while the query is still pending
+      delete (global as any).strapi;
+      return Promise.reject(new Error('aborted'));
+    });
+    global.strapi = {
+      log: { debug: vi.fn() },
+      telemetry: { send: vi.fn() },
+      admin: { services: { user: { count: countUsers }, role: { count: vi.fn() } } },
+    } as any;
+
+    try {
+      await expect(metrics.sendDidInviteUser()).resolves.toBeUndefined();
+    } finally {
+      Object.defineProperty(globalThis, 'strapi', descriptor);
+    }
+  });
+
   test('sendDidUpdateRolePermissions', async () => {
     const send = vi.fn(() => Promise.resolve());
     global.strapi = {

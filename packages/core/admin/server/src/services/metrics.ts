@@ -11,8 +11,11 @@ const sendDidInviteUser = async () => {
       groupProperties: { numberOfRoles, numberOfUsers },
     });
   } catch (error) {
-    // Telemetry is best effort, but a debug line keeps a broken pipeline diagnosable
-    strapi.log.debug(`Admin telemetry not sent: ${error instanceof Error ? error.message : error}`);
+    // Telemetry is best effort, but a debug line keeps a broken pipeline diagnosable. The global is
+    // gone if Strapi was destroyed while the query ran, and the catch must not throw either
+    globalThis.strapi?.log.debug(
+      `Admin telemetry not sent: ${error instanceof Error ? error.message : error}`
+    );
   }
 };
 
@@ -28,8 +31,11 @@ const sendDidChangeInterfaceLanguage = async () => {
     // This event is anonymous
     strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
   } catch (error) {
-    // Telemetry is best effort, but a debug line keeps a broken pipeline diagnosable
-    strapi.log.debug(`Admin telemetry not sent: ${error instanceof Error ? error.message : error}`);
+    // Telemetry is best effort, but a debug line keeps a broken pipeline diagnosable. The global is
+    // gone if Strapi was destroyed while the query ran, and the catch must not throw either
+    globalThis.strapi?.log.debug(
+      `Admin telemetry not sent: ${error instanceof Error ? error.message : error}`
+    );
   }
 };
 
