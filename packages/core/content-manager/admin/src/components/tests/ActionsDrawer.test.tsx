@@ -36,6 +36,26 @@ describe('ActionsDrawer', () => {
       expect(screen.getByTestId('actions-drawer-spacer')).toHaveStyle({ height: '180px' });
     });
 
+    it('should keep tall injected header content inside a scrollable body', () => {
+      render(
+        <ActionsDrawer.Root hasContent={true}>
+          <ActionsDrawer.Header>
+            <div style={{ height: 1200 }}>Tall injected component</div>
+          </ActionsDrawer.Header>
+          <ActionsDrawer.Content>{defaultDrawerContent}</ActionsDrawer.Content>
+        </ActionsDrawer.Root>
+      );
+
+      const headerBody = screen.getByTestId('actions-drawer-header-body');
+
+      expect(headerBody).toContainElement(screen.getByText('Tall injected component'));
+      expect(headerBody).toHaveStyle({ overflowY: 'auto' });
+      // The toggle must stay reachable, so it must not scroll away with the injected content
+      expect(headerBody).not.toContainElement(
+        screen.getByRole('button', { name: 'Open more actions' })
+      );
+    });
+
     it('should render drawer content when provided', () => {
       render(
         <ActionsDrawer.Root hasContent={true}>
