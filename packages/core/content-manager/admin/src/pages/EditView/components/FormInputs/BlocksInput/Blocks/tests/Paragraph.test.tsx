@@ -2,6 +2,8 @@
 import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
 
+import { withStrapiSchema } from '../../plugins/withStrapiSchema';
+import { linkBlocks } from '../Link';
 import { paragraphBlocks } from '../Paragraph';
 
 import { Wrapper } from './Wrapper';
@@ -320,6 +322,64 @@ describe('Paragraph', () => {
             italic: true,
             text: 'Heading 1',
           },
+        ],
+      },
+    ]);
+  });
+
+  it('preserves the link and trailing text when pressing enter inside a link', () => {
+    const baseEditor = withStrapiSchema(linkBlocks.link.plugin!(createEditor()));
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: '' },
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            rel: '',
+            target: '',
+            children: [{ type: 'text', text: 'StrapiDocs' }],
+          },
+          { type: 'text', text: ' after' },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 1, 0], offset: 6 },
+      focus: { path: [0, 1, 0], offset: 6 },
+    });
+
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: '' },
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            rel: '',
+            target: '',
+            children: [{ type: 'text', text: 'Strapi' }],
+          },
+          { type: 'text', text: '' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: '' },
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            rel: '',
+            target: '',
+            children: [{ type: 'text', text: 'Docs' }],
+          },
+          { type: 'text', text: ' after' },
         ],
       },
     ]);

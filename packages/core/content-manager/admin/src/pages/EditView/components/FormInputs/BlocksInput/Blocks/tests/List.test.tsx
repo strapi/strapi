@@ -6,6 +6,7 @@ import { Editor, Transforms, createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
 import { withStrapiSchema } from '../../plugins/withStrapiSchema';
+import { linkBlocks } from '../Link';
 import { listBlocks } from '../List';
 
 import { Wrapper } from './Wrapper';
@@ -1618,6 +1619,200 @@ describe('List', () => {
                     text: 'Heading link',
                   },
                 ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts a paragraph containing a link to a list when the selection spans across the link', () => {
+    const baseEditor = withStrapiSchema(linkBlocks.link.plugin!(createEditor()));
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Visit ',
+          },
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            rel: '',
+            target: '',
+            children: [
+              {
+                type: 'text',
+                text: 'Strapi',
+              },
+            ],
+          },
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 6 },
+    });
+
+    listBlocks['list-unordered'].handleConvert!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Visit ',
+              },
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                rel: '',
+                target: '',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Strapi',
+                  },
+                ],
+              },
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts multiple selected paragraphs containing links into a single list', () => {
+    const baseEditor = withStrapiSchema(linkBlocks.link.plugin!(createEditor()));
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'First ',
+          },
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            rel: '',
+            target: '',
+            children: [
+              {
+                type: 'text',
+                text: 'link 1',
+              },
+            ],
+          },
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Second ',
+          },
+          {
+            type: 'link',
+            url: 'https://docs.strapi.io',
+            rel: '',
+            target: '',
+            children: [
+              {
+                type: 'text',
+                text: 'link 2',
+              },
+            ],
+          },
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 1, 0], offset: 6 },
+    });
+
+    listBlocks['list-unordered'].handleConvert!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First ',
+              },
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                rel: '',
+                target: '',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'link 1',
+                  },
+                ],
+              },
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Second ',
+              },
+              {
+                type: 'link',
+                url: 'https://docs.strapi.io',
+                rel: '',
+                target: '',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'link 2',
+                  },
+                ],
+              },
+              {
+                type: 'text',
+                text: '',
               },
             ],
           },
