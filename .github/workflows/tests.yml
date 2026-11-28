@@ -224,7 +224,7 @@ jobs:
 
       - name: Upload coverage artifacts
         if: matrix.node == 24 # Only upload from one node version to avoid conflicts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unit-coverage-reports
           path: |
@@ -257,7 +257,7 @@ jobs:
 
       - name: Upload coverage artifacts
         if: matrix.node == 24 # Only upload from one node version to avoid conflicts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unit-vitest-coverage-reports
           path: coverage/
@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload coverage artifacts
         if: matrix.node == 24 # Only upload from one node version to avoid conflicts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: front-coverage-reports
           path: |
@@ -357,7 +357,7 @@ jobs:
           PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
           PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ce-${{ matrix.project }}
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
@@ -365,7 +365,7 @@ jobs:
           retention-days: 1
 
       # Per-test timings, to balance the shards by duration instead of by file count.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: ce-e2e-junit-${{ matrix.project }}-${{ strategy.job-index }}
@@ -440,7 +440,7 @@ jobs:
           PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
           PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ce-media-library
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-media-library-playwright-trace-${{ github.run_id }}-${{ github.job }}
@@ -505,7 +505,7 @@ jobs:
           PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
           PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ce-media-library-legacy
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-media-library-legacy-playwright-trace-${{ github.run_id }}-${{ github.job }}
@@ -594,7 +594,7 @@ jobs:
           domains: enterprise-plugins
           jestOptions: '--project=chromium'
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ failure() && steps.e2e.outcome == 'failure' }}
         with:
           name: ee-enterprise-plugins-${{ matrix.plugin-versions }}-playwright-trace-${{ github.run_id }}-${{ github.job }}
@@ -660,7 +660,7 @@ jobs:
           PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
           PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ee-${{ matrix.project }}
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
@@ -668,7 +668,7 @@ jobs:
           retention-days: 1
 
       # Per-test timings, to balance the shards by duration instead of by file count.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: ee-e2e-junit-${{ matrix.project }}-${{ strategy.job-index }}
@@ -1069,7 +1069,7 @@ jobs:
         uses: ./.github/actions/run-build
       - name: Run tests-next ui
         run: yarn nx run @strapi/tests-e2e:test --skip-nx-cache -- --project=${{ matrix.project }}
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: tests-next-ui-${{ matrix.edition }}-${{ matrix.project }}-reports
@@ -1134,7 +1134,7 @@ jobs:
         run: yarn nx run @strapi/tests-api:test --skip-nx-cache
         env:
           TESTS_DATABASE: ${{ matrix.database }}
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: tests-next-api-${{ matrix.database }}-reports
@@ -1197,7 +1197,7 @@ jobs:
         run: yarn nx run @strapi/tests-cli:test --skip-nx-cache
         env:
           TESTS_DATABASE: ${{ matrix.database }}
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: tests-next-cli-${{ matrix.database }}-reports
