@@ -380,16 +380,38 @@ const addMinValidation: ValidationFn =
       return schema;
     }
 
-    if ('min' in attribute && 'min' in schema) {
-      const min = toInteger(attribute.min);
+    if ('min' in attribute) {
+      // `biginteger` is validated as a numeric string, so yup's `.min()` would compare its
+      // length. Compare the numeric value instead, matching the server-side validator.
+      if (attribute.type === 'biginteger') {
+        const min = toBigInt(attribute.min);
 
-      if (min !== undefined) {
-        return schema.min(min, {
-          ...translatedErrors.min,
-          values: {
-            min,
-          },
-        }) as TSchema;
+        if (min !== undefined) {
+          // `biginteger` always builds a string schema (see `createAttributeSchema`).
+          return (schema as yup.StringSchema).test(
+            'biginteger-min',
+            { ...translatedErrors.min, values: { min: attribute.min } },
+            (value) => {
+              const parsed = toBigInt(value);
+              return parsed === undefined || parsed >= min;
+            }
+          ) as TSchema;
+        }
+
+        return schema;
+      }
+
+      if ('min' in schema) {
+        const min = toInteger(attribute.min);
+
+        if (min !== undefined) {
+          return schema.min(min, {
+            ...translatedErrors.min,
+            values: {
+              min,
+            },
+          }) as TSchema;
+        }
       }
     }
 
@@ -400,6 +422,25 @@ const addMaxValidation: ValidationFn =
   (attribute) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
     if ('max' in attribute) {
+      // See `addMinValidation`: compare `biginteger` by numeric value, not string length.
+      if (attribute.type === 'biginteger') {
+        const max = toBigInt(attribute.max);
+
+        if (max !== undefined) {
+          // `biginteger` always builds a string schema (see `createAttributeSchema`).
+          return (schema as yup.StringSchema).test(
+            'biginteger-max',
+            { ...translatedErrors.max, values: { max: attribute.max } },
+            (value) => {
+              const parsed = toBigInt(value);
+              return parsed === undefined || parsed <= max;
+            }
+          ) as TSchema;
+        }
+
+        return schema;
+      }
+
       const max = toInteger(attribute.max);
 
       if ('max' in schema && max !== undefined) {
@@ -421,6 +462,23 @@ const toInteger = (val?: string | number): number | undefined => {
   } else {
     const num = Number(val);
     return isNaN(num) ? undefined : num;
+  }
+};
+
+/**
+ * `biginteger` values can exceed Number.MAX_SAFE_INTEGER, so they are compared as BigInt to
+ * avoid the precision loss `Number()` would introduce. Returns undefined when the value is
+ * empty or not a valid integer, in which case the bound simply doesn't apply.
+ */
+const toBigInt = (val?: string | number | null): bigint | undefined => {
+  if (val === undefined || val === null || val === '') {
+    return undefined;
+  }
+
+  try {
+    return BigInt(val);
+  } catch {
+    return undefined;
   }
 };
 
