@@ -29,7 +29,7 @@ const apiValidators = createAPIValidators({ getModel });
 // packages/core/core/src/services/document-service/repository.ts).
 const documentServiceIncludes = {
   sort: ['nonAttributesOperators', 'dynamicZones', 'morphRelations'],
-  field: ['scalarAttributes'],
+  fields: ['scalarAttributes'],
   filters: ['nonAttributesOperators', 'dynamicZones', 'morphRelations'],
 };
 

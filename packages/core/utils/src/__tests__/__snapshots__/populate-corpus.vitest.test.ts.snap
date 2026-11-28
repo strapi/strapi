@@ -723,11 +723,7 @@ exports[`populate validation and sanitization corpus > count 1`] = `
 exports[`populate validation and sanitization corpus > depth 2: components 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalNotes",
-      "path": "internalNotes",
-    },
-    "throws": "ValidationError: Invalid key internalNotes",
+    "passes": "unchanged",
   },
   "queryLayer": "1d13f2480683",
   "sanitized": {
@@ -790,11 +786,7 @@ exports[`populate validation and sanitization corpus > depth 2: dynamic zone dot
 exports[`populate validation and sanitization corpus > depth 2: dynamic zone fragments 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "5386d04452a5",
   "sanitized": {
@@ -1138,11 +1130,7 @@ exports[`populate validation and sanitization corpus > depth 2: password filters
 exports[`populate validation and sanitization corpus > depth 2: polymorphic fragments 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "212fd0357dab",
   "sanitized": {
@@ -1227,11 +1215,7 @@ exports[`populate validation and sanitization corpus > depth 2: private attribut
 exports[`populate validation and sanitization corpus > depth 2: private fields 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "74b5ee014b89",
   "sanitized": {
@@ -1406,11 +1390,7 @@ exports[`populate validation and sanitization corpus > depth 2: scalar populate 
 exports[`populate validation and sanitization corpus > depth 4: components 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalNotes",
-      "path": "internalNotes",
-    },
-    "throws": "ValidationError: Invalid key internalNotes",
+    "passes": "unchanged",
   },
   "queryLayer": "a277af11c155",
   "sanitized": {
@@ -1473,11 +1453,7 @@ exports[`populate validation and sanitization corpus > depth 4: dynamic zone dot
 exports[`populate validation and sanitization corpus > depth 4: dynamic zone fragments 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "de2808241759",
   "sanitized": {
@@ -1821,11 +1797,7 @@ exports[`populate validation and sanitization corpus > depth 4: password filters
 exports[`populate validation and sanitization corpus > depth 4: polymorphic fragments 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "79ca3ad52fe9",
   "sanitized": {
@@ -1910,11 +1882,7 @@ exports[`populate validation and sanitization corpus > depth 4: private attribut
 exports[`populate validation and sanitization corpus > depth 4: private fields 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "9dc6d74ec801",
   "sanitized": {
@@ -2089,11 +2057,7 @@ exports[`populate validation and sanitization corpus > depth 4: scalar populate 
 exports[`populate validation and sanitization corpus > depth 6: components 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalNotes",
-      "path": "internalNotes",
-    },
-    "throws": "ValidationError: Invalid key internalNotes",
+    "passes": "unchanged",
   },
   "queryLayer": "adbebd6a004a",
   "sanitized": {
@@ -2156,11 +2120,7 @@ exports[`populate validation and sanitization corpus > depth 6: dynamic zone dot
 exports[`populate validation and sanitization corpus > depth 6: dynamic zone fragments 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "d79995948aea",
   "sanitized": {
@@ -2504,11 +2464,7 @@ exports[`populate validation and sanitization corpus > depth 6: password filters
 exports[`populate validation and sanitization corpus > depth 6: polymorphic fragments 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "d71bb26a5c09",
   "sanitized": {
@@ -2593,11 +2549,7 @@ exports[`populate validation and sanitization corpus > depth 6: private attribut
 exports[`populate validation and sanitization corpus > depth 6: private fields 1`] = `
 {
   "documentServiceValidate": {
-    "details": {
-      "key": "internalCode",
-      "path": "internalCode",
-    },
-    "throws": "ValidationError: Invalid key internalCode",
+    "passes": "unchanged",
   },
   "queryLayer": "ce05ee421f7a",
   "sanitized": {
