@@ -24,7 +24,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async computeMetrics(): Promise<WeeklyMetrics> {
-      // Fetches every workflow. The license workflow limit (200 by default) bounds how many there are
+      // Fetches every workflow. The license workflow limit only blocks new workflows, so a license
+      // lowered below the current count does not bound how many this returns
       const workflows = await workflowsService.find({ populate: 'stages' });
 
       const stagesCount = map(workflows, (workflow) => size(workflow.stages));

@@ -50,7 +50,7 @@ export default {
     const isActiveLicense = strapi.ee.licenseStatus === 'active';
     const activeEntitlements = strapi.ee.entitlements.list();
     // A lapsed license resolves through the same resolvers against its retained snapshot, so the
-    // card shows the defaulted, clamped limits the plan enforced rather than raw options.
+    // card shows the defaulted limits the plan enforced rather than raw options.
     const retainedEntitlements = isActiveLicense ? [] : strapi.ee.entitlements.listRetained();
 
     let shouldNotify = false;
