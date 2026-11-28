@@ -180,4 +180,4 @@ const extractAndDedupeFields = (permissions: Permission[] = []) => {
  */
 const removeNumericalStrings = (arr: string[]) => arr.filter((item) => isNaN(Number(item)));
 
-export { DocumentRBAC, useDocumentRBAC, DocumentRBACContextValue, DocumentRBACProps };
+export { DocumentRBAC, useDocumentRBAC, type DocumentRBACContextValue, type DocumentRBACProps };

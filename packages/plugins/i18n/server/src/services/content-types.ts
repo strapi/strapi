@@ -237,4 +237,4 @@ const contentTypes = () => ({
 type ContentTypesService = typeof contentTypes;
 
 export default contentTypes;
-export { ContentTypesService };
+export { type ContentTypesService };
