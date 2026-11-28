@@ -182,7 +182,7 @@ const Passkeys = () => {
                       label={formatMessage(
                         {
                           id: 'Settings.profile.form.section.mfa.passkeys.delete',
-                          defaultMessage: 'Remove passkey {name}',
+                          defaultMessage: 'Remove {name}',
                         },
                         { name: passkey.name }
                       )}

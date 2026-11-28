@@ -491,7 +491,7 @@
   "Settings.profile.form.section.mfa.passkeys.add.title": "Add a passkey",
   "Settings.profile.form.section.mfa.passkeys.added": "Added",
   "Settings.profile.form.section.mfa.passkeys.cap": "You have reached the limit of {max} passkeys. Remove one to add another.",
-  "Settings.profile.form.section.mfa.passkeys.delete": "Remove passkey {name}",
+  "Settings.profile.form.section.mfa.passkeys.delete": "Remove {name}",
   "Settings.profile.form.section.mfa.passkeys.delete.confirm": "Remove",
   "Settings.profile.form.section.mfa.passkeys.delete.intro": "{name} will no longer log you in. Your authenticator app is unaffected. Confirm your password and a code from it, or an unused recovery code.",
   "Settings.profile.form.section.mfa.passkeys.delete.success": "Passkey removed.",
