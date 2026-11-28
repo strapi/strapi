@@ -24,11 +24,11 @@ const settings = {
 };
 
 describe('security-settings controller', () => {
-  test('get returns the settings', async () => {
+  test('get returns the settings and the roles exempt from two-factor authentication', async () => {
     setStrapi({
       admin: {
         services: {
-          mfa: { isEnabled: () => true },
+          mfa: { isEnabled: () => true, exemptRoleIds: vi.fn(async () => ['9']) },
           'security-settings': { getSettings: vi.fn(() => Promise.resolve(settings)) },
         },
       },
@@ -37,7 +37,7 @@ describe('security-settings controller', () => {
 
     await controller.get(ctx);
 
-    expect(ctx.body).toEqual({ data: settings });
+    expect(ctx.body).toEqual({ data: { ...settings, mfaExemptRoles: ['9'] } });
   });
 
   test('passkeysImpact returns how many passkeys turning passkeys off would delete', async () => {

@@ -70,6 +70,8 @@ describe('Admin MFA enforcement', () => {
       mfa: { mode: 'off', graceDays: 7, requiredRoles: [] },
       trustedDevices: { enabled: true, days: 30 },
       passkeys: { enabled: true },
+      // No SSO-locked roles in this app, so no role is exempt.
+      mfaExemptRoles: [],
     });
   });
 

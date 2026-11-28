@@ -174,7 +174,7 @@ describe('Roles | EditPage', () => {
     const ALERT_TEXT =
       'Users with this role must set up two-factor authentication. Change this in Settings › Security.';
 
-    const mockSecuritySettings = (mfa: MfaEnforcementSettings) => {
+    const mockSecuritySettings = (mfa: MfaEnforcementSettings, mfaExemptRoles: string[] = []) => {
       server.use(
         http.get('/admin/security-settings', () =>
           HttpResponse.json({
@@ -182,6 +182,7 @@ describe('Roles | EditPage', () => {
               mfa,
               trustedDevices: { enabled: false, days: 30 },
               passkeys: { enabled: false },
+              mfaExemptRoles,
             },
           })
         )
@@ -203,6 +204,15 @@ describe('Roles | EditPage', () => {
         '/settings/security'
       );
       expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+    });
+
+    it('is not shown for a role the server exempts (locked to SSO), like the users list', async () => {
+      mockSecuritySettings({ mode: 'required', graceDays: 7, requiredRoles: [] }, ['1']);
+      renderEditPage('strapi-editor');
+
+      await waitForPage();
+      await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+      expect(screen.queryByText(ALERT_TEXT)).not.toBeInTheDocument();
     });
 
     it('is shown when the role is one of the selected roles', async () => {

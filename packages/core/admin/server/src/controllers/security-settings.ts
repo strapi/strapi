@@ -13,9 +13,12 @@ import type {
 
 export default {
   async get(ctx: Context) {
-    ctx.body = {
-      data: await getService('security-settings').getSettings(),
-    } satisfies GetSecuritySettings.Response;
+    const [settings, mfaExemptRoles] = await Promise.all([
+      getService('security-settings').getSettings(),
+      getService('mfa').exemptRoleIds(),
+    ]);
+
+    ctx.body = { data: { ...settings, mfaExemptRoles } } satisfies GetSecuritySettings.Response;
   },
 
   async mfaImpact(ctx: Context) {

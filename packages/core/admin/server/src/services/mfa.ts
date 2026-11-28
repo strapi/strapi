@@ -207,6 +207,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return lockedRoles.some((lockedId) => roles.some((role) => lockedId === String(role.id)));
   };
 
+  /**
+   * The roles whose every holder is exempt: the SSO-locked ones, matched as `isExemptGiven` does
+   * (only a string id ever equals `String(role.id)`). The roles pages use it so they do not call a
+   * role required when the users list, which reads `requiredForUsers`, says its users are not.
+   */
+  const exemptRoleIds = async (): Promise<string[]> =>
+    (await readSsoLockedRoles()).filter((id): id is string => typeof id === 'string');
+
   const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> =>
     // No store read for a password-less account: it is exempt whatever SSO says.
     !user.password || isExemptGiven(user, await readSsoLockedRoles());
@@ -1734,6 +1742,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isExemptFromMfa,
     isMfaRequiredFor,
     requiredForUsers,
+    exemptRoleIds,
     enforce,
     clearGraceIfStale,
     syncFeatureState,

@@ -3590,6 +3590,25 @@ describe('mfa service: enforcement policy', () => {
     expect(storeGet.mock.calls.filter(([{ key }]) => key === 'auth')).toHaveLength(1);
   });
 
+  test('exemptRoleIds lists the SSO-locked roles requiredForUsers exempts, and none without SSO', async () => {
+    // A numeric id never matches in isExemptGiven, so it is not listed either.
+    const { service } = setup({
+      stored: { mfa: { mode: 'required' } },
+      ssoEnabled: true,
+      ssoLockedRoles: ['9', 4],
+    });
+    await expect(service.exemptRoleIds()).resolves.toEqual(['9']);
+    await expect(
+      service.requiredForUsers([
+        user({ roles: [{ id: 9, mfaRequired: null }] }),
+        user({ id: 2, roles: [{ id: 4, mfaRequired: null }] }),
+      ])
+    ).resolves.toEqual([false, true]);
+
+    const withoutSso = setup({ stored: { mfa: { mode: 'required' } }, ssoLockedRoles: ['9'] });
+    await expect(withoutSso.service.exemptRoleIds()).resolves.toEqual([]);
+  });
+
   test('requiredForUsers requires nobody while the feature or the mode is off', async () => {
     await expect(
       setup({ stored: { mfa: { mode: 'required' } }, enabled: false }).service.requiredForUsers([

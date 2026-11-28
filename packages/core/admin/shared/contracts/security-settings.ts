@@ -31,7 +31,9 @@ export interface SecuritySettings {
 
 export declare namespace GetSecuritySettings {
   export interface Response {
-    data: SecuritySettings;
+    /** `mfaExemptRoles`: read-only, never sent back. The roles whose every holder is exempt from
+     * two-factor authentication (locked to SSO), so the roles pages agree with the users list. */
+    data: SecuritySettings & { mfaExemptRoles?: string[] };
     error?: errors.ApplicationError;
   }
 }

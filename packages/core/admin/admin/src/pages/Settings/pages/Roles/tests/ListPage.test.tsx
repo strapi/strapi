@@ -57,7 +57,7 @@ const renderList = ({ canReadSecurity = true } = {}) => {
   return render(<ListPage />, { providerOptions: { storeConfig: { preloadedState } } });
 };
 
-const mockSecuritySettings = (mfa: MfaEnforcementSettings) =>
+const mockSecuritySettings = (mfa: MfaEnforcementSettings, mfaExemptRoles: string[] = []) =>
   server.use(
     http.get('/admin/security-settings', () =>
       HttpResponse.json({
@@ -65,6 +65,7 @@ const mockSecuritySettings = (mfa: MfaEnforcementSettings) =>
           mfa,
           trustedDevices: { enabled: false, days: 30 },
           passkeys: { enabled: false },
+          mfaExemptRoles,
         },
       })
     )
@@ -98,6 +99,15 @@ describe('<ListPage />', () => {
       renderList();
 
       expect(await screen.findAllByText('Required')).toHaveLength(2);
+    });
+
+    it('leaves a role the server exempts (locked to SSO) empty, like the users list', async () => {
+      mockSecuritySettings({ mode: 'required', graceDays: 7, requiredRoles: [] }, ['2']);
+      renderList();
+
+      expect(await screen.findAllByText('Required')).toHaveLength(1);
+      const editorRow = screen.getByRole('row', { name: /Editor/ });
+      expect(editorRow).not.toHaveTextContent('Required');
     });
 
     it('leaves the column empty when nothing is required', async () => {

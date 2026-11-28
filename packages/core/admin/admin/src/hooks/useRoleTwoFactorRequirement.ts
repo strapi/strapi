@@ -9,7 +9,9 @@ import { useRBAC } from './useRBAC';
  * Read-only view of the two-factor requirement for the roles pages. Returns `null` while the
  * feature is off, when the caller cannot read the security settings, or while they load, so
  * callers render nothing extra. Otherwise returns a predicate telling whether a role is covered:
- * everyone ("required"), or the role is listed under "Required for selected roles".
+ * everyone ("required"), or the role is listed under "Required for selected roles". A role the
+ * server exempts (locked to SSO, `mfaExemptRoles`) is never covered, as on the users list, which
+ * reads the server's per-user answer.
  */
 const useRoleTwoFactorRequirement = (): ((roleId: string | number) => boolean) | null => {
   const enabled = isMfaFeatureEnabled();
@@ -27,11 +29,12 @@ const useRoleTwoFactorRequirement = (): ((roleId: string | number) => boolean) |
     return null;
   }
 
-  const { mfa } = settings;
+  const { mfa, mfaExemptRoles = [] } = settings;
 
   return (roleId) =>
-    mfa.mode === 'required' ||
-    (mfa.mode === 'optional' && mfa.requiredRoles.includes(String(roleId)));
+    !mfaExemptRoles.includes(String(roleId)) &&
+    (mfa.mode === 'required' ||
+      (mfa.mode === 'optional' && mfa.requiredRoles.includes(String(roleId))));
 };
 
 export { useRoleTwoFactorRequirement };
