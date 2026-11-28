@@ -10,8 +10,9 @@ const sendDidInviteUser = async () => {
     strapi.telemetry.send('didInviteUser', {
       groupProperties: { numberOfRoles, numberOfUsers },
     });
-  } catch {
-    // Telemetry is best effort
+  } catch (error) {
+    // Telemetry is best effort, but a debug line keeps a broken pipeline diagnosable
+    strapi.log.debug(`Admin telemetry not sent: ${error instanceof Error ? error.message : error}`);
   }
 };
 
@@ -26,8 +27,9 @@ const sendDidChangeInterfaceLanguage = async () => {
     const languagesInUse = await getService('user').getLanguagesInUse();
     // This event is anonymous
     strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
-  } catch {
-    // Telemetry is best effort
+  } catch (error) {
+    // Telemetry is best effort, but a debug line keeps a broken pipeline diagnosable
+    strapi.log.debug(`Admin telemetry not sent: ${error instanceof Error ? error.message : error}`);
   }
 };
 

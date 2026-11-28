@@ -32,7 +32,9 @@ describe('Metrics', () => {
     const send = vi.fn(() => Promise.resolve());
     const countUsers = vi.fn(() => Promise.resolve(2));
     const countRoles = vi.fn(() => Promise.reject(new Error('Timeout acquiring a connection')));
+    const debug = vi.fn();
     global.strapi = {
+      log: { debug },
       telemetry: { send },
       admin: {
         services: {
@@ -46,6 +48,7 @@ describe('Metrics', () => {
 
     expect(countRoles).toHaveBeenCalledWith();
     expect(send).not.toHaveBeenCalled();
+    expect(debug).toHaveBeenCalledWith(expect.stringContaining('Timeout acquiring a connection'));
   });
 
   test('sendDidUpdateRolePermissions', async () => {
@@ -88,7 +91,9 @@ describe('Metrics', () => {
     );
     const send = vi.fn(() => Promise.resolve());
 
+    const debug = vi.fn();
     global.strapi = {
+      log: { debug },
       telemetry: { send },
       admin: {
         services: {
@@ -101,5 +106,6 @@ describe('Metrics', () => {
 
     expect(getLanguagesInUse).toHaveBeenCalledWith();
     expect(send).not.toHaveBeenCalled();
+    expect(debug).toHaveBeenCalledWith(expect.stringContaining('Timeout acquiring a connection'));
   });
 });
