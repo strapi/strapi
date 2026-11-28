@@ -520,6 +520,13 @@ const RepeatableComponentFields = React.memo(
                   defaultMessage: field.label,
                 });
 
+                const translatedPlaceholder = field.placeholder
+                  ? formatMessage({
+                      id: `content-manager.components.${attributeComponent}.${field.name}.placeholder`,
+                      defaultMessage: field.placeholder,
+                    })
+                  : field.placeholder;
+
                 return (
                   <ResponsiveGridItem
                     col={size}
@@ -534,6 +541,7 @@ const RepeatableComponentFields = React.memo(
                       disabled: field.disabled || disabled,
                       size,
                       label: translatedLabel,
+                      placeholder: translatedPlaceholder,
                       name: completeFieldName,
                     })}
                   </ResponsiveGridItem>
