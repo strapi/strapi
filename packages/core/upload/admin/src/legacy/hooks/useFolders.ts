@@ -8,6 +8,7 @@ import { useQuery } from 'react-query';
 
 import { GetFolders } from '../../../../shared/contracts/folders';
 import { pluginId } from '../../pluginId';
+import { getTrad } from '../utils';
 
 import type { Query } from '../../../../shared/contracts/files';
 
@@ -80,7 +81,7 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
     if (data) {
       notifyStatus(
         formatMessage({
-          id: 'list.asset.at.finished',
+          id: getTrad('list.folder.at.finished'),
           defaultMessage: 'The folders have finished loading.',
         })
       );

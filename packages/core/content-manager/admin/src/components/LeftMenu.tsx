@@ -252,7 +252,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
         onChange={handleChangeSearch}
         onClear={handleClear}
         placeholder={formatMessage({
-          id: 'search.placeholder',
+          id: getTranslation('search.placeholder'),
           defaultMessage: 'Search',
         })}
         size="S"
