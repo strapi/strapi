@@ -277,28 +277,30 @@ password-less administrator into a dialog they cannot complete.
   its own line: the roles no longer required (by name), "no longer required for everyone", the new
   grace or trust period against the old one, and the number of passkeys deleted. Leaving the page
   with unsaved changes asks for confirmation
-- **Settings > Users**, list: the User status column reads Active, Inactive or Locked (a lock
-  stops password login and wins over Active). A two-factor column, shown to holders of
+- **Settings > Users**, list: with the flag on, the User status column reads Inactive (`neutral`),
+  Locked (`danger`) or Active (`success`), in that order of precedence: an inactive account cannot
+  log in at all, and a lock only stops password login. With the flag off it is the develop badge
+  (Active, or Inactive in `danger`). A two-factor column, shown to holders of
   `admin::users.update` while the flag is on, reads only Enabled or Not set up, with the requirement
   as a small line under it: "Required from next login" (required, grace not started), "Required,
   {n} days left", or "Required" once locked. No line when it is not required
   (`utils/mfaRequirement.ts` derives it for the list and the user page)
 - **Settings > Users**, per user: the lock and its Unlock action sit with the account status in
-  Details (`components/UserLockStatus.tsx`); `TwoFactorPanel.tsx` shows only the two-factor state
+  Details (`components/UserLockStatus.tsx`). A viewer without `admin::users.update` sees the lock
+  read-only, without Unlock; `TwoFactorPanel.tsx` shows only the two-factor state
   (Enabled, or Not set up with the same requirement line and the deadline), the reset action, and
   trusted-device and passkey counts. An unlocked account has no lock and no grace, like one that
   never started, so right after an unlock made on that page the panel reads "Required from next
   login" even when the viewer cannot read the security settings
-- **Settings > Roles**, per role (`pages/Settings/pages/Roles/components/RoleTwoFactorRequirement.tsx`):
-  a "Require two-factor authentication for this role" checkbox on `admin::role.mfaRequired`, shown
-  to holders of `admin::security-settings.read` and `.update` while the feature is on. It saves on
-  its own through `PUT /admin/security-settings` (`mfa.requiredRoles`), with the Security page's
-  impact dialog on a raise and `ConfirmDowngradeDialog`, naming the role, on a drop. The
-  line under the checkbox says it saves at once, without the role form's Save. Under "Not required", checking it
-  saves "Required for selected roles" with this role alone; unchecking the last selected role saves
-  "Not required". It is disabled only while everyone is required. The grace-period hint shows only
-  while the role requires it, and a line under the checkbox says how this relates to the Security
-  page and links to it. The Security page's role picker links back to Settings > Roles
+- **Settings > Roles** is read-only for two-factor authentication: the requirement is set only in
+  Settings > Security. `hooks/useRoleTwoFactorRequirement.ts` reads `GET /admin/security-settings`
+  (holders of `admin::security-settings.read`, flag on) and tells whether a role is covered:
+  everyone ("required"), or the role is in `mfa.requiredRoles`. A role in `mfaExemptRoles` (the
+  SSO-locked roles the server exempts, from `exemptRoleIds` in `services/mfa.ts`, matched as
+  `isExemptGiven` does) is never covered, so these pages agree with the users list. On Edit a role,
+  a covered role shows an `Alert` under the header ("Users with this role must set up two-factor
+  authentication. Change this in Settings › Security.") with a link to the Security page. The Roles
+  list has a "Two-factor" column that reads "Required" or stays empty
 - Every two-factor date with a time (deadlines, locks, device use, events) names its time zone
   (`admin/src/utils/mfaDates.ts`), since the viewer and the user are often in different ones
 - **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period. It links
@@ -306,7 +308,9 @@ password-less administrator into a dialog they cannot complete.
 
 `GET /admin/users` and `GET /admin/users/:id` append `mfaEnabledAt`, `mfaGraceUntil`,
 `mfaLockedAt` and `mfaRequired` for a caller holding `admin::users.update` (`withMfaState` in
-`controllers/user.ts`), so the list shows state without a call per row. `mfaRequired` comes from
+`controllers/user.ts`), so the list shows state without a call per row. Other readers get
+`mfaLockedAt` alone, because the lock is a login state shown in the user status, and the
+two-factor column and panel stay hidden from them. `mfaRequired` comes from
 `requiredForUsers` in `services/mfa.ts`, the same rules as `isMfaRequiredFor` with exemptions
 applied, reading the settings and the SSO-locked roles once per page.
 

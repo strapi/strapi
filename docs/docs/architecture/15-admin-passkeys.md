@@ -142,7 +142,7 @@ extra, since it strengthens the second factor and destroys nothing.
 The one exemption: a caller with no local password (SSO-only) may turn passkeys off on session
 authority alone, when that is the **only** relaxing term in the save. Otherwise, in an SSO-only
 organisation, nobody could ever reach the setting. The Security page still shows that caller the
-"Turn passkeys off?" dialog, without credential fields.
+"Disable passkeys?" dialog, without credential fields.
 
 Before the off-transition is confirmed, the dialog reads `GET /admin/security-settings/passkeys-impact`
 (`admin::security-settings.read`), which returns `{ count }`: every passkey across all
