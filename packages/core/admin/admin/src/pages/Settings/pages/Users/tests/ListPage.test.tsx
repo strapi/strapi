@@ -4,6 +4,23 @@ import { http, HttpResponse } from 'msw';
 
 import { ListPageCE } from '../ListPage';
 
+// Expose the Status variant so the tests can check the colour the badge carries, not just its text.
+jest.mock('@strapi/design-system', () => {
+  const actual = jest.requireActual('@strapi/design-system');
+  return {
+    ...actual,
+    Status: ({ variant, children }: { variant: string; children: React.ReactNode }) => (
+      <div data-testid="status" data-variant={variant}>
+        {children}
+      </div>
+    ),
+  };
+});
+
+/** The variant of the one Status badge in this cell or row. */
+const variantOf = (container: HTMLElement) =>
+  within(container).getByTestId('status').getAttribute('data-variant');
+
 describe('Users | ListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +92,7 @@ describe('Users | ListPage', () => {
       expect((await cellsOf('Never')).twoFactor).toHaveTextContent('Not set up');
     });
 
-    it('gives the user status Active, Inactive or Locked, Locked taking precedence', async () => {
+    it('gives the user status Active, Inactive or Locked, Inactive taking precedence', async () => {
       rowsOf(
         row(1, 'Alpha', {}),
         row(2, 'Beta', { isActive: false }),
@@ -84,10 +101,19 @@ describe('Users | ListPage', () => {
       );
       render(<ListPageCE />);
 
-      expect((await cellsOf('Alpha')).status).toHaveTextContent('Active');
-      expect((await cellsOf('Beta')).status).toHaveTextContent('Inactive');
-      expect((await cellsOf('Lockee')).status).toHaveTextContent('Locked');
-      expect((await cellsOf('Both')).status).toHaveTextContent('Locked');
+      const alpha = (await cellsOf('Alpha')).status;
+      expect(alpha).toHaveTextContent('Active');
+      expect(variantOf(alpha)).toBe('success');
+      const beta = (await cellsOf('Beta')).status;
+      expect(beta).toHaveTextContent('Inactive');
+      expect(variantOf(beta)).toBe('neutral');
+      const lockee = (await cellsOf('Lockee')).status;
+      expect(lockee).toHaveTextContent('Locked');
+      expect(variantOf(lockee)).toBe('danger');
+      // An inactive account cannot log in at all, so unlocking it would not help: Inactive wins.
+      const both = (await cellsOf('Both')).status;
+      expect(both).toHaveTextContent('Inactive');
+      expect(both).not.toHaveTextContent('Locked');
     });
 
     it('words the requirement under the state', async () => {
@@ -116,7 +142,7 @@ describe('Users | ListPage', () => {
     });
   });
 
-  it('does not show Locked in the user status when the feature is off', async () => {
+  it('shows the user status exactly as before when the feature is off', async () => {
     server.use(
       http.get('/admin/users', () =>
         HttpResponse.json({
@@ -128,9 +154,15 @@ describe('Users | ListPage', () => {
                 lastname: 'Lockee',
                 roles: [],
                 isActive: true,
-                mfaEnabledAt: null,
-                mfaGraceUntil: null,
+                // Only a stale lock: the server sends nothing else with the feature off.
                 mfaLockedAt: '2026-09-12T10:00:00.000Z',
+              },
+              {
+                id: 2,
+                firstname: 'U',
+                lastname: 'Dormant',
+                roles: [],
+                isActive: false,
               },
             ],
             pagination: { page: 1 },
@@ -142,6 +174,10 @@ describe('Users | ListPage', () => {
 
     const row = await screen.findByRole('row', { name: /Lockee/ });
     expect(within(row).getByText('Active')).toBeInTheDocument();
+    expect(variantOf(row)).toBe('success');
     expect(within(row).queryByText('Locked')).not.toBeInTheDocument();
+    // Inactive keeps its red badge with the feature off.
+    const dormant = await screen.findByRole('row', { name: /Dormant/ });
+    expect(variantOf(dormant)).toBe('danger');
   });
 });
