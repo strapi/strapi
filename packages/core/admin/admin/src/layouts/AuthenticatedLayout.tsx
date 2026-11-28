@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
+import { MfaBanners } from '../components/MfaBanners';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
@@ -94,38 +95,46 @@ const AdminLayout = () => {
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
-            <Flex
-              height="100dvh"
-              direction={{
-                initial: 'column',
-                large: 'row',
-              }}
-              alignItems="flex-start"
-            >
-              <LeftMenu
-                generalSectionLinks={generalSectionLinks}
-                pluginsSectionLinks={pluginsSectionLinks}
-                topMobileNavigation={topMobileNavigation}
-                burgerMobileNavigation={burgerMobileNavigation}
-              />
+            {/*
+             * Global banners span the whole app above all navigation; the navigation and content row
+             * takes the rest of the viewport, so nothing scrolls twice.
+             */}
+            <Flex height="100dvh" direction="column" alignItems="stretch">
+              <MfaBanners />
               <Flex
-                direction="column"
-                alignItems="stretch"
                 flex={1}
-                overflow="auto"
-                width="100%"
-                height={{
-                  initial: 'auto',
-                  large: '100%',
+                minHeight={0}
+                direction={{
+                  initial: 'column',
+                  large: 'row',
                 }}
+                alignItems="flex-start"
               >
-                <TopBanners />
-                {/*
-                 * Top-level Suspense only — nested layouts (Settings, Content Manager) use
-                 * LazyOutlet with useNavigation so in-app navigations show loading in the content
-                 * column without hiding section side navs.
-                 */}
-                <LazyOutlet suspenseOnly />
+                <LeftMenu
+                  generalSectionLinks={generalSectionLinks}
+                  pluginsSectionLinks={pluginsSectionLinks}
+                  topMobileNavigation={topMobileNavigation}
+                  burgerMobileNavigation={burgerMobileNavigation}
+                />
+                <Flex
+                  direction="column"
+                  alignItems="stretch"
+                  flex={1}
+                  overflow="auto"
+                  width="100%"
+                  height={{
+                    initial: 'auto',
+                    large: '100%',
+                  }}
+                >
+                  <TopBanners />
+                  {/*
+                   * Top-level Suspense only — nested layouts (Settings, Content Manager) use
+                   * LazyOutlet with useNavigation so in-app navigations show loading in the content
+                   * column without hiding section side navs.
+                   */}
+                  <LazyOutlet suspenseOnly />
+                </Flex>
               </Flex>
             </Flex>
           </Box>

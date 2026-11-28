@@ -16,12 +16,20 @@ const Oops = () => {
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
 
-  const message =
-    query.get('info') ||
-    formatMessage({
-      id: 'Auth.components.Oops.text',
-      defaultMessage: 'Your account has been suspended.',
-    });
+  // An inactive account is a known state with its own fix, so it says what to do instead of the
+  // generic message (which other callers, such as SSO errors, still use).
+  const inactive = query.get('reason') === 'inactive';
+
+  const message = inactive
+    ? formatMessage({
+        id: 'Auth.form.error.blocked',
+        defaultMessage: 'Your account is inactive. Ask an administrator to activate it.',
+      })
+    : query.get('info') ||
+      formatMessage({
+        id: 'Auth.components.Oops.text',
+        defaultMessage: 'Your account has been suspended.',
+      });
 
   return (
     <UnauthenticatedLayout>
@@ -35,14 +43,16 @@ const Oops = () => {
               </Typography>
             </Box>
             <Typography>{message}</Typography>
-            <Box paddingTop={4}>
-              <Typography>
-                {formatMessage({
-                  id: 'Auth.components.Oops.text.admin',
-                  defaultMessage: 'If this is a mistake, please contact your administrator.',
-                })}
-              </Typography>
-            </Box>
+            {inactive ? null : (
+              <Box paddingTop={4}>
+                <Typography>
+                  {formatMessage({
+                    id: 'Auth.components.Oops.text.admin',
+                    defaultMessage: 'If this is a mistake, please contact your administrator.',
+                  })}
+                </Typography>
+              </Box>
+            )}
           </Column>
         </LayoutContent>
         <Flex justifyContent="center">

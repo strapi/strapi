@@ -16,6 +16,7 @@ import { registerTokenAuditEvents } from '../../../server/src/audit-logs/tokens'
 import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/admin-users';
 import { registerWebhookAuditEvents } from '../../../server/src/audit-logs/webhooks';
 import { registerAuthAuditEvents } from '../../../server/src/audit-logs/auth';
+import { registerMfaAuditEvents } from '../../../server/src/audit-logs/mfa';
 import { registerSsoSettingsAuditEvents } from '../../../server/src/audit-logs/sso-settings';
 import { registerProjectSettingsAuditEvents } from '../../../server/src/audit-logs/project-settings';
 
@@ -65,6 +66,7 @@ const getAdminEE = () => {
         registerAdminUserAuditEvents(auditLogsLifecycle);
         registerWebhookAuditEvents(auditLogsLifecycle);
         registerAuthAuditEvents(auditLogsLifecycle);
+        registerMfaAuditEvents(auditLogsLifecycle, { strapi });
         registerSsoSettingsAuditEvents(auditLogsLifecycle);
         registerProjectSettingsAuditEvents(auditLogsLifecycle);
 

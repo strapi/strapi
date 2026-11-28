@@ -34,6 +34,18 @@ import type {
 } from '../../../../shared/contracts/history-versions';
 import type { UID } from '@strapi/types';
 
+/**
+ * The admin's global banner stack (two-factor notices) publishes its height on the root element.
+ * Unset when no banner shows, so the fallback keeps the offsets exactly as without banners.
+ */
+const GLOBAL_BANNERS_HEIGHT = 'var(--strapi-global-banners-height, 0px)';
+
+/** Below the banners on every screen, and below the top bar on small ones. */
+const HISTORY_TOP = {
+  initial: `calc(${GLOBAL_BANNERS_HEIGHT} + ${HEIGHT_TOP_NAVIGATION})`,
+  large: GLOBAL_BANNERS_HEIGHT,
+};
+
 /* -------------------------------------------------------------------------------------------------
  * HistoryProvider
  * -----------------------------------------------------------------------------------------------*/
@@ -258,7 +270,7 @@ const ProtectedHistoryPageImpl = () => {
       <Box
         width="100dvw"
         position="fixed"
-        top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
+        top={HISTORY_TOP}
         bottom={0}
         left={0}
         zIndex={{ initial: 2, large: 4 }}
@@ -273,7 +285,7 @@ const ProtectedHistoryPageImpl = () => {
     <Box
       width="100dvw"
       position="fixed"
-      top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
+      top={HISTORY_TOP}
       bottom={0}
       left={0}
       zIndex={{ initial: 2, large: 4 }}

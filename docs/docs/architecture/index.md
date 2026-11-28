@@ -73,6 +73,10 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 | [Enterprise Edition](./09-enterprise-edition.md)             | How Enterprise features are gated.                               |
 | [Future flags](./10-future-flags.md)                         | Opt-in features.                                                 |
 | [Glossary](./11-glossary.md)                                 | Terms and naming traps.                                          |
+| [Admin two-factor authentication](./12-admin-two-factor.md)  | Enrolment, login, recovery codes and throttling.                 |
+| [Admin 2FA enforcement](./13-admin-mfa-enforcement.md)       | Enforcement modes, grace periods, locks and the settings API.    |
+| [Admin trusted devices](./14-admin-trusted-devices.md)       | Skipping the second factor on a known browser.                   |
+| [Admin passkeys](./15-admin-passkeys.md)                     | WebAuthn credentials as a second factor.                         |
 
 ## Reading tracks
 

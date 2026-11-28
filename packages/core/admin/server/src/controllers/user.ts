@@ -16,10 +16,51 @@ import {
   FindAll,
   FindOne,
   Update,
+  type AdminUserMfaState,
 } from '../../../shared/contracts/user';
 import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
+
+/**
+ * How much enforcement state the caller sees, and only while the feature is on. Those who can act
+ * on it (unlock, reset) get all of it. Everyone else who can read users gets the lock alone: it is
+ * a login state shown in the user status, so a read-only viewer should not see a locked account
+ * as active.
+ */
+type MfaStateScope = 'none' | 'lock' | 'full';
+
+const mfaStateScope = (ctx: Context): MfaStateScope => {
+  if (!getService('mfa').isEnabled()) {
+    return 'none';
+  }
+
+  return ctx.state.userAbility?.can('admin::users.update') ? 'full' : 'lock';
+};
+
+/** Appended after sanitising, like `registrationToken` in `create`; never the secrets. */
+const withMfaState = <T extends object>(
+  sanitized: T,
+  user: AdminUser,
+  scope: MfaStateScope,
+  required = false
+): T & AdminUserMfaState => {
+  if (scope === 'full') {
+    return {
+      ...sanitized,
+      mfaEnabledAt: user.mfaEnabledAt ?? null,
+      mfaGraceUntil: user.mfaGraceUntil ?? null,
+      mfaLockedAt: user.mfaLockedAt ?? null,
+      mfaRequired: required,
+    };
+  }
+
+  if (scope === 'lock') {
+    return { ...sanitized, mfaLockedAt: user.mfaLockedAt ?? null };
+  }
+
+  return sanitized;
+};
 
 export default {
   async create(ctx: Context) {
@@ -70,9 +111,15 @@ export default {
     // @ts-expect-error update the service type
     const { results, pagination } = await userService.findPage(sanitizedQuery);
 
+    const mfaScope = mfaStateScope(ctx);
+    const required: boolean[] =
+      mfaScope === 'full' ? await getService('mfa').requiredForUsers(results) : [];
+
     ctx.body = {
       data: {
-        results: results.map((user: AdminUser) => userService.sanitizeUser(user)),
+        results: results.map((user: AdminUser, index: number) =>
+          withMfaState(userService.sanitizeUser(user), user, mfaScope, required[index])
+        ),
         pagination,
       },
     } satisfies FindAll.Response;
@@ -87,9 +134,18 @@ export default {
       return ctx.notFound('User does not exist');
     }
 
-    ctx.body = {
-      data: getService('user').sanitizeUser(user as AdminUser),
-    } as FindOne.Response;
+    const sanitized = getService('user').sanitizeUser(user as AdminUser);
+    const mfaScope = mfaStateScope(ctx);
+    const [required] =
+      mfaScope === 'full' ? await getService('mfa').requiredForUsers([user]) : [false];
+    const data: FindOne.Response['data'] = withMfaState(
+      sanitized,
+      user as AdminUser,
+      mfaScope,
+      required
+    );
+
+    ctx.body = { data } satisfies FindOne.Response;
   },
 
   async update(ctx: Context) {

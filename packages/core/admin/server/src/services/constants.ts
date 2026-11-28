@@ -3,7 +3,20 @@ import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
+/** The private two-factor columns the CE and EE user sanitizers strip. */
+const PRIVATE_MFA_FIELDS = [
+  'mfaSecret',
+  'mfaEnabledAt',
+  'mfaLastUsedStep',
+  'mfaPendingSecret',
+  'mfaGraceUntil',
+  'mfaLockedAt',
+  'mfaPasskeyChallenge',
+  'mfaPasskeyChallengeExpiresAt',
+] as const;
+
 const constants = {
+  PRIVATE_MFA_FIELDS,
   CONTENT_TYPE_SECTION: 'contentTypes',
   SUPER_ADMIN_CODE,
   // Role `name`, `code` and `description` are `string` attributes, stored as varchar(255)
@@ -62,4 +75,5 @@ const constants = {
   },
 };
 
+export { PRIVATE_MFA_FIELDS };
 export default constants;

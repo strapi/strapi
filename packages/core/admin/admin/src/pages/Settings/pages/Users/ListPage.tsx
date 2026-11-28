@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Typography, Status, IconButton, Dialog } from '@strapi/design-system';
+import { Flex, Typography, IconButton, Dialog } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -25,6 +25,10 @@ import { getDisplayName } from '../../../../utils/users';
 
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
+import { TwoFactorStatus } from './components/TwoFactorStatus';
+import { UserStatus } from './components/UserStatus';
+
+import type { AdminUserMfaState } from '../../../../../../shared/contracts/user';
 
 /* -------------------------------------------------------------------------------------------------
  * ListPageCE
@@ -63,7 +67,16 @@ const ListPageCE = () => {
       ).LicenseLimitBanner
   );
 
-  const headers = TABLE_HEADERS.map((header) => ({
+  // Only when the rows carry two-factor state
+  const showTwoFactor = users.some((user) => 'mfaEnabledAt' in user);
+  // With the feature on, the status column is a plain "Status" next to the two-factor column; the
+  // list without it keeps its "User status" header.
+  const headers = [
+    ...TABLE_HEADERS.map((header) =>
+      header.name === 'isActive' && showTwoFactor ? { ...header, label: STATUS_LABEL } : header
+    ),
+    ...(showTwoFactor ? [TWO_FACTOR_HEADER] : []),
+  ].map((header) => ({
     ...header,
     label: formatMessage(header.label),
   }));
@@ -293,19 +306,31 @@ const TABLE_HEADERS: Array<
       defaultMessage: 'User status',
     },
     sortable: false,
-    cellFormatter({ isActive }) {
-      return (
-        <Flex>
-          <Status size="S" variant={isActive ? 'success' : 'danger'}>
-            <Typography tag="span" variant="omega" fontWeight="bold">
-              {isActive ? 'Active' : 'Inactive'}
-            </Typography>
-          </Status>
-        </Flex>
-      );
+    cellFormatter(user) {
+      return <UserStatus user={user as SanitizedAdminUser & AdminUserMfaState} />;
     },
   },
 ];
+
+/** The status column's header when the list also shows the two-factor column. */
+const STATUS_LABEL = {
+  id: 'Settings.permissions.users.status',
+  defaultMessage: 'Status',
+};
+
+/** Two-factor enforcement state per row. */
+const TWO_FACTOR_HEADER: (typeof TABLE_HEADERS)[number] = {
+  // Not a column on the row type; the cell reads the appended state directly.
+  name: 'mfaEnabledAt' as keyof SanitizedAdminUser,
+  label: {
+    id: 'Settings.permissions.users.mfa.column',
+    defaultMessage: 'Two-factor',
+  },
+  sortable: false,
+  cellFormatter(user) {
+    return <TwoFactorStatus user={user as AdminUserMfaState} />;
+  },
+};
 
 const FILTERS = [
   {

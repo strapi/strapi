@@ -27,8 +27,15 @@ const defaultAdminAuthSettings = {
   },
 };
 
+/** Registered only while the two-factor feature is on, as EE actions are gated on their licence. */
+const MFA_ACTION_UIDS = new Set(['security-settings.read', 'security-settings.update']);
+
 const registerPermissionActions = async () => {
-  await getService('permission').actionProvider.registerMany(adminActions.actions);
+  const mfaEnabled = getService('mfa').isEnabled();
+  const actions = adminActions.actions.filter(
+    (action) => mfaEnabled || !MFA_ACTION_UIDS.has(action.uid)
+  );
+  await getService('permission').actionProvider.registerMany(actions);
 };
 
 const registerAdminConditions = async () => {
@@ -54,6 +61,19 @@ export const registerModelHooks = () => {
       const user = await strapi.db.query('admin::user').findOne({ where, select: ['id'] });
       if (user !== null) {
         await getService('api-token-admin').deleteTokensForUser(user.id);
+        // The two-factor rows exist whether or not the feature is on
+        await getService('mfa').purgeUser(String(user.id));
+      }
+    },
+    async beforeUpdate(event) {
+      // A role change can take the account off the two-factor clock; the check needs the old roles
+      if (event.params.data?.roles !== undefined) {
+        const previous = await strapi.db
+          .query('admin::user')
+          .findOne({ where: event.params.where, populate: ['roles'] });
+        if (previous) {
+          await getService('mfa').clearGraceIfStale(previous);
+        }
       }
     },
     async afterUpdate(event) {
@@ -63,6 +83,14 @@ export const registerModelHooks = () => {
       if (event.params.data?.roles !== undefined) {
         // We re-sync token permissions for all owner users with their role when the user is updated
         await getService('api-token-admin').syncPermissionsForUser(event.result.id);
+      }
+      if (event.params.data?.password !== undefined && event.result) {
+        // A browser trusted under the old password must not skip the second factor under the new one
+        const mfa = getService('mfa');
+        const userId = String(event.result.id);
+        await (mfa.isEnabled()
+          ? mfa.revokeAllTrustedDevices(userId)
+          : mfa.clearTrustedDevices(userId));
       }
     },
   });
@@ -263,6 +291,8 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // The audit-log content type is registered in every edition: persist its table with it
   await persistTablesWithPrefix('strapi_audit_logs');
+  // Same for the two-factor tables, whatever the state of `unstableAdminMfa`
+  await persistTablesWithPrefix('strapi_admin_mfa');
 
   await registerAdminConditions();
   await registerPermissionActions();
@@ -301,4 +331,6 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   tokenService.checkSecretIsDefined();
 
   await createDefaultAPITokensIfNeeded();
+
+  await getService('mfa').bootstrap();
 };

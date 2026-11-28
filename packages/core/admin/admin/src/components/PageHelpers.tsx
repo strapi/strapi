@@ -13,6 +13,7 @@ import { WarningCircle } from '@strapi/icons';
 import { EmptyPermissions, EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
+import { GLOBAL_BANNERS_HEIGHT } from '../constants/theme';
 import { useAuth, Permission } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
@@ -48,7 +49,9 @@ interface LoadingProps {
  */
 const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
   return (
-    <PageMain height="100dvh" aria-busy={true}>
+    // Minus the global banner stack (0px when none shows), so a loading page inside the layout
+    // does not overflow its column by the banners' height.
+    <PageMain height={`calc(100dvh - ${GLOBAL_BANNERS_HEIGHT})`} aria-busy={true}>
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Loader>{children}</Loader>
       </Flex>

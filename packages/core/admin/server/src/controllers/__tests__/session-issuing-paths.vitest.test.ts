@@ -1,0 +1,564 @@
+import { describe, test, expect, afterEach, vi, type Mock } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// @ts-expect-error - types are not generated for this file
+// eslint-disable-next-line import/no-relative-packages
+import createContext from '../../../../../../../tests/helpers/create-context';
+import authenticationController from '../authentication';
+import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
+// The real implementation, for the reason `authentication.vitest.test.ts` gives: a canned mock would
+// make every "this field never leaks" assertion vacuous.
+import userService from '../../services/user';
+
+const { sanitizeUser: realSanitizeUser } = userService;
+
+const setStrapi = (value: object) => {
+  (globalThis as any).strapi = value;
+};
+
+/** If this fails because a new call site appeared, decide what that path does for an enrolled
+ * user before updating the list. */
+const DECIDED_CALL_SITES = [
+  'login', // gated: issues a challenge instead
+  'loginMfa', // the gate itself
+  'loginMfaWebauthn', // the same gate, satisfied by a passkey instead of a code
+  'register', // no gate: invite acceptance, the user cannot be enrolled yet
+  'registerAdmin', // no gate: first admin bootstrap, no mfa can exist
+  'resetPassword', // gated: issues a challenge instead
+];
+
+const walk = (dir: string): string[] =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      return walk(entryPath);
+    }
+    return entryPath.endsWith('.ts') ? [entryPath] : [];
+  });
+
+/** The three roots a session can be minted from. `admin/src` is out of scope: nothing in the React
+ * app can mint a server-side session. */
+const ADMIN_ROOT = path.join(__dirname, '..', '..', '..', '..');
+const SERVER_SRC = path.join(ADMIN_ROOT, 'server', 'src');
+const EE_SERVER_SRC = path.join(ADMIN_ROOT, 'ee', 'server', 'src');
+const SHARED_DIR = path.join(ADMIN_ROOT, 'shared');
+
+const defaultResetBody = { resetPasswordToken: 'reset-token', password: 'NewPassword123' };
+
+/** `resetPassword` reads `request.body` twice: once as the validated input, and again through
+ * `extractDeviceParams`. */
+const buildResetCtx = (cookiesSet: Mock, body: Record<string, unknown> = defaultResetBody) => {
+  const ctx = createContext(
+    { body },
+    {
+      state: {},
+      cookies: { set: cookiesSet },
+      internalServerError: vi.fn(),
+      request: { query: {}, body, headers: {}, secure: false },
+    }
+  ) as any;
+
+  return ctx;
+};
+
+/** `buildIssuingStrapi` from `authentication.vitest.test.ts`, scoped to what `resetPassword` reads, with
+ * the real `sanitizeUser`. */
+const buildResetStrapi = ({
+  enrolled,
+  resetPassword,
+}: {
+  enrolled: boolean;
+  resetPassword: Mock;
+}) => {
+  const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+  const isEnrolled = vi.fn(() => Promise.resolve(enrolled));
+  const createChallenge = vi.fn(() =>
+    Promise.resolve({ token: 'reset-challenge-token', expiresIn: 300 })
+  );
+  const generateRefreshToken = vi.fn(() =>
+    Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
+  );
+  const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'access-token' }));
+  const sanitizeUser = vi.fn(realSanitizeUser);
+  const emit = vi.fn();
+
+  setStrapi({
+    eventHub: { emit },
+    log: { error: vi.fn(), warn: vi.fn() },
+    config: { get: vi.fn(() => undefined) },
+    sessionManager: vi.fn(() => ({
+      invalidateRefreshToken,
+      generateRefreshToken,
+      generateAccessToken,
+    })),
+    admin: {
+      services: {
+        auth: { resetPassword },
+        mfa: {
+          claimRequestEvents: vi.fn(() => Promise.resolve()),
+          isEnabled: vi.fn(() => true),
+          isEnrolled,
+          createChallenge,
+          enforce: vi.fn(() => Promise.resolve({ outcome: 'none' })),
+          trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+          countPasskeys: vi.fn(() => Promise.resolve(1)),
+          passkeysConfigured: vi.fn(() => true),
+          // A reset revokes every trusted browser alongside the sessions.
+          revokeAllTrustedDevices: vi.fn(() => Promise.resolve(0)),
+        },
+        user: { sanitizeUser },
+      },
+    },
+  });
+
+  return {
+    invalidateRefreshToken,
+    isEnrolled,
+    createChallenge,
+    generateRefreshToken,
+    generateAccessToken,
+    sanitizeUser,
+    emit,
+  };
+};
+
+type SessionPath = 'register' | 'registerAdmin' | 'resetPassword';
+
+/** Real, valid bodies: the validators actually run. */
+const validRegisterBody = {
+  registrationToken: 'a-real-token',
+  userInfo: { firstname: 'Kai', lastname: 'Doe', password: 'NewPassword123' },
+};
+const validRegisterAdminBody = {
+  email: 'first-admin@example.com',
+  firstname: 'Kai',
+  lastname: 'Doe',
+  password: 'NewPassword123',
+};
+
+/**
+ * A working double for whichever of `register` / `registerAdmin` / `resetPassword` the caller
+ * names, scoped to what each reads: `user.register` / `user.createFirstAdmin` /
+ * `auth.resetPassword` all resolve the same fixture user, `telemetry.send` covers
+ * `registerAdmin`'s bootstrap event, and `invalidateRefreshToken` covers `resetPassword`'s
+ * pre-existing invalidate-all-sessions step. `mfa.isEnabled`/`isEnrolled` default to a state that
+ * never reaches the (unrelated) challenge branch on `resetPassword` -- consistent with a graced
+ * or refused user necessarily being unenrolled -- so every test using this builder is free to
+ * focus purely on `enforce`.
+ */
+const buildPath = (
+  path: SessionPath,
+  mfaOverrides: Record<string, unknown> = {}
+): { ctx: any; generateRefreshToken: Mock } => {
+  const user = { id: 31, email: 'session-path-user@example.com', isActive: true };
+
+  const generateRefreshToken = vi.fn(() =>
+    Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
+  );
+  const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'access-token' }));
+  const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+  const sanitizeUser = vi.fn(realSanitizeUser);
+
+  setStrapi({
+    eventHub: { emit: vi.fn() },
+    log: { error: vi.fn(), warn: vi.fn() },
+    config: { get: vi.fn(() => undefined) },
+    telemetry: { send: vi.fn() },
+    sessionManager: vi.fn(() => ({
+      generateRefreshToken,
+      generateAccessToken,
+      invalidateRefreshToken,
+    })),
+    admin: {
+      services: {
+        user: {
+          sanitizeUser,
+          register: vi.fn(() => Promise.resolve(user)),
+          createFirstAdmin: vi.fn(() => Promise.resolve(user)),
+        },
+        auth: {
+          resetPassword: vi.fn(() => Promise.resolve({ user, pendingPasswordHash: null })),
+        },
+        mfa: {
+          claimRequestEvents: vi.fn(() => Promise.resolve()),
+          isEnabled: vi.fn(() => true),
+          isEnrolled: vi.fn(() => Promise.resolve(false)),
+          createChallenge: vi.fn(() =>
+            Promise.resolve({ token: 'path-challenge-token', expiresIn: 300 })
+          ),
+          enforce: vi.fn(() => Promise.resolve({ outcome: 'none' })),
+          countPasskeys: vi.fn(() => Promise.resolve(0)),
+          revokeAllTrustedDevices: vi.fn(() => Promise.resolve(0)),
+          ...mfaOverrides,
+        },
+      },
+    },
+  });
+
+  const bodyByPath: Record<SessionPath, Record<string, unknown>> = {
+    register: validRegisterBody,
+    registerAdmin: validRegisterAdminBody,
+    resetPassword: defaultResetBody,
+  };
+  const body = bodyByPath[path];
+
+  const ctx = createContext(
+    { body },
+    {
+      state: {},
+      cookies: { set: vi.fn() },
+      internalServerError: vi.fn(),
+      request: { query: {}, body, headers: {}, secure: false },
+    }
+  ) as any;
+
+  return { ctx, generateRefreshToken };
+};
+
+const invokePath = (path: SessionPath, ctx: any) => authenticationController[path](ctx);
+
+describe('session issuing paths', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('no undecided call site mints an admin session', () => {
+    const controller = fs.readFileSync(path.join(__dirname, '..', 'authentication.ts'), 'utf8');
+
+    // `issueSession` is called once, by the local `issueAdminSession` wrapper that claims the
+    // login's events; every call of the wrapper is a call site.
+    expect([...controller.matchAll(/issueSession\(/g)]).toHaveLength(1);
+    const callSites = [...controller.matchAll(/issueAdminSession\(/g)];
+
+    expect(callSites.length).toBe(DECIDED_CALL_SITES.length);
+
+    // `login` still funnels both its branches (challenge, session) through one call site: the
+    // trusted-device and passkey paths fall through to it rather than adding a second.
+    const loginBlock = controller.slice(
+      controller.indexOf('login: compose('),
+      controller.indexOf('loginMfa: compose(')
+    );
+    expect([...loginBlock.matchAll(/issueAdminSession\(/g)]).toHaveLength(1);
+
+    expect(controller).not.toMatch(/generateRefreshToken\(/);
+
+    // `accessToken` bypasses `issueSession` because it renews rather than authenticates. A second
+    // call site would be a new way to mint a token outside both it and this decision.
+    const rotateSites = [...controller.matchAll(/rotateRefreshToken\(/g)];
+    const generateAccessTokenSites = [...controller.matchAll(/generateAccessToken\(/g)];
+
+    expect(rotateSites.length).toBe(1);
+    expect(generateAccessTokenSites.length).toBe(1);
+  });
+
+  test.each(['register', 'registerAdmin'] as const)(
+    '%s hands the new login family to the mfa service to claim its events',
+    async (sessionPath) => {
+      const { ctx, generateRefreshToken } = buildPath(sessionPath);
+
+      await invokePath(sessionPath, ctx);
+
+      const { metadata } = (generateRefreshToken.mock.calls[0] as unknown[])[2] as {
+        metadata: { familyId: string };
+      };
+      const { claimRequestEvents } = (global.strapi as any).admin.services.mfa;
+      expect(claimRequestEvents).toHaveBeenCalledWith(metadata.familyId);
+    }
+  );
+
+  test('an enrolled user resetting their password gets a challenge, not a session', async () => {
+    const user = {
+      id: 9,
+      email: 'reset-mfa@example.com',
+      isActive: true,
+      // Carried on the fixture so `sanitizeUser` has something to strip: this test asserts on
+      // the exact emitted payload.
+      mfaSecret: 'encrypted-secret-ciphertext',
+      mfaEnabledAt: '2026-01-01T00:00:00.000Z',
+      mfaLastUsedStep: 3,
+    };
+
+    // The auth service staged the password: an enrolled account's reset commits only at
+    // /login/mfa, so this answer must change nothing about the account.
+    const resetPassword = vi.fn(() => Promise.resolve({ user, pendingPasswordHash: '$2a$staged' }));
+    const {
+      invalidateRefreshToken,
+      createChallenge,
+      generateRefreshToken,
+      generateAccessToken,
+      emit,
+    } = buildResetStrapi({ enrolled: true, resetPassword });
+
+    const cookiesSet = vi.fn();
+    const ctx = buildResetCtx(cookiesSet);
+
+    await authenticationController.resetPassword(ctx);
+
+    // Someone holding only the mailbox cannot sign the holder out either.
+    expect(invalidateRefreshToken).not.toHaveBeenCalled();
+    expect(createChallenge).toHaveBeenCalledWith(String(user.id), {
+      pendingPasswordHash: '$2a$staged',
+    });
+
+    // The property the challenge step rests on: no cookie, no token, alongside mfaRequired.
+    expect(cookiesSet).not.toHaveBeenCalled();
+    expect(generateRefreshToken).not.toHaveBeenCalled();
+    expect(generateAccessToken).not.toHaveBeenCalled();
+    expect(ctx.body).toEqual({
+      data: {
+        mfaRequired: true,
+        challengeToken: 'reset-challenge-token',
+        expiresIn: 300,
+        trustedDeviceDays: 30,
+        passkeyAvailable: true,
+      },
+    });
+
+    // A gated reset must not look like a completed one. The exact-shape match means something only
+    // because `sanitizeUser` is the real implementation.
+    expect(emit).toHaveBeenCalledWith('admin.auth.mfa_required', {
+      user: { id: user.id, email: user.email, isActive: user.isActive },
+      provider: 'local',
+    });
+
+    const [, mfaRequiredPayload] = emit.mock.calls.find(
+      ([eventName]) => eventName === 'admin.auth.mfa_required'
+    )!;
+    expect(mfaRequiredPayload.user).not.toHaveProperty('mfaSecret');
+    expect(mfaRequiredPayload.user).not.toHaveProperty('mfaEnabledAt');
+    expect(mfaRequiredPayload.user).not.toHaveProperty('mfaLastUsedStep');
+
+    expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
+  });
+
+  test('a user with no mfa resetting their password still gets a session', async () => {
+    const user = { id: 11, email: 'reset-no-mfa@example.com', isActive: true };
+
+    const resetPassword = vi.fn(() => Promise.resolve({ user, pendingPasswordHash: null }));
+    const {
+      invalidateRefreshToken,
+      createChallenge,
+      generateRefreshToken,
+      generateAccessToken,
+      emit,
+    } = buildResetStrapi({ enrolled: false, resetPassword });
+
+    const cookiesSet = vi.fn();
+    const ctx = buildResetCtx(cookiesSet);
+
+    await authenticationController.resetPassword(ctx);
+
+    expect(invalidateRefreshToken).toHaveBeenCalledWith(String(user.id));
+    expect(createChallenge).not.toHaveBeenCalled();
+    expect(generateRefreshToken).toHaveBeenCalled();
+    expect(generateAccessToken).toHaveBeenCalled();
+    expect(cookiesSet).toHaveBeenCalledWith(
+      REFRESH_COOKIE_NAME,
+      'refresh-token',
+      expect.any(Object)
+    );
+    expect(ctx.body).toEqual({
+      data: {
+        token: 'access-token',
+        accessToken: 'access-token',
+        user: { id: user.id, email: user.email, isActive: user.isActive },
+      },
+    });
+
+    expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
+    // Pins today's behaviour, so a change to it is a deliberate one.
+    expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
+  });
+
+  test('existing sessions are invalidated before the new one, and not at all until a staged reset commits', async () => {
+    const runReset = async (enrolled: boolean) => {
+      const user = { id: enrolled ? 21 : 22, email: 'x@example.com', isActive: true };
+      const resetPassword = vi.fn(() =>
+        Promise.resolve({ user, pendingPasswordHash: enrolled ? '$2a$staged' : null })
+      );
+      const { invalidateRefreshToken, createChallenge, generateRefreshToken } = buildResetStrapi({
+        enrolled,
+        resetPassword,
+      });
+
+      const ctx = buildResetCtx(vi.fn());
+      await authenticationController.resetPassword(ctx);
+
+      return { invalidateRefreshToken, createChallenge, generateRefreshToken };
+    };
+
+    // Staged: the sessions end when `commitStagedPasswordReset` runs at /login/mfa.
+    const enrolledResult = await runReset(true);
+    expect(enrolledResult.invalidateRefreshToken).not.toHaveBeenCalled();
+    expect(enrolledResult.createChallenge).toHaveBeenCalled();
+
+    const unenrolledResult = await runReset(false);
+    expect(unenrolledResult.invalidateRefreshToken).toHaveBeenCalled();
+    expect(unenrolledResult.generateRefreshToken).toHaveBeenCalled();
+    expect(unenrolledResult.invalidateRefreshToken.mock.invocationCallOrder[0]).toBeLessThan(
+      unenrolledResult.generateRefreshToken.mock.invocationCallOrder[0]
+    );
+  });
+
+  test('a user may never hold both a registration token and an active enrolment', async () => {
+    // `registrationToken` can only be non-null on a user who has never logged in, and so cannot be
+    // enrolled, because one place mints it and one clears it. If a future change lets an admin
+    // re-issue one to an active user, `/admin/register` becomes an MFA-skipping account takeover.
+
+    // Content-type and validation files declare shape rather than write, so they are excluded.
+    const files = walk(SERVER_SRC).filter(
+      (file) =>
+        !file.includes(`${path.sep}__tests__${path.sep}`) &&
+        !file.includes(`${path.sep}content-types${path.sep}`) &&
+        !file.includes(`${path.sep}validation${path.sep}`)
+    );
+
+    const writeSites = files.flatMap((file) => {
+      const contents = fs.readFileSync(file, 'utf8');
+      // Excludes `registrationToken: string` type annotations, which describe a parameter's
+      // shape rather than an assignment.
+      const count = [...contents.matchAll(/registrationToken:(?!\s*string)/g)].length;
+      return Array(count).fill(path.relative(SERVER_SRC, file));
+    });
+
+    // `services/user.ts` is the only place that assigns it: mint, null it for the bootstrap admin,
+    // and null it on registration acceptance -- the write this test exists to protect.
+    expect(writeSites.sort()).toEqual(
+      ['controllers/user.ts', 'services/user.ts', 'services/user.ts', 'services/user.ts'].sort()
+    );
+
+    // The behavioural half: the real `register` must be the site that nulls the token.
+    const updateById = vi.fn(() => Promise.resolve({}));
+    const findOne = vi.fn(() => Promise.resolve({ id: 42, registrationToken: 'a-real-token' }));
+
+    setStrapi({
+      db: { query: vi.fn(() => ({ findOne })) },
+      admin: { services: { user: { updateById } } },
+      // `register` records an audit event, which goes through the event hub and logs a failure.
+      eventHub: { emit: vi.fn() },
+      log: { error: vi.fn(), warn: vi.fn() },
+    });
+
+    await userService.register({
+      registrationToken: 'a-real-token',
+      userInfo: { password: 'NewPassword123', firstname: 'A', lastname: 'B' },
+    });
+
+    expect(updateById).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({ registrationToken: null, isActive: true })
+    );
+  });
+
+  describe('enforcement runs before every session is minted', () => {
+    const graceUntil = new Date('2026-09-11T10:00:00.000Z');
+
+    test.each(['register', 'registerAdmin', 'resetPassword'] as const)(
+      '%s: a refused user gets no session and a graced user gets the deadline',
+      async (path) => {
+        // Refused
+        {
+          const enforce = vi.fn(() => Promise.resolve({ outcome: 'refused' }));
+          const { ctx, generateRefreshToken } = buildPath(path, { enforce });
+          await expect(invokePath(path, ctx)).rejects.toMatchObject({
+            details: { code: 'MFA_LOCKED' },
+          });
+          expect(generateRefreshToken).not.toHaveBeenCalled();
+        }
+        // Graced
+        {
+          const enforce = vi.fn(() => Promise.resolve({ outcome: 'grace', graceUntil }));
+          const { ctx, generateRefreshToken } = buildPath(path, { enforce });
+          await invokePath(path, ctx);
+          expect(enforce.mock.invocationCallOrder[0]).toBeLessThan(
+            generateRefreshToken.mock.invocationCallOrder[0]
+          );
+          expect(ctx.body.data).toEqual(
+            expect.objectContaining({
+              mfaEnrolmentRequired: true,
+              mfaGraceUntil: graceUntil.toISOString(),
+            })
+          );
+        }
+      }
+    );
+  });
+});
+
+/**
+ * The enumeration above reads `controllers/authentication.ts` only, so it cannot see a mint site
+ * elsewhere -- including the EE SSO callback, which calls `generateRefreshToken` directly because
+ * passport has already authenticated and there is no body for `extractDeviceParams` to read.
+ * This scans the whole surface for both ways a session is minted and pins the decided set. A new
+ * call site must fail here until it is added with its own decision.
+ */
+describe('generateRefreshToken / issueSession call-site inventory', () => {
+  const PATTERNS = ['issueSession(', 'issueAdminSession(', 'generateRefreshToken('] as const;
+
+  test('generateRefreshToken( and issueSession( occur only at the exact, decided sites', () => {
+    const roots = [SERVER_SRC, EE_SERVER_SRC, SHARED_DIR];
+
+    const found: Record<string, number> = {};
+
+    for (const root of roots) {
+      const files = walk(root).filter((file) => !file.includes(`${path.sep}__tests__${path.sep}`));
+
+      for (const file of files) {
+        const contents = fs.readFileSync(file, 'utf8');
+        const relative = path.relative(ADMIN_ROOT, file);
+
+        for (const pattern of PATTERNS) {
+          const count = [...contents.matchAll(new RegExp(pattern.replace('(', '\\('), 'g'))].length;
+          if (count > 0) {
+            found[`${relative} :: ${pattern}`] = count;
+          }
+        }
+      }
+    }
+
+    expect(found).toEqual({
+      // The six decided CE call sites (`login`, `loginMfa`, `loginMfaWebauthn`, `register`,
+      // `registerAdmin`, `resetPassword`) -- already enumerated and reasoned about individually
+      // above.
+      [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueAdminSession(`]:
+        DECIDED_CALL_SITES.length,
+      // `issueAdminSession` itself: `issueSession`, then the claim of the login's events.
+      [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueSession(`]: 1,
+      // `issueSession`'s own implementation: every CE flow above funnels through this one call.
+      [`${path.join('shared', 'utils', 'session-auth.ts')} :: generateRefreshToken(`]: 1,
+      // The SSO callback: deliberately exempt from `issueSession` (see the block comment above).
+      [`${path.join('ee', 'server', 'src', 'controllers', 'authentication-utils', 'middlewares.ts')} :: generateRefreshToken(`]: 1,
+    });
+  });
+});
+
+/**
+ * API token and transfer token requests must succeed for an mfa-enrolled user presenting no
+ * code at all -- those strategies authenticate a *token*, not an interactive admin session, and
+ * there is nothing resembling a second factor to check. That is exactly the kind of property a
+ * later refactor breaks silently: someone "helpfully" adding an mfa check to a shared auth
+ * strategy file would lock out every API/transfer-token integration for any org whose
+ * service-account owner happens to be mfa-enrolled, and nothing in an interactive/browser-driven
+ * test suite would ever exercise a token-authenticated request from an enrolled account to catch
+ * it. Asserted structurally rather than behaviourally: no strategy file may mention `mfa` in any
+ * form at all.
+ */
+describe('programmatic-auth strategies stay mfa-free', () => {
+  test('no file under server/src/strategies references mfa in any form', () => {
+    const STRATEGIES_DIR = path.join(SERVER_SRC, 'strategies');
+    const files = walk(STRATEGIES_DIR).filter(
+      (file) => !file.includes(`${path.sep}__tests__${path.sep}`)
+    );
+
+    // Sanity check on the scan itself: an empty file list would make the assertion below
+    // vacuously pass.
+    expect(files.length).toBeGreaterThan(0);
+
+    const offenders = files
+      .filter((file) => /mfa/i.test(fs.readFileSync(file, 'utf8')))
+      .map((file) => path.relative(SERVER_SRC, file));
+
+    expect(offenders).toEqual([]);
+  });
+});

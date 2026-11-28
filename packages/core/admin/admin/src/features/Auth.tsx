@@ -4,7 +4,8 @@ import { Dialog } from '@strapi/design-system';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Login } from '../../../shared/contracts/authentication';
+import { Login, type LoginMfa } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin } from '../../../shared/contracts/mfa';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector, useTypedStore } from '../core/store/hooks';
@@ -18,6 +19,8 @@ import {
   useGetMeQuery,
   useGetMyPermissionsQuery,
   useLazyCheckPermissionsQuery,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnMutation,
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
@@ -63,9 +66,26 @@ type AdminUserId = string | number | undefined;
 const getAdminUserId = (user?: AdminUserRef): AdminUserId => user?.id ?? user?.email;
 
 interface AuthContextValue {
+  /**
+   * With the `unstableAdminMfa` future flag on, `data` can be an `MfaChallengeResponse` instead of
+   * a session (narrow on `'mfaRequired' in data`); that shape is experimental.
+   */
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
+  /** Persists the session token exactly as `login` does. The trust `trustDevice` asks for arrives
+   * as an httpOnly cookie the panel never sees. */
+  loginMfa: (
+    body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
+  /** Satisfies the same challenge with a passkey assertion instead of a code. */
+  loginMfaWebauthn: (
+    body: Pick<MfaWebauthnLogin.Request['body'], 'challengeToken' | 'assertion' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaWebauthnMutation>[0]>>>;
   logout: () => Promise<void>;
   /**
    * @alpha
@@ -164,7 +184,7 @@ const LOGOUT_PROMPTS = {
 const REPLACED_SESSION_UNSAVED = {
   id: 'app.session.replaced.unsaved',
   defaultMessage:
-    'You were signed in as another admin in a different tab. Unsaved changes were discarded.',
+    'You logged in as another admin in a different tab. Unsaved changes were discarded.',
 } satisfies MessageDescriptor;
 
 const AuthProvider = ({
@@ -213,6 +233,8 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
+  const [loginMfaMutation] = useLoginMfaMutation();
+  const [loginMfaWebauthnMutation] = useLoginMfaWebauthnMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const pendingLogoutRef = React.useRef<(() => void) | null>(null);
@@ -526,8 +548,10 @@ const AuthProvider = ({
       /**
        * There will always be a `data` key in the response
        * because if something fails, it will throw an error.
+       *
+       * An enrolled account gets the challenge shape instead: nothing to persist until `/login/mfa`.
        */
-      if ('data' in res) {
+      if ('data' in res && !('mfaRequired' in res.data)) {
         const { token } = res.data;
 
         resetSessionExpiredNotification();
@@ -540,6 +564,41 @@ const AuthProvider = ({
       return res;
     },
     [dispatch, loginMutation]
+  );
+
+  const loginMfa = React.useCallback<AuthContextValue['loginMfa']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
+
+      if ('data' in res) {
+        // As in `login`: this is where an enrolled account's session actually starts, so the
+        // `sessionExpired` latch has to be re-armed here or the next expiry passes in silence.
+        resetSessionExpiredNotification();
+        establishAdminSession(dispatch, { token: res.data.token, persist: rememberMe });
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaMutation]
+  );
+
+  const loginMfaWebauthn = React.useCallback<AuthContextValue['loginMfaWebauthn']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaWebauthnMutation({
+        ...body,
+        deviceId: getOrCreateDeviceId(),
+        rememberMe,
+      });
+
+      if ('data' in res) {
+        // See `loginMfa`.
+        resetSessionExpiredNotification();
+        establishAdminSession(dispatch, { token: res.data.token, persist: rememberMe });
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaWebauthnMutation]
   );
 
   /**
@@ -665,6 +724,8 @@ const AuthProvider = ({
         token={token}
         user={user}
         login={login}
+        loginMfa={loginMfa}
+        loginMfaWebauthn={loginMfaWebauthn}
         logout={logout}
         permissions={userPermissions}
         checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}

@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl';
 import { useLocation, Link } from 'react-router-dom';
 
 import {
+  GLOBAL_BANNERS_HEIGHT,
   HEIGHT_TOP_NAVIGATION,
   HEIGHT_TOP_NAVIGATION_MEDIUM,
   RESPONSIVE_DEFAULT_SPACING,
@@ -84,7 +85,8 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           paddingTop={2}
           paddingBottom={2}
           position="fixed"
-          top={0}
+          // Below the global banners, which a header pinned to the viewport top would cover.
+          top={GLOBAL_BANNERS_HEIGHT}
           background="neutral0"
           shadow="tableShadow"
           width={`${width}px`}

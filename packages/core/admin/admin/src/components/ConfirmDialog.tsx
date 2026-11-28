@@ -5,16 +5,30 @@ import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-const StyledWarning = styled(WarningCircle)`
+const StyledWarning = styled(WarningCircle)<{ $neutral?: boolean; $primary?: boolean }>`
   width: 24px;
   height: 24px;
 
   path {
-    fill: ${({ theme }) => theme.colors.danger600};
+    fill: ${({ theme, $neutral, $primary }) => {
+      if ($neutral) {
+        return theme.colors.neutral500;
+      }
+      return $primary ? theme.colors.primary600 : theme.colors.danger600;
+    }};
   }
 `;
 
 const DEFAULT_ICON: NonNullable<ConfirmDialogProps['icon']> = <StyledWarning />;
+
+/**
+ * The red warning icon `ConfirmDialog` shows by default, for dialogs composed to look like it.
+ * `neutral` greys it, for a dialog whose action is not available yet; `primary` swaps the red for
+ * the primary colour, for a dialog whose action is not negative.
+ */
+const ConfirmDialogIcon = ({ neutral, primary }: { neutral?: boolean; primary?: boolean }) => (
+  <StyledWarning $neutral={neutral} $primary={primary} />
+);
 
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialog
@@ -138,5 +152,5 @@ const ConfirmDialog = ({
   );
 };
 
-export { ConfirmDialog };
+export { ConfirmDialog, ConfirmDialogIcon };
 export type { ConfirmDialogProps };

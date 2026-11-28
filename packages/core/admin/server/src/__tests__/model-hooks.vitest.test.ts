@@ -25,6 +25,7 @@ const setup = ({
 }) => {
   const subscribers: Subscriber[] = [];
   const deleteTokensForUser = vi.fn(() => Promise.resolve());
+  const purgeUser = vi.fn(() => Promise.resolve());
   const findOneUser = vi.fn(({ where }: { where: Record<string, unknown> }) =>
     Promise.resolve(
       users.find((row) =>
@@ -46,6 +47,7 @@ const setup = ({
       services: {
         metrics: { sendDidChangeInterfaceLanguage: vi.fn() },
         'api-token-admin': { deleteTokensForUser },
+        mfa: { purgeUser },
       },
     },
     db: {
@@ -76,6 +78,7 @@ const setup = ({
     userBeforeDelete: subscriberFor('admin::user').beforeDelete,
     roleBeforeDelete: subscriberFor('admin::role').beforeDelete,
     deleteTokensForUser,
+    purgeUser,
     findManyUsers,
   };
 };
@@ -93,12 +96,14 @@ const fixtures = {
 
 describe('admin::user beforeDelete', () => {
   test('deletes the tokens of the user matched by id', async () => {
-    const { userBeforeDelete, deleteTokensForUser } = setup(fixtures);
+    const { userBeforeDelete, deleteTokensForUser, purgeUser } = setup(fixtures);
 
     await userBeforeDelete({ params: { where: { id: 2 } }, state: {} });
 
     expect(deleteTokensForUser).toHaveBeenCalledTimes(1);
     expect(deleteTokensForUser).toHaveBeenCalledWith(2);
+    // The two-factor rows of the same user go with it
+    expect(purgeUser).toHaveBeenCalledWith('2');
   });
 
   test('deletes the tokens of the user matched by a where without id', async () => {

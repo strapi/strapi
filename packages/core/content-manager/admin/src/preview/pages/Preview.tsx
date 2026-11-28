@@ -42,6 +42,12 @@ import { getSendMessage } from '../utils/getSendMessage';
 
 import type { Schema, UID } from '@strapi/types';
 
+/**
+ * The admin's global banner stack (two-factor notices) publishes its height on the root element.
+ * Unset when no banner shows, so the preview keeps covering the whole viewport as before.
+ */
+const GLOBAL_BANNERS_HEIGHT = 'var(--strapi-global-banners-height, 0px)';
+
 /* -------------------------------------------------------------------------------------------------
  * Constants
  * -----------------------------------------------------------------------------------------------*/
@@ -496,10 +502,10 @@ const ProtectedPreviewPageImpl = () => {
   if (error || !model) {
     return (
       <Box
-        height="100dvh"
+        height={`calc(100dvh - ${GLOBAL_BANNERS_HEIGHT})`}
         width="100dvw"
         position="fixed"
-        top={0}
+        top={GLOBAL_BANNERS_HEIGHT}
         left={0}
         zIndex={5}
         background="neutral0"
@@ -511,10 +517,10 @@ const ProtectedPreviewPageImpl = () => {
 
   return (
     <Box
-      height="100dvh"
+      height={`calc(100dvh - ${GLOBAL_BANNERS_HEIGHT})`}
       width="100dvw"
       position="fixed"
-      top={0}
+      top={GLOBAL_BANNERS_HEIGHT}
       left={0}
       zIndex={5}
       background="neutral0"

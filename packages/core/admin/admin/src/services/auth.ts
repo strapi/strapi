@@ -2,12 +2,17 @@ import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
   type AccessTokenExchange,
   type Login,
+  type LoginMfa,
+  type LoginOrMfaChallenge,
+  type MfaChallengeResponse,
   type ResetPassword,
+  type ResetPasswordOrMfaChallenge,
   type RegisterAdmin,
   type Register,
   type RegistrationInfo,
   ForgotPassword,
 } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin, type MfaWebauthnOptions } from '../../../shared/contracts/mfa';
 import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
 import {
@@ -104,13 +109,58 @@ const authService = adminApi
       /**
        * Auth methods
        */
-      login: builder.mutation<Login.Response['data'], Login.Request['body']>({
+      login: builder.mutation<LoginOrMfaChallenge, Login.Request['body']>({
         query: (body) => ({
           method: 'POST',
           url: '/admin/login',
           data: body,
         }),
-        transformResponse(res: Login.Response) {
+        transformResponse(res: Login.Response | MfaChallengeResponse) {
+          // Both shapes pass through untouched: the MFA challenge carries no token or user to
+          // transform, and the caller narrows on `mfaRequired` before treating it as a session.
+          return res.data;
+        },
+        invalidatesTags: ['Me'],
+      }),
+      /** Completes a login that `/login` answered with `MfaChallengeResponse`. */
+      loginMfa: builder.mutation<LoginMfa.Response['data'], LoginMfa.Request['body']>({
+        query: (body) => ({
+          method: 'POST',
+          url: '/admin/login/mfa',
+          data: body,
+        }),
+        transformResponse(res: LoginMfa.Response) {
+          return res.data;
+        },
+        invalidatesTags: ['Me'],
+      }),
+      /**
+       * Step one of the passkey login, beside `loginMfa` as an unauthenticated login endpoint. A
+       * mutation because it writes the ceremony challenge server-side.
+       */
+      loginMfaWebauthnOptions: builder.mutation<
+        MfaWebauthnOptions.Response['data'],
+        MfaWebauthnOptions.Request['body']
+      >({
+        query: (body) => ({
+          method: 'POST',
+          url: '/admin/login/mfa/webauthn/options',
+          data: body,
+        }),
+        transformResponse(res: MfaWebauthnOptions.Response) {
+          return res.data;
+        },
+      }),
+      /**
+       * Step two: the assertion in exchange for a session. Same response shape as `loginMfa`, so
+       * `features/Auth.tsx` persists its token through the identical code path.
+       */
+      loginMfaWebauthn: builder.mutation<
+        MfaWebauthnLogin.Response['data'],
+        MfaWebauthnLogin.Request['body']
+      >({
+        query: (body) => ({ method: 'POST', url: '/admin/login/mfa/webauthn', data: body }),
+        transformResponse(res: MfaWebauthnLogin.Response) {
           return res.data;
         },
       }),
@@ -121,16 +171,15 @@ const authService = adminApi
           data: body,
         }),
       }),
-      resetPassword: builder.mutation<
-        ResetPassword.Response['data'],
-        ResetPassword.Request['body']
-      >({
+      resetPassword: builder.mutation<ResetPasswordOrMfaChallenge, ResetPassword.Request['body']>({
         query: (body) => ({
           method: 'POST',
           url: '/admin/reset-password',
           data: body,
         }),
-        transformResponse(res: ResetPassword.Response) {
+        transformResponse(res: ResetPassword.Response | MfaChallengeResponse) {
+          // Both shapes pass through untouched: the MFA challenge carries no token or user to
+          // transform, and the caller narrows on `mfaRequired` before treating it as a session.
           return res.data;
         },
       }),
@@ -245,6 +294,9 @@ const {
   useRevokeSessionMutation,
   useRevokeAllSessionsMutation,
   useLoginMutation,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnOptionsMutation,
+  useLoginMfaWebauthnMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
@@ -268,6 +320,9 @@ export {
   useRevokeSessionMutation,
   useRevokeAllSessionsMutation,
   useLoginMutation,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnOptionsMutation,
+  useLoginMfaWebauthnMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,

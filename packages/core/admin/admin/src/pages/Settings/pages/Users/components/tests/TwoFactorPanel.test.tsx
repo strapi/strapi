@@ -1,0 +1,454 @@
+import { within } from '@testing-library/react';
+import { initialState } from '@tests/store';
+import { render, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
+
+import { TwoFactorPanel } from '../TwoFactorPanel';
+
+const ENROLLED = {
+  id: 3,
+  mfaEnabledAt: '2026-01-01T00:00:00.000Z',
+  mfaGraceUntil: null,
+  mfaLockedAt: null,
+} as const;
+
+const renderPanel = (
+  user: Partial<React.ComponentProps<typeof TwoFactorPanel>['user']> = {},
+  canUpdate = true
+) =>
+  render(
+    <TwoFactorPanel
+      user={{ ...ENROLLED, ...user } as React.ComponentProps<typeof TwoFactorPanel>['user']}
+      canUpdate={canUpdate}
+    />
+  );
+
+/** The shared fixtures grant `admin::security-settings.read`, but their redux permission map has no
+ * `settings.security` entry; this wires it in so the panel may read the enforcement settings. */
+const withSecurityRead = () => {
+  const preloadedState = initialState();
+  preloadedState.admin_app.permissions = {
+    ...preloadedState.admin_app.permissions,
+    settings: {
+      ...preloadedState.admin_app.permissions.settings,
+      security: {
+        main: [{ action: 'admin::security-settings.read', subject: null }],
+        read: [{ action: 'admin::security-settings.read', subject: null }],
+        update: [{ action: 'admin::security-settings.update', subject: null }],
+      },
+    } as typeof preloadedState.admin_app.permissions.settings,
+  };
+  return { storeConfig: { preloadedState } };
+};
+
+const NOT_ENROLLED = {
+  ...ENROLLED,
+  mfaEnabledAt: null,
+  roles: [{ id: 2, name: 'Editor', code: 'strapi-editor' }],
+} as unknown as React.ComponentProps<typeof TwoFactorPanel>['user'];
+
+const settings = (mfa: { mode: 'off' | 'optional' | 'required'; requiredRoles: string[] }) => {
+  const reads = { count: 0 };
+  server.use(
+    http.get('/admin/security-settings', () => {
+      reads.count += 1;
+      return HttpResponse.json({
+        data: {
+          mfa: { graceDays: 5, ...mfa },
+          trustedDevices: { enabled: false, days: 30 },
+          passkeys: { enabled: false },
+        },
+      });
+    })
+  );
+  return reads;
+};
+
+const DEVICE = {
+  id: 9,
+  deviceName: 'Chrome on macOS',
+  createdAt: '2026-01-02T00:00:00.000Z',
+  lastUsedAt: null,
+  expiresAt: '2026-02-01T00:00:00.000Z',
+  current: false,
+};
+
+/**
+ * The device counts the panel reads. A parameter, not a blanket `beforeEach`: pinned to zero for
+ * every test, the revoke and remove buttons -- their dialogs, toasts and failure paths -- were
+ * unreachable from this suite.
+ */
+const counts = ({ trusted = 0, passkeys = 0 }: { trusted?: number; passkeys?: number } = {}) =>
+  server.use(
+    http.get('/admin/mfa/users/:id/trusted-devices', () =>
+      HttpResponse.json({
+        data: Array.from({ length: trusted }, (_, i) => ({ ...DEVICE, id: DEVICE.id + i })),
+      })
+    ),
+    http.get('/admin/mfa/users/:id/passkeys', () =>
+      HttpResponse.json({ data: { count: passkeys } })
+    )
+  );
+
+const failWith = (message: string) =>
+  HttpResponse.json(
+    { error: { status: 500, name: 'InternalServerError', message, details: {} } },
+    { status: 500 }
+  );
+
+/** The request bodies of the latest `captureReset`: the viewer's own credentials. */
+let resetBodies: unknown[] = [];
+
+const captureReset = () => {
+  const calls: string[] = [];
+  const bodies: unknown[] = [];
+  resetBodies = bodies;
+  server.use(
+    http.post('/admin/mfa/users/:id/reset', async ({ params, request }) => {
+      calls.push(String(params.id));
+      bodies.push(await request.json());
+      return new HttpResponse(null, { status: 204 });
+    })
+  );
+  return calls;
+};
+
+/** What `/mfa/me` says about the *viewer*: whether they owe a password and a code. */
+const viewer = ({ enabled = true, hasLocalPassword = true } = {}) =>
+  server.use(
+    http.get('/admin/mfa/me', () =>
+      HttpResponse.json({
+        data: {
+          enabled,
+          enabledAt: null,
+          recoveryCodesRemaining: 10,
+          codesAcknowledged: true,
+          required: false,
+          graceUntil: null,
+          trustedDevicesEnabled: true,
+          passkeysEnabled: false,
+          hasLocalPassword,
+        },
+      })
+    )
+  );
+
+/**
+ * Reset, unlock and removing passkeys lower another user's protection, so the dialog asks the
+ * viewer for their own password and code (Decision A). Fills what is shown and confirms.
+ */
+const confirmWithCredentials = async (
+  user: ReturnType<typeof renderPanel>['user'],
+  confirm: string,
+  { password = 'Password123', code = '123456' } = {}
+) => {
+  const dialog = await screen.findByRole('alertdialog');
+  const passwordField = within(dialog).queryByLabelText(/Current password/);
+  if (passwordField) await user.type(passwordField, password);
+  const codeField = within(dialog).queryByLabelText(/Authentication code/);
+  if (codeField) await user.type(codeField, code);
+  await user.click(within(dialog).getByRole('button', { name: confirm }));
+};
+
+describe('TwoFactorPanel', () => {
+  beforeEach(() => {
+    counts();
+    viewer();
+  });
+
+  // The case this action exists for is not a lock: the user still knows their password but has
+  // lost the authenticator and spent their recovery codes. Offering Reset only for a locked
+  // account would leave exactly that user with no route back in short of a shell.
+  it('offers Reset for an enrolled account that is not locked', async () => {
+    renderPanel();
+
+    expect(await screen.findByRole('button', { name: 'Reset' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
+  });
+
+  // The lock is a login state: it lives with the account status (UserLockStatus), not here.
+  it('offers Reset but no lock or Unlock for a locked account', async () => {
+    renderPanel({ mfaLockedAt: '2026-02-01T00:00:00.000Z' });
+
+    expect(await screen.findByRole('button', { name: 'Reset' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Locked/)).not.toBeInTheDocument();
+  });
+
+  it('offers no Reset for an account that was never enrolled', async () => {
+    renderPanel({ mfaEnabledAt: null });
+
+    expect(await screen.findByText('Not set up')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
+  });
+
+  it('hides Reset from a caller who cannot update users', async () => {
+    renderPanel({}, false);
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument()
+    );
+  });
+
+  // Destructive and not undoable, so it goes through a confirmation that says what is lost.
+  it('confirms before resetting, and names what the reset removes', async () => {
+    const { user } = renderPanel();
+    const calls = captureReset();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+
+    expect(
+      await screen.findByText("Reset this user's two-factor authentication?")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/authenticator app, recovery codes, passkeys and trusted devices/i)
+    ).toBeInTheDocument();
+    expect(calls).toHaveLength(0);
+
+    await confirmWithCredentials(user, 'Reset');
+
+    await waitFor(() => expect(calls).toEqual(['3']));
+    // The viewer's own credentials, not the target's: the server re-authenticates the actor.
+    expect(resetBodies).toEqual([{ password: 'Password123', code: '123456' }]);
+    expect(await screen.findByText('Two-factor authentication reset.')).toBeInTheDocument();
+  });
+
+  it('asks a viewer without a second factor for the password alone', async () => {
+    viewer({ enabled: false });
+    const { user } = renderPanel();
+    captureReset();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    const dialog = await screen.findByRole('alertdialog');
+    await waitFor(() =>
+      expect(within(dialog).queryByLabelText(/Authentication code/)).not.toBeInTheDocument()
+    );
+    await confirmWithCredentials(user, 'Reset');
+
+    await waitFor(() => expect(resetBodies).toEqual([{ password: 'Password123' }]));
+  });
+
+  it('asks an SSO-only viewer for nothing: they act on their session', async () => {
+    viewer({ enabled: false, hasLocalPassword: false });
+    const { user } = renderPanel();
+    captureReset();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    const dialog = await screen.findByRole('alertdialog');
+    await waitFor(() =>
+      expect(within(dialog).queryByLabelText(/Current password/)).not.toBeInTheDocument()
+    );
+    await confirmWithCredentials(user, 'Reset');
+
+    await waitFor(() => expect(resetBodies).toEqual([{}]));
+  });
+
+  it('keeps the dialog open with the reason when the viewer is not a super admin', async () => {
+    server.use(
+      http.post('/admin/mfa/users/:id/reset', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 403,
+              name: 'ForbiddenError',
+              message: 'Only a super admin can change the two-factor settings of a super admin',
+              details: { code: 'MFA_SUPER_ADMIN_TARGET' },
+            },
+          },
+          { status: 403 }
+        )
+      )
+    );
+    const { user } = renderPanel();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    await confirmWithCredentials(user, 'Reset');
+
+    expect(
+      await screen.findByText(
+        'Only a super admin can change the two-factor settings of a super admin.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+  });
+
+  it('leaves the account alone when the confirmation is cancelled', async () => {
+    const { user } = renderPanel();
+    const calls = captureReset();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    await user.click(await screen.findByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Reset this user's two-factor authentication?")
+      ).not.toBeInTheDocument()
+    );
+    expect(calls).toHaveLength(0);
+  });
+
+  it('surfaces a failed reset rather than reporting success', async () => {
+    // Asserting only that the success toast is absent proved nothing: it is absent on the first
+    // tick before the request resolves, and would stay absent with the error branch deleted.
+    server.use(http.post('/admin/mfa/users/:id/reset', () => failWith('Nope')));
+    const { user } = renderPanel();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    await confirmWithCredentials(user, 'Reset');
+
+    expect(await screen.findByText('Nope')).toBeInTheDocument();
+    expect(screen.queryByText('Two-factor authentication reset.')).not.toBeInTheDocument();
+  });
+
+  describe('trusted devices', () => {
+    it('removes every trusted device after confirmation', async () => {
+      counts({ trusted: 2 });
+      const calls: string[] = [];
+      server.use(
+        http.delete('/admin/mfa/users/:id/trusted-devices', ({ params }) => {
+          calls.push(String(params.id));
+          return HttpResponse.json({ data: { count: 2 } });
+        })
+      );
+      const { user } = renderPanel();
+
+      await user.click(await screen.findByRole('button', { name: 'Remove trusted devices' }));
+      expect(await screen.findByText("Remove this user's trusted devices?")).toBeInTheDocument();
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
+      );
+
+      await waitFor(() => expect(calls).toEqual(['3']));
+      expect(await screen.findByText('Trusted devices removed.')).toBeInTheDocument();
+    });
+
+    it('says why a revoke failed', async () => {
+      counts({ trusted: 1 });
+      server.use(
+        http.delete('/admin/mfa/users/:id/trusted-devices', () => failWith('Revoke refused'))
+      );
+      const { user } = renderPanel();
+
+      await user.click(await screen.findByRole('button', { name: 'Remove trusted devices' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
+      );
+
+      expect(await screen.findByText('Revoke refused')).toBeInTheDocument();
+      expect(screen.queryByText('Trusted devices removed.')).not.toBeInTheDocument();
+    });
+
+    it('offers no remove when there is nothing to remove', async () => {
+      renderPanel();
+
+      await screen.findByRole('button', { name: 'Reset' });
+      expect(
+        screen.queryByRole('button', { name: 'Remove trusted devices' })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('passkeys', () => {
+    it('removes every passkey after confirmation', async () => {
+      counts({ passkeys: 3 });
+      const calls: string[] = [];
+      server.use(
+        http.post('/admin/mfa/users/:id/passkeys/remove', ({ params }) => {
+          calls.push(String(params.id));
+          return HttpResponse.json({ data: { count: 3 } });
+        })
+      );
+      const { user } = renderPanel();
+
+      await user.click(await screen.findByRole('button', { name: 'Remove passkeys' }));
+      expect(await screen.findByText("Remove this user's passkeys?")).toBeInTheDocument();
+      await confirmWithCredentials(user, 'Remove');
+
+      await waitFor(() => expect(calls).toEqual(['3']));
+      expect(await screen.findByText('Passkeys removed.')).toBeInTheDocument();
+    });
+
+    it('says why a removal failed', async () => {
+      counts({ passkeys: 1 });
+      server.use(
+        http.post('/admin/mfa/users/:id/passkeys/remove', () => failWith('Remove refused'))
+      );
+      const { user } = renderPanel();
+
+      await user.click(await screen.findByRole('button', { name: 'Remove passkeys' }));
+      await confirmWithCredentials(user, 'Remove');
+
+      expect(await screen.findByText('Remove refused')).toBeInTheDocument();
+      expect(screen.queryByText('Passkeys removed.')).not.toBeInTheDocument();
+    });
+  });
+  describe('not set up', () => {
+    it('says the requirement starts at the next login when the settings require it of this user', async () => {
+      settings({ mode: 'optional', requiredRoles: ['2'] });
+      render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
+    });
+
+    it("trusts the server's mfaRequired over the settings, so an exempt account is not called required", async () => {
+      const reads = settings({ mode: 'required', requiredRoles: [] });
+      render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaRequired: false }} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      await waitFor(() => expect(reads.count).toBe(1));
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      expect(screen.queryByText(/Required/)).not.toBeInTheDocument();
+    });
+
+    it('says required from next login even without settings to read', async () => {
+      render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaRequired: true }} canUpdate />);
+
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
+    });
+
+    it('reads as only not set up when none of their roles is required', async () => {
+      const reads = settings({ mode: 'optional', requiredRoles: ['1'] });
+      render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      await waitFor(() => expect(reads.count).toBe(1));
+      expect(await screen.findByText('Not set up')).toBeInTheDocument();
+      expect(screen.queryByText(/Required/)).not.toBeInTheDocument();
+    });
+
+    it('says required from next login after an unlock, even without settings to read', async () => {
+      render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate justUnlocked />);
+
+      expect(await screen.findByText('Required from next login')).toBeInTheDocument();
+    });
+
+    it('shows the days left and the deadline for an account in its grace period', async () => {
+      const graceUntil = new Date(Date.now() + 4.5 * 24 * 60 * 60 * 1000).toISOString();
+      render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaGraceUntil: graceUntil }} canUpdate />);
+
+      expect(await screen.findByText('Required, 5 days left')).toBeInTheDocument();
+      expect(screen.getByText(/^Set up before .*\d{1,2}:\d{2}/)).toBeInTheDocument();
+    });
+
+    it('says only Required for a locked account, with no deadline', async () => {
+      render(
+        <TwoFactorPanel
+          user={{
+            ...NOT_ENROLLED,
+            mfaGraceUntil: '2026-02-01T00:00:00.000Z',
+            mfaLockedAt: '2026-02-02T00:00:00.000Z',
+          }}
+          canUpdate
+        />
+      );
+
+      expect(await screen.findByText('Required')).toBeInTheDocument();
+      expect(screen.queryByText(/Set up before/)).not.toBeInTheDocument();
+    });
+  });
+});

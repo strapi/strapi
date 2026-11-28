@@ -1,0 +1,389 @@
+import * as React from 'react';
+
+import { Alert, Badge, Button, Flex, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+
+import { Panel } from '../../components/Panel';
+import { formatMfaNotice } from '../../features/MfaNotices';
+import { useNotification } from '../../features/Notifications';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
+import {
+  useGetMfaRecentEventsQuery,
+  useGetMfaStatusQuery,
+  useMarkMfaNoticesSeenMutation,
+} from '../../services/mfa';
+import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
+import { isMfaNotFoundError } from '../../utils/mfaFeature';
+
+import { EnrolDialog } from './EnrolDialog';
+import { MfaBlockHeader } from './MfaBlock';
+import { Passkeys } from './Passkeys';
+import { ReAuthDialog } from './ReAuthDialog';
+import { TrustedDevices } from './TrustedDevices';
+
+import type { Me, MfaRecentEvent } from '../../../../shared/contracts/mfa';
+
+/** Below this many unused recovery codes the section nags. */
+export const LOW_RECOVERY_CODES_THRESHOLD = 3;
+
+type MfaStatus = Me.Response['data'];
+
+const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
+  const { formatMessage, formatDate } = useIntl();
+
+  if (!status.enabled) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={1}>
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.status.disabled',
+            defaultMessage: 'Not set up',
+          })}
+        </Typography>
+        {status.required ? (
+          <Typography textColor="warning700">
+            {status.graceUntil
+              ? formatMessage(
+                  {
+                    id: 'Settings.profile.form.section.mfa.status.required.deadline',
+                    defaultMessage: 'Required for your account. Set it up before {datetime}.',
+                  },
+                  {
+                    datetime: formatDate(status.graceUntil, MFA_DATE_TIME_FORMAT),
+                  }
+                )
+              : formatMessage({
+                  id: 'Settings.profile.form.section.mfa.status.required',
+                  defaultMessage: 'Required for your account.',
+                })}
+          </Typography>
+        ) : null}
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex direction="column" alignItems="flex-start" gap={1}>
+      <Typography>
+        {formatMessage(
+          {
+            id: 'Settings.profile.form.section.mfa.status.enabled',
+            defaultMessage: 'Enabled since {date}',
+          },
+          { date: status.enabledAt ? formatDate(status.enabledAt, { dateStyle: 'medium' }) : '' }
+        )}
+      </Typography>
+      <Typography textColor="neutral600">
+        {formatMessage(
+          {
+            id: 'Settings.profile.form.section.mfa.status.codes',
+            defaultMessage: '{count, plural, one {# recovery code} other {# recovery codes}} left',
+          },
+          { count: status.recoveryCodesRemaining }
+        )}
+      </Typography>
+    </Flex>
+  );
+};
+
+/**
+ * The account's newest security events, seen or not, including the ones this login caused (a
+ * recovery-code login, a passkey added here), which the security notice (`MfaNotices`) rightly
+ * leaves out. Rows the notice would announce carry a "New" badge. "Mark all as seen" (an absent
+ * `ids`, per `MarkNoticesSeen.Request`) is offered only while some row `canMarkSeen`: the server
+ * never lets a login clear its own events, nor, while an older login is live, events from before
+ * it began, so a button shown otherwise would clear nothing.
+ */
+const RecentSecurityEvents = ({
+  notices,
+  onMarkAllSeen,
+}: {
+  notices: MfaRecentEvent[];
+  onMarkAllSeen: () => void;
+}) => {
+  const { formatMessage, formatDate } = useIntl();
+
+  return (
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <MfaBlockHeader
+        title={formatMessage({
+          id: 'Settings.profile.form.section.mfa.notices.title',
+          defaultMessage: 'Recent security events',
+        })}
+        action={
+          notices.some((notice) => notice.canMarkSeen) ? (
+            <Button variant="tertiary" onClick={onMarkAllSeen}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.notices.markSeen',
+                defaultMessage: 'Mark all as seen',
+              })}
+            </Button>
+          ) : null
+        }
+      />
+      <Flex tag="ul" role="list" direction="column" alignItems="stretch" gap={1}>
+        {notices.map((notice) => (
+          <Flex key={`${notice.id}`} tag="li" gap={2} alignItems="baseline">
+            <Typography textColor="neutral600">
+              {formatMfaNotice(notice, formatMessage, formatDate)}
+            </Typography>
+            {notice.isNew ? (
+              <Badge>
+                {formatMessage({
+                  id: 'Settings.profile.form.section.mfa.notices.new',
+                  defaultMessage: 'New',
+                })}
+              </Badge>
+            ) : null}
+          </Flex>
+        ))}
+      </Flex>
+    </Flex>
+  );
+};
+
+const TwoFactorSection = () => {
+  const { formatMessage } = useIntl();
+  const { data: status, error, isLoading } = useGetMfaStatusQuery();
+  const { toggleNotification } = useNotification();
+  const toMessage = useMfaErrorMessage();
+  // Skipped until the status says the feature exists, as `MfaNotices` does: otherwise every profile
+  // view with the kill switch on fires one request that can only 404.
+  const { data: notices } = useGetMfaRecentEventsQuery(undefined, {
+    skip: isLoading || isMfaNotFoundError(error),
+  });
+  const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();
+
+  const handleMarkAllSeen = async () => {
+    const res = await markNoticesSeen({});
+    // Without this a failure leaves the list unchanged and the button looking broken.
+    if ('error' in res) {
+      toggleNotification({ type: 'danger', message: toMessage(res.error) });
+    }
+  };
+  /**
+   * Dismissing a warning only hides it for the lifetime of this component instance -- nothing is
+   * persisted, so the warning comes back the next time the profile page is visited.
+   */
+  const [dismissedAck, setDismissedAck] = React.useState(false);
+  const [dismissedLowCodes, setDismissedLowCodes] = React.useState(false);
+  const [enrolOpen, setEnrolOpen] = React.useState(false);
+  const [replaceOpen, setReplaceOpen] = React.useState(false);
+  const [regenerateOpen, setRegenerateOpen] = React.useState(false);
+  const [disableOpen, setDisableOpen] = React.useState(false);
+
+  // Mounted only in a build with the feature (`ProfilePage`), so a 404 here means the server's
+  // kill switch (`admin.auth.mfa.enabled: false`) has it off.
+  const isNotFound = isMfaNotFoundError(error);
+
+  if (isLoading || isNotFound) {
+    return null;
+  }
+
+  // Any *other* failure is a transient fault, not a feature that does not exist. Returning null
+  // here too would erase the whole section on a 500, so the page would say nothing about
+  // two-factor authentication at all and a user could not tell a broken request from an account
+  // that is simply not enrolled. Say so instead, and keep the heading so the section does not
+  // silently move everything below it.
+  if (!status) {
+    return (
+      <Panel>
+        <Typography variant="delta" tag="h2">
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.title',
+            defaultMessage: 'Two-factor authentication',
+          })}
+        </Typography>
+        <Alert
+          variant="danger"
+          // Not dismissible: the section has nothing else to show, so closing it would leave an
+          // empty panel. `closeLabel` is required by the type regardless.
+          closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+          title={formatMessage({
+            id: 'Settings.profile.form.section.mfa.unavailable.title',
+            defaultMessage: 'Two-factor settings unavailable',
+          })}
+        >
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.unavailable',
+            defaultMessage:
+              'Your two-factor authentication settings could not be loaded. Refresh the page to try again.',
+          })}
+        </Alert>
+      </Panel>
+    );
+  }
+
+  const showAckWarning = status.enabled && !status.codesAcknowledged && !dismissedAck;
+  const showLowCodesWarning =
+    status.enabled &&
+    status.codesAcknowledged &&
+    status.recoveryCodesRemaining <= LOW_RECOVERY_CODES_THRESHOLD &&
+    !dismissedLowCodes;
+
+  return (
+    <Panel gap={7}>
+      <Flex direction="column" alignItems="stretch" gap={4}>
+        {/*
+         * The same header row as the other blocks. Its actions are a group of buttons with a
+         * hierarchy, not a single action, so they stay below as the block's body.
+         */}
+        <MfaBlockHeader
+          headingTag="h2"
+          title={formatMessage({
+            id: 'Settings.profile.form.section.mfa.title',
+            defaultMessage: 'Two-factor authentication',
+          })}
+          description={formatMessage({
+            id: 'Settings.profile.form.section.mfa.description',
+            defaultMessage:
+              'Protect your account with a code from an authenticator app each time you log in.',
+          })}
+        />
+        {showAckWarning ? (
+          <Alert
+            variant="warning"
+            onClose={() => setDismissedAck(true)}
+            closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+            title={formatMessage({
+              id: 'Settings.profile.form.section.mfa.warning.ack.title',
+              defaultMessage: 'Recovery codes not saved',
+            })}
+          >
+            {formatMessage({
+              id: 'Settings.profile.form.section.mfa.warning.ack.body',
+              defaultMessage:
+                'You have not confirmed that you saved your recovery codes. They cannot be shown again. Generate new ones and store them somewhere safe.',
+            })}
+          </Alert>
+        ) : null}
+        {showLowCodesWarning ? (
+          <Alert
+            variant="warning"
+            onClose={() => setDismissedLowCodes(true)}
+            closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+            title={formatMessage({
+              id: 'Settings.profile.form.section.mfa.warning.low.title',
+              defaultMessage: 'Running low on recovery codes',
+            })}
+          >
+            {formatMessage(
+              {
+                id: 'Settings.profile.form.section.mfa.warning.low.body',
+                defaultMessage:
+                  'You have only {count, plural, one {# recovery code} other {# recovery codes}} left. Generate new ones before you run out.',
+              },
+              { count: status.recoveryCodesRemaining }
+            )}
+          </Alert>
+        ) : null}
+        <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
+          <TwoFactorStatus status={status} />
+          {!status.enabled && !status.hasLocalPassword ? (
+            // The dialog's first and only field is the current password, which this account does not
+            // have: the button was a dead end. `hasLocalPassword` was already on the wire.
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.noPassword',
+                defaultMessage:
+                  'You log in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider.',
+              })}
+            </Typography>
+          ) : !status.enabled ? (
+            <Flex gap={2}>
+              <Button onClick={() => setEnrolOpen(true)}>
+                {formatMessage({
+                  id: 'Settings.profile.form.section.mfa.enable',
+                  defaultMessage: 'Set up two-factor authentication',
+                })}
+              </Button>
+            </Flex>
+          ) : (
+            <Flex direction="column" alignItems="flex-end" gap={2}>
+              <Flex gap={2} wrap="wrap" justifyContent="flex-end">
+                <Button variant="secondary" onClick={() => setRegenerateOpen(true)}>
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.regenerate.title',
+                    defaultMessage: 'Generate new recovery codes',
+                  })}
+                </Button>
+                <Button variant="secondary" onClick={() => setReplaceOpen(true)}>
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.replace.title',
+                    defaultMessage: 'Replace authenticator',
+                  })}
+                </Button>
+                {!status.required ? (
+                  <Button variant="danger-light" onClick={() => setDisableOpen(true)}>
+                    {formatMessage({
+                      id: 'Settings.profile.form.section.mfa.disable.title',
+                      defaultMessage: 'Disable two-factor authentication',
+                    })}
+                  </Button>
+                ) : null}
+              </Flex>
+              {status.required ? (
+                <Typography variant="pi" textColor="neutral600">
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.disable.required',
+                    defaultMessage:
+                      'Two-factor authentication is required for your account and cannot be disabled.',
+                  })}
+                </Typography>
+              ) : null}
+            </Flex>
+          )}
+        </Flex>
+      </Flex>
+      {/*
+       * Only for an enrolled user (an unenrolled one has nothing to skip) and only while
+       * the organisation offers trust: `trustedDevicesEnabled` comes from `/mfa/me`, and the
+       * server empties the table when the setting is turned off.
+       */}
+      {status.enabled && status.trustedDevicesEnabled ? <TrustedDevices /> : null}
+      {/*
+       * Same two gates as the trusted-devices block above and for the same reasons: only
+       * an enrolled account can hold a passkey (a passkey is a second factor, never a replacement
+       * for TOTP), and `passkeysEnabled` comes from `/mfa/me` -- the server deletes every passkey
+       * when the setting is turned off. An SSO-only user never reaches either, because they are
+       * never enrolled.
+       */}
+      {status.enabled && status.passkeysEnabled ? <Passkeys /> : null}
+      {notices && notices.length > 0 ? (
+        <RecentSecurityEvents notices={notices} onMarkAllSeen={handleMarkAllSeen} />
+      ) : null}
+      {/*
+       * All dialogs are mounted unconditionally (only `open` toggles), same as `EnrolDialog`
+       * below: the `Mfa` tag invalidation that follows a successful regenerate or disable (see
+       * services/mfa.ts) refetches this section's status query, and mounting a dialog only while
+       * `status.enabled` is true would unmount it out from under itself the moment that refetch
+       * flips `enabled` to `false` mid-flow. The `ReAuthDialog intent="disable"` stays mounted
+       * even while `status.required` hides its trigger button above: the server refuses a
+       * disable for a required user regardless, so there's nothing to gain by unmounting it, and
+       * mounting it conditionally would risk the same unmount-mid-flow hazard.
+       *
+       * `EnrolDialog` renders as a single instance for both `enrol` and `replace` modes -- not
+       * two -- because both share the same `MFA_ENROL_CACHE_KEYS` `fixedCacheKey`s (see
+       * EnrolDialog.tsx); two mounted instances would share one cached mutation result and could
+       * clobber each other's in-flight state.
+       */}
+      <EnrolDialog
+        open={enrolOpen || replaceOpen}
+        mode={replaceOpen ? 'replace' : 'enrol'}
+        onClose={() => {
+          setEnrolOpen(false);
+          setReplaceOpen(false);
+        }}
+      />
+      <ReAuthDialog
+        open={regenerateOpen}
+        onClose={() => setRegenerateOpen(false)}
+        intent="regenerate"
+      />
+      <ReAuthDialog open={disableOpen} onClose={() => setDisableOpen(false)} intent="disable" />
+    </Panel>
+  );
+};
+
+export { TwoFactorSection, TwoFactorStatus };
+export type { MfaStatus };

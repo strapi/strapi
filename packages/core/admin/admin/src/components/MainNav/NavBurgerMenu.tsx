@@ -2,7 +2,7 @@ import { Box, FocusTrap, Portal, ScrollArea, Flex, Divider } from '@strapi/desig
 import { motion, AnimatePresence } from 'motion/react';
 import { styled } from 'styled-components';
 
-import { HEIGHT_TOP_NAVIGATION } from '../../constants/theme';
+import { GLOBAL_BANNERS_HEIGHT, HEIGHT_TOP_NAVIGATION } from '../../constants/theme';
 import { MenuItem } from '../../core/apis/router';
 
 import { MainNavBurgerMenuLinks } from './MainNavLinks';
@@ -18,7 +18,8 @@ interface NavBurgerMenuProps {
 
 const MotionLayer = styled(motion.div)`
   position: fixed;
-  top: calc(${HEIGHT_TOP_NAVIGATION} + 1px);
+  /* Below the global banners and the top navigation, which the menu must not cover. */
+  top: calc(${GLOBAL_BANNERS_HEIGHT} + ${HEIGHT_TOP_NAVIGATION} + 1px);
   left: 0;
   right: 0;
   bottom: 0;

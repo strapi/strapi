@@ -6,7 +6,7 @@ import { emitLoginFailure } from '../../../../../server/src/audit-logs/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
-  buildSessionMetadataFromContext,
+  buildAdminSessionMetadata,
   getAccessCookieName,
   getAccessCookiePath,
   getAccessCookieDomain,
@@ -134,7 +134,9 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
       'admin'
     ).generateRefreshToken(userId, deviceId, {
       type: 'refresh',
-      metadata: buildSessionMetadataFromContext(ctx),
+      // Marked as SSO: the identity provider owns the second factor, so the refresh path does not
+      // apply two-factor enforcement to this login.
+      metadata: buildAdminSessionMetadata(ctx, { sso: true }),
     });
 
     const cookieOptions = buildCookieOptionsWithExpiry('refresh', absoluteExpiresAt);

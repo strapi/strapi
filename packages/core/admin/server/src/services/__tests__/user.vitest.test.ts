@@ -1,9 +1,11 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import _ from 'lodash';
 import { errors, queryParams, emitAudit } from '@strapi/utils';
-import constants from '../constants';
+import constants, { PRIVATE_MFA_FIELDS } from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
+
+import type { PrivateMfaField } from '../../../../shared/contracts/shared';
 
 vi.mock('@strapi/utils', async () => ({
   ...(await vi.importActual<typeof import('@strapi/utils')>('@strapi/utils')),
@@ -28,6 +30,27 @@ const {
   resetPasswordByEmail,
   getLanguagesInUse,
 } = userService;
+
+describe('private MFA fields', () => {
+  test('the runtime list and the contract type name exactly the same columns', () => {
+    // A compile error here means the runtime list gained a column the contract type has not.
+    const fromRuntime: PrivateMfaField[] = [...PRIVATE_MFA_FIELDS];
+
+    // ...and this direction catches the contract type gaining one the runtime list has not.
+    const fromContract: Array<(typeof PRIVATE_MFA_FIELDS)[number]> = [
+      'mfaSecret',
+      'mfaEnabledAt',
+      'mfaLastUsedStep',
+      'mfaPendingSecret',
+      'mfaGraceUntil',
+      'mfaLockedAt',
+      'mfaPasskeyChallenge',
+      'mfaPasskeyChallengeExpiresAt',
+    ] satisfies PrivateMfaField[];
+
+    expect([...fromRuntime].sort()).toEqual([...fromContract].sort());
+  });
+});
 
 describe('User', () => {
   global.strapi = {
@@ -64,6 +87,44 @@ describe('User', () => {
         otherField: 'Hello',
         roles: [],
       });
+    });
+
+    test('Removes every MFA column', () => {
+      const res = sanitizeUser({
+        id: 1,
+        firstname: 'Test',
+        otherField: 'Hello',
+        password: '$5IAZUDB871',
+        resetPasswordToken: '3456-5678-6789-789',
+        mfaSecret: 'encrypted-secret-ciphertext',
+        mfaEnabledAt: '2026-01-01T00:00:00.000Z',
+        mfaLastUsedStep: 12345,
+        mfaPendingSecret: 'encrypted-pending-ciphertext',
+        mfaGraceUntil: '2026-09-11T00:00:00.000Z',
+        mfaLockedAt: '2026-09-12T00:00:00.000Z',
+        mfaPasskeyChallenge: 'pending-ceremony-challenge',
+        mfaPasskeyChallengeExpiresAt: '2026-09-09T00:05:00.000Z',
+        roles: [],
+      } as any);
+
+      expect(res).toEqual({
+        id: 1,
+        firstname: 'Test',
+        otherField: 'Hello',
+        roles: [],
+      });
+      for (const column of [
+        'mfaSecret',
+        'mfaEnabledAt',
+        'mfaLastUsedStep',
+        'mfaPendingSecret',
+        'mfaGraceUntil',
+        'mfaLockedAt',
+        'mfaPasskeyChallenge',
+        'mfaPasskeyChallengeExpiresAt',
+      ]) {
+        expect(res).not.toHaveProperty(column);
+      }
     });
   });
 
