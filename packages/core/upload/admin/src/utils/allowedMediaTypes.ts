@@ -1,7 +1,8 @@
 /**
  * The `allowedTypes` values a `media` attribute can carry, and the mime prefix
  * each one stands for. `files` is the catch-all: anything that is not an image,
- * video or audio.
+ * video or audio. The server checks replacements with a copy of this rule in
+ * `server/src/utils/media-types.ts`, so keep the two in sync.
  */
 export type AllowedMediaType = 'files' | 'images' | 'videos' | 'audios';
 

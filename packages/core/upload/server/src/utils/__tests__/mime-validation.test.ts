@@ -355,6 +355,104 @@ describe('mime-validation', () => {
       expect(result.detectedMime).toBe('image/svg+xml');
     });
 
+    describe('when the content is a different kind of file than its name says', () => {
+      const validateRenamed = (name: string, type: string, detected: string, ext: string) => {
+        mockFileRead(Buffer.from('content'));
+        mockFileTypeFromBuffer.mockResolvedValue({ mime: detected, ext } as any);
+
+        return validateFile({ name, path: `/tmp/${name}`, size: 1000, type }, {}, mockStrapi);
+      };
+
+      // Stored as image/png, it showed as a broken image and passed images-only fields.
+      it('rejects a PDF renamed to .png', async () => {
+        const result = await validateRenamed('photo.png', 'image/png', 'application/pdf', 'pdf');
+
+        expect(result.isValid).toBe(false);
+        expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
+        expect(result.error?.message).toBe(
+          'The content of photo.png is application/pdf, which does not match image/png'
+        );
+        expect(result.error?.details.reason).toBe(
+          'File content is a different kind of file than its extension or declared type'
+        );
+      });
+
+      it('rejects an image renamed to .pdf', async () => {
+        const result = await validateRenamed('report.pdf', 'application/pdf', 'image/jpeg', 'jpg');
+
+        expect(result.isValid).toBe(false);
+      });
+
+      it('rejects a mismatch even when the type is in the allow list', async () => {
+        mockFileRead(Buffer.from('content'));
+        mockFileTypeFromBuffer.mockResolvedValue({ mime: 'application/pdf', ext: 'pdf' } as any);
+
+        const result = await validateFile(
+          { name: 'photo.png', path: '/tmp/photo.png', size: 1000, type: 'image/png' },
+          { allowedTypes: ['image/*', 'application/pdf'] },
+          mockStrapi
+        );
+
+        expect(result.isValid).toBe(false);
+      });
+
+      it('uses the declared type when there is no extension', async () => {
+        const result = await validateRenamed('photo', 'image/png', 'application/pdf', 'pdf');
+
+        expect(result.isValid).toBe(false);
+      });
+
+      // Browsers decode an image from its bytes, so a JPEG named .png still shows.
+      it('allows an image of another format', async () => {
+        const result = await validateRenamed('photo.png', 'image/png', 'image/jpeg', 'jpg');
+
+        expect(result.isValid).toBe(true);
+      });
+
+      // file-type reports webm audio as video/webm.
+      it('allows audio and video formats that share a container', async () => {
+        const result = await validateRenamed('voice.weba', 'audio/webm', 'video/webm', 'webm');
+
+        expect(result.isValid).toBe(true);
+      });
+
+      it('allows an office document detected as a zip archive', async () => {
+        const result = await validateRenamed(
+          'report.docx',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/zip',
+          'zip'
+        );
+
+        expect(result.isValid).toBe(true);
+      });
+
+      // `.bin` maps to application/octet-stream, which says nothing about the content.
+      it('allows any content in a .bin file', async () => {
+        const result = await validateRenamed('upload.bin', 'image/png', 'image/png', 'png');
+
+        expect(result.isValid).toBe(true);
+      });
+
+      it('falls back to the declared type when the extension is generic', async () => {
+        const result = await validateRenamed('upload.bin', 'image/png', 'application/pdf', 'pdf');
+
+        expect(result.isValid).toBe(false);
+      });
+
+      it('compares with the detected type when nothing else claims a type', async () => {
+        const result = await validateRenamed(
+          'upload',
+          'application/octet-stream',
+          'image/png',
+          'png'
+        );
+
+        expect(result.isValid).toBe(true);
+        expect(result.detectedMime).toBe('image/png');
+      });
+    });
+
     it('should reject all files when allowedTypes is explicit empty array', async () => {
       mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
