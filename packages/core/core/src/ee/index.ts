@@ -429,7 +429,7 @@ export default Object.freeze({
     // "these are your granted limits". No license, no entitlements.
     list: () => (ee.enabled ? entitlements.list(get) : []),
     // A lapsed license's limits, from the same resolvers run against its retained feature list,
-    // so a lapsed Plan card and the debug dump carry the defaults and clamps the plan enforced
+    // so a lapsed Plan card and the debug dump carry the defaulted limits the plan enforced
     // instead of raw options. Only features the retained license listed are reported.
     listRetained() {
       const retainedFeatures = (ee.retainedLicense?.features ?? []).map(toFeature);
