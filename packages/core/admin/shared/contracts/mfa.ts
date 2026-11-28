@@ -347,11 +347,15 @@ export declare namespace Notices {
 /**
  * One row of the profile's "Recent security events": the newest events on the account, seen or
  * not, including the ones the caller's own login caused (a recovery-code login, a passkey added),
- * which the notices feed leaves out. `isNew` is true only for what `Notices` would return, so
- * "Mark all as seen" is offered exactly when it has something to clear.
+ * which the notices feed leaves out.
  */
 export interface MfaRecentEvent extends MfaEventNotice {
+  /** True only for what `Notices` would return: unseen, and not caused by the caller's login. */
   isNew: boolean;
+  /** Whether `MarkNoticesSeen` would clear this row for the caller's login. Narrower than `isNew`:
+   * while an older login is live, a login cannot clear events from before it began. "Mark all as
+   * seen" is offered only while some row has it. */
+  canMarkSeen: boolean;
 }
 
 /** GET /mfa/events */

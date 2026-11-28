@@ -89,9 +89,10 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
 /**
  * The account's newest security events, seen or not, including the ones this login caused (a
  * recovery-code login, a passkey added here), which the security notice (`MfaNotices`) rightly
- * leaves out. Rows the notice would announce carry a "New" badge, and "Mark all as seen" (an absent
- * `ids`, per `MarkNoticesSeen.Request`) is offered only while there is one, because the server
- * never lets a login clear its own events (the other logins still need them).
+ * leaves out. Rows the notice would announce carry a "New" badge. "Mark all as seen" (an absent
+ * `ids`, per `MarkNoticesSeen.Request`) is offered only while some row `canMarkSeen`: the server
+ * never lets a login clear its own events, nor, while an older login is live, events from before
+ * it began, so a button shown otherwise would clear nothing.
  */
 const RecentSecurityEvents = ({
   notices,
@@ -110,7 +111,7 @@ const RecentSecurityEvents = ({
           defaultMessage: 'Recent security events',
         })}
         action={
-          notices.some((notice) => notice.isNew) ? (
+          notices.some((notice) => notice.canMarkSeen) ? (
             <Button variant="tertiary" onClick={onMarkAllSeen}>
               {formatMessage({
                 id: 'Settings.profile.form.section.mfa.notices.markSeen',

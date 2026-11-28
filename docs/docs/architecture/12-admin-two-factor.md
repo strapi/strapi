@@ -300,9 +300,11 @@ URI.
 `GET /admin/mfa/events` (`recentEvents`) feeds the profile's "Recent security events": the
 newest 20 rows, seen or not, **including** the caller's own family's, because the profile is the
 account's history (a recovery-code login or a passkey added from this login belongs there). Each row
-carries `isNew`, which is the notices rule (unseen and not from the caller's family), so the
-profile shows a "New" badge and offers "Mark all as seen" only when the server would clear
-something. Reading `/mfa/notices` there hid exactly those own-login events.
+carries `isNew`, which is the notices rule (unseen and not from the caller's family), and drives
+the "New" badge. It also carries `canMarkSeen`, which is `markEventsSeen`'s rule: `isNew`, and, while
+an older login of the user is live, created after the caller's login began. The profile offers
+"Mark all as seen" only while some row has `canMarkSeen`, so the button never clears nothing.
+Reading `/mfa/notices` there hid exactly those own-login events.
 
 `recovery_codes_issued` is the acknowledgement marker (its `seenAt` means "codes saved"), written on
 enrolment and on every regeneration, so it is never a notice. A regeneration also records its own

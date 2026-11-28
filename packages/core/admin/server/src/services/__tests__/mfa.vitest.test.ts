@@ -2584,15 +2584,23 @@ describe('mfa service: recentEvents (the profile history)', () => {
           }
         : baseQuery(uid);
     (fixture.strapi as any).requestContext = { get: () => request };
+    const live = new Set<string>();
+    (fixture.strapi as any).sessionManager = Object.assign(
+      () => ({
+        listSessions: vi.fn(async () => [...live].map((id) => ({ ...sessions.get(id) }))),
+      }),
+      { hasOrigin: () => true }
+    );
     const service = createMfaService(defaultDeps(fixture.strapi));
-    const login = (sessionId: string, familyId: string) => {
+    const login = (sessionId: string, familyId: string, loginAt = new Date()) => {
       sessions.set(sessionId, {
         sessionId,
         origin: 'admin',
         userId: '1',
-        createdAt: new Date(),
-        metadata: { familyId, loginAt: new Date().toISOString() },
+        createdAt: loginAt,
+        metadata: { familyId, loginAt: loginAt.toISOString() },
       });
+      live.add(sessionId);
     };
     const act = async (sessionId: string | undefined, run: () => Promise<unknown>) => {
       request.state = sessionId ? { session: { id: sessionId } } : {};
@@ -2600,6 +2608,8 @@ describe('mfa service: recentEvents (the profile history)', () => {
     };
     return { ...fixture, service, login, act };
   };
+
+  const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000);
 
   test("lists the caller's own recovery-code login and passkey, which the notices feed leaves out", async () => {
     // Round-3 bug: after a recovery-code login, and after adding a passkey, the profile's "Recent
@@ -2618,7 +2628,7 @@ describe('mfa service: recentEvents (the profile history)', () => {
     const events = await service.recentEvents('1', 'session-a');
     expect(events.map((e) => e.type).sort()).toEqual(['passkey_registered', 'recovery_code_used']);
     // The caller already knows: listed, but nothing for "Mark all as seen" to clear.
-    expect(events.every((e) => e.isNew === false)).toBe(true);
+    expect(events.every((e) => e.isNew === false && e.canMarkSeen === false)).toBe(true);
     expect(events[0]).not.toHaveProperty('sessionId');
   });
 
@@ -2636,6 +2646,60 @@ describe('mfa service: recentEvents (the profile history)', () => {
       challenge_failed: true,
       device_trusted: false,
     });
+  });
+
+  test('offers to clear only what markEventsSeen would clear while an older login is live', async () => {
+    // A phone logs in beside a live desktop login. An unseen failed code from before the phone's
+    // login is new to it, but only the desktop may clear it, so "Mark all as seen" must not be
+    // offered for it: the click would clear nothing and the button would look broken.
+    const { service, events: rows, login, act } = setup();
+    login('desktop', 'family-desktop', minutesAgo(60));
+    await act(undefined, () => service.recordEvent('1', 'challenge_failed'));
+    rows[0].createdAt = minutesAgo(10);
+    login('phone', 'family-phone', minutesAgo(5));
+    await act(undefined, () => service.recordEvent('1', 'unlocked', { byUserId: '9' }));
+
+    const events = await service.recentEvents('1', 'phone');
+    const byType = Object.fromEntries(events.map((e) => [e.type, e]));
+    expect(byType.challenge_failed).toMatchObject({ isNew: true, canMarkSeen: false });
+    expect(byType.unlocked).toMatchObject({ isNew: true, canMarkSeen: true });
+
+    // canMarkSeen agrees with what markEventsSeen actually does.
+    await service.markEventsSeen('1', undefined, 'phone');
+    expect(rows.find((e) => e.type === 'challenge_failed')!.seenAt).toBeNull();
+    expect(rows.find((e) => e.type === 'unlocked')!.seenAt).not.toBeNull();
+    const after = await service.recentEvents('1', 'phone');
+    expect(after.some((e) => e.canMarkSeen)).toBe(false);
+
+    // The older login can clear it.
+    const desktop = await service.recentEvents('1', 'desktop');
+    expect(desktop.find((e) => e.type === 'challenge_failed')).toMatchObject({
+      canMarkSeen: true,
+    });
+  });
+
+  test('the only live login may clear events from before it began', async () => {
+    const { service, events: rows, login, act } = setup();
+    await act(undefined, () => service.recordEvent('1', 'reset', { byUserId: '9' }));
+    rows[0].createdAt = minutesAgo(30);
+    login('session-a', 'family-a', minutesAgo(1));
+
+    const [event] = await service.recentEvents('1', 'session-a');
+
+    expect(event).toMatchObject({ type: 'reset', isNew: true, canMarkSeen: true });
+  });
+
+  test("returns only the caller's own events, never another user's", async () => {
+    const { service } = setup();
+    await service.recordEvent('1', 'enabled');
+    await service.recordEvent('2', 'disabled');
+    await service.recordEvent('2', 'challenge_failed');
+
+    const mine = await service.recentEvents('1');
+    const theirs = await service.recentEvents('2');
+
+    expect(mine.map((e) => e.type)).toEqual(['enabled']);
+    expect(theirs.map((e) => e.type).sort()).toEqual(['challenge_failed', 'disabled']);
   });
 
   test('never lists the acknowledgement marker, lists newest first, and caps the list', async () => {

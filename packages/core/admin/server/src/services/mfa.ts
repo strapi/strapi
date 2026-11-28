@@ -1180,8 +1180,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * The newest events on the account for the profile's "Recent security events", seen or not, and
    * *including* the caller's own login's: the profile is the account's history, so a recovery-code
    * login or a passkey added from this very session belongs there even though the notices feed
-   * (`unseenEvents`) rightly leaves them out. `isNew` is `unseenEvents`' own rule, so the profile
-   * never offers to clear a row `markEventsSeen` would refuse to clear for this login.
+   * (`unseenEvents`) rightly leaves them out.
+   *
+   * `isNew` is `unseenEvents`' own rule (unseen, and not caused by this login), so the "New" badge
+   * matches the security notice. `canMarkSeen` is `markEventsSeen`'s rule: it is also false for
+   * events from before this login began while an older login is live, which this login may not
+   * clear. The profile offers "Mark all as seen" only while some row can actually be cleared.
    */
   const recentEvents = async (
     userId: string,
@@ -1195,14 +1199,25 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       limit: RECENT_EVENTS_LIMIT,
     });
 
-    return rows.map((row) => ({
-      id: row.id,
-      type: row.type,
-      metadata: row.metadata ?? {},
-      createdAt: new Date(row.createdAt).toISOString(),
-      seenAt: row.seenAt ? new Date(row.seenAt).toISOString() : null,
-      isNew: !row.seenAt && !(ownFamily && row.sessionId === ownFamily),
-    }));
+    const isNewRow = (row: (typeof rows)[number]) =>
+      !row.seenAt && !(ownFamily && row.sessionId === ownFamily);
+    // Read once, and only when it can matter: the session list is not free.
+    const olderLive =
+      family && rows.some(isNewRow) ? await hasOlderLiveFamily(userId, family) : false;
+
+    return rows.map((row) => {
+      const isNew = isNewRow(row);
+      const createdAt = new Date(row.createdAt);
+      return {
+        id: row.id,
+        type: row.type,
+        metadata: row.metadata ?? {},
+        createdAt: createdAt.toISOString(),
+        seenAt: row.seenAt ? new Date(row.seenAt).toISOString() : null,
+        isNew,
+        canMarkSeen: isNew && (!olderLive || !family || createdAt >= new Date(family.startedAt)),
+      };
+    });
   };
 
   /**

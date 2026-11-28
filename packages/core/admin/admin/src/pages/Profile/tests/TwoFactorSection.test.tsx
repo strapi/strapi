@@ -287,6 +287,7 @@ describe('TwoFactorSection', () => {
         createdAt: '2026-09-01T10:00:00.000Z',
         seenAt: null,
         isNew: true,
+        canMarkSeen: true,
       },
       {
         id: 2,
@@ -295,6 +296,7 @@ describe('TwoFactorSection', () => {
         createdAt: '2026-09-01T11:00:00.000Z',
         seenAt: null,
         isNew: true,
+        canMarkSeen: true,
       },
     ];
     let seenBody: unknown;
@@ -342,6 +344,7 @@ describe('TwoFactorSection', () => {
         createdAt: '2026-09-01T12:00:00.000Z',
         seenAt: null,
         isNew: false,
+        canMarkSeen: false,
       },
       {
         id: 2,
@@ -350,6 +353,7 @@ describe('TwoFactorSection', () => {
         createdAt: '2026-09-01T11:00:00.000Z',
         seenAt: null,
         isNew: false,
+        canMarkSeen: false,
       },
     ];
     server.use(
@@ -370,6 +374,31 @@ describe('TwoFactorSection', () => {
     expect(screen.queryByRole('button', { name: 'Mark all as seen' })).not.toBeInTheDocument();
   });
 
+  /**
+   * A login cannot clear events from before it began while an older login is live, so such an
+   * event is new to it (the notice announces it) but "Mark all as seen" would clear nothing.
+   */
+  it('shows New but no Mark all as seen when nothing can be cleared from this login', async () => {
+    const notice: MfaRecentEvent = {
+      id: 1,
+      type: 'challenge_failed',
+      metadata: {},
+      createdAt: '2026-09-01T10:00:00.000Z',
+      seenAt: null,
+      isNew: true,
+      canMarkSeen: false,
+    };
+    server.use(
+      status({ enabled: true, enabledAt: '2026-09-01T10:14:00.000Z', codesAcknowledged: true }),
+      http.get('/admin/mfa/events', () => HttpResponse.json({ data: [notice] }))
+    );
+    renderSection();
+
+    expect(await screen.findByText(expectFormattedNotice(notice))).toBeInTheDocument();
+    expect(screen.getByText('New')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Mark all as seen' })).not.toBeInTheDocument();
+  });
+
   it('says so when marking the events as seen fails, instead of looking broken', async () => {
     const notice: MfaRecentEvent = {
       id: 1,
@@ -378,6 +407,7 @@ describe('TwoFactorSection', () => {
       createdAt: '2026-09-01T10:00:00.000Z',
       seenAt: null,
       isNew: true,
+      canMarkSeen: true,
     };
     server.use(
       status({ enabled: true, enabledAt: '2026-09-01T10:14:00.000Z', codesAcknowledged: true }),
@@ -410,6 +440,7 @@ describe('TwoFactorSection', () => {
       createdAt: '2026-09-01T10:00:00.000Z',
       seenAt: null,
       isNew: true,
+      canMarkSeen: true,
     };
     let seenBody: unknown;
     server.use(
