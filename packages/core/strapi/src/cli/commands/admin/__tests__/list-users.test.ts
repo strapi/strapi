@@ -9,21 +9,18 @@ const mfaService = {
   isEnabled: jest.fn(() => false),
   requiredForUsers: jest.fn(async (users: unknown[]) => users.map(() => false)),
 };
-const service = jest.fn(() => mfaService);
 
-const admin = {
-  services: {
-    user: {
-      findPage,
-    },
+const adminServices: Record<string, unknown> = {
+  mfa: mfaService,
+  user: {
+    findPage,
   },
 };
 
 const mock = {
   load,
-  admin,
+  service: jest.fn((uid: string) => adminServices[uid.slice('admin::'.length)]),
   destroy,
-  service,
 };
 
 jest.mock('@strapi/core', () => {

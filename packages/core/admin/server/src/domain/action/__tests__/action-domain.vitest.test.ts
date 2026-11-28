@@ -16,6 +16,10 @@ describe('Action Domain', () => {
       expect(domain.appliesToProperty('fields')(action)).toBe(false);
     });
 
+    test('returns false for an undefined action', () => {
+      expect(domain.appliesToProperty('fields', undefined)).toBe(false);
+    });
+
     test('Should return false when action.options.applyToProperties is Nil', () => {
       const action: any = { options: {} };
       const property: any = 'foo';
@@ -235,5 +239,20 @@ describe('Action Domain', () => {
         expect(sanitizedAction).not.toHaveProperty(attribute)
       );
     });
+  });
+});
+
+describe('appliesToProperty exact match', () => {
+  test('does not match a property that is only a substring of an allowed one', () => {
+    const action = domain.create({
+      uid: 'read',
+      pluginName: 'foo',
+      displayName: 'Read',
+      section: 'contentTypes',
+      options: { applyToProperties: ['fields'] },
+    } as any);
+
+    expect(domain.appliesToProperty('field', action)).toBe(false);
+    expect(domain.appliesToProperty('fields', action)).toBe(true);
   });
 });

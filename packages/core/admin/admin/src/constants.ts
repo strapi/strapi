@@ -204,6 +204,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             to: '/settings/purchase-single-sign-on',
             id: 'sso-purchase-page',
             licenseOnly: true,
+            licenseFeature: 'sso',
           },
         ]
       : []),
@@ -214,6 +215,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             to: '/settings/purchase-content-history',
             id: 'content-history-purchase-page',
             licenseOnly: true,
+            licenseFeature: 'cms-content-history',
           },
         ]
       : []),
@@ -254,6 +256,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs-purchase-page',
             licenseOnly: true,
+            licenseFeature: 'audit-logs',
           },
         ]
       : []),

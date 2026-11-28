@@ -115,6 +115,9 @@ export interface AuditLogs {
 
 export interface History {
   retentionDays?: number;
+  contentApi?: {
+    enabled?: boolean;
+  };
 }
 
 export interface ForgotPassword {

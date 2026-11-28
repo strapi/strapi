@@ -41,7 +41,7 @@ const setup = ({ mfaEnabled = true, previous = { id: 1, roles: [] } as unknown }
 
 describe('admin::user lifecycles: two-factor cleanup', () => {
   test('deleting a user purges their two-factor rows', async () => {
-    const { hooks, mfa } = setup();
+    const { hooks, mfa } = setup({ previous: { id: 7 } });
 
     await hooks.beforeDelete({ params: { where: { id: 7 } } });
 

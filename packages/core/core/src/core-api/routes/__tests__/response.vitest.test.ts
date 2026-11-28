@@ -97,7 +97,9 @@ const toResponseSchema = (response: z.ZodType | undefined): SchemaObject => {
 };
 
 const compile = (schema: SchemaObject) => {
-  const ajv = new Ajv2020({ strict: true, allErrors: true });
+  // Zod writes a union of primitives as `type: ['string', 'number']`, which JSON Schema 2020-12
+  // and OpenAPI 3.1 allow. Ajv's strict mode rejects that form unless `allowUnionTypes` is set.
+  const ajv = new Ajv2020({ strict: true, allowUnionTypes: true, allErrors: true });
   addFormats(ajv);
   return ajv.compile(schema);
 };

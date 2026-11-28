@@ -39,7 +39,7 @@ const action = async () => {
   const mfa = app.service('admin::mfa') as MfaService;
   const showMfa = mfa.isEnabled();
 
-  const list = await app.admin.services.user.findPage({
+  const list = await app.service('admin::user').findPage({
     select: [
       'id',
       'firstname',

@@ -17,7 +17,7 @@ import type { Attribute } from '../../types';
 
 type WhereCtx = Ctx & { alias?: string; isGroupRoot?: boolean };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
+export const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
 const castValue = (value: unknown, attribute: Attribute | null) => {
   if (!attribute) {

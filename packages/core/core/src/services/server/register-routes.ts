@@ -59,23 +59,25 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
     const generateRouteScope = createRouteScopeGenerator(`plugin::${pluginName}`);
 
     if (Array.isArray(plugin.routes)) {
-      plugin.routes.forEach((route) => {
+      // Same route objects, mutated in place: the plugin keeps its array
+      const routes = plugin.routes.map((route) => {
         generateRouteScope(route);
-        route.info = { pluginName };
+        return Object.assign(route, { info: { pluginName } });
       });
-      strapi.contentAPI.applyExtraParamsToRoutes(plugin.routes);
+      strapi.contentAPI.applyExtraParamsToRoutes(routes);
 
       strapi.server.routes({
         type: 'admin',
         prefix: `/${pluginName}`,
-        routes: plugin.routes,
+        routes,
       });
     } else {
       // Instantiate function-like routers
       // Mutate plugin.routes in-place and make sure router factories are instantiated correctly
-      plugin.routes = instantiateRouterInputs(plugin.routes, strapi);
+      const routers = instantiateRouterInputs(plugin.routes, strapi);
+      plugin.routes = routers;
 
-      for (const router of Object.values(plugin.routes)) {
+      for (const router of Object.values(routers)) {
         router.type = router.type ?? 'admin';
         router.prefix = router.prefix ?? `/${pluginName}`;
         router.routes.forEach((route) => {
@@ -100,9 +102,10 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
     const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
 
     // Mutate api.routes in-place and make sure router factories are instantiated correctly
-    api.routes = instantiateRouterInputs(api.routes, strapi);
+    const routers = instantiateRouterInputs(api.routes, strapi);
+    api.routes = routers;
 
-    for (const router of Object.values(api.routes)) {
+    for (const router of Object.values(routers)) {
       // TODO: remove once auth setup
       // pass meta down to compose endpoint
       router.type = 'content-api';

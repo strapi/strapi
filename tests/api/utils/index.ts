@@ -1,3 +1,5 @@
+import profile from 'api-tests/profile';
+
 /* -------------------------------------------------------------------------------------------------
  * setupDatabaseReset
  * -----------------------------------------------------------------------------------------------*/
@@ -6,6 +8,60 @@
 let initialTestData = {};
 let isTestDataCaptured = false;
 let allTableNames = [];
+
+/**
+ * Tables that SQL run since the last reset may have written to.
+ *
+ * Every query knex runs, in a transaction or not, emits a `query` event, and a write names its
+ * table right after its verb. A statement that is neither a read nor a write whose table this
+ * can read marks every table dirty, so SQL this does not understand costs a full reset, not a
+ * leak into the next test.
+ */
+const READ_ONLY_STATEMENT =
+  /^\s*(select|pragma|begin|commit|rollback|savepoint|release|show|explain)\b/i;
+const WRITE_STATEMENT =
+  /^\s*(?:insert(?:\s+or\s+\w+)?\s+into|update|delete\s+from|replace\s+into)\s+(?:[`"]?\w+[`"]?\.)?[`"]?(\w+)[`"]?/i;
+
+const DELETE_STATEMENT = /^\s*(?:delete|replace|insert\s+or\s+replace)\b/i;
+const CHANGED_ON_DELETE = /^(?:cascade|set null|set default)$/i;
+
+const dirtyTables = new Set<string>();
+let everyTableDirty = false;
+
+/**
+ * For each table, the tables whose foreign keys to it delete or change rows when a row of it is
+ * deleted. Strapi's link tables reference their entries with ON DELETE CASCADE, so deleting an
+ * entry also deletes link rows in tables the statement doesn't name.
+ */
+const deleteCascades = new Map<string, string[]>();
+
+const markDeletedFrom = (tableName: string, seen = new Set<string>()) => {
+  if (seen.has(tableName)) {
+    return;
+  }
+
+  seen.add(tableName);
+  dirtyTables.add(tableName);
+  (deleteCascades.get(tableName) ?? []).forEach((referencing) =>
+    markDeletedFrom(referencing, seen)
+  );
+};
+
+const trackWrites = ({ sql }: { sql?: unknown }) => {
+  if (typeof sql !== 'string' || READ_ONLY_STATEMENT.test(sql)) {
+    return;
+  }
+
+  const match = WRITE_STATEMENT.exec(sql);
+
+  if (!match) {
+    everyTableDirty = true;
+  } else if (DELETE_STATEMENT.test(sql)) {
+    markDeletedFrom(match[1]);
+  } else {
+    dirtyTables.add(match[1]);
+  }
+};
 
 /**
  * Capture the initial state of all database tables for later restoration
@@ -28,6 +84,20 @@ async function captureInitialTestData() {
     }
   }
 
+  for (const tableName of allTableNames) {
+    const foreignKeys = await strapi.db.dialect.schemaInspector.getForeignKeys(tableName);
+
+    for (const { referencedTable, onDelete } of foreignKeys) {
+      if (CHANGED_ON_DELETE.test(onDelete ?? '')) {
+        deleteCascades.set(referencedTable, [
+          ...(deleteCascades.get(referencedTable) ?? []),
+          tableName,
+        ]);
+      }
+    }
+  }
+
+  strapi.db.connection.on('query', trackWrites);
   isTestDataCaptured = true;
 }
 
@@ -54,14 +124,26 @@ const rowsForMysqlInsert = (rows: Record<string, unknown>[]) =>
     return copy;
   });
 
+/**
+ * Restores the tables written to since the last reset. Restoring every table took about 1.4 s
+ * on SQLite, most of it re-inserting rows no test had touched.
+ */
 async function resetTestDatabase() {
+  const tablesToReset = everyTableDirty
+    ? allTableNames
+    : allTableNames.filter((tableName) => dirtyTables.has(tableName));
+
+  if (tablesToReset.length === 0) {
+    return;
+  }
+
   // Use Strapi's built-in schema update mechanism to disable constraints (e.g. foreign key constraints)
   await strapi.db.dialect.startSchemaUpdate();
   const client = strapi.db.connection.client.config.client;
   const isMysql = client === 'mysql' || client === 'mysql2';
 
   try {
-    for (const tableName of allTableNames) {
+    for (const tableName of tablesToReset) {
       try {
         // Clear the table
         await strapi.db.connection(tableName).del();
@@ -79,6 +161,9 @@ async function resetTestDatabase() {
   } finally {
     // Always re-enable constraints
     await strapi.db.dialect.endSchemaUpdate();
+    // The reset's own writes leave every table as captured.
+    dirtyTables.clear();
+    everyTableDirty = false;
   }
 }
 
@@ -88,20 +173,24 @@ async function resetTestDatabase() {
  *
  * NOTE:
  * Only use sparingly where needed as the operation is slower than testInTransaction
+ *
+ * Only writes made through the global `strapi.db` are detected. A write through another
+ * Strapi instance (for example one a builder or model helper boots) uses its own connection,
+ * so its tables are not reset and its rows stay for the next test.
  */
 export function setupDatabaseReset() {
   let isDataCaptured = false;
 
   beforeEach(async () => {
     if (!isDataCaptured) {
-      await captureInitialTestData();
+      await profile.timed('reset.capture', () => captureInitialTestData());
       isDataCaptured = true;
     }
   });
 
   afterEach(async () => {
     if (isDataCaptured) {
-      await resetTestDatabase();
+      await profile.timed('reset.restore', () => resetTestDatabase());
     }
   });
 }

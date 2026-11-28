@@ -57,7 +57,13 @@ const PanelsItems = ({ panels, setVisiblePanels, visiblePanelsLength }: PanelsIt
  * Panels
  * -----------------------------------------------------------------------------------------------*/
 
-const Panels = ({ withActions = true }: { withActions?: boolean }) => {
+const Panels = ({
+  withActions = true,
+  actionsOnly = false,
+}: {
+  withActions?: boolean;
+  actionsOnly?: boolean;
+}) => {
   const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
@@ -76,7 +82,11 @@ const Panels = ({ withActions = true }: { withActions?: boolean }) => {
     plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
   ).getEditViewSidePanels();
   const filteredPanels = allPanels.filter((panel) => (panel as PanelComponent).type !== 'actions');
-  const panelsToDisplay = withActions ? allPanels : filteredPanels;
+  const panelsToDisplay = actionsOnly
+    ? allPanels.filter((panel) => (panel as PanelComponent).type === 'actions')
+    : withActions
+      ? allPanels
+      : filteredPanels;
 
   const props = {
     activeTab: status,
@@ -93,7 +103,7 @@ const Panels = ({ withActions = true }: { withActions?: boolean }) => {
         {(panels) => (
           <PanelsItems
             panels={panels}
-            setVisiblePanels={setVisiblePanels}
+            setVisiblePanels={actionsOnly ? undefined : setVisiblePanels}
             visiblePanelsLength={visiblePanels?.length}
           />
         )}

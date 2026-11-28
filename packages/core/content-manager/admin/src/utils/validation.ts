@@ -149,6 +149,27 @@ const createYupSchema = (
                   )
                 ).test(arrayValidator(attribute, options)),
               };
+            case 'media':
+              return {
+                ...acc,
+                // mixed().required() rejects null and undefined. An untouched multiple
+                // field is loaded as [], which would still publish.
+                [name]: transformSchema(
+                  attribute.multiple
+                    ? yup.mixed().test({
+                        name: 'media-required',
+                        message: translatedErrors.required,
+                        test(value: unknown) {
+                          if (options.status === 'draft' || !attribute.required) {
+                            return true;
+                          }
+
+                          return !Array.isArray(value) || value.length > 0;
+                        },
+                      })
+                    : yup.mixed()
+                ),
+              };
             case 'relation':
               return {
                 ...acc,

@@ -115,7 +115,6 @@
   "Settings.adminTokens.editPage.title": "Modifier le jeton d'administration",
   "Settings.adminTokens.emptyStateLayout": "Vous n'avez pas encore de contenu...",
   "Settings.adminTokens.title": "Jetons d'administration",
-  "Settings.application.admin-seats": "Places d'administrateur",
   "Settings.application.ai-usage": "Utilisation de l'IA",
   "Settings.application.ai-usage.overage-rate": "+1,50 $ par tranche de 100 crédits au-delà de la limite du plan",
   "Settings.tokens.duration.30-days": "30 jours",
@@ -1131,6 +1130,5 @@
   "app.error": "Une erreur s'est produite",
   "app.error.message": "Il semble qu'il y ait un bug dans votre instance, mais nous pouvons vous aider. Prévenez votre équipe technique afin qu'elle puisse en rechercher la cause, et signalez-nous le problème en ouvrant un rapport de bug sur {link}.",
   "tours.previous": "Précédent",
-  "Settings.application.admin-seats.at-limit-tooltip": "Limite atteinte : ajoutez des sièges pour inviter plus d'utilisateurs",
   "Settings.permissions.auditLogs.filter.aria-label": "Rechercher et sélectionner une option pour filtrer"
 }

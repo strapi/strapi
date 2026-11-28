@@ -43,8 +43,8 @@ import { DragOverlayChip } from './DragOverlayChip';
 import type { DragItemData } from '../../../../types/dnd';
 
 /* -------------------------------------------------------------------------------------------------
- * Context — shared with UploadDropZoneProvider for bidirectional drag guard.
- * See UploadDropZoneContext.tsx TODO linking both providers.
+ * Context — also read by the upload drop zone (`useAssetsDndOptional`), which
+ * hides its overlay while an internal drag is active.
  * -----------------------------------------------------------------------------------------------*/
 
 interface AssetsDndContextValue {
@@ -154,7 +154,7 @@ export const AssetsDndProvider = ({
 
   // Moving is a mutation (bulk-move → `assets.update`); without the permission
   // pointer drag must never activate. Keyboard moves go through BulkMoveDialog,
-  // which is itself gated.
+  // which checks no permission itself: its callers must gate it.
   //
   // The gate has to keep BOTH the `useSensor`/`useSensors` calls AND the sensor
   // array's length constant across renders: `canUpdate` starts false and flips

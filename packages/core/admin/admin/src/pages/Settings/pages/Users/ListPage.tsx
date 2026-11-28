@@ -59,6 +59,14 @@ const ListPageCE = () => {
       ).CreateActionEE
   );
 
+  const LicenseLimitBanner = useEnterprise(
+    null,
+    async () =>
+      (
+        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/LicenseLimitBanner')
+      ).LicenseLimitBanner
+  );
+
   // Only when the rows carry two-factor state
   const showTwoFactor = users.some((user) => 'mfaEnabledAt' in user);
   const headers = [...TABLE_HEADERS, ...(showTwoFactor ? [TWO_FACTOR_HEADER] : [])].map(
@@ -142,6 +150,7 @@ const ListPageCE = () => {
           defaultMessage: 'All the users who have access to the Strapi admin panel',
         })}
       />
+      {LicenseLimitBanner && <LicenseLimitBanner />}
       <Layouts.Action
         startActions={
           <>
@@ -340,26 +349,7 @@ const FILTERS = [
   },
 ] satisfies Filters.Filter[];
 
-/* -------------------------------------------------------------------------------------------------
- * ListPage
- * -----------------------------------------------------------------------------------------------*/
-
-// component which determines whether this page should render the CE or EE page
-const ListPage = () => {
-  const UsersListPage = useEnterprise(
-    ListPageCE,
-    async () =>
-      (await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
-        .UserListPageEE
-  );
-
-  // block rendering until the EE component is fully loaded
-  if (!UsersListPage) {
-    return null;
-  }
-
-  return <UsersListPage />;
-};
+const ListPage = ListPageCE;
 
 /* -------------------------------------------------------------------------------------------------
  * ProtectedListPage
