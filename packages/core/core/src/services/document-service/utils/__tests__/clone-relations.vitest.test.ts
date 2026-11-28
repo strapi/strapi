@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
+import { get } from 'lodash';
+
 import type { Core } from '@strapi/types';
 
 import {
@@ -393,6 +395,374 @@ describe('clone relations', () => {
 
         expect(original).toEqual(snapshot);
       });
+    });
+  });
+
+  describe('prepareCloneData with edited component lists', () => {
+    const PAGE = 'api::page.page';
+    const ROW = 'default.row';
+    const NOTE = 'default.note';
+    const LIST = 'default.list';
+    const TEXT = 'default.text';
+
+    const brand = { type: 'relation', relation: 'manyToOne', target: TAG };
+
+    const pageModels: Record<string, unknown> = {
+      [TAG]: tagModel,
+      [NOTE]: {
+        uid: NOTE,
+        modelType: 'component',
+        attributes: { text: { type: 'string' }, brand },
+      },
+      [ROW]: {
+        uid: ROW,
+        modelType: 'component',
+        attributes: {
+          url: { type: 'string' },
+          brand,
+          // Bidirectional oneToOne: copied from the source row once the clone exists
+          partner: { type: 'relation', relation: 'oneToOne', target: TAG, inversedBy: 'row' },
+          files: { type: 'media', multiple: true },
+          notes: { type: 'component', component: NOTE, repeatable: true },
+        },
+      },
+      [LIST]: {
+        uid: LIST,
+        modelType: 'component',
+        attributes: {
+          title: { type: 'string' },
+          rows: { type: 'component', component: ROW, repeatable: true },
+        },
+      },
+      [TEXT]: {
+        uid: TEXT,
+        modelType: 'component',
+        attributes: { text: { type: 'string' }, brand },
+      },
+    };
+
+    const pageModel = {
+      uid: PAGE,
+      modelType: 'contentType',
+      options: { draftAndPublish: false },
+      attributes: {
+        title: { type: 'string' },
+        rows: { type: 'component', component: ROW, repeatable: true },
+        box: { type: 'component', component: LIST, repeatable: false },
+        blocks: { type: 'dynamiczone', components: [LIST, TEXT] },
+      },
+    };
+    pageModels[PAGE] = pageModel;
+
+    const getPageModel = (uid: string) => pageModels[uid];
+
+    const UNTOUCHED = { connect: [], disconnect: [] };
+
+    const file = (name: string) => ({ id: name.charCodeAt(0), documentId: `file-${name}` });
+
+    /** A stored row: everything on it is named after `name`. */
+    const sourceRow = (id: number, name: string, notes: unknown[] = []) => ({
+      id,
+      url: `url-${name}`,
+      brand: { id: id * 10, documentId: `brand-${name}` },
+      partner: { id: id * 100, documentId: `partner-${name}` },
+      files: [file(name)],
+      notes,
+    });
+
+    /** What a clone form sends for a stored row whose relations and media were left alone. */
+    const submittedRow = (id: number | string, name: string, extra: object = {}) => ({
+      id,
+      url: `url-${name}`,
+      brand: UNTOUCHED,
+      partner: UNTOUCHED,
+      ...extra,
+    });
+
+    /** What a clone form sends for a row added in the form. */
+    const newRow = (name: string) => ({
+      url: `url-${name}`,
+      brand: { connect: [{ documentId: `brand-${name}` }], disconnect: [] },
+    });
+
+    const sourceRows = () => [sourceRow(1, 'a'), sourceRow(2, 'b'), sourceRow(3, 'c')];
+
+    const prepare = (original: Record<string, unknown>, submitted: Record<string, unknown>) =>
+      prepareCloneData(original, submitted, pageModel as never, getPageModel as never);
+
+    const brandOf = (row: any) => row.brand?.documentId ?? row.brand?.connect?.[0]?.documentId;
+
+    /** `url > brand > file` of each row: the three names differ when a row took another's values. */
+    const summarize = (rows: unknown) =>
+      (rows as any[]).map((row) =>
+        [row.url, brandOf(row), row.files?.[0]?.documentId ?? '-'].join(' > ')
+      );
+
+    /** The source row each deferred copy reads, by the row the clone gets at the same path. */
+    const deferredSources = (result: Awaited<ReturnType<typeof prepare>>) =>
+      result.deferredCopies.map(({ attributeName, ownerPath }) => [
+        `${ownerPath}.${attributeName}`,
+        (get(result.data, ownerPath!) as any).url,
+        (get(result.sourceData, ownerPath!) as any).partner.documentId,
+      ]);
+
+    it('drops a removed entry instead of shifting the ones after it', async () => {
+      const result = await prepare(
+        { rows: sourceRows() },
+        { rows: [submittedRow(1, 'a'), submittedRow(3, 'c')] }
+      );
+
+      expect(summarize(result.data.rows)).toEqual([
+        'url-a > brand-a > file-a',
+        'url-c > brand-c > file-c',
+      ]);
+      expect(deferredSources(result)).toEqual([
+        ['rows.0.partner', 'url-a', 'partner-a'],
+        ['rows.1.partner', 'url-c', 'partner-c'],
+      ]);
+    });
+
+    it('keeps each entry with its own values when one is added before them', async () => {
+      const result = await prepare(
+        { rows: sourceRows() },
+        { rows: [newRow('n'), submittedRow(1, 'a'), submittedRow(2, 'b'), submittedRow(3, 'c')] }
+      );
+
+      expect(summarize(result.data.rows)).toEqual([
+        'url-n > brand-n > -',
+        'url-a > brand-a > file-a',
+        'url-b > brand-b > file-b',
+        'url-c > brand-c > file-c',
+      ]);
+      // The added row takes nothing from a source row: no id, no relation, no deferred copy
+      expect(result.data.rows).toHaveProperty('0', newRow('n'));
+      expect(result.sourceData.rows).toHaveProperty('0', null);
+      expect(deferredSources(result)).toEqual([
+        ['rows.1.partner', 'url-a', 'partner-a'],
+        ['rows.2.partner', 'url-b', 'partner-b'],
+        ['rows.3.partner', 'url-c', 'partner-c'],
+      ]);
+    });
+
+    it('keeps each entry with its own values when they are reordered', async () => {
+      const result = await prepare(
+        { rows: sourceRows() },
+        { rows: [submittedRow(3, 'c'), submittedRow(1, 'a'), submittedRow(2, 'b')] }
+      );
+
+      expect(summarize(result.data.rows)).toEqual([
+        'url-c > brand-c > file-c',
+        'url-a > brand-a > file-a',
+        'url-b > brand-b > file-b',
+      ]);
+      expect(deferredSources(result)).toEqual([
+        ['rows.0.partner', 'url-c', 'partner-c'],
+        ['rows.1.partner', 'url-a', 'partner-a'],
+        ['rows.2.partner', 'url-b', 'partner-b'],
+      ]);
+    });
+
+    it('applies a relation or media edit to the entry it was made on', async () => {
+      const result = await prepare(
+        { rows: sourceRows() },
+        {
+          rows: [
+            submittedRow(3, 'c', {
+              brand: { connect: [{ documentId: 'brand-x' }], disconnect: [{ id: 30 }] },
+              files: { connect: [{ id: 7 }] },
+            }),
+            submittedRow(1, 'a', { files: { disconnect: [{ id: file('a').id }] } }),
+          ],
+        }
+      );
+      const rows = result.data.rows as any[];
+
+      expect(rows.map((row) => row.url)).toEqual(['url-c', 'url-a']);
+      expect(rows[0].brand).toEqual({
+        connect: [{ documentId: 'brand-x' }],
+        disconnect: [{ id: 30 }],
+      });
+      // Media operations resolve against the files of the row they were sent for
+      expect(rows[0].files).toEqual({ set: [{ id: file('c').id }, { id: 7 }] });
+      expect(rows[1].files).toEqual({ set: [] });
+      expect(rows[1].brand).toMatchObject({ documentId: 'brand-a' });
+    });
+
+    it('matches ids sent as strings', async () => {
+      const result = await prepare(
+        { rows: sourceRows() },
+        { rows: [submittedRow('3', 'c'), submittedRow('1', 'a')] }
+      );
+
+      expect(summarize(result.data.rows)).toEqual([
+        'url-c > brand-c > file-c',
+        'url-a > brand-a > file-a',
+      ]);
+    });
+
+    it('treats an entry whose id is not in the source list as a new one', async () => {
+      const result = await prepare(
+        { rows: sourceRows() },
+        { rows: [submittedRow(99, 'z'), submittedRow(2, 'b')] }
+      );
+
+      expect(summarize(result.data.rows)).toEqual(['url-z >  > -', 'url-b > brand-b > file-b']);
+      expect(result.sourceData.rows).toHaveProperty('0', null);
+      expect(deferredSources(result)).toEqual([['rows.1.partner', 'url-b', 'partner-b']]);
+    });
+
+    it('empties a list submitted empty', async () => {
+      const result = await prepare({ rows: sourceRows(), blocks: [] }, { rows: [], blocks: [] });
+
+      expect(result.data.rows).toEqual([]);
+      expect(result.data.blocks).toEqual([]);
+      expect(result.deferredCopies).toEqual([]);
+    });
+
+    it.each([
+      ['carries no id', [{ url: 'renamed' }]],
+      ['carries only ids of another entry, such as another locale', [submittedRow(99, 'z')]],
+    ])('overlays the list by position when it %s', async (_, rows) => {
+      const original = { rows: sourceRows() };
+      const result = await prepare(original, { rows });
+
+      expect(result.sourceData.rows).toEqual(original.rows);
+      expect(summarize(result.data.rows)).toEqual([
+        `${(rows[0] as { url: string }).url} > brand-a > file-a`,
+        'url-b > brand-b > file-b',
+        'url-c > brand-c > file-c',
+      ]);
+      expect(deferredSources(result).map(([path]) => path)).toEqual([
+        'rows.0.partner',
+        'rows.1.partner',
+        'rows.2.partner',
+      ]);
+    });
+
+    it('leaves a list the clone does not submit as it is', async () => {
+      const original = {
+        rows: sourceRows(),
+        box: { id: 5, title: 'Box', rows: sourceRows() },
+        blocks: [{ id: 6, __component: LIST, title: 'List', rows: sourceRows() }],
+      };
+      const result = await prepare(original, { title: 'Clone', box: { title: 'Renamed' } });
+
+      expect(result.sourceData.rows).toBe(original.rows);
+      expect(result.sourceData.blocks).toBe(original.blocks);
+      expect((result.sourceData.box as typeof original.box).rows).toBe(original.box.rows);
+      expect(result.data).toMatchObject({ title: 'Clone', box: { id: 5, title: 'Renamed' } });
+      expect(summarize(result.data.rows)).toEqual(summarize(original.rows));
+    });
+
+    it('lines up dynamic zone entries by id and component', async () => {
+      const original = {
+        blocks: [
+          { id: 1, __component: TEXT, text: 'text-a', brand: { id: 10, documentId: 'brand-a' } },
+          { id: 1, __component: LIST, title: 'list', rows: sourceRows() },
+          { id: 2, __component: TEXT, text: 'text-b', brand: { id: 20, documentId: 'brand-b' } },
+        ],
+      };
+      const result = await prepare(original, {
+        blocks: [
+          { id: 2, __component: TEXT, text: 'text-b', brand: UNTOUCHED },
+          { __component: TEXT, text: 'text-n', brand: UNTOUCHED },
+          { id: 1, __component: LIST, title: 'list', rows: [submittedRow(2, 'b')] },
+          // The id of a stored list block, on a text block: not the same entry
+          { id: 1, __component: TEXT, text: 'text-a', brand: UNTOUCHED },
+          // The id of a stored text block, on a list block: not the same entry
+          { id: 2, __component: LIST, title: 'other', rows: [] },
+        ],
+      });
+      const blocks = result.data.blocks as any[];
+
+      expect(blocks.map((block) => [block.text ?? block.title, brandOf(block)])).toEqual([
+        ['text-b', 'brand-b'],
+        ['text-n', undefined],
+        ['list', undefined],
+        ['text-a', 'brand-a'],
+        ['other', undefined],
+      ]);
+      expect(summarize(blocks[2].rows)).toEqual(['url-b > brand-b > file-b']);
+      expect(blocks[4]).toEqual({ id: 2, __component: LIST, title: 'other', rows: [] });
+      expect(deferredSources(result)).toEqual([['blocks.2.rows.0.partner', 'url-b', 'partner-b']]);
+    });
+
+    it('lines up lists nested in a component, a repeatable entry and a dynamic zone entry', async () => {
+      const note = (id: number, name: string) => ({
+        id,
+        text: `note-${name}`,
+        brand: { id: id * 10, documentId: `brand-${name}` },
+      });
+      const submittedNote = (id: number, name: string) => ({
+        id,
+        text: `note-${name}`,
+        brand: UNTOUCHED,
+      });
+      const notes = (rows: unknown) =>
+        (rows as any[]).map((row) =>
+          row.notes.map((item: any) => `${item.text} > ${brandOf(item)}`)
+        );
+
+      const original = {
+        rows: [
+          sourceRow(1, 'a', [note(1, 'a1'), note(2, 'a2')]),
+          sourceRow(2, 'b', [note(3, 'b1'), note(4, 'b2')]),
+        ],
+        box: { id: 5, title: 'Box', rows: sourceRows() },
+        blocks: [{ id: 6, __component: LIST, title: 'List', rows: sourceRows() }],
+      };
+      const result = await prepare(original, {
+        rows: [
+          submittedRow(2, 'b', { notes: [submittedNote(4, 'b2'), submittedNote(3, 'b1')] }),
+          submittedRow(1, 'a', { notes: [submittedNote(2, 'a2')] }),
+        ],
+        box: { id: 5, rows: [submittedRow(3, 'c'), submittedRow(1, 'a')] },
+        blocks: [{ id: 6, __component: LIST, rows: [submittedRow(2, 'b'), newRow('n')] }],
+      });
+      const data = result.data as any;
+
+      expect(notes(data.rows)).toEqual([
+        ['note-b2 > brand-b2', 'note-b1 > brand-b1'],
+        ['note-a2 > brand-a2'],
+      ]);
+      expect(summarize(data.box.rows)).toEqual([
+        'url-c > brand-c > file-c',
+        'url-a > brand-a > file-a',
+      ]);
+      expect(summarize(data.blocks[0].rows)).toEqual([
+        'url-b > brand-b > file-b',
+        'url-n > brand-n > -',
+      ]);
+      expect(deferredSources(result)).toEqual([
+        ['rows.0.partner', 'url-b', 'partner-b'],
+        ['rows.1.partner', 'url-a', 'partner-a'],
+        ['box.rows.0.partner', 'url-c', 'partner-c'],
+        ['box.rows.1.partner', 'url-a', 'partner-a'],
+        ['blocks.0.rows.0.partner', 'url-b', 'partner-b'],
+      ]);
+    });
+
+    it('lines up the lists of an entry paired by position', async () => {
+      const original = {
+        blocks: [{ id: 6, __component: LIST, title: 'List', rows: sourceRows() }],
+      };
+      const result = await prepare(original, {
+        blocks: [{ __component: LIST, rows: [submittedRow(3, 'c'), submittedRow(2, 'b')] }],
+      });
+
+      expect(summarize((result.data.blocks as any[])[0].rows)).toEqual([
+        'url-c > brand-c > file-c',
+        'url-b > brand-b > file-b',
+      ]);
+    });
+
+    it('does not mutate the source entry', async () => {
+      const original = { rows: sourceRows() };
+      const snapshot = structuredClone(original);
+
+      await prepare(original, { rows: [submittedRow(3, 'c'), newRow('n'), submittedRow(1, 'a')] });
+
+      expect(original).toEqual(snapshot);
     });
   });
 
