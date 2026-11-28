@@ -22,17 +22,17 @@ const UserStatus = ({ user }: { user: { isActive?: boolean } & AdminUserMfaState
           }),
         ] as const)
       : user.isActive
-      ? ([
-          'success',
-          formatMessage({ id: 'Settings.permissions.users.active', defaultMessage: 'Active' }),
-        ] as const)
-      : ([
-          'neutral',
-          formatMessage({
-            id: 'Settings.permissions.users.inactive',
-            defaultMessage: 'Inactive',
-          }),
-        ] as const);
+        ? ([
+            'success',
+            formatMessage({ id: 'Settings.permissions.users.active', defaultMessage: 'Active' }),
+          ] as const)
+        : ([
+            'neutral',
+            formatMessage({
+              id: 'Settings.permissions.users.inactive',
+              defaultMessage: 'Inactive',
+            }),
+          ] as const);
 
   return (
     <Flex>

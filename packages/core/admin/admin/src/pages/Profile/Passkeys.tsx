@@ -97,18 +97,18 @@ const Passkeys = () => {
                       'Passkeys need the admin panel to be served over HTTPS. This page is not, so your device will not offer them.',
                   })
                 : !supported
-                ? formatMessage({
-                    id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
-                    defaultMessage: 'This device does not support passkeys.',
-                  })
-                : formatMessage(
-                    {
-                      id: 'Settings.profile.form.section.mfa.passkeys.cap',
-                      defaultMessage:
-                        'You have reached the limit of {max} passkeys. Remove one to add another.',
-                    },
-                    { max: MAX_PASSKEYS_PER_USER }
-                  )}
+                  ? formatMessage({
+                      id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
+                      defaultMessage: 'This device does not support passkeys.',
+                    })
+                  : formatMessage(
+                      {
+                        id: 'Settings.profile.form.section.mfa.passkeys.cap',
+                        defaultMessage:
+                          'You have reached the limit of {max} passkeys. Remove one to add another.',
+                      },
+                      { max: MAX_PASSKEYS_PER_USER }
+                    )}
             </Typography>
           )
         }

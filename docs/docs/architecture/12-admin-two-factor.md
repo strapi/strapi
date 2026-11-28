@@ -104,8 +104,8 @@ password changed and the account is locked, and drops the form, whose link is sp
     "challengeToken": "...", // authorises exactly one follow-up call
     "expiresIn": 300,
     "trustedDeviceDays": 30, // or null; see Trusted devices
-    "passkeyAvailable": true // see Passkeys
-  }
+    "passkeyAvailable": true, // see Passkeys
+  },
 }
 ```
 
@@ -376,8 +376,8 @@ otpauth URI or a recovery code:
     "graceUntil": null, // ISO deadline of a running grace period
     "trustedDevicesEnabled": true,
     "passkeysEnabled": true,
-    "hasLocalPassword": true // false for an SSO-only administrator
-  }
+    "hasLocalPassword": true, // false for an SSO-only administrator
+  },
 }
 ```
 

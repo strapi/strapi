@@ -88,9 +88,7 @@ export interface AttemptReservation {
 }
 
 export type EnforceOutcome =
-  | { outcome: 'none' }
-  | { outcome: 'grace'; graceUntil: Date }
-  | { outcome: 'refused' };
+  { outcome: 'none' } | { outcome: 'grace'; graceUntil: Date } | { outcome: 'refused' };
 
 /** Roles are optional: the login path does not populate them, so the resolver loads them rather
  * than read "not populated" as "no roles". */
@@ -187,9 +185,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const adminStore = strapi.store({ type: 'core', name: 'admin' });
     const auth = (await adminStore.get({ key: 'auth' })) as
-      | { providers?: { ssoLockedRoles?: Array<string | number> } }
-      | null
-      | undefined;
+      { providers?: { ssoLockedRoles?: Array<string | number> } } | null | undefined;
     return auth?.providers?.ssoLockedRoles ?? [];
   };
 
@@ -385,9 +381,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const syncFeatureState = async (): Promise<void> => {
     const store = strapi.store({ type: 'core', name: 'admin' });
     const stored = (await store.get({ key: FEATURE_STATE_KEY })) as
-      | { enabled?: unknown }
-      | null
-      | undefined;
+      { enabled?: unknown } | null | undefined;
     const enabled = isEnabled();
 
     if (enabled && stored?.enabled !== true) {
@@ -833,7 +827,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     for (const candidate of candidates) {
       // Sequential: no reason to burn every bcrypt comparison once one matches.
-
       const matches = await auth.validatePassword(normalised, candidate.codeHash);
       if (!matches) {
         continue;

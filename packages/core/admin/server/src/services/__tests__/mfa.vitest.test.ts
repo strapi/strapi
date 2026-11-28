@@ -3724,7 +3724,7 @@ describe('mfa service: enforce', () => {
     } = {}
   ) => {
     const storeGet = vi.fn(async ({ key }: { key: string }) =>
-      key === 'security-settings' ? options.stored ?? { mfa: { mode: 'required' } } : null
+      key === 'security-settings' ? (options.stored ?? { mfa: { mode: 'required' } }) : null
     );
     const invalidateRefreshToken = vi.fn(() => Promise.resolve());
     const sessionManager = Object.assign(
@@ -4187,7 +4187,6 @@ describe('mfa service: trusted devices', () => {
     const tokens: string[] = [];
     for (let i = 0; i <= MAX_TRUSTED_DEVICES_PER_USER; i += 1) {
       vi.setSystemTime(now + i * 1000);
-
       tokens.push((await service.trustDevice('1', {}))!.token);
     }
 

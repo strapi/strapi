@@ -231,14 +231,14 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                     defaultMessage: 'Save your recovery codes',
                   }
                 : isReplace
-                ? {
-                    id: 'Settings.profile.form.section.mfa.replace.title',
-                    defaultMessage: 'Replace authenticator',
-                  }
-                : {
-                    id: 'Settings.profile.form.section.mfa.enrol.title',
-                    defaultMessage: 'Set up two-factor authentication',
-                  }
+                  ? {
+                      id: 'Settings.profile.form.section.mfa.replace.title',
+                      defaultMessage: 'Replace authenticator',
+                    }
+                  : {
+                      id: 'Settings.profile.form.section.mfa.enrol.title',
+                      defaultMessage: 'Set up two-factor authentication',
+                    }
             )}
           </Modal.Title>
         </Modal.Header>
