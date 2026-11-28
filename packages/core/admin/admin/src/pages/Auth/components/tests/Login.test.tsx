@@ -4,6 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { Login } from '../Login';
+import { Oops } from '../Oops';
 
 const FIELD_LABELS = ['Email', 'Password', 'Remember me'];
 
@@ -190,6 +191,55 @@ describe('ResetPassword', () => {
       expect(getByLabelText('Password*')).toHaveAttribute('aria-invalid', 'true');
       expect(getByLabelText('Password*')).toHaveAccessibleDescription(message);
       expect(window.localStorage.getItem('jwtToken')).toBeNull();
+    });
+
+    it('sends an inactive account to the oops page with the inactive message', async () => {
+      server.use(
+        http.post('/admin/login', () =>
+          HttpResponse.json(
+            {
+              error: {
+                status: 400,
+                name: 'ApplicationError',
+                message: 'User not active',
+                details: {},
+              },
+            },
+            { status: 400 }
+          )
+        )
+      );
+
+      const { getByRole, getByLabelText, user, findByText, queryByText } = render(
+        <Routes>
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/oops" element={<Oops />} />
+        </Routes>,
+        { initialEntries: ['/auth/login'] }
+      );
+
+      await user.type(getByLabelText('Email*'), 'test@testing.com');
+      await user.type(getByLabelText('Password*'), 'Testing123!');
+      fireEvent.click(getByRole('button', { name: 'Login' }));
+
+      expect(
+        await findByText('Your account is inactive. Ask an administrator to activate it.')
+      ).toBeInTheDocument();
+      expect(queryByText('Your account has been suspended.')).not.toBeInTheDocument();
+    });
+
+    it('keeps the generic oops message for other callers', async () => {
+      const { findByText } = render(
+        <Routes>
+          <Route path="/auth/oops" element={<Oops />} />
+        </Routes>,
+        { initialEntries: ['/auth/oops'] }
+      );
+
+      expect(await findByText('Your account has been suspended.')).toBeInTheDocument();
+      expect(
+        await findByText('If this is a mistake, please contact your administrator.')
+      ).toBeInTheDocument();
     });
 
     it('still shows the server message for other login errors', async () => {

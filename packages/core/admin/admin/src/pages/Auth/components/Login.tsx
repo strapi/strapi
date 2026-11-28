@@ -77,7 +77,7 @@ const Login = ({ children }: LoginProps) => {
       const message = res.error.message ?? 'Something went wrong';
 
       if (camelCase(message).toLowerCase() === 'usernotactive') {
-        navigate('/auth/oops');
+        navigate({ pathname: '/auth/oops', search: '?reason=inactive' });
         return;
       }
 
