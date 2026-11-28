@@ -3,7 +3,7 @@
  * App.js
  *
  */
-import { Suspense, useEffect } from 'react';
+import { Suspense } from 'react';
 
 import { Outlet } from 'react-router-dom';
 
@@ -11,7 +11,6 @@ import { GlobalNotifications } from '../../ee/admin/src/components/GlobalNotific
 
 import { Page } from './components/PageHelpers';
 import { Providers } from './components/Providers';
-import { LANGUAGE_LOCAL_STORAGE_KEY } from './reducer';
 
 import type { Store } from './core/store/configure';
 import type { StrapiApp } from './StrapiApp';
@@ -22,14 +21,6 @@ interface AppProps {
 }
 
 const App = ({ strapi, store }: AppProps) => {
-  useEffect(() => {
-    const language = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
-
-    if (language) {
-      document.documentElement.lang = language;
-    }
-  }, []);
-
   /**
    * @internal
    * @experimental
