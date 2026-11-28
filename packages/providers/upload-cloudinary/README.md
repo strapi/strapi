@@ -27,7 +27,7 @@ npm install @strapi/provider-upload-cloudinary --save
 - `providerOptions` is passed down during the construction of the provider. (ex: `cloudinary.config`). [Complete list of options](https://cloudinary.com/documentation/cloudinary_sdks#configuration_parameters)
 - `actionOptions` is passed directly to each method respectively allowing for custom options. You can find the complete list of [upload/ uploadStream options](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters) and [delete options](https://cloudinary.com/documentation/image_upload_api_reference#destroy_optional_parameters)
 
-See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
+See the [documentation about using a provider](https://docs.strapi.io/cms/configurations/media-library-providers/cloudinary) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/cms/configurations/environment).
 
 ### Provider Configuration
 
@@ -57,7 +57,7 @@ module.exports = ({ env }) => ({
 
 ### Security Middleware Configuration
 
-Due to the default settings in the Strapi Security Middleware you will need to modify the `contentSecurityPolicy` settings to properly see thumbnail previews in the Media Library. You should replace `strapi::security` string with the object bellow instead as explained in the [middleware configuration](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/required/middlewares.html#loading-order) documentation.
+Due to the default settings in the Strapi Security Middleware you will need to modify the `contentSecurityPolicy` settings to properly see thumbnail previews in the Media Library. You should replace `strapi::security` string with the object bellow instead as explained in the [middleware configuration](https://docs.strapi.io/cms/configurations/middlewares) documentation.
 
 `./config/middlewares.js`
 
