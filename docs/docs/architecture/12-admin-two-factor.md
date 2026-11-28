@@ -319,7 +319,9 @@ navigation and content row takes the rest. The stack publishes its height as
 `--strapi-global-banners-height` on the root element (`GLOBAL_BANNERS_HEIGHT` in
 `constants/theme.ts`), and the toaster, the sticky page header, the desktop navigation height and
 the mobile burger menu offset by it, so none of them covers the banners. The variable falls back to
-`0px` when no stack is mounted, so a build without the feature lays out as before.
+`0px` when no stack is mounted, so a build without the feature lays out as before. Below the `large`
+breakpoint a strip is compact: tighter padding and gap, and title, text and action link flow inline
+as one run of text instead of one line each. From `large` up it is the wrapping flex row.
 
 `MfaNotices` turns the unseen rows into one notice per load, whose "profile page" links to the
 profile, and closing it marks those rows seen. Its colour follows severity: `warning` when any

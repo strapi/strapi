@@ -41,8 +41,8 @@ interface ConfirmDowngradeDialogProps {
   confirmLabel?: string;
   /** The confirm button's variant: `danger-light`, like `ConfirmDialog`, by default. */
   variant?: ButtonProps['variant'];
-  /** The icon over the text: the red warning one by default. */
-  icon?: React.ReactElement;
+  /** The colour the warning icon takes once the fields are filled: red by default. */
+  iconTone?: 'danger' | 'primary';
 }
 
 /**
@@ -62,7 +62,7 @@ interface ConfirmDowngradeDialogProps {
  * guards a double fire.
  *
  * Looks like the admin `ConfirmDialog` (`FormConfirmDialog`); callers pick the confirm variant and
- * icon, `danger-light` with the red warning by default.
+ * icon tone, `danger-light` with the red warning by default.
  */
 const ConfirmDowngradeDialog = ({
   open,
@@ -74,7 +74,7 @@ const ConfirmDowngradeDialog = ({
   description,
   confirmLabel,
   variant,
-  icon,
+  iconTone,
 }: ConfirmDowngradeDialogProps) => {
   const { formatMessage } = useIntl();
   const [password, setPassword] = React.useState('');
@@ -143,7 +143,7 @@ const ConfirmDowngradeDialog = ({
         })
       }
       variant={variant}
-      icon={icon}
+      iconTone={iconTone}
       canSubmit={canSubmit}
       loading={submitting}
       onSubmit={handleSubmit}

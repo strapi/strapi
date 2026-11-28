@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button, Flex, Status, Typography } from '@strapi/design-system';
-import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useNotification } from '../../../../../features/Notifications';
@@ -110,7 +109,7 @@ const UserLockStatus = ({ userId, lockedAt, canUpdate, onUnlocked }: UserLockSta
         })}
         // Unlock restores access: it is not a negative action, so no red icon or danger button.
         variant="secondary"
-        icon={<Information />}
+        iconTone="primary"
         description={
           <ReauthDescription
             body={formatMessage({

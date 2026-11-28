@@ -20,7 +20,7 @@ export const actionTypes = {
   'admin.auth.autoRegistration': 'SSO auto-registration',
   'admin.logout': 'Admin logout',
   'admin.auth.mfa_required': 'Two-factor code requested',
-  'admin.mfa.enabled': 'Enable two-factor authentication',
+  'admin.mfa.enabled': 'Set up two-factor authentication',
   'admin.mfa.disabled': 'Disable two-factor authentication',
   'admin.mfa.reset': "Reset a user's two-factor authentication",
   'admin.mfa.challenge.failed': 'Failed two-factor code',

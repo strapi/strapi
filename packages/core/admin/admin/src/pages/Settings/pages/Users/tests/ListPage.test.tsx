@@ -38,6 +38,7 @@ describe('Users | ListPage', () => {
 
     await screen.findByText('John');
     expect(screen.queryByText('Two-factor')).not.toBeInTheDocument();
+    expect(screen.getByText('User status')).toBeInTheDocument();
   });
 
   describe('with the two-factor feature on', () => {
@@ -85,6 +86,9 @@ describe('Users | ListPage', () => {
       render(<ListPageCE />);
 
       expect(await screen.findByText('Two-factor')).toBeInTheDocument();
+      // Next to the two-factor column the status column is a plain "Status".
+      expect(screen.getByText('Status', { selector: 'th *' })).toBeInTheDocument();
+      expect(screen.queryByText('User status')).not.toBeInTheDocument();
       expect((await cellsOf('Enrolled')).twoFactor).toHaveTextContent('Enabled');
       const locked = await cellsOf('Lockee');
       expect(locked.twoFactor).toHaveTextContent('Not set up');

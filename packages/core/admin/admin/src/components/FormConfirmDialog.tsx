@@ -11,6 +11,11 @@ const Form = styled.form`
   flex-direction: column;
 `;
 
+/** All body text is centred, so a wrapped sentence and a short line read the same way. */
+const BodyText = styled(Flex)`
+  text-align: center;
+`;
+
 interface FormConfirmDialogProps {
   open: boolean;
   /** Called when the dialog is dismissed (Cancel, Escape). */
@@ -28,6 +33,11 @@ interface FormConfirmDialogProps {
    * `canSubmit`; pass an icon of your own for an action that is not negative.
    */
   icon?: React.ReactElement;
+  /**
+   * The colour the default icon takes once `canSubmit`: `danger` (red) by default, `primary` for
+   * an action that is not negative. It is grey until then either way.
+   */
+  iconTone?: 'danger' | 'primary';
   /** Whether the required fields are filled in. */
   canSubmit: boolean;
   loading?: boolean;
@@ -50,6 +60,7 @@ const FormConfirmDialog = ({
   confirmLabel,
   variant = 'danger-light',
   icon,
+  iconTone = 'danger',
   canSubmit,
   loading,
   onSubmit,
@@ -66,14 +77,21 @@ const FormConfirmDialog = ({
       }}
     >
       <Dialog.Content aria-describedby={undefined}>
-        <Dialog.Header>{title}</Dialog.Header>
+        <Dialog.Header textAlign="center">{title}</Dialog.Header>
         <Form onSubmit={onSubmit}>
-          <Dialog.Body>
-            {React.cloneElement(icon ?? <ConfirmDialogIcon neutral={!canSubmit} />, {
-              width: 24,
-              height: 24,
-            })}
-            {children}
+          {/* Stretch, so the credential fields take the dialog's full width in every dialog. */}
+          <Dialog.Body alignItems="stretch">
+            <Flex justifyContent="center">
+              {React.cloneElement(
+                icon ?? <ConfirmDialogIcon neutral={!canSubmit} primary={iconTone === 'primary'} />,
+                { width: 24, height: 24 }
+              )}
+            </Flex>
+            {children ? (
+              <BodyText direction="column" alignItems="stretch" gap={2}>
+                {children}
+              </BodyText>
+            ) : null}
             {fields ? (
               <Flex direction="column" alignItems="stretch" gap={4} paddingTop={2}>
                 {fields}

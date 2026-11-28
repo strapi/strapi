@@ -69,12 +69,17 @@ const ListPageCE = () => {
 
   // Only when the rows carry two-factor state
   const showTwoFactor = users.some((user) => 'mfaEnabledAt' in user);
-  const headers = [...TABLE_HEADERS, ...(showTwoFactor ? [TWO_FACTOR_HEADER] : [])].map(
-    (header) => ({
-      ...header,
-      label: formatMessage(header.label),
-    })
-  );
+  // With the feature on, the status column is a plain "Status" next to the two-factor column; the
+  // list without it keeps its "User status" header.
+  const headers = [
+    ...TABLE_HEADERS.map((header) =>
+      header.name === 'isActive' && showTwoFactor ? { ...header, label: STATUS_LABEL } : header
+    ),
+    ...(showTwoFactor ? [TWO_FACTOR_HEADER] : []),
+  ].map((header) => ({
+    ...header,
+    label: formatMessage(header.label),
+  }));
 
   const title = formatMessage({
     id: 'global.users',
@@ -306,6 +311,12 @@ const TABLE_HEADERS: Array<
     },
   },
 ];
+
+/** The status column's header when the list also shows the two-factor column. */
+const STATUS_LABEL = {
+  id: 'Settings.permissions.users.status',
+  defaultMessage: 'Status',
+};
 
 /** Two-factor enforcement state per row. */
 const TWO_FACTOR_HEADER: (typeof TABLE_HEADERS)[number] = {

@@ -29,6 +29,36 @@ const Strip = styled(Flex)<{ $divider: (typeof VARIANTS)[GlobalBannerVariant]['d
   border-bottom: 1px solid ${({ theme, $divider }) => theme.colors[$divider]};
 `;
 
+/**
+ * Title, text and action. From the `large` breakpoint up it is a wrapping flex row; below it, text
+ * flows inline (title, text and the action link on one run, wrapping only where it has to), so a
+ * phone does not spend a line on each.
+ */
+const Content = styled(Flex)`
+  display: block;
+
+  > * {
+    margin-right: ${({ theme }) => theme.spaces[1]};
+  }
+
+  ${({ theme }) => theme.breakpoints.large} {
+    display: flex;
+
+    > * {
+      margin-right: 0;
+    }
+  }
+`;
+
+/** The icon only repeats what the colour and the title say, so a phone gives its width to the text. */
+const IconSlot = styled(Flex)`
+  display: none;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    display: flex;
+  }
+`;
+
 interface GlobalBannerProps {
   variant?: GlobalBannerVariant;
   title: React.ReactNode;
@@ -64,23 +94,23 @@ const GlobalBanner = ({
       $divider={divider}
       background={background}
       width="100%"
-      gap={3}
+      gap={{ initial: 2, large: 3 }}
       alignItems="center"
-      paddingTop={2}
-      paddingBottom={2}
+      paddingTop={{ initial: 1, large: 2 }}
+      paddingBottom={{ initial: 1, large: 2 }}
       paddingLeft={RESPONSIVE_DEFAULT_SPACING}
       paddingRight={RESPONSIVE_DEFAULT_SPACING}
     >
-      <Flex shrink={0}>
+      <IconSlot shrink={0}>
         <Icon fill={icon} aria-hidden />
-      </Flex>
-      <Flex flex={1} wrap="wrap" alignItems="baseline" gap={2}>
+      </IconSlot>
+      <Content flex={1} wrap="wrap" alignItems="baseline" gap={2}>
         <Typography fontWeight="bold" textColor="neutral800">
           {title}
         </Typography>
         <Typography textColor="neutral800">{children}</Typography>
         {action ? <Box>{action}</Box> : null}
-      </Flex>
+      </Content>
       {onClose && closeLabel ? (
         <Box shrink={0}>
           <IconButton variant="ghost" label={closeLabel} onClick={onClose} withTooltip={false}>

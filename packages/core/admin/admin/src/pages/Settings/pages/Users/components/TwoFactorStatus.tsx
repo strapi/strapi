@@ -39,7 +39,7 @@ const MfaRequirementText = ({ requirement }: { requirement: MfaRequirement }) =>
 /**
  * One account's two-factor state in a table cell: Enabled or Not set up, with the requirement as a
  * small line under it. Whether the account is locked is a login state, not a two-factor one, and is
- * shown in the User status column instead. Status text, not colour alone, carries the meaning.
+ * shown in the Status column instead. Status text, not colour alone, carries the meaning.
  */
 const TwoFactorStatus = ({ user }: { user: AdminUserMfaState }) => {
   const { formatMessage } = useIntl();

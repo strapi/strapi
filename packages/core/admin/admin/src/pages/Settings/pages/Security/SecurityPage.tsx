@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, Dialog, EmptyStateLayout, Flex, Typography } from '@strapi/design-system';
-import { Check, Information } from '@strapi/icons';
+import { Check } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
@@ -363,7 +363,7 @@ const SecurityDowngradeDialog = ({
   let description: React.ReactNode;
   let confirmLabel: string | undefined;
   let variant: React.ComponentProps<typeof ConfirmDowngradeDialog>['variant'] = 'danger';
-  let icon: React.ReactElement | undefined;
+  let iconTone: React.ComponentProps<typeof ConfirmDowngradeDialog>['iconTone'];
 
   const enforcementSentences = () =>
     downgrade?.lowersEnforcement
@@ -405,7 +405,7 @@ const SecurityDowngradeDialog = ({
     confirmLabel = formatMessage({ id: 'global.save', defaultMessage: 'Save' });
     // Saving a longer trust period is a plain confirmation, not a negative action.
     variant = 'default';
-    icon = <Information />;
+    iconTone = 'primary';
   } else if (downgrade?.disablesPasskeys) {
     title = formatMessage({
       id: 'Settings.security.passkeys.disable.title',
@@ -437,7 +437,7 @@ const SecurityDowngradeDialog = ({
       description={description}
       confirmLabel={confirmLabel}
       variant={variant}
-      icon={icon}
+      iconTone={iconTone}
     />
   );
 };
