@@ -1,5 +1,5 @@
-import { MAX_COMPONENT_DEPTH } from '../../../constants';
-import { getComponentDepth } from '../../../utils/getMaxDepth';
+import { MAX_COMPONENT_DEPTH, MAX_DZ_DEPTH } from '../../../constants';
+import { getComponentDepth, getDzDepth } from '../../../utils/getMaxDepth';
 
 import type { IconByType } from '../../AttributeIcon';
 import type { NestedComponent } from '../../DataManager/utils/retrieveNestedComponents';
@@ -42,7 +42,13 @@ export const getAttributesToDisplay = (
     const canAddComponentInAnotherComponent =
       !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
     if (canAddComponentInAnotherComponent) {
-      return [defaultAttributes, ['component']];
+      const dzDepth = getDzDepth(targetUid, nestedComponents);
+      const canAddDzInComponent = dzDepth < MAX_DZ_DEPTH;
+      const extraTypes: IconByType[] = ['component'];
+      if (canAddDzInComponent) {
+        extraTypes.push('dynamiczone');
+      }
+      return [defaultAttributes, extraTypes];
     }
   }
 
