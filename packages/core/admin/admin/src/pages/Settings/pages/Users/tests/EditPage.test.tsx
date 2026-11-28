@@ -189,14 +189,9 @@ describe('Users | EditPage', () => {
       expect(await screen.findByText('This account is not locked')).toBeInTheDocument();
     });
 
-    it('disables Unlock without the update permission', async () => {
-      server.use(
-        userWith({
-          mfaEnabledAt: null,
-          mfaGraceUntil: '2026-09-01T14:30:00.000Z',
-          mfaLockedAt: '2026-09-08T14:30:00.000Z',
-        })
-      );
+    it('shows the lock without Unlock to a viewer who cannot update users', async () => {
+      // A read-only viewer gets the lock alone from the server, not the two-factor state.
+      server.use(userWith({ mfaLockedAt: '2026-09-08T14:30:00.000Z' }));
       render(<EditPage />, {
         initialEntries: ['/settings/users/1'],
         providerOptions: {
@@ -204,7 +199,10 @@ describe('Users | EditPage', () => {
         },
       });
 
-      expect(await screen.findByRole('button', { name: 'Unlock' })).toBeDisabled();
+      expect(await screen.findByText(/^Locked for password login since/)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
+      // No two-factor panel without the update permission.
+      expect(screen.queryByText('Not set up')).not.toBeInTheDocument();
     });
 
     const enrolled = () =>

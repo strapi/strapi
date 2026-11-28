@@ -22,26 +22,45 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
 
-/** For those who can act on it (unlock, reset), and only while the feature is on. */
-const canSeeMfaState = (ctx: Context): boolean =>
-  getService('mfa').isEnabled() && Boolean(ctx.state.userAbility?.can('admin::users.update'));
+/**
+ * How much enforcement state the caller sees, and only while the feature is on. Those who can act
+ * on it (unlock, reset) get all of it. Everyone else who can read users gets the lock alone: it is
+ * a login state shown in the user status, so a read-only viewer should not see a locked account
+ * as active.
+ */
+type MfaStateScope = 'none' | 'lock' | 'full';
+
+const mfaStateScope = (ctx: Context): MfaStateScope => {
+  if (!getService('mfa').isEnabled()) {
+    return 'none';
+  }
+
+  return ctx.state.userAbility?.can('admin::users.update') ? 'full' : 'lock';
+};
 
 /** Appended after sanitising, like `registrationToken` in `create`; never the secrets. */
 const withMfaState = <T extends object>(
   sanitized: T,
   user: AdminUser,
-  include: boolean,
+  scope: MfaStateScope,
   required = false
-): T & AdminUserMfaState =>
-  include
-    ? {
-        ...sanitized,
-        mfaEnabledAt: user.mfaEnabledAt ?? null,
-        mfaGraceUntil: user.mfaGraceUntil ?? null,
-        mfaLockedAt: user.mfaLockedAt ?? null,
-        mfaRequired: required,
-      }
-    : sanitized;
+): T & AdminUserMfaState => {
+  if (scope === 'full') {
+    return {
+      ...sanitized,
+      mfaEnabledAt: user.mfaEnabledAt ?? null,
+      mfaGraceUntil: user.mfaGraceUntil ?? null,
+      mfaLockedAt: user.mfaLockedAt ?? null,
+      mfaRequired: required,
+    };
+  }
+
+  if (scope === 'lock') {
+    return { ...sanitized, mfaLockedAt: user.mfaLockedAt ?? null };
+  }
+
+  return sanitized;
+};
 
 export default {
   async create(ctx: Context) {
@@ -92,13 +111,14 @@ export default {
     // @ts-expect-error update the service type
     const { results, pagination } = await userService.findPage(sanitizedQuery);
 
-    const includeMfa = canSeeMfaState(ctx);
-    const required: boolean[] = includeMfa ? await getService('mfa').requiredForUsers(results) : [];
+    const mfaScope = mfaStateScope(ctx);
+    const required: boolean[] =
+      mfaScope === 'full' ? await getService('mfa').requiredForUsers(results) : [];
 
     ctx.body = {
       data: {
         results: results.map((user: AdminUser, index: number) =>
-          withMfaState(userService.sanitizeUser(user), user, includeMfa, required[index])
+          withMfaState(userService.sanitizeUser(user), user, mfaScope, required[index])
         ),
         pagination,
       },
@@ -115,12 +135,13 @@ export default {
     }
 
     const sanitized = getService('user').sanitizeUser(user as AdminUser);
-    const includeMfa = canSeeMfaState(ctx);
-    const [required] = includeMfa ? await getService('mfa').requiredForUsers([user]) : [false];
+    const mfaScope = mfaStateScope(ctx);
+    const [required] =
+      mfaScope === 'full' ? await getService('mfa').requiredForUsers([user]) : [false];
     const data: FindOne.Response['data'] = withMfaState(
       sanitized,
       user as AdminUser,
-      includeMfa,
+      mfaScope,
       required
     );
 

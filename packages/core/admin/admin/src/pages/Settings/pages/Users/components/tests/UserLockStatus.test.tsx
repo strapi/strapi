@@ -73,9 +73,11 @@ describe('UserLockStatus', () => {
     expect(onUnlocked).not.toHaveBeenCalled();
   });
 
-  it('disables Unlock without the update permission', async () => {
+  it('shows the lock read-only, with no Unlock, without the update permission', async () => {
     renderLock({ canUpdate: false });
 
-    expect(await screen.findByRole('button', { name: 'Unlock' })).toBeDisabled();
+    expect(await screen.findByText('Locked')).toBeInTheDocument();
+    expect(screen.getByText(/^Locked for password login since/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
   });
 });

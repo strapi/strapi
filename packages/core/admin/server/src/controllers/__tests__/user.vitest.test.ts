@@ -198,8 +198,14 @@ describe('User Controller', () => {
       });
     });
 
-    test('appends nothing for a read-only caller', async () => {
-      const user = { id: 1, email: 'a@b.c', mfaGraceUntil: '2026-09-11T10:00:00.000Z' };
+    test('appends only the lock for a read-only caller', async () => {
+      const user = {
+        id: 1,
+        email: 'a@b.c',
+        mfaEnabledAt: null,
+        mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+        mfaLockedAt: '2026-09-12T10:00:00.000Z',
+      };
       const findOne = vi.fn(() => Promise.resolve(user));
       const sanitizeUser = vi.fn(() => ({ id: 1, email: 'a@b.c' }));
       global.strapi = {
@@ -218,7 +224,10 @@ describe('User Controller', () => {
       await userController.findOne(ctx);
 
       expect(findOne).toHaveBeenCalledWith(1);
-      expect(ctx.body).toEqual({ data: { id: 1, email: 'a@b.c' } });
+      // The lock is a login state shown in the user status; the two-factor state stays hidden.
+      expect(ctx.body).toEqual({
+        data: { id: 1, email: 'a@b.c', mfaLockedAt: '2026-09-12T10:00:00.000Z' },
+      });
     });
 
     test('flag off: appends nothing even for a caller who may update users', async () => {
@@ -432,10 +441,10 @@ describe('User Controller', () => {
       ]);
     });
 
-    test('appends nothing for a read-only caller', async () => {
+    test('appends only the lock for a read-only caller', async () => {
       expect(await run({ enabled: true, canUpdate: false })).toEqual([
-        { id: 1, email: 'a@b.c' },
-        { id: 2, email: 'd@e.f' },
+        { id: 1, email: 'a@b.c', mfaLockedAt: null },
+        { id: 2, email: 'd@e.f', mfaLockedAt: null },
       ]);
     });
 

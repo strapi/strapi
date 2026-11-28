@@ -60,8 +60,8 @@ export declare namespace FindAll {
   }
 }
 /**
- * Enforcement state appended to `GET /admin/users` and `GET /admin/users/:id` for callers holding
- * `admin::users.update` while the feature is on.
+ * Enforcement state appended to `GET /admin/users` and `GET /admin/users/:id` while the feature is
+ * on: all of it for callers holding `admin::users.update`, only `mfaLockedAt` for other readers.
  */
 export interface AdminUserMfaState {
   mfaEnabledAt?: string | Date | null;

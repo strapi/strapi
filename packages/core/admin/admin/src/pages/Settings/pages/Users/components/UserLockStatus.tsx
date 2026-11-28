@@ -88,14 +88,12 @@ const UserLockStatus = ({ userId, lockedAt, canUpdate, onUnlocked }: UserLockSta
           })}
         </Typography>
       </Flex>
-      <Button
-        variant="secondary"
-        disabled={!canUpdate}
-        loading={isLoading}
-        onClick={() => setConfirmOpen(true)}
-      >
-        {formatMessage({ id: 'Settings.permissions.users.mfa.unlock', defaultMessage: 'Unlock' })}
-      </Button>
+      {/* Viewers who cannot update users still see the lock, read-only: no action to offer. */}
+      {canUpdate ? (
+        <Button variant="secondary" loading={isLoading} onClick={() => setConfirmOpen(true)}>
+          {formatMessage({ id: 'Settings.permissions.users.mfa.unlock', defaultMessage: 'Unlock' })}
+        </Button>
+      ) : null}
       <ConfirmDowngradeDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
