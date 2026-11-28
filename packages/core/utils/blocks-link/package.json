@@ -1,0 +1,6 @@
+{
+  "main": "../dist/blocks-link.js",
+  "module": "../dist/blocks-link.mjs",
+  "source": "../src/blocks-link.ts",
+  "types": "../dist/blocks-link.d.ts"
+}

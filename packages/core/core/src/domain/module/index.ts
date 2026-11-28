@@ -51,7 +51,6 @@ const removeNamespacedKeys = <T extends Record<string, unknown>>(map: T, namespa
 
 const defaultModule = {
   config: {},
-  routes: [],
   controllers: {},
   services: {},
   contentTypes: {},
@@ -64,7 +63,8 @@ export const createModule = (
   rawModule: RawModule,
   strapi: Core.Strapi
 ): Module => {
-  _.defaults(rawModule, defaultModule);
+  // A fresh routes array per module, so that route-less modules don't share one
+  _.defaults(rawModule, { routes: [] }, defaultModule);
 
   try {
     validateModule(rawModule);

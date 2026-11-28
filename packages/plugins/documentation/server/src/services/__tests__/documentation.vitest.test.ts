@@ -8,6 +8,13 @@ import documentation from '../documentation';
 import override from '../override';
 import { defaultConfig } from '../../config/default-plugin-config';
 
+/**
+ * The service reads `environment` through `strapi.config.get`; every other key it reads
+ * returns the plugin config.
+ */
+let environment = 'development';
+const getConfig = (key: string) => (key === 'environment' ? environment : defaultConfig);
+
 const mockStrapiInstance = {
   dirs: {
     app: {
@@ -20,8 +27,7 @@ const mockStrapiInstance = {
   apis,
   plugins,
   config: {
-    environment: 'development',
-    get: () => defaultConfig,
+    get: getConfig,
   },
   log: {
     info: vi.fn(),
@@ -70,8 +76,8 @@ describe('Documentation plugin | Documentation service', () => {
 
   afterEach(() => {
     // Reset the mocked strapi config
-    global.strapi.config.environment = 'development';
-    global.strapi.config.get = () => defaultConfig as any;
+    environment = 'development';
+    global.strapi.config.get = getConfig as any;
   });
 
   it('generates a valid openapi schema', async () => {
@@ -637,7 +643,7 @@ describe('Documentation plugin | Documentation service', () => {
 
     beforeAll(() => {
       previousDirs = global.strapi.dirs;
-      previousEnvironment = global.strapi.config.environment;
+      previousEnvironment = environment;
       global.strapi.dirs = {
         app: {
           extensions: '/mock-project/src/extensions',
@@ -652,15 +658,15 @@ describe('Documentation plugin | Documentation service', () => {
 
     afterAll(() => {
       global.strapi.dirs = previousDirs;
-      global.strapi.config.environment = previousEnvironment;
+      environment = previousEnvironment;
     });
 
     afterEach(() => {
-      global.strapi.config.environment = previousEnvironment;
+      environment = previousEnvironment;
     });
 
     it('uses dist.extensions for getFullDocumentationPath when config.environment is production', () => {
-      global.strapi.config.environment = 'production';
+      environment = 'production';
       const docService = documentation({ strapi: global.strapi });
       expect(docService.getFullDocumentationPath()).toBe(
         path.join('/mock-project/dist/src/extensions', 'documentation', 'documentation')
@@ -668,7 +674,7 @@ describe('Documentation plugin | Documentation service', () => {
     });
 
     it('uses app.extensions for getFullDocumentationPath when config.environment is not production', () => {
-      global.strapi.config.environment = 'development';
+      environment = 'development';
       const docService = documentation({ strapi: global.strapi });
       expect(docService.getFullDocumentationPath()).toBe(
         path.join('/mock-project/src/extensions', 'documentation', 'documentation')
@@ -676,7 +682,7 @@ describe('Documentation plugin | Documentation service', () => {
     });
 
     it('uses dist paths for plugin and API docs when config.environment is production', () => {
-      global.strapi.config.environment = 'production';
+      environment = 'production';
       const docService = documentation({ strapi: global.strapi });
       expect(docService.getApiDocumentationPath({ name: 'upload', getter: 'plugin' })).toBe(
         path.join('/mock-project/dist/src/extensions', 'upload', 'documentation')
@@ -687,7 +693,7 @@ describe('Documentation plugin | Documentation service', () => {
     });
 
     it('uses app paths for plugin and API docs when config.environment is not production', () => {
-      global.strapi.config.environment = 'test';
+      environment = 'test';
       const docService = documentation({ strapi: global.strapi });
       expect(docService.getApiDocumentationPath({ name: 'upload', getter: 'plugin' })).toBe(
         path.join('/mock-project/src/extensions', 'upload', 'documentation')

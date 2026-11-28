@@ -259,6 +259,38 @@ describe('Releases home page', () => {
     });
   });
 
+  it('shows the date alone for a release published by hand before a schedule still to come', async () => {
+    const [base] = mockReleasesPageData.releasesByStatus.data;
+    const DAY = 24 * 60 * 60 * 1000;
+    server.use(
+      http.get('/content-releases', () =>
+        HttpResponse.json({
+          ...mockReleasesPageData.releasesByStatus,
+          data: [
+            {
+              ...base,
+              id: 1,
+              name: 'Published early',
+              status: 'done',
+              scheduledAt: '2099-01-15T09:00:00.000Z',
+              timezone: 'UTC',
+              releasedAt: new Date(Date.now() - DAY).toISOString(),
+            },
+          ],
+        })
+      )
+    );
+
+    render(<ReleasesPage />);
+
+    await screen.findByRole('link', { name: 'Published early' });
+    const [early] = screen.getAllByRole('row').slice(1);
+
+    expect(within(early).getByText(/^Jan 15, 2099 • 09:00/)).toBeInTheDocument();
+    expect(within(early).queryByRole('time')).not.toBeInTheDocument();
+    expect(early).not.toHaveTextContent(/\bin \d+ \w+|\bago\b/i);
+  });
+
   it('dates a release by its schedule, the one the sort and the filters use, even once it ran', async () => {
     const [base] = mockReleasesPageData.releasesByStatus.data;
     server.use(
@@ -416,6 +448,87 @@ describe('Releases home page', () => {
       '50',
       '100',
     ]);
+  });
+
+  describe('release name', () => {
+    const mockWidths = ({
+      scrollWidth,
+      clientWidth,
+    }: {
+      scrollWidth: number;
+      clientWidth: number;
+    }) => {
+      const original = {
+        scroll: Object.getOwnPropertyDescriptor(Element.prototype, 'scrollWidth'),
+        client: Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth'),
+      };
+      Object.defineProperty(Element.prototype, 'scrollWidth', {
+        configurable: true,
+        get: () => scrollWidth,
+      });
+      Object.defineProperty(Element.prototype, 'clientWidth', {
+        configurable: true,
+        get: () => clientWidth,
+      });
+
+      return () => {
+        if (original.scroll) {
+          Object.defineProperty(Element.prototype, 'scrollWidth', original.scroll);
+        }
+        if (original.client) {
+          Object.defineProperty(Element.prototype, 'clientWidth', original.client);
+        }
+      };
+    };
+
+    it('shows the full name in a tooltip when it is cut off', async () => {
+      const restore = mockWidths({ scrollWidth: 400, clientWidth: 200 });
+      captureRequests();
+
+      try {
+        const { user } = render(<ReleasesPage />);
+
+        await user.hover(await screen.findByRole('link', { name: 'Holiday newsletter' }));
+
+        expect(await screen.findByRole('tooltip')).toHaveTextContent('Holiday newsletter');
+      } finally {
+        restore();
+      }
+    });
+
+    it('shows the tooltip when the link takes the keyboard focus', async () => {
+      const restore = mockWidths({ scrollWidth: 400, clientWidth: 200 });
+      captureRequests();
+
+      try {
+        render(<ReleasesPage />);
+
+        const link = await screen.findByRole('link', { name: 'Holiday newsletter' });
+        fireEvent.focus(link);
+
+        expect(await screen.findByRole('tooltip')).toHaveTextContent('Holiday newsletter');
+      } finally {
+        restore();
+      }
+    });
+
+    it('shows no tooltip when the name fits', async () => {
+      const restore = mockWidths({ scrollWidth: 200, clientWidth: 200 });
+      captureRequests();
+
+      try {
+        const { user } = render(<ReleasesPage />);
+
+        await user.hover(await screen.findByRole('link', { name: 'Holiday newsletter' }));
+
+        // The tooltip opens asynchronously: give it the chance to appear, then require it hasn't
+        await expect(
+          waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument(), { timeout: 1500 })
+        ).rejects.toThrow();
+      } finally {
+        restore();
+      }
+    });
   });
 
   describe('filters', () => {

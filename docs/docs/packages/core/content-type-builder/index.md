@@ -28,7 +28,7 @@ CTB does not store schemas in the database. A content type of an API lives in `s
 
 The admin panel does not save one attribute at a time. It sends the whole change set to `POST /content-type-builder/update-schema`. Each content type, component and attribute in the payload has an `action` (`create`, `update` or `delete`). The `schema` service applies the payload to the builder, writes the files, generates or clears API folders, and commits the folder groups last. On error, `rollbackSchemaMutation` restores the touched files. Code: [`services/schema.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/services/schema.ts).
 
-After the files are written, CTB emits `content-type.create|update|delete` and `component.create|update|delete` on `strapi.eventHub`, one event per changed schema. It awaits each event before the controller triggers the reload, for at most 2.5 seconds (except `content-type.update` after a kind change, which `editContentType` emits without awaiting it): past that, `emitSchemaEvent` logs a warning with `strapi.log.warn`, leaves the listeners running and moves on, so a listener that never settles cannot hang the save. If a listener throws, `emitSchemaEvent` logs the error with `strapi.log.error` and the request still succeeds, because the schema change is already on disk. Code: [`utils/events.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/utils/events.ts).
+After the files are written, CTB emits `content-type.create|update|delete` and `component.create|update|delete` on `strapi.eventHub`, one event per changed schema. It awaits each event before the controller triggers the reload, for at most 2.5 seconds: past that, `emitSchemaEvent` logs a warning with `strapi.log.warn`, leaves the listeners running and moves on, so a listener that never settles cannot hang the save. If a listener throws, `emitSchemaEvent` logs the error with `strapi.log.error` and the request still succeeds, because the schema change is already on disk. Code: [`utils/events.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/utils/events.ts).
 
 ### Reload after a write
 
@@ -49,6 +49,8 @@ The `content-structure` service writes the folder groups that the admin navigati
 ### Admin editor
 
 The admin part registers a menu link and the plugin API `forms`, which other plugins use to add fields and validation to the CTB modals. `DataManagerProvider` keeps the working copy of the schema in a Redux slice with undo and redo (`undoRedo.ts`). Modals in `components/FormModal` edit attributes and types. The read permission is `plugin::content-type-builder.read`, which `bootstrap` registers.
+
+`GET /content-type-builder/schema` returns `settings` next to the schemas: the `renameMigrations` plugin setting, and `strictRelations`, which is `true` only when `api.documents.strictRelations` is the literal `true` (the document service rejects other non-boolean values). The document service enforces `required` on relations and media only under that flag. When `strictRelations` is `false`, the advanced form of relation attributes disables the **Required** checkbox, with a hint and a tooltip explaining the flag. Media attributes, single or multiple, keep an editable checkbox because the Content Manager already requires them on publish. A `required: true` already in the schema stays checked, and the save keeps it.
 
 ## Related
 

@@ -56,7 +56,7 @@ describe('Schema controller', () => {
         })
     );
 
-    const controller = schemaController();
+    const controller = schemaController({ strapi: global.strapi });
     const first = createCtx();
     const second = createCtx();
 

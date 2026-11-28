@@ -119,16 +119,29 @@ describe('Admin Permissions - fields query parameter', () => {
   });
 
   test('a list read drops a field the role cannot read from fields', async () => {
-    const res = await restrictedRq({
-      method: 'GET',
-      url: `/content-manager/collection-types/${articleUid}`,
-      qs: { fields: ['title', 'secret'] },
-    });
+    // The response is also sanitized, so check the fields the sanitized query selects
+    const findPageSpy = jest.spyOn(
+      strapi.plugin('content-manager').service('document-manager'),
+      'findPage'
+    );
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0].title).toBe('Title');
-    expect(res.body.results[0].secret).toBeUndefined();
+    try {
+      const res = await restrictedRq({
+        method: 'GET',
+        url: `/content-manager/collection-types/${articleUid}`,
+        qs: { fields: ['title', 'secret'] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.results).toHaveLength(1);
+      expect(res.body.results[0].title).toBe('Title');
+      expect(res.body.results[0].secret).toBeUndefined();
+
+      expect(findPageSpy).toHaveBeenCalledTimes(1);
+      expect(findPageSpy.mock.calls[0][0].fields).toEqual(['title']);
+    } finally {
+      findPageSpy.mockRestore();
+    }
   });
 
   test('a relation search returns a field the role can read when fields names it', async () => {
@@ -167,5 +180,8 @@ describe('Admin Permissions - fields query parameter', () => {
     const stored = await strapi.documents(homepageUid).findFirst();
 
     expect(stored.headline).toBe('Headline');
+    // The first save creates the document, and the role can create subtitle: dropping it from
+    // fields must not drop the value it was sent with
+    expect(stored.subtitle).toBe('Subtitle');
   });
 });

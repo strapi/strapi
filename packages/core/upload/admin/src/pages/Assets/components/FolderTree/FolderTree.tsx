@@ -720,13 +720,9 @@ export const FOLDER_TREE_ROOT_SELECTOR = '[data-folder-tree-root]';
  * and renders:
  *
  * 1. A "Media library" title
- * 2. A filter input that prunes the tree to matching destinations
- * 3. A "Home" entry that clears the folder query param
- * 4. A "FOLDERS" section header
- * 5. The folder tree itself
- *
- * The filter is purely local: it never touches the URL and never affects the
- * asset list, which has its own independent search in the content toolbar.
+ * 2. A "Home" entry that clears the folder query param
+ * 3. A "FOLDERS" section header
+ * 4. The folder tree itself
  *
  * Presentational with respect to routing — navigation is delegated to the parent
  * via `onSelectFolder` so the URL stays the single source of truth (see

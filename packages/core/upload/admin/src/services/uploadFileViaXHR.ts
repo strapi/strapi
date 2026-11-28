@@ -1,4 +1,4 @@
-import { attemptTokenRefresh } from '@strapi/admin/strapi-admin';
+import { attemptTokenRefresh, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import type { File } from '../../../shared/contracts/files';
 
@@ -26,11 +26,24 @@ export class UploadFileError extends Error {
    */
   isServerMessage: boolean;
 
-  constructor(message: string, status?: number, isServerMessage = false) {
+  /** `error.name` from the Strapi error envelope, when there is one. */
+  errorName?: string;
+
+  /** `error.details` from the Strapi error envelope, when there is one. */
+  details?: unknown;
+
+  constructor(
+    message: string,
+    status?: number,
+    isServerMessage = false,
+    { errorName, details }: { errorName?: string; details?: unknown } = {}
+  ) {
     super(message);
     this.name = 'UploadFileError';
     this.status = status;
     this.isServerMessage = isServerMessage;
+    this.errorName = errorName;
+    this.details = details;
   }
 }
 
@@ -45,6 +58,7 @@ export type UploadProgressCallback = (bytes: number, total: number) => void;
  *
  * @param url - The full endpoint URL to POST to.
  * @param token - Admin auth token; the `Authorization` header is only set when present.
+ * @param requestHeaders - Headers from `unstable_getRequestHeaders()`, read by the caller.
  * @param formData - Prebuilt multipart body containing the single file and its `fileInfo`.
  * @param signal - Aborts the in-flight request when triggered.
  * @param onProgress - Called with `(loaded, total)` bytes as the upload progresses.
@@ -56,6 +70,7 @@ export type UploadProgressCallback = (bytes: number, total: number) => void;
 const sendUploadViaXHR = <T>(
   url: string,
   token: string | null | undefined,
+  requestHeaders: Headers,
   formData: FormData,
   signal: AbortSignal,
   onProgress?: UploadProgressCallback
@@ -72,6 +87,8 @@ const sendUploadViaXHR = <T>(
     if (token) {
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     }
+
+    requestHeaders.forEach((value, name) => xhr.setRequestHeader(name, value));
 
     const handleAbort = () => xhr.abort();
     signal.addEventListener('abort', handleAbort);
@@ -100,6 +117,8 @@ const sendUploadViaXHR = <T>(
 
       let message = `Upload failed with status ${xhr.status}`;
       let isServerMessage = false;
+      let errorName: string | undefined;
+      let details: unknown;
       try {
         const parsed = JSON.parse(xhr.responseText);
         const serverMessage = parsed?.error?.message || parsed?.message;
@@ -107,10 +126,14 @@ const sendUploadViaXHR = <T>(
           message = serverMessage;
           isServerMessage = true;
         }
+        if (parsed?.error && typeof parsed.error === 'object') {
+          errorName = typeof parsed.error.name === 'string' ? parsed.error.name : undefined;
+          details = parsed.error.details;
+        }
       } catch {
         // Keep the default status-based message.
       }
-      reject(new UploadFileError(message, xhr.status, isServerMessage));
+      reject(new UploadFileError(message, xhr.status, isServerMessage, { errorName, details }));
     };
 
     xhr.onerror = () => {
@@ -127,15 +150,17 @@ const sendUploadViaXHR = <T>(
   });
 };
 
+/** @throws {RequestHeadersError} When `requestHeaders` is absent and a provider fails */
 export const uploadFileViaXHR = async <T = File>(
   url: string,
   token: string | null | undefined,
   formData: FormData,
   signal: AbortSignal,
-  onProgress?: UploadProgressCallback
+  onProgress?: UploadProgressCallback,
+  requestHeaders: Headers = unstable_getRequestHeaders()
 ): Promise<T> => {
   try {
-    return await sendUploadViaXHR<T>(url, token, formData, signal, onProgress);
+    return await sendUploadViaXHR<T>(url, token, requestHeaders, formData, signal, onProgress);
   } catch (error) {
     if (!(error instanceof UploadFileError) || error.status !== 401) {
       throw error;
@@ -144,7 +169,14 @@ export const uploadFileViaXHR = async <T = File>(
     try {
       const refreshedToken = await attemptTokenRefresh();
 
-      return await sendUploadViaXHR<T>(url, refreshedToken, formData, signal, onProgress);
+      return await sendUploadViaXHR<T>(
+        url,
+        refreshedToken,
+        requestHeaders,
+        formData,
+        signal,
+        onProgress
+      );
     } catch (refreshError) {
       if (refreshError instanceof UploadFileError) {
         throw refreshError;

@@ -7,7 +7,7 @@ const { getService } = require('../utils');
 module.exports = ({ strapi }) => ({
   async createRole(params) {
     if (!params.type) {
-      params.type = _.snakeCase(_.deburr(_.toLower(params.name)));
+      params.type = _.snakeCase(_.deburr(String(params.name ?? '').toLowerCase()));
     }
 
     const role = await strapi.db

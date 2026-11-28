@@ -1,9 +1,10 @@
 import _ from 'lodash';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Modules, Struct } from '@strapi/types';
+import type { Modules, Struct, UID } from '@strapi/types';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
+import type { Action } from '../domain/action';
 import permissionDomain from '../domain/permission';
 
 interface FieldOptions {
@@ -114,25 +115,43 @@ const getNestedFieldsWithIntermediate = (
 };
 
 /**
- * Creates an array of permissions with the "properties.fields" attribute filled
+ * Whether the subject is the UID of a loaded content type. Own keys only, so an inherited key
+ * such as `constructor` does not pass.
+ */
+const isContentTypeUID = (subject: string): subject is UID.ContentType => {
+  return Object.hasOwn(strapi.contentTypes, subject);
+};
+
+/**
+ * Creates an array of permissions with the "properties.fields" attribute filled.
+ * An action without subjects and an undefined subject create no permission. When the action
+ * applies to fields, a subject that is not a loaded content type creates no permission either,
+ * since its fields cannot be resolved.
  */
 const getPermissionsWithNestedFields = (
-  actions: any[],
+  actions: readonly Action[],
   { nestingLevel, restrictedSubjects = [] }: FieldOptions = {}
 ): Modules.Permissions.PermissionRule[] => {
-  return actions.reduce((permissions, action) => {
-    const validSubjects = action.subjects.filter(
-      (subject: any) => !restrictedSubjects.includes(subject)
-    );
+  return actions.reduce<Modules.Permissions.PermissionRule[]>((permissions, action) => {
+    const appliesToFields = actionDomain.appliesToProperty('fields', action);
+    const validSubjects = (action.subjects ?? [])
+      .filter((subject): subject is string => subject !== undefined)
+      .filter((subject) => restrictedSubjects.includes(subject) === false);
 
-    // Create a Permission for each subject (content-type uid) within the action
+    // Create a Permission for each subject within the action
     for (const subject of validSubjects) {
-      const fields = actionDomain.appliesToProperty('fields', action)
-        ? getNestedFields(strapi.contentTypes[subject], {
-            components: strapi.components,
-            nestingLevel,
-          })
-        : undefined;
+      let fields: string[] | undefined;
+
+      if (appliesToFields === true) {
+        if (isContentTypeUID(subject) === false) {
+          continue;
+        }
+
+        fields = getNestedFields(strapi.contentTypes[subject], {
+          components: strapi.components,
+          nestingLevel,
+        });
+      }
 
       const permission = permissionDomain.create({
         action: action.actionId,
@@ -148,7 +167,8 @@ const getPermissionsWithNestedFields = (
 };
 
 /**
- * Cleans permissions' fields (add required ones, remove the non-existing ones)
+ * Cleans permissions' fields (remove the ones that left the schema, replace a stored parent path
+ * with its nested fields)
  */
 const cleanPermissionFields = (
   permissions: Modules.Permissions.PermissionRule[]

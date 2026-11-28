@@ -270,10 +270,16 @@ describe('Content-API Token Auth Strategy', () => {
       },
     };
 
+    // Like Strapi's ability.can: a string or a { name, params } action, and a TypeError on a nullish one
     const ability = {
-      can: vi.fn((action) => {
-        if (customApiToken.permissions.includes(action)) return true;
-        return false;
+      can: vi.fn((action: unknown) => {
+        if (action === undefined || action === null) {
+          throw new TypeError(`Cannot check a nullish action: ${String(action)}`);
+        }
+
+        const name = typeof action === 'string' ? action : (action as { name: string }).name;
+
+        return customApiToken.permissions.includes(name);
       }),
     };
 
@@ -370,6 +376,38 @@ describe('Content-API Token Auth Strategy', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }
+    });
+
+    test('Throws if a sparse scope hides a write action from a read-only key', () => {
+      global.strapi = strapiMock as any;
+
+      // eslint-disable-next-line no-sparse-arrays
+      const scope = [, 'api::model.model.find'];
+
+      expect(() =>
+        contentApiTokenStrategy.verify({ credentials: readOnlyApiToken }, { scope })
+      ).toThrow(errors.ForbiddenError);
+    });
+
+    test('Throws if a sparse scope hides an action from a custom key', () => {
+      global.strapi = strapiMock as any;
+
+      // eslint-disable-next-line no-sparse-arrays
+      const scope = [, 'api::model.model.update'];
+
+      expect(() =>
+        contentApiTokenStrategy.verify({ credentials: customApiToken, ability }, { scope })
+      ).toThrow(errors.ForbiddenError);
+    });
+
+    test('Allows a parametrized action from a custom key', () => {
+      global.strapi = strapiMock as any;
+
+      const scope = [{ name: 'api::model.model.update', params: {} }];
+
+      expect(
+        contentApiTokenStrategy.verify({ credentials: customApiToken, ability }, { scope })
+      ).toBeUndefined();
     });
 
     test('Throws if the credentials are not passed in the auth object', () => {
