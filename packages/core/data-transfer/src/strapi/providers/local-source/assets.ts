@@ -1,44 +1,103 @@
+import { tmpdir } from 'os';
 import { join } from 'path';
-import { Duplex, PassThrough, Readable } from 'stream';
-import { stat, createReadStream, ReadStream } from 'fs-extra';
+import { Duplex, Readable } from 'stream';
+import { pipeline } from 'stream/promises';
+import { stat, createReadStream, createWriteStream, mkdtemp, remove } from 'fs-extra';
 import * as webStream from 'stream/web';
 import type { Core } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../types';
 
-function getFileStream(
-  filepath: string,
-  strapi: Core.Strapi,
-  isLocal = false
-): PassThrough | ReadStream {
-  if (isLocal) {
-    // Todo: handle errors
-    return createReadStream(filepath);
+/**
+ * Number of times a remote asset download is attempted before the transfer fails.
+ */
+const REMOTE_ASSET_DOWNLOAD_ATTEMPTS = 3;
+
+/**
+ * A response that will not change on retry (e.g. a non-200 status).
+ */
+class RemoteAssetResponseError extends Error {}
+
+interface AssetForTransfer {
+  stats: { size: number };
+  stream: Readable;
+}
+
+async function downloadRemoteAsset(filepath: string, strapi: Core.Strapi, destination: string) {
+  const res: Response = await strapi.fetch(filepath);
+
+  if (res.status !== 200) {
+    res.body?.cancel().catch(() => {});
+    throw new RemoteAssetResponseError(`Request failed with status code ${res.status}`);
   }
 
-  const readableStream = new PassThrough();
+  if (!res.body) {
+    throw new RemoteAssetResponseError('Empty data found for file');
+  }
 
-  // fetch the image from remote url and stream it
-  strapi
-    .fetch(filepath)
-    .then((res: Response) => {
-      if (res.status !== 200) {
-        readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
-        return;
+  await pipeline(
+    Readable.fromWeb(res.body as webStream.ReadableStream<Uint8Array>),
+    createWriteStream(destination)
+  );
+}
+
+/**
+ * Downloads a remote asset into a temporary file and streams it from there.
+ *
+ * The transfer engine buffers several assets ahead of the destination and pipes each asset's
+ * stream as soon as it is read, so streaming straight from the HTTP response leaves many
+ * downloads open and paused on backpressure. Storage providers close such idle connections
+ * ("other side closed"), which aborts the whole transfer. Downloading each file completely,
+ * one at a time as the generator advances, keeps no connection idle. The temporary file is
+ * removed once its stream closes.
+ */
+async function getRemoteAssetForTransfer(
+  filepath: string,
+  strapi: Core.Strapi
+): Promise<AssetForTransfer> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= REMOTE_ASSET_DOWNLOAD_ATTEMPTS; attempt += 1) {
+    const dir = await mkdtemp(join(tmpdir(), 'strapi-transfer-asset-'));
+    const file = join(dir, 'asset');
+    const removeDir = () => remove(dir).catch(() => {});
+
+    try {
+      await downloadRemoteAsset(filepath, strapi, file);
+      const { size } = await stat(file);
+      const stream = createReadStream(file);
+      stream.once('close', removeDir);
+
+      return { stats: { size }, stream };
+    } catch (error: unknown) {
+      await removeDir();
+
+      if (error instanceof RemoteAssetResponseError) {
+        throw error;
       }
 
-      if (res.body) {
-        // pipe the image data
-        Readable.fromWeb(res.body as webStream.ReadableStream<Uint8Array>).pipe(readableStream);
-      } else {
-        readableStream.emit('error', new Error('Empty data found for file'));
-      }
-    })
-    .catch((error: unknown) => {
-      readableStream.emit('error', error);
-    });
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      strapi.log.warn(
+        `[Data transfer] Downloading ${filepath} failed (attempt ${attempt}/${REMOTE_ASSET_DOWNLOAD_ATTEMPTS}): ${message}`
+      );
+    }
+  }
 
-  return readableStream;
+  throw lastError;
+}
+
+async function getAssetForTransfer(
+  filepath: string,
+  strapi: Core.Strapi,
+  isLocal: boolean
+): Promise<AssetForTransfer> {
+  if (!isLocal) {
+    return getRemoteAssetForTransfer(filepath, strapi);
+  }
+
+  const stats = await stat(filepath);
+  return { stats, stream: createReadStream(filepath) };
 }
 
 export function getFileStatsForTransfer(
@@ -53,6 +112,9 @@ export function getFileStatsForTransfer(
     strapi
       .fetch(filepath)
       .then((res: Response) => {
+        // Only the headers are needed; an unread body would keep the connection open
+        res.body?.cancel().catch(() => {});
+
         if (res.status !== 200) {
           reject(new Error(`Request failed with status code ${res.status}`));
           return;
@@ -122,9 +184,9 @@ export const createAssetsStream = (
         await signUploadFileForTransfer(strapi, file);
       }
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
-      let stats: { size: number };
+      let asset: AssetForTransfer;
       try {
-        stats = await getFileStatsForTransfer(filepath, strapi, isLocalProvider);
+        asset = await getAssetForTransfer(filepath, strapi, isLocalProvider);
       } catch (err: unknown) {
         const code =
           err && typeof err === 'object' && 'code' in err
@@ -136,14 +198,13 @@ export const createAssetsStream = (
         }
         throw err;
       }
-      const stream = getFileStream(filepath, strapi, isLocalProvider);
 
       yield {
         metadata: file,
         filepath,
         filename: `${file.hash}${file.ext ?? ''}`,
-        stream,
-        stats: { size: stats.size },
+        stream: asset.stream,
+        stats: { size: asset.stats.size },
       };
 
       if (file.formats) {
@@ -152,9 +213,9 @@ export const createAssetsStream = (
           const fileFormatFilepath = isLocalProvider
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
-          let fileFormatStats: { size: number };
+          let fileFormatAsset: AssetForTransfer;
           try {
-            fileFormatStats = await getFileStatsForTransfer(
+            fileFormatAsset = await getAssetForTransfer(
               fileFormatFilepath,
               strapi,
               isLocalProvider
@@ -170,14 +231,13 @@ export const createAssetsStream = (
             }
             throw err;
           }
-          const fileFormatStream = getFileStream(fileFormatFilepath, strapi, isLocalProvider);
           const metadata = { ...fileFormat, type: format, id: file.id, mainHash: file.hash };
           yield {
             metadata,
             filepath: fileFormatFilepath,
             filename: `${fileFormat.hash}${fileFormat.ext ?? ''}`,
-            stream: fileFormatStream,
-            stats: { size: fileFormatStats.size },
+            stream: fileFormatAsset.stream,
+            stats: { size: fileFormatAsset.stats.size },
           };
         }
       }
