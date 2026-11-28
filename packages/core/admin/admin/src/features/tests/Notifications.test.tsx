@@ -1,4 +1,4 @@
-import { act, render } from '@tests/utils';
+import { act, render, waitFor } from '@tests/utils';
 
 import { NotificationConfig, useNotification } from '../Notifications';
 
@@ -132,5 +132,25 @@ describe.skip('Notifications', () => {
     act(() => jest.advanceTimersByTime(1500));
 
     expect(queryAllByText(/test/)).toHaveLength(1);
+  });
+});
+
+describe('Notifications below the global banners', () => {
+  it('offsets the toasts by the global banner stack height', async () => {
+    const { getByRole, user } = render(<Component />);
+
+    await user.click(getByRole('button', { name: 'Trigger Notification' }));
+
+    const toaster = await waitFor(() => {
+      const element = document.querySelector<HTMLElement>('[data-sonner-toaster]');
+      expect(element).not.toBeNull();
+      return element!;
+    });
+    expect(toaster.style.getPropertyValue('--offset-top')).toBe(
+      'calc(var(--strapi-global-banners-height, 0px) + 24px)'
+    );
+    expect(toaster.style.getPropertyValue('--mobile-offset-top')).toBe(
+      'calc(var(--strapi-global-banners-height, 0px) + 16px)'
+    );
   });
 });

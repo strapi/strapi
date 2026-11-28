@@ -104,8 +104,8 @@ password changed and the account is locked, and drops the form, whose link is sp
     "challengeToken": "...", // authorises exactly one follow-up call
     "expiresIn": 300,
     "trustedDeviceDays": 30, // or null; see Trusted devices
-    "passkeyAvailable": true, // see Passkeys
-  },
+    "passkeyAvailable": true // see Passkeys
+  }
 }
 ```
 
@@ -297,12 +297,35 @@ two limits:
 Notice `metadata` is limited to neutral context and never carries a code, a secret or an otpauth
 URI.
 
-In the admin panel, `MfaNotices` turns the unseen rows into one inline warning per load, whose
-"profile page" links to the profile, and closing it marks those rows seen. `MfaBanners` renders it in
-the content column directly under the two-factor grace banner, so the two stack and never overlap
-(it was a toast that covered the banner until then). It never shows on the profile page itself,
-which lists the same rows in its two-factor section with its own "Mark all as seen". Arriving there
-hides the notice without marking anything seen.
+`GET /admin/mfa/events` (`recentEvents`) feeds the profile's "Recent security events": the
+newest 20 rows, seen or not, **including** the caller's own family's, because the profile is the
+account's history (a recovery-code login or a passkey added from this login belongs there). Each row
+carries `isNew`, which is the notices rule (unseen and not from the caller's family), so the
+profile shows a "New" badge and offers "Mark all as seen" only when the server would clear
+something. Reading `/mfa/notices` there hid exactly those own-login events.
+
+`recovery_codes_issued` is the acknowledgement marker (its `seenAt` means "codes saved"), written on
+enrolment and on every regeneration, so it is never a notice. A regeneration also records its own
+`recovery_codes_regenerated` row from the controller, which is a notice ("New recovery codes were
+generated"); enrolment does not, because it already records `enabled` or `authenticator_replaced`.
+`recovery_codes_regenerated` is not emitted on the hub or audited.
+
+In the admin panel, `MfaBanners` renders the global banners above all navigation, edge to edge, as
+full-width strips (`GlobalBanner`, not the card-shaped `Alert`): the grace banner first, the
+security notice under it. The authenticated layout is a `100dvh` column, banners first, and the
+navigation and content row takes the rest. The stack publishes its height as
+`--strapi-global-banners-height` on the root element (`GLOBAL_BANNERS_HEIGHT` in
+`constants/theme.ts`), and the toaster, the sticky page header, the desktop navigation height and
+the mobile burger menu offset by it, so none of them covers the banners. The variable falls back to
+`0px` when no stack is mounted, so a build without the feature lays out as before.
+
+`MfaNotices` turns the unseen rows into one notice per load, whose "profile page" links to the
+profile, and closing it marks those rows seen. Its colour follows severity: `warning` when any
+unseen row is risky, otherwise `default`, per `MFA_NOTICE_SEVERITY` in `utils/mfaNoticeSeverity.ts`.
+`enabled` counts as risky (the feed never shows the caller's own enrolment, so it means another login
+enrolled the account) and `locked` as info (only ever seen next to the `unlocked` that ended it). It
+never shows on the profile page itself, which lists the same rows in its two-factor section with
+its own "Mark all as seen". Arriving there hides the notice without marking anything seen.
 
 The EE audit log records thirteen of these, plus `admin.auth.mfa_required` and
 `admin.security-settings.update`, on the standard shape. They are registered through
@@ -353,8 +376,8 @@ otpauth URI or a recovery code:
     "graceUntil": null, // ISO deadline of a running grace period
     "trustedDevicesEnabled": true,
     "passkeysEnabled": true,
-    "hasLocalPassword": true, // false for an SSO-only administrator
-  },
+    "hasLocalPassword": true // false for an SSO-only administrator
+  }
 }
 ```
 

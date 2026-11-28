@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Link, Typography } from '@strapi/design-system';
-import { WarningCircle } from '@strapi/icons';
+import { Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -9,13 +8,15 @@ import { useGetMfaStatusQuery } from '../services/mfa';
 import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
 import { isMfaNotFoundError } from '../utils/mfaFeature';
 
+import { GlobalBanner } from './GlobalBanner';
+
 /** Re-read every 15 minutes so a long-lived tab notices a grace period stamped by a background token refresh. */
 export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
 
 /**
- * Non-dismissible warning shown while `/admin/mfa/me` reports `required && !enabled`: this
- * account must enrol before `graceUntil` or lose password login. A `Box` rather than the design
- * system `Alert`, because `Alert` always renders a close button and this must stay put.
+ * Non-dismissible warning strip shown while `/admin/mfa/me` reports `required && !enabled`: this
+ * account must enrol before `graceUntil` or lose password login. A `GlobalBanner` without
+ * `onClose`, so it has no close button and stays put.
  *
  * `graceUntil` can be `null` while `required` is true -- the session predates the requirement,
  * since the clock starts at the first session issued after it applies -- so the copy then points
@@ -57,55 +58,41 @@ const MfaGraceBanner = () => {
   }
 
   return (
-    <Box paddingTop={4} paddingLeft={6} paddingRight={6}>
-      <Flex
-        role="status"
-        background="warning100"
-        borderColor="warning200"
-        hasRadius
-        padding={4}
-        gap={3}
-        alignItems="flex-start"
-      >
-        <Box shrink={0} paddingTop={1}>
-          <WarningCircle fill="warning600" aria-hidden />
-        </Box>
-        <Flex direction="column" alignItems="flex-start" gap={1}>
-          <Typography fontWeight="bold" textColor="warning700" tag="p">
+    <GlobalBanner
+      variant="warning"
+      data-testid="mfa-grace-banner"
+      title={formatMessage({
+        id: 'Settings.profile.form.section.mfa.grace.title',
+        defaultMessage: 'Two-factor authentication required',
+      })}
+      action={
+        onProfilePage ? null : (
+          <Link tag={NavLink} to="/me" isExternal={false}>
             {formatMessage({
-              id: 'Settings.profile.form.section.mfa.grace.title',
-              defaultMessage: 'Two-factor authentication required',
+              id: 'Settings.profile.form.section.mfa.grace.action',
+              defaultMessage: 'Set up two-factor authentication',
             })}
-          </Typography>
-          <Typography textColor="warning700" tag="p">
-            {data.graceUntil
-              ? formatMessage(
-                  {
-                    id: 'Settings.profile.form.section.mfa.grace.deadline',
-                    defaultMessage:
-                      'Set up two-factor authentication before {datetime}, or your account will be locked.',
-                  },
-                  {
-                    datetime: formatDate(data.graceUntil, MFA_DATE_TIME_FORMAT),
-                  }
-                )
-              : formatMessage({
-                  id: 'Settings.profile.form.section.mfa.grace.pending',
-                  defaultMessage:
-                    'Two-factor authentication is now required for your account. Your grace period to set it up starts at your next login.',
-                })}
-          </Typography>
-          {onProfilePage ? null : (
-            <Link tag={NavLink} to="/me" isExternal={false}>
-              {formatMessage({
-                id: 'Settings.profile.form.section.mfa.grace.action',
-                defaultMessage: 'Set up two-factor authentication',
-              })}
-            </Link>
-          )}
-        </Flex>
-      </Flex>
-    </Box>
+          </Link>
+        )
+      }
+    >
+      {data.graceUntil
+        ? formatMessage(
+            {
+              id: 'Settings.profile.form.section.mfa.grace.deadline',
+              defaultMessage:
+                'Set up two-factor authentication before {datetime}, or your account will be locked.',
+            },
+            {
+              datetime: formatDate(data.graceUntil, MFA_DATE_TIME_FORMAT),
+            }
+          )
+        : formatMessage({
+            id: 'Settings.profile.form.section.mfa.grace.pending',
+            defaultMessage:
+              'Two-factor authentication is now required for your account. Your grace period to set it up starts at your next login.',
+          })}
+    </GlobalBanner>
   );
 };
 

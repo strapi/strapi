@@ -4,6 +4,8 @@ import { Alert, AlertVariant, Link, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Toaster, toast } from 'sonner';
 
+import { GLOBAL_BANNERS_HEIGHT } from '../constants/theme';
+
 interface NotificationLink {
   label: string;
   target?: string;
@@ -40,6 +42,14 @@ const NotificationsContext = React.createContext<NotificationsContextValue>({
  * -----------------------------------------------------------------------------------------------*/
 
 /**
+ * Toasts start below the global banner stack, never over it: Sonner's own default gaps (its
+ * `VIEWPORT_OFFSET` and `MOBILE_VIEWPORT_OFFSET`) plus the stack height, which is `0px` while no
+ * banner shows. Not theme spacing: the provider is public API and may render outside a theme.
+ */
+const TOASTER_OFFSET = { top: `calc(${GLOBAL_BANNERS_HEIGHT} + 24px)` };
+const TOASTER_MOBILE_OFFSET = { top: `calc(${GLOBAL_BANNERS_HEIGHT} + 16px)` };
+
+/**
  * @internal
  * @description exposes the `NotificationsContext` to its children and renders notifications
  */
@@ -73,7 +83,7 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" offset={TOASTER_OFFSET} mobileOffset={TOASTER_MOBILE_OFFSET} />
       <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>
     </>
   );
