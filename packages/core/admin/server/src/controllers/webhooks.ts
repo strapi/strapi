@@ -7,6 +7,7 @@ import { yup, validateYupSchema, emitAudit, errors } from '@strapi/utils';
 import type { Modules } from '@strapi/types';
 
 import { AUDITED_EVENTS, getWebhookChanges, toAuditedWebhook } from '../audit-logs/webhooks';
+import constants from '../services/constants';
 
 import {
   CreateWebhook,
@@ -23,7 +24,7 @@ const urlRegex =
 
 const webhookValidator = yup
   .object({
-    name: yup.string().required(),
+    name: yup.string().max(constants.WEBHOOK_NAME_MAX_LENGTH).required(),
     url: yup
       .string()
       .matches(urlRegex, 'url must be a valid URL')

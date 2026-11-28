@@ -119,6 +119,18 @@ describe('Register', () => {
     });
   });
 
+  it('shows a max length error when the firstname is longer than 255 characters', async () => {
+    const { getByLabelText, getByRole, findByText, user } = render(<Register />, {
+      initialEntries: ['/auth/register-admin'],
+    });
+
+    await user.click(getByLabelText(/^Firstname/i));
+    await user.paste('a'.repeat(256));
+    fireEvent.click(getByRole('button', { name: /let's start/i }));
+
+    expect(await findByText('The value is too long (max: 255).')).toBeInTheDocument();
+  });
+
   describe('formatValidationMessage', () => {
     /**
      * `components.Input.error.validation.minLength` is translated as
