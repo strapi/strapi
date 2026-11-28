@@ -310,7 +310,9 @@ Reading `/mfa/notices` there hid exactly those own-login events.
 enrolment and on every regeneration, so it is never a notice. A regeneration also records its own
 `recovery_codes_regenerated` row from the controller, which is a notice ("New recovery codes were
 generated"); enrolment does not, because it already records `enabled` or `authenticator_replaced`.
-`recovery_codes_regenerated` is not emitted on the hub or audited.
+`recovery_codes_regenerated` is also announced on the hub, as `admin.mfa.recovery.codes.regenerated`,
+so the EE audit log records it. Like `passkey_registered`, it is not emailed: it needs the password
+and a live second factor, and it does not change the factor itself.
 
 In the admin panel, `MfaBanners` renders the global banners above all navigation, edge to edge, as
 full-width strips (`GlobalBanner`, not the card-shaped `Alert`): the grace banner first, the
@@ -322,6 +324,10 @@ the mobile burger menu offset by it, so none of them covers the banners. The var
 `0px` when no stack is mounted, so a build without the feature lays out as before. Below the `large`
 breakpoint a strip is compact: tighter padding and gap, and title, text and action link flow inline
 as one run of text instead of one line each. From `large` up it is the wrapping flex row.
+Below `large` the two banners also switch to short copy (chosen with `useIsDesktop`, so only one
+version is in the DOM): the grace banner reads "Two-factor authentication required by Dec 5" (the
+year only when it is not the current one) with a "Set up" link, and the security notice reads "2 new
+security events" with a "Review" link and its close button.
 
 `MfaNotices` turns the unseen rows into one notice per load, whose "profile page" links to the
 profile, and closing it marks those rows seen. Its colour follows severity: `warning` when any
@@ -331,7 +337,7 @@ enrolled the account) and `locked` as info (only ever seen next to the `unlocked
 never shows on the profile page itself, which lists the same rows in its two-factor section with
 its own "Mark all as seen". Arriving there hides the notice without marking anything seen.
 
-The EE audit log records thirteen of these, plus `admin.auth.mfa_required` and
+The EE audit log records fourteen of these, plus `admin.auth.mfa_required` and
 `admin.security-settings.update`, on the standard shape. They are registered through
 `registerEvent` in `server/src/audit-logs/mfa.ts`. The actor is the session user when there is one
 and `unknown` when there is not, as on `/login/mfa`, and the account the event concerns is the

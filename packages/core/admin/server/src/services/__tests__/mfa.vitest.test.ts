@@ -3351,6 +3351,23 @@ describe('mfa notifications', () => {
     // flood the account holder's inbox.
     expect(sendTemplatedEmail).not.toHaveBeenCalled();
   });
+
+  test('recovery_codes_regenerated reaches the audit log hub under its dotted name, with no email', async () => {
+    const sendTemplatedEmail = vi.fn().mockResolvedValue(undefined);
+    const { strapi, service } = setup({
+      plugin: vi.fn(() => ({ service: vi.fn(() => ({ sendTemplatedEmail })) })),
+    });
+
+    service.notify('1', 'recovery_codes_regenerated');
+    await flushMicrotasks();
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.recovery.codes.regenerated', {
+      userId: '1',
+    });
+    // Like a passkey being added: a notice and an audit row, not one of the four changes to the
+    // factor itself that are mailed.
+    expect(sendTemplatedEmail).not.toHaveBeenCalled();
+  });
 });
 
 describe('mfa service: event pruning', () => {

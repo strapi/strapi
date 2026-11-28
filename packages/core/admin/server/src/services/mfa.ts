@@ -964,16 +964,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /**
    * Derived so it cannot drift from the row types. The exclusions are rows `recordEvent` alone
    * serves: emailing every recovery-code use would tell an attacker who has already stolen one that
-   * the account holder is about to find out.
+   * the account holder is about to find out. `recovery_codes_regenerated` is a notice, so it is
+   * announced on the hub (and audited) but, like a passkey being added, not emailed.
    */
   type MfaChangeNotice =
-    | Exclude<
-        MfaEventType,
-        | 'recovery_code_used'
-        | 'recovery_codes_issued'
-        | 'recovery_codes_regenerated'
-        | 'grace_started'
-      >
+    | Exclude<MfaEventType, 'recovery_code_used' | 'recovery_codes_issued' | 'grace_started'>
     | MfaAuditOnlyNotice;
 
   /** Written out rather than derived, so a new hub-only notice cannot start demanding an email

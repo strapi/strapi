@@ -164,6 +164,8 @@ export default {
     // the marker's `seenAt` is the acknowledgement, so it can never double as a notice. Enrolment
     // issues codes too, but records `enabled`/`authenticator_replaced` instead of this.
     await mfa.recordEvent(userId, 'recovery_codes_regenerated');
+    // Announced on the hub so the EE audit log records it. Not emailed: see `EMAILED_NOTICES`.
+    mfa.notify(userId, 'recovery_codes_regenerated');
 
     ctx.body = { data: { recoveryCodes } } satisfies RegenerateRecoveryCodes.Response;
   },

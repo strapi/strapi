@@ -33,6 +33,7 @@ export const actionTypes = {
   'admin.mfa.passkey.registered': 'Add a passkey',
   'admin.mfa.passkey.removed': 'Remove a passkey',
   'admin.mfa.passkey.used': 'Log in with a passkey',
+  'admin.mfa.recovery.codes.regenerated': 'Regenerate recovery codes',
   'admin.security-settings.update': 'Update security settings',
   'content-type.create': 'Create content type',
   'content-type.update': 'Update content type',

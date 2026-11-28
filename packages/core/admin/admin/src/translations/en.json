@@ -273,6 +273,7 @@
   "Settings.permissions.auditLogs.admin.mfa.passkey.registered": "Add a passkey",
   "Settings.permissions.auditLogs.admin.mfa.passkey.removed": "Remove a passkey",
   "Settings.permissions.auditLogs.admin.mfa.passkey.used": "Log in with a passkey",
+  "Settings.permissions.auditLogs.admin.mfa.recovery.codes.regenerated": "Regenerate recovery codes",
   "Settings.permissions.auditLogs.admin.security-settings.update": "Update security settings",
   "Settings.permissions.auditLogs.audit-log.export": "Export audit logs",
   "Settings.permissions.auditLogs.component.create": "Create component",

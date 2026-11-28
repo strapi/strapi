@@ -22,6 +22,7 @@ export const MFA_NOTICE_EVENTS = [
   'admin.mfa.passkey.registered',
   'admin.mfa.passkey.removed',
   'admin.mfa.passkey.used',
+  'admin.mfa.recovery.codes.regenerated',
 ] as const;
 
 /** Emitted by `/login` and `/reset-password` when the account must present a second factor. */

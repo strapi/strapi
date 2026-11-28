@@ -44,8 +44,8 @@ describe('every second-factor notice reaches the audit log', () => {
    * deciding whether it is audited is a type error here, rather than a silent gap nobody finds
    * until an auditor asks for a trail that does not exist.
    *
-   * The `false`s are deliberate: the recovery-code types say nothing `disabled`/`reset` does not,
-   * and `grace_started` follows from a policy change that is itself audited.
+   * The `false`s are deliberate: a recovery code's use or issue is covered by the sign-in and
+   * enrolment rows, and `grace_started` follows from a policy change that is itself audited.
    */
   const AUDITED: Record<MfaEventType, boolean> = {
     enabled: true,
@@ -54,7 +54,7 @@ describe('every second-factor notice reaches the audit log', () => {
     challenge_failed: true,
     recovery_code_used: false,
     recovery_codes_issued: false,
-    recovery_codes_regenerated: false,
+    recovery_codes_regenerated: true,
     grace_started: false,
     locked: true,
     unlocked: true,

@@ -678,6 +678,7 @@ describe('mfa controller', () => {
     const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
     const issueRecoveryCodes = vi.fn(() => Promise.resolve(['aaaa-bbbb']));
     const recordEvent = vi.fn(() => Promise.resolve(1));
+    const notify = vi.fn();
     setStrapi({
       admin: {
         services: {
@@ -686,6 +687,7 @@ describe('mfa controller', () => {
             assertPasswordAndFactor,
             issueRecoveryCodes,
             recordEvent,
+            notify,
           },
         },
       },
@@ -695,6 +697,7 @@ describe('mfa controller', () => {
     await mfaController.regenerateRecoveryCodes(ctx);
 
     expect(recordEvent).toHaveBeenCalledWith('7', 'recovery_codes_regenerated');
+    expect(notify).toHaveBeenCalledWith('7', 'recovery_codes_regenerated');
     expect(ctx.body).toEqual({ data: { recoveryCodes: ['aaaa-bbbb'] } });
   });
 
