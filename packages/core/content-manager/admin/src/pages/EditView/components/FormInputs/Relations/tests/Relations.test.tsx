@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Form } from '@strapi/admin/strapi-admin';
+import { Form, useRBAC } from '@strapi/admin/strapi-admin';
+import { errors } from '@strapi/utils';
 import {
   RenderOptions,
   fireEvent,
@@ -15,6 +16,14 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import { mockData } from '../../../../../../../tests/mockData';
 import { ComponentProvider } from '../../ComponentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
+
+jest.mock('@strapi/admin/strapi-admin', () => {
+  const actual = jest.requireActual('@strapi/admin/strapi-admin');
+  return {
+    ...actual,
+    useRBAC: jest.fn((...args: Parameters<typeof actual.useRBAC>) => actual.useRBAC(...args)),
+  };
+});
 
 const render = (
   {
@@ -902,6 +911,153 @@ describe('Relations', () => {
       expect(await screen.findAllByRole('button', { name: 'Relation entity 6' })).toHaveLength(2);
       expect(requestedPages).not.toContain(3);
       expect(requestedPages.at(-1)).toBe(2);
+    });
+  });
+
+  describe('selecting a relation without explorer.read permission on target model', () => {
+    afterEach(() => {
+      const actual = jest.requireActual('@strapi/admin/strapi-admin');
+      jest
+        .mocked(useRBAC)
+        .mockImplementation((...args: Parameters<typeof actual.useRBAC>) =>
+          actual.useRBAC(...args)
+        );
+    });
+
+    it('does not fetch the target document or show a Policy Failed warning when user lacks explorer.read', async () => {
+      let documentFetchCount = 0;
+
+      jest.mocked(useRBAC).mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: {
+          canCreate: false,
+          canRead: false,
+          canUpdate: false,
+          canDelete: false,
+          canPublish: false,
+        },
+        permissions: [],
+      }));
+
+      server.use(
+        http.get('/content-manager/relations/:model/:fieldName', () =>
+          HttpResponse.json({
+            results: [
+              {
+                id: 1,
+                documentId: 'user-1',
+                name: 'Author User',
+                status: 'published',
+              },
+            ],
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+          })
+        ),
+        http.get('/content-manager/:collectionType/:model/:id', ({ params }) => {
+          if (params.model !== 'api::category.category') {
+            return HttpResponse.json({
+              data: {
+                id: 1,
+                documentId: '12345',
+                name: 'Entry 1',
+              },
+            });
+          }
+
+          documentFetchCount += 1;
+          return HttpResponse.json(
+            {
+              error: new errors.PolicyError('Policy Failed'),
+            },
+            { status: 403 }
+          );
+        })
+      );
+
+      const { user } = render({
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      const combobox = await screen.findByRole('combobox', { name: /relations/i });
+      await user.click(combobox);
+
+      const option = await screen.findByRole('option', { name: /Author User/ });
+      await user.click(option);
+
+      expect(await screen.findByText('Author User')).toBeInTheDocument();
+
+      // Give React effects a tick to ensure no background document fetch is triggered
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(documentFetchCount).toBe(0);
+      expect(screen.queryByText('Policy Failed')).not.toBeInTheDocument();
+    });
+
+    it('fetches the target document to refresh temporary relation when user has explorer.read', async () => {
+      let documentFetchCount = 0;
+
+      jest.mocked(useRBAC).mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: {
+          canCreate: false,
+          canRead: true,
+          canUpdate: false,
+          canDelete: false,
+          canPublish: false,
+        },
+        permissions: [],
+      }));
+
+      server.use(
+        http.get('/content-manager/relations/:model/:fieldName', () =>
+          HttpResponse.json({
+            results: [
+              {
+                id: 1,
+                documentId: 'cat-1',
+                locale: 'en',
+                name: 'Initial Category',
+                status: 'draft',
+              },
+            ],
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+          })
+        ),
+        http.get('/content-manager/:collectionType/:model/:id', ({ params }) => {
+          if (params.model !== 'api::category.category') {
+            return HttpResponse.json({
+              data: {
+                id: 1,
+                documentId: '12345',
+                name: 'Entry 1',
+              },
+            });
+          }
+
+          documentFetchCount += 1;
+          return HttpResponse.json({
+            data: {
+              id: 1,
+              documentId: 'cat-1',
+              name: 'Refreshed Category',
+              status: 'published',
+            },
+          });
+        })
+      );
+
+      const { user } = render({
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      const combobox = await screen.findByRole('combobox', { name: /relations/i });
+      await user.click(combobox);
+
+      const option = await screen.findByRole('option', { name: /Initial Category/ });
+      await user.click(option);
+
+      await waitFor(() => expect(documentFetchCount).toBe(1));
+      expect(await screen.findByText('Refreshed Category')).toBeInTheDocument();
     });
   });
 

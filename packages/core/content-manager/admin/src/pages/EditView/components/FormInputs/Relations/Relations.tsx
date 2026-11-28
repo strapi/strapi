@@ -421,6 +421,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       ]
     );
 
+    const targetReadPermissions = React.useMemo(
+      () => [{ action: 'plugin::content-manager.explorer.read', subject: targetModel }],
+      [targetModel]
+    );
+    const { allowedActions: targetAllowedActions, isLoading: isLoadingTargetPermissions } =
+      useRBAC(targetReadPermissions);
+    const canReadTargetModel = !isLoadingTargetPermissions && Boolean(targetAllowedActions.canRead);
+
     return (
       <Flex
         ref={composedRefs}
@@ -467,6 +475,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           targetModel={targetModel}
           documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
+          canReadTargetModel={canReadTargetModel}
         />
         {isError ? (
           <Typography variant="pi" textColor="danger600">
@@ -948,6 +957,7 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
   targetModel: string;
   documentParams?: DocumentMeta['params'];
   mainField?: MainField;
+  canReadTargetModel?: boolean;
 }
 
 const RelationsList = ({
@@ -960,6 +970,7 @@ const RelationsList = ({
   targetModel,
   documentParams,
   mainField,
+  canReadTargetModel = false,
 }: RelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
@@ -1183,6 +1194,7 @@ const RelationsList = ({
       relations: data,
       targetModel,
       mainField,
+      canReadTargetModel,
     }),
     [
       ariaDescriptionId,
@@ -1198,6 +1210,7 @@ const RelationsList = ({
       data,
       targetModel,
       mainField,
+      canReadTargetModel,
     ]
   );
 
@@ -1284,6 +1297,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     targetModel: string;
     documentParams?: DocumentMeta['params'];
     mainField?: MainField;
+    canReadTargetModel: boolean;
   };
 }
 
@@ -1312,6 +1326,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
     targetModel,
     documentParams,
     mainField,
+    canReadTargetModel,
   } = data;
   const isDesktop = useIsDesktop();
 
@@ -1345,7 +1360,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
       documentId: documentId ?? apiData?.documentId,
       params: documentParams,
     },
-    { skip: !isTemporary }
+    { skip: !isTemporary || !canReadTargetModel }
   );
   const label =
     isTemporary && document ? getRelationLabel(document, mainField, emptyLabel) : originalLabel;
