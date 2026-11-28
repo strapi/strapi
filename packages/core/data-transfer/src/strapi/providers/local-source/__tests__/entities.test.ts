@@ -65,6 +65,10 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
       // Should have been called with 'foo', then 'bar'
       // Note: This check must happen AFTER we've collected the results
       expect(queryBuilder).toHaveBeenCalledTimes(2);
+
+      queryBuilder.mock.results.forEach((result) => {
+        expect(result.value.orderBy).toHaveBeenCalledWith('id');
+      });
       // We have 2 * 2 entities
       expect(results).toHaveLength(4);
 
@@ -89,6 +93,9 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
     test('Should warn and continue with the next content type when a stream fails', async () => {
       const queryBuilder = jest.fn((uid: string) => ({
         select() {
+          return this;
+        },
+        orderBy() {
           return this;
         },
         populate() {
