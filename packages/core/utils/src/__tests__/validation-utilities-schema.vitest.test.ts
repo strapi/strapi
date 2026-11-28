@@ -61,9 +61,28 @@ describe('validation utilities (schema modifiers)', () => {
       expect(schema.safeParse('abcdef').success).toBe(false);
     });
 
-    it('returns schema unchanged when min or max missing', () => {
-      const schema = maybeWithMinMax(undefined, 5)(z.string());
-      expect(schema.safeParse('a').success).toBe(true);
+    it('applies min when only min is provided', () => {
+      const schema = maybeWithMinMax(2, undefined)(z.string());
+      expect(schema.safeParse('a').success).toBe(false);
+      expect(schema.safeParse('abcdefghij').success).toBe(true);
+    });
+
+    it('applies max when only max is provided', () => {
+      const schema = maybeWithMinMax(undefined, 5)(z.number());
+      expect(schema.safeParse(5).success).toBe(true);
+      expect(schema.safeParse(6).success).toBe(false);
+    });
+
+    it('returns schema unchanged when neither min nor max is provided', () => {
+      const schema = maybeWithMinMax(undefined, undefined)(z.array(z.any()));
+      expect(schema.safeParse([]).success).toBe(true);
+      expect(schema.safeParse(Array.from({ length: 100 })).success).toBe(true);
+    });
+
+    it('treats a null min or max as not provided', () => {
+      const schema = maybeWithMinMax(null as unknown as number, 5)(z.number());
+      expect(schema.safeParse(-100).success).toBe(true);
+      expect(schema.safeParse(6).success).toBe(false);
     });
   });
 

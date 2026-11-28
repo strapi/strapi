@@ -98,8 +98,8 @@ export const maybeWithDefault = (defaultValue?: unknown) => {
 /**
  * Conditionally applies `min` and `max` constraints to a Zod string, number, or array schema.
  *
- * @param min - The minimum value/length. If `undefined`, no minimum constraint is applied.
- * @param max - The maximum value/length. If `undefined`, no maximum constraint is applied.
+ * @param min - The minimum value/length. If `undefined` or `null`, no minimum constraint is applied.
+ * @param max - The maximum value/length. If `undefined` or `null`, no maximum constraint is applied.
  * @returns A function that takes a Zod string, number, or array schema and returns a modified schema (with min/max constraints or original).
  * @example
  * ```typescript
@@ -109,7 +109,17 @@ export const maybeWithDefault = (defaultValue?: unknown) => {
  */
 export const maybeWithMinMax = (min?: number, max?: number) => {
   return <R extends z.ZodString | z.ZodEmail | z.ZodNumber | z.ZodArray<z.ZodAny>>(schema: R) => {
-    return min !== undefined && max !== undefined ? schema.min(min).max(max) : schema;
+    let result = schema;
+
+    if (min != null) {
+      result = result.min(min) as R;
+    }
+
+    if (max != null) {
+      result = result.max(max) as R;
+    }
+
+    return result;
   };
 };
 
