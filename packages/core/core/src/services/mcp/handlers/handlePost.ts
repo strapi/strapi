@@ -34,6 +34,13 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       const authResult = await authenticationStrategy.authenticate(ctx);
       if (authResult.authenticated === false) {
         sendDidNotAuthenticateMcpRequest(strapi, authResult.reason);
+        if (config.oauth.isEnabled() && res.headersSent === false) {
+          // RFC 9728 §5.1: point OAuth-capable MCP clients at the resource metadata.
+          res.setHeader(
+            'WWW-Authenticate',
+            `Bearer resource_metadata="${config.oauth.protectedResourceMetadataUrl}"`
+          );
+        }
         sendJsonRpcError(res, 'AUTHENTICATION_REQUIRED');
         return;
       }

@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Navigate, useLocation, useMatch } from 'react-router-dom';
 
 import { useAuth } from '../../features/Auth';
@@ -7,7 +9,7 @@ import { retryDynamicImport } from '../../utils/retryDynamicImport';
 
 import { Login as LoginCE } from './components/Login';
 import { AUTH_TYPES, FORMS, FormDictionary, isAuthType } from './constants';
-import { getRedirectTo } from './utils';
+import { getRedirectTo, persistSsoRedirectTo } from './utils';
 
 /* -------------------------------------------------------------------------------------------------
  * AuthPage
@@ -45,6 +47,12 @@ const AuthPage = () => {
   );
 
   const { token } = useAuth('AuthPage', (auth) => auth);
+
+  // Keep the deep-link target across an SSO round trip, which leaves the app and returns
+  // without the login page's query string.
+  React.useEffect(() => {
+    persistSsoRedirectTo(search);
+  }, [search]);
 
   if (!isAuthType(authType) || !forms) {
     return <Navigate to="/" />;

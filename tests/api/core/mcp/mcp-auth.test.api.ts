@@ -256,6 +256,8 @@ describe('MCP admin token authentication (api)', () => {
       });
 
       expectJsonRpcError(res, 'AUTHENTICATION_REQUIRED');
+      // OAuth is disabled here, so no resource metadata is advertised.
+      expect(res.headers['www-authenticate']).toBeUndefined();
     });
 
     test.each(['GET', 'DELETE'] as const)(
