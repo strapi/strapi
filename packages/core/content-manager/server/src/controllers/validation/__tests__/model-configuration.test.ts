@@ -499,5 +499,45 @@ describe('model-configuration validation', () => {
       expect(result.metadatas.title.edit.description).toBe('Existing description');
       expect(result.metadatas.title.edit.placeholder).toBe('Existing placeholder');
     });
+
+    it('should allow adding the users-permissions user provider field to list layout', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const userSchema = require('../../../../../../../plugins/users-permissions/server/src/content-types/user');
+      const schemaWithIds = {
+        ...userSchema,
+        attributes: {
+          id: { type: 'integer' },
+          ...userSchema.attributes,
+          role: {
+            ...userSchema.attributes.role,
+            relationType: userSchema.attributes.role.relation,
+            targetModel: userSchema.attributes.role.target,
+          },
+        },
+      };
+
+      const config = {
+        layouts: {
+          edit: [
+            [
+              { name: 'username', size: 6 },
+              { name: 'email', size: 6 },
+            ],
+            [
+              { name: 'password', size: 6 },
+              { name: 'confirmed', size: 4 },
+            ],
+            [
+              { name: 'blocked', size: 4 },
+              { name: 'role', size: 6 },
+            ],
+          ],
+          list: ['id', 'username', 'email', 'provider', 'role', 'confirmed', 'blocked'],
+        },
+      };
+
+      const schema = modelConfigurationValidation(schemaWithIds);
+      await expect(schema.validate(config, { strict: true })).resolves.toBeDefined();
+    });
   });
 });
