@@ -1,11 +1,14 @@
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 import { errors } from '@strapi/utils';
 
 import type Koa from 'koa';
 import type {} from 'koa-body';
 import type { EmailConfig, SendOptions } from '../types';
 
-const { ApplicationError } = errors;
+const { ApplicationError, ValidationError } = errors;
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && Array.isArray(value) === false;
 
 /**
  * Email.js controller
@@ -14,7 +17,18 @@ const { ApplicationError } = errors;
  */
 const emailController = {
   async send(ctx: Koa.Context) {
-    const options = ctx.request.body as SendOptions;
+    const { body } = ctx.request;
+
+    // The body passes to the provider unchanged: providers accept their own shapes (template
+    // sends, recipient arrays, provider options). Only a non-object body is rejected.
+    // TODO @Nico enforcing the documented `SendOptions` contract (strings, required `to`,
+    // `subject`, `text`) is a breaking change for provider-specific shapes; it needs a future
+    // flag or a major release.
+    if (isPlainObject(body) === false) {
+      throw new ValidationError('The email body must be a JSON object');
+    }
+
+    const options = body as SendOptions;
 
     try {
       await strapi.plugin('email').service('email').send(options);
@@ -78,10 +92,12 @@ const emailController = {
     const isIdle = typeof provider?.isIdle === 'function' ? provider.isIdle() : undefined;
 
     ctx.send({
-      config: pick(
-        ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo', 'settings.testAddress'],
-        config
-      ),
+      config: pick(config, [
+        'provider',
+        'settings.defaultFrom',
+        'settings.defaultReplyTo',
+        'settings.testAddress',
+      ]),
       supportsVerify,
       ...(capabilities ? { capabilities } : {}),
       ...(isIdle !== undefined ? { isIdle } : {}),

@@ -34,5 +34,21 @@ module.exports = {
         auth: false,
       },
     },
+    {
+      method: 'POST',
+      path: '/config/reset-admin-fixture',
+      handler: 'config.resetAdminFixture',
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: 'POST',
+      path: '/config/reset-fixture',
+      handler: 'config.resetFixture',
+      config: {
+        auth: false,
+      },
+    },
   ],
 };

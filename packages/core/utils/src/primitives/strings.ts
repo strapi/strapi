@@ -1,5 +1,4 @@
 import _, { kebabCase } from 'lodash';
-import { trimChars, trimCharsEnd, trimCharsStart } from 'lodash/fp';
 import slugify from '@sindresorhus/slugify';
 
 const nameToSlug = (name: string, options: slugify.Options = { separator: '-' }) =>
@@ -27,16 +26,20 @@ const isCamelCase = (value: string) => /^[a-z][a-zA-Z0-9]+$/.test(value);
 const isKebabCase = (value: string) => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
 const startsWithANumber = (value: string) => /^[0-9]/.test(value);
 
-const joinBy = (joint: string, ...args: string[]) => {
-  const trim = trimChars(joint);
-  const trimEnd = trimCharsEnd(joint);
-  const trimStart = trimCharsStart(joint);
+// Like lodash trim with `chars`: strips any of the characters in `joint`, not the whole string.
+const jointPattern = (joint: string) => `[${joint.replace(/[\\\]^-]/g, '\\$&')}]+`;
 
-  return args.reduce((url, path, index) => {
-    if (args.length === 1) return path;
-    if (index === 0) return trimEnd(path);
-    if (index === args.length - 1) return url + joint + trimStart(path);
-    return url + joint + trim(path);
+const joinBy = (joint: string, ...args: string[]) => {
+  const start = new RegExp(`^${jointPattern(joint)}`);
+  const end = new RegExp(`${jointPattern(joint)}$`);
+
+  return args.reduce((url, value, index) => {
+    if (args.length === 1) return value;
+    // Like lodash trim: a nullish segment becomes ''
+    const path = String(value ?? '');
+    if (index === 0) return path.replace(end, '');
+    if (index === args.length - 1) return url + joint + path.replace(start, '');
+    return url + joint + path.replace(start, '').replace(end, '');
   }, '');
 };
 

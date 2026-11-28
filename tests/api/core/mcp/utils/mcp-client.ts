@@ -23,6 +23,121 @@ export type JsonRpcResponse = {
   error?: { code: number; message: string };
 };
 
+/**
+ * MCP reports failure on two distinct layers, and a real client reads only one of them:
+ *
+ * - a JSON-RPC `error`, for a request the server would not dispatch at all — a tool that is
+ *   unknown to the session, or one its token may not use;
+ * - `result.isError`, for everything the tool layer reports, which covers both a schema
+ *   rejection of the arguments and a failure thrown by the handler itself.
+ *
+ * Asserting `response.error ?? response.result?.isError` passes on either, so it cannot tell a
+ * validation rejection from a not-found, nor catch a case that moves between layers. These
+ * helpers pin the layer, and the message where the wording is part of the contract.
+ */
+
+/** The text a tool-level error carries, joined across content parts. */
+export const toolErrorText = (response: JsonRpcResponse): string =>
+  (response.result?.content ?? []).map((part) => part.text ?? '').join('\n');
+
+/** Asserts the tool ran and returned a failure — never a JSON-RPC error. */
+export const expectToolError = (response: JsonRpcResponse, message?: string | RegExp): string => {
+  expect(response.error).toBeUndefined();
+  expect(response.result?.isError).toBe(true);
+
+  const text = toolErrorText(response);
+
+  if (typeof message === 'string') {
+    expect(text).toContain(message);
+  } else if (message !== undefined) {
+    expect(text).toMatch(message);
+  }
+
+  return text;
+};
+
+/** Asserts the request was refused by the protocol layer, before any handler ran. */
+export const expectJsonRpcError = (
+  response: JsonRpcResponse,
+  message?: string | RegExp
+): { code: number; message: string } => {
+  expect(response.result).toBeUndefined();
+  expect(response.error).toBeDefined();
+
+  const error = response.error as { code: number; message: string };
+
+  if (typeof message === 'string') {
+    expect(error.message).toContain(message);
+  } else if (message !== undefined) {
+    expect(error.message).toMatch(message);
+  }
+
+  return error;
+};
+
+/** Asserts the call succeeded on both layers. */
+export const expectToolOk = (response: JsonRpcResponse): void => {
+  expect(response.error).toBeUndefined();
+  expect(response.result?.isError).not.toBe(true);
+};
+
+/**
+ * The three failure shapes this MCP surface actually produces, pinned so a test says which one
+ * it means:
+ *
+ * - a tool the session may not use is never advertised, and calling it is refused by the
+ *   protocol as `-32602 Tool <name> disabled` — the handler never runs;
+ * - arguments rejected against the tool's Zod schema come back as a tool error prefixed
+ *   `Input validation error:`;
+ * - anything the handler itself throws comes back as `Tool "<name>" execution failed: <message>`.
+ *
+ * Keeping these apart is the point: a validation rejection and a not-found are both `isError`,
+ * so a test that accepts either cannot catch one turning into the other.
+ */
+
+/** A tool the session is not allowed to use: refused by the protocol, before the handler. */
+export const expectToolDisabled = (response: JsonRpcResponse, name: string): void => {
+  const error = expectJsonRpcError(response);
+  expect(error.code).toBe(-32602);
+  expect(error.message).toBe(`Tool ${name} disabled`);
+};
+
+/** Arguments rejected against the tool's input schema. Never a domain error. */
+export const expectInputValidationError = (
+  response: JsonRpcResponse,
+  message?: string | RegExp
+): string => {
+  const text = expectToolError(response, /^Input validation error:/m);
+
+  if (typeof message === 'string') {
+    expect(text).toContain(message);
+  } else if (message !== undefined) {
+    expect(text).toMatch(message);
+  }
+
+  return text;
+};
+
+/** An error thrown by the handler — a domain failure, not a schema rejection. */
+export const expectExecutionError = (
+  response: JsonRpcResponse,
+  name: string,
+  message?: string | RegExp
+): string => {
+  const text = expectToolError(response, `Tool "${name}" execution failed:`);
+
+  // A domain failure must not be reported as a validation rejection, and vice versa.
+  expect(text).not.toMatch(/^Input validation error:/m);
+
+  if (typeof message === 'string') {
+    expect(text).toContain(message);
+  } else if (message !== undefined) {
+    expect(text).toMatch(message);
+  }
+
+  return text;
+};
+
 export type AdminPermission = {
   action: string;
   subject: string | null;

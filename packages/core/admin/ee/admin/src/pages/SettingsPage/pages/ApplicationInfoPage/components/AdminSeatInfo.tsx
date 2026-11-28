@@ -1,16 +1,12 @@
-import type { ReactNode } from 'react';
-
-import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
-import { ExternalLink, WarningCircle } from '@strapi/icons';
+import { Badge, Flex, Tooltip, Typography } from '@strapi/design-system';
+import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { RelativeTime } from '../../../../../../../../admin/src/components/RelativeTime';
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
-
-const BILLING_SELF_HOSTED_URL = 'mailto:sales@strapi.io';
-const MANAGE_SUBSCRIPTION_URL = 'https://billing.strapi.io';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -37,69 +33,87 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, type } = license;
+  const { enforcementUserCount, permittedSeats, seats, adminUsersAcrossInstances } = license;
 
-  if (!permittedSeats) {
+  // `permittedSeats` is wiped once the licence stops being usable, so fall back to the retained
+  // `seats` to keep showing the limit on an expired licence. Enforcement is unchanged.
+  const instanceLimit = permittedSeats ?? seats;
+
+  // The count across instances when the registry sent one, otherwise this instance's.
+  // Without `contractedUsers` from the registry, use this instance's limit.
+  const count = adminUsersAcrossInstances?.activeUsers ?? enforcementUserCount;
+  const limit = adminUsersAcrossInstances
+    ? (adminUsersAcrossInstances.contractedUsers ?? instanceLimit ?? null)
+    : instanceLimit || null;
+
+  if (!adminUsersAcrossInstances && !limit) {
     return null;
   }
 
+  const overBy = limit ? count - limit : 0;
+
   return (
-    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
-      <Typography variant="sigma" textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.application.admin-seats',
-          defaultMessage: 'Admin seats',
-        })}
-      </Typography>
-      <Flex gap={2}>
-        <Flex>
-          <Typography tag="p">
+    <Flex direction="column" alignItems="start" gap={2}>
+      <Flex gap={2} alignItems="center" tag="dt">
+        <Typography variant="sigma" textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.application.admin-users',
+            defaultMessage: 'Admin users',
+          })}
+        </Typography>
+        <Tooltip
+          label={formatMessage({
+            id: 'Settings.application.admin-users.tooltip',
+            defaultMessage:
+              'Unique active admin users across every instance using this license. Updated at each license check and when users are added or removed.',
+          })}
+        >
+          <Information width="1.4rem" height="1.4rem" fill="neutral500" />
+        </Tooltip>
+      </Flex>
+      <Flex direction="column" alignItems="start" gap={1} tag="dd">
+        <Flex gap={2} alignItems="center">
+          <Typography tag="p" textColor={overBy > 0 ? 'danger600' : undefined}>
+            {limit === null ? count : `${count}/${limit}`}
+          </Typography>
+          {overBy > 0 && (
+            <Badge size="S" variant="danger">
+              {formatMessage(
+                {
+                  id: 'Settings.application.admin-users.over',
+                  defaultMessage: '{count} over',
+                },
+                { count: overBy }
+              )}
+            </Badge>
+          )}
+        </Flex>
+        {adminUsersAcrossInstances && (
+          <Typography variant="pi" textColor="neutral500">
             {formatMessage(
               {
-                id: 'Settings.application.ee.admin-seats.count',
-                defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
+                id: 'Settings.application.admin-users.caption',
+                defaultMessage:
+                  'Across all environments · {count} in this environment · updated {updatedAt}',
               },
               {
-                permittedSeats,
-                enforcementUserCount,
-                text: (chunks: ReactNode) => (
-                  <Typography
-                    fontWeight="semiBold"
-                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
-                  >
-                    {chunks}
-                  </Typography>
+                count: enforcementUserCount,
+                // Reports can fail or lag behind a change, so say how old the count is. The
+                // date comes from the registry's clock: never show it in the future.
+                updatedAt: (
+                  <RelativeTime
+                    timestamp={
+                      new Date(
+                        Math.min(Date.parse(adminUsersAcrossInstances.updatedAt), Date.now())
+                      )
+                    }
+                  />
                 ),
               }
             )}
           </Typography>
-        </Flex>
-        {licenseLimitStatus === 'OVER_LIMIT' && (
-          <Tooltip
-            label={formatMessage({
-              id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
-              defaultMessage: 'At limit: add seats to invite more users',
-            })}
-          >
-            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
-          </Tooltip>
         )}
       </Flex>
-      {type === 'gold' ? (
-        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />} target="_blank">
-          {formatMessage({
-            id: 'Settings.application.ee.admin-seats.support',
-            defaultMessage: 'Contact sales',
-          })}
-        </Link>
-      ) : (
-        <Link href={MANAGE_SUBSCRIPTION_URL} isExternal endIcon={<ExternalLink />} target="_blank">
-          {formatMessage({
-            id: 'Settings.application.ee.admin-seats.add-seats',
-            defaultMessage: 'Manage subscription',
-          })}
-        </Link>
-      )}
-    </Grid.Item>
+    </Flex>
   );
 };

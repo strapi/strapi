@@ -80,15 +80,14 @@ type PopulateClause<
   [TKey in TKeys]?: Schema.Attribute.Target<
     Schema.AttributeByName<TSchemaUID, TKey>
   > extends infer TTarget extends UID.Schema
-    ?
-        | boolean
-        | Intersect<
-            [
-              NestedParams<TTarget>,
-              // Only add the count clause to content types links, ignore components
-              If<Extends<TTarget, UID.ContentType>, CountClause, unknown>,
-            ]
-          >
+    ? | boolean
+      | Intersect<
+          [
+            NestedParams<TTarget>,
+            // Only add the count clause to content types links, ignore components
+            If<Extends<TTarget, UID.ContentType>, CountClause, unknown>,
+          ]
+        >
     : never;
 };
 
@@ -167,6 +166,4 @@ export type NestedParams<TSchemaUID extends UID.Schema> = Params.Pick<
 >;
 
 export type Any<TSchemaUID extends UID.Schema> =
-  | StringNotation<TSchemaUID>
-  | ArrayNotation<TSchemaUID>
-  | ObjectNotation<TSchemaUID>;
+  StringNotation<TSchemaUID> | ArrayNotation<TSchemaUID> | ObjectNotation<TSchemaUID>;

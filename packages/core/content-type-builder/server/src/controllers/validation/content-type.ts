@@ -1,10 +1,11 @@
+import { get, has, snakeCase } from 'lodash';
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
-import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
 import type { Struct, Internal, UID } from '@strapi/types';
 
+import type { NestedComponentInput } from '../../services/components';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -15,10 +16,7 @@ import { nestedComponentSchema } from './component';
 export type CreateContentTypeInput = {
   uid?: UID.ContentType;
   contentType?: Partial<Struct.ContentTypeSchema> & Partial<Struct.ContentTypeSchemaInfo>;
-  components?: Array<
-    Partial<Struct.ComponentSchema> &
-      Partial<Struct.SchemaInfo> & { tmpUID?: Internal.UID.Component }
-  >;
+  components?: NestedComponentInput[];
   singularName: Struct.ContentTypeSchemaInfo['singularName'];
   attributes: Struct.SchemaAttributes & Record<string, any>;
   kind: Struct.ContentTypeKind;
@@ -66,10 +64,10 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'custo
  * Returns a yup schema to validate a content type payload
  */
 const createContentTypeSchema = (data: CreateContentTypeInput, { isEdition = false } = {}) => {
-  const kind: keyof typeof VALID_RELATIONS = getOr(
-    typeKinds.COLLECTION_TYPE,
+  const kind: keyof typeof VALID_RELATIONS = get(
+    data,
     'contentType.kind',
-    data
+    typeKinds.COLLECTION_TYPE
   );
 
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
@@ -124,15 +122,15 @@ export const validateContentTypeInput = (data: CreateContentTypeInput) => {
  * Validator for content type edition
  */
 export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => {
-  if (has('contentType', data)) {
+  if (has(data, 'contentType')) {
     removeEmptyDefaults(data.contentType);
     removeDeletedUIDTargetFields(data.contentType as Struct.ContentTypeSchema);
   }
 
-  if (has('components', data) && Array.isArray(data.components)) {
+  if (has(data, 'components') && Array.isArray(data.components)) {
     data.components.forEach((comp) => {
-      if (has('uid', comp)) {
-        removeEmptyDefaults(comp as Struct.ComponentSchema);
+      if (has(comp, 'uid')) {
+        removeEmptyDefaults(comp);
       }
     });
   }
@@ -157,10 +155,9 @@ const forbiddenContentTypeNameValidator = () => {
 };
 
 const nameIsAvailable = (isEdition: boolean) => {
-  // TODO TS: if strapi.contentTypes (ie, ContentTypes) works as an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
-  const usedNames = flatMap((ct: Struct.ContentTypeSchema) => {
+  const usedNames = Object.values(strapi.contentTypes).flatMap((ct) => {
     return [ct.info?.singularName, ct.info?.pluralName];
-  })(strapi.contentTypes as any);
+  });
 
   return {
     name: 'nameAlreadyUsed',

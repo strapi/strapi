@@ -1,6 +1,6 @@
 import { render, screen } from '@strapi/admin/strapi-admin/test';
 
-import { GenericInput } from '../GenericInputs';
+import { GENERIC_INPUT_TYPES, GenericInput } from '../GenericInputs';
 
 jest.mock('@strapi/design-system', () => {
   const actual = jest.requireActual('@strapi/design-system');
@@ -62,9 +62,49 @@ describe('CTB | GenericInput', () => {
     );
   });
 
+  it.each(GENERIC_INPUT_TYPES)('renders the %s input type without a custom input', (type) => {
+    setup({ type });
+
+    expect(screen.queryByPlaceholderText('Not supported')).not.toBeInTheDocument();
+  });
+
+  it('renders an unknown input type as not supported', () => {
+    setup({ type: 'unknown-type' });
+
+    expect(screen.getByPlaceholderText('Not supported')).toBeInTheDocument();
+  });
+
   it('keeps truthy boolean defaults checked', () => {
     setup({ type: 'bool', value: 'true' });
 
     expect(screen.getByRole('checkbox', { name: 'boolean-value' })).toBeChecked();
+  });
+
+  describe('checkbox tooltip', () => {
+    const tooltip = { id: 'field.tooltip', defaultMessage: 'Why this is disabled' };
+
+    it('keeps a disabled checkbox checked and explains it on hover', async () => {
+      const onChange = jest.fn();
+      const { user } = setup({ type: 'checkbox', value: true, disabled: true, tooltip, onChange });
+
+      const checkbox = screen.getByRole('checkbox', { name: 'Field' });
+      expect(checkbox).toBeChecked();
+      expect(checkbox).toBeDisabled();
+
+      await user.click(checkbox);
+      expect(onChange).not.toHaveBeenCalled();
+
+      await user.hover(screen.getByText('Field'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Why this is disabled');
+    });
+
+    it('renders no tooltip without one', async () => {
+      const { user } = setup({ type: 'checkbox', value: false });
+
+      await user.hover(screen.getByText('Field'));
+
+      expect(screen.getByRole('checkbox', { name: 'Field' })).toBeEnabled();
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
   });
 });

@@ -1,7 +1,5 @@
 import type { Core } from '@strapi/types';
 
-import { values } from 'lodash/fp';
-
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
@@ -26,11 +24,11 @@ export type BuilderResources = {
 };
 
 const addSchemasToBuilder = (schemas, builder) => {
-  for (const component of values(schemas.components)) {
+  for (const component of Object.values(schemas.components ?? {})) {
     builder.addComponent(component);
   }
 
-  builder.addContentTypes(values(schemas['content-types']));
+  builder.addContentTypes(Object.values(schemas['content-types'] ?? {}));
 };
 
 const bootstrapBuilder = ({ fixtures, schemas, locales }: BuilderResources, builder: Builder) => {
@@ -75,9 +73,20 @@ export const createTestSetup = async (
 };
 
 export const destroyTestSetup = async ({ strapi, builder }) => {
-  documentServiceSetupBarrier = documentServiceSetupBarrier.then(async () => {
+  const previous = documentServiceSetupBarrier;
+  let releaseBarrier = () => {};
+  // Do not chain onto the previous promise. A rejected teardown would
+  // otherwise reject every later setup. The next setup waits only for this one.
+  documentServiceSetupBarrier = new Promise((resolve) => {
+    releaseBarrier = resolve;
+  });
+
+  await previous;
+
+  try {
     await strapi.destroy();
     await builder.cleanup();
-  });
-  await documentServiceSetupBarrier;
+  } finally {
+    releaseBarrier();
+  }
 };

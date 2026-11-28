@@ -1,0 +1,14 @@
+---
+title: Docs health
+description: Generated report of the pages flagged as stub, draft or needs-review, and of the packages that have no real documentation yet.
+---
+
+import DocsHealth from '@site/src/components/DocsHealth';
+
+This report is generated at build time from the `status` and `review_notes` frontmatter of every page, and from the `package` frontmatter of the package pages.
+
+- `stub`: headings only, no real content yet.
+- `draft`: content exists but is incomplete or not verified against the code.
+- `needs-review`: existing content suspected to be stale; `review_notes` names the claims to check.
+
+<DocsHealth />

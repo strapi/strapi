@@ -1,0 +1,18 @@
+---
+title: Package map
+description: Interactive map of the workspace packages under packages/ and their internal dependencies, built from each package.json.
+hide_table_of_contents: true
+---
+
+import PackageGraph from '@site/src/components/PackageGraph';
+import PackageTable from '@site/src/components/PackageTable';
+
+The map shows every workspace package under `packages/` and the dependencies between them. It is generated at build time from the root `package.json` workspaces and each package's `package.json`. Only internal dependencies are drawn: production by default, dev and peer on demand.
+
+<PackageGraph />
+
+## All packages
+
+The same data as a table. _Deps_ counts the internal production dependencies of a package; _Used by_ counts the internal packages that depend on it in production.
+
+<PackageTable />

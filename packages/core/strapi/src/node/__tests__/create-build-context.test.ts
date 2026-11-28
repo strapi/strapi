@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import type { Logger } from '../../cli/utils/logger';
+
 import { createBuildContext } from '../create-build-context';
 
 jest.mock('../core/env', () => ({
@@ -18,6 +20,12 @@ jest.mock('../core/admin-customisations', () => ({
 
 jest.mock('node:fs/promises', () => ({
   rm: jest.fn().mockResolvedValue(undefined),
+}));
+
+const mockScanRoot = '/app/node_modules/@strapi/admin/dist/admin';
+
+jest.mock('../core/scan-roots', () => ({
+  getScanRoots: jest.fn(async () => [mockScanRoot]),
 }));
 
 const buildStrapiMock = (
@@ -65,12 +73,13 @@ const buildStrapiMock = (
 
 const buildArgs = (strapi: Core.Strapi) => ({
   cwd: '/app',
+  // createBuildContext calls `debug` and `warn` only, so the mock leaves out the counters, spinner and progress bar
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  },
+  } as unknown as Logger,
   strapi,
 });
 
@@ -81,6 +90,18 @@ describe('createBuildContext', () => {
     process.env = ORIGINAL_ENV;
     jest.clearAllMocks();
   });
+
+  it.each(['vite', 'webpack'] as const)(
+    'holds the Tailwind scan roots and warns nothing under %s',
+    async (bundler) => {
+      const args = { ...buildArgs(buildStrapiMock()), options: { bundler } };
+
+      const ctx = await createBuildContext(args);
+
+      expect(ctx.scanRoots).toEqual([mockScanRoot]);
+      expect(args.logger.warn).not.toHaveBeenCalled();
+    }
+  );
 
   it('transports admin.auth.cookie.name into STRAPI_ADMIN_AUTH_COOKIE_NAME', async () => {
     const strapi = buildStrapiMock('my_admin_jwt');
@@ -132,12 +153,56 @@ describe('createBuildContext', () => {
     expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/strapi-de/admin');
   });
 
-  it('sets an empty STRAPI_ADMIN_AUTH_COOKIE_PATH when config is unset', async () => {
-    const strapi = buildStrapiMock(undefined, undefined);
+  describe('STRAPI_ADMIN_AUTH_COOKIE_PATH when admin.auth.cookie.path is unset', () => {
+    // Overrides the URL config with what packages/core/core/src/configuration resolves.
+    const withUrls = (strapi: Core.Strapi, urls: Record<string, string>) => {
+      const get = strapi.config.get as jest.Mock;
+      const original = get.getMockImplementation()!;
+      get.mockImplementation((key: string, def?: unknown) =>
+        key in urls ? urls[key] : original(key, def)
+      );
+      return strapi;
+    };
 
-    const ctx = await createBuildContext(buildArgs(strapi));
+    it('uses the default admin panel path', async () => {
+      const ctx = await createBuildContext(buildArgs(buildStrapiMock()));
 
-    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('');
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/admin');
+    });
+
+    it('follows a custom admin.url so the panel can read its own cookie', async () => {
+      const strapi = withUrls(buildStrapiMock(), {
+        'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+        'admin.path': '/dashboard',
+      });
+
+      const ctx = await createBuildContext(buildArgs(strapi));
+
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/dashboard');
+    });
+
+    it('includes a server.url subpath, which admin.path leaves out', async () => {
+      const strapi = withUrls(buildStrapiMock(), {
+        'server.absoluteUrl': 'https://example.com/strapi',
+        'admin.absoluteUrl': 'https://example.com/strapi/admin',
+        'admin.path': '/admin',
+      });
+
+      const ctx = await createBuildContext(buildArgs(strapi));
+
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/strapi/admin');
+    });
+
+    it('treats a blank admin.auth.cookie.path as unset', async () => {
+      const strapi = withUrls(buildStrapiMock(undefined, '  '), {
+        'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+        'admin.path': '/dashboard',
+      });
+
+      const ctx = await createBuildContext(buildArgs(strapi));
+
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/dashboard');
+    });
   });
 
   it('overrides ambient STRAPI_ADMIN_AUTH_COOKIE_PATH from process.env with config', async () => {

@@ -20,8 +20,7 @@ export type WildcardNotation = '*';
  * type D = '<random_string>'; // ❌
  */
 export type SingleAttribute<TSchemaUID extends UID.Schema> =
-  | 'id'
-  | Guard.Never<Schema.NonPopulatableAttributeNames<TSchemaUID>, string>;
+  'id' | Guard.Never<Schema.NonPopulatableAttributeNames<TSchemaUID>, string>;
 
 /**
  * Union of all possible string representation for fields
@@ -73,5 +72,4 @@ export type ArrayNotation<TSchemaUID extends UID.Schema> = Exclude<
  * type K = '<random_string>'; // ❌
  */
 export type Any<TSchemaUID extends UID.Schema> =
-  | StringNotation<TSchemaUID>
-  | ArrayNotation<TSchemaUID>;
+  StringNotation<TSchemaUID> | ArrayNotation<TSchemaUID>;

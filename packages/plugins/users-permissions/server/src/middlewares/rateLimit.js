@@ -2,7 +2,7 @@
 
 const path = require('path');
 const utils = require('@strapi/utils');
-const { isString, has, toLower } = require('lodash/fp');
+const { isString, has } = require('lodash');
 
 const { RateLimitError } = utils.errors;
 
@@ -47,7 +47,7 @@ const routeUsesEmailIdentifier = (requestPath) => {
  */
 const normalizeRequestPathForRateLimit = (requestPath) => {
   const normalized = path.posix.normalize(requestPath);
-  const lower = toLower(normalized);
+  const lower = normalized.toLowerCase();
   return lower.replace(/\/+$/, '') || '/';
 };
 
@@ -56,7 +56,7 @@ const getEmailIdentifierForKey = (body) => {
     return 'unknownIdentifier';
   }
 
-  return toLower(body.email);
+  return body.email.toLowerCase();
 };
 
 const buildPrefixKey = (ctx) => {
@@ -102,7 +102,7 @@ module.exports =
       };
     }
 
-    if (!has('enabled', rateLimitConfig)) {
+    if (!has(rateLimitConfig, 'enabled')) {
       rateLimitConfig.enabled = true;
     }
 

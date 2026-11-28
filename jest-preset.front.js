@@ -35,7 +35,8 @@ module.exports = {
   setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: '@strapi/admin-test-utils/environment',
-  prettierPath: require.resolve('prettier-2'),
+  // Required: Jest 29 cannot format inline snapshots with Prettier 3, the default 'prettier' path.
+  prettierPath: null,
   transform: {
     '^.+\\.m?js(x)?$': [
       '@swc/jest',
@@ -119,7 +120,7 @@ module.exports = {
     '!**/static/**',
   ],
   coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', ['lcov', { projectRoot: __dirname }], 'html'],
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/node_modules/',

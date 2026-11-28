@@ -11,7 +11,12 @@ import isEqual from 'lodash/isEqual';
 
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import { useThrottledCallback } from '../hooks/useThrottledCallback';
-import { cancelIdleCallback, requestIdleCallback } from '../utils/shims';
+
+/**
+ * Module level so the throttled function keeps its identity across renders: a new options
+ * object would create a new throttle, with its own leading call, on every render.
+ */
+const UPDATE_THROTTLE_OPTIONS = { trailing: true };
 
 interface DescriptionComponent<Props, Description> {
   (props: Props): Description | null;
@@ -47,23 +52,15 @@ const DescriptionComponentRenderer = <Props, Description>({
   const statesRef = React.useRef<Record<string, { value: Description & { id: string } }>>({});
   const [tick, forceUpdate] = useForceUpdate();
 
-  const requestHandle = React.useRef<number | null>(null);
-  const requestUpdate = React.useCallback(() => {
-    if (requestHandle.current) {
-      cancelIdleCallback(requestHandle.current);
-    }
-
-    requestHandle.current = requestIdleCallback(() => {
-      requestHandle.current = null;
-
-      forceUpdate();
-    });
-  }, [forceUpdate]);
-
   /**
    * This will avoid us calling too many react updates in a short space of time.
+   *
+   * The update must not wait for the browser to be idle: an idle callback without a timeout
+   * can be postponed indefinitely, and the descriptions would never be rendered. Headless
+   * Chromium does this after an input on a page that has gone quiet, which left the list view
+   * bulk action bar empty after "Select all".
    */
-  const throttledRequestUpdate = useThrottledCallback(requestUpdate, 60, { trailing: true });
+  const throttledRequestUpdate = useThrottledCallback(forceUpdate, 60, UPDATE_THROTTLE_OPTIONS);
 
   const update = React.useCallback<DescriptionProps<Props, Description>['update']>(
     (id, description) => {

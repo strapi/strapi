@@ -1,0 +1,66 @@
+.scroll {
+  overflow-x: auto;
+  margin-bottom: var(--ifm-spacing-vertical);
+}
+
+.scroll table {
+  display: table;
+  width: 100%;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+}
+
+.groupHeading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+  background: var(--pkg-color);
+}
+
+.groupCount {
+  padding: 0 0.5em;
+  border-radius: 999px;
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.name {
+  white-space: nowrap;
+}
+
+.private {
+  margin-left: 0.4rem;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.75rem;
+}
+
+.path {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--ifm-color-emphasis-700);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.75rem;
+}
+
+.scroll th {
+  white-space: nowrap;
+}
+
+.description {
+  min-width: 14rem;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

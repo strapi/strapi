@@ -1,4 +1,5 @@
-import { curry, matchesProperty, pick } from 'lodash/fp';
+import { pick, curry, matchesProperty } from 'lodash';
+
 import type { Internal, Struct } from '@strapi/types';
 
 const isOfKind = (kind: unknown) => matchesProperty('kind', kind);
@@ -14,7 +15,7 @@ const hasProperty = curry((property: unknown, subject: any) => {
   return !!subject.properties.find((prop: any) => prop.value === property);
 });
 
-const getValidOptions = pick(['applyToProperties']);
+const getValidOptions = (options: object) => pick(options, ['applyToProperties']);
 
 const toSubjectTemplate = (ct: any) => ({
   uid: ct.uid,

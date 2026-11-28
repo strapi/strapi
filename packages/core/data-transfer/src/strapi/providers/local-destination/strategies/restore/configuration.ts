@@ -1,12 +1,12 @@
 import { Writable } from 'stream';
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
 import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
 
-const omitInvalidCreationAttributes = omit(['id']);
+const omitInvalidCreationAttributes = <T extends object>(data: T) => omit(data, ['id']);
 
 const restoreCoreStore = async <T extends { value: unknown }>(strapi: Core.Strapi, values: T) => {
   const data = omitInvalidCreationAttributes(values);

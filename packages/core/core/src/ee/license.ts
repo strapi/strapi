@@ -14,6 +14,12 @@ interface LicenseInfo {
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
   subscriptionId?: string;
   planPriceId?: string;
+  /** End of the subscription term, epoch milliseconds. */
+  // The registry sends an ISO date string; kept open to a timestamp
+  renewalDate?: string | number;
+  // Present on the payload at runtime; declared here so the type reflects reality.
+  licenseKey?: string;
+  customerId?: string;
 }
 
 const DEFAULT_FEATURES = {
@@ -28,6 +34,24 @@ const DEFAULT_FEATURES = {
     { name: 'cms-content-releases' },
     { name: 'cms-content-history', options: { retentionDays: 99999 } },
     { name: 'cms-advanced-preview' },
+  ],
+};
+
+/**
+ * Features that can appear on a plan, in the order the admin panel lists them.
+ * Used to render entitlement rows for features a plan supports but this license
+ * does not include. `cms-ai` is deliberately absent: AI usage has its own panel.
+ */
+export const PLAN_FEATURE_CATALOG: Record<'bronze' | 'silver' | 'gold', string[]> = {
+  bronze: [],
+  silver: ['sso', 'cms-advanced-preview', 'cms-content-releases', 'cms-content-history'],
+  gold: [
+    'sso',
+    'cms-advanced-preview',
+    'cms-content-releases',
+    'review-workflows',
+    'cms-content-history',
+    'audit-logs',
   ],
 };
 
@@ -46,6 +70,23 @@ const licenseErrorSchema = z.object({
     message: z.string(),
   }),
 });
+
+// Identifies this process. Changes on every restart.
+const INSTANCE_ID = crypto.randomUUID();
+
+// Active admin users across all instances of a license, as the registry sends it and as it is
+// stored in the core store
+const adminUsersAcrossInstancesSchema = z.object({
+  activeUsers: z.number().int().nonnegative(),
+  contractedUsers: z.number().int().nonnegative().nullable(),
+  updatedAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+});
+
+const adminUsersResponseSchema = z.object({ data: adminUsersAcrossInstancesSchema });
+
+type AdminUsersAcrossInstances = z.infer<typeof adminUsersAcrossInstancesSchema>;
+
+const ADMIN_USERS_REPORT_TIMEOUT_MS = 5000;
 
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
@@ -111,21 +152,29 @@ const throwShouldFallbackError = () => {
   throw createShouldFallbackError();
 };
 
+const getStrapiVersion = (strapi: Core.Strapi): string | undefined => {
+  const version = strapi.config.get('info.strapi');
+  return typeof version === 'string' ? version : undefined;
+};
+
 const fetchLicense = async (
   { strapi }: { strapi: Core.Strapi },
   key: string,
   projectId: string
 ) => {
-  const { installId: installIdFromPackageJson } = strapi.config;
+  const installIdFromPackageJson = strapi.config.get<string | undefined>('installId');
 
   const response = await strapi
     .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      // Older registries ignore the new fields
       body: JSON.stringify({
         key,
         projectId,
         deviceId: generateInstallId(projectId, installIdFromPackageJson),
+        instanceId: INSTANCE_ID,
+        strapiVersion: getStrapiVersion(strapi),
       }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwShouldFallbackError);
@@ -133,7 +182,9 @@ const fetchLicense = async (
   const contentType = response.headers.get('Content-Type');
 
   if (contentType?.includes('application/json')) {
-    const body = await response.json();
+    // A body that does not parse is an outage like any other malformed response, so it keeps
+    // the stored license instead of reading as a rejection.
+    const body = await response.json().catch(throwShouldFallbackError);
 
     switch (response.status) {
       case 200: {
@@ -156,4 +207,51 @@ const fetchLicense = async (
   }
 };
 
-export { readLicense, verifyLicense, fetchLicense, LicenseCheckError, LICENSE_REGISTRY_URI };
+/** Sends this instance's active admin users and returns the count across instances, or `null`. */
+const reportAdminUsers = async (
+  { strapi }: { strapi: Core.Strapi },
+  key: string,
+  userHashes: string[]
+): Promise<AdminUsersAcrossInstances | null> => {
+  try {
+    const response = await strapi.fetch(`${LICENSE_REGISTRY_URI}/api/licenses/admin-users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, instanceId: INSTANCE_ID, userHashes }),
+      signal: AbortSignal.timeout(ADMIN_USERS_REPORT_TIMEOUT_MS),
+    });
+
+    if (response.status !== 200) {
+      // e.g. 404 from an older registry, 429 when rate limited
+      strapi.log.debug(
+        `Could not report the admin users to the license registry (${response.status}).`
+      );
+      return null;
+    }
+
+    const result = adminUsersResponseSchema.safeParse(await response.json());
+
+    if (!result.success) {
+      strapi.log.warn('Ignoring an unexpected admin users response from the license registry.');
+      return null;
+    }
+
+    return result.data.data;
+  } catch (error) {
+    strapi.log.debug(
+      `Could not report the admin users: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return null;
+  }
+};
+
+export {
+  readLicense,
+  verifyLicense,
+  fetchLicense,
+  reportAdminUsers,
+  adminUsersAcrossInstancesSchema,
+  LicenseCheckError,
+  LICENSE_REGISTRY_URI,
+};
+export type { AdminUsersAcrossInstances };

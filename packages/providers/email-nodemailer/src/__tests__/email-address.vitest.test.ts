@@ -293,6 +293,11 @@ describe('Email Address Parser', () => {
       const text = 'Normal text without encoding';
       expect(decodeRfc2047(text)).toBe(text);
     });
+
+    it('should decode using the declared charset', () => {
+      expect(decodeRfc2047('=?ISO-8859-1?Q?M=FCller?=')).toBe('Müller');
+      expect(decodeRfc2047('=?ISO-8859-1?B?TfxsbGVy?=')).toBe('Müller');
+    });
   });
 
   describe('encodeRfc2047Base64', () => {

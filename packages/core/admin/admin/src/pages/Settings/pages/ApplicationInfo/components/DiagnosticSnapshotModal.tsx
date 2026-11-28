@@ -1,0 +1,188 @@
+import * as React from 'react';
+
+import { Box, Button, Flex, Loader, Modal, Typography } from '@strapi/design-system';
+import { Download, Duplicate } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+
+import { useNotification } from '../../../../../features/Notifications';
+import { useClipboard } from '../../../../../hooks/useClipboard';
+import { useLazyGetDebugDumpQuery } from '../../../../../services/admin';
+
+/* -------------------------------------------------------------------------------------------------
+ * DiagnosticSnapshotModal
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DiagnosticSnapshotModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+/**
+ * Generates the redacted diagnostic snapshot behind the Support card's "Generate snapshot" action.
+ * The fetch is triggered as soon as the modal opens, so the user only ever sees a spinner followed
+ * by the payload (or, on failure, a notification while the modal closes itself).
+ */
+const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalProps) => {
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
+  const [triggerGetDump, { data, isFetching }] = useLazyGetDebugDumpQuery();
+
+  // Failure is read from this open's own request. The lazy query keeps `isError` from an earlier
+  // failed request while a new one is in flight, which closed the next open straight away.
+  React.useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    let active = true;
+
+    triggerGetDump()
+      .unwrap()
+      .catch(() => {
+        if (!active) {
+          return;
+        }
+
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'Settings.debug-dump.error',
+            defaultMessage:
+              'Failed to generate the debug dump. Check the server logs and try again.',
+          }),
+        });
+        onClose();
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isOpen, triggerGetDump, toggleNotification, formatMessage, onClose]);
+
+  const serialized = React.useMemo(
+    () => (data === undefined ? '' : JSON.stringify(data, null, 2)),
+    [data]
+  );
+
+  const isReady = !isFetching && data !== undefined;
+
+  const handleCopy = async () => {
+    const didCopy = await copy(serialized);
+    toggleNotification({
+      type: didCopy ? 'success' : 'danger',
+      message: didCopy
+        ? formatMessage({ id: 'Settings.debug-dump.copied', defaultMessage: 'Copied to clipboard' })
+        : formatMessage({
+            id: 'Settings.debug-dump.copy-failed',
+            defaultMessage: 'Could not copy to clipboard',
+          }),
+    });
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([serialized], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `strapi-debug-dump-${new Date().toISOString().replaceAll(':', '-')}.json`;
+    // In the document for the click and revoked on a later turn, as the audit-log export does:
+    // some browsers cancel a click on a detached anchor or a download whose URL is gone.
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
+
+  return (
+    <Modal.Root open={isOpen} onOpenChange={onClose}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>
+            {formatMessage({
+              id: 'Settings.debug-dump.snapshot-modal.title',
+              defaultMessage: 'Diagnostic snapshot',
+            })}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {isReady ? (
+            <Flex direction="column" alignItems="stretch" gap={4}>
+              <Typography>
+                {formatMessage({
+                  id: 'Settings.debug-dump.snapshot-modal.description',
+                  defaultMessage:
+                    "This snapshot describes how your project is built so a third party can reproduce the bug locally. It does not contain any of your app's content and no credentials.",
+                })}
+              </Typography>
+              <Typography variant="sigma">
+                {formatMessage({
+                  id: 'Settings.debug-dump.payload-label',
+                  defaultMessage: 'payload',
+                })}
+              </Typography>
+              <Box
+                hasRadius
+                padding={4}
+                maxHeight="26rem"
+                overflow="auto"
+                // A code surface that stays dark in BOTH themes. The design-system neutrals invert
+                // between themes (`neutral800` is #32324d in light but #ffffff in dark, and
+                // `neutral0` inverts with it), so tokens here flip the block to white on dark.
+                // These are the same fixed values the WYSIWYG preview uses for its code surface.
+                style={{ backgroundColor: '#32324d' }}
+              >
+                <Typography
+                  tag="pre"
+                  variant="pi"
+                  style={{
+                    color: '#ffffff',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    margin: 0,
+                  }}
+                >
+                  {serialized}
+                </Typography>
+              </Box>
+            </Flex>
+          ) : (
+            <Flex justifyContent="center" alignItems="center" padding={7}>
+              <Loader>
+                {formatMessage({
+                  id: 'Settings.debug-dump.generating',
+                  defaultMessage: 'Generating diagnostic snapshot',
+                })}
+              </Loader>
+            </Flex>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Modal.Close>
+          {/* Grouped so Copy and Download stay together on the right rather than being pushed to
+              opposite edges by the footer's `space-between`. */}
+          <Flex gap={2}>
+            <Button
+              variant="secondary"
+              onClick={handleCopy}
+              startIcon={<Duplicate />}
+              disabled={!isReady}
+            >
+              {formatMessage({ id: 'Settings.debug-dump.copy', defaultMessage: 'Copy' })}
+            </Button>
+            <Button onClick={handleDownload} startIcon={<Download />} disabled={!isReady}>
+              {formatMessage({ id: 'Settings.debug-dump.download', defaultMessage: 'Download' })}
+            </Button>
+          </Flex>
+        </Modal.Footer>
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
+export { DiagnosticSnapshotModal };
+export type { DiagnosticSnapshotModalProps };

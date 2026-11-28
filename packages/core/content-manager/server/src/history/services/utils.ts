@@ -1,20 +1,158 @@
-import { difference, omit } from 'lodash/fp';
+import { difference, omit } from 'lodash';
+
 import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
 import { FIELDS_TO_IGNORE } from '../constants';
-import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
+import { getService } from '../utils';
+import type {
+  CreateHistoryVersion,
+  HistoryVersionAuthor,
+  HistoryVersionAuthorReference,
+  HistoryVersionSource,
+} from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
+
+/**
+ * The retention the history delete job applies, from the license's value and the admin setting.
+ * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
+ */
+export const computeRetentionDays = (
+  licenseRetentionDays: unknown,
+  userRetentionDays: number | null | undefined
+): number => {
+  if (licenseRetentionDays == null) {
+    return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
+  }
+
+  // The registry can ship the value as a numeric string
+  const licenseDays = Number(licenseRetentionDays);
+
+  // Allow users to override the license retention days, but not to increase it
+  if (userRetentionDays && userRetentionDays < licenseDays) {
+    return userRetentionDays;
+  }
+
+  // User didn't provide retention days value, use the license or fallback to default
+  return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
+};
+
+export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.RequestContext['get']>>;
+
+interface HistoryOriginAuthor extends Omit<HistoryVersionAuthorReference, 'id'> {
+  entityId: Data.ID;
+}
+
+export interface HistoryOrigin {
+  source: HistoryVersionSource;
+  author: HistoryOriginAuthor | null;
+}
+
+export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
+
+export type AuthorColumns =
+  | {
+      authorType: StoredAuthorReference['type'];
+      authorModel: StoredAuthorReference['model'];
+      authorId: StoredAuthorReference['id'];
+    }
+  | { authorType: null; authorModel: null; authorId: null };
+
+export const toAuthorColumns = (author: HistoryVersionAuthorReference | null): AuthorColumns =>
+  author === null
+    ? { authorType: null, authorModel: null, authorId: null }
+    : {
+        authorType: author.type,
+        authorModel: author.model,
+        authorId: author.id,
+      };
+
+export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
+  columns.authorType === null
+    ? null
+    : {
+        type: columns.authorType,
+        model: columns.authorModel,
+        id: columns.authorId,
+      };
+
+type AuthorNameDictionary = Record<string, Record<string, string>>;
+
+export const toAuthor = (
+  author: StoredAuthorReference | null,
+  authorNameDictionary: AuthorNameDictionary
+): HistoryVersionAuthor | null => {
+  if (!author) {
+    return null;
+  }
+
+  const name = author.id ? authorNameDictionary[author.model]?.[author.id] : undefined;
+
+  return name === undefined ? { ...author, id: null, name: null } : { ...author, name };
+};
+
+interface AdminUserNames {
+  username: string | null;
+  firstname: string | null;
+  lastname: string | null;
+  email: string;
+}
+
+/**
+ * Retrieves the display name of an admin panel user
+ */
+const getDisplayName = ({ firstname, lastname, username, email }: AdminUserNames): string => {
+  if (username) {
+    return username;
+  }
+
+  // firstname is not required if the user is created with a username
+  if (firstname) {
+    return `${firstname} ${lastname ?? ''}`.trim();
+  }
+
+  return email;
+};
 
 type RelationResponse = {
   results: RelationResult[];
   meta: { missingCount: number };
 };
 
+const isContentManagerRoute = ({ state }: RequestContext) =>
+  state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
+
+const isContentApiRoute = ({ state }: RequestContext) => state.route?.info?.type === 'content-api';
+
+const isMcpRequest = ({ state }: RequestContext) => state.auth?.strategy?.name === 'mcp';
+
+const resolveSource = (requestContext: RequestContext): HistoryVersionSource | null => {
+  if (isMcpRequest(requestContext)) {
+    return 'mcp';
+  }
+
+  if (isContentManagerRoute(requestContext)) {
+    switch (requestContext.state.auth?.strategy?.name) {
+      case 'admin-token':
+        return 'admin-api';
+      default:
+        return requestContext.state.user ? 'admin-panel' : null;
+    }
+  }
+
+  if (isContentApiRoute(requestContext)) {
+    return 'content-api';
+  }
+
+  return null;
+};
+
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
+  const historyAuthors = getService(strapi, 'history-authors');
+
   /**
    * @description
    * Get the difference between the version schema and the content type schema
@@ -25,8 +163,8 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   ) => {
     // Omit the same fields that were omitted when creating a history version
     const sanitizedContentTypeSchemaAttributes = omit(
-      FIELDS_TO_IGNORE,
-      contentTypeSchemaAttributes
+      contentTypeSchemaAttributes,
+      FIELDS_TO_IGNORE
     );
 
     const reduceDifferenceToAttributesObject = (
@@ -113,13 +251,10 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
       .findOne({ where: { id: versionRelationData.id } });
   };
 
-  const localesService = strapi.plugin('i18n')?.service('locales');
-  const i18nContentTypeService = strapi.plugin('i18n')?.service('content-types');
-
-  const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
+  const getDefaultLocale = async () => strapi.localization.getDefaultLocale();
 
   const isLocalizedContentType = (model: Schema.ContentType) =>
-    i18nContentTypeService ? i18nContentTypeService.isLocalizedContentType(model) : false;
+    strapi.localization.isLocalizedContentType(model);
 
   /**
    *
@@ -129,20 +264,81 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocaleDictionary = async (): Promise<{
     [key: string]: { name: string; code: string };
   }> => {
-    if (!localesService) return {};
+    const locales = await strapi.localization.getLocales();
 
-    const locales = (await localesService.find()) || [];
-    return locales.reduce(
-      (
-        acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
-        locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
-      ) => {
-        acc[locale.code] = { name: locale.name, code: locale.code };
+    return locales.reduce<
+      Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>
+    >((acc, locale) => {
+      acc[locale.code] = { name: locale.name, code: locale.code };
 
-        return acc;
-      },
-      {}
+      return acc;
+    }, {});
+  };
+
+  const findAuthorDocumentId = async ({
+    model,
+    entityId,
+  }: HistoryOriginAuthor): Promise<string | null> => {
+    const author: { documentId: string } | null = await strapi.db
+      .query(model as UID.Schema)
+      .findOne({ select: ['documentId'], where: { id: entityId } });
+
+    return author?.documentId ?? null;
+  };
+
+  const findAdminUserNames = async (documentIds: string[]): Promise<Record<string, string>> => {
+    const users: Array<AdminUserNames & { documentId: string }> = await strapi.db
+      .query('admin::user')
+      .findMany({
+        select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
+        where: { documentId: { $in: documentIds } },
+      });
+
+    return users.reduce<Record<string, string>>((acc, user) => {
+      acc[user.documentId] = getDisplayName(user);
+
+      return acc;
+    }, {});
+  };
+
+  const findApiTokenNames = async (documentIds: string[]): Promise<Record<string, string>> => {
+    const tokens: Array<{ documentId: string; name: string }> = await strapi.db
+      .query('admin::api-token')
+      .findMany({
+        select: ['documentId', 'name'],
+        where: { documentId: { $in: documentIds } },
+      });
+
+    return tokens.reduce<Record<string, string>>((acc, token) => {
+      acc[token.documentId] = token.name;
+
+      return acc;
+    }, {});
+  };
+
+  /**
+   * @description
+   * Creates a dictionary of the current author names, with one query per model
+   */
+  const getAuthorNameDictionary = async (
+    authors: Array<StoredAuthorReference | null>
+  ): Promise<AuthorNameDictionary> => {
+    const idsByModel = authors.reduce<Record<string, Set<string>>>((acc, author) => {
+      if (author?.id) {
+        acc[author.model] = (acc[author.model] ?? new Set()).add(author.id);
+      }
+
+      return acc;
+    }, {});
+
+    const namesByModel = await Promise.all(
+      Object.entries(idsByModel).map(
+        async ([model, ids]) =>
+          [model, await historyAuthors.findNames(model, Array.from(ids))] as const
+      )
     );
+
+    return Object.fromEntries(namesByModel);
   };
 
   /**
@@ -152,25 +348,24 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const getRetentionDays = () => {
     const featureConfig = strapi.ee.features.get('cms-content-history');
-    const licenseRetentionDays =
-      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
-    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
 
-    // Allow users to override the license retention days, but not to increase it
-    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
-      return userRetentionDays;
-    }
-
-    // User didn't provide retention days value, use the license or fallback to default
-    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
+    return computeRetentionDays(
+      typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
+      strapi.config.get('admin.history.retentionDays')
+    );
   };
+
+  const isContentApiHistoryEnabled = () =>
+    strapi.config.get('admin.history.contentApi.enabled', true);
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
     document: Modules.Documents.AnyDocument | null
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
-    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
+    const meta = await documentMetadataService.getMetadata(contentTypeUid, document, {
+      availableLocales: false,
+    });
 
     return documentMetadataService.getStatus(document, meta.availableStatus);
   };
@@ -347,6 +542,42 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
+  const resolveAuthor = (
+    { state }: RequestContext,
+    source: HistoryVersionSource
+  ): HistoryOrigin['author'] => {
+    // An admin panel write is authored by the logged-in admin, whatever the admin strategy
+    const isAdminPanel = source === 'admin-panel';
+    const strategyName = isAdminPanel ? 'admin' : state.auth?.strategy?.name;
+    const provider = strategyName ? historyAuthors.findProviderByStrategy(strategyName) : undefined;
+    const recordId = provider?.getRecordId({
+      credentials: state.auth?.credentials,
+      user: state.user,
+    });
+
+    if (!provider || recordId === null || recordId === undefined) {
+      return null;
+    }
+
+    return { type: provider.type, model: provider.model, entityId: recordId };
+  };
+
+  const resolveHistoryOrigin = (
+    requestContext: RequestContext | undefined
+  ): HistoryOrigin | null => {
+    if (!requestContext) {
+      return null;
+    }
+
+    const source = resolveSource(requestContext);
+
+    if (source === null) {
+      return null;
+    }
+
+    return { source, author: resolveAuthor(requestContext, source) };
+  };
+
   return {
     getSchemaAttributesDiff,
     getRelationRestoreValue,
@@ -354,8 +585,14 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getDefaultLocale,
     isLocalizedContentType,
     getLocaleDictionary,
+    findAuthorDocumentId,
+    findAdminUserNames,
+    findApiTokenNames,
+    getAuthorNameDictionary,
     getRetentionDays,
+    isContentApiHistoryEnabled,
     getVersionStatus,
+    resolveHistoryOrigin,
     getDeepPopulate,
     buildMediaResponse,
     buildRelationReponse,

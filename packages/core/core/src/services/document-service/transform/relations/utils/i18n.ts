@@ -3,11 +3,11 @@ import { LongHandDocument } from './types';
 
 export const isLocalizedContentType = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
-  return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
+  return strapi.localization.isLocalizedContentType(model);
 };
 
 export const getDefaultLocale = () => {
-  return strapi.plugin('i18n').service('locales').getDefaultLocale();
+  return strapi.localization.getDefaultLocale();
 };
 
 export const getRelationTargetLocale = (

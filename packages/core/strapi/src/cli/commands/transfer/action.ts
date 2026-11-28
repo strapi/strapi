@@ -1,4 +1,4 @@
-import { isObject } from 'lodash/fp';
+import { isObject } from 'lodash';
 import ora from 'ora';
 import type { Ora } from 'ora';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';

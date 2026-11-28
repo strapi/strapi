@@ -10,4 +10,10 @@ export interface FeaturesService {
   future: {
     isEnabled: (futureFlagName: string) => boolean;
   };
+  /**
+   * Permanent flags, read straight off `features`. Unlike `future.*` these are supported
+   * configuration rather than opt-in previews, so they are named for what they do rather
+   * than gathered under a bucket that promises removal.
+   */
+  isEnabled: (flagName: keyof Omit<FeaturesConfig, 'future'>) => boolean;
 }

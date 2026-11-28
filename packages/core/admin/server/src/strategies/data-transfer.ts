@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
-import { castArray, isNil } from 'lodash/fp';
+import { castArray } from 'lodash';
 
 import { getService } from '../utils';
 
@@ -44,7 +44,7 @@ export const authenticate = async (ctx: Context) => {
   // Check if the token has expired
   const currentDate = new Date();
 
-  if (!isNil(transferToken.expiresAt)) {
+  if (transferToken.expiresAt != null) {
     const expirationDate = new Date(transferToken.expiresAt);
 
     if (expirationDate < currentDate) {
@@ -84,7 +84,7 @@ export const verify = async (auth: any, config: any = {}) => {
 
   const currentDate = new Date();
 
-  if (!isNil(transferToken.expiresAt)) {
+  if (transferToken.expiresAt != null) {
     const expirationDate = new Date(transferToken.expiresAt);
     // token has expired
     if (expirationDate < currentDate) {
@@ -96,9 +96,13 @@ export const verify = async (auth: any, config: any = {}) => {
     throw new ForbiddenError();
   }
 
-  const scopes = castArray(config.scope ?? []);
+  // Array.from fills holes: native every skips them, so a sparse scope array would pass unchecked.
+  // A hole becomes undefined, and Strapi's ability.can throws a TypeError on a nullish action, so reject it first.
+  const scopes: unknown[] = Array.from(castArray(config.scope ?? []));
 
-  const isAllowed = scopes.every((scope) => ability.can(scope));
+  const isAllowed = scopes.every(
+    (scope) => scope !== undefined && scope !== null && ability.can(scope)
+  );
 
   if (!isAllowed) {
     throw new ForbiddenError();

@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
 import {
+  getAdminUserId,
   useAuth,
   type Permission,
   useNotification,
@@ -13,7 +14,7 @@ import { useIntl } from 'react-intl';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { HOOKS } from '../constants/hooks';
-import { AppState, setInitialData } from '../modules/app';
+import { AppState, initialState, setInitialData } from '../modules/app';
 import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
@@ -73,6 +74,8 @@ const useContentManagerInitData = (): AppState => {
     'useContentManagerInitData',
     (state) => state.checkUserHasPermissions
   );
+  const isLoadingAuth = useAuth('useContentManagerInitData', (state) => state.isLoading);
+  const adminUserId = useAuth('useContentManagerInitData', (state) => getAdminUserId(state.user));
 
   const state = useTypedSelector((state) => state['content-manager'].app);
 
@@ -117,7 +120,8 @@ const useContentManagerInitData = (): AppState => {
       components: Component[],
       contentTypes: ContentType[],
       fieldSizes: GetInitData.Response['data']['fieldSizes'],
-      contentTypeConfigurations: FindContentTypesSettings.Response['data']
+      contentTypeConfigurations: FindContentTypesSettings.Response['data'],
+      contentStructure: GetInitData.Response['data']['contentStructure']
     ) => {
       /**
        * We group these by the two types we support. We do with an object because we can use default
@@ -167,40 +171,60 @@ const useContentManagerInitData = (): AppState => {
         models: contentTypes,
       });
 
-      dispatch(
-        setInitialData({
-          authorizedCollectionTypeLinks: ctLinks,
-          authorizedSingleTypeLinks: stLinks,
-          components,
-          contentTypeSchemas: contentTypes,
-          fieldSizes,
-        })
-      );
+      return {
+        adminUserId,
+        authorizedCollectionTypeLinks: ctLinks,
+        authorizedSingleTypeLinks: stLinks,
+        components,
+        contentStructure,
+        contentTypeSchemas: contentTypes,
+        fieldSizes,
+      };
     },
-    [checkUserHasPermissions, dispatch, runHookWaterfall]
+    [adminUserId, checkUserHasPermissions, runHookWaterfall]
   );
 
   useEffect(() => {
+    let cancelled = false;
+
     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
       formatData(
         initialDataQuery.data.components,
         initialDataQuery.data.contentTypes,
         initialDataQuery.data.fieldSizes,
-        contentTypeSettingsQuery.data
-      ).catch((error) => {
-        toggleNotification({
-          type: 'danger',
-          message: formatAPIError(error),
+        contentTypeSettingsQuery.data,
+        initialDataQuery.data.contentStructure
+      )
+        .then((data) => {
+          if (!cancelled) {
+            dispatch(setInitialData(data));
+          }
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            toggleNotification({
+              type: 'danger',
+              message: formatAPIError(error),
+            });
+          }
         });
-      });
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    dispatch,
     formatAPIError,
     formatData,
     initialDataQuery.data,
     contentTypeSettingsQuery.data,
     toggleNotification,
   ]);
+
+  if (isLoadingAuth || state.adminUserId !== adminUserId) {
+    return { ...initialState };
+  }
 
   return { ...state };
 };

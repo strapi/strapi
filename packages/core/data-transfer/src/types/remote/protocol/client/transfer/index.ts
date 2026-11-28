@@ -8,7 +8,5 @@ export * from './push';
 export * from './utils';
 
 export type TransferMessage = { type: 'transfer'; transferID: string } & (
-  | Action
-  | TransferPushMessage
-  | TransferPullMessage
+  Action | TransferPushMessage | TransferPullMessage
 );

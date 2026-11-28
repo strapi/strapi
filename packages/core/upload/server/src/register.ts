@@ -2,12 +2,16 @@ import _ from 'lodash';
 import sharp from 'sharp';
 
 import { errors, file } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Providers } from '@strapi/types';
 
 import registerUploadMiddleware from './middlewares/upload';
+import { unsignRichtextAndBlocksUrls } from './migrations/unsign-richtext-and-blocks-urls';
 import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
 import { aiMetadataJob } from './models/ai-metadata-job';
+import { registerUploadMcpTools } from './mcp';
+import { warnOnSizeLimitMismatch } from './size-limit-warning';
+import type { UploadTooLargeDetails } from '../../shared/contracts/files';
 
 const { PayloadTooLargeError } = errors;
 const { bytesToHumanReadable, kbytesToBytes } = file;
@@ -35,7 +39,15 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
 
   strapi.plugin('upload').provider = createProvider(uploadConfig);
 
+  warnOnSizeLimitMismatch({ strapi });
+
+  // Rewrites richtext / blocks URLs persisted with a (now expired) signature
+  strapi.db.migrations.providers.internal.register(unsignRichtextAndBlocksUrls);
+
   await registerUploadMiddleware({ strapi });
+
+  // Register phase, before the MCP HTTP server starts during bootstrap.
+  registerUploadMcpTools({ strapi });
 
   if (strapi.plugin('graphql')) {
     const { installGraphqlExtension } = await import('./graphql.js');
@@ -56,8 +68,12 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
 const createProvider = (config: Config) => {
   const { providerOptions, actionOptions = {} } = config;
 
-  const providerName = _.toLower(config.provider);
-  let provider;
+  const providerName = String(config.provider ?? '').toLowerCase();
+  // Documents what the module should be: `require` returns `any`, so nothing is checked here.
+  let provider: Providers.Upload.Factory<
+    Config['providerOptions'],
+    Providers.Upload.Provider & Record<string, unknown>
+  >;
 
   let modulePath;
   try {
@@ -105,9 +121,14 @@ const createProvider = (config: Config) => {
     );
   }
 
-  const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
+  // Wrap only real methods: a key declared as `undefined` (e.g. `uploadStream: undefined`) must stay
+  // missing, so callers fall back on `upload` and the base provider defaults still apply.
+  const providerMethods = _.pickBy(providerInstance, (method) => typeof method === 'function');
+
+  const wrappedProvider = _.mapValues(providerMethods, (method, methodName) => {
     return async (file: File, options = actionOptions[methodName]) =>
-      providerInstance[methodName](file, options);
+      // Every member is called as a method, contract or not
+      (providerInstance[methodName] as (file: File, options: unknown) => unknown)(file, options);
   });
 
   return Object.assign(Object.create(baseProvider), wrappedProvider);
@@ -120,7 +141,8 @@ const baseProvider = {
   checkFileSize(file: InputFile, { sizeLimit }: { sizeLimit: number }) {
     if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
       throw new PayloadTooLargeError(
-        `${file.originalFilename} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+        `${file.originalFilename} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`,
+        { code: 'SizeLimitExceeded', limit: sizeLimit } satisfies UploadTooLargeDetails
       );
     }
   },

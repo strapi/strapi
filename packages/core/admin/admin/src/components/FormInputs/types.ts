@@ -8,7 +8,8 @@ interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
 }
 
 interface StringProps
-  extends Omit<InputProps, 'autoComplete' | 'type'>,
+  extends
+    Omit<InputProps, 'autoComplete' | 'type'>,
     Pick<ComponentPropsWithoutRef<'input'>, 'autoComplete'> {
   type: Extract<Schema.Attribute.Kind, 'text' | 'string' | 'password' | 'email'>;
 }

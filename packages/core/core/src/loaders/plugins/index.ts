@@ -1,6 +1,6 @@
 import { join } from 'path';
 import fse from 'fs-extra';
-import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
+import { defaults, defaultsDeep, get } from 'lodash';
 import * as resolve from 'resolve.exports';
 
 import { env } from '@strapi/utils';
@@ -23,7 +23,6 @@ const defaultPlugin = {
     default: {},
     validator() {},
   },
-  routes: [],
   controllers: {},
   services: {},
   policies: {},
@@ -43,11 +42,10 @@ const applyUserExtension = async (plugins: Plugins) => {
   for (const pluginName of Object.keys(plugins)) {
     const plugin = plugins[pluginName];
     // first: load json schema
-    const extendedContentTypes = get([pluginName, 'content-types'], extendedSchemas) ?? {};
+    const extendedContentTypes = get(extendedSchemas, [pluginName, 'content-types']) ?? {};
     for (const ctName of Object.keys(extendedContentTypes)) {
-      const extendedSchema = get([ctName, 'schema'], extendedContentTypes);
+      const extendedSchema = extendedContentTypes?.[ctName]?.schema;
       if (!extendedSchema) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -63,7 +61,7 @@ const applyUserExtension = async (plugins: Plugins) => {
 
     formatContentTypes(pluginName, plugin.contentTypes);
     // second: execute strapi-server extension
-    const strapiServer = get([pluginName, 'strapi-server'], strapiServers);
+    const strapiServer = get(strapiServers, [pluginName, 'strapi-server']);
     if (strapiServer) {
       plugins[pluginName] = await strapiServer(plugin);
     }
@@ -75,13 +73,13 @@ const applyUserConfig = async (plugins: Plugins) => {
 
   for (const pluginName of Object.keys(plugins)) {
     const plugin = plugins[pluginName];
-    const userPluginConfig = getOr({}, `${pluginName}.config`, userPluginsConfig);
+    const userPluginConfig = get(userPluginsConfig, `${pluginName}.config`, {});
     const defaultConfig =
       typeof plugin.config.default === 'function'
         ? plugin.config.default({ env })
         : plugin.config.default;
 
-    const config = defaultsDeep(defaultConfig, userPluginConfig);
+    const config = defaultsDeep({}, userPluginConfig, defaultConfig);
     try {
       plugin.config.validator(config);
     } catch (e) {
@@ -136,8 +134,10 @@ export default async function loadPlugins(strapi: Core.Strapi) {
       ...defaultPlugin,
       ...pluginServer,
       contentTypes: formatContentTypes(pluginName, pluginServer.contentTypes ?? {}),
-      config: defaults(defaultPlugin.config, pluginServer.config),
-      routes: pluginServer.routes ?? defaultPlugin.routes,
+      config: defaults({}, pluginServer.config, defaultPlugin.config),
+      // A fresh array per plugin: a shared default would register a route pushed on one
+      // route-less plugin under every route-less plugin's prefix
+      routes: pluginServer.routes ?? [],
     };
   }
 

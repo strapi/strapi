@@ -1,6 +1,5 @@
 'use strict';
 
-const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 const componentData = require('../../core/core/src/services/document-service/components');
 
@@ -12,13 +11,30 @@ const toCompoUID = (name) => {
   return `default.${name}`;
 };
 
-const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {
-  const strapi = strapiInstance || (await createStrapiInstance(options));
+/**
+ * Boots an instance for a helper. Helper instances only write schema files or rows and never
+ * serve GraphQL requests, so they skip building the GraphQL schema. The instance a test boots
+ * itself still builds it.
+ */
+const createHelperInstance = (options = {}) =>
+  createStrapiInstance({ buildGraphqlSchema: false, ...options });
+
+/**
+ * Gives a helper an instance and its content-type-builder services.
+ *
+ * @param {object} [options]
+ * @param {object} [options.strapi] An instance to reuse. The helper then neither boots nor
+ *   destroys one.
+ * @param {boolean} [options.registerOnly] Only load the registries. Enough for the helpers that
+ *   write or delete schema files; the next full boot syncs the database with them.
+ */
+const createHelpers = async ({ strapi: strapiInstance = null, registerOnly = false } = {}) => {
+  const strapi = strapiInstance || (await createHelperInstance({ registerOnly }));
   const contentTypeService = strapi.plugin('content-type-builder').service('content-types');
   const componentsService = strapi.plugin('content-type-builder').service('components');
 
   const cleanup = async () => {
-    if (isNil(strapiInstance)) {
+    if (strapiInstance == null) {
       await strapi.destroy();
     }
   };
@@ -31,8 +47,8 @@ const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {})
   };
 };
 
-const createContentType = async (model, { strapi } = {}) => {
-  const { contentTypeService, cleanup } = await createHelpers({ strapi });
+const createContentType = async (model, { strapi, registerOnly } = {}) => {
+  const { contentTypeService, cleanup } = await createHelpers({ strapi, registerOnly });
 
   const contentType = await contentTypeService.createContentType({
     contentType: {
@@ -45,8 +61,8 @@ const createContentType = async (model, { strapi } = {}) => {
   return contentType;
 };
 
-const createContentTypes = async (models, { strapi } = {}) => {
-  const { contentTypeService, cleanup } = await createHelpers({ strapi });
+const createContentTypes = async (models, { strapi, registerOnly } = {}) => {
+  const { contentTypeService, cleanup } = await createHelpers({ strapi, registerOnly });
 
   const contentTypes = await contentTypeService.createContentTypes(
     models.map((model) => ({
@@ -61,8 +77,8 @@ const createContentTypes = async (models, { strapi } = {}) => {
   return contentTypes;
 };
 
-const createComponent = async (component, { strapi } = {}) => {
-  const { componentsService, cleanup } = await createHelpers({ strapi });
+const createComponent = async (component, { strapi, registerOnly } = {}) => {
+  const { componentsService, cleanup } = await createHelpers({ strapi, registerOnly });
 
   const createdComponent = await componentsService.createComponent({
     component: {
@@ -77,18 +93,18 @@ const createComponent = async (component, { strapi } = {}) => {
   return createdComponent;
 };
 
-const createComponents = async (components, { strapi } = {}) => {
+const createComponents = async (components, { strapi, registerOnly } = {}) => {
   const createdComponents = [];
 
   for (const component of components) {
-    createdComponents.push(await createComponent(component, { strapi }));
+    createdComponents.push(await createComponent(component, { strapi, registerOnly }));
   }
 
   return createdComponents;
 };
 
-const deleteComponent = async (componentUID, { strapi } = {}) => {
-  const { componentsService, cleanup } = await createHelpers({ strapi });
+const deleteComponent = async (componentUID, { strapi, registerOnly } = {}) => {
+  const { componentsService, cleanup } = await createHelpers({ strapi, registerOnly });
 
   const component = await componentsService.deleteComponent(componentUID);
 
@@ -97,18 +113,18 @@ const deleteComponent = async (componentUID, { strapi } = {}) => {
   return component;
 };
 
-const deleteComponents = async (componentsUID, { strapi } = {}) => {
+const deleteComponents = async (componentsUID, { strapi, registerOnly } = {}) => {
   const deletedComponents = [];
 
   for (const componentUID of componentsUID) {
-    deletedComponents.push(await deleteComponent(componentUID, { strapi }));
+    deletedComponents.push(await deleteComponent(componentUID, { strapi, registerOnly }));
   }
 
   return deletedComponents;
 };
 
-const deleteContentType = async (uid, { strapi } = {}) => {
-  const { contentTypeService, cleanup } = await createHelpers({ strapi });
+const deleteContentType = async (uid, { strapi, registerOnly } = {}) => {
+  const { contentTypeService, cleanup } = await createHelpers({ strapi, registerOnly });
 
   const contentType = await contentTypeService.deleteContentType(uid);
 
@@ -117,8 +133,8 @@ const deleteContentType = async (uid, { strapi } = {}) => {
   return contentType;
 };
 
-const deleteContentTypes = async (modelsUIDs, { strapi } = {}) => {
-  const { contentTypeService, cleanup } = await createHelpers({ strapi });
+const deleteContentTypes = async (modelsUIDs, { strapi, registerOnly } = {}) => {
+  const { contentTypeService, cleanup } = await createHelpers({ strapi, registerOnly });
 
   const contentTypes = await contentTypeService.deleteContentTypes(modelsUIDs);
 
@@ -170,7 +186,7 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   const results = [];
 
   for (const entry of entries) {
-    const dataToCreate = isFunction(entry) ? entry(results) : entry;
+    const dataToCreate = typeof entry === 'function' ? entry(results) : entry;
 
     const componentValidData = await componentData.createComponents(uid, dataToCreate);
     const entryData = Object.assign(
@@ -193,7 +209,7 @@ async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   await strapi.db
     .query(toContentTypeUID(model))
-    .deleteMany({ where: { id: entries.map(prop('id')) } });
+    .deleteMany({ where: { id: entries.map((entry) => entry?.id) } });
 
   await cleanup();
 }
@@ -251,6 +267,7 @@ async function getContentTypeSchema(modelName, { strapi: strapiIst } = {}) {
 
 module.exports = {
   toContentTypeUID,
+  createHelperInstance,
   // Create Content-Types
   createContentType,
   createContentTypes,
@@ -276,3 +293,22 @@ module.exports = {
   // Misc
   getContentTypeSchema,
 };
+
+const profile = require('./profile');
+
+if (profile.enabled) {
+  // Every helper takes its options last.
+  const modeOf = (args) => {
+    const last = args[args.length - 1];
+    const options = last && typeof last === 'object' && !Array.isArray(last) ? last : {};
+    if (options.strapi) return 'shared';
+    return options.registerOnly ? 'register-only' : 'boots';
+  };
+
+  for (const [name, fn] of Object.entries(module.exports)) {
+    if (typeof fn === 'function' && name !== 'toContentTypeUID') {
+      module.exports[name] = (...args) =>
+        profile.timed(`models.${name}`, () => fn(...args), { mode: modeOf(args) });
+    }
+  }
+}

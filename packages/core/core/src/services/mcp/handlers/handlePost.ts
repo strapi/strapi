@@ -8,6 +8,7 @@ import {
 } from '../metrics/metrics';
 import { sendJsonRpcError } from '../utils/sendJsonRpcError';
 import { withTimeout } from '../utils/withTimeout';
+import { resolveToolSchemaScope } from '../internal/resolveToolSchemaScope';
 import type { McpHandlerDependencies } from './types';
 
 export const createPostHandler = (deps: McpHandlerDependencies): Core.MiddlewareHandler => {
@@ -40,16 +41,24 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       hadAuthenticatedMcpRequest = true;
       sendDidUseMcpServer(strapi);
 
-      // Let audit logs pick up MCP actions and tag their origin.
+      // Let audit logs and content history pick up MCP actions and tag their origin.
       ctx.state.user = authResult.user;
       ctx.state.auditSource = 'mcp';
+      ctx.state.auth = {
+        strategy: authenticationStrategy,
+        credentials: authResult.credentials,
+        ability: authResult.ability,
+      };
 
+      const requestBody = ctx.request.body ?? null;
       const { mcpServer } = createServerWithRegistries({
         strapi,
         definitions: capabilityDefinitions,
         isDevMode: config.isDevMode(),
         ability: authResult.ability,
         user: authResult.user,
+        toolSchemaScope: resolveToolSchemaScope(requestBody),
+        maxToolInputElements: config.maxToolInputElements,
       });
 
       const transport = new NodeStreamableHTTPServerTransport({
@@ -63,7 +72,6 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
           'mcpServer.connect'
         );
 
-        const requestBody = ctx.request.body ?? null;
         await withTimeout(
           transport.handleRequest(req, res, requestBody),
           config.requestTimeoutMs,

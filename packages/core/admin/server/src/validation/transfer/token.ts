@@ -4,8 +4,8 @@ import constants from '../../services/constants';
 const transferTokenCreationSchema = yup
   .object()
   .shape({
-    name: yup.string().min(1).required(),
-    description: yup.string().optional(),
+    name: yup.string().min(1).max(constants.TOKEN_TEXT_MAX_LENGTH).required(),
+    description: yup.string().max(constants.TOKEN_TEXT_MAX_LENGTH).optional(),
     permissions: yup
       .array()
       .min(1)
@@ -23,8 +23,8 @@ const transferTokenCreationSchema = yup
 const transferTokenUpdateSchema = yup
   .object()
   .shape({
-    name: yup.string().min(1).notNull(),
-    description: yup.string().nullable(),
+    name: yup.string().min(1).max(constants.TOKEN_TEXT_MAX_LENGTH).notNull(),
+    description: yup.string().max(constants.TOKEN_TEXT_MAX_LENGTH).nullable(),
     permissions: yup
       .array()
       .min(1)

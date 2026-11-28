@@ -7,11 +7,6 @@ describe('ReleaseActionMenu', () => {
     const { user } = render(
       <ReleaseActionMenu.Root>
         <ReleaseActionMenu.DeleteReleaseActionItem releaseId="1" actionId="1" />
-        <ReleaseActionMenu.ReleaseActionEntryLinkItem
-          contentTypeUid="api::category.category"
-          locale="en-GB"
-          documentId="1"
-        />
       </ReleaseActionMenu.Root>
     );
 
@@ -20,6 +15,5 @@ describe('ReleaseActionMenu', () => {
     expect(
       await screen.findByRole('menuitem', { name: 'Remove from release' })
     ).toBeInTheDocument();
-    expect(await screen.findByRole('menuitem', { name: 'Edit entry' })).toBeInTheDocument();
   });
 });

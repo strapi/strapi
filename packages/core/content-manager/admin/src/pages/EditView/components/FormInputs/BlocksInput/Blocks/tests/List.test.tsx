@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
+import { withStrapiSchema } from '../../plugins/withStrapiSchema';
 import { listBlocks } from '../List';
 
 import { Wrapper } from './Wrapper';
@@ -254,6 +255,83 @@ describe('List', () => {
     ]);
   });
 
+  it('does not replace a single-item list with a paragraph when pressing enter if the item starts with an inline element', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                rel: '',
+                target: '',
+                children: [{ type: 'text', text: 'Link' }],
+              },
+              {
+                type: 'text',
+                text: ' text',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                rel: '',
+                target: '',
+                children: [{ type: 'text', text: 'Link' }],
+              },
+              {
+                type: 'text',
+                text: ' text',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('handles enter key on a nested empty list item', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
@@ -476,6 +554,79 @@ describe('List', () => {
           },
         ],
       },
+    ]);
+  });
+
+  it('does not replace a single-item list with a paragraph on backspace if the item starts with an inline element', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                rel: '',
+                target: '',
+                children: [{ type: 'text', text: 'Link' }],
+              },
+              {
+                type: 'text',
+                text: ' text',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 2], offset: 2 },
+      focus: { path: [0, 0, 2], offset: 2 },
+    });
+
+    const preventDefault = jest.fn();
+    listBlocks['list-unordered'].handleBackspaceKey?.(baseEditor, {
+      preventDefault,
+    } as unknown as React.KeyboardEvent<HTMLElement>);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(baseEditor.children[0]).toMatchObject({
+      type: 'list',
+      children: [
+        expect.objectContaining({
+          type: 'list-item',
+        }),
+      ],
+    });
+  });
+
+  it('replaces the only empty list with a single paragraph', () => {
+    const baseEditor = withStrapiSchema(createEditor());
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: '' }] }],
+      },
+    ];
+    Transforms.select(baseEditor, { path: [0, 0, 0], offset: 0 });
+
+    listBlocks['list-unordered'].handleBackspaceKey?.(
+      baseEditor,
+      mockEvent as unknown as React.KeyboardEvent<HTMLDivElement>
+    );
+
+    expect(baseEditor.children).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: '' }] },
     ]);
   });
 

@@ -3,6 +3,18 @@ import type { UID } from '@strapi/types';
 import { getDefaultLocale, isLocalizedContentType } from '../utils/i18n';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 
+const setDefaultLocaleToRelation = <T extends Record<string, any>>(
+  relation: T,
+  defaultLocale: string | null
+): T & { locale: string | null } => {
+  const position = relation.position;
+  if (position && typeof position === 'object' && !position.locale) {
+    position.locale = defaultLocale;
+  }
+
+  return { ...relation, locale: defaultLocale };
+};
+
 /**
  * In scenarios like Non i18n CT -> i18n CT
  * relations can be connected to multiple locales,
@@ -14,8 +26,9 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
     return data;
   }
 
-  // Store the default locale to avoid multiple calls
-  let defaultLocale: string;
+  // Store the default locale lookup, not only its result: relations are mapped concurrently, so
+  // caching the value alone lets every one of them issue the query before the first one answers
+  let defaultLocale: Promise<string | null> | null = null;
 
   /**
    * Traverse the entity input data and set the default locale to relations
@@ -32,20 +45,11 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
         }
 
         // Set default locale if not provided
-        if (!defaultLocale) {
-          defaultLocale = await getDefaultLocale();
-        }
+        defaultLocale ??= Promise.resolve(getDefaultLocale());
 
-        // Assign default locale to the positional argument
-        const position = relation.position;
-        if (position && typeof position === 'object' && !position.locale) {
-          relation.position.locale = defaultLocale;
-        }
-
-        return { ...relation, locale: defaultLocale };
+        return setDefaultLocaleToRelation(relation, await defaultLocale);
       }, value as any);
 
-      // @ts-expect-error - fix type
       set(key, relation);
     },
     { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },
@@ -53,4 +57,4 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
   );
 };
 
-export { setDefaultLocaleToRelations };
+export { setDefaultLocaleToRelation, setDefaultLocaleToRelations };

@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { defaultsDeep } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 import { koaBody, KoaBodyMiddlewareOptions } from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
@@ -10,6 +10,15 @@ export type Config = KoaBodyMiddlewareOptions;
 const defaults = {
   multipart: true,
   patchKoa: true,
+};
+
+// formidable's own default, applied when `formidable.maxFileSize` is not configured
+export const DEFAULT_MAX_FILE_SIZE = 200 * 1024 * 1024;
+
+const getMaxFileSize = (config: Config) => {
+  const limit = Number(config.formidable?.maxFileSize);
+
+  return Number.isFinite(limit) ? limit : DEFAULT_MAX_FILE_SIZE;
 };
 
 function ensureFileMimeType(file: any): void {
@@ -23,7 +32,7 @@ function getFiles(ctx: Koa.Context) {
 }
 
 const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
-  const bodyConfig: Config = defaultsDeep(defaults, config);
+  const bodyConfig: Config = defaultsDeep({}, config, defaults);
 
   let gqlEndpoint: string | undefined;
   if (strapi.plugin('graphql')) {
@@ -61,7 +70,10 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
           error.message.includes('maxFileSize') &&
           error.message.includes('exceeded')
         ) {
-          return ctx.payloadTooLarge('FileTooBig');
+          return ctx.payloadTooLarge('FileTooBig', {
+            code: 'FileTooBig',
+            limit: getMaxFileSize(bodyConfig),
+          });
         }
 
         throw error;

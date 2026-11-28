@@ -25,12 +25,13 @@ import { styled, useTheme } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
-import { DocumentRBAC } from '../../features/DocumentRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { Blocker } from '../../pages/EditView/components/Blocker';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
+import { getPublishValidationErrors } from '../../pages/EditView/utils/forms';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
@@ -73,6 +74,7 @@ const DEVICES = [
 interface PopoverField extends FieldContentSourceMap {
   position: DOMRect;
   attribute: Schema.Attribute.AnyAttribute;
+  blockIndex: number | null;
 }
 
 interface PreviewContextValue {
@@ -139,6 +141,26 @@ const PreviewPage = () => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
   const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const prevPopoverFieldRef = React.useRef<PopoverField | null>(null);
+
+  // When the popover closes, ask the iframe to rescan its stega element groups.
+  // Live-preview sync updates the iframe DOM while editing, which can change the
+  // rendered height of the field; groups need to reflect the current DOM so that
+  // hover highlights and double-click detection work on the updated content.
+  React.useEffect(() => {
+    const prev = prevPopoverFieldRef.current;
+    prevPopoverFieldRef.current = popoverField;
+
+    if (prev !== null && popoverField === null) {
+      const iframe = iframeRef.current;
+      if (!iframe?.src) return;
+      iframe.contentWindow?.postMessage(
+        { type: INTERNAL_EVENTS.STRAPI_RESCAN_HIGHLIGHTS },
+        new URL(iframe.src).origin
+      );
+    }
+  }, [popoverField, iframeRef]);
+
   const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
@@ -237,10 +259,14 @@ const PreviewPage = () => {
     params,
   });
   const documentLayoutResponse = useDocumentLayout(model);
+  const isLoadingActionsRBAC = useDocumentRBAC('PreviewPage', (state) => state.isLoading);
 
   const isLoading =
     previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
-  if (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading)) {
+  if (
+    isLoadingActionsRBAC ||
+    (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading))
+  ) {
     return <Page.Loading />;
   }
 
@@ -262,26 +288,6 @@ const PreviewPage = () => {
   }
 
   const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
-
-  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
-    const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
-      schema: documentResponse.schema,
-      initialValues,
-      components: documentResponse.components,
-    });
-
-    const yupSchema = createYupSchema(
-      documentResponse.schema?.attributes,
-      documentResponse.components,
-      {
-        status: documentResponse.document?.status,
-        removedAttributes,
-        ...options,
-      }
-    );
-
-    return yupSchema.validateSync(cleanedValues, { abortEarly: false });
-  };
 
   const previewUrl = previewUrlResponse.data.data.url;
 
@@ -329,7 +335,14 @@ const PreviewPage = () => {
             documentResponse.document.status !== 'draft'
           }
           initialValues={documentResponse.getInitialFormValues()}
-          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+          initialErrors={
+            location?.state?.forceValidation
+              ? getPublishValidationErrors(initialValues, {
+                  schema: documentResponse.schema,
+                  components: documentResponse.components,
+                })
+              : {}
+          }
           height="100%"
           validate={(values: Record<string, unknown>, options: Record<string, string>) => {
             const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {

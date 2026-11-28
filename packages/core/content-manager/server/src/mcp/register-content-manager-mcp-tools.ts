@@ -5,7 +5,9 @@ import { getService } from '../utils';
 
 /**
  * Registers derived content-type MCP tools via strapi.ai.mcp.registerTool().
- * Must be called from the plugin register phase, before the MCP HTTP server starts.
+ * Must be called from the plugin bootstrap phase: after every plugin's register (so the
+ * localization provider is installed and locale rows are readable) and before the MCP HTTP
+ * server starts.
  */
 export const registerContentManagerMcpTools = async ({
   strapi,
@@ -18,15 +20,15 @@ export const registerContentManagerMcpTools = async ({
     return;
   }
 
-  const i18nPlugin = strapi.plugin('i18n');
-
-  let localeCodes = null;
+  let localeCodes: [string, ...string[]] | null = null;
   let defaultLocale: string | null = null;
-  if (i18nPlugin !== undefined) {
-    localeCodes = (await i18nPlugin.service('locales').find()).map(
-      (locale: { code: string }) => locale.code
-    ) as [string, ...string[]];
-    defaultLocale = await i18nPlugin.service('locales').getDefaultLocale();
+  if (strapi.localization.isEnabled() === true) {
+    // The tuple type is a lie for zero locales; consumers guard on length > 0 before z.enum.
+    localeCodes = (await strapi.localization.getLocales()).map((locale) => locale.code) as [
+      string,
+      ...string[],
+    ];
+    defaultLocale = await strapi.localization.getDefaultLocale();
   }
 
   const models = getService('content-types').findDisplayedContentTypes();

@@ -1,6 +1,5 @@
 import { pruneSchema } from '@graphql-tools/utils';
 import { makeSchema } from 'nexus';
-import { prop, startsWith } from 'lodash/fp';
 import type * as Nexus from 'nexus';
 import type { Core, Struct } from '@strapi/types';
 
@@ -101,15 +100,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // eg: removes registered subscriptions if they're disabled in the config)
     const prunedNexusSchema = pruneSchema(wrappedNexusSchema);
 
-    // Populate builtInQueryFields set for use by resolvers to avoid runtime schema builds
-    try {
-      const queryType = prunedNexusSchema.getQueryType();
-      const fields = queryType ? Object.keys(queryType.getFields() || {}) : [];
-      builtInQueryFields = new Set(fields);
-    } catch {
-      // ignore; leave set empty
-    }
-
     return prunedNexusSchema;
   };
 
@@ -119,6 +109,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     builtInQueryFields.has(fieldName) || fieldName.endsWith('_connection');
 
   const buildMergedSchema = ({ registry }: { registry: TypeRegistry }) => {
+    // Capture the built-in (shadow CRUD) query fields from a schema built with only the
+    // registry's own types, before any extension-registered types/typeDefs are merged in,
+    // so isBuiltInQueryField can tell shadow CRUD fields apart from custom extension resolvers.
+    const shadowCRUDSchema = makeSchema({ types: [registry.definitions] });
+    const shadowCRUDQueryFields = shadowCRUDSchema.getQueryType()?.getFields() ?? {};
+    builtInQueryFields = new Set(Object.keys(shadowCRUDQueryFields));
+
     // Here we extract types, plugins & typeDefs from a temporary generated
     // extension since there won't be any addition allowed after schemas generation
     const { types, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
@@ -146,8 +143,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // Disable Shadow CRUD for admin content types
     contentTypes
-      .map(prop('uid'))
-      .filter(startsWith('admin::'))
+      .map((contentType) => contentType.uid)
+      .filter((uid) => uid.startsWith('admin::'))
       .forEach((uid) => extensionService.shadowCRUD(uid).disable());
 
     const contentTypesWithShadowCRUD = contentTypes.filter((ct) =>

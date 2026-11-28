@@ -1,0 +1,37 @@
+import type { Core, Modules } from '@strapi/types';
+import register from '../register';
+
+jest.mock('../graphql', () => ({ __esModule: true, default: jest.fn() }));
+jest.mock('../utils', () => ({
+  getService: jest.fn(() => ({ isLocalizedContentType: jest.fn() })),
+}));
+
+it('installs the provider during register without resolving i18n services', async () => {
+  const install = jest.fn();
+  const plugin = jest.fn();
+  const strapi = {
+    localization: { register: install },
+    get: jest.fn(() => ({ add: jest.fn() })),
+    contentTypes: {},
+    server: { router: { use: jest.fn() } },
+    hook: jest.fn(() => ({ register: jest.fn() })),
+    plugin,
+  } as unknown as Core.Strapi;
+
+  await register({ strapi });
+
+  expect(install).toHaveBeenCalledTimes(1);
+  const provider: Modules.Localization.Provider = install.mock.calls[0][0];
+  expect(provider).toEqual({
+    isLocalizedContentType: expect.any(Function),
+    getDefaultLocale: expect.any(Function),
+    getLocales: expect.any(Function),
+    getNestedPopulateOfNonLocalizedAttributes: expect.any(Function),
+    getNonLocalizedAttributes: expect.any(Function),
+    fillNonLocalizedAttributes: expect.any(Function),
+  });
+  expect(plugin).not.toHaveBeenCalledWith('i18n');
+
+  plugin.mockReturnValue({ service: () => ({ getDefaultLocale: async () => 'en' }) });
+  await expect(provider.getDefaultLocale()).resolves.toBe('en');
+});

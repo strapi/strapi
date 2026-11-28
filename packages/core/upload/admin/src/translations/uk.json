@@ -126,8 +126,6 @@
   "list.table.header.sort": "Сортувати за {label}",
   "list.table.content.empty-label": "Це поле порожнє",
   "tabs.title": "Як ви хочете завантажити свої активи?",
-  "window.confirm.close-modal.file": "Ви впевнені? Ваші зміни будуть втрачені.",
-  "window.confirm.close-modal.files": "Ви впевнені? Деякі файли все ще не завантажені.",
   "config.back": "Назад",
   "config.subtitle": "Визначте налаштування перегляду медіабібліотеки.",
   "config.entries.title": "Записів на сторінку",

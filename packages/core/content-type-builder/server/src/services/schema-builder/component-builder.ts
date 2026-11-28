@@ -34,6 +34,12 @@ export default function createComponentBuilder() {
      * create a component in the tmpComponent map
      */
     createComponent(this: any, infos: any) {
+      // The HTTP validator requires it; without it a direct service call writes a nameless
+      // file (e.g. `shared/.json`) that never loads.
+      if (typeof infos.displayName !== 'string' || infos.displayName === '') {
+        throw new ApplicationError('A component requires a displayName');
+      }
+
       if (infos.uid && infos.uid !== this.createComponentUID(infos)) {
         throw new ApplicationError('component.invalidUID');
       }
@@ -44,7 +50,9 @@ export default function createComponentBuilder() {
         throw new ApplicationError('component.alreadyExists');
       }
 
-      const handler = createSchemaHandler({
+      const handler = createSchemaHandler<Internal.UID.Component>({
+        uid,
+        isNew: true,
         dir: path.join(strapi.dirs.app.components, strings.nameToSlug(infos.category)),
         filename: `${strings.nameToSlug(infos.displayName)}.json`,
       });
@@ -62,7 +70,6 @@ export default function createComponentBuilder() {
       });
 
       handler
-        .setUID(uid)
         .set('collectionName', collectionName)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)

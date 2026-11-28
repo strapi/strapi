@@ -6,10 +6,8 @@
  * @description: A set of functions called "actions" for managing `Auth`.
  */
 
-/* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const { concat, compact, isArray } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');
@@ -205,7 +203,15 @@ module.exports = ({ strapi }) => ({
 
     // Connect the user with the third-party provider.
     try {
-      const user = await getService('providers').connect(provider, ctx.query);
+      const grantResponse = _.get(ctx, 'session.grant.response');
+
+      if (!grantResponse) {
+        throw new ApplicationError('OAuth authentication requires a completed provider session');
+      }
+
+      const user = await getService('providers').connect(provider, grantResponse, {
+        grantResponse,
+      });
 
       if (user.blocked) {
         throw new ForbiddenError('Your account has been blocked by an administrator');
@@ -436,7 +442,7 @@ module.exports = ({ strapi }) => ({
       throw new ApplicationError('This provider is disabled');
     }
 
-    if (!strapi.config.server.url.startsWith('http')) {
+    if (!strapi.config.get('server.url').startsWith('http')) {
       strapi.log.warn(
         'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#setting-up-the-server-url'
       );
@@ -548,9 +554,10 @@ module.exports = ({ strapi }) => ({
     const alwaysAllowedKeys = ['username', 'password', 'email'];
 
     // Note that we intentionally do not filter allowedFields to allow a project to explicitly accept private or other Strapi field on registration
-    const allowedKeys = compact(
-      concat(alwaysAllowedKeys, isArray(register?.allowedFields) ? register.allowedFields : [])
-    );
+    const allowedKeys = [
+      ...alwaysAllowedKeys,
+      ...(Array.isArray(register?.allowedFields) ? register.allowedFields : []),
+    ].filter((field) => Boolean(field));
 
     // Check if there are any keys in requestBody that are not in allowedKeys
     const invalidKeys = Object.keys(ctx.request.body).filter((key) => !allowedKeys.includes(key));

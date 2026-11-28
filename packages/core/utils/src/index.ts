@@ -28,6 +28,7 @@ export * as file from './file';
 export * as async from './async';
 export * as policy from './policy';
 export * as yup from './yup';
+export { EMAIL_REGEX } from './email-regex';
 export * as errors from './errors';
 export * as contentTypes from './content-types';
 export * as relations from './relations';
@@ -48,7 +49,11 @@ export {
 
 export * from './primitives';
 export * from './content-api-router';
+export * from './module-routers';
 export * from './security';
+export * from './blocks-link';
 export * from './publication-filter';
 export * from './has-published-version-param';
 export { hasSort } from './sort-query';
+export { quoteForLog } from './quote-for-log';
+export { emitAudit, type AuditEmitter } from './audit-logs';

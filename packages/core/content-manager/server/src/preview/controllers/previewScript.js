@@ -39,6 +39,7 @@
  * @property {string} [STRAPI_HIGHLIGHT_ACTIVE_COLOR] Optional override for the highlight active color, injected by the admin.
  * @property {boolean} [STRAPI_DISABLE_STEGA_DECODING] Optional flag to disable steganography decoding, injected by the admin.
  * @property {() => void} [__strapi_previewCleanup] Optional cleanup function, injected by the admin.
+ * @property {number} [__strapi_previewRunId] Id of the latest run of this script in the page.
  */
 
 /**
@@ -49,6 +50,11 @@ function previewScript(config) {
 
   /** @type {typeof window & WindowExtensions} */
   const win = window;
+
+  // The script can be injected more than once in the same page (e.g. React StrictMode or a
+  // remount posting previewReady twice). Only the latest run may set up; see Orchestration.
+  const runId = (win.__strapi_previewRunId ?? 0) + 1;
+  win.__strapi_previewRunId = runId;
 
   /* -----------------------------------------------------------------------------------------------
    * Params
@@ -61,6 +67,100 @@ function previewScript(config) {
 
   const DISABLE_STEGA_DECODING = win.STRAPI_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
+
+  /**
+   * Sources this script decoded are kept here rather than written onto the page. Setting
+   * data-strapi-source on markup the framework rendered makes hydration report an
+   * attribute mismatch and throw the tree away. A frontend may still render the attribute
+   * itself, so every read honours both: the attribute first, then what we decoded.
+   */
+  const decodedSources = new WeakMap();
+  const decodedElements = new Set();
+
+  /**
+   * Writing data-strapi-source fired an attribute mutation that kept highlights in sync.
+   * Sources kept in memory fire nothing, so changes are queued here and handed, once per
+   * microtask like mutation records, to the highlight observer (see setupObservers).
+   * @type {Set<Element>}
+   */
+  const pendingSourceChanges = new Set();
+  /** @type {((element: Element) => void) | null} */
+  let sourceChangeHandler = null;
+
+  /** @param {Element} element */
+  const notifySourceChange = (element) => {
+    if (pendingSourceChanges.size === 0) {
+      queueMicrotask(() => {
+        const elements = Array.from(pendingSourceChanges);
+        pendingSourceChanges.clear();
+        if (sourceChangeHandler) elements.forEach(sourceChangeHandler);
+      });
+    }
+    pendingSourceChanges.add(element);
+  };
+
+  /**
+   * @param {Element} element
+   * @param {string} source
+   */
+  const writeSource = (element, source) => {
+    if (decodedSources.get(element) === source) return;
+    decodedSources.set(element, source);
+    decodedElements.add(element);
+    notifySourceChange(element);
+  };
+
+  /**
+   * Drops a decoded source without notifying, for elements that already left the page.
+   * @param {Element} element
+   * @returns {boolean} whether there was a decoded source to drop
+   */
+  const forgetDecodedSource = (element) => {
+    decodedElements.delete(element);
+    return decodedSources.delete(element);
+  };
+
+  /**
+   * @param {Element | null | undefined} element
+   * @returns {string | null}
+   */
+  const readSource = (element) => {
+    if (!element) return null;
+    return element.getAttribute(SOURCE_ATTRIBUTE) ?? decodedSources.get(element) ?? null;
+  };
+
+  /** @param {Element} element */
+  const hasSource = (element) => readSource(element) !== null;
+
+  /**
+   * Only called once the user is editing media, long after hydration, so removing an
+   * attribute the frontend rendered itself is as safe here as it always was.
+   * @param {Element} element
+   */
+  const clearSource = (element) => {
+    const hadDecodedSource = forgetDecodedSource(element);
+    if (element.hasAttribute(SOURCE_ATTRIBUTE)) {
+      element.removeAttribute(SOURCE_ATTRIBUTE);
+    } else if (hadDecodedSource) {
+      notifySourceChange(element);
+    }
+  };
+
+  /** @returns {Element[]} every element carrying a source, from either origin */
+  const allSourcedElements = () => {
+    /** @type {Element[]} */
+    const result = [];
+    document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`).forEach((element) => result.push(element));
+    decodedElements.forEach((element) => {
+      if (!element.isConnected) {
+        forgetDecodedSource(element);
+        return;
+      }
+      if (!element.hasAttribute(SOURCE_ATTRIBUTE)) result.push(element);
+    });
+    return result;
+  };
+
   const OVERLAY_ID = 'strapi-preview-overlay';
 
   /* -----------------------------------------------------------------------------------------------
@@ -79,7 +179,65 @@ function previewScript(config) {
    * @param {string} path
    */
   const getElementsByPath = (path) => {
-    return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+    return allSourcedElements().filter((element) =>
+      (readSource(element) || '').includes(`path=${path}`)
+    );
+  };
+
+  /**
+   * Group key for the highlight manager. For most fields this is the raw
+   * source attribute (so identical sources share one highlight, which is what
+   * gives multi-media galleries their single bounding box). For blocks fields,
+   * every encoded marker shares the same `path` and `fieldPath` (the blocks
+   * field path). We drop `path` from the key so all marked elements cluster
+   * into a single highlight whose rect spans the entire rendered field.
+   * @param {string} sourceAttr
+   * @returns {string}
+   */
+  const deriveGroupKey = (sourceAttr) => {
+    const params = new URLSearchParams(sourceAttr);
+    const fieldPath = params.get('fieldPath');
+    if (!fieldPath) return sourceAttr;
+    params.delete('path');
+    return params.toString();
+  };
+
+  /**
+   * Returns true when value looks like a Strapi blocks AST. Inlined here because
+   * this script is serialised and injected into iframes where imports are unavailable.
+   * @param {unknown} value
+   * @returns {boolean}
+   */
+  const isBlocksValue = (value) => {
+    if (!Array.isArray(value) || value.length === 0) return false;
+    return value.every(
+      (n) =>
+        n !== null &&
+        typeof n === 'object' &&
+        'type' in n &&
+        'children' in n &&
+        Array.isArray(/** @type {{ children: unknown }} */ (n).children)
+    );
+  };
+
+  /**
+   * Blocks live updates are rendered by the host frontend (e.g. via BlocksRenderer).
+   * Re-dispatch the change on the iframe window so integrators can subscribe with
+   * `window.addEventListener('strapiFieldChange', …)` without the preview script
+   * attempting to patch the DOM. The admin panel also posts the same payload via
+   * `postMessage`, which hosts can listen for on `window` 'message' events.
+   *
+   * 'strapiFieldChange' is a public event — host apps depend on this name, so it
+   * is intentionally hardcoded rather than read from INTERNAL_EVENTS config.
+   * @param {string} field
+   * @param {unknown} value
+   */
+  const forwardBlocksFieldChange = (field, value) => {
+    window.dispatchEvent(
+      new CustomEvent('strapiFieldChange', {
+        detail: { field, value },
+      })
+    );
   };
 
   /**
@@ -287,6 +445,25 @@ function previewScript(config) {
     return sourceAttr;
   };
 
+  /**
+   * Resolve the source attribute to use when opening the popover for a clicked
+   * element. Blocks markers carry a `fieldPath`; redirect the popover to that
+   * field. Falls back to the media-specific normalization for everything else.
+   * @param {string} sourceAttr
+   * @param {Element} element
+   * @returns {string}
+   */
+  const getFocusPath = (sourceAttr, element) => {
+    const params = new URLSearchParams(sourceAttr);
+    const fieldPath = params.get('fieldPath');
+    if (fieldPath) {
+      params.set('path', fieldPath);
+      params.delete('fieldPath');
+      return params.toString();
+    }
+    return getFieldPathForMedia(sourceAttr, element);
+  };
+
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
    * ---------------------------------------------------------------------------------------------*/
@@ -310,11 +487,24 @@ function previewScript(config) {
       return;
     }
 
+    // Never touch elements whose text is not rendered content. <script> in particular
+    // carries the framework's own payload (Next streams RSC chunks as inline
+    // self.__next_f.push([...]) scripts, markers included): cleaning that text corrupts
+    // the stream ("Connection closed") or strips markers before it executes, so the
+    // client renders clean values while the parsed HTML still has them - a hydration
+    // mismatch on every encoded field.
+    const NON_RENDERED_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE']);
+
     /**
      * @param {Element} element
      */
     const applyStegaToElement = (element) => {
-      // Handle img and video tags - check src attribute for stega encoding
+      if (NON_RENDERED_TAGS.has(element.tagName)) {
+        return;
+      }
+      // Handle img and video tags - check src and alt attributes for stega encoding.
+      // The src path handles media fields; the alt path handles blocks image blocks
+      // (the url is intentionally not encoded to avoid corrupting the src attribute).
       if (isMediaElement(element)) {
         const src = element.getAttribute('src');
         if (src) {
@@ -329,7 +519,7 @@ function previewScript(config) {
                 // Remove .url to get the media field path
                 const mediaPath = originalPath.replace(/\.url$/, '');
                 const newSource = sourceValue.replace(`path=${originalPath}`, `path=${mediaPath}`);
-                element.setAttribute(SOURCE_ATTRIBUTE, newSource);
+                writeSource(element, newSource);
               }
             }
             // Clean the src attribute so the resource can load
@@ -339,6 +529,26 @@ function previewScript(config) {
             }
           } catch (error) {}
         }
+
+        // Blocks image markers are encoded into the alt attribute (not the src).
+        // If the alt carries a marker that is not yet superseded by a src-derived one,
+        // apply it and clean the visible alt text.
+        if (!hasSource(element)) {
+          const alt = element.getAttribute('alt');
+          if (alt) {
+            try {
+              const result = stegaDecode(alt);
+              if (result && 'strapiSource' in result) {
+                writeSource(element, result.strapiSource);
+              }
+              const cleanedAlt = stegaClean(alt);
+              if (cleanedAlt !== alt) {
+                element.setAttribute('alt', cleanedAlt);
+              }
+            } catch (error) {}
+          }
+        }
+
         return;
       }
 
@@ -353,17 +563,12 @@ function previewScript(config) {
           // TODO: check if we can call split instead of decode+clean
           const result = stegaDecode(directTextContent);
           if (result && 'strapiSource' in result) {
-            element.setAttribute(SOURCE_ATTRIBUTE, result.strapiSource);
+            writeSource(element, result.strapiSource);
 
-            // Remove encoded part from DOM text content (to avoid breaking links for example)
-            directTextNodes.forEach((node) => {
-              if (node.textContent) {
-                const cleanedText = stegaClean(node.textContent);
-                if (cleanedText !== node.textContent) {
-                  node.textContent = cleanedText;
-                }
-              }
-            });
+            // Leave the text itself alone. The markers are zero-width characters - invisible
+            // to the reader - and rewriting the text node diverges the DOM from what the
+            // framework rendered, so hydration reports "server rendered text didn't match"
+            // and regenerates the tree. Reading the markers is enough to map the element.
           }
         } catch (error) {}
       }
@@ -417,12 +622,6 @@ function previewScript(config) {
   };
 
   const createHighlightStyles = () => {
-    const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
-    // Remove existing styles to avoid duplicates
-    if (existingStyles) {
-      existingStyles.remove();
-    }
-
     const styleElement = document.createElement('style');
     styleElement.id = HIGHLIGHT_STYLES_ID;
     styleElement.textContent = `
@@ -451,8 +650,6 @@ function previewScript(config) {
   };
 
   const createOverlaySystem = () => {
-    // Clean up before creating a new overlay so we can safely call previewScript multiple times
-    win.__strapi_previewCleanup?.();
     document.getElementById(OVERLAY_ID)?.remove();
 
     const overlay = document.createElement('div');
@@ -506,9 +703,64 @@ function previewScript(config) {
     let focusedField = null;
 
     /**
-     * @param {HighlightGroup} group
+     * Blocks fields fully delegate live-typing renders to the host frontend
+     * (see forwardBlocksFieldChange) — new or resized block content never gets
+     * a stega tag of its own, so the per-element ResizeObserver used for every
+     * other field type can't see it. Observing the field's own container
+     * instead picks up any size change inside it (new blocks, growing or
+     * shrinking text, removed blocks) without requiring each child to be
+     * individually tagged. computeGroupRect already reads the container's
+     * rect fresh on every call — this only makes sure something re-triggers
+     * that read while the user is typing, instead of waiting for the next
+     * explicit rescan.
+     * @type {Map<string, HTMLElement>}
      */
-    const computeGroupRect = (group) => {
+    const observedContainers = new Map();
+    const containerResizeObserver = new ResizeObserver(() => {
+      updateAllHighlights();
+    });
+
+    /**
+     * Block-level HTML tags produced by standard Strapi blocks renderers.
+     * Each corresponds to exactly one top-level Slate block in the editor.
+     */
+    const BLOCK_LEVEL_TAGS = [
+      'P',
+      'H1',
+      'H2',
+      'H3',
+      'H4',
+      'H5',
+      'H6',
+      'UL',
+      'OL',
+      'BLOCKQUOTE',
+      'PRE',
+    ];
+
+    /**
+     * Maximum area a candidate blocks container may have, relative to the union
+     * of the group's own marked elements. A real field container is only
+     * slightly larger than its content (padding, empty trailing blocks). A
+     * candidate many times larger is a page-level layout element that merely
+     * happens to contain block-level children, and using it would stretch the
+     * highlight across unrelated content.
+     */
+    const MAX_CONTAINER_AREA_RATIO = 6;
+
+    /**
+     * Extra height added below a blocks field's marked content so empty trailing
+     * blocks (which produce no stega span) stay hoverable and clickable. Always
+     * clamped to the field's own bounds — see computeGroupRect.
+     */
+    const BLOCKS_TRAILING_BUFFER = 80;
+
+    /**
+     * Union rect of a group's marked elements, ignoring zero-sized ones.
+     * @param {HighlightGroup} group
+     * @returns {{ left: number, top: number, width: number, height: number } | null}
+     */
+    const getGroupUnionRect = (group) => {
       let minLeft = Infinity;
       let minTop = Infinity;
       let maxRight = -Infinity;
@@ -524,19 +776,245 @@ function previewScript(config) {
         if (r.bottom > maxBottom) maxBottom = r.bottom;
       });
       if (!any) return null;
+      return { left: minLeft, top: minTop, width: maxRight - minLeft, height: maxBottom - minTop };
+    };
+
+    /**
+     * Find the DOM element that wraps the entire rendered output of a blocks
+     * field — the direct parent of all top-level block elements (`<p>`, `<h1>`,
+     * etc.). Used to derive a tight, always-current bounding rect for the
+     * highlight, including empty blocks and container padding that stega spans
+     * cannot cover.
+     *
+     * Strategy: walk up from the first stega span until we find an element
+     * whose direct children include at least one block-level element. This
+     * mirrors the fallback in findBlockIndex and handles all DOM shapes
+     * correctly — including lists where NCA would land on <li> (not the
+     * container) and single-span groups where there is no useful NCA.
+     *
+     * The block-level-tag test alone is not sufficient: a blocks field whose
+     * blocks produce no block-level tags (e.g. a field containing only an
+     * image, which renders as <img>) has no matching ancestor inside the field,
+     * so the walk escapes into page layout and matches an unrelated container.
+     * That stretched the highlight over the whole page and — because highlights
+     * sit on top and swallow clicks — made the rest of the preview unclickable.
+     * We therefore reject candidates whose area dwarfs the group's own content.
+     *
+     * @param {HighlightGroup} group
+     * @returns {HTMLElement | null}
+     */
+    const findBlocksContainer = (group) => {
+      const firstEl = group.elements.values().next().value;
+      if (!firstEl) return null;
+
+      const union = getGroupUnionRect(group);
+      const unionArea = union ? union.width * union.height : 0;
+
+      let el = firstEl.parentElement;
+      while (el && el !== document.body && el !== document.documentElement) {
+        // Skip list elements — <li> can have a nested <ul>/<ol> as a direct child, and
+        // @strapi/blocks-react-renderer places nested lists directly inside <ul>/<ol>
+        // (not wrapped in a <li>), so list containers also satisfy the block-level check
+        // while being blocks themselves, not the field container.
+        if (
+          el.tagName !== 'LI' &&
+          el.tagName !== 'UL' &&
+          el.tagName !== 'OL' &&
+          Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))
+        ) {
+          const r = el.getBoundingClientRect();
+          const area = r.width * r.height;
+          // Accept only a container that stays proportionate to the field's own
+          // content. Bail out entirely rather than climbing further: everything
+          // above an over-large candidate is even larger.
+          if (unionArea > 0 && area > unionArea * MAX_CONTAINER_AREA_RATIO) {
+            return null;
+          }
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    };
+
+    /**
+     * Resolves the trusted container for a blocks field's group, preferring a
+     * still-attached, already-observed container over re-running the
+     * ratio-guarded discovery walk.
+     *
+     * findBlocksContainer's area guard only needs to protect *first*
+     * discovery (telling a real field container apart from an unrelated
+     * page-level ancestor we escaped into, e.g. an image-only field with no
+     * block-level tags of its own). Once a container has been established for
+     * a groupKey, live edits inside it (e.g. typing a new, unmarked image
+     * block into a field whose only marked content is a short paragraph) can
+     * legitimately dwarf the originally-marked content — re-running the guard
+     * on every redraw would then reject the same, still-correct container and
+     * collapse the highlight down to a too-small fallback box. The container
+     * element itself doesn't change across those edits (the host re-renders
+     * its children, not the field's own wrapper), so trusting it is safe as
+     * long as it's still in the document.
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
+     * @returns {HTMLElement | null}
+     */
+    const getBlocksContainer = (groupKey, group) => {
+      const cached = observedContainers.get(groupKey);
+      if (cached && document.contains(cached)) {
+        return cached;
+      }
+      return findBlocksContainer(group);
+    };
+
+    /**
+     * Keeps a blocks group's container under observation as its membership
+     * changes. Safe to call every time an element joins the group — re-finding
+     * and re-observing the same container is a no-op; it only does real work
+     * when the container genuinely changes or disappears (e.g. an image-only
+     * field where findBlocksContainer's area guard rejects every candidate).
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
+     */
+    const syncContainerObservation = (groupKey, group) => {
+      const firstEl = group.elements.values().next().value;
+      const sourceAttr = readSource(firstEl);
+      const isBlocksField = !!sourceAttr && new URLSearchParams(sourceAttr).has('fieldPath');
+      if (!isBlocksField) return;
+
+      const container = getBlocksContainer(groupKey, group);
+      const previousContainer = observedContainers.get(groupKey);
+      if (container === previousContainer) return;
+
+      if (previousContainer) {
+        containerResizeObserver.unobserve(previousContainer);
+      }
+      if (container) {
+        containerResizeObserver.observe(container);
+        observedContainers.set(groupKey, container);
+      } else {
+        observedContainers.delete(groupKey);
+      }
+    };
+
+    /**
+     * Find the 0-based index of the Slate block that was clicked in a blocks
+     * field. We cannot use `group.elements.indexOf(anchor)` because
+     * `group.elements` has one entry per stega text-span, not one per block —
+     * formatted text (bold, italic…) produces multiple spans per block, so an
+     * element-list index is not the same as the Slate block index.
+     *
+     * Uses the same trusted-container resolution as computeGroupRect
+     * (getBlocksContainer) rather than its own walk-up-with-area-guard, so
+     * that double-clicking a legitimately marked block next to a large
+     * unmarked one (e.g. an image typed in next to a short paragraph) doesn't
+     * spuriously fail the guard and lose the block index.
+     * @param {HTMLElement} anchor - stega span that was clicked
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
+     * @returns {number} 0-based block index, or -1 if it cannot be determined
+     */
+    const findBlockIndex = (anchor, groupKey, group) => {
+      const fieldContainer = getBlocksContainer(groupKey, group);
+      if (!fieldContainer) return -1;
+
+      // Walk up from anchor to its direct-child-of-container ancestor
+      let blockEl = anchor;
+      while (blockEl.parentElement && blockEl.parentElement !== fieldContainer) {
+        blockEl = /** @type {HTMLElement} */ (blockEl.parentElement);
+      }
+      if (blockEl.parentElement !== fieldContainer) return -1;
+
+      // Use the full children list (not just block-level tags) so that every
+      // Slate block maps to its correct DOM position. Empty paragraphs render
+      // as <br> and images may render as <img> or custom elements — filtering
+      // by tag name would make the index drift whenever one of these appears
+      // before the clicked block.
+      return Array.from(fieldContainer.children).indexOf(blockEl);
+    };
+
+    /**
+     * @param {HighlightGroup} group
+     * @param {string} groupKey
+     */
+    const computeGroupRect = (group, groupKey) => {
+      if (group.elements.size === 0) return null;
+
+      // For blocks fields (identified by fieldPath in the source attribute),
+      // derive the highlight from the field container's bounding rect so that
+      // empty blocks and container padding are always included — a fixed pixel
+      // buffer on the span union is too brittle when content grows or shrinks.
+      const firstEl = group.elements.values().next().value;
+      const firstSourceAttr = readSource(firstEl);
+      const isBlocksField =
+        !!firstSourceAttr && new URLSearchParams(firstSourceAttr).has('fieldPath');
+
+      if (isBlocksField) {
+        const container = getBlocksContainer(groupKey, group);
+        if (container) {
+          const r = container.getBoundingClientRect();
+          if (r.width > 0 || r.height > 0) {
+            return { left: r.left, top: r.top, width: r.width, height: r.height };
+          }
+        }
+      }
+
+      // Non-blocks fields (and blocks fallback): union of all non-zero span rects.
+      // For blocks fields add a buffer so that empty trailing blocks are still
+      // clickable even when they produce no stega spans.
+      let minLeft = Infinity;
+      let minTop = Infinity;
+      let maxRight = -Infinity;
+      let maxBottom = -Infinity;
+      let any = false;
+      group.elements.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) return;
+        any = true;
+        if (r.left < minLeft) minLeft = r.left;
+        if (r.top < minTop) minTop = r.top;
+        if (r.right > maxRight) maxRight = r.right;
+        if (r.bottom > maxBottom) maxBottom = r.bottom;
+      });
+      if (!any) return null;
+
+      let bottom = maxBottom;
+      if (isBlocksField) {
+        // The buffer keeps empty trailing blocks clickable, but it must not spill
+        // past the field itself — otherwise it covers whatever the host renders
+        // below (e.g. the next field's label) and swallows its clicks.
+        //
+        // Clamp it to the field's own extent: walk up while each ancestor still
+        // starts at the marked content's top edge. Such an ancestor wraps only
+        // this field, so its bottom includes trailing blocks (which carry no
+        // stega span) while stopping short of sibling content. The first
+        // ancestor that starts higher up belongs to the surrounding layout.
+        const limit = maxBottom + BLOCKS_TRAILING_BUFFER;
+        let fieldBottom = maxBottom;
+        const firstElement = /** @type {HTMLElement} */ (firstEl);
+        let el = firstElement?.parentElement;
+        while (el && el !== document.body && el !== document.documentElement) {
+          const r = el.getBoundingClientRect();
+          if (r.height === 0 || r.top < minTop - 1) break;
+          if (r.bottom > fieldBottom) fieldBottom = r.bottom;
+          el = el.parentElement;
+        }
+        bottom = Math.min(limit, Math.max(maxBottom, fieldBottom));
+      }
+
       return {
         left: minLeft,
         top: minTop,
         width: maxRight - minLeft,
-        height: maxBottom - minTop,
+        height: bottom - minTop,
       };
     };
 
     /**
      * @param {HighlightGroup} group
+     * @param {string} groupKey
      */
-    const drawGroup = (group) => {
-      const rect = computeGroupRect(group);
+    const drawGroup = (group, groupKey) => {
+      const rect = computeGroupRect(group, groupKey);
       if (!rect) {
         group.highlight.style.display = 'none';
         return;
@@ -548,28 +1026,49 @@ function previewScript(config) {
     };
 
     const updateAllHighlights = () => {
-      groups.forEach(drawGroup);
+      groups.forEach((group, groupKey) => drawGroup(group, groupKey));
     };
 
     /**
      * Pick the underlying source element under the pointer so single-click
      * redispatch hits the specific item the user clicked, even when the group
      * highlight covers several elements (multi-media gallery).
+     * When no element rect contains the point (e.g. click in empty space within
+     * a blocks field, or on an unmarked node like a code block or an image with
+     * no alt text), falls back to the nearest element by distance to rect.
+     *
+     * `exact` tells callers whether the returned element actually contains the
+     * point or is just the nearest fallback — the blocks double-click handler
+     * needs this to avoid deriving a Slate block index from an element the user
+     * didn't actually click on.
      *
      * @param {HighlightGroup} group
      * @param {number} x
      * @param {number} y
-     * @returns {HTMLElement | null}
+     * @returns {{ element: HTMLElement | null, exact: boolean }}
      */
     const pickElementAtPoint = (group, x, y) => {
       for (const el of group.elements) {
         const r = el.getBoundingClientRect();
         if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
-          return el;
+          return { element: el, exact: true };
         }
       }
-      const first = group.elements.values().next().value;
-      return first ?? null;
+      // No exact hit — find the nearest element by squared distance to its rect.
+      let nearest = null;
+      let minDist = Infinity;
+      for (const el of group.elements) {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        const dx = Math.max(r.left - x, 0, x - r.right);
+        const dy = Math.max(r.top - y, 0, y - r.bottom);
+        const dist = dx * dx + dy * dy;
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = el;
+        }
+      }
+      return { element: nearest ?? group.elements.values().next().value ?? null, exact: false };
     };
 
     /**
@@ -593,6 +1092,10 @@ function previewScript(config) {
         event.preventDefault();
         event.stopPropagation();
 
+        // Notify admin immediately so it can close any open popover.
+        // (highlights call stopPropagation so the document-level listener below won't fire)
+        sendMessage(INTERNAL_EVENTS.STRAPI_IFRAME_CLICK, null);
+
         const existingTimeout = pendingClicks.get(group);
         if (existingTimeout) {
           window.clearTimeout(existingTimeout);
@@ -606,7 +1109,7 @@ function previewScript(config) {
 
           // Pick the specific underlying element under the pointer so the
           // redispatched click targets the right item in a multi-element group
-          const underlying = pickElementAtPoint(group, event.clientX, event.clientY);
+          const { element: underlying } = pickElementAtPoint(group, event.clientX, event.clientY);
           if (!underlying) return;
 
           /** @type {HTMLElement} */
@@ -662,13 +1165,65 @@ function previewScript(config) {
           pendingClicks.delete(group);
         }
 
-        const anchor = pickElementAtPoint(group, event.clientX, event.clientY);
+        const { element: anchor, exact } = pickElementAtPoint(group, event.clientX, event.clientY);
         if (!anchor) return;
-        const sourceAttribute = anchor.getAttribute(SOURCE_ATTRIBUTE);
+        const sourceAttribute = readSource(anchor);
         if (!sourceAttribute) return;
-        const path = getFieldPathForMedia(sourceAttribute, anchor);
-        const rect = computeGroupRect(group);
+        const path = getFocusPath(sourceAttribute, anchor);
+        // For blocks fields, use the specific clicked element's rect so the
+        // popover opens adjacent to the clicked block, not the entire field.
+        // If the stega element is zero-width (empty block with only invisible
+        // chars), walk up to the nearest block-level ancestor that has a real
+        // width so the popover isn't anchored to a point at the far edge of a line.
+        const isBlocksField = new URLSearchParams(sourceAttribute).has('fieldPath');
+        let rect;
+        if (isBlocksField) {
+          let anchorRect = anchor.getBoundingClientRect();
+          if (anchorRect.width <= 5) {
+            let el = anchor.parentElement;
+            while (el && el !== document.documentElement) {
+              const r = el.getBoundingClientRect();
+              if (r.width > 5) {
+                anchorRect = r;
+                break;
+              }
+              el = el.parentElement;
+            }
+          }
+          rect = anchorRect;
+        } else {
+          rect = computeGroupRect(group, groupKey);
+        }
         if (!rect) return;
+        let blockIndex = -1;
+        if (isBlocksField) {
+          if (exact) {
+            blockIndex = findBlockIndex(anchor, groupKey, group);
+          } else {
+            // No exact hit on a marked element — resolve the real clicked
+            // element's own position instead of guessing from the fallback
+            // anchor above (nearest marked sibling), which is only reliable
+            // for "which field", not "which block". findBlockIndex only
+            // needs a genuine DOM descendant of the field container, not a
+            // marked one, so this works whether the element is unmarked
+            // because it's not yet saved (live-typed content) or unmarked by
+            // design (code blocks, alt-less images) — no stega marker needed
+            // either way.
+            // elementsFromPoint (not elementFromPoint) skips past the
+            // highlight overlay itself, which is what actually received this
+            // dblclick and would otherwise be the only hit at this point.
+            const clickedElement = document
+              .elementsFromPoint(event.clientX, event.clientY)
+              .find((el) => !overlay.contains(el));
+            if (clickedElement) {
+              blockIndex = findBlockIndex(
+                /** @type {HTMLElement} */ (clickedElement),
+                groupKey,
+                group
+              );
+            }
+          }
+        }
         sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
           path,
           position: {
@@ -679,6 +1234,7 @@ function previewScript(config) {
             width: rect.width,
             height: rect.height,
           },
+          blockIndex: blockIndex >= 0 ? blockIndex : null,
         });
       };
 
@@ -719,6 +1275,12 @@ function previewScript(config) {
      * @param {HighlightGroup} group
      */
     const destroyGroup = (groupKey, group) => {
+      const observedContainer = observedContainers.get(groupKey);
+      if (observedContainer) {
+        containerResizeObserver.unobserve(observedContainer);
+        observedContainers.delete(groupKey);
+      }
+
       const pendingTimeout = pendingClicks.get(group);
       if (pendingTimeout) {
         window.clearTimeout(pendingTimeout);
@@ -754,8 +1316,9 @@ function previewScript(config) {
       if (elementToGroupKey.has(element)) {
         return;
       }
-      const groupKey = element.getAttribute(SOURCE_ATTRIBUTE);
-      if (!groupKey) return;
+      const sourceAttr = readSource(element);
+      if (!sourceAttr) return;
+      const groupKey = deriveGroupKey(sourceAttr);
 
       let group = groups.get(groupKey);
 
@@ -828,7 +1391,8 @@ function previewScript(config) {
       }
       group.elements.add(element);
       elementToGroupKey.set(element, groupKey);
-      drawGroup(group);
+      drawGroup(group, groupKey);
+      syncContainerObservation(groupKey, group);
     };
 
     /**
@@ -846,7 +1410,7 @@ function previewScript(config) {
       if (group.elements.size === 0) {
         destroyGroup(groupKey, group);
       } else {
-        drawGroup(group);
+        drawGroup(group, groupKey);
       }
     };
 
@@ -872,12 +1436,34 @@ function previewScript(config) {
     };
 
     // Process all existing elements with source attributes
-    const initialElements = window.document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+    const initialElements = allSourcedElements();
     Array.from(initialElements).forEach((element) => {
       if (element instanceof HTMLElement) {
         createHighlightForElement(element);
       }
     });
+
+    /**
+     * Reconcile tracked elements with the current DOM. Removes any elements
+     * that are no longer mounted, registers any new ones, and redraws all
+     * highlights. Called after the editor popover closes to correct staleness
+     * from live-preview updates that changed the field's rendered height.
+     */
+    const rescan = () => {
+      // Prune elements that were removed from the DOM while the popover was open
+      for (const element of [...elementToGroupKey.keys()]) {
+        if (!document.contains(element)) {
+          removeHighlightForElement(element);
+        }
+      }
+      // Register any elements that appeared during editing
+      allSourcedElements().forEach((element) => {
+        if (element instanceof HTMLElement) {
+          createHighlightForElement(element); // no-op for already-tracked elements
+        }
+      });
+      updateAllHighlights();
+    };
 
     return {
       get elements() {
@@ -887,6 +1473,7 @@ function previewScript(config) {
         return Array.from(groups.values());
       },
       updateAllHighlights,
+      rescan,
       eventListeners,
       focusedHighlights,
       createHighlightForElement,
@@ -900,6 +1487,9 @@ function previewScript(config) {
       clearAllPendingClicks: () => {
         pendingClicks.forEach((timeout) => clearTimeout(timeout));
         pendingClicks.clear();
+      },
+      disconnectContainerObserver: () => {
+        containerResizeObserver.disconnect();
       },
     };
   };
@@ -983,18 +1573,35 @@ function previewScript(config) {
     highlightManager.elements.forEach(observeElementForResize);
     resizeObserver.observe(document.documentElement);
 
+    /**
+     * @param {Element} element
+     */
+    const syncSourceChange = (element) => {
+      const target = /** @type {HTMLElement} */ (element);
+      if (hasSource(target)) {
+        highlightManager.removeHighlightForElement(target);
+        highlightManager.createHighlightForElement(target);
+        observeElementForResize(target);
+      } else {
+        highlightManager.removeHighlightForElement(target);
+      }
+    };
+    sourceChangeHandler = syncSourceChange;
+
     // Create highlight observer to watch for new elements with source attributes
     const highlightObserver = new MutationObserver((mutations) => {
+      // Every sourced element on the page, read once for the whole batch and only if an element was
+      // added: reading it per added node made a large re-render cost added nodes x sourced elements.
+      /** @type {Element[] | null} */
+      let sourcedInBatch = null;
+      const sourcedNow = () => {
+        if (!sourcedInBatch) sourcedInBatch = allSourcedElements();
+        return sourcedInBatch;
+      };
+
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === SOURCE_ATTRIBUTE) {
-          const target = /** @type {HTMLElement} */ (mutation.target);
-          if (target.hasAttribute(SOURCE_ATTRIBUTE)) {
-            highlightManager.removeHighlightForElement(target);
-            highlightManager.createHighlightForElement(target);
-            observeElementForResize(target);
-          } else {
-            highlightManager.removeHighlightForElement(target);
-          }
+          syncSourceChange(/** @type {Element} */ (mutation.target));
         }
 
         if (mutation.type === 'childList') {
@@ -1002,13 +1609,15 @@ function previewScript(config) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = /** @type {Element} */ (node);
               // Check if the added element has source attribute
-              if (element.hasAttribute(SOURCE_ATTRIBUTE) && element instanceof HTMLElement) {
+              if (hasSource(element) && element instanceof HTMLElement) {
                 highlightManager.createHighlightForElement(element);
                 observeElementForResize(element);
               }
               // Check all child elements for source attributes
-              const elementsWithSource = element.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
-              Array.from(elementsWithSource).forEach((childElement) => {
+              const elementsWithSource = sourcedNow().filter(
+                (sourced) => sourced !== element && element.contains(sourced)
+              );
+              elementsWithSource.forEach((childElement) => {
                 if (childElement instanceof HTMLElement) {
                   highlightManager.createHighlightForElement(childElement);
                   observeElementForResize(childElement);
@@ -1021,9 +1630,13 @@ function previewScript(config) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = /** @type {Element} */ (node);
               highlightManager.removeHighlightForElement(element);
-              element.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`).forEach((childElement) => {
-                highlightManager.removeHighlightForElement(childElement);
-              });
+              // The removed subtree is already detached, so walk the tracked elements:
+              // the page's sourced elements only include ones still attached.
+              highlightManager.elements
+                .filter((tracked) => element.contains(tracked))
+                .forEach((childElement) => {
+                  highlightManager.removeHighlightForElement(childElement);
+                });
 
               // If a tracked media original (or its ancestor) was removed —
               // typically when the host framework re-renders after save and
@@ -1077,8 +1690,8 @@ function previewScript(config) {
       const removeInjection = () => {
         if (!injection) return;
         // Move the source attribute back to the original so highlights track it again
-        const sourceAttr = injection.getAttribute(SOURCE_ATTRIBUTE);
-        if (sourceAttr) original.setAttribute(SOURCE_ATTRIBUTE, sourceAttr);
+        const sourceAttr = readSource(injection);
+        if (sourceAttr) writeSource(original, sourceAttr);
         untrackInjection(injection);
         injection.remove();
       };
@@ -1093,7 +1706,7 @@ function previewScript(config) {
         // it after.
         removeInjection();
 
-        const sourceAttr = original.getAttribute(SOURCE_ATTRIBUTE);
+        const sourceAttr = readSource(original);
         if (!sourceAttr) {
           original.style.display = 'none';
           return;
@@ -1108,7 +1721,7 @@ function previewScript(config) {
         // Move the source attr onto a placeholder div so the highlight
         // system keeps tracking the spot and the user can click to re-add
         // media.
-        original.removeAttribute(SOURCE_ATTRIBUTE);
+        clearSource(original);
         const placeholder = createMediaPlaceholder(sourceAttr, rect);
         original.parentNode?.insertBefore(placeholder, original.nextSibling);
         trackInjection(original, placeholder);
@@ -1200,9 +1813,15 @@ function previewScript(config) {
       }
       newInjection.style.display = '';
 
+      // The attribute copy above only carries a source the frontend rendered itself
+      const originalSource = readSource(original);
+      if (originalSource && !newInjection.hasAttribute(SOURCE_ATTRIBUTE)) {
+        writeSource(newInjection, originalSource);
+      }
+
       // Hide the host-framework-managed original and let highlights track our injection
       original.style.display = 'none';
-      original.removeAttribute(SOURCE_ATTRIBUTE);
+      clearSource(original);
       original.parentNode?.insertBefore(newInjection, original.nextSibling);
       trackInjection(original, newInjection);
     };
@@ -1214,10 +1833,21 @@ function previewScript(config) {
       if (!event.data?.type) return;
       if (event.source !== window.parent || event.origin !== parentOrigin) return;
 
-      // The user typed in an input, reflect the change in the preview
-      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
-        const { field, value } = event.data.payload;
+      // The user typed in an input, reflect the change in the preview.
+      // 'strapiFieldChange' is a public event name — host apps also depend on it.
+      if (event.data.type === 'strapiFieldChange') {
+        const { field, value, type } = event.data.payload;
         if (!field) return;
+
+        // Blocks fields are identified by the `type` key in the payload (set by
+        // usePreviewInputManager). isBlocksValue is a fallback for any value that
+        // looks like a blocks AST without an explicit type. Both paths delegate to
+        // the host frontend so that null/[] clears are forwarded correctly instead
+        // of falling through to DOM text patching.
+        if (type === 'blocks' || isBlocksValue(value)) {
+          forwardBlocksFieldChange(field, value);
+          return;
+        }
 
         const matchedElements = /** @type {HTMLElement[]} */ (
           Array.from(getElementsByPath(field)).filter((el) => el instanceof HTMLElement)
@@ -1267,6 +1897,8 @@ function previewScript(config) {
               parent = parent.parentElement;
             }
 
+            // cloneNode copies attributes, so it only carries a source the frontend rendered itself
+            const lastSource = readSource(lastEl);
             /** @type {HTMLElement} */
             let insertAfter = template;
             for (let i = mediaEls.length; i < value.length; i++) {
@@ -1278,6 +1910,9 @@ function previewScript(config) {
               }
               cloneMedia.setAttribute(CLONE_ATTRIBUTE, '');
               cloneMedia.removeAttribute('id');
+              if (lastSource && !cloneMedia.hasAttribute(SOURCE_ATTRIBUTE)) {
+                writeSource(cloneMedia, lastSource);
+              }
               if (wrapperClone !== cloneMedia) {
                 wrapperClone.setAttribute(CLONE_WRAPPER_ATTRIBUTE, '');
               }
@@ -1311,10 +1946,10 @@ function previewScript(config) {
         // Handle nested media asset fields (caption, alt, etc.)
         // These are identified by model=plugin::upload.file in the source attribute
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          const allSourceElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+          const allSourceElements = allSourcedElements();
 
           allSourceElements.forEach((element) => {
-            const sourceAttr = element.getAttribute(SOURCE_ATTRIBUTE);
+            const sourceAttr = readSource(element);
             if (!sourceAttr) return;
 
             // Parse the source attribute as URL search params
@@ -1367,6 +2002,15 @@ function previewScript(config) {
         return;
       }
 
+      // The editor popover just closed; rescan groups after the next frame so
+      // any in-flight React renders in the iframe have committed first.
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_RESCAN_HIGHLIGHTS) {
+        requestAnimationFrame(() => {
+          highlightManager.rescan();
+        });
+        return;
+      }
+
       // The user is no longer focusing an input, remove the highlights
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_BLUR) {
         const { field } = event.data.payload;
@@ -1382,6 +2026,13 @@ function previewScript(config) {
 
     window.addEventListener('message', handleMessage);
 
+    // Notify admin of any click on non-highlighted page areas so it can close an open popover.
+    // Highlight click handlers call stopPropagation, so this only fires for background clicks.
+    const documentClickHandler = () => {
+      sendMessage(INTERNAL_EVENTS.STRAPI_IFRAME_CLICK, null);
+    };
+    document.addEventListener('click', documentClickHandler);
+
     // Add the message handler to the cleanup list
     const messageEventListener = {
       element: window,
@@ -1389,10 +2040,17 @@ function previewScript(config) {
       handler: /** @type {EventListener} */ (handleMessage),
     };
 
-    return [...highlightManager.eventListeners, messageEventListener];
+    const documentClickEventListener = {
+      element: /** @type {any} */ (document),
+      type: /** @type {keyof HTMLElementEventMap} */ ('click'),
+      handler: /** @type {EventListener} */ (documentClickHandler),
+    };
+
+    return [...highlightManager.eventListeners, messageEventListener, documentClickEventListener];
   };
 
   /**
+   * @param {HTMLStyleElement} styleElement
    * @param {HTMLElement} overlay
    * @param {ReturnType<typeof setupObservers>} observers
    * @param {ReturnType<typeof setupScrollManagement>} scrollManager
@@ -1400,6 +2058,7 @@ function previewScript(config) {
    * @param {HighlightManager} highlightManager
    */
   const createCleanupSystem = (
+    styleElement,
     overlay,
     observers,
     scrollManager,
@@ -1407,6 +2066,7 @@ function previewScript(config) {
     highlightManager
   ) => {
     win.__strapi_previewCleanup = () => {
+      sourceChangeHandler = null;
       observers.resizeObserver.disconnect();
       observers.highlightObserver.disconnect();
       observers.stegaObserver?.disconnect();
@@ -1417,16 +2077,17 @@ function previewScript(config) {
       // Clear all pending click timeouts
       highlightManager.clearAllPendingClicks();
 
+      // Stop watching blocks-field containers for live resize
+      highlightManager.disconnectContainerObserver();
+
       // Remove highlight event listeners
       eventHandlers.forEach(({ element, type, handler }) => {
         element.removeEventListener(type, handler);
       });
 
-      // Clean up CSS styles
-      const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
-      if (existingStyles) {
-        existingStyles.remove();
-      }
+      // Remove this run's own element, not whatever currently holds the id: a newer run may
+      // already have created a stylesheet with the same id.
+      styleElement.remove();
 
       overlay.remove();
     };
@@ -1439,12 +2100,29 @@ function previewScript(config) {
   setupStegaDOMObserver()
     .catch(() => undefined)
     .then((stegaObserver) => {
-      createHighlightStyles();
+      // A newer run started while this one was loading the stega decoder: let it win, and
+      // don't leave this run's observer behind.
+      if (runId !== win.__strapi_previewRunId) {
+        stegaObserver?.disconnect();
+        return;
+      }
+
+      // Last run wins: tear the previous run down completely before setting up.
+      win.__strapi_previewCleanup?.();
+
+      const styleElement = createHighlightStyles();
       const overlay = createOverlaySystem();
       const highlightManager = createHighlightManager(overlay);
       const observers = setupObservers(highlightManager, stegaObserver);
       const scrollManager = setupScrollManagement(highlightManager);
       const eventHandlers = setupEventHandlers(highlightManager);
-      createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
+      createCleanupSystem(
+        styleElement,
+        overlay,
+        observers,
+        scrollManager,
+        eventHandlers,
+        highlightManager
+      );
     });
 }

@@ -32,6 +32,13 @@ type GetRelationsResponse =
       error: errors.ApplicationError | errors.YupValidationError;
     };
 
+/**
+ * The relations API loads the main field of the relations with a second query that isn't
+ * paginated, so it's capped at the default page size of the database layer: 10 rows. Past that
+ * number in a page, relations come back without their label.
+ */
+const ALL_RELATIONS_PAGE_SIZE = 10;
+
 const relationsApi = contentManagerApi.injectEndpoints({
   endpoints: (build) => ({
     getRelations: build.query<
@@ -105,6 +112,47 @@ const relationsApi = contentManagerApi.injectEndpoints({
       },
       providesTags: ['Relations'],
     }),
+    /**
+     * Loads every existing relation of a field, in the order they're displayed.
+     * `getRelations` is paginated for the relations input, this one is meant for
+     * copying the relations of an entry.
+     */
+    getAllRelations: build.query<
+      RelResult[],
+      FindExisting.Params & {
+        params?: Omit<FindExisting.Request['query'], 'page' | 'pageSize'>;
+      }
+    >({
+      queryFn: async ({ model, id, targetField, params }, _api, _extraOpts, baseQuery) => {
+        const relations: RelResult[] = [];
+        let page = 1;
+        let pageCount = 1;
+
+        while (page <= pageCount) {
+          const res = await baseQuery({
+            url: `/content-manager/relations/${model}/${id}/${targetField}`,
+            method: 'GET',
+            config: {
+              params: { ...params, page, pageSize: ALL_RELATIONS_PAGE_SIZE },
+            },
+          });
+
+          if (res.error) {
+            return { error: res.error };
+          }
+
+          const { results = [], pagination } = res.data as FindExisting.Response;
+
+          relations.push(...results);
+          pageCount = pagination?.pageCount ?? 1;
+          page += 1;
+        }
+
+        // The API returns the latest relations first.
+        return { data: relations.toReversed() };
+      },
+      providesTags: ['Relations'],
+    }),
     searchRelations: build.query<
       FindAvailable.Response,
       FindAvailable.Params & {
@@ -126,6 +174,9 @@ const relationsApi = contentManagerApi.injectEndpoints({
           endpointName,
           model: queryArgs.model,
           targetField: queryArgs.targetField,
+          id: queryArgs.params?.id,
+          locale: queryArgs.params?.locale,
+          status: queryArgs.params?.status,
           _q: queryArgs.params?._q,
           idsToOmit: queryArgs.params?.idsToOmit,
           idsToInclude: queryArgs.params?.idsToInclude,
@@ -138,9 +189,9 @@ const relationsApi = contentManagerApi.injectEndpoints({
              * Relations will always have unique IDs, so we can therefore assume
              * that we only need to push the new items to the cache.
              */
-            const existingIds = currentCache.results.map((item) => item.documentId);
+            const existingIds = new Set(currentCache.results.map((item) => item.documentId));
             const uniqueNewItems = newItems.results.filter(
-              (item) => !existingIds.includes(item.documentId)
+              (item) => !existingIds.has(item.documentId)
             );
             currentCache.results.push(...uniqueNewItems);
             currentCache.pagination = newItems.pagination;
@@ -192,7 +243,8 @@ const prepareTempKeys = (relations: RelResult[], existingRelations: RelationResu
   }));
 };
 
-const { useGetRelationsQuery, useLazySearchRelationsQuery } = relationsApi;
+const { useGetRelationsQuery, useLazyGetAllRelationsQuery, useLazySearchRelationsQuery } =
+  relationsApi;
 
-export { useGetRelationsQuery, useLazySearchRelationsQuery };
+export { useGetRelationsQuery, useLazyGetAllRelationsQuery, useLazySearchRelationsQuery };
 export type { RelationResult };

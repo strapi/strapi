@@ -37,7 +37,13 @@
       "cache": true
     },
     "test:unit": {
-      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/jest-preset.unit.js",
+        "{workspaceRoot}/tests/setup/unit.setup.js",
+        "{workspaceRoot}/tests/setup/timezone-environment.js",
+        "{workspaceRoot}/tests/helpers/**"
+      ],
       "cache": true
     },
     "test:front": {

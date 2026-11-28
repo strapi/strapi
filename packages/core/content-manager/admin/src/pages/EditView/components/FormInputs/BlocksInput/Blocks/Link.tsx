@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import { Box, Button, Field, Flex, Popover } from '@strapi/design-system';
+// Subpath import only: the `@strapi/utils` root pulls in Node-only modules.
+import { isValidAbsoluteBlocksLink, isValidBlocksLink } from '@strapi/utils/blocks-link';
 import { useIntl } from 'react-intl';
 import {
   BaseEditor,
@@ -123,29 +125,17 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const isLastInsertedLink = editor.lastInsertedLinkPath
       ? !Path.equals(path, editor.lastInsertedLinkPath)
       : true;
-    const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
+    const isSaveDisabled = !isValidBlocksLink(linkUrl);
 
     const onLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaveDisabled(false);
       setLinkUrl(e.target.value);
-
-      try {
-        // eslint-disable-next-line no-new
-        new URL(
-          e.target.value?.startsWith('/') ? `https://strapi.io${e.target.value}` : e.target.value
-        );
-      } catch {
-        setIsSaveDisabled(true);
-      }
     };
 
     const onLinkRelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaveDisabled(false);
       setLinRel(e.target.value);
     };
 
     const onLinkTargetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaveDisabled(false);
       setLinkTarget(e.target.value);
     };
 
@@ -195,7 +185,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
             {...attributes}
             ref={forwardedRef}
             tag="a"
-            href={link.url}
+            href={isValidBlocksLink(link.url) ? link.url : undefined}
             rel={link.rel}
             target={link.target}
             onClick={() => setPopoverOpen(true)}
@@ -400,15 +390,11 @@ const withLinks = (editor: Editor) => {
     const pastedText = data.getData('text/plain');
 
     if (pastedText) {
-      try {
-        // eslint-disable-next-line no-new
-        new URL(pastedText);
+      if (isValidAbsoluteBlocksLink(pastedText)) {
         // Do not show link popup on copy-paste a link, so do not save its path
         editor.shouldSaveLinkPath = false;
         insertLink(editor, { url: pastedText });
         return;
-      } catch {
-        // continue normal data insertion
       }
     }
 

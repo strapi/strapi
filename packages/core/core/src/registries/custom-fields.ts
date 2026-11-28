@@ -1,4 +1,4 @@
-import { has, isPlainObject } from 'lodash/fp';
+import { has, isPlainObject } from 'lodash';
 
 import type { Core, Modules } from '@strapi/types';
 
@@ -44,7 +44,7 @@ const customFieldsRegistry = (strapi: Core.Strapi) => {
       const customFieldList = Array.isArray(customField) ? customField : [customField];
 
       for (const cf of customFieldList) {
-        if (!has('name', cf) || !has('type', cf)) {
+        if (!has(cf, 'name') || !has(cf, 'type')) {
           throw new Error(`Custom fields require a 'name' and 'type' key`);
         }
 
@@ -64,8 +64,8 @@ const customFieldsRegistry = (strapi: Core.Strapi) => {
         if (inputSize) {
           if (
             !isPlainObject(inputSize) ||
-            !has('default', inputSize) ||
-            !has('isResizable', inputSize)
+            !has(inputSize, 'default') ||
+            !has(inputSize, 'isResizable')
           ) {
             throw new Error(`inputSize should be an object with 'default' and 'isResizable' keys`);
           }
@@ -81,7 +81,7 @@ const customFieldsRegistry = (strapi: Core.Strapi) => {
         const uid =
           plugin && strapi.plugin(plugin) ? `plugin::${plugin}.${name}` : `global::${name}`;
 
-        if (has(uid, customFields)) {
+        if (has(customFields, uid)) {
           throw new Error(`Custom field: '${uid}' has already been registered`);
         }
 

@@ -1,8 +1,8 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
-import { logout as logoutAction } from '../reducer';
 import {
+  getFailedRequestSessionToken,
   getFetchClient,
   triggerSessionExpired,
   type FetchOptions,
@@ -33,7 +33,7 @@ const simpleQuery: BaseQueryFn<
   unknown,
   BaseQueryError | SerializedError
 > = async (query, api) => {
-  const { signal, dispatch } = api;
+  const { signal } = api;
 
   const executeQuery = async (queryToExecute: string | QueryArguments) => {
     const { get, post, del, put } = getFetchClient();
@@ -68,19 +68,9 @@ const simpleQuery: BaseQueryFn<
         const url = typeof query === 'string' ? query : query.url;
 
         if (!isAuthPath(url)) {
-          try {
-            const { post } = getFetchClient();
-            await post('/admin/logout');
-          } catch {
-            // no-op
-          }
-
-          dispatch(logoutAction());
-          // Notify the React layer so the active tab redirects to /auth/login.
-          // Without this, only other tabs (via the storage event) would react;
-          // the tab that originated the failing request would stay put until
-          // the user clicked something or refreshed.
-          triggerSessionExpired();
+          // Defer clearing auth state to AuthProvider so unsaved-change guards
+          // can run before token removal (which unmounts edit forms).
+          triggerSessionExpired(getFailedRequestSessionToken(err));
         }
       }
 

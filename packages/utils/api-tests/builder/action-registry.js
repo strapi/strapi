@@ -1,6 +1,5 @@
 'use strict';
 
-const { isFunction, map } = require('lodash/fp');
 const modelsUtils = require('../models');
 
 const stringifyDates = (object) =>
@@ -13,7 +12,14 @@ const stringifyDates = (object) =>
     })
   );
 
-const formatFixtures = map(stringifyDates);
+const formatFixtures = (value) => value.map((item) => stringifyDates(item));
+
+/**
+ * Every action has a `kind`. The builder runs `schema` actions, which write or delete schema
+ * files, and `data` actions, which write or delete rows, on different kinds of instances.
+ * `build` and `cleanup` receive the options to pass to the model helpers: an instance to reuse,
+ * or `registerOnly`.
+ */
 
 module.exports = {
   contentType: {
@@ -21,11 +27,12 @@ module.exports = {
       let createdModel;
 
       return {
-        async build(ctx) {
-          createdModel = await modelsUtils.createContentType(contentType);
+        kind: 'schema',
+        async build(ctx, options) {
+          createdModel = await modelsUtils.createContentType(contentType, options);
           ctx.addModel(createdModel);
         },
-        cleanup: () => modelsUtils.deleteContentType(createdModel.uid),
+        cleanup: (ctx, options) => modelsUtils.deleteContentType(createdModel.uid, options),
       };
     },
 
@@ -33,13 +40,14 @@ module.exports = {
       let createdModels = [];
 
       return {
-        async build(ctx) {
-          createdModels = await modelsUtils.createContentTypes(contentTypes);
+        kind: 'schema',
+        async build(ctx, options) {
+          createdModels = await modelsUtils.createContentTypes(contentTypes, options);
           createdModels.forEach(ctx.addModel);
         },
-        async cleanup() {
+        async cleanup(ctx, options) {
           for (const model of createdModels) {
-            await modelsUtils.deleteContentType(model.uid);
+            await modelsUtils.deleteContentType(model.uid, options);
           }
         },
       };
@@ -49,17 +57,18 @@ module.exports = {
       const createdModels = [];
 
       return {
-        async build(ctx) {
+        kind: 'schema',
+        async build(ctx, options) {
           for (const contentType of contentTypes) {
-            const model = await modelsUtils.createContentType(contentType);
+            const model = await modelsUtils.createContentType(contentType, options);
 
             createdModels.push(model);
             ctx.addModel(model);
           }
         },
-        async cleanup() {
+        async cleanup(ctx, options) {
           for (const model of createdModels) {
-            await modelsUtils.deleteContentType(model.uid);
+            await modelsUtils.deleteContentType(model.uid, options);
           }
         },
       };
@@ -70,11 +79,12 @@ module.exports = {
       let createdModel;
 
       return {
-        async build(ctx) {
-          createdModel = await modelsUtils.createComponent(component);
+        kind: 'schema',
+        async build(ctx, options) {
+          createdModel = await modelsUtils.createComponent(component, options);
           ctx.addModel(createdModel);
         },
-        cleanup: () => modelsUtils.deleteComponent(createdModel.uid),
+        cleanup: (ctx, options) => modelsUtils.deleteComponent(createdModel.uid, options),
       };
     },
   },
@@ -83,17 +93,20 @@ module.exports = {
       let createdEntries = [];
 
       return {
-        async build(ctx) {
+        kind: 'data',
+        async build(ctx, options) {
           createdEntries = formatFixtures(
             await modelsUtils.createFixturesFor(
               modelName,
-              isFunction(entries) ? entries(getFixtures()) : entries
+              typeof entries === 'function' ? entries(getFixtures()) : entries,
+              options
             )
           );
 
           ctx.addFixtures(modelName, createdEntries);
         },
-        cleanup: () => modelsUtils.deleteFixturesFor(modelName, createdEntries),
+        cleanup: (ctx, options) =>
+          modelsUtils.deleteFixturesFor(modelName, createdEntries, options),
       };
     },
   },

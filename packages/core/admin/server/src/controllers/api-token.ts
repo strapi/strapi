@@ -1,7 +1,8 @@
 import type { Context } from 'koa';
 
 import { strings, errors } from '@strapi/utils';
-import { trim, has } from 'lodash/fp';
+import { has } from 'lodash';
+
 import { getService } from '../utils';
 import {
   validateApiTokenCreationInput,
@@ -22,8 +23,8 @@ export default {
 
     const attributes = {
       kind: 'content-api' as const,
-      name: trim(body.name),
-      description: trim(body.description),
+      name: String(body.name ?? '').trim(),
+      description: String(body.description ?? '').trim(),
       type: body.type,
       permissions: body.permissions,
       lifespan: body.lifespan,
@@ -103,11 +104,11 @@ export default {
     const apiTokenService = getService('api-token-content-api');
 
     const mutableBody = body as Record<string, unknown>;
-    if (has('name', mutableBody)) {
-      mutableBody.name = trim(body.name ?? '');
+    if (has(mutableBody, 'name')) {
+      mutableBody.name = String(body.name ?? '').trim();
     }
-    if (has('description', mutableBody) || mutableBody.description === null) {
-      mutableBody.description = trim(body.description ?? '');
+    if (has(mutableBody, 'description') || mutableBody.description === null) {
+      mutableBody.description = String(body.description ?? '').trim();
     }
 
     await validateApiTokenUpdateInput(body);
@@ -117,7 +118,7 @@ export default {
       return ctx.notFound('API Token not found');
     }
 
-    if (has('name', body)) {
+    if (has(body, 'name')) {
       const nameAlreadyTaken = await apiTokenService.getByName(body.name!);
       if (nameAlreadyTaken !== null && !strings.isEqual(nameAlreadyTaken.id, id)) {
         throw new ApplicationError('Name already taken');
