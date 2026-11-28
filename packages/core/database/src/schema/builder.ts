@@ -159,6 +159,7 @@ export default (db: Database) => {
 
           const { indexes, foreignKeys } = existingMetadata[table.name];
           await helpers.alterTable(schemaBuilder, table, { indexes, foreignKeys });
+          await helpers.backfillAddedColumnDefaults(trx, table.name, table.columns.added);
         }
       });
 
@@ -655,6 +656,34 @@ const createHelpers = (db: Database) => {
     }
   };
 
+  /**
+   * Backfill NULL values on newly added columns that declare a default.
+   * Some dialects add the column without rewriting existing rows when a default is set.
+   */
+  const backfillAddedColumnDefaults = async (
+    trx: Knex.Transaction,
+    tableName: string,
+    addedColumns: Column[]
+  ) => {
+    for (const column of addedColumns) {
+      if (isNil(column.defaultTo)) {
+        continue;
+      }
+
+      const [defaultValue, defaultOpts] = castArray(column.defaultTo);
+
+      if (prop('isRaw', defaultOpts)) {
+        continue;
+      }
+
+      debug(`Backfilling default for ${tableName}.${column.name}`);
+
+      await trx(tableName)
+        .whereNull(column.name)
+        .update({ [column.name]: defaultValue });
+    }
+  };
+
   return {
     createTable,
     alterTable,
@@ -663,5 +692,6 @@ const createHelpers = (db: Database) => {
     dropTableForeignKeys,
     handleSpecialTypeConversions,
     getCurrentColumnType,
+    backfillAddedColumnDefaults,
   };
 };
