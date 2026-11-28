@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { renderHook, screen, server, waitFor } from '@tests/utils';
+import { act, renderHook, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
@@ -603,6 +603,74 @@ describe('useDocumentActions', () => {
   });
 
   describe('unpublish', () => {
+    it('reports loading until the unpublish request settles', async () => {
+      let releaseResponse!: () => void;
+      const pendingResponse = new Promise<void>((resolve) => {
+        releaseResponse = resolve;
+      });
+      server.use(
+        http.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', async () => {
+          await pendingResponse;
+          return HttpResponse.json({ data: { documentId: '12345', publishedAt: null } });
+        })
+      );
+      const { result } = renderHook(() => useDocumentActions());
+      let operation!: ReturnType<typeof result.current.unpublish>;
+
+      act(() => {
+        operation = result.current.unpublish({
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+        });
+      });
+      try {
+        await waitFor(() => expect(result.current.isLoading).toBe(true));
+      } finally {
+        releaseResponse();
+        await act(async () => {
+          await operation;
+        });
+      }
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      await screen.findByText('Unpublished document');
+    });
+
+    it('retains the error notification and allows retrying a failed unpublish', async () => {
+      server.use(
+        http.post(
+          '/content-manager/:collectionType/:uid/:id/actions/unpublish',
+          () =>
+            HttpResponse.json(
+              { error: new errors.ApplicationError("Couldn't unpublish entry.") },
+              { status: 500 }
+            ),
+          { once: true }
+        )
+      );
+      const { result } = renderHook(() => useDocumentActions());
+      const params = {
+        collectionType: 'collection-types',
+        model: mockData.contentManager.contentType,
+        documentId: '12345',
+      };
+
+      await act(async () => {
+        expect(await result.current.unpublish(params)).toMatchObject({
+          error: { message: "Couldn't unpublish entry." },
+        });
+      });
+      await screen.findByText("Couldn't unpublish entry.");
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      await act(async () => {
+        expect(await result.current.unpublish(params)).toMatchObject({ publishedAt: null });
+      });
+      await screen.findByText('Unpublished document');
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+    });
+
     it('should return the unpublished document when successful', async () => {
       const { result } = renderHook(() => useDocumentActions());
 

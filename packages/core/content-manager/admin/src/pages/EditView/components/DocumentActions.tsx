@@ -33,6 +33,7 @@ import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
+import { useDocumentActionConfirm } from '../../../hooks/useDocumentActionConfirm';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useOmitLockedSharedFieldsOnLocaleCreate } from '../../../hooks/useI18nFieldLock';
@@ -114,6 +115,7 @@ interface DialogOptions {
   bodyIcon?: 'danger' | 'default';
   variant?: ButtonProps['variant'];
   confirmLabel?: string;
+  loading?: ButtonProps['loading'];
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
@@ -585,7 +587,6 @@ const DocumentActionsMenu = ({
 interface DocumentActionConfirmDialogProps extends DialogOptions, Pick<Action, 'variant'> {
   onClose: () => void;
   isOpen: Dialog.Props['open'];
-  loading?: ButtonProps['loading'];
 }
 
 const DocumentActionConfirmDialog = ({
@@ -610,13 +611,7 @@ const DocumentActionConfirmDialog = ({
     onClose();
   };
 
-  const handleConfirm = async () => {
-    if (onConfirm) {
-      await onConfirm();
-    }
-
-    onClose();
-  };
+  const handleConfirm = useDocumentActionConfirm({ onConfirm, onClose, isOpen });
 
   const dialogBody = bodyIcon ? (
     <Flex direction="column" alignItems="stretch" gap={2}>
@@ -810,8 +805,8 @@ const PublishAction: DocumentActionComponent = ({
   const publishConfirmScope: PublishConfirmDialogScope = fromRelationModal
     ? 'relation-modal'
     : onPreview
-      ? 'preview'
-      : 'panel';
+    ? 'preview'
+    : 'panel';
 
   const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
   const fieldToConnect = useRelationModal(
@@ -1622,7 +1617,7 @@ const UnpublishAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
   const canPublish = useDocumentRBAC('UnpublishAction', ({ canPublish }) => canPublish);
-  const { unpublish } = useDocumentActions();
+  const { unpublish, isLoading } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const { toggleNotification } = useNotification();
@@ -1683,6 +1678,7 @@ const UnpublishAction: DocumentActionComponent = ({
     dialog: isDocumentModified
       ? {
           type: 'dialog',
+          loading: isLoading,
           title: formatMessage({
             id: 'app.components.ConfirmDialog.title',
             defaultMessage: 'Confirmation',

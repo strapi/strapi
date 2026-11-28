@@ -11,6 +11,8 @@ const mockResetForm = jest.fn();
 const mockCountDraftRelations = jest.fn();
 const mockUseDraftRelationCountQuery = jest.fn();
 const mockDiscard = jest.fn();
+const mockUnpublish = jest.fn();
+let mockIsDocumentActionLoading = false;
 const mockFetchDraftDocument = jest.fn();
 const mockNavigate = jest.fn();
 const mockParams: { id?: string } = {};
@@ -72,7 +74,8 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
     update: mockUpdateDocument,
     publish: mockPublish,
     discard: mockDiscard,
-    isLoading: false,
+    unpublish: mockUnpublish,
+    isLoading: mockIsDocumentActionLoading,
   }),
 }));
 jest.mock('../../../../hooks/useDocument', () => ({
@@ -132,12 +135,95 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
 
 import {
   DiscardAction,
+  DEFAULT_ACTIONS,
   DocumentActions,
   DocumentActionsMenu,
   openPublishConfirmDialog,
   PublishAction,
   UpdateAction,
 } from '../DocumentActions';
+
+describe('Unpublish confirmation loading', () => {
+  const UnpublishHarness = () => {
+    const UnpublishAction = DEFAULT_ACTIONS.find((action) => action.type === 'unpublish')!;
+    const action = UnpublishAction({
+      activeTab: 'draft',
+      documentId: 'child',
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      meta: { availableStatus: [], availableLocales: [] },
+      document: { documentId: 'child', id: 1, status: 'modified' },
+    });
+
+    return action ? <DocumentActionsMenu actions={[{ id: 'unpublish', ...action }]} /> : null;
+  };
+
+  afterEach(() => {
+    mockIsDocumentActionLoading = false;
+  });
+
+  it('disables confirmation while unpublishing and enables it again after settling', async () => {
+    const { user, rerender } = render(<UnpublishHarness />);
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Unpublish' }));
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled();
+
+    mockIsDocumentActionLoading = true;
+    rerender(<UnpublishHarness />);
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+
+    mockIsDocumentActionLoading = false;
+    rerender(<UnpublishHarness />);
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled();
+  });
+});
+
+describe.each(['button', 'menu'] as const)(
+  'Confirmation guard through a document action %s',
+  (source) => {
+    it('submits once for two immediate clicks and can be opened again', async () => {
+      let complete!: () => void;
+      const operation = new Promise<void>((resolve) => {
+        complete = resolve;
+      });
+      const onConfirm = jest.fn(() => operation);
+      const actions = [
+        {
+          id: 'test',
+          label: 'Test action',
+          dialog: { type: 'dialog' as const, title: 'Confirmation', onConfirm },
+        },
+      ];
+      const { user } = render(
+        source === 'menu' ? (
+          <DocumentActionsMenu actions={actions} />
+        ) : (
+          <DocumentActions actions={actions} />
+        )
+      );
+      const openDialog = async () => {
+        if (source === 'menu') {
+          await user.click(screen.getByRole('button', { name: 'More document actions' }));
+          await user.click(screen.getByRole('menuitem', { name: 'Test action' }));
+        } else {
+          await user.click(screen.getByRole('button', { name: 'Test action' }));
+        }
+      };
+
+      await openDialog();
+      const confirm = screen.getByRole('button', { name: 'Confirm' });
+      fireEvent.click(confirm);
+      fireEvent.click(confirm);
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+
+      complete();
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      await openDialog();
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+      expect(onConfirm).toHaveBeenCalledTimes(2);
+    });
+  }
+);
 
 const ActionHarness = ({ Action, label }: { Action: typeof UpdateAction; label: string }) => {
   const action = Action({
