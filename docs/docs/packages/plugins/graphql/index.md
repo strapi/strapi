@@ -31,7 +31,7 @@ The plugin also sets `strapi.plugin('graphql').destroy` to stop Apollo Server on
 
 ### Config
 
-The default config is in `server/src/config/default-config.ts`: `shadowCRUD` (`true`), `endpoint` (`/graphql`), `maxLimit` (`-1`), `apolloServer` (`{}`) and `v4CompatibilityMode` (from `STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE`). The code also reads `depthLimit`, `defaultLimit`, `landingPage`, `generateArtifacts` and `artifacts`. `playgroundAlways` is deprecated. `bootstrap` logs a warning when `depthLimit` or `maxLimit` is not a positive finite number. The `apolloServer` value is merged into the Apollo options, and arrays are concatenated.
+The default config is in `server/src/config/default-config.ts`: `shadowCRUD` (`true`), `endpoint` (`/graphql`), `maxLimit` (`-1`), `apolloServer` (`{}`) and `v4CompatibilityMode` (from `STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE`). The code also reads `depthLimit`, `defaultLimit`, `landingPage`, `generateArtifacts` and `artifacts`. `artifacts.schema` and `artifacts.typegen` are passed to the Nexus `outputs` option; a relative path string is resolved against the app root (`strapi.dirs.app.root`) because Nexus only accepts absolute paths, and booleans and absolute paths are passed unchanged. `playgroundAlways` is deprecated. `bootstrap` logs a warning when `depthLimit` or `maxLimit` is not a positive finite number. The `apolloServer` value is merged into the Apollo options, and arrays are concatenated.
 
 ### Schema build
 

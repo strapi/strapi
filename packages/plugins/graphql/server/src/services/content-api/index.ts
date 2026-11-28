@@ -4,6 +4,7 @@ import type * as Nexus from 'nexus';
 import type { Core, Struct } from '@strapi/types';
 
 import { wrapResolvers } from './wrap-resolvers';
+import { resolveArtifactPath } from './resolve-artifact-path';
 import {
   registerSingleType,
   registerCollectionType,
@@ -67,10 +68,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       resolvers: extension.resolvers,
     });
 
-    // Create a configuration object for the artifacts generation
+    // Create a configuration object for the artifacts generation.
+    // Relative paths are resolved against the app root, since Nexus requires absolute paths
+    const appRoot = strapi.dirs.app.root;
     const outputs: Nexus.core.SchemaConfig['outputs'] = {
-      schema: config('artifacts.schema', false),
-      typegen: config('artifacts.typegen', false),
+      schema: resolveArtifactPath(config('artifacts.schema', false), appRoot),
+      typegen: resolveArtifactPath(config('artifacts.typegen', false), appRoot),
     };
 
     const currentEnv = strapi.config.get('environment');
