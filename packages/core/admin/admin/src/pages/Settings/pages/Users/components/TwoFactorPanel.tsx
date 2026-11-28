@@ -152,8 +152,8 @@ const TwoFactorPanel = ({ user, canUpdate, justUnlocked = false }: TwoFactorPane
     toggleNotification({
       type: 'success',
       message: formatMessage({
-        id: 'Settings.permissions.users.mfa.trustedDevices.revoke.success',
-        defaultMessage: 'Trusted devices revoked.',
+        id: 'Settings.permissions.users.mfa.trustedDevices.remove.success',
+        defaultMessage: 'Trusted devices removed.',
       }),
     });
   };
@@ -286,31 +286,31 @@ const TwoFactorPanel = ({ user, canUpdate, justUnlocked = false }: TwoFactorPane
               <Dialog.Trigger>
                 <Button variant="danger-light" loading={isRevokingTrust}>
                   {formatMessage({
-                    id: 'Settings.permissions.users.mfa.trustedDevices.revoke',
-                    defaultMessage: 'Revoke trusted devices',
+                    id: 'Settings.permissions.users.mfa.trustedDevices.remove',
+                    defaultMessage: 'Remove trusted devices',
                   })}
                 </Button>
               </Dialog.Trigger>
               <ConfirmDialog
                 title={formatMessage({
-                  id: 'Settings.permissions.users.mfa.trustedDevices.revoke.title',
-                  defaultMessage: "Revoke this user's trusted devices?",
+                  id: 'Settings.permissions.users.mfa.trustedDevices.remove.title',
+                  defaultMessage: "Remove this user's trusted devices?",
                 })}
                 endAction={
                   <Dialog.Action>
                     <Button fullWidth variant="danger-light" onClick={handleRevokeTrustedDevices}>
                       {formatMessage({
-                        id: 'Settings.permissions.users.mfa.trustedDevices.revoke.confirm',
-                        defaultMessage: 'Revoke',
+                        id: 'Settings.permissions.users.mfa.trustedDevices.remove.confirm',
+                        defaultMessage: 'Remove',
                       })}
                     </Button>
                   </Dialog.Action>
                 }
               >
                 {formatMessage({
-                  id: 'Settings.permissions.users.mfa.trustedDevices.revoke.body',
+                  id: 'Settings.permissions.users.mfa.trustedDevices.remove.body',
                   defaultMessage:
-                    'Every browser this user trusted will ask for a code at its next login. They keep their authenticator and recovery codes.',
+                    'Every device this user trusted will ask for a code at its next login. They keep their authenticator and recovery codes.',
                 })}
               </ConfirmDialog>
             </Dialog.Root>

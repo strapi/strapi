@@ -69,14 +69,11 @@ describe('TwoFactorEnforcementCard', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('says the roles can also be set on each role page, with a link to the roles', () => {
+  it('does not point to the role pages', () => {
     render(<Harness />);
 
-    expect(screen.getByText(/You can also set this on each role's page in/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Settings > Roles' })).toHaveAttribute(
-      'href',
-      '/settings/roles'
-    );
+    expect(screen.queryByText(/role's page/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Settings > Roles' })).not.toBeInTheDocument();
   });
 
   it('lists every role with its user count and adds the one picked', async () => {

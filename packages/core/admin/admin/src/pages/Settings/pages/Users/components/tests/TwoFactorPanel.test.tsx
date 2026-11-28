@@ -301,7 +301,7 @@ describe('TwoFactorPanel', () => {
   });
 
   describe('trusted devices', () => {
-    it('revokes every trusted browser after confirmation', async () => {
+    it('removes every trusted device after confirmation', async () => {
       counts({ trusted: 2 });
       const calls: string[] = [];
       server.use(
@@ -312,14 +312,14 @@ describe('TwoFactorPanel', () => {
       );
       const { user } = renderPanel();
 
-      await user.click(await screen.findByRole('button', { name: 'Revoke trusted devices' }));
-      expect(await screen.findByText("Revoke this user's trusted devices?")).toBeInTheDocument();
+      await user.click(await screen.findByRole('button', { name: 'Remove trusted devices' }));
+      expect(await screen.findByText("Remove this user's trusted devices?")).toBeInTheDocument();
       await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
       );
 
       await waitFor(() => expect(calls).toEqual(['3']));
-      expect(await screen.findByText('Trusted devices revoked.')).toBeInTheDocument();
+      expect(await screen.findByText('Trusted devices removed.')).toBeInTheDocument();
     });
 
     it('says why a revoke failed', async () => {
@@ -329,21 +329,21 @@ describe('TwoFactorPanel', () => {
       );
       const { user } = renderPanel();
 
-      await user.click(await screen.findByRole('button', { name: 'Revoke trusted devices' }));
+      await user.click(await screen.findByRole('button', { name: 'Remove trusted devices' }));
       await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
       );
 
       expect(await screen.findByText('Revoke refused')).toBeInTheDocument();
-      expect(screen.queryByText('Trusted devices revoked.')).not.toBeInTheDocument();
+      expect(screen.queryByText('Trusted devices removed.')).not.toBeInTheDocument();
     });
 
-    it('offers no revoke when there is nothing to revoke', async () => {
+    it('offers no remove when there is nothing to remove', async () => {
       renderPanel();
 
       await screen.findByRole('button', { name: 'Reset' });
       expect(
-        screen.queryByRole('button', { name: 'Revoke trusted devices' })
+        screen.queryByRole('button', { name: 'Remove trusted devices' })
       ).not.toBeInTheDocument();
     });
   });

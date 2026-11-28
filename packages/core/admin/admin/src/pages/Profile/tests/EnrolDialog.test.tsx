@@ -70,7 +70,7 @@ describe('EnrolDialog', () => {
     const { user } = renderDialog({ open: true, onClose });
 
     expect(
-      screen.getByRole('dialog', { name: 'Enable two-factor authentication' })
+      screen.getByRole('dialog', { name: 'Set up two-factor authentication' })
     ).toBeInTheDocument();
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');

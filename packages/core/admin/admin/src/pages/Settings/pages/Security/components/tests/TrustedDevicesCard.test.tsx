@@ -37,7 +37,7 @@ describe('TrustedDevicesCard', () => {
       screen.getByRole('checkbox', { name: 'Allow users to trust a device after entering a code' })
     ).toBeChecked();
     expect(screen.getByRole('spinbutton', { name: 'Trust period (days)' })).toHaveValue(30);
-    expect(screen.getByText('How long a trusted browser can skip the code.')).toBeInTheDocument();
+    expect(screen.getByText('How long a trusted device can skip the code.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
   });
 

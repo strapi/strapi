@@ -62,7 +62,7 @@ const PasskeysCard = ({ value, onChange, canUpdate, saveError }: PasskeysCardPro
           <Typography variant="pi" textColor="neutral600">
             {formatMessage({
               id: 'Settings.security.passkeys.hint',
-              defaultMessage: 'Turning passkeys off deletes every registered passkey.',
+              defaultMessage: 'Disabling passkeys deletes every registered passkey.',
             })}
           </Typography>
           <ErrorMessage error={saveError} />

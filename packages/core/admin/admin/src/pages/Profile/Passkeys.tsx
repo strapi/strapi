@@ -94,12 +94,12 @@ const Passkeys = () => {
                 ? formatMessage({
                     id: 'Settings.profile.form.section.mfa.passkeys.insecure',
                     defaultMessage:
-                      'Passkeys need the admin panel to be served over HTTPS. This page is not, so your browser will not offer them.',
+                      'Passkeys need the admin panel to be served over HTTPS. This page is not, so your device will not offer them.',
                   })
                 : !supported
                 ? formatMessage({
                     id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
-                    defaultMessage: 'This browser does not support passkeys.',
+                    defaultMessage: 'This device does not support passkeys.',
                   })
                 : formatMessage(
                     {

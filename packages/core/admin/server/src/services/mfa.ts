@@ -580,10 +580,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       // The operator gets the diagnosis; the user gets what they can do about it. A Cloud customer
       // has no shell to run a CLI command in, and backticks render literally in the panel.
       strapi.log.error(
-        `The two-factor secret of admin user ${userId} could not be decrypted. This usually means the admin encryption key changed. Recover the account with \`strapi admin:reset-user-mfa\`, or have the user sign in with a recovery code.`
+        `The two-factor secret of admin user ${userId} could not be decrypted. This usually means the admin encryption key changed. Recover the account with \`strapi admin:reset-user-mfa\`, or have the user log in with a recovery code.`
       );
       throw new ApplicationError(
-        'Your two-factor secret could not be read. Use a recovery code to sign in, or ask an administrator to reset two-factor authentication for your account.',
+        'Your two-factor secret could not be read. Use a recovery code to log in, or ask an administrator to reset two-factor authentication for your account.',
         { code: MFA_ERROR_CODES.SECRET_UNREADABLE }
       );
     }

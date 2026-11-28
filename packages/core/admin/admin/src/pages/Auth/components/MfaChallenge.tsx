@@ -343,7 +343,7 @@ const MfaChallenge = () => {
                   {formatMessage({
                     id: 'Settings.profile.form.section.mfa.passkeys.insecure',
                     defaultMessage:
-                      'Passkeys need the admin panel to be served over HTTPS. This page is not, so your browser will not offer them.',
+                      'Passkeys need the admin panel to be served over HTTPS. This page is not, so your device will not offer them.',
                   })}
                 </Typography>
               ) : null}

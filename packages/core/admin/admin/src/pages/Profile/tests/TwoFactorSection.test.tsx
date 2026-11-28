@@ -152,7 +152,7 @@ describe('TwoFactorSection', () => {
     expect(
       await screen.findByRole('heading', { name: 'Two-factor authentication' })
     ).toBeInTheDocument();
-    expect(screen.getByText('Not enabled')).toBeInTheDocument();
+    expect(screen.getByText('Not set up')).toBeInTheDocument();
     expect(screen.queryByText(/recovery codes/i)).not.toBeInTheDocument();
   });
 
@@ -238,13 +238,13 @@ describe('TwoFactorSection', () => {
     const { user } = renderSection();
 
     const enableButton = await screen.findByRole('button', {
-      name: 'Enable two-factor authentication',
+      name: 'Set up two-factor authentication',
     });
 
     await user.click(enableButton);
 
     expect(
-      await screen.findByRole('dialog', { name: 'Enable two-factor authentication' })
+      await screen.findByRole('dialog', { name: 'Set up two-factor authentication' })
     ).toBeInTheDocument();
   });
 
@@ -399,7 +399,7 @@ describe('TwoFactorSection', () => {
   /**
    * `disabled` and `reset` events are recorded exactly when the user stops being enrolled, so
    * gating the list on `status.enabled` hid it in precisely the case it exists for -- after a
-   * self-disable or a CLI-driven reset, the section showed only "Not enabled" with no way to see
+   * self-disable or a CLI-driven reset, the section showed only "Not set up" with no way to see
    * why, and "Mark all as seen" was unreachable.
    */
   it('lists security events even when not currently enrolled (e.g. after a reset)', async () => {
@@ -422,7 +422,7 @@ describe('TwoFactorSection', () => {
     );
     const { user } = renderSection();
 
-    await screen.findByText('Not enabled');
+    await screen.findByText('Not set up');
     expect(
       await screen.findByRole('heading', { name: 'Recent security events' })
     ).toBeInTheDocument();
@@ -486,7 +486,7 @@ describe('TwoFactorSection', () => {
       await screen.findByText(/Required for your account\. Set it up before .*2026/)
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Enable two-factor authentication' })
+      screen.getByRole('button', { name: 'Set up two-factor authentication' })
     ).toBeInTheDocument();
   });
 
@@ -580,7 +580,7 @@ describe('TwoFactorSection', () => {
     );
     renderSection();
 
-    expect(await screen.findByText('Not enabled')).toBeInTheDocument();
+    expect(await screen.findByText('Not set up')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Passkeys' })).not.toBeInTheDocument();
   });
 
@@ -609,7 +609,7 @@ describe('TwoFactorSection', () => {
       await screen.findByText(/You log in through single sign-on, so there is no password/)
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', { name: 'Enable two-factor authentication' })
+      screen.queryByRole('button', { name: 'Set up two-factor authentication' })
     ).not.toBeInTheDocument();
   });
 });

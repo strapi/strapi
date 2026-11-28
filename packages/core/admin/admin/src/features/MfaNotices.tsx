@@ -65,7 +65,7 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
   },
   device_trust_revoked: {
     id: 'Settings.profile.form.section.mfa.notice.device_trust_revoked',
-    defaultMessage: 'Trusted devices were revoked',
+    defaultMessage: 'Trusted devices were removed',
   },
   passkey_registered: {
     id: 'Settings.profile.form.section.mfa.notice.passkey_registered',
@@ -81,7 +81,7 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
  * both and keeps the distinction in `byUserId`. */
 const REVOKED_BY_ADMIN_COPY = {
   id: 'Settings.profile.form.section.mfa.notice.device_trust_revoked.byAdmin',
-  defaultMessage: 'Trusted devices were revoked by an administrator',
+  defaultMessage: 'Trusted devices were removed by an administrator',
 };
 
 /** Used when the server could name the browser, instead of the generic copy. */

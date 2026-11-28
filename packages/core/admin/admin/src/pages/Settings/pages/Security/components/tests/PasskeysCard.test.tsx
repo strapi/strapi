@@ -38,7 +38,7 @@ describe('PasskeysCard', () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Turning passkeys off deletes every registered passkey.')
+      screen.getByText('Disabling passkeys deletes every registered passkey.')
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
   });

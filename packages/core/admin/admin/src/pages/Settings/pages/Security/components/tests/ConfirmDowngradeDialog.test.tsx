@@ -106,14 +106,14 @@ describe('ConfirmDowngradeDialog', () => {
     renderDialog({
       title: 'Turn passkeys off?',
       description: 'This deletes all 4 passkeys your users registered. This cannot be undone.',
-      confirmLabel: 'Turn off',
+      confirmLabel: 'Disable',
     });
 
     expect(screen.getByRole('alertdialog', { name: 'Turn passkeys off?' })).toBeInTheDocument();
     expect(
       screen.getByText('This deletes all 4 passkeys your users registered. This cannot be undone.')
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Turn off' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disable' })).toBeInTheDocument();
     // the credential fields are unaffected by the copy override
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
@@ -121,11 +121,11 @@ describe('ConfirmDowngradeDialog', () => {
 
   /** An SSO-only administrator turning passkeys off: the server asks them for nothing. */
   it('confirms without credential fields when no password is required', async () => {
-    const { onConfirm } = renderDialog({ requiresPassword: false, confirmLabel: 'Turn off' });
+    const { onConfirm } = renderDialog({ requiresPassword: false, confirmLabel: 'Disable' });
 
     expect(screen.queryByLabelText('Current password*')).not.toBeInTheDocument();
     expect(screen.queryByText(/Confirm your password/)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Turn off' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Disable' }));
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledWith(undefined));
   });

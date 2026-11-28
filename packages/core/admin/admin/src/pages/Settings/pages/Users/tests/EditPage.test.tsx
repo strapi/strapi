@@ -234,18 +234,18 @@ describe('Users | EditPage', () => {
       const { user } = renderEdit();
 
       expect(await screen.findByText('2 trusted devices')).toBeInTheDocument();
-      await user.click(screen.getByRole('button', { name: 'Revoke trusted devices' }));
+      await user.click(screen.getByRole('button', { name: 'Remove trusted devices' }));
       expect(
-        screen.getByRole('alertdialog', { name: "Revoke this user's trusted devices?" })
+        screen.getByRole('alertdialog', { name: "Remove this user's trusted devices?" })
       ).toBeInTheDocument();
       fireEvent.click(
-        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' })
       );
 
-      expect(await screen.findByText('Trusted devices revoked.')).toBeInTheDocument();
+      expect(await screen.findByText('Trusted devices removed.')).toBeInTheDocument();
       expect(await screen.findByText('No trusted devices')).toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: 'Revoke trusted devices' })
+        screen.queryByRole('button', { name: 'Remove trusted devices' })
       ).not.toBeInTheDocument();
     });
 
@@ -275,7 +275,7 @@ describe('Users | EditPage', () => {
       expect(called).toBe(false);
     });
 
-    it('shows the count but no Revoke button without the update permission', async () => {
+    it('shows the count but no Remove button without the update permission', async () => {
       server.use(
         enrolled(),
         http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [DEVICE] }))
@@ -289,7 +289,7 @@ describe('Users | EditPage', () => {
 
       expect(await screen.findByText('1 trusted device')).toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: 'Revoke trusted devices' })
+        screen.queryByRole('button', { name: 'Remove trusted devices' })
       ).not.toBeInTheDocument();
     });
 
@@ -307,9 +307,9 @@ describe('Users | EditPage', () => {
       const { user } = renderEdit();
 
       await screen.findByText('1 trusted device');
-      await user.click(screen.getByRole('button', { name: 'Revoke trusted devices' }));
+      await user.click(screen.getByRole('button', { name: 'Remove trusted devices' }));
       fireEvent.click(
-        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' })
       );
 
       expect(await screen.findByText('User does not exist')).toBeInTheDocument();

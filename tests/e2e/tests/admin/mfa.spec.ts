@@ -76,7 +76,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Two-factor authentication', () => {
     await waitForNextTotpStep();
     await dialog.getByLabel('Authentication code*').fill(totpFor(secret));
     await dialog.getByRole('button', { name: 'Disable two-factor authentication' }).click();
-    await expect(page.getByText('Not enabled')).toBeVisible();
+    await expect(page.getByText('Not set up')).toBeVisible();
 
     await context.clearCookies();
     await page.goto('/admin');

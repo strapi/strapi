@@ -67,7 +67,7 @@ describe('TrustedDevices', () => {
     render(<TrustedDevices />);
 
     expect(
-      await screen.findByText(/^No trusted devices\. You can trust a browser/)
+      await screen.findByText(/^No trusted devices\. You can trust a device/)
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Remove all' })).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();

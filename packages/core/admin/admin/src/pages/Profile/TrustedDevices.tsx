@@ -114,7 +114,7 @@ const TrustedDevices = () => {
         description={formatMessage({
           id: 'Settings.profile.form.section.mfa.trustedDevices.description',
           defaultMessage:
-            'Browsers that skip the code at login. A browser is trusted when you check "Trust this device" after entering a code, until the date shown. Your password is still required every time.',
+            'Devices that skip the code at login. A device is trusted when you check "Trust this device" after entering a code, until the date shown. Your password is still required every time.',
         })}
         action={
           hasDevices ? (
@@ -148,7 +148,7 @@ const TrustedDevices = () => {
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.trustedDevices.empty',
             defaultMessage:
-              'No trusted devices. You can trust a browser the next time you enter a code.',
+              'No trusted devices. You can trust a device the next time you enter a code.',
           })}
         </Typography>
       ) : null}

@@ -23,7 +23,10 @@ interface FormConfirmDialogProps {
   confirmLabel: React.ReactNode;
   /** `danger-light` by default, like `ConfirmDialog`. */
   variant?: ButtonProps['variant'];
-  /** The red warning icon by default; pass a neutral one for an action that is not negative. */
+  /**
+   * By default the warning icon is neutral while the confirm button is disabled and turns red once
+   * `canSubmit`; pass an icon of your own for an action that is not negative.
+   */
   icon?: React.ReactElement;
   /** Whether the required fields are filled in. */
   canSubmit: boolean;
@@ -46,7 +49,7 @@ const FormConfirmDialog = ({
   fields,
   confirmLabel,
   variant = 'danger-light',
-  icon = <ConfirmDialogIcon />,
+  icon,
   canSubmit,
   loading,
   onSubmit,
@@ -66,7 +69,10 @@ const FormConfirmDialog = ({
         <Dialog.Header>{title}</Dialog.Header>
         <Form onSubmit={onSubmit}>
           <Dialog.Body>
-            {React.cloneElement(icon, { width: 24, height: 24 })}
+            {React.cloneElement(icon ?? <ConfirmDialogIcon neutral={!canSubmit} />, {
+              width: 24,
+              height: 24,
+            })}
             {children}
             {fields ? (
               <Flex direction="column" alignItems="stretch" gap={4} paddingTop={2}>

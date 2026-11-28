@@ -64,7 +64,7 @@ const TrustedDevicesCard = ({
             {formatMessage({
               id: 'Settings.security.trustedDevices.description',
               defaultMessage:
-                'After entering a code, a user may trust the browser they are on and skip the code there until the trust expires. The password is still required at every login.',
+                'After entering a code, a user may trust the device they are on and skip the code there until the trust expires. The password is still required at every login.',
             })}
           </Typography>
         </Flex>
@@ -91,7 +91,7 @@ const TrustedDevicesCard = ({
             error={daysError}
             hint={formatMessage({
               id: 'Settings.security.trustedDevices.days.hint',
-              defaultMessage: 'How long a trusted browser can skip the code.',
+              defaultMessage: 'How long a trusted device can skip the code.',
             })}
           >
             <Field.Label>

@@ -302,9 +302,9 @@ describe('formatMfaNotice (device notices)', () => {
   it('names the administrator only when the revocation carries byUserId', () => {
     expect(
       format({ ...base, type: 'device_trust_revoked', metadata: { count: 2, byUserId: '9' } })
-    ).toMatch(/^Trusted devices were revoked by an administrator \(/);
+    ).toMatch(/^Trusted devices were removed by an administrator \(/);
     expect(format({ ...base, type: 'device_trust_revoked', metadata: { count: 1 } })).toMatch(
-      /^Trusted devices were revoked \(/
+      /^Trusted devices were removed \(/
     );
     expect(format({ ...base, type: 'device_trusted', metadata: { days: 30 } })).toMatch(
       /^A device was trusted to skip the two-factor code \(/

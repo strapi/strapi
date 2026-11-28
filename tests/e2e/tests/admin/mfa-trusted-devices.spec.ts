@@ -39,7 +39,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     await expect(page).toHaveTitle(TITLE_HOME);
   });
 
-  test('trust a browser after a code, skip the code next time, revoke it from the profile', async ({
+  test('trust a device after a code, skip the code next time, remove it from the profile', async ({
     page,
     context,
   }) => {
@@ -75,7 +75,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     await expect(page).toHaveTitle(TITLE_HOME);
     await expect(page.getByRole('heading', { name: 'Two-factor authentication' })).toHaveCount(0);
 
-    // 4. The profile lists the browser as this device; revoke it.
+    // 4. The profile lists the browser as this device; remove it.
     await page.goto('/admin/me');
     await expect(page.getByRole('heading', { name: 'Trusted devices' })).toBeVisible();
     await expect(page.getByText('This device', { exact: true })).toBeVisible();
@@ -96,7 +96,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     await expect(page.getByRole('heading', { name: 'Two-factor authentication' })).toBeVisible();
   });
 
-  test("an administrator revokes another user's trusted devices from the user page", async ({
+  test("an administrator removes another user's trusted devices from the user page", async ({
     page,
     context,
   }) => {
@@ -116,7 +116,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     const editorTrust = (await context.cookies()).filter((cookie) => cookie.name === TRUST_COOKIE);
     expect(editorTrust).toHaveLength(1);
 
-    // 2. The super admin logs in (password, then a code) and revokes from the editor's page.
+    // 2. The super admin logs in (password, then a code) and removes from the editor's page.
     await context.clearCookies();
     await page.goto('/admin');
     await login({ page });
@@ -125,12 +125,12 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     await page.getByRole('row', { name: new RegExp(EDITOR_EMAIL_ADDRESS) }).click();
     await expect(page.getByRole('heading', { name: /^Edit / })).toBeVisible();
     await expect(page.getByText('1 trusted device')).toBeVisible();
-    await page.getByRole('button', { name: 'Revoke trusted devices' }).click();
+    await page.getByRole('button', { name: 'Remove trusted devices' }).click();
     await page
-      .getByRole('alertdialog', { name: "Revoke this user's trusted devices?" })
-      .getByRole('button', { name: 'Revoke' })
+      .getByRole('alertdialog', { name: "Remove this user's trusted devices?" })
+      .getByRole('button', { name: 'Remove' })
       .click();
-    await expect(page.getByText('Trusted devices revoked.')).toBeVisible();
+    await expect(page.getByText('Trusted devices removed.')).toBeVisible();
     await expect(page.getByText('No trusted devices')).toBeVisible();
 
     // 3. The editor's browser, trust cookie and all, is challenged again.

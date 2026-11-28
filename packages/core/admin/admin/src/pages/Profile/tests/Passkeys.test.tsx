@@ -121,7 +121,7 @@ describe('Passkeys', () => {
 
     expect(await screen.findByRole('heading', { name: 'Passkeys' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Add a passkey' })).not.toBeInTheDocument();
-    expect(screen.getByText('This browser does not support passkeys.')).toBeInTheDocument();
+    expect(screen.getByText('This device does not support passkeys.')).toBeInTheDocument();
     // Existing rows are still listed and still removable from here
     expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^Remove passkey / })).toHaveLength(2);

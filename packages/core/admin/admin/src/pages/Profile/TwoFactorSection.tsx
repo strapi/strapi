@@ -37,7 +37,7 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
         <Typography textColor="neutral600">
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.status.disabled',
-            defaultMessage: 'Not enabled',
+            defaultMessage: 'Not set up',
           })}
         </Typography>
         {status.required ? (
@@ -290,7 +290,7 @@ const TwoFactorSection = () => {
               <Button onClick={() => setEnrolOpen(true)}>
                 {formatMessage({
                   id: 'Settings.profile.form.section.mfa.enable',
-                  defaultMessage: 'Enable two-factor authentication',
+                  defaultMessage: 'Set up two-factor authentication',
                 })}
               </Button>
             </Flex>

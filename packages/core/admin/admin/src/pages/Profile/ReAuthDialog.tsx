@@ -59,7 +59,7 @@ const COPY = {
     intro: {
       id: 'Settings.profile.form.section.mfa.disable.intro',
       defaultMessage:
-        'Your passkeys, recovery codes and trusted devices will be removed, and every other device signed in to this account will be logged out. Confirm your password and a code to continue.',
+        'Your passkeys, recovery codes and trusted devices will be removed, and every other device logged in to this account will be logged out. Confirm your password and a code to continue.',
     },
     submit: {
       id: 'Settings.profile.form.section.mfa.disable.submit',
