@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main } from '@strapi/design-system';
+import { Alert, Box, Button, Flex, Link, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { Navigate, useMatch } from 'react-router-dom';
+import { Navigate, NavLink, useMatch } from 'react-router-dom';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
@@ -17,6 +18,7 @@ import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRoleTwoFactorRequirement } from '../../../../hooks/useRoleTwoFactorRequirement';
 import {
   useGetRolePermissionLayoutQuery,
   useGetRolePermissionsQuery,
@@ -24,13 +26,17 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
-import { isMfaFeatureEnabled } from '../../../../utils/mfaFeature';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
-import { RoleTwoFactorRequirement } from './components/RoleTwoFactorRequirement';
 import { isPermissionsCeilingError } from './utils/isPermissionsCeilingError';
+
+const RequirementAlert = styled(Alert)`
+  > button {
+    display: none;
+  }
+`;
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -53,6 +59,7 @@ const EditPage = () => {
   const permissionsRef = React.useRef<PermissionsAPI>(null);
   const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
+  const isTwoFactorRequiredFor = useRoleTwoFactorRequirement();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -247,6 +254,28 @@ const EditPage = () => {
             />
             <Layouts.Content>
               <Flex direction="column" alignItems="stretch" gap={6}>
+                {id && isTwoFactorRequiredFor?.(id) ? (
+                  <RequirementAlert
+                    variant="default"
+                    // Not dismissible: the design-system `Alert` always renders its close button, so
+                    // it is hidden below. `closeLabel` is required by the type.
+                    closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+                    action={
+                      <Link tag={NavLink} to="/settings/security" isExternal={false}>
+                        {formatMessage({
+                          id: 'Settings.roles.form.mfa.alert.action',
+                          defaultMessage: 'Go to Security settings',
+                        })}
+                      </Link>
+                    }
+                  >
+                    {formatMessage({
+                      id: 'Settings.roles.form.mfa.alert',
+                      defaultMessage:
+                        'Users with this role must set up two-factor authentication. Change this in Settings › Security.',
+                    })}
+                  </RequirementAlert>
+                ) : null}
                 <RoleForm
                   disabled={isFormDisabled}
                   errors={errors}
@@ -255,9 +284,6 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
-                {isMfaFeatureEnabled() ? (
-                  <RoleTwoFactorRequirement roleId={id} roleName={role.name} />
-                ) : null}
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}

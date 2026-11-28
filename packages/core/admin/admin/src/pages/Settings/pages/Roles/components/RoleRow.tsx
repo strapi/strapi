@@ -7,6 +7,8 @@ interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | '
   icons: Array<Required<Pick<IconButtonProps, 'children' | 'label' | 'onClick'>>>;
   rowIndex: number;
   canUpdate?: boolean;
+  /** `undefined` hides the Two-factor cell, `false` leaves it empty, `true` shows "Required". */
+  twoFactor?: boolean;
   cursor?: string;
 }
 
@@ -18,6 +20,7 @@ const RoleRow = ({
   icons,
   rowIndex,
   canUpdate,
+  twoFactor,
   cursor,
 }: RoleRowProps) => {
   const { formatMessage } = useIntl();
@@ -52,6 +55,18 @@ const RoleRow = ({
       <Td>
         <Typography textColor="neutral800">{usersCountText}</Typography>
       </Td>
+      {twoFactor !== undefined ? (
+        <Td>
+          {twoFactor ? (
+            <Typography textColor="neutral800">
+              {formatMessage({
+                id: 'Settings.roles.list.mfa.required',
+                defaultMessage: 'Required',
+              })}
+            </Typography>
+          ) : null}
+        </Td>
+      ) : null}
       <Td>
         <Flex justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
           {icons.map((icon, i) => {

@@ -28,6 +28,7 @@ import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
+import { useRoleTwoFactorRequirement } from '../../../../hooks/useRoleTwoFactorRequirement';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isFetchError } from '../../../../utils/getFetchClient';
 
@@ -53,6 +54,7 @@ const ListPage = () => {
     }
   );
 
+  const isTwoFactorRequiredFor = useRoleTwoFactorRequirement();
   const navigate = useNavigate();
   const [{ roleToDelete }, dispatch] = React.useReducer(reducer, initialState);
   const { post } = useFetchClient();
@@ -113,7 +115,7 @@ const ListPage = () => {
   };
 
   const rowCount = roles.length + 1;
-  const colCount = 6;
+  const colCount = isTwoFactorRequiredFor ? 5 : 4;
 
   if (isLoadingForPermissions) {
     return <Page.Loading />;
@@ -208,6 +210,16 @@ const ListPage = () => {
                     })}
                   </Typography>
                 </Th>
+                {isTwoFactorRequiredFor ? (
+                  <Th>
+                    <Typography variant="sigma" textColor="neutral600">
+                      {formatMessage({
+                        id: 'Settings.roles.list.header.mfa',
+                        defaultMessage: 'Two-factor',
+                      })}
+                    </Typography>
+                  </Th>
+                ) : null}
                 <Th>
                   <VisuallyHidden>
                     {formatMessage({
@@ -227,6 +239,7 @@ const ListPage = () => {
                   name={role.name}
                   description={role.description}
                   usersCount={role.usersCount}
+                  twoFactor={isTwoFactorRequiredFor ? isTwoFactorRequiredFor(role.id) : undefined}
                   icons={
                     [
                       canCreate &&
