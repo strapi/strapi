@@ -172,7 +172,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
-    "vite": "6.4.5",
+    "vite": "6.4.6",
     "vite-plugin-dts": "^4.3.0",
     "vitest": "catalog:",
     "vitest-config": "5.64.0"
