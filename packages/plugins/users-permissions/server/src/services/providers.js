@@ -54,7 +54,7 @@ module.exports = ({ strapi }) => {
     // Get the profile.
     const profile = await getProfile(provider, oauthData, { grantResponse });
 
-    const email = _.toLower(profile.email);
+    const email = String(profile.email ?? '').toLowerCase();
 
     // We need at least the mail.
     if (!email) {

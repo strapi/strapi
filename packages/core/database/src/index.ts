@@ -17,6 +17,7 @@ import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
+import { createScopeRegistry, type ScopeRegistry } from './query/scopes';
 
 /**
  * Commit and rollback hooks run after the transaction has already settled.
@@ -58,6 +59,7 @@ export type {
   MigrationFileOperation,
 } from './migrations';
 export type { Event } from './lifecycles';
+export type { QueryScope, QueryScopeContext, ScopeRegistry } from './query/scopes';
 export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
@@ -151,6 +153,8 @@ class Database {
 
   lifecycles: LifecycleProvider;
 
+  unstable_scopes: ScopeRegistry;
+
   entityManager: EntityManager;
 
   repair: RepairManager;
@@ -224,6 +228,7 @@ class Database {
 
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
+    this.unstable_scopes = createScopeRegistry();
 
     this.entityManager = createEntityManager(this);
 
@@ -298,6 +303,10 @@ class Database {
    * `commit` and `rollback` helpers: if you call `rollback` and return without
    * throwing, the implementation avoids attempting a second `commit` on an
    * already-finalised transactor.
+   *
+   * A call inside another transaction joins it, without a savepoint: it neither commits nor rolls
+   * back on its own. If `cb` throws and a caller catches the error, the writes `cb` made before
+   * the error are committed with the outer transaction. Use `savepoint` to undo them.
    */
   transaction(): Promise<TransactionObject>;
   transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;

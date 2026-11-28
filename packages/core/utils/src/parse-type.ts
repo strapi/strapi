@@ -1,4 +1,4 @@
-import { padEnd, toNumber } from 'lodash';
+import { toNumber } from 'lodash';
 import * as dates from 'date-fns';
 
 const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]{1,3})?$/;
@@ -22,7 +22,7 @@ const parseTime = (value: unknown): string => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = padEnd(fraction.slice(1), 3, '0');
+  const fractionPart = fraction.slice(1).padEnd(3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };

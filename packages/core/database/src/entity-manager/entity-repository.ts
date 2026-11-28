@@ -149,6 +149,10 @@ export const createRepository = (uid: string, db: Database): Repository => {
         throw new Error(`Invalid load. Expected ${field} to be an anyToMany relational attribute`);
       }
 
+      if (params === undefined || params === null) {
+        throw new Error('Invalid load. Expected params to be an object');
+      }
+
       // Only the total query counts: a count key from the caller would replace the results with a count
       const [query, { page, pageSize }] = withOffsetLimit(omit(params, 'count'));
 

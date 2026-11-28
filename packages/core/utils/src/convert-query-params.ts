@@ -493,7 +493,7 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
     }
 
     if (typeof populate === 'string') {
-      return populate.split(',').map((value) => _.trim(value));
+      return populate.split(',').map((value) => value.trim());
     }
 
     if (Array.isArray(populate)) {
@@ -504,7 +504,7 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
             throw new InvalidPopulateError();
           }
 
-          return value.split(',').map((value) => _.trim(value));
+          return value.split(',').map((value) => value.trim());
         })
       );
     }
@@ -570,7 +570,9 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
 
         if (hasInvalidProperties) {
           throw new ValidationError(
-            `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
+            `Invalid nested populate for ${schema.info?.singularName}.${key} (${
+              schema.uid
+            }). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
           );
         }
 
@@ -736,7 +738,7 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
     }
 
     if (typeof fields === 'string') {
-      const fieldsValues = fields.split(',').map((value) => _.trim(value));
+      const fieldsValues = fields.split(',').map((value) => value.trim());
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {

@@ -124,6 +124,11 @@ export default function createSchemaHandler<
       return _.cloneDeep(state.schema);
     },
 
+    // the schema before the save, which the edits of the save do not change
+    get initialSchema() {
+      return initialState.schema;
+    },
+
     setSchema(val: Struct.ContentTypeSchema) {
       modified = true;
 
