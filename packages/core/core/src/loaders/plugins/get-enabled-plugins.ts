@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
+import { createRequire } from 'module';
 import { defaultsDeep, get, pickBy } from 'lodash';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
@@ -44,7 +45,33 @@ const validatePluginName = (pluginName: string) => {
   }
 };
 
-const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
+/**
+ * A `require` anchored at the app root. The app's plugins are the app's dependencies, so they must
+ * be resolved from the app and not from this package: under isolated installs (e.g. pnpm's global
+ * virtual store) the app's dependencies are not visible from `@strapi/core`'s own location.
+ */
+const createAppRequire = (strapi: Core.Strapi) =>
+  createRequire(join(strapi.dirs.app.root, 'package.json'));
+
+/**
+ * Where to resolve the internal plugins from. `@strapi/core` does not depend on them:
+ * `@strapi/strapi` does, and the app depends on `@strapi/strapi`. So `@strapi/strapi` is
+ * resolved from the app, and the internal plugins from there. Apps that run `@strapi/core`
+ * without `@strapi/strapi` fall back to the working directory.
+ */
+const getInternalPluginsPaths = (appRequire: NodeRequire) => {
+  try {
+    return [appRequire.resolve('@strapi/strapi/package.json'), process.cwd()];
+  } catch {
+    return [process.cwd()];
+  }
+};
+
+const toDetailedDeclaration = (
+  strapi: Core.Strapi,
+  appRequire: NodeRequire,
+  declaration: boolean | PluginDeclaration
+) => {
   if (typeof declaration === 'boolean') {
     return { enabled: declaration };
   }
@@ -63,7 +90,7 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
       pathToPlugin = join(declaration.resolve, '..');
     } else {
       try {
-        pathToPlugin = dirname(require.resolve(declaration.resolve));
+        pathToPlugin = dirname(appRequire.resolve(declaration.resolve));
       } catch {
         pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
 
@@ -81,20 +108,22 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
 
 export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { client: false }) => {
   const internalPlugins: PluginMetas = {};
+  const appRequire = createAppRequire(strapi);
+  const internalPluginsPaths = getInternalPluginsPaths(appRequire);
 
   for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
-
-    // NOTE: internal plugins should be resolved from the strapi package
-    const packageModulePath = require.resolve(packagePath, {
-      paths: [require.resolve('@strapi/strapi/package.json'), process.cwd()],
-    });
+    const packageModulePath = require.resolve(packagePath, { paths: internalPluginsPaths });
 
     const packageInfo = require(packageModulePath);
 
     validatePluginName(packageInfo.strapi.name);
     internalPlugins[packageInfo.strapi.name] = {
-      ...toDetailedDeclaration({ enabled: true, resolve: packageModulePath, isModule: client }),
+      ...toDetailedDeclaration(strapi, appRequire, {
+        enabled: true,
+        resolve: packageModulePath,
+        isModule: client,
+      }),
       info: packageInfo.strapi,
       packageInfo,
     };
@@ -107,7 +136,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     const packagePath = join(dep, 'package.json');
     let packageInfo;
     try {
-      packageInfo = require(packagePath);
+      packageInfo = appRequire(packagePath);
     } catch {
       continue;
     }
@@ -115,7 +144,11 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     if (isStrapiPlugin(packageInfo)) {
       validatePluginName(packageInfo.strapi.name);
       installedPlugins[packageInfo.strapi.name] = {
-        ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
+        ...toDetailedDeclaration(strapi, appRequire, {
+          enabled: true,
+          resolve: packagePath,
+          isModule: client,
+        }),
         info: {
           ...packageInfo.strapi,
           packageName: packageInfo.name,
@@ -132,7 +165,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     validatePluginName(pluginName);
 
     declaredPlugins[pluginName] = {
-      ...toDetailedDeclaration(declaration),
+      ...toDetailedDeclaration(strapi, appRequire, declaration),
       info: {},
     };
 

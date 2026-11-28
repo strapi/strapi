@@ -24,6 +24,8 @@ The plugins loader builds the list of enabled plugins from three sources:
 2. **Installed plugins.** Dependencies of the application whose `package.json` has `strapi.kind: 'plugin'`.
 3. **Declared plugins.** Entries in `config/plugins.js`, merged with `config/env/<NODE_ENV>/plugins.js`. An entry with `resolve` points to a local folder or a module.
 
+Every lookup starts from the application root, never from `@strapi/core`'s own location. `@strapi/core` depends on none of these packages, so under an isolated install (pnpm's global virtual store) it cannot see them. Installed plugins and module `resolve` entries are resolved from the application. The always-enabled plugins are dependencies of `@strapi/strapi`, so the loader resolves `@strapi/strapi` from the application and the plugins from there. An application without `@strapi/strapi` falls back to `process.cwd()`.
+
 Plugin names must be kebab-case. The loader throws otherwise.
 
 For each enabled plugin, the loader resolves the `strapi-server` export of the package. If the export is missing, it uses `./strapi-server.js`. It skips a plugin that has no server entry.
