@@ -38,7 +38,7 @@
   "button.model.create": "建立新的集合類型",
   "button.single-types.create": "建立新的單一類型",
   "component.repeatable": "(可重複的)",
-  "components.SelectComponents.displayed-value": " 已選擇 {number, plural, =0 {# components} 一個 {# component} 其他 {# components}}",
+  "components.SelectComponents.displayed-value": "已選擇 {number} 個元件",
   "components.componentSelect.no-component-available": "你已經加入了所有可以加入的元件",
   "components.componentSelect.no-component-available.with-search": "搜尋不到符合的元件",
   "components.componentSelect.value-component": "{number} 個元件被選取 (輸入搜尋元件)",
