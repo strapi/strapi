@@ -62,7 +62,8 @@ const IconSlot = styled(Flex)`
 interface GlobalBannerProps {
   variant?: GlobalBannerVariant;
   title: React.ReactNode;
-  children: React.ReactNode;
+  /** Left out by the short, phone-sized copy, where the title carries the whole sentence. */
+  children?: React.ReactNode;
   action?: React.ReactNode;
   /** Without it the banner cannot be closed. */
   onClose?: () => void;
@@ -108,7 +109,7 @@ const GlobalBanner = ({
         <Typography fontWeight="bold" textColor="neutral800">
           {title}
         </Typography>
-        <Typography textColor="neutral800">{children}</Typography>
+        {children ? <Typography textColor="neutral800">{children}</Typography> : null}
         {action ? <Box>{action}</Box> : null}
       </Content>
       {onClose && closeLabel ? (

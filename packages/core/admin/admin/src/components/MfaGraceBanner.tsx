@@ -4,6 +4,7 @@ import { Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import { useGetMfaStatusQuery } from '../services/mfa';
 import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
 import { isMfaNotFoundError } from '../utils/mfaFeature';
@@ -12,6 +13,13 @@ import { GlobalBanner } from './GlobalBanner';
 
 /** Re-read every 15 minutes so a long-lived tab notices a grace period stamped by a background token refresh. */
 export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
+
+/** "Dec 5", with the year only once the date is not in the current year. */
+const shortDateFormat = (date: string): Intl.DateTimeFormatOptions => ({
+  month: 'short',
+  day: 'numeric',
+  ...(new Date(date).getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
+});
 
 /**
  * Non-dismissible warning strip shown while `/admin/mfa/me` reports `required && !enabled`: this
@@ -27,6 +35,10 @@ export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
  */
 const MfaGraceBanner = () => {
   const { formatMessage, formatDate } = useIntl();
+  // Below `large` the sentences wrap to three lines on a phone, so the banner switches to short
+  // copy chosen here rather than rendering both and hiding one, which would have a screen reader
+  // read the long and the short version.
+  const isDesktop = useIsDesktop();
   // On the profile page the link would point at the page the user is on, and the setup button is
   // already in front of them, so it is left out there.
   const { pathname } = useLocation();
@@ -55,6 +67,39 @@ const MfaGraceBanner = () => {
 
   if (!data || !data.required || data.enabled) {
     return null;
+  }
+
+  if (!isDesktop) {
+    return (
+      <GlobalBanner
+        variant="warning"
+        data-testid="mfa-grace-banner"
+        title={
+          data.graceUntil
+            ? formatMessage(
+                {
+                  id: 'Settings.profile.form.section.mfa.grace.deadline.short',
+                  defaultMessage: 'Two-factor authentication required by {date}',
+                },
+                { date: formatDate(data.graceUntil, shortDateFormat(data.graceUntil)) }
+              )
+            : formatMessage({
+                id: 'Settings.profile.form.section.mfa.grace.pending.short',
+                defaultMessage: 'Two-factor authentication required at your next login',
+              })
+        }
+        action={
+          onProfilePage ? null : (
+            <Link tag={NavLink} to="/me" isExternal={false}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.grace.action.short',
+                defaultMessage: 'Set up',
+              })}
+            </Link>
+          )
+        }
+      />
+    );
   }
 
   return (

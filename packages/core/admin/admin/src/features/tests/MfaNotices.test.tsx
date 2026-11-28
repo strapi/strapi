@@ -5,7 +5,13 @@ import { http, HttpResponse } from 'msw';
 import { createIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { MfaNotices, formatMfaNotice } from '../MfaNotices';
+
+jest.mock('../../hooks/useMediaQuery', () => ({
+  ...jest.requireActual('../../hooks/useMediaQuery'),
+  useIsDesktop: jest.fn(() => true),
+}));
 
 const NOTICES = [
   {
@@ -43,6 +49,47 @@ const status = (overrides = {}) =>
 const LocationDisplay = () => <span data-testid="location">{useLocation().pathname}</span>;
 
 describe('MfaNotices', () => {
+  beforeEach(() => {
+    jest.mocked(useIsDesktop).mockReturnValue(true);
+  });
+
+  describe('below the large breakpoint', () => {
+    beforeEach(() => {
+      jest.mocked(useIsDesktop).mockReturnValue(false);
+    });
+
+    it('shows the short plural copy, a Review link to the profile and a close button', async () => {
+      let seenBody: unknown;
+      server.use(
+        status(),
+        http.get('/admin/mfa/notices', () => HttpResponse.json({ data: NOTICES })),
+        http.post('/admin/mfa/notices/seen', async ({ request }) => {
+          seenBody = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        })
+      );
+      const { user } = render(<MfaNotices />);
+
+      expect(await screen.findByText('2 new security events')).toBeInTheDocument();
+      expect(screen.queryByText(/since your last visit/)).not.toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Review' })).toHaveAttribute('href', '/me');
+
+      await user.click(screen.getByRole('button', { name: 'Close' }));
+      await waitFor(() => expect(seenBody).toEqual({ ids: [1, 2] }));
+      expect(screen.queryByText('2 new security events')).not.toBeInTheDocument();
+    });
+
+    it('uses the singular for one event', async () => {
+      server.use(
+        status(),
+        http.get('/admin/mfa/notices', () => HttpResponse.json({ data: [NOTICES[0]] }))
+      );
+      render(<MfaNotices />);
+
+      expect(await screen.findByText('1 new security event')).toBeInTheDocument();
+    });
+  });
+
   it('links "profile page" to the profile, and the notice goes away there without marking seen', async () => {
     let seenCalls = 0;
     server.use(

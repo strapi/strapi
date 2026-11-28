@@ -4,6 +4,11 @@ import { http, HttpResponse } from 'msw';
 import { GLOBAL_BANNERS_HEIGHT_VAR } from '../../constants/theme';
 import { MfaBanners } from '../MfaBanners';
 
+jest.mock('../../hooks/useMediaQuery', () => ({
+  ...jest.requireActual('../../hooks/useMediaQuery'),
+  useIsDesktop: jest.fn(() => true),
+}));
+
 /**
  * The security notice must never cover the "Two-factor authentication required" banner: both are
  * in one flow container, banner first, notice under it, and the container publishes its height for

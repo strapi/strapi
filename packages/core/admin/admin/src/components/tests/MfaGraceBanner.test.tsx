@@ -2,8 +2,14 @@ import { within } from '@testing-library/react';
 import { render, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { useGetMfaStatusQuery } from '../../services/mfa';
 import { MfaGraceBanner } from '../MfaGraceBanner';
+
+jest.mock('../../hooks/useMediaQuery', () => ({
+  ...jest.requireActual('../../hooks/useMediaQuery'),
+  useIsDesktop: jest.fn(() => true),
+}));
 
 const status = (overrides = {}) =>
   http.get('/admin/mfa/me', () =>
@@ -31,6 +37,50 @@ const renderBanner = (initialEntries?: string[]) => {
 };
 
 describe('MfaGraceBanner', () => {
+  beforeEach(() => {
+    jest.mocked(useIsDesktop).mockReturnValue(true);
+  });
+
+  describe('below the large breakpoint', () => {
+    beforeEach(() => {
+      jest.mocked(useIsDesktop).mockReturnValue(false);
+    });
+
+    it('shows the short deadline with a short date and a Set up link', async () => {
+      const year = new Date().getFullYear();
+      server.use(status({ required: true, graceUntil: `${year}-12-05T12:00:00.000Z` }));
+      const { root } = renderBanner();
+
+      const banner = await within(root).findByRole('status');
+      expect(banner).toHaveTextContent('Two-factor authentication required by Dec 5');
+      // The year is left off while the date is in the current year.
+      expect(banner).not.toHaveTextContent(String(year));
+      expect(banner).not.toHaveTextContent(/your account will be locked/);
+      expect(within(root).getByRole('link', { name: 'Set up' })).toHaveAttribute('href', '/me');
+      expect(within(root).getAllByRole('status')).toHaveLength(1);
+    });
+
+    it('adds the year when the deadline is not in the current year', async () => {
+      const year = new Date().getFullYear() + 1;
+      server.use(status({ required: true, graceUntil: `${year}-01-15T12:00:00.000Z` }));
+      const { root } = renderBanner();
+
+      expect(await within(root).findByRole('status')).toHaveTextContent(
+        `Two-factor authentication required by Jan 15, ${year}`
+      );
+    });
+
+    it('uses short copy without a deadline and drops the link on the profile page', async () => {
+      server.use(status({ required: true, graceUntil: null }));
+      const { root } = renderBanner(['/me']);
+
+      expect(await within(root).findByRole('status')).toHaveTextContent(
+        'Two-factor authentication required at your next login'
+      );
+      expect(within(root).queryByRole('link')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders nothing while the feature is off (404)', async () => {
     server.use(
       http.get('/admin/mfa/me', () =>

@@ -5,6 +5,7 @@ import { type IntlFormatters, useIntl } from 'react-intl';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { GlobalBanner } from '../components/GlobalBanner';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import {
   useGetMfaNoticesQuery,
   useGetMfaStatusQuery,
@@ -159,6 +160,8 @@ const PROFILE_PATH = '/me';
  */
 const MfaNotices = () => {
   const { formatMessage } = useIntl();
+  // Short copy below `large`: see `MfaGraceBanner`.
+  const isDesktop = useIsDesktop();
   const { error: statusError, isLoading: statusLoading } = useGetMfaStatusQuery();
   // Also true while the status query is in flight: dropping that half would fire the notices query
   // once against a feature that may turn out to be off.
@@ -192,6 +195,33 @@ const MfaNotices = () => {
     markSeen({ ids: shown.map((notice) => Number(notice.id)) });
     setShown(null);
   };
+
+  if (!isDesktop) {
+    return (
+      <GlobalBanner
+        variant={hasRiskyNotice(shown) ? 'warning' : 'default'}
+        data-testid="mfa-security-notice"
+        closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+        title={formatMessage(
+          {
+            id: 'Settings.profile.form.section.mfa.notice.summary.short',
+            defaultMessage:
+              '{count, plural, one {# new security event} other {# new security events}}',
+          },
+          { count: shown.length }
+        )}
+        action={
+          <Link tag={NavLink} to={PROFILE_PATH} isExternal={false}>
+            {formatMessage({
+              id: 'Settings.profile.form.section.mfa.notice.action.short',
+              defaultMessage: 'Review',
+            })}
+          </Link>
+        }
+        onClose={handleClose}
+      />
+    );
+  }
 
   return (
     <GlobalBanner
