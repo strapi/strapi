@@ -6,7 +6,10 @@ export default {
       path: '/',
       handler: 'email.send',
       config: {
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { name: 'admin::hasPermissions', config: { actions: ['plugin::email.settings.read'] } },
+        ],
       },
     },
     {

@@ -108,7 +108,8 @@ export const readBack = <TSchemaUID extends UID.ContentType>(filters: Filters<TS
 };
 
 /**
- * Filters with a known UID keep their checks
+ * Filters with a known UID keep the checks below: an unknown attribute (at the root, in a
+ * nested group or in a relation filter) and an unknown operator are type errors.
  */
 export const knownUID: PostFilters[] = [
   { slug: { $notNull: true }, views: { $between: [1, 10] } },
@@ -153,7 +154,9 @@ export const knownUID: PostFilters[] = [
 ];
 
 /**
- * Reading back filters with a known UID keeps the attributes' types
+ * Reading back filters with a known UID does not widen them to `any`.
+ * This checks that the read-backs are not `any` and keep a filter type. The annotations do not
+ * check which content type the filter is for.
  */
 export const knownUIDReadBack = (filters: PostFilters) => {
   const tagFilters: Filters<'api::tag.tag'> | undefined = filters.tags;

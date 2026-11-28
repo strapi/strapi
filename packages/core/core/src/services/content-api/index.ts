@@ -1,6 +1,7 @@
 import {
   sanitize,
   validate,
+  routesOf,
   sanitizeRoutesMapForSerialization,
   ALLOWED_QUERY_PARAM_KEYS,
   RESERVED_INPUT_PARAM_KEYS,
@@ -10,6 +11,8 @@ import * as z from 'zod/v4';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { inspectZodSchema, isZodType } from '../../utils/zod';
+import { areRoutesRegistered } from '../server/routes-registration';
+import { warnAboutRoutesAddedAfterRouting } from '../server/late-routes';
 
 import instantiatePermissionsUtilities from './permissions';
 
@@ -23,7 +26,10 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
   };
 };
 
-const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api';
+// A route without `info` was added to its router after the routes were registered: Strapi never
+// serves it, so the routes map does not list it.
+const filterContentAPI = (route: Core.RouteInput): route is Core.Route =>
+  route.info?.type === 'content-api';
 
 /**
  * Runtime check for addQueryParams: we only allow scalar or array-of-scalar schemas (no nested objects).
@@ -223,12 +229,21 @@ const createContentAPI = (strapi: Core.Strapi) => {
   };
 
   const getRoutesMap = async () => {
+    // Before the routes are registered, routers may still be factories and routes have no `info`:
+    // the map would be incomplete.
+    if (areRoutesRegistered(strapi) === false) {
+      throw new Error(
+        'contentAPI.getRoutesMap() called before routes are registered. Strapi registers them in the bootstrap phase, before the bootstrap function of plugins and APIs: call it from a bootstrap function or later.'
+      );
+    }
+
+    // The routes it skips below, added after the routes were registered
+    warnAboutRoutesAddedAfterRouting(strapi);
+
     const routesMap: Record<string, Core.Route[]> = {};
 
     for (const [apiName, api] of Object.entries(strapi.apis)) {
-      const routes = Object.values(api.routes)
-        .flatMap((route) => ('routes' in route ? route.routes : route))
-        .filter(filterContentAPI);
+      const routes = Object.values(api.routes).flatMap(routesOf).filter(filterContentAPI);
 
       if (routes.length === 0) {
         continue;
@@ -246,7 +261,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
 
       const pluginRoutes = Array.isArray(plugin.routes)
         ? plugin.routes
-        : Object.values(plugin.routes).flatMap((route) => route.routes);
+        : Object.values(plugin.routes).flatMap(routesOf);
 
       const routes = pluginRoutes.map(transformPrefix).filter(filterContentAPI);
 

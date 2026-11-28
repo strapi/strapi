@@ -9,7 +9,16 @@ import {
   createBeforeEvaluateContext,
   createValidateContext,
 } from './hooks';
-import type { PermissionEngineHooks, HookName } from './hooks';
+import type {
+  PermissionEngineHooks,
+  HookName,
+  TypedPermissionEngineHooks,
+  TypedPermission,
+  BeforeEvaluateContext,
+  ValidateContext,
+  WillRegisterCondition,
+  WillRegisterContext,
+} from './hooks';
 
 import * as abilities from './abilities';
 import { Permission } from '../domain/permission';
@@ -17,6 +26,17 @@ import type { ConditionRef } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };
+// `PermissionEngineHooks` stays unexported here: a re-export changes how downstream declarations
+// print the engine's `hooks` (`engine.PermissionEngineHooks` instead of the path to `engine/hooks`)
+export type {
+  HookName,
+  TypedPermissionEngineHooks,
+  TypedPermission,
+  BeforeEvaluateContext,
+  ValidateContext,
+  WillRegisterCondition,
+  WillRegisterContext,
+};
 
 /** Turn an ability's rules for an action and subject into Strapi query filters (admin RBAC, Content API) */
 export { buildCaslQuery, buildStrapiQuery } from './query-builders';
@@ -46,6 +66,19 @@ export interface Engine {
     options: Record<string, unknown>
   ): (permission: PermissionRule) => Promise<unknown>;
 }
+
+/**
+ * The engine with typed hooks and handlers. {@link Engine}, what `new` returns, keeps untyped
+ * handlers; a typed contract can declare this type instead.
+ */
+export type TypedEngine = Omit<Engine, 'hooks' | 'on' | 'generateAbility'> & {
+  hooks: TypedPermissionEngineHooks;
+  generateAbility(permissions: TypedPermission[], options?: object): Promise<Ability>;
+  on<THook extends HookName>(
+    hook: THook,
+    handler: Parameters<TypedPermissionEngineHooks[THook]['register']>[0]
+  ): TypedEngine;
+};
 
 export interface EngineParams {
   providers: { action: ActionProvider; condition: ConditionProvider };

@@ -138,6 +138,13 @@ describe('Entity service loadPages', () => {
       expect(pagination).toEqual({ page: 3, pageSize: 5, pageCount: 5, total: TAG_COUNT });
     });
 
+    test('applies the sort before the page', async () => {
+      const { names, pagination } = await loadTags({ page: 2, pageSize: 3 }, { sort: 'name:desc' });
+
+      expect(names).toEqual(['tag-21', 'tag-20', 'tag-19']);
+      expect(pagination).toEqual({ page: 2, pageSize: 3, pageCount: 9, total: TAG_COUNT });
+    });
+
     test('returns the first 10 entries without pagination', async () => {
       const { names, pagination } = await loadTags();
 

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createEntityManager } from '../../entity-manager';
 import { createMetadata } from '../../metadata';
+import { createScopeRegistry } from '../scopes';
 
 /**
  * A filtered `count` over relation joins counts each stored row once.
@@ -98,6 +99,7 @@ const setUp = async () => {
     lifecycles: { run: async () => undefined },
     // Query execution reads the timeout setting; none is set here
     config: { settings: {} },
+    unstable_scopes: createScopeRegistry(),
   } as any;
 
   // The join tables the metadata gives the two relations, which are what the queries join through

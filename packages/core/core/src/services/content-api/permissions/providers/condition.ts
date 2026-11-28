@@ -67,14 +67,14 @@ export default (options = {}) => {
   return {
     ...provider,
 
-    async register(definition: ContentApiConditionDefinition): Promise<void> {
+    async register(definition: ContentApiConditionDefinition) {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new conditions outside the bootstrap function.`);
       }
 
       const frozen = freezeConditionDefinition(definition);
 
-      await provider.register(frozen.name, frozen);
+      return provider.register(frozen.name, frozen);
     },
 
     get,

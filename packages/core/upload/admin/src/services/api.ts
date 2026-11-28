@@ -1,5 +1,5 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import {
   openUploadProgress,
@@ -17,6 +17,7 @@ import {
 } from '../store/uploadProgress';
 import { createRafBatcher } from '../utils/createRafBatcher';
 import { getFilenameFromUrl } from '../utils/files';
+import { getUploadTooLargeError } from '../utils/getUploadTooLargeError';
 
 import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from './uploadFileViaXHR';
 
@@ -37,7 +38,7 @@ interface UploadFilesArgs {
    * settings value. Defaults to 1 (sequential).
    */
   concurrency?: number;
-  /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
+  /** Whether AI metadata generation is enabled (a provider is registered, `aiMetadataAvailable`, and `settings.aiMetadata` is on). */
   generateAiMetadata: boolean;
   /**
    * Called for each file of this call as it finishes uploading, including files
@@ -79,7 +80,39 @@ interface UploadEntry {
   file: File;
   fileInfo: UploadFileInfo;
   onUploaded?: (file: UploadedFile) => void;
+  /** Read once per drop, so a space switch cannot split the drop. An error fails the file */
+  requestHeaders?: Headers | Error;
 }
+
+const readRequestHeaders = (): Headers | Error => {
+  try {
+    return unstable_getRequestHeaders();
+  } catch (error) {
+    // `unstable_getRequestHeaders` only throws `RequestHeadersError`
+    return error as Error;
+  }
+};
+
+// No file of a failed read was sent, so a retry reads the providers again. Each drop has
+// its own error, so the new value goes to every entry of the retried drops
+const rereadFailedRequestHeaders = (
+  entries: UploadEntry[],
+  retried: Array<UploadEntry | undefined>
+) => {
+  const failed = new Set<UploadEntry['requestHeaders']>(
+    retried.map((entry) => entry?.requestHeaders).filter((headers) => headers instanceof Error)
+  );
+  if (failed.size === 0) {
+    return;
+  }
+
+  const requestHeaders = readRequestHeaders();
+  entries.forEach((entry) => {
+    if (failed.has(entry.requestHeaders)) {
+      entry.requestHeaders = requestHeaders;
+    }
+  });
+};
 
 /**
  * Everything a batch needs to be replayed on retry: the original entries plus the
@@ -142,7 +175,8 @@ const getFileKey = (uploadId: number, index: number) => `${uploadId}:${index}`;
 
 /**
  * Aborts an upload by its uploadId.
- * Called from the UploadProgressDialog when the user clicks cancel or close.
+ * Called from the UploadProgressDialog when the user clicks Cancel all. Closing
+ * the dialog does not abort.
  */
 export const abortUpload = (uploadId: number) => {
   const controller = abortControllers.get(uploadId);
@@ -258,8 +292,8 @@ const withTargetFolder = (
  *    succeeded), which is why the promise is fully swallowed here.
  *
  * Every uploaded file is sent, including non-images: the server already classifies
- * them (`ai-metadata.generateForFiles` returns `skipped` for anything whose mime
- * isn't `image/*`) and duplicating that rule here would let the two drift apart.
+ * them (`ai-metadata.generateForFiles` returns `skipped` for anything that is not
+ * an image format the provider supports) and duplicating that rule here would let the two drift apart.
  * The upshot is that a non-image now reports "Metadata generation skipped" rather
  * than silently showing no metadata state at all.
  */
@@ -373,12 +407,17 @@ const runUploadPool = async ({
     });
 
     try {
+      if (entry.requestHeaders instanceof Error) {
+        throw entry.requestHeaders;
+      }
+
       const file = await uploadFileViaXHR(
         url,
         token,
         formData,
         fileAbortController.signal,
-        (bytes) => batcher.schedule(bytes)
+        (bytes) => batcher.schedule(bytes),
+        entry.requestHeaders
       );
       batcher.cancel();
       uploaded.push(file);
@@ -410,7 +449,15 @@ const runUploadPool = async ({
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
-      dispatch(setFileError({ index, name: fileName, message, uploadId }));
+      dispatch(
+        setFileError({
+          index,
+          name: fileName,
+          message,
+          uploadId,
+          tooLarge: getUploadTooLargeError(err),
+        })
+      );
     } finally {
       abortController.signal.removeEventListener('abort', abortFile);
       fileAbortControllers.delete(fileKey);
@@ -505,8 +552,9 @@ const runMergedUploadPool = async ({
 
   // The chained value keeps every file in the batch, because the next merged leg
   // reads it as its own `earlier`. The caller gets only what it handed in: a
-  // consumer that attaches the result — the Content Manager field — would
-  // otherwise re-attach the files the earlier drop already added.
+  // consumer that attached the result would otherwise re-attach the files the
+  // earlier drop already added. (The Content Manager field attaches each file
+  // through `onFileUploaded` instead.)
   return run.then((result) => (result.error ? result : { data: result.own ?? result.data }));
 };
 
@@ -562,11 +610,10 @@ const fetchUrlUploadStream = async ({
   signal: AbortSignal;
 }): Promise<Response> => {
   const backendURL = window.strapi.backendURL;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers = unstable_getRequestHeaders();
+  headers.set('Content-Type', 'application/json');
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   return fetch(`${backendURL}/upload/actions/upload-from-urls`, {
@@ -678,7 +725,15 @@ const processSSEStream = async ({
         }
         case 'file:error': {
           const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-          dispatch(setFileError({ index, name: payload.name, message: payload.message, uploadId }));
+          dispatch(
+            setFileError({
+              index,
+              name: payload.name,
+              message: payload.message,
+              uploadId,
+              tooLarge: getUploadTooLargeError({ details: payload.details }),
+            })
+          );
           break;
         }
         case 'stream:complete': {
@@ -721,6 +776,7 @@ const uploadApi = adminApi
           const fileInfoJson = formData.get('fileInfo') as string;
           const fileInfoArray = JSON.parse(fileInfoJson) as UploadFileInfo[];
 
+          const requestHeaders = readRequestHeaders();
           const entries: UploadEntry[] = files.map((file, index) => ({
             file,
             fileInfo: fileInfoArray[index] ?? {
@@ -730,6 +786,7 @@ const uploadApi = adminApi
               folder: null,
             },
             onUploaded: onFileUploaded,
+            requestHeaders,
           }));
 
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
@@ -875,6 +932,10 @@ const uploadApi = adminApi
 
           // Reset cancelled files back to pending
           dispatch(retryCancelledFiles());
+          rereadFailedRequestHeaders(
+            batch.entries,
+            cancelledIndices.map((index) => batch.entries[index])
+          );
 
           // Fresh AbortController for the retry run
           const abortController = new AbortController();
@@ -922,6 +983,7 @@ const uploadApi = adminApi
 
           skippedFiles.delete(getFileKey(uploadId, index));
           dispatch(retryFile({ uploadId, index }));
+          rereadFailedRequestHeaders(batch.entries, [batch.entries[index]]);
 
           return runMergedUploadPool({
             entries: batch.entries,

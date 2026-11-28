@@ -36,7 +36,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             getService('release-action', { strapi }).deletePlannedActions({
               contentType: model.uid,
               locale: where?.locale ?? null,
-              ...(where?.documentId && { entryDocumentId: where.documentId }),
+              ...(where?.documentId ? { entryDocumentId: where.documentId } : {}),
             }),
           'Error while deleting release actions after entry deleteMany',
           { strapi }

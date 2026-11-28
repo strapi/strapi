@@ -225,3 +225,40 @@ describe('EE user service without a super admin role', () => {
     expect(deleteFn).not.toHaveBeenCalled();
   });
 });
+
+describe('EE user service with a single super admin and an unknown user id', () => {
+  const setup = () => {
+    const findOne = vi.fn(() => Promise.resolve(null));
+    const update = vi.fn(() => Promise.resolve(null));
+
+    global.strapi = {
+      eventHub: { emit: vi.fn() },
+      db: { query: () => ({ findOne, update, count: vi.fn() }) },
+      store: { set: vi.fn() },
+      admin: {
+        services: {
+          role: {
+            getSuperAdminWithUsersCount: vi.fn(() => Promise.resolve({ id: 9, usersCount: 1 })),
+          },
+          'seat-enforcement': { getDisabledUserList: vi.fn(() => Promise.resolve(null)) },
+        },
+      },
+    } as any;
+
+    return { update };
+  };
+
+  test('updateById resolves to null when deactivating a missing user', async () => {
+    const { update } = setup();
+
+    await expect(updateById(404, { isActive: false })).resolves.toBeNull();
+    expect(update).toHaveBeenCalled();
+  });
+
+  test('updateById resolves to null when changing roles of a missing user', async () => {
+    const { update } = setup();
+
+    await expect(updateById(404, { roles: [3] })).resolves.toBeNull();
+    expect(update).toHaveBeenCalled();
+  });
+});

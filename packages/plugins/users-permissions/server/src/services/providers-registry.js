@@ -458,7 +458,7 @@ const initProviders = ({ baseURL }) => ({
 
 module.exports = () => {
   const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
+  const baseURL = urljoin(strapi.config.get('server.url'), apiPrefix, 'auth');
 
   const authProviders = initProviders({ baseURL });
 

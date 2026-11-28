@@ -72,7 +72,7 @@ describe('useFolderNavigation', () => {
     });
 
     expect(mockSetQuery).toHaveBeenCalledTimes(1);
-    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '7', _q: undefined });
+    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '7', _q: undefined, searchAll: undefined });
   });
 
   it('navigateToRoot removes the folder query param', () => {
@@ -85,7 +85,7 @@ describe('useFolderNavigation', () => {
     });
 
     expect(mockSetQuery).toHaveBeenCalledTimes(1);
-    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '', _q: '' }, 'remove');
+    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '', _q: '', searchAll: '' }, 'remove');
   });
 
   it('navigateToFolderId(null) clears the folder param', () => {
@@ -97,7 +97,7 @@ describe('useFolderNavigation', () => {
       result.current.navigateToFolderId(null);
     });
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '', _q: '' }, 'remove');
+    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '', _q: '', searchAll: '' }, 'remove');
   });
 
   it('navigateToFolderId(id) sets the folder param to that id', () => {
@@ -109,10 +109,14 @@ describe('useFolderNavigation', () => {
       result.current.navigateToFolderId(11);
     });
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '11', _q: undefined });
+    expect(mockSetQuery).toHaveBeenCalledWith({
+      folder: '11',
+      _q: undefined,
+      searchAll: undefined,
+    });
   });
 
-  describe('clearing the search term on navigation', () => {
+  describe('clearing the search on navigation', () => {
     it('drops _q and sets the folder in a single navigation', () => {
       mockUseQueryParams.mockReturnValue([{ query: { _q: 'kitten' } }, mockSetQuery]);
 
@@ -125,7 +129,11 @@ describe('useFolderNavigation', () => {
       // One call, so the two effects can't derive from the same stale query and
       // clobber each other.
       expect(mockSetQuery).toHaveBeenCalledTimes(1);
-      expect(mockSetQuery).toHaveBeenCalledWith({ folder: '7', _q: undefined });
+      expect(mockSetQuery).toHaveBeenCalledWith({
+        folder: '7',
+        _q: undefined,
+        searchAll: undefined,
+      });
     });
 
     it('drops _q when the sidebar selects a folder', () => {
@@ -138,11 +146,18 @@ describe('useFolderNavigation', () => {
       });
 
       expect(mockSetQuery).toHaveBeenCalledTimes(1);
-      expect(mockSetQuery).toHaveBeenCalledWith({ folder: '11', _q: undefined });
+      expect(mockSetQuery).toHaveBeenCalledWith({
+        folder: '11',
+        _q: undefined,
+        searchAll: undefined,
+      });
     });
 
-    it('removes both folder and _q when navigating to the root', () => {
-      mockUseQueryParams.mockReturnValue([{ query: { folder: '7', _q: 'kitten' } }, mockSetQuery]);
+    it('removes folder, _q and searchAll when navigating to the root', () => {
+      mockUseQueryParams.mockReturnValue([
+        { query: { folder: '7', _q: 'kitten', searchAll: 'true' } },
+        mockSetQuery,
+      ]);
 
       const { result } = renderHook(() => useFolderNavigation());
 
@@ -151,12 +166,12 @@ describe('useFolderNavigation', () => {
       });
 
       expect(mockSetQuery).toHaveBeenCalledTimes(1);
-      expect(mockSetQuery).toHaveBeenCalledWith({ folder: '', _q: '' }, 'remove');
+      expect(mockSetQuery).toHaveBeenCalledWith({ folder: '', _q: '', searchAll: '' }, 'remove');
     });
 
-    it('only names folder and _q so unrelated params survive the merge', () => {
+    it('only names folder, _q and searchAll so unrelated params survive the merge', () => {
       mockUseQueryParams.mockReturnValue([
-        { query: { _q: 'kitten', sort: 'name:ASC' } },
+        { query: { _q: 'kitten', searchAll: 'true', sort: 'name:ASC' } },
         mockSetQuery,
       ]);
 
@@ -169,7 +184,7 @@ describe('useFolderNavigation', () => {
       // setQuery merges the argument into the existing query, so anything the
       // argument doesn't name (a future `sort`, the details drawer id, …) is kept.
       const [nextParams] = mockSetQuery.mock.calls[0];
-      expect(Object.keys(nextParams).sort()).toEqual(['_q', 'folder']);
+      expect(Object.keys(nextParams).sort()).toEqual(['_q', 'folder', 'searchAll']);
     });
 
     it('leaves an active search alone when stripping a malformed folder value', async () => {

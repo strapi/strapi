@@ -107,6 +107,8 @@
   "form.attribute.item.privateField.description": "This field will not show up in the API response. New private fields are also excluded from search.",
   "form.attribute.item.requiredField": "Required field",
   "form.attribute.item.requiredField.description": "You won't be able to create an entry if this field is empty",
+  "form.attribute.item.requiredField.strictRelations": "The API only enforces Required on this field when documents.strictRelations is set to true in config/api. Set it, then restart the server. Once enabled, saving or publishing an entry with this field empty is rejected, even if it was accepted before.",
+  "form.attribute.item.requiredField.strictRelations.description": "Not enforced until documents.strictRelations is true in config/api",
   "form.attribute.item.text.regex": "RegExp pattern",
   "form.attribute.item.text.regex.description": "The text of the regular expression",
   "form.attribute.item.uniqueField": "Unique field",
@@ -318,5 +320,16 @@
   "chat.figma-upload.no-images": "No frames found in the Figma file.",
   "chat.figma-upload.import-button": "Import",
   "form.button.finish": "Finish",
-  "form.button.back": "Back"
+  "form.button.back": "Back",
+  "table.warning.deleted": "This {kind} has been deleted",
+  "table.content.create-first-content-type.import-figma": "Import from Figma",
+  "ComponentIconPicker.search.placeholder": "Search for an icon",
+  "contentType.draftAndPublish.label": "Draft & publish",
+  "contentType.draftAndPublish.description": "Allows writing a draft version of an entry, before it is published",
+  "FIXME": "FIXME",
+  "true": "true",
+  "null": "null",
+  "false": "false",
+  "form.attribute.condition.if": "IF",
+  "search.placeholder": "Search"
 }

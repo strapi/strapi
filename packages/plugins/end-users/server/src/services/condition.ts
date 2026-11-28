@@ -986,8 +986,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
      * and rejects a malformed definition, a name it already holds, and any registration once Strapi
      * has loaded: a plugin calls this from an async `register()` and awaits it.
      */
-    register(definition: ContentApiConditionDefinition): Promise<void> {
-      return conditionProvider(strapi).register(
+    async register(definition: ContentApiConditionDefinition): Promise<void> {
+      await conditionProvider(strapi).register(
         withSource(definition, 'plugin') as ContentApiConditionDefinition
       );
     },

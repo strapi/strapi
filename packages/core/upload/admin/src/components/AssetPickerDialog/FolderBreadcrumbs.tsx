@@ -2,8 +2,7 @@ import { Breadcrumbs, Crumb, CrumbSimpleMenu, MenuItem } from '@strapi/design-sy
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useGetFolderStructureQuery } from '../../services/folders';
-import { findFolderPath } from '../../utils/findFolderPath';
+import { useFolderTrail } from '../../hooks/useFolderTrail';
 import { getTranslationKey } from '../../utils/translations';
 
 // Past this many folders, the ones between the first and the parent collapse
@@ -40,9 +39,7 @@ interface FolderBreadcrumbsProps {
  */
 export const FolderBreadcrumbs = ({ currentFolderId, onSelectFolder }: FolderBreadcrumbsProps) => {
   const { formatMessage } = useIntl();
-  const { data: folderStructure = [] } = useGetFolderStructureQuery();
-
-  const path = findFolderPath(folderStructure, currentFolderId);
+  const { path, ancestors } = useFolderTrail(currentFolderId);
   const current = path?.at(-1);
 
   // The tree has not loaded yet, or no longer holds the folder (deleted
@@ -51,7 +48,6 @@ export const FolderBreadcrumbs = ({ currentFolderId, onSelectFolder }: FolderBre
     return null;
   }
 
-  const ancestors = path.slice(0, -1);
   const isCollapsed = path.length > MAX_VISIBLE_FOLDERS;
   const leading = isCollapsed ? ancestors.slice(0, 1) : ancestors;
   const hidden = isCollapsed ? ancestors.slice(1, -1) : [];
