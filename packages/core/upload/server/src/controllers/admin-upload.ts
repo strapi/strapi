@@ -467,7 +467,12 @@ export default {
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           uploadErrors.push({ name: url, message: errorMessage });
-          writeSSE('file:error', { url, index: i, message: errorMessage });
+          writeSSE('file:error', {
+            url,
+            index: i,
+            message: errorMessage,
+            ...(error instanceof errors.ApplicationError && { details: error.details }),
+          });
         }
       }
 

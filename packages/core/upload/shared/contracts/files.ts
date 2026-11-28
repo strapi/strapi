@@ -75,6 +75,9 @@ export interface File {
         thumbnail: {
           url: string;
         };
+        small?: {
+          url: string;
+        };
       }
     | null;
   hash: string;
@@ -114,6 +117,20 @@ export interface RawFile extends Blob {
   name: string;
   type: string;
 }
+
+/**
+ * `error.details` of a too-large upload, with `limit` in bytes:
+ * - `FileTooBig`: `formidable.maxFileSize` on the `strapi::body` middleware
+ * - `SizeLimitExceeded`: `upload.config.sizeLimit`, or the deprecated `setting` when that is the
+ *   one that applied
+ */
+export type UploadTooLargeDetails =
+  | { code: 'FileTooBig'; limit: number }
+  | {
+      code: 'SizeLimitExceeded';
+      limit: number;
+      setting?: 'upload.config.providerOptions.sizeLimit';
+    };
 
 export interface Pagination {
   page: number;
@@ -314,6 +331,8 @@ export declare namespace CreateFilesStreamEvents {
     name: string;
     index: number;
     message: string;
+    /** `details` of the `ApplicationError` that failed the file, if any. */
+    details?: UploadTooLargeDetails | Record<string, unknown>;
   }
 
   export interface StreamCompleteEvent {
@@ -372,6 +391,9 @@ export declare namespace BulkUpdateFiles {
 
 /**
  * GET /upload/ai-metadata-jobs/pending-count - Get count of images without metadata
+ *
+ * The counts are the bare response body, not wrapped in `{ data }`. Failures
+ * come back as a Strapi error response instead.
  */
 export declare namespace GetAIMetadataPendingCount {
   export interface Request {
@@ -379,34 +401,32 @@ export declare namespace GetAIMetadataPendingCount {
   }
 
   export interface Response {
-    data: {
-      imagesWithoutMetadataCount: number;
-      totalImages: number;
-    };
-    error?: errors.ApplicationError;
+    imagesWithoutMetadataCount: number;
+    totalImages: number;
   }
 }
 
 /**
  * POST /upload/ai-metadata-jobs - Create a backfill job over every image missing metadata
+ *
+ * The created job, or a zero count when no image misses metadata, is the bare
+ * response body, not wrapped in `{ data }`. Failures come back as a Strapi
+ * error response instead.
  */
 export declare namespace CreateAIMetadataJob {
   export interface Request {
     body: {};
   }
 
-  export interface Response {
-    data:
-      | {
-          jobId: number;
-          status: 'pending';
-        }
-      | {
-          count: 0;
-          message: string;
-        };
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | {
+        jobId: number;
+        status: 'pending';
+      }
+    | {
+        count: 0;
+        message: string;
+      };
 }
 
 /**

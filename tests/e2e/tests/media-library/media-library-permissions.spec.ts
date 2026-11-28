@@ -1,6 +1,7 @@
 import path from 'path';
 
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 
 import {
   AUTHOR_EMAIL_ADDRESS,
@@ -9,7 +10,7 @@ import {
   EDITOR_PASSWORD,
 } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { login, loginWithApi } from '../../../utils/login';
 import { describeOnCondition, navToHeader } from '../../../utils/shared';
 
 import { AssetsPage } from './page-objects/AssetsPage';
@@ -54,8 +55,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('a user whose role has the upload permission can use the upload actions', async ({

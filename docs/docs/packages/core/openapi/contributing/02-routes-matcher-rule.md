@@ -39,9 +39,7 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
   // ...
 
   const routeCollector = new RouteCollector(
-    [
-      /* ... */
-    ],
+    [/* ... */],
 
     new RouteMatcher([
       // ... other rules

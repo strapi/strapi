@@ -43,12 +43,12 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     );
   },
 
-  findContentTypesByKind(kind: { kind: Struct.ContentTypeKind | undefined }) {
-    if (!kind) {
+  findContentTypesByKind(kind: Struct.ContentTypeKind | null | undefined) {
+    if (kind === undefined || kind === null) {
       return this.findAllContentTypes();
     }
 
-    // @ts-expect-error TODO when adding types
+    // @ts-expect-error should be resolved from data-mapper types
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 

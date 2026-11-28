@@ -21,9 +21,11 @@ The utility is used for structured data manipulation. It supports various types 
 async function traverseEntity(
   visitor: [Visitor](#visitoroptions),
   options: TraverseOptions,
-  entity: Data
-): Promise<Data>;
+  entity: Entry
+): Promise<Entry>;
 ```
+
+`traverseEntity` is curried: `traverseEntity(visitor, options)` returns a function that takes the entity. Sanitizers and validators registered with `strapi.sanitizers.add` and `strapi.validators.add` use this form.
 
 ### Parameters
 
@@ -36,15 +38,28 @@ async function traverseEntity(
   - `path` _(Path, optional)_: Tracks the current traversal path.
   - `parent` _(Parent, optional)_: Information about the parent attribute.
   - `getModel` _(Function)_: A function to retrieve the schema of a model by its UID.
+  - `allowedExtraRootKeys` _(string[], optional)_: Extra keys that are allowed at the root of the entity, such as the registered input params of a route. Traversal passes it to every visitor.
 
 - **`entity`**:  
-  The data entity to be traversed.
+  The data entity to be traversed. Any plain object type is accepted, including a document whose values are `unknown`. A value typed with an `interface` (no implicit index signature) or a class instance is rejected at compile time. When present, `__type` and `__component` must be strings: `{ __type: 1 }` is rejected at compile time. At runtime, a value that is not an object is returned unchanged.
 
 ### Returns
 
-A `Promise<Data>` that resolves with the transformed entity.
+A `Promise<Entry>` that resolves with the transformed entity. Traversal works on shallow copies: it copies each object it visits before the visitor runs, so `remove` and `set` never change the input entity. A visitor still receives the caller's nested objects as `value`, so a visitor that mutates `value` in place mutates the input entity.
 
 ## Related Types
+
+### Entry
+
+```typescript
+type Entry = {
+  __type?: string;
+  __component?: string;
+  [key: string]: unknown;
+};
+```
+
+The entity that traversal reads and returns. Values are `unknown`, because traversal only reads the keys that the schema describes. A visitor narrows a value before it reads it. `__type` selects the target schema of a morph relation entry, and `__component` the schema of a dynamic zone entry.
 
 ### Visitor
 
@@ -66,29 +81,31 @@ interface VisitorOptions {
   data: Record<string, unknown>;
   schema: Model;
   key: string;
-  value: Data[keyof Data];
+  value: unknown;
   attribute?: AnyAttribute;
   path: Path;
   getModel(uid: string): Model;
   parent?: Parent;
+  allowedExtraRootKeys?: string[];
 }
 ```
 
 - **`data`**: The current entity or its sub-section being processed.
 - **`schema`**: The schema definition of the current entity.
 - **`key`**: The current attribute key.
-- **`value`**: The current attribute value.
+- **`value`**: The current attribute value. It is `unknown`: narrow it before you read it.
 - **`attribute`** _(optional)_: The schema attribute definition for the current key.
 - **`path`**: Tracks the traversal path.
 - **`getModel`**: Function to retrieve a schema definition by UID.
 - **`parent`** _(optional)_: Information about the parent attribute.
+- **`allowedExtraRootKeys`** _(optional)_: Extra keys allowed at the root of the entity, as passed in `TraverseOptions`. Visitors such as `removeUnrecognizedFields` and `throwUnrecognizedFields` read it only when `path.attribute` is `null`.
 
 ### VisitorUtils
 
 ```typescript
 interface VisitorUtils {
   remove(key: string): void;
-  set(key: string, value: Data): void;
+  set(key: string, value: unknown): void;
 }
 ```
 
@@ -103,7 +120,7 @@ Utility functions to modify the entity:
 interface Path {
   raw: string | null;
   attribute: string | null;
-  rawWithIndices: string | null;
+  rawWithIndices?: string | null;
 }
 ```
 
@@ -111,7 +128,7 @@ Tracks the traversal path:
 
 - **`raw`**: The traversal path on the entity
 - **`attribute`**: The same traversal path on the schema if the attribute exists
-- **`rawWithIndices`**: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
+- **`rawWithIndices`** _(optional)_: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
 
 ### Parent
 
@@ -134,6 +151,7 @@ interface TraverseOptions {
   path?: Path;
   parent?: Parent;
   getModel(uid: string): Model;
+  allowedExtraRootKeys?: string[];
 }
 ```
 
@@ -143,3 +161,4 @@ Configuration for the traversal:
 - **`path`** _(optional)_: Tracks the current traversal path.
 - **`parent`** _(optional)_: Information about the parent attribute.
 - **`getModel`**: Function to retrieve a schema definition by UID.
+- **`allowedExtraRootKeys`** _(optional)_: Extra keys allowed at the root of the entity, such as the registered input params of a route. Traversal passes it to every visitor and nested traversal.

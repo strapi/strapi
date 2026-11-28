@@ -37,8 +37,7 @@ return <Form method="PUT" onSubmit={handleSubmit} />;
 
 ```ts
 type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
-  | Pick<TResponse, 'data' | 'meta'>
-  | { error: BaseQueryError | SerializedError };
+  Pick<TResponse, 'data' | 'meta'> | { error: BaseQueryError | SerializedError };
 
 type UseDocumentActions = () => {
   clone: (

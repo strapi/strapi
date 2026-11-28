@@ -6,14 +6,14 @@ import { useGetAssetsQuery, useGenerateAiMetadataMutation } from '../assets';
 
 describe('future assets service - getAssets filter shape', () => {
   let lastRequestParams:
-    | { _q?: string; filters?: { $and?: Array<{ folder?: { id: unknown } }> } }
-    | undefined;
+    { _q?: string; filters?: { $and?: Array<{ folder?: { id: unknown } }> } } | undefined;
 
   beforeEach(() => {
     lastRequestParams = undefined;
     server.use(
       http.get('*/upload/files', ({ request }) => {
-        lastRequestParams = qs.parse(new URL(request.url).search.slice(1));
+        // Same depth as the server's `strapi::query` middleware.
+        lastRequestParams = qs.parse(new URL(request.url).search.slice(1), { depth: 20 });
         return HttpResponse.json({
           results: [],
           pagination: { page: 1, pageSize: 10, pageCount: 0, total: 0 },
@@ -94,6 +94,51 @@ describe('future assets service - getAssets filter shape', () => {
     expect(lastRequestParams).not.toHaveProperty('_q');
     expect(lastRequestParams).toMatchObject({
       filters: { $and: [{ folder: { id: '7' } }] },
+    });
+  });
+
+  describe('search limited to a folder', () => {
+    const SUBTREE_SCOPE = {
+      $or: [{ folderPath: '/1/4' }, { folderPath: { $startsWith: '/1/4/' } }],
+    };
+
+    it('matches the folder and every subfolder by folderPath', async () => {
+      const { result } = renderHook(() =>
+        useGetAssetsQuery({ folder: 4, search: 'kitten', searchFolderPath: '/1/4' })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams?._q).toBe('kitten');
+      expect(lastRequestParams?.filters).toEqual({ $and: [SUBTREE_SCOPE] });
+    });
+
+    it('composes the subtree scope with the list filters', async () => {
+      const { result } = renderHook(() =>
+        useGetAssetsQuery({
+          folder: 4,
+          search: 'kitten',
+          searchFolderPath: '/1/4',
+          filters: [{ mime: { $contains: 'image' } }],
+        })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams?.filters).toEqual({
+        $and: [SUBTREE_SCOPE, { mime: { $contains: 'image' } }],
+      });
+    });
+
+    it('ignores the folder path when not searching', async () => {
+      const { result } = renderHook(() =>
+        useGetAssetsQuery({ folder: 4, searchFolderPath: '/1/4' })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams).toMatchObject({ filters: { $and: [{ folder: { id: '4' } }] } });
+      expect(JSON.stringify(lastRequestParams)).not.toContain('folderPath');
     });
   });
 

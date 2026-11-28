@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type DragEvent,
@@ -36,7 +37,10 @@ const DropZoneWrapper = styled(Box)`
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  /* Flex child of the admin's scrolling column: fill the space left under the
+     top banners, not 100% of the column, or the sidebar ends off-screen. */
+  flex: 1;
+  min-height: 0;
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -63,9 +67,7 @@ export const UploadDropZoneProvider = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
 
-  const contextValue: UploadDropZoneContextValue = {
-    isDragging,
-  };
+  const contextValue = useMemo<UploadDropZoneContextValue>(() => ({ isDragging }), [isDragging]);
 
   useEffect(() => {
     const handleDragEnd = () => {
@@ -101,8 +103,9 @@ export const UploadDropZoneProvider = ({
         return;
       }
 
-      // Bidirectional guard with AssetsDndProvider — internal item drags must not
-      // activate the upload overlay. See AssetsDndProvider.tsx.
+      // Only a drag that carries files activates the upload overlay. Internal item
+      // drags (AssetsDndProvider) use pointer events and start no HTML5 drag, and
+      // UploadDropZone also hides its overlay while one is active.
       if (!e.dataTransfer.types.includes('Files')) {
         return;
       }

@@ -4,8 +4,6 @@ import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
 import { isEmpty, keyBy } from 'lodash';
-import { chain } from 'stream-chain';
-import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -19,6 +17,8 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import { loadStreamDeps } from '../../../utils/esm-deps';
+import { errorMessageFromUnknown } from '../../../utils/unknown-error';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -166,7 +166,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       try {
         metadata.set(name, await this.#readAssetMetadata(name));
       } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
+        const reason = errorMessageFromUnknown(error);
         throw new ProviderValidationError(
           `Asset metadata preflight failed for "${name}": ${reason}. The destination was not modified; re-export and try again.`,
           { error }
@@ -281,16 +281,13 @@ class LocalDirectorySourceProvider implements ISourceProvider {
   }
 
   async #pipeJsonlDirectoryToStream(outStream: PassThrough, posixSubdir: string): Promise<void> {
+    const { chain, parser } = await loadStreamDeps();
     const files = await this.#listJsonlFiles(posixSubdir);
     for (const absPath of files) {
-      const transforms = [
-        parser({
-          checkErrors: true,
-        }),
-        (line: { key: string; value: object }) => line.value,
-      ];
+      const transforms = [parser(), (line: { key: string; value: object }) => line.value];
 
-      const stream = fs.createReadStream(absPath).pipe(chain(transforms));
+      const stream = chain(transforms);
+      fs.createReadStream(absPath).pipe(stream);
 
       try {
         for await (const chunk of stream) {

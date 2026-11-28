@@ -1,25 +1,37 @@
 import type { Context } from 'koa';
 import { isEmpty } from 'lodash';
+import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
 
-export default () => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const internals = {
     isUpdating: false,
+    // Held from the first line of updateSchema until it returns. isUpdating
+    // means this request turned the watcher off, so it cannot be claimed
+    // before validation.
+    hasRequestInFlight: false,
   };
 
   return {
     async getSchema(ctx: Context) {
       const schema = await getService('schema').getSchema();
+      // Only a literal `true` enforces required relations and media; the document service rejects other non-boolean values.
+      const strictRelations = strapi.config.get('api.documents.strictRelations') === true;
 
-      ctx.send({ data: schema });
+      ctx.send({ data: { ...schema, settings: { ...schema.settings, strictRelations } } });
     },
 
     async updateSchema(ctx: Context) {
-      if (internals.isUpdating === true) {
+      if (internals.isUpdating === true || internals.hasRequestInFlight === true) {
         return ctx.conflict('Schema update is already in progress.');
       }
+
+      // Claim the in-process lock before any await. Validation and the schema
+      // write both yield, so a check that happens only after those awaits lets
+      // a second request pass the guard and apply a second update.
+      internals.hasRequestInFlight = true;
 
       try {
         const { data } = await validateUpdateSchema(ctx.request.body);
@@ -46,9 +58,16 @@ export default () => {
 
         ctx.body = {};
       } catch (error) {
+        // The server will not restart, so hand file changes back to the watcher
+        if (internals.isUpdating === true) {
+          strapi.reload.resumeWatching();
+        }
+
         internals.isUpdating = false;
         const errorMessage = error instanceof Error ? error.message : String(error);
         return ctx.send({ error: errorMessage }, 400);
+      } finally {
+        internals.hasRequestInFlight = false;
       }
     },
 

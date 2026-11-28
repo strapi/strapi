@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { gotoAdminPath } from '../../../utils/shared';
 import { login } from '../../../utils/login';
@@ -58,6 +58,10 @@ test.describe('Legacy Admin Token Migration', () => {
     // Login first
     await login({ page });
     await expect(page).toHaveTitle(TITLE_HOME);
+
+    // Leave the running app before expiring storage so its background requests
+    // cannot trigger a competing logout during the navigation under test.
+    await gotoAdminPath(page, 'init');
 
     // Clear cookies and localStorage to simulate session expiry
     await context.clearCookies();

@@ -4,6 +4,12 @@ import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
 import { styled, DefaultTheme } from 'styled-components';
 
+const DEFAULT_ROUTE: NonNullable<BoundRouteProps['route']> = {
+  handler: 'Nocontroller.error',
+  method: 'GET',
+  path: '/there-is-no-path',
+};
+
 type HttpVerb = 'POST' | 'GET' | 'PUT' | 'DELETE';
 
 type MethodColor = {
@@ -65,13 +71,7 @@ interface BoundRouteProps {
   };
 }
 
-export const BoundRoute = ({
-  route = {
-    handler: 'Nocontroller.error',
-    method: 'GET',
-    path: '/there-is-no-path',
-  },
-}: BoundRouteProps) => {
+export const BoundRoute = ({ route = DEFAULT_ROUTE }: BoundRouteProps) => {
   const { formatMessage } = useIntl();
 
   const { method, handler: title, path } = route;

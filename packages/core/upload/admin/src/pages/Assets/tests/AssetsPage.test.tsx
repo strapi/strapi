@@ -99,7 +99,16 @@ const renderPage = (search = '') =>
     { initialEntries: [`/${search}`] }
   );
 
-const findHeading = () => screen.findByRole('heading', { level: 1 });
+/**
+ * Pass the accessible name when the page can still show the "Loading..." heading:
+ * the loaded title replaces it with a new element, so the first h1 found can be the
+ * detached loading one.
+ */
+const findHeading = (name?: string | RegExp) => screen.findByRole('heading', { level: 1, name });
+
+const RESULT_COUNT_PATTERN = /^\d+ results?$/;
+
+const findResultCount = () => screen.findByText(RESULT_COUNT_PATTERN);
 
 /**
  * The context menu stays shut until `useRBAC` commits `assets.create`. That
@@ -145,21 +154,28 @@ describe('AssetsPage search', () => {
 
       await findHeading();
 
-      await waitFor(() => expect(requests.length).toBeGreaterThan(0));
-      const last = decodeURIComponent(requests[requests.length - 1]);
+      // The folder item count fetches /upload/files too (pageSize=1), and request
+      // order between the two is not part of the contract — pick the list page.
+      const findListRequest = () =>
+        requests
+          .map((request) => decodeURIComponent(request))
+          .find((request) => request.includes('pageSize=20'));
+
+      await waitFor(() => expect(findListRequest()).toBeDefined());
+      const listRequest = findListRequest()!;
       // Both facets on the wire: global search + mime clause, no folder scope.
-      expect(last).toContain('_q=kitten');
-      expect(last).toContain('[mime][$contains]=image');
-      expect(last).not.toContain('[folder]');
+      expect(listRequest).toContain('_q=kitten');
+      expect(listRequest).toContain('[mime][$contains]=image');
+      expect(listRequest).not.toContain('[folder]');
     });
 
-    it('shows the filter badge and the search results title together', async () => {
+    it('shows the filter badge and the result count together', async () => {
       captureFileRequests();
 
       renderPage('?_q=kitten&filters=type:is:picture');
 
-      expect(await findHeading()).toHaveTextContent('Search results for "kitten"');
       expect(await screen.findByTestId('filter-badge')).toHaveTextContent('Picture');
+      expect(await findResultCount()).toBeInTheDocument();
     });
   });
 
@@ -169,58 +185,39 @@ describe('AssetsPage search', () => {
     expect(await findHeading()).toHaveTextContent('Home (1 item)');
   });
 
-  it('shows the search results title and the matching folder and asset totals', async () => {
+  it('keeps the folder title and item count while searching', async () => {
     respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'other.png')]);
 
     renderPage('?_q=img');
 
-    expect(await findHeading()).toHaveTextContent('Search results for "img" (1 folder - 2 assets)');
+    expect(await findHeading()).toHaveTextContent('Home (2 items)');
+    expect(screen.getByRole('heading', { level: 1 })).not.toHaveTextContent('Search results');
   });
 
-  it('drops the assets half of the count when only folders match', async () => {
-    respondWithAssets([]);
+  it('counts matching folders and assets together next to the search field', async () => {
+    respondWithAssets([createAsset(1, 'report.png')]);
     respondWithFolders([createFolder(1, 'reports'), createFolder(2, 'report-archive')]);
 
     renderPage('?_q=report');
 
-    const heading = await findHeading();
-
-    expect(heading).toHaveTextContent('Search results for "report" (2 folders)');
-    expect(heading).not.toHaveTextContent('0 assets');
+    await waitFor(async () => expect(await findResultCount()).toHaveTextContent('3 results'));
   });
 
-  it('drops the folders half of the count when only assets match', async () => {
-    respondWithAssets([createAsset(1, 'a.png'), createAsset(2, 'b.png'), createAsset(3, 'c.png')]);
+  it('uses the singular form for a single result', async () => {
+    respondWithAssets([createAsset(1, 'report.png')]);
     respondWithFolders([]);
 
-    renderPage('?_q=png');
-
-    const heading = await findHeading();
-
-    expect(heading).toHaveTextContent('Search results for "png" (3 assets)');
-    expect(heading).not.toHaveTextContent('0 folders');
-  });
-
-  it('counts both halves when folders and assets match', async () => {
-    respondWithAssets([createAsset(1, 'report.png')]);
-    respondWithFolders([createFolder(1, 'reports'), createFolder(2, 'report-archive')]);
-
     renderPage('?_q=report');
 
-    expect(await findHeading()).toHaveTextContent(
-      'Search results for "report" (2 folders - 1 asset)'
-    );
+    await waitFor(async () => expect(await findResultCount()).toHaveTextContent('1 result'));
   });
 
-  it('uses the singular form on both halves', async () => {
-    respondWithAssets([createAsset(1, 'report.png')]);
-    respondWithFolders([createFolder(1, 'reports')]);
+  it('shows no result count when not searching', async () => {
+    renderPage();
 
-    renderPage('?_q=report');
+    await findHeading();
 
-    expect(await findHeading()).toHaveTextContent(
-      'Search results for "report" (1 folder - 1 asset)'
-    );
+    expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
   });
 
   it('leaves the folder heading count assets-only when not searching', async () => {
@@ -232,18 +229,28 @@ describe('AssetsPage search', () => {
     expect(await findHeading()).toHaveTextContent('Home (1 item)');
   });
 
-  it('decodes the query before showing it in the title', async () => {
-    renderPage('?_q=a%26b');
-
-    expect(await findHeading()).toHaveTextContent('Search results for "a&b"');
-  });
-
   // The side nav is `display: none` outside the medium breakpoint, which puts it
   // outside jsdom's accessibility tree — hence the test ids rather than roles.
   const findFolderTreeRows = () => screen.findAllByTestId(/^folder-tree-/);
 
-  it('suppresses the folder tree highlight while searching', async () => {
+  it('keeps the Home highlight while searching from the root', async () => {
     renderPage('?_q=img');
+
+    await findFolderTreeRows();
+
+    expect(screen.getByTestId('folder-tree-home')).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('keeps the folder tree highlight while the search is scoped to the current folder', async () => {
+    renderPage('?folder=1&_q=img');
+
+    const row = await screen.findByTestId('folder-tree-node-1');
+
+    await waitFor(() => expect(row).toHaveAttribute('aria-current', 'page'));
+  });
+
+  it('suppresses the folder tree highlight while searching all media', async () => {
+    renderPage('?folder=1&_q=img&searchAll=true');
 
     const rows = await findFolderTreeRows();
 
@@ -295,17 +302,15 @@ describe('AssetsPage search', () => {
 
     await user.type(screen.getByRole('searchbox', { name: 'Search for an asset' }), 'img');
 
+    // 1 matching folder + the 2 assets still on screen, never a zero.
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        'Search results for "img"'
-      );
+      expect(screen.getByText(RESULT_COUNT_PATTERN)).toHaveTextContent('3 results');
     });
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1 folder - 2 assets)');
 
     releaseSearch();
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1 folder - 1 asset)');
+      expect(screen.getByText(RESULT_COUNT_PATTERN)).toHaveTextContent('2 results');
     });
   });
 
@@ -508,11 +513,7 @@ describe('AssetsPage search', () => {
 
       await user.type(screen.getByRole('searchbox', { name: 'Search for an asset' }), 'match');
 
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-          'Search results for "match"'
-        );
-      });
+      expect(await findResultCount()).toBeInTheDocument();
 
       // The folder's assets must still be on screen — no blank, no empty state.
       expect(screen.getByText('page-one-0.png')).toBeInTheDocument();
@@ -542,9 +543,7 @@ describe('AssetsPage search', () => {
       await user.click(screen.getByRole('button', { name: 'Clear' }));
 
       await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 1 })).not.toHaveTextContent(
-          'Search results for'
-        );
+        expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
       });
 
       expect(screen.getByText('page-one-0.png')).toBeInTheDocument();
@@ -589,15 +588,15 @@ describe('AssetsPage search', () => {
       });
     });
 
-    it('restores the folder title after the search is cleared', async () => {
+    it('hides the result count after the search is cleared', async () => {
       const { user } = renderPage('?_q=nothing');
 
       await user.click(await screen.findByRole('button', { name: 'Clear search' }));
 
       await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Home');
+        expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
       });
-      expect(screen.queryByText(/Search results for/)).not.toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Home');
     });
   });
 
@@ -628,6 +627,302 @@ describe('AssetsPage search', () => {
       expect(await screen.findByRole('option', { name: 'Media Library' })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'A' })).not.toBeInTheDocument();
     });
+  });
+
+  describe('search scope', () => {
+    /** Decoded query strings of every assets and folders list request. */
+    const captureListRequests = () => {
+      const files: string[] = [];
+      const folders: string[] = [];
+
+      server.use(
+        http.get('*/upload/files', ({ request }) => {
+          files.push(decodeURIComponent(new URL(request.url).search));
+          return HttpResponse.json({
+            results: [createAsset(1, 'cat.png')],
+            pagination: { page: 1, pageSize: 20, pageCount: 1, total: 1 },
+          });
+        }),
+        http.get('*/upload/folders', ({ request }) => {
+          folders.push(decodeURIComponent(new URL(request.url).search));
+          return HttpResponse.json({ data: [] });
+        })
+      );
+
+      return { files, folders };
+    };
+
+    const searchesFor = (requests: string[]) =>
+      requests.filter((request) => request.includes('_q=cat'));
+
+    it('limits a search inside a folder to that folder and its subfolders', async () => {
+      const requests = captureListRequests();
+
+      renderPage('?folder=1&_q=cat');
+
+      await waitFor(() => expect(searchesFor(requests.files)).not.toHaveLength(0));
+      await waitFor(() => expect(searchesFor(requests.folders)).not.toHaveLength(0));
+
+      // Every search request is scoped: none goes out before the folder path is known.
+      searchesFor(requests.files).forEach((request) => {
+        expect(request).toContain('[folderPath]=/1');
+        expect(request).toContain('[folderPath][$startsWith]=/1/');
+        expect(request).not.toContain('[folder][id]');
+      });
+      searchesFor(requests.folders).forEach((request) => {
+        expect(request).toContain('[path][$startsWith]=/1/');
+        expect(request).not.toContain('[parent][id]');
+      });
+    });
+
+    it('searches the whole library when "Search all media" is on', async () => {
+      const requests = captureListRequests();
+
+      renderPage('?folder=1&_q=cat&searchAll=true');
+
+      await waitFor(() => expect(searchesFor(requests.files)).not.toHaveLength(0));
+      await waitFor(() => expect(searchesFor(requests.folders)).not.toHaveLength(0));
+
+      searchesFor(requests.files).forEach((request) => {
+        expect(request).not.toContain('folderPath');
+        expect(request).not.toContain('[folder]');
+      });
+      searchesFor(requests.folders).forEach((request) => {
+        expect(request).not.toContain('[path]');
+        expect(request).not.toContain('[parent][id]');
+      });
+    });
+
+    it('offers "Search all media", off, while searching inside a folder', async () => {
+      renderPage('?folder=1&_q=cat');
+
+      expect(await screen.findByRole('switch', { name: 'Search all media' })).not.toBeChecked();
+    });
+
+    it('does not offer "Search all media" at the root', async () => {
+      renderPage('?_q=cat');
+
+      expect(await findResultCount()).toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: 'Search all media' })).not.toBeInTheDocument();
+    });
+
+    it('does not offer "Search all media" inside a folder without a search term', async () => {
+      renderPage('?folder=1');
+
+      expect(await findHeading(/test/)).toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: 'Search all media' })).not.toBeInTheDocument();
+    });
+
+    it('shows no result count while the folder scope is still loading', async () => {
+      captureListRequests();
+      let releaseFolder: () => void = () => {};
+      const folderResponded = new Promise<void>((resolve) => {
+        releaseFolder = resolve;
+      });
+      server.use(
+        http.get('*/upload/folders/:id', async () => {
+          await folderResponded;
+          return HttpResponse.json({ data: { ...createFolder(1, 'test'), parent: null } });
+        })
+      );
+
+      renderPage('?folder=1&_q=cat');
+
+      await screen.findByRole('switch', { name: 'Search all media' });
+      expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
+      const statusesWhileLoading = screen.getAllByRole('status');
+
+      releaseFolder();
+
+      await waitFor(async () => expect(await findResultCount()).toHaveTextContent('1 result'));
+      const resultCount = screen.getByText(RESULT_COUNT_PATTERN);
+      expect(resultCount).toHaveAttribute('role', 'status');
+      expect(statusesWhileLoading).toContain(resultCount);
+    });
+
+    it('shows an error rather than loading forever when the folder request fails', async () => {
+      const requests = captureListRequests();
+      server.use(
+        http.get('*/upload/folders/:id', () =>
+          HttpResponse.json({ error: { status: 500, name: 'ApplicationError' } }, { status: 500 })
+        )
+      );
+
+      renderPage('?folder=1&_q=cat');
+
+      expect(
+        await screen.findByText('An error occurred while fetching assets.')
+      ).toBeInTheDocument();
+      expect(searchesFor(requests.files)).toHaveLength(0);
+      expect(searchesFor(requests.folders)).toHaveLength(0);
+      expect(screen.queryByText(RESULT_COUNT_PATTERN)).not.toBeInTheDocument();
+    });
+
+    it('widens the search and records it in the URL when the switch is turned on', async () => {
+      const requests = captureListRequests();
+
+      const { user } = renderPage('?folder=1&_q=cat');
+
+      await user.click(await screen.findByRole('switch', { name: 'Search all media' }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('location-search')).toHaveTextContent('searchAll=true');
+      });
+      expect(screen.getByRole('switch', { name: 'Search all media' })).toBeChecked();
+      await waitFor(() => {
+        expect(searchesFor(requests.files).some((request) => !request.includes('folderPath'))).toBe(
+          true
+        );
+      });
+    });
+  });
+});
+
+describe('AssetsPage mobile folder breadcrumb', () => {
+  const FOLDER_NAMES: Record<number, string> = { 1: 'Photos', 2: 'Events', 3: 'Paris' };
+
+  const findBreadcrumb = () => screen.findByRole('navigation', { name: 'Folder navigation' });
+  const queryBreadcrumb = () => screen.queryByRole('navigation', { name: 'Folder navigation' });
+
+  beforeEach(() => {
+    respondWithAssets([]);
+    respondWithFolders([]);
+    server.use(
+      http.get('*/upload/folder-structure', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              name: 'Photos',
+              children: [
+                { id: 2, name: 'Events', children: [{ id: 3, name: 'Paris', children: [] }] },
+              ],
+            },
+          ],
+        })
+      ),
+      http.get('*/upload/folders/:id', ({ params }) => {
+        const id = Number(params.id);
+
+        return HttpResponse.json({
+          data: { ...createFolder(id, FOLDER_NAMES[id]), files: { count: 2 } },
+        });
+      })
+    );
+  });
+
+  it('keeps the plain title at the root', async () => {
+    renderPage();
+
+    expect(await findHeading()).toHaveTextContent('Home (0 items)');
+    expect(queryBreadcrumb()).not.toBeInTheDocument();
+  });
+
+  it('goes back to the root from a first-level folder', async () => {
+    const { user } = renderPage('?folder=1');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading('Photos')).toBeInTheDocument();
+    expect(screen.getByText('2 items')).toBeInTheDocument();
+    expect(
+      within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
+    ).not.toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
+  it('lists the ancestors between Home and a deeper folder, shallowest first', async () => {
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading('Paris')).toBeInTheDocument();
+    expect(screen.getByText('2 items')).toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Show more folders' }));
+
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((item) => item.textContent)).toEqual(['Photos', 'Events']);
+
+    await user.click(screen.getByRole('menuitem', { name: 'Events' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).toHaveTextContent('?folder=2');
+    });
+  });
+
+  it('goes back to the root from a deeper folder', async () => {
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
+  it.each([
+    [
+      'cannot be loaded',
+      () => HttpResponse.json({ error: { status: 500, message: 'boom' } }, { status: 500 }),
+    ],
+    ['does not hold the folder', () => HttpResponse.json({ data: [] })],
+  ])('still offers Home when the folder tree %s', async (_, resolver) => {
+    server.use(http.get('*/upload/folder-structure', resolver));
+    const { user } = renderPage('?folder=3');
+
+    const breadcrumb = await findBreadcrumb();
+    expect(await findHeading('Paris')).toBeInTheDocument();
+    expect(
+      within(breadcrumb).queryByRole('button', { name: 'Show more folders' })
+    ).not.toBeInTheDocument();
+
+    await user.click(within(breadcrumb).getByRole('button', { name: 'Home' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location-search')).not.toHaveTextContent('folder');
+    });
+  });
+
+  it('keeps the plain folder title while searching inside a folder', async () => {
+    renderPage('?folder=3&_q=x');
+
+    // The sidebar row proves the folder structure has loaded.
+    await screen.findByText('Paris');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Paris (2 items)' })
+    ).toBeInTheDocument();
+    expect(queryBreadcrumb()).not.toBeInTheDocument();
+  });
+
+  it('keeps the plain title on desktop, where the sidebar is visible', async () => {
+    const { matchMedia } = window;
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }));
+
+    try {
+      renderPage('?folder=3');
+
+      await screen.findByText('Paris');
+
+      expect(await findHeading()).toHaveTextContent('Paris (2 items)');
+      expect(queryBreadcrumb()).not.toBeInTheDocument();
+    } finally {
+      window.matchMedia = matchMedia;
+    }
   });
 });
 

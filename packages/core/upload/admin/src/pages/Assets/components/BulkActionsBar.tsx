@@ -32,6 +32,9 @@ import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 import type { File } from '../../../../../shared/contracts/files';
 
+const EMPTY_ASSETS: NonNullable<BulkActionsBarProps['assets']> = [];
+const EMPTY_RENDERED_KEYS: NonNullable<BulkActionsBarProps['renderedKeys']> = [];
+
 /**
  * Bulk action bar for the future Media Library. Mobile: docked full-bleed to the
  * bottom edge (no radius, top border only). Desktop (medium+): a floating,
@@ -160,9 +163,9 @@ interface BulkActionsBarProps {
 }
 
 export const BulkActionsBar = ({
-  assets = [],
+  assets = EMPTY_ASSETS,
   locations = emptyItemLocations,
-  renderedKeys = [],
+  renderedKeys = EMPTY_RENDERED_KEYS,
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -363,8 +366,8 @@ export const BulkActionsBar = ({
   //
   // With the drawer open the bar is hidden on mobile only, in CSS: there the two
   // are stacked at `bottom: 0` and the bar (popover, 500) would cover the
-  // drawer's footer actions, since the drawer sits below the overlay token at
-  // 200. From `medium` up the drawer is a side panel and the bar is a centered
+  // drawer's footer actions, since the drawer sits on the overlay token (300).
+  // From `medium` up the drawer is a side panel and the bar is a centered
   // pill, so they no longer collide.
   if (count === 0 || !canUpdate) {
     return null;

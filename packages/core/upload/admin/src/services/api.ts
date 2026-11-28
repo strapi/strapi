@@ -1,5 +1,5 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import {
   openUploadProgress,
@@ -13,9 +13,11 @@ import {
   setFileMetadataResult,
   setUploadFailed,
   retryCancelledFiles,
+  retryFile,
 } from '../store/uploadProgress';
 import { createRafBatcher } from '../utils/createRafBatcher';
 import { getFilenameFromUrl } from '../utils/files';
+import { getUploadTooLargeError } from '../utils/getUploadTooLargeError';
 
 import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from './uploadFileViaXHR';
 
@@ -36,8 +38,15 @@ interface UploadFilesArgs {
    * settings value. Defaults to 1 (sequential).
    */
   concurrency?: number;
-  /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
+  /** Whether AI metadata generation is enabled (a provider is registered, `aiMetadataAvailable`, and `settings.aiMetadata` is on). */
   generateAiMetadata: boolean;
+  /**
+   * Called for each file of this call as it finishes uploading, including files
+   * a later retry uploads after the call itself has resolved.
+   */
+  onFileUploaded?: (file: UploadedFile) => void;
+  /** Tags the batch's rows in the progress store, see `FileProgress.owner`. */
+  owner?: string;
 }
 
 interface UploadFromUrlsArgs {
@@ -70,7 +79,40 @@ interface RootState {
 interface UploadEntry {
   file: File;
   fileInfo: UploadFileInfo;
+  onUploaded?: (file: UploadedFile) => void;
+  /** Read once per drop, so a space switch cannot split the drop. An error fails the file */
+  requestHeaders?: Headers | Error;
 }
+
+const readRequestHeaders = (): Headers | Error => {
+  try {
+    return unstable_getRequestHeaders();
+  } catch (error) {
+    // `unstable_getRequestHeaders` only throws `RequestHeadersError`
+    return error as Error;
+  }
+};
+
+// No file of a failed read was sent, so a retry reads the providers again. Each drop has
+// its own error, so the new value goes to every entry of the retried drops
+const rereadFailedRequestHeaders = (
+  entries: UploadEntry[],
+  retried: Array<UploadEntry | undefined>
+) => {
+  const failed = new Set<UploadEntry['requestHeaders']>(
+    retried.map((entry) => entry?.requestHeaders).filter((headers) => headers instanceof Error)
+  );
+  if (failed.size === 0) {
+    return;
+  }
+
+  const requestHeaders = readRequestHeaders();
+  entries.forEach((entry) => {
+    if (failed.has(entry.requestHeaders)) {
+      entry.requestHeaders = requestHeaders;
+    }
+  });
+};
 
 /**
  * Everything a batch needs to be replayed on retry: the original entries plus the
@@ -121,8 +163,20 @@ const unregisterAbortController = (uploadId: number) => {
 };
 
 /**
+ * One controller per file in flight, keyed by `uploadId:index`, so a single row
+ * can be cancelled without stopping the rest of its batch. Files still queued
+ * have no request to abort yet; they are remembered in `skippedFiles` instead
+ * and dropped when a worker reaches them.
+ */
+const fileAbortControllers = new Map<string, AbortController>();
+const skippedFiles = new Set<string>();
+
+const getFileKey = (uploadId: number, index: number) => `${uploadId}:${index}`;
+
+/**
  * Aborts an upload by its uploadId.
- * Called from the UploadProgressDialog when the user clicks cancel or close.
+ * Called from the UploadProgressDialog when the user clicks Cancel all. Closing
+ * the dialog does not abort.
  */
 export const abortUpload = (uploadId: number) => {
   const controller = abortControllers.get(uploadId);
@@ -130,7 +184,39 @@ export const abortUpload = (uploadId: number) => {
     controller.abort();
     unregisterAbortController(uploadId);
   }
+
+  // A cancelled batch stops its workers before they reach the queued files, so
+  // their skip markers would otherwise outlive it and make a retry skip them.
+  for (const key of skippedFiles) {
+    if (key.startsWith(`${uploadId}:`)) {
+      skippedFiles.delete(key);
+    }
+  }
 };
+
+/**
+ * Aborts one file of a batch. Pair it with `cancelFile` to mark the row, the
+ * same way `abortUpload` pairs with `cancelUpload`.
+ */
+export const abortUploadFile = (uploadId: number, index: number) => {
+  const key = getFileKey(uploadId, index);
+  const controller = fileAbortControllers.get(key);
+
+  if (controller) {
+    controller.abort();
+    fileAbortControllers.delete(key);
+    return;
+  }
+
+  skippedFiles.add(key);
+};
+
+/**
+ * The file the user picked for a row, kept so it can be previewed while it
+ * uploads and replayed on retry.
+ */
+export const getUploadSourceFile = (uploadId: number, index: number): File | undefined =>
+  getUploadEntries(uploadId)?.entries[index]?.file;
 
 /**
  * Runs are chained per batch rather than started in parallel: a second pool
@@ -171,8 +257,12 @@ type AppDispatch = Dispatch &
   (<T>(thunk: T) => T extends (...args: never[]) => infer R ? R : never);
 
 type UploadPoolResult =
-  | { data: UploadedFile[]; error?: undefined }
-  | { error: UploadError; data?: undefined };
+  /**
+   * `own` is set only by a merged leg: `data` is the whole batch so far, for the
+   * next leg to chain from, while `own` is what this call uploaded.
+   */
+  | { data: UploadedFile[]; own?: UploadedFile[]; error?: undefined }
+  | { error: UploadError; data?: undefined; own?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
 const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {
@@ -202,8 +292,8 @@ const withTargetFolder = (
  *    succeeded), which is why the promise is fully swallowed here.
  *
  * Every uploaded file is sent, including non-images: the server already classifies
- * them (`ai-metadata.generateForFiles` returns `skipped` for anything whose mime
- * isn't `image/*`) and duplicating that rule here would let the two drift apart.
+ * them (`ai-metadata.generateForFiles` returns `skipped` for anything that is not
+ * an image format the provider supports) and duplicating that rule here would let the two drift apart.
  * The upshot is that a non-image now reports "Metadata generation skipped" rather
  * than silently showing no metadata state at all.
  */
@@ -291,9 +381,21 @@ const runUploadPool = async ({
       return;
     }
 
+    const fileKey = getFileKey(uploadId, index);
+
+    if (skippedFiles.delete(fileKey)) {
+      return;
+    }
+
     const fileName = entry.fileInfo?.name ?? entry.file.name;
 
     dispatch(setFileUploading({ name: fileName, index, size: entry.file.size, uploadId }));
+
+    // Aborted by either a per-file cancel or the batch's own Cancel all.
+    const fileAbortController = new AbortController();
+    const abortFile = () => fileAbortController.abort();
+    abortController.signal.addEventListener('abort', abortFile);
+    fileAbortControllers.set(fileKey, fileAbortController);
 
     const formData = new FormData();
     formData.append('files', entry.file);
@@ -305,8 +407,17 @@ const runUploadPool = async ({
     });
 
     try {
-      const file = await uploadFileViaXHR(url, token, formData, abortController.signal, (bytes) =>
-        batcher.schedule(bytes)
+      if (entry.requestHeaders instanceof Error) {
+        throw entry.requestHeaders;
+      }
+
+      const file = await uploadFileViaXHR(
+        url,
+        token,
+        formData,
+        fileAbortController.signal,
+        (bytes) => batcher.schedule(bytes),
+        entry.requestHeaders
       );
       batcher.cancel();
       uploaded.push(file);
@@ -318,6 +429,7 @@ const runUploadPool = async ({
           completedAt: Date.now(),
         })
       );
+      entry.onUploaded?.(file);
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
       maybeGenerateMetadata({
@@ -331,13 +443,24 @@ const runUploadPool = async ({
       batcher.cancel();
 
       if (err instanceof UploadAbortedError) {
-        // Batch was cancelled — the worker loop checks the signal and stops.
-        // cancelUpload (dispatched from the dialog) marks the remaining rows.
+        // Batch or file was cancelled. Whoever cancelled marks the rows
+        // (`cancelUpload` / `cancelFile`); a batch abort also stops the workers.
         return;
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
-      dispatch(setFileError({ index, name: fileName, message, uploadId }));
+      dispatch(
+        setFileError({
+          index,
+          name: fileName,
+          message,
+          uploadId,
+          tooLarge: getUploadTooLargeError(err),
+        })
+      );
+    } finally {
+      abortController.signal.removeEventListener('abort', abortFile);
+      fileAbortControllers.delete(fileKey);
     }
   };
 
@@ -358,7 +481,6 @@ const runUploadPool = async ({
         break;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       await uploadOne(index);
     }
   };
@@ -404,7 +526,7 @@ const runMergedUploadPool = async ({
       const earlier = previous?.data ?? [];
 
       if (abortController.signal.aborted) {
-        return { data: earlier };
+        return { data: earlier, own: [] };
       }
 
       registerAbortController(uploadId, abortController);
@@ -418,13 +540,22 @@ const runMergedUploadPool = async ({
         dispatch,
         concurrency,
         generateAiMetadata,
-      }).then((result) => (result.error ? result : { data: [...earlier, ...(result.data ?? [])] }));
+      }).then((result) =>
+        result.error
+          ? result
+          : { data: [...earlier, ...(result.data ?? [])], own: result.data ?? [] }
+      );
     }
   );
 
   trackPoolRun(uploadId, run);
 
-  return run;
+  // The chained value keeps every file in the batch, because the next merged leg
+  // reads it as its own `earlier`. The caller gets only what it handed in: a
+  // consumer that attached the result would otherwise re-attach the files the
+  // earlier drop already added. (The Content Manager field attaches each file
+  // through `onFileUploaded` instead.)
+  return run.then((result) => (result.error ? result : { data: result.own ?? result.data }));
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -479,11 +610,10 @@ const fetchUrlUploadStream = async ({
   signal: AbortSignal;
 }): Promise<Response> => {
   const backendURL = window.strapi.backendURL;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers = unstable_getRequestHeaders();
+  headers.set('Content-Type', 'application/json');
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   return fetch(`${backendURL}/upload/actions/upload-from-urls`, {
@@ -529,7 +659,6 @@ const processSSEStream = async ({
     const lastDoubleNewline = buffer.lastIndexOf('\n\n');
     if (lastDoubleNewline === -1) {
       // No complete events yet, keep buffering
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -596,7 +725,15 @@ const processSSEStream = async ({
         }
         case 'file:error': {
           const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-          dispatch(setFileError({ index, name: payload.name, message: payload.message, uploadId }));
+          dispatch(
+            setFileError({
+              index,
+              name: payload.name,
+              message: payload.message,
+              uploadId,
+              tooLarge: getUploadTooLargeError({ details: payload.details }),
+            })
+          );
           break;
         }
         case 'stream:complete': {
@@ -629,7 +766,7 @@ const uploadApi = adminApi
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
         queryFn: async (
-          { formData, totalFiles, concurrency = 1, generateAiMetadata },
+          { formData, totalFiles, concurrency = 1, generateAiMetadata, onFileUploaded, owner },
           { dispatch, getState }
         ) => {
           const token = (getState() as RootState).admin_app?.token;
@@ -639,6 +776,7 @@ const uploadApi = adminApi
           const fileInfoJson = formData.get('fileInfo') as string;
           const fileInfoArray = JSON.parse(fileInfoJson) as UploadFileInfo[];
 
+          const requestHeaders = readRequestHeaders();
           const entries: UploadEntry[] = files.map((file, index) => ({
             file,
             fileInfo: fileInfoArray[index] ?? {
@@ -647,6 +785,8 @@ const uploadApi = adminApi
               alternativeText: null,
               folder: null,
             },
+            onUploaded: onFileUploaded,
+            requestHeaders,
           }));
 
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
@@ -664,7 +804,7 @@ const uploadApi = adminApi
             const offset = batch.entries.length;
 
             // No `totalFiles`: the reducer derives it from the rows it appends.
-            dispatch(appendUploadFiles({ uploadId, fileNames, fileSizes }));
+            dispatch(appendUploadFiles({ uploadId, fileNames, fileSizes, owner }));
 
             const mergedEntries = [...batch.entries, ...entries];
 
@@ -689,7 +829,7 @@ const uploadApi = adminApi
           }
 
           // Open the progress dialog
-          dispatch(openUploadProgress({ totalFiles, fileNames, fileSizes }));
+          dispatch(openUploadProgress({ totalFiles, fileNames, fileSizes, owner }));
 
           // Get the uploadId from state after dispatching
           const uploadId = (getState() as RootState).uploadProgress.uploadId;
@@ -792,6 +932,10 @@ const uploadApi = adminApi
 
           // Reset cancelled files back to pending
           dispatch(retryCancelledFiles());
+          rereadFailedRequestHeaders(
+            batch.entries,
+            cancelledIndices.map((index) => batch.entries[index])
+          );
 
           // Fresh AbortController for the retry run
           const abortController = new AbortController();
@@ -818,6 +962,39 @@ const uploadApi = adminApi
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
         // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
+      }),
+
+      /**
+       * Retry one cancelled or failed file of the current batch. Queued behind
+       * whatever the batch still has in flight, so `concurrency` keeps holding.
+       */
+      retryUploadFile: builder.mutation<UploadedFile[], { uploadId: number; index: number }>({
+        queryFn: async ({ uploadId, index }, { dispatch, getState }) => {
+          const { uploadProgress, admin_app } = getState() as RootState;
+          const batch = getUploadEntries(uploadId);
+
+          if (uploadId !== uploadProgress.uploadId || !batch || !batch.entries[index]) {
+            return { error: { name: 'UnknownError', message: 'Original file not found' } };
+          }
+
+          skippedFiles.delete(getFileKey(uploadId, index));
+          dispatch(retryFile({ uploadId, index }));
+          rereadFailedRequestHeaders(batch.entries, [batch.entries[index]]);
+
+          return runMergedUploadPool({
+            entries: batch.entries,
+            indices: [index],
+            token: admin_app?.token,
+            uploadId,
+            dispatch,
+            concurrency: batch.concurrency,
+            generateAiMetadata: batch.generateAiMetadata,
+          });
+        },
         invalidatesTags: [
           { type: 'Asset', id: 'LIST' },
           { type: 'Folder', id: 'LIST' },
@@ -961,6 +1138,7 @@ export const {
   useUploadFilesMutation,
   useUploadFileSilentlyMutation,
   useRetryCancelledFilesMutation,
+  useRetryUploadFileMutation,
   useUploadFromUrlsMutation,
   useGenerateAiMetadataMutation,
 } = uploadApi;

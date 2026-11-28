@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { UnsavedChangesModal, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Field,
@@ -50,8 +50,9 @@ interface BulkMoveDialogProps {
  * folder-structure, so both panes refresh on success. On failure the modal stays
  * open so the user can retry or cancel.
  *
- * Used both by the bulk actions bar (the whole selection) and by a folder's
- * actions menu (that one folder).
+ * Used by the bulk actions bar and the selection menu (the whole selection), and
+ * by the actions menu of one asset or folder (that one item). It checks no
+ * permission: its callers do.
  */
 export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDialogProps) => {
   const { formatMessage } = useIntl();
@@ -246,8 +247,10 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
   };
 
   return (
-    <Modal.Root
+    <UnsavedChangesModal
       open={open}
+      // Picking a destination is the only input; the default one is not a change.
+      hasUnsavedChanges={destination !== defaultDestination && !isMoving}
       onOpenChange={(nextOpen: boolean) => {
         // The modal must stay open while the request runs — the loader on the
         // Move button is the source of truth for the pending state.
@@ -268,9 +271,11 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
         <Modal.Body>{renderBody()}</Modal.Body>
         <Modal.Footer>
           <Flex gap={2} justifyContent="space-between" width="100%">
-            <Button variant="tertiary" onClick={onClose} disabled={isMoving} type="button">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
+            <Modal.Close>
+              <Button variant="tertiary" disabled={isMoving} type="button">
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+            </Modal.Close>
             <Button
               onClick={handleMove}
               loading={isMoving}
@@ -284,6 +289,6 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
           </Flex>
         </Modal.Footer>
       </StyledModalContent>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

@@ -75,6 +75,12 @@ export interface Strapi extends Container {
     }: {
       strapi: Core.Strapi;
     }) => Promise<{ trialEndsAt: string } | null>;
+    /** Active admin users across all instances, or `null` when missing or older than 48 hours. */
+    getAdminUsersAcrossInstances: ({ strapi }: { strapi: Core.Strapi }) => Promise<{
+      activeUsers: number;
+      contractedUsers: number | null;
+      updatedAt: string;
+    } | null>;
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
@@ -90,8 +96,7 @@ export interface Strapi extends Container {
           // snapshot); returns the limit the feature enforces.
           get: (
             feature?:
-              | string
-              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+              string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
           ) => unknown;
         }>;
       }) => void;
@@ -186,12 +191,20 @@ export interface Strapi extends Container {
     : TSchemaUID extends UID.Component
       ? Schema.Component<TSchemaUID>
       : never;
+  /**
+   * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
+   */
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 
 export interface Reloader {
   isReloading: boolean;
   isWatching: boolean;
+  /**
+   * Turns file watching back on without skipping the next reload.
+   * Setting `isWatching` from `false` to `true` skips the next `reload()` call instead.
+   */
+  resumeWatching(): void;
   (): void;
 }
 

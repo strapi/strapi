@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { createContext, useContext, ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { GUIDED_TOUR_REQUIRED_ACTIONS, useGuidedTour } from '@strapi/admin/strapi-admin';
 
@@ -98,7 +98,6 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
           }
         }
 
-        // eslint-disable-next-line no-await-in-loop
         const applied = await applyChange({
           action: TYPE_TO_ACTION[change.type]!,
           schema: newSchema,
@@ -120,11 +119,9 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
-  return (
-    <SchemaContext.Provider value={{ lastRevisedId, setLastRevisedId }}>
-      {children}
-    </SchemaContext.Provider>
-  );
+  const contextValue = useMemo(() => ({ lastRevisedId, setLastRevisedId }), [lastRevisedId]);
+
+  return <SchemaContext.Provider value={contextValue}>{children}</SchemaContext.Provider>;
 };
 
 export const useChatSchema = () => {

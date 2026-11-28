@@ -13,6 +13,8 @@ import {
   closeUploadProgress,
   setUploadFailed,
   retryCancelledFiles,
+  cancelFile,
+  retryFile,
   selectAggregateProgress,
   selectReportsByteProgress,
   selectCountBasedProgress,
@@ -244,6 +246,87 @@ describe('uploadProgress slice', () => {
       // The completed row keeps its outcome; only the retried row is reset.
       expect(next.files[0].metadataStatus).toBe('generated');
       expect(next.files[1].metadataStatus).toBeUndefined();
+    });
+  });
+
+  describe('cancelFile', () => {
+    it('cancels the one row, leaving the rest of the batch alone', () => {
+      const state = makeState([
+        makeFile(0, 'uploading', 100, 20),
+        makeFile(1, 'uploading', 100, 40),
+        makeFile(2, 'pending', 100),
+      ]);
+
+      const next = uploadProgressReducer(state, cancelFile({ uploadId: 1, index: 1 }));
+
+      expect(next.files.map((f) => f.status)).toEqual(['uploading', 'cancelled', 'pending']);
+    });
+
+    it('leaves a settled row as it is', () => {
+      const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+      const next = uploadProgressReducer(state, cancelFile({ uploadId: 1, index: 0 }));
+
+      expect(next.files[0].status).toBe('complete');
+    });
+
+    it('ignores a row from another batch', () => {
+      const state = makeState([makeFile(0, 'uploading', 100, 20)]);
+
+      const next = uploadProgressReducer(state, cancelFile({ uploadId: 2, index: 0 }));
+
+      expect(next.files[0].status).toBe('uploading');
+    });
+  });
+
+  describe('retryFile', () => {
+    it('puts a failed row back in the queue, from scratch', () => {
+      const state = makeState([
+        { ...makeFile(0, 'error', 100, 60), error: 'Server error', metadataStatus: 'failed' },
+        makeFile(1, 'error', 100),
+      ]);
+
+      const next = uploadProgressReducer(state, retryFile({ uploadId: 1, index: 0 }));
+
+      expect(next.files[0]).toMatchObject({ status: 'pending', uploadedBytes: 0 });
+      expect(next.files[0].error).toBeUndefined();
+      expect(next.files[0].metadataStatus).toBeUndefined();
+      expect(next.files[1].status).toBe('error');
+    });
+
+    it('puts a cancelled row back in the queue', () => {
+      const state = makeState([makeFile(0, 'cancelled', 100, 30)]);
+
+      const next = uploadProgressReducer(state, retryFile({ uploadId: 1, index: 0 }));
+
+      expect(next.files[0].status).toBe('pending');
+    });
+
+    it('leaves a completed row as it is', () => {
+      const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+      const next = uploadProgressReducer(state, retryFile({ uploadId: 1, index: 0 }));
+
+      expect(next.files[0].status).toBe('complete');
+    });
+  });
+
+  describe('owner', () => {
+    it('tags the rows of a batch and of a drop appended to it', () => {
+      const opened = uploadProgressReducer(
+        makeState([]),
+        openUploadProgress({ totalFiles: 1, fileNames: ['a.png'], owner: 'field-a' })
+      );
+      const appended = uploadProgressReducer(
+        opened,
+        appendUploadFiles({
+          uploadId: opened.uploadId,
+          fileNames: ['b.png'],
+          owner: 'field-b',
+        })
+      );
+
+      expect(appended.files.map((f) => f.owner)).toEqual(['field-a', 'field-b']);
     });
   });
 

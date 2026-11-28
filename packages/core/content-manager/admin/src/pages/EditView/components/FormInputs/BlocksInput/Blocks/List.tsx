@@ -74,21 +74,24 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
 };
 
 const replaceListWithEmptyBlock = (editor: Editor, currentListPath: Path) => {
-  // Delete the empty list
-  Transforms.removeNodes(editor, { at: currentListPath });
+  // Normalize once the paragraph is in, or removing the only block adds a second paragraph
+  Editor.withoutNormalizing(editor, () => {
+    // Delete the empty list
+    Transforms.removeNodes(editor, { at: currentListPath });
 
-  if (currentListPath[0] === 0) {
-    // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
-    Transforms.insertNodes(
-      editor,
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
-      { at: currentListPath }
-    );
-    Transforms.select(editor, currentListPath);
-  }
+    if (currentListPath[0] === 0) {
+      // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
+      Transforms.insertNodes(
+        editor,
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        },
+        { at: currentListPath }
+      );
+      Transforms.select(editor, currentListPath);
+    }
+  });
 };
 
 const isText = (node: unknown): node is Text => {
@@ -103,14 +106,11 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
 
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty =
-    currentList.children.length === 1 &&
-    isText(currentListItem.children[0]) &&
-    currentListItem.children[0].text === '';
   const isListItemEmpty =
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isListEmpty = currentList.children.length === 1 && isListItemEmpty;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-2) === 0;
 
@@ -184,14 +184,11 @@ const handleEnterKeyOnList = (editor: Editor) => {
 
   const [currentListItem, currentListItemPath] = currentListItemEntry;
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty =
-    currentList.children.length === 1 &&
-    isText(currentListItem.children[0]) &&
-    currentListItem.children[0].text === '';
   const isListItemEmpty =
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isListEmpty = currentList.children.length === 1 && isListItemEmpty;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 

@@ -133,3 +133,54 @@ describe('findAvailable source-row status filter', () => {
     );
   });
 });
+
+describe('findAvailable search and omitted ids', () => {
+  beforeEach(() => {
+    setupStrapi(createQueryBuilder());
+  });
+
+  const getFindPageParams = () => {
+    const { findPage } = (global.strapi.db.query as jest.Mock).mock.results[0].value;
+    return findPage.mock.calls[0][0];
+  };
+
+  test('searches the main field with the given where operator', async () => {
+    await relations.findAvailable(createCtx({ _q: 'foo', _filter: '$eq' }));
+
+    expect(getFindPageParams().filters.$and).toContainEqual({ name: { $eq: 'foo' } });
+  });
+
+  test('searches the main field with $containsi when the operator is not a string', async () => {
+    await relations.findAvailable(createCtx({ _q: 'foo', _filter: ['$eq'] }));
+
+    expect(getFindPageParams().filters.$and).toContainEqual({ name: { $containsi: 'foo' } });
+  });
+
+  test('searches the main field with $containsi when the operator is unknown', async () => {
+    await relations.findAvailable(createCtx({ _q: 'foo', _filter: '$unknown' }));
+
+    expect(getFindPageParams().filters.$and).toContainEqual({ name: { $containsi: 'foo' } });
+  });
+
+  test('does not filter out ids when idsToOmit is absent', async () => {
+    await relations.findAvailable(createCtx({}));
+
+    expect(getFindPageParams().filters.$and).not.toContainEqual(
+      expect.objectContaining({ id: expect.anything() })
+    );
+  });
+
+  test('does not filter out ids when idsToOmit is empty', async () => {
+    await relations.findAvailable(createCtx({ idsToOmit: [] }));
+
+    expect(getFindPageParams().filters.$and).not.toContainEqual(
+      expect.objectContaining({ id: expect.anything() })
+    );
+  });
+
+  test('filters out the unique omitted ids', async () => {
+    await relations.findAvailable(createCtx({ idsToOmit: ['3', '3', '4'] }));
+
+    expect(getFindPageParams().filters.$and).toContainEqual({ id: { $notIn: ['3', '4'] } });
+  });
+});

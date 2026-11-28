@@ -1,4 +1,4 @@
-import { isEqual, pick } from 'lodash';
+import { isEqual, isPlainObject, mapValues, pick } from 'lodash';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
@@ -10,14 +10,21 @@ import {
   LICENSE_REGISTRY_URI,
   PLAN_FEATURE_CATALOG,
 } from './license';
-import { createEntitlementsRegistry } from './entitlements';
+import { createEntitlementsRegistry, parseNumericString } from './entitlements';
+import {
+  getAdminUsersAcrossInstances,
+  reportActiveAdminUsers,
+  watchAdminUsers,
+} from './admin-users';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
 
+type LicenseFeature = { name: string; [key: string]: any };
+
 interface LicenseInfoState {
   licenseKey?: string;
-  features?: Array<{ name: string; [key: string]: any } | string>;
+  features?: Array<LicenseFeature | string>;
   expireAt?: string;
   seats?: number;
   type?: string;
@@ -136,12 +143,17 @@ const init = (licenseDir: string, logger?: Logger) => {
   }
 };
 
+// Read when a report runs, so a license disabled after the watcher started stops the reports
+const getActiveLicenseKey = () => (ee.enabled ? ee.licenseInfo.licenseKey : undefined);
+
 /**
  * Contact the license registry to update the license to its latest state.
  *
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
+  let registryAnswered = false;
+
   const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
 
@@ -190,9 +202,12 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     const license = shouldContactRegistry
-      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(
-          fallback
-        )
+      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid'))
+          .then((fetchedLicense) => {
+            registryAnswered = true;
+            return fetchedLicense;
+          })
+          .catch(fallback)
       : storedInfo.license;
 
     if (license) {
@@ -242,6 +257,11 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     // Example of errors: SQLite does not support FOR UPDATE
     await rollback();
   }
+
+  // Not awaited: it must not delay startup
+  if (registryAnswered) {
+    reportActiveAdminUsers(strapi, getActiveLicenseKey).catch(() => {});
+  }
 };
 
 const validateInfo = () => {
@@ -273,6 +293,8 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
         options: shiftCronExpression('0 0 */12 * * *'),
       },
     });
+
+    watchAdminUsers(strapi, getActiveLicenseKey);
   } else {
     if (!ee.licenseInfo.expireAt) {
       return disable('Your license does not have offline support.');
@@ -309,12 +331,24 @@ const getTrialEndDate = async ({
   return data;
 };
 
+/**
+ * Lists a license feature as `{ name, options? }`. Numeric string options are read as numbers so
+ * readers comparing them with counts get the number the registry meant.
+ */
+const toFeature = (feature: LicenseFeature | string): LicenseFeature => {
+  if (typeof feature !== 'object') {
+    return { name: feature };
+  }
+
+  if (isPlainObject(feature.options) === false) {
+    return feature;
+  }
+
+  return { ...feature, options: mapValues(feature.options, parseNumericString) };
+};
+
 const list = () => {
-  return (
-    ee.licenseInfo.features?.map((feature) =>
-      typeof feature === 'object' ? feature : { name: feature }
-    ) || []
-  );
+  return ee.licenseInfo.features?.map(toFeature) || [];
 };
 
 const get = (featureName: string) => list().find((feature) => feature.name === featureName);
@@ -325,6 +359,7 @@ export default Object.freeze({
   init,
   checkLicense,
   getTrialEndDate,
+  getAdminUsersAcrossInstances,
 
   get isEE() {
     return ee.enabled;
@@ -397,9 +432,7 @@ export default Object.freeze({
     // so a lapsed Plan card and the debug dump carry the defaults and clamps the plan enforced
     // instead of raw options. Only features the retained license listed are reported.
     listRetained() {
-      const retainedFeatures = (ee.retainedLicense?.features ?? []).map((feature) =>
-        typeof feature === 'object' ? feature : { name: feature }
-      );
+      const retainedFeatures = (ee.retainedLicense?.features ?? []).map(toFeature);
       const getRetained = (name: string) =>
         retainedFeatures.find((feature) => feature.name === name);
 

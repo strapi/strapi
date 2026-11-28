@@ -33,16 +33,11 @@ const OpaqueBox = styled(Box)`
 `;
 
 interface FromComputerFormProps {
-  onClose: () => void;
   onAddAssets: (assets: FileWithRawFile[]) => void;
   trackedLocation?: string;
 }
 
-export const FromComputerForm = ({
-  onClose,
-  onAddAssets,
-  trackedLocation,
-}: FromComputerFormProps) => {
+export const FromComputerForm = ({ onAddAssets, trackedLocation }: FromComputerFormProps) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -146,12 +141,14 @@ export const FromComputerForm = ({
       </Box>
 
       <Modal.Footer>
-        <Button onClick={onClose} variant="tertiary">
-          {formatMessage({
-            id: 'app.components.Button.cancel',
-            defaultMessage: 'cancel',
-          })}
-        </Button>
+        <Modal.Close>
+          <Button variant="tertiary">
+            {formatMessage({
+              id: 'app.components.Button.cancel',
+              defaultMessage: 'cancel',
+            })}
+          </Button>
+        </Modal.Close>
       </Modal.Footer>
     </form>
   );

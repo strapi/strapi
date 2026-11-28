@@ -6,12 +6,16 @@ import {
   discoverEnterprisePlugins,
   listInstalledEnterprisePlugins,
 } from '../discovery';
+import { EnterpriseInstallError } from '../errors';
 import {
+  createFetchResponse,
   createPackument,
   createRegistryFetch,
   createTemporaryDirectory,
   createTestLogger,
   installFakePackage,
+  NOT_LICENSED_MESSAGE,
+  REGISTRY_URL,
 } from './test-helpers';
 
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
@@ -55,26 +59,60 @@ const aiWorkflowsPackument = createPackument(AI_WORKFLOWS, [{ version: '0.1.0' }
   latest: '0.1.0',
 });
 
+const catalogPlugin = (name: string, licensed: boolean) => ({
+  name,
+  displayName: `${name} name`,
+  description: `${name} summary`,
+  kind: 'plugin',
+  licensed,
+});
+
 const discover = async (appDir: string, fetchImplementation: typeof fetch) =>
   discoverEnterprisePlugins({
     appDir,
+    registryUrl: REGISTRY_URL,
     license: 'the-license',
     logger: createTestLogger(),
     fetchImplementation,
   });
 
+const licensedCatalog = (...names: string[]) => ({
+  plugins: names.map((name) => catalogPlugin(name, true)),
+});
+
+const requestedPaths = (fetchImplementation: jest.Mock) =>
+  fetchImplementation.mock.calls.map(([input]) => new URL(String(input)).pathname);
+
 describe('discoverEnterprisePlugins', () => {
-  it('lists the plugins the registry search returns, and skips libraries', async () => {
+  it('leaves out a catalog plugin with an invalid name, without asking for its metadata', async () => {
+    const invalidName = '@strapi-enterprise/plugin\u001B[2J';
     const fetchImplementation = createRegistryFetch({
-      searchResult: [AI_BYOK, NEW_PLUGIN, AI_WORKFLOWS],
+      packuments: { [AI_BYOK]: aiByokPackument, [invalidName]: aiByokPackument },
+      catalog: licensedCatalog(AI_BYOK, invalidName),
+    });
+
+    const { plugins } = await discover(await createTemporaryDirectory(), fetchImplementation);
+
+    expect(plugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(fetchImplementation.mock.calls.map(([input]) => String(input))).not.toContainEqual(
+      expect.stringContaining('plugin%1B')
+    );
+  });
+
+  it('lists the plugins the catalog includes in the license, and skips libraries', async () => {
+    const fetchImplementation = createRegistryFetch({
       packuments: {
         [AI_BYOK]: aiByokPackument,
         [NEW_PLUGIN]: newPluginPackument,
         [AI_WORKFLOWS]: aiWorkflowsPackument,
       },
+      catalog: licensedCatalog(AI_BYOK, NEW_PLUGIN, AI_WORKFLOWS),
     });
 
-    const discoveredPlugins = await discover(await createTemporaryDirectory(), fetchImplementation);
+    const { plugins: discoveredPlugins } = await discover(
+      await createTemporaryDirectory(),
+      fetchImplementation
+    );
 
     expect(discoveredPlugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK, NEW_PLUGIN]);
     expect(discoveredPlugins[1]?.entry).toEqual({
@@ -88,7 +126,6 @@ describe('discoverEnterprisePlugins', () => {
   it('lists a package of another kind, such as a provider', async () => {
     const provider = '@strapi-enterprise/provider-upload-s3';
     const fetchImplementation = createRegistryFetch({
-      searchResult: [provider],
       packuments: {
         [provider]: createPackument(
           provider,
@@ -96,9 +133,13 @@ describe('discoverEnterprisePlugins', () => {
           { latest: '1.0.0' }
         ),
       },
+      catalog: licensedCatalog(provider),
     });
 
-    const discoveredPlugins = await discover(await createTemporaryDirectory(), fetchImplementation);
+    const { plugins: discoveredPlugins } = await discover(
+      await createTemporaryDirectory(),
+      fetchImplementation
+    );
 
     expect(discoveredPlugins.map(({ entry }) => entry)).toMatchObject([
       { packageName: provider, displayName: 'S3 Upload', kind: 'provider' },
@@ -108,13 +149,14 @@ describe('discoverEnterprisePlugins', () => {
   it('leaves out a package the registry fails to describe, and lists the others', async () => {
     const logger = createTestLogger();
 
-    const discoveredPlugins = await discoverEnterprisePlugins({
+    const { plugins: discoveredPlugins } = await discoverEnterprisePlugins({
       appDir: await createTemporaryDirectory(),
+      registryUrl: REGISTRY_URL,
       license: 'the-license',
       logger,
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK, NEW_PLUGIN],
         packuments: { [AI_BYOK]: aiByokPackument, [NEW_PLUGIN]: 503 },
+        catalog: licensedCatalog(AI_BYOK, NEW_PLUGIN),
       }),
     });
 
@@ -135,9 +177,14 @@ describe('discoverEnterprisePlugins', () => {
       { asDependency: false }
     );
 
-    const [discoveredPlugin] = await discover(
+    const {
+      plugins: [discoveredPlugin],
+    } = await discover(
       appDir,
-      createRegistryFetch({ searchResult: [AI_BYOK], packuments: { [AI_BYOK]: aiByokPackument } })
+      createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: licensedCatalog(AI_BYOK),
+      })
     );
 
     expect(discoveredPlugin).toMatchObject({ entry: { packageName: AI_BYOK } });
@@ -149,52 +196,11 @@ describe('discoverEnterprisePlugins', () => {
       discover(
         await createTemporaryDirectory(),
         createRegistryFetch({
-          searchResult: [AI_BYOK, NEW_PLUGIN],
           packuments: { [AI_BYOK]: 503, [NEW_PLUGIN]: 503 },
+          catalog: licensedCatalog(AI_BYOK, NEW_PLUGIN),
         })
       )
     ).rejects.toThrow('answered HTTP 503');
-  });
-
-  it('lists the installed plugins when the registry search is unavailable, and says so', async () => {
-    const appDir = await createTemporaryDirectory();
-    await installFakePackage(appDir, AI_BYOK, { version: '1.0.0', strapi: { kind: 'plugin' } });
-    const logger = createTestLogger();
-
-    const discoveredPlugins = await discoverEnterprisePlugins({
-      appDir,
-      license: 'the-license',
-      logger,
-      fetchImplementation: createRegistryFetch({
-        searchResult: 500,
-        packuments: { [AI_BYOK]: aiByokPackument },
-      }),
-    });
-
-    expect(discoveredPlugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Could not search packages.strapi.io, so only the installed Enterprise plugins are listed.'
-    );
-  });
-
-  it('stops with the license error when the search rejects the license', async () => {
-    await expect(
-      discover(
-        await createTemporaryDirectory(),
-        createRegistryFetch({ searchResult: 401, packuments: {} })
-      )
-    ).rejects.toThrow('https://packages.strapi.io rejected this Strapi license.');
-  });
-
-  it('stops when the registry search is unavailable and no plugin is installed', async () => {
-    await expect(
-      discover(
-        await createTemporaryDirectory(),
-        createRegistryFetch({ searchResult: 500, packuments: {} })
-      )
-    ).rejects.toThrow(
-      'Could not search packages.strapi.io. Try again later, or name the plugin to install.'
-    );
   });
 
   it('includes an installed plugin that the license no longer includes', async () => {
@@ -204,17 +210,213 @@ describe('discoverEnterprisePlugins', () => {
       strapi: { kind: 'plugin' },
     });
     const fetchImplementation = createRegistryFetch({
-      searchResult: [AI_BYOK],
       packuments: { [AI_BYOK]: aiByokPackument, [NEW_PLUGIN]: 403 },
+      catalog: licensedCatalog(AI_BYOK),
     });
 
-    const discoveredPlugins = await discover(appDir, fetchImplementation);
+    const { plugins: discoveredPlugins } = await discover(appDir, fetchImplementation);
 
     expect(discoveredPlugins.find(({ entry }) => entry.packageName === NEW_PLUGIN)).toMatchObject({
       lookup: { status: 'not-licensed' },
       installedVersion: '2.0.0',
     });
   });
+});
+
+describe('discoverEnterprisePlugins with the plugin catalog', () => {
+  it('describes the licensed plugins, and lists the others as locked with the message', async () => {
+    const fetchImplementation = createRegistryFetch({
+      packuments: { [AI_BYOK]: aiByokPackument, [NEW_PLUGIN]: 403 },
+      catalog: {
+        plugins: [catalogPlugin(AI_BYOK, true), catalogPlugin(NEW_PLUGIN, false)],
+        notLicensedMessage: NOT_LICENSED_MESSAGE,
+      },
+    });
+
+    const { plugins, lockedPlugins, notLicensedMessage } = await discover(
+      await createTemporaryDirectory(),
+      fetchImplementation
+    );
+
+    expect(plugins.map(({ entry }) => entry)).toEqual([
+      {
+        packageName: AI_BYOK,
+        displayName: 'AI BYOK',
+        summary: 'Bring your own key.',
+        kind: 'plugin',
+      },
+    ]);
+    expect(lockedPlugins).toEqual([
+      {
+        packageName: NEW_PLUGIN,
+        displayName: `${NEW_PLUGIN} name`,
+        summary: `${NEW_PLUGIN} summary`,
+        kind: 'plugin',
+      },
+    ]);
+    expect(notLicensedMessage).toBe(NOT_LICENSED_MESSAGE);
+    expect(requestedPaths(fetchImplementation)).not.toContain(`/${NEW_PLUGIN}`);
+  });
+
+  it('keeps an installed plugin outside the license with the plugins, not locked', async () => {
+    const appDir = await createTemporaryDirectory();
+    await installFakePackage(appDir, NEW_PLUGIN, { version: '2.0.0', strapi: { kind: 'plugin' } });
+
+    const { plugins, lockedPlugins, notLicensedMessage } = await discover(
+      appDir,
+      createRegistryFetch({
+        packuments: { [NEW_PLUGIN]: 403 },
+        catalog: {
+          plugins: [catalogPlugin(NEW_PLUGIN, false)],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      })
+    );
+
+    expect(plugins).toMatchObject([
+      {
+        entry: { packageName: NEW_PLUGIN },
+        lookup: { status: 'not-licensed' },
+        listedOutsideLicense: true,
+      },
+    ]);
+    expect(lockedPlugins).toEqual([]);
+    expect(notLicensedMessage).toBe(NOT_LICENSED_MESSAGE);
+  });
+
+  it('drops the message when every plugin is in the license', async () => {
+    const result = await discover(
+      await createTemporaryDirectory(),
+      createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: {
+          plugins: [catalogPlugin(AI_BYOK, true)],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      })
+    );
+
+    expect(result).toMatchObject({
+      plugins: [{ entry: { packageName: AI_BYOK }, listedOutsideLicense: false }],
+      lockedPlugins: [],
+      notLicensedMessage: undefined,
+    });
+  });
+
+  it('leaves out a package outside the Enterprise scope, or with an invalid name', async () => {
+    const { plugins, lockedPlugins } = await discover(
+      await createTemporaryDirectory(),
+      createRegistryFetch({
+        packuments: {},
+        catalog: {
+          plugins: [
+            catalogPlugin('left-pad', true),
+            catalogPlugin('@other/plugin', false),
+            catalogPlugin('@strapi-enterprise/\u001B[2Jplugin', false),
+          ],
+        },
+      })
+    );
+
+    expect(plugins).toEqual([]);
+    expect(lockedPlugins).toEqual([]);
+  });
+
+  it('lists a plugin the catalog repeats once, as licensed when one entry says so', async () => {
+    const fetchImplementation = createRegistryFetch({
+      packuments: { [AI_BYOK]: aiByokPackument },
+      catalog: {
+        plugins: [
+          catalogPlugin(AI_BYOK, false),
+          catalogPlugin(AI_BYOK, true),
+          catalogPlugin(NEW_PLUGIN, false),
+          catalogPlugin(NEW_PLUGIN, false),
+        ],
+      },
+    });
+
+    const { plugins, lockedPlugins } = await discover(
+      await createTemporaryDirectory(),
+      fetchImplementation
+    );
+
+    expect(plugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(lockedPlugins.map(({ packageName }) => packageName)).toEqual([NEW_PLUGIN]);
+    expect(
+      fetchImplementation.mock.calls.filter(
+        ([input]) => new URL(String(input)).pathname === `/${AI_BYOK}`
+      )
+    ).toHaveLength(1);
+  });
+
+  it('stops with the license error when the catalog rejects the license', async () => {
+    const fetchImplementation = createRegistryFetch({ packuments: {}, catalog: 401 });
+
+    await expect(discover(await createTemporaryDirectory(), fetchImplementation)).rejects.toThrow(
+      'https://packages.strapi.io rejected this Strapi license.'
+    );
+    expect(requestedPaths(fetchImplementation)).toEqual(['/-/strapi/plugins']);
+  });
+
+  it('stops with the redirect error when the catalog request is redirected', async () => {
+    const fetchImplementation = jest.fn(async () => {
+      throw new TypeError('fetch failed', { cause: new Error('unexpected redirect') });
+    });
+
+    await expect(discover(await createTemporaryDirectory(), fetchImplementation)).rejects.toThrow(
+      new EnterpriseInstallError(
+        'https://packages.strapi.io redirected the request. Use the final registry URL.'
+      )
+    );
+  });
+});
+
+describe('discoverEnterprisePlugins without the plugin catalog', () => {
+  it.each([
+    ['is missing, as on an older registry', async () => createFetchResponse(404)],
+    ['answers with an error', async () => createFetchResponse(500)],
+    [
+      'times out',
+      async () => {
+        throw new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+      },
+    ],
+    [
+      'answers with invalid JSON',
+      async () =>
+        ({
+          status: 200,
+          ok: true,
+          async json() {
+            throw new SyntaxError('Unexpected token < in JSON');
+          },
+        }) as unknown as Response,
+    ],
+    ['answers with no object', async () => createFetchResponse(200, null)],
+    [
+      'answers with a plugin list that is not an array',
+      async () => createFetchResponse(200, { plugins: 'not-a-list' }),
+    ],
+  ])(
+    'stops when the catalog %s, even with a plugin installed, and asks nothing else',
+    async (_case, answerCatalog) => {
+      const appDir = await createTemporaryDirectory();
+      await installFakePackage(appDir, AI_BYOK, { version: '1.0.0', strapi: { kind: 'plugin' } });
+      const registryFetch = createRegistryFetch({ packuments: { [AI_BYOK]: aiByokPackument } });
+      const fetchImplementation = jest.fn(async (input: Parameters<typeof fetch>[0]) =>
+        new URL(String(input)).pathname === '/-/strapi/plugins'
+          ? answerCatalog()
+          : registryFetch(input)
+      );
+
+      await expect(discover(appDir, fetchImplementation)).rejects.toThrow(
+        new EnterpriseInstallError(
+          'Could not list the Enterprise plugins from packages.strapi.io. Try again later, or name the plugin to install.'
+        )
+      );
+      expect(requestedPaths(fetchImplementation)).toEqual(['/-/strapi/plugins']);
+    }
+  );
 });
 
 describe('listInstalledEnterprisePlugins', () => {
@@ -254,6 +456,32 @@ describe('describeEnterprisePlugin', () => {
       displayName: 'AI BYOK',
       summary: 'Bring your own key.',
       kind: 'plugin',
+    });
+  });
+
+  it('removes control characters, ANSI codes and format characters from the copy', () => {
+    const entry = describeEnterprisePlugin(AI_BYOK, {
+      status: 'available',
+      packument: createPackument(
+        AI_BYOK,
+        [
+          {
+            version: '1.0.0',
+            strapi: {
+              displayName: '\u001B[31mAI\u001B[0m\u202E BYOK',
+              description: 'Bring\r\nyour own\u200B key.\u0007',
+              kind: 'provider\u001B]8;;https://example.com\u0007',
+            },
+          },
+        ],
+        { latest: '1.0.0' }
+      ),
+    });
+
+    expect(entry).toMatchObject({
+      displayName: 'AI BYOK',
+      summary: 'Bring your own key.',
+      kind: 'provider',
     });
   });
 

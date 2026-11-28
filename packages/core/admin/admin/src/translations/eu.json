@@ -78,7 +78,7 @@
   "Roles.RoleRow.select-all": "Hautatu {name} ekintza masiboetarako",
   "Roles.RoleRow.user-count": "{number, plural, =0 {#  user} one {#  user} other {# users}}",
   "Roles.components.List.empty.withSearch": "Ez dago bilaketari dagokion paperik ({search})...",
-  "Settings.PageTitle": "Konfigurazioa - {name}}",
+  "Settings.PageTitle": "Konfigurazioa - {name}",
   "Settings.apiTokens.addFirstToken": "Gehitu zure lehen API Token",
   "Settings.apiTokens.addNewToken": "Gehitu API Token berri bat",
   "Settings.tokens.copy.editMessage": "Segurtasun arrazoiengatik, behin bakarrik ikus dezakezu zure tokena",

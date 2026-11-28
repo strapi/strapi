@@ -1,4 +1,4 @@
-import { property, uniqBy, concat, flow, isEmpty } from 'lodash';
+import { property, uniq, uniqBy, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -17,6 +17,11 @@ interface RelationEntity {
   publishedAt?: string | Date;
   [key: string]: unknown;
 }
+
+/**
+ * Fields every relation returned by findExisting carries, whatever the user's permissions.
+ */
+const RELATION_BASE_FIELDS = ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'];
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
@@ -73,7 +78,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     publishedAt: firstRelation.publishedAt !== null ? { $null: true } : { $notNull: true },
   };
 
-  const availableStatus = await strapi.query(targetUid).findMany({
+  const availableStatus = await strapi.db.query(targetUid).findMany({
     select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     filters,
   });
@@ -93,7 +98,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
   });
 };
 
-const getPublishedAtClause = (status: string, uid: UID.Schema) => {
+const getPublishedAtClause = (status: string | undefined, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
 
   /**
@@ -162,6 +167,15 @@ export default {
       );
     }
 
+    // Morph-to relations (morphToOne, morphToMany) have no single target model.
+    // `attribute` is still `any` here: the `in` check prepares the narrowing for the strict types
+    // branch, where `attribute` is typed and only the relations that declare a target pass it.
+    if (!('target' in attribute) || attribute.target === undefined) {
+      throw new errors.ValidationError(
+        `The relational field ${targetField} on ${model} has no target model`
+      );
+    }
+
     const sourceUid = model;
     const targetUid = attribute.target;
 
@@ -180,7 +194,7 @@ export default {
     const isComponent = sourceSchema.modelType === 'component';
     if (!isComponent) {
       if (permissionChecker.cannot.read(null, targetField)) {
-        return ctx.forbidden();
+        throw new errors.ForbiddenError();
       }
     }
 
@@ -398,11 +412,14 @@ export default {
      * searching should be allowed only on mainField for permission reasons
      */
     if (search) {
-      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      const filter =
+        typeof query._filter === 'string' && isOperatorOfType('where', query._filter)
+          ? query._filter
+          : '$containsi';
       addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
-    if (idsToOmit?.length > 0) {
+    if ((idsToOmit?.length ?? 0) > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
         id: { $notIn: [...new Set(idsToOmit)] },
@@ -423,7 +440,7 @@ export default {
     const { userAbility } = ctx.state;
     const { id } = ctx.params;
 
-    await validateFindExisting(ctx.request.query);
+    const { page, pageSize } = await validateFindExisting(ctx.request.query);
 
     const {
       entryId,
@@ -456,7 +473,7 @@ export default {
           dbQuery
             .load(...args)
             // Ensure response is an array
-            .then((res) => ({ results: res ? [res] : [] }));
+            .then((res) => ({ results: res ? [res] : [], pagination: undefined }));
 
     const filters: {
       publishedAt?: Record<string, any>;
@@ -475,6 +492,35 @@ export default {
       filters.publishedAt = { $null: true };
     }
 
+    const pageParams = { page, pageSize };
+
+    const defaultPagination = (total: number) => ({ page: 1, pageCount: 1, pageSize: 10, total });
+
+    /**
+     * The permission query only carries row-level conditions when the user's read permission on
+     * the target has conditions (e.g. "only entries I created"). Without them it only restricts
+     * the fields, so a single load returns exactly what the two-step flow below would: the
+     * relations of the page with the fields the user is allowed to read.
+     */
+    if (isEmpty(permissionQuery.filters)) {
+      const { select } = strapi.get('query-params').transform(targetUid, permissionQuery);
+      const permittedFields = Array.isArray(select) ? select : [];
+
+      const res = await loadRelations({ id: entryId }, targetField, {
+        select: uniq([...RELATION_BASE_FIELDS, ...permittedFields]),
+        ordering: 'desc',
+        ...pageParams,
+        filters,
+      });
+
+      ctx.body = {
+        pagination: res.pagination || defaultPagination(res.results.length),
+        results: await addStatusToRelations(targetUid, res.results),
+      };
+
+      return;
+    }
+
     /**
      * If user does not have access to specific relations (custom conditions),
      * only the ids of the relations are returned.
@@ -485,12 +531,24 @@ export default {
      * The response contains the union of the two queries.
      */
     const res = await loadRelations({ id: entryId }, targetField, {
-      select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'],
+      select: RELATION_BASE_FIELDS,
       ordering: 'desc',
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
+      ...pageParams,
       filters,
     });
+
+    /**
+     * A page without relations (no relation, or a page past the last one) has no main field to
+     * load: return it as is.
+     */
+    if (res.results.length === 0) {
+      ctx.body = {
+        pagination: res.pagination || defaultPagination(0),
+        results: [],
+      };
+
+      return;
+    }
 
     /**
      * Add all ids to load in permissionQuery
@@ -503,23 +561,22 @@ export default {
      * Load the relations with the main field, the sanitized permission query
      * will exclude the relations the user does not have access to.
      *
-     * Pagination is not necessary as the permissionQuery contains the ids to load.
+     * The permissionQuery already restricts the load to the ids of the page, so it reads them as
+     * one first page. Without explicit page params, loadPages would fall back to its default page
+     * size of 10 and drop the main field of the relations past the 10th.
      */
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
       ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
+      page: 1,
+      pageSize: loadedIds.length,
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
+    const relationsUnion = uniqBy([sanitizedRes.results, res.results].flat(), 'id');
 
     ctx.body = {
-      pagination: res.pagination || {
-        page: 1,
-        pageCount: 1,
-        pageSize: 10,
-        total: relationsUnion.length,
-      },
+      pagination: res.pagination || defaultPagination(relationsUnion.length),
       results: await addStatusToRelations(targetUid, relationsUnion),
     };
   },

@@ -183,15 +183,21 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Created At' })).toBeInTheDocument();
   });
 
-  it('should label the empty option of the Select field combobox with its placeholder', async () => {
-    const { user } = render();
+  it.each(['Select field', 'Select filter'])(
+    'should not offer the %s placeholder as an option',
+    async (combobox) => {
+      const { user } = render();
 
-    await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      const select = await screen.findByRole('combobox', { name: combobox });
+      await user.click(select);
 
-    expect(await screen.findByRole('option', { name: 'Select field' })).toBeInTheDocument();
-    expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
-  });
+      expect(await screen.findAllByRole('option')).not.toHaveLength(0);
+      expect(screen.queryByRole('option', { name: combobox })).not.toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
+      expect(select).toBeRequired();
+    }
+  );
 
   it("should display a list of the operators when the combobox named Select filter is pressed & the 'Status' filter is selected", async () => {
     const { user } = render();
@@ -652,6 +658,162 @@ describe('Filters', () => {
 
     await waitFor(() => {
       expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(1);
+    });
+  });
+
+  it.each(['$null', '$notNull'])(
+    'should render a %s chip on a date field without formatting its value',
+    async (operator) => {
+      renderWithSearch(`?filters[$and][0][createdAt][${operator}]=true`);
+
+      expect(await screen.findByText(`Created At ${operator}`)).toBeInTheDocument();
+    }
+  );
+
+  it('should show the value as the filter formats it, except for operators without a value', async () => {
+    const formatValue = jest.fn((value: string) => `formatted ${value}`);
+    renderRTL(
+      <Filters.Root
+        options={[{ name: 'publishAt', label: 'Publish at', type: 'datetime', formatValue }]}
+      >
+        <Filters.List />
+      </Filters.Root>,
+      {
+        initialEntries: [
+          {
+            search:
+              '?filters[$and][0][publishAt][$eq]=2026-10-23&filters[$and][1][publishAt][$null]=true',
+          },
+        ],
+      }
+    );
+
+    expect(await screen.findByText('Publish at $eq formatted 2026-10-23')).toBeInTheDocument();
+    expect(screen.getByText('Publish at $null')).toBeInTheDocument();
+    expect(formatValue).toHaveBeenCalledWith('2026-10-23');
+    expect(formatValue).not.toHaveBeenCalledWith('true');
+  });
+
+  it('should show the label of a matching option over the formatted value', async () => {
+    renderRTL(
+      <Filters.Root
+        options={[
+          {
+            name: 'mode',
+            label: 'Mode',
+            type: 'enumeration',
+            input: () => null,
+            options: [{ label: 'Automatic', value: 'auto' }],
+            formatValue: (value) => `formatted ${value}`,
+          },
+        ]}
+      >
+        <Filters.List />
+      </Filters.Root>,
+      {
+        initialEntries: [
+          { search: '?filters[$and][0][mode][$eq]=auto&filters[$and][1][mode][$eq]=manual' },
+        ],
+      }
+    );
+
+    expect(await screen.findByText('Mode $eq Automatic')).toBeInTheDocument();
+    expect(screen.getByText('Mode $eq formatted manual')).toBeInTheDocument();
+  });
+
+  it('should ignore a hand-edited `$and` that is not a list', async () => {
+    const { user } = renderWithSearch('?filters[$and]=x');
+
+    await addNameFilter(user, 'Jimbob');
+
+    expect(await screen.findByText('Name $eq Jimbob')).toBeInTheDocument();
+    expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][name][$eq]=Jimbob']);
+  });
+
+  describe('boolean filters', () => {
+    const BOOLEAN_FILTERS = [
+      { name: 'name', label: 'Name', type: 'string' },
+      { name: 'isArchived', label: 'Is Archived', type: 'boolean' },
+    ] satisfies Filters.Filter[];
+
+    const renderBoolean = (search?: string) =>
+      renderRTL(
+        <Filters.Root options={BOOLEAN_FILTERS}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>,
+        search ? { initialEntries: [{ search }] } : undefined
+      );
+
+    /**
+     * The toggle's input is visually hidden behind the track, so `user.click` can't reach it.
+     */
+    const openWithIsArchived = async (user: ReturnType<typeof renderBoolean>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+      await user.click(await screen.findByRole('option', { name: 'Is Archived' }));
+
+      return screen.findByRole('checkbox', { name: 'Is Archived' });
+    };
+
+    it('should apply a false filter without touching the toggle', async () => {
+      const { user } = renderBoolean();
+
+      await openWithIsArchived(user);
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq false');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=false']);
+    });
+
+    it('should apply a false filter after toggling true and back', async () => {
+      const { user } = renderBoolean();
+
+      const toggle = await openWithIsArchived(user);
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq false');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=false']);
+    });
+
+    it('should apply a true filter', async () => {
+      const { user } = renderBoolean();
+
+      fireEvent.click(await openWithIsArchived(user));
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq true');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
+    });
+
+    it('should not apply a filter after clearing the toggle', async () => {
+      const { user } = renderBoolean();
+
+      const toggle = await openWithIsArchived(user);
+      fireEvent.click(toggle);
+      fireEvent.click(await screen.findByRole('button', { name: 'Clear' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      // the cleared submit is a no-op, so a follow-up submit is the only filter applied
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Add filter' })).toBeEnabled());
+      fireEvent.click(toggle);
+      await waitFor(() => expect(toggle).toBeChecked());
+      fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq true');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
+    });
+
+    it('should open the edit form with the toggle matching the applied value', async () => {
+      const { user } = renderBoolean('?filters[$and][0][isArchived][$eq]=false');
+
+      await user.click(await screen.findByText('Is Archived $eq false'));
+
+      expect(await screen.findByRole('checkbox', { name: 'Is Archived' })).not.toBeChecked();
     });
   });
 });

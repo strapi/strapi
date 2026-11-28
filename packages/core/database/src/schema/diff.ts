@@ -158,17 +158,20 @@ export default (db: Database) => {
     };
   };
 
+  // Matches lodash toLower: nullish becomes '' and other values are coerced to a string.
+  const toLower = (value: unknown) => String(value ?? '').toLowerCase();
+
   const diffDefault = (oldColumn: Column, column: Column) => {
     const oldDefaultTo = oldColumn.defaultTo;
     const { defaultTo } = column;
 
-    if (oldDefaultTo === null || _.toLower(oldDefaultTo) === 'null') {
-      return defaultTo == null || _.toLower(defaultTo) === 'null';
+    if (oldDefaultTo === null || toLower(oldDefaultTo) === 'null') {
+      return defaultTo == null || toLower(defaultTo) === 'null';
     }
 
     return (
-      _.toLower(oldDefaultTo) === _.toLower(column.defaultTo) ||
-      _.toLower(oldDefaultTo) === _.toLower(`'${column.defaultTo}'`)
+      toLower(oldDefaultTo) === toLower(column.defaultTo) ||
+      toLower(oldDefaultTo) === toLower(`'${column.defaultTo}'`)
     );
   };
 
@@ -432,13 +435,16 @@ export default (db: Database) => {
         })) ?? [])
       : [];
 
-    const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
+    const reservedTables = new Set([
+      ...RESERVED_TABLE_NAMES,
+      ...persistedTables.map(parsePersistedTable),
+    ]);
 
     // for all tables in the database schema, check if they are not in the user schema
     for (const databaseTable of databaseSchema.tables) {
       const isInUserSchema = helpers.hasTable(userSchema, databaseTable.name);
       const wasTracked = previousSchema && helpers.hasTable(previousSchema, databaseTable.name);
-      const isReserved = reservedTables.includes(databaseTable.name);
+      const isReserved = reservedTables.has(databaseTable.name);
 
       // NOTE: if db table is not in the user schema and is not in the previous stored schema leave it alone. it is a user custom table that we should not touch
       if (!isInUserSchema && !wasTracked) {

@@ -65,7 +65,7 @@ const initialState: DataManagerStateType = {
   isLoading: true,
 };
 
-const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
+const ONE_SIDE_RELATIONS = new Set(['oneWay', 'manyWay']);
 
 type AttributeMutation = AnyAttribute & {
   createComponent?: unknown;
@@ -175,8 +175,7 @@ type CreateComponentSchemaPayload = {
 };
 
 type FolderAssignmentPayload =
-  | { targetGroupId: string | null }
-  | { newFolderId: string; newFolderName: string };
+  { targetGroupId: string | null } | { newFolderId: string; newFolderName: string };
 
 type CreateSchemaPayload = {
   uid: string;
@@ -396,6 +395,37 @@ const applyRenameConsent = (
   if (shouldRecordRename) {
     recordRename(type, previousAttribute, newAttribute);
   }
+};
+
+const UID_TARGET_TYPES = new Set(['string', 'text']);
+
+/**
+ * Keeps uid fields attached to a field when it is renamed, whether or not the
+ * rename is recorded as a data-preserving hop. A rename that also turns the
+ * field into a type a uid cannot target detaches the uid, as deleting it would.
+ */
+const renameUIDTargetFields = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  const isValidTarget = UID_TARGET_TYPES.has(newAttribute.type);
+
+  type.attributes.forEach((attribute) => {
+    if (attribute.type === 'uid' && attribute.targetField === oldName) {
+      if (isValidTarget) {
+        attribute.targetField = newName;
+      } else {
+        delete attribute.targetField;
+      }
+    }
+  });
 };
 
 /**
@@ -889,6 +919,7 @@ const slice = createUndoRedoSlice(
         renameConditionVars(type, previousAttribute, attributeToSet as AnyAttribute);
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
+        renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
 
         if (previousAttribute.type !== attributeToSet.type) {
           return;
@@ -926,7 +957,7 @@ const slice = createUndoRedoSlice(
           attributeToSet.targetAttribute
         );
         const isBidirectionnal =
-          newRelationType !== undefined && !ONE_SIDE_RELATIONS.includes(newRelationType);
+          newRelationType !== undefined && !ONE_SIDE_RELATIONS.has(newRelationType);
 
         if (isBidirectionnal) {
           const newTargetAttribute = {
@@ -979,6 +1010,7 @@ const slice = createUndoRedoSlice(
           recordRename,
           declineRename,
         });
+        renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
         renameConditionVars(type, previousAttribute, attributeToSet as AnyAttribute);
       },
       reloadPlugin: () => {
@@ -1016,7 +1048,7 @@ const slice = createUndoRedoSlice(
           const { target, relation, targetAttribute: targetAttributeName } = attribute;
           const relationType = getRelationType(relation, targetAttributeName);
 
-          const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(relationType!);
+          const isBidirectionnal = !ONE_SIDE_RELATIONS.has(relationType!);
 
           if (isBidirectionnal && targetAttributeName) {
             const targetContentType = getType(state, { forTarget, targetUid: target });

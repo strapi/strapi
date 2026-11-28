@@ -9,8 +9,7 @@ export type PackageManagerName = 'npm' | 'pnpm' | 'yarn';
 
 /** Yarn's major version matters: Yarn 2 and later read another configuration file. */
 export type DetectedPackageManager =
-  | { name: 'npm' | 'pnpm'; majorVersion?: number }
-  | { name: 'yarn'; majorVersion: number };
+  { name: 'npm' | 'pnpm'; majorVersion?: number } | { name: 'yarn'; majorVersion: number };
 
 /** Reads a `packageManager` field such as `yarn@4.5.0` or `pnpm@9.1.0+sha512...`. */
 export const parsePackageManagerField = (

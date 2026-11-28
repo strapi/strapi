@@ -3,6 +3,7 @@ import type { Context } from 'koa';
 import type {} from 'koa-body';
 import type { Internal } from '@strapi/types';
 import { getService } from '../utils';
+import { formatValidationError } from '../utils/errors';
 import {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -39,7 +40,7 @@ export default {
     try {
       await validateKind(kind);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     const contentTypeService = getService('content-types');
@@ -84,7 +85,7 @@ export default {
     try {
       await validateContentTypeInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
@@ -112,6 +113,10 @@ export default {
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (err) {
       strapi.log.error(err);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       strapi.telemetry
         .send('didNotCreateContentType', {
           eventProperties: { error: (err as Error).message || err },
@@ -132,7 +137,7 @@ export default {
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
@@ -150,6 +155,10 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
     }
   },
@@ -173,6 +182,10 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
     }
   },

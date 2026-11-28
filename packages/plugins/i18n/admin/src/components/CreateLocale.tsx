@@ -10,6 +10,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useAuth,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -46,7 +47,7 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <Modal.Root open={visible} onOpenChange={setVisible}>
+    <UnsavedChangesModal open={visible} onOpenChange={setVisible}>
       <Modal.Trigger>
         <Button
           variant={variant}
@@ -63,7 +64,7 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
         </Button>
       </Modal.Trigger>
       <CreateModal onClose={() => setVisible(false)} />
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

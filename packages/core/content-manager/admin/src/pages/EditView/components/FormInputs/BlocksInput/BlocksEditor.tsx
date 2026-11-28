@@ -212,7 +212,8 @@ const normalizeBlocksState = (
 };
 
 interface BlocksEditorProps
-  extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
+  extends
+    Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
     BlocksContentProps {
   disabled?: boolean;
   name: string;
@@ -245,8 +246,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       (state) =>
         (
           state.plugins['content-manager']?.apis as
-            | ContentManagerPlugin['config']['apis']
-            | undefined
+            ContentManagerPlugin['config']['apis'] | undefined
         )?.getRichTextBlocks() ?? ({} as RichTextBlocksStore)
     );
 

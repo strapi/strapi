@@ -1,14 +1,43 @@
-import { merge, set } from 'lodash';
+import { get, has, merge, set, unset } from 'lodash';
 
 import type { Core, Schema, UID } from '@strapi/types';
-import type { traverseEntity } from '@strapi/utils';
-import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
+import { contentTypes, traverseEntity } from '@strapi/utils';
+import { isNumeric, traverseEntityRelations } from '../transform/relations/utils/map-relation';
+import {
+  getDefaultLocale,
+  getRelationTargetLocale,
+  isLocalizedContentType,
+} from '../transform/relations/utils/i18n';
+import { getRelationTargetStatus } from '../transform/relations/utils/dp';
+import { setDefaultLocaleToRelation } from '../transform/relations/transform/default-locale';
 
 const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
 type TraversableData = Parameters<typeof traverseEntity>[2];
+type TraverseVisitor = Parameters<typeof traverseEntity>[0];
 
 type CloneRelationAttribute = Schema.Attribute.Relation & {
   targetAttribute?: string;
+};
+
+export type DeferredRelationCopy = {
+  schemaUid: UID.Schema;
+  attributeName: string;
+  kind: 'joinTable' | 'fkColumn' | 'morphToOne';
+  /** Lodash path to the owning entity in entry data (e.g. `details` or `items.0`). `null` = root entry. */
+  ownerPath: string | null;
+};
+
+export type PostCloneRelationUpdate = {
+  dataPath: string;
+  value: Record<string, unknown>;
+  schemaUid: UID.Schema;
+  ownerPath: string | null;
+};
+
+export type PrepareCloneDataResult = {
+  data: Record<string, unknown>;
+  deferredCopies: DeferredRelationCopy[];
+  postCloneUpdates: PostCloneRelationUpdate[];
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -23,13 +52,12 @@ const isRelationAttribute = (attribute: unknown): attribute is CloneRelationAttr
 
 const isRelationOperationPayload = (value: unknown): value is Record<string, unknown> => {
   return (
-    isRecord(value) &&
-    RELATION_OPERATIONS.some((operation) => Object.prototype.hasOwnProperty.call(value, operation))
+    isRecord(value) && RELATION_OPERATIONS.some((operation) => Object.hasOwn(value, operation))
   );
 };
 
 const hasMeaningfulRelationOperations = (value: Record<string, unknown>) => {
-  if (Object.prototype.hasOwnProperty.call(value, 'set')) {
+  if (Object.hasOwn(value, 'set')) {
     return true;
   }
 
@@ -39,8 +67,8 @@ const hasMeaningfulRelationOperations = (value: Record<string, unknown>) => {
   });
 };
 
-const canTransformRelationOperationPayload = (attribute: Schema.Attribute.Relation) => {
-  return attribute.useJoinTable !== false && attribute.relation !== 'morphToOne';
+const usesJoinTable = (attribute: Schema.Attribute.Relation) => {
+  return attribute.useJoinTable !== false;
 };
 
 const isBidirectionalOneToOne = (attribute: CloneRelationAttribute) => {
@@ -52,8 +80,168 @@ const isBidirectionalOneToOne = (attribute: CloneRelationAttribute) => {
   );
 };
 
+const isMorphToOneAttribute = (attribute: CloneRelationAttribute) => {
+  return (attribute as { relation?: string }).relation === 'morphToOne';
+};
+
+const isBidirectionalOneToManyMappedBy = (attribute: CloneRelationAttribute) => {
+  return attribute.relation === 'oneToMany' && attribute.mappedBy != null;
+};
+
 const hasPopulatedRelation = (value: unknown) => {
   return isRecord(value) && ('id' in value || 'documentId' in value);
+};
+
+const hasPopulatedRelationList = (value: unknown) => {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((item) => isRecord(item) && ('id' in item || 'documentId' in item))
+  );
+};
+
+const getSubmittedValueAtPath = (submitted: Record<string, unknown>, path: string) => {
+  return get(submitted, path);
+};
+
+const wasRelationSubmittedAtPath = (submitted: Record<string, unknown>, path: string) => {
+  return has(submitted, path);
+};
+
+const isRelationUnchangedAtPath = (
+  submitted: Record<string, unknown>,
+  path: string,
+  submittedValue: unknown
+) => {
+  if (!wasRelationSubmittedAtPath(submitted, path)) {
+    return true;
+  }
+
+  const isOperationPayload = isRelationOperationPayload(submittedValue);
+  const hasMeaningfulOperations =
+    isOperationPayload && hasMeaningfulRelationOperations(submittedValue);
+
+  return isOperationPayload && !hasMeaningfulOperations;
+};
+
+/**
+ * The nested collector walks the source entry, so a relation under a component
+ * the clone payload set to null still looks omitted. That copy has no owner on
+ * the clone and must not be queued. Missing paths are not removal: those owners
+ * still need their deferred copy, and a later resolution failure must still throw.
+ */
+const isOwnerExplicitlyRemoved = (submitted: Record<string, unknown>, ownerPath: string) => {
+  const segments = ownerPath.split('.');
+  let current: unknown = submitted;
+
+  for (const segment of segments) {
+    if (Array.isArray(current)) {
+      const index = Number(segment);
+      if (!Number.isInteger(index) || index < 0 || index >= current.length) {
+        return false;
+      }
+
+      current = current[index];
+    } else if (isRecord(current) && Object.hasOwn(current, segment)) {
+      current = current[segment];
+    } else {
+      return false;
+    }
+
+    if (current === null) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Like `traverseEntityRelations`, but also visits inline storage (`useJoinTable: false`
+ * and `morphToOne`). Clone follow-up must see those relations; the shared transform
+ * helper intentionally skips them because they are handled in processData.
+ */
+const traverseAllEntityRelations = (
+  visitor: TraverseVisitor,
+  options: Parameters<typeof traverseEntity>[1],
+  data: TraversableData
+) => {
+  return traverseEntity(
+    (visitorOptions, utils) => {
+      const { attribute } = visitorOptions;
+
+      if (attribute?.type !== 'relation') {
+        return;
+      }
+
+      return visitor(visitorOptions, utils);
+    },
+    options,
+    data
+  );
+};
+
+type RelationOperationOverride = {
+  value: Record<string, unknown>;
+  isMedia: boolean;
+  isMultiple: boolean;
+};
+
+const toList = (value: unknown): unknown[] => {
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+};
+
+const isSameMedia = (file: unknown, ref: unknown) => {
+  if (!isRecord(file)) {
+    return false;
+  }
+
+  if (isNumeric(ref)) {
+    return String(file.id) === String(ref);
+  }
+
+  if (typeof ref === 'string') {
+    return file.documentId === ref;
+  }
+
+  if (isRecord(ref)) {
+    if (ref.id != null) {
+      return String(file.id) === String(ref.id);
+    }
+
+    if (ref.documentId != null) {
+      return file.documentId === ref.documentId;
+    }
+  }
+
+  return false;
+};
+
+const resolveMediaOperations = (
+  sourceMedia: unknown,
+  operations: Record<string, unknown>,
+  isMultiple: boolean
+) => {
+  if (Object.hasOwn(operations, 'set')) {
+    return operations;
+  }
+
+  const disconnect = toList(operations.disconnect);
+  const connect = toList(operations.connect);
+
+  const kept = toList(sourceMedia)
+    .filter((file) => ![...disconnect, ...connect].some((ref) => isSameMedia(file, ref)))
+    .map((file) => (isRecord(file) && file.id != null ? { id: file.id } : file));
+
+  if (!isMultiple) {
+    return { set: connect.length > 0 ? connect.slice(-1) : kept };
+  }
+
+  return { set: [...kept, ...connect] };
 };
 
 const collectRelationOperationOverrides = async (
@@ -61,15 +249,19 @@ const collectRelationOperationOverrides = async (
   contentType: Schema.ContentType,
   getModel: (uid: string) => Schema.Schema
 ) => {
-  const overrides = new Map<string, Record<string, unknown>>();
+  const overrides = new Map<string, RelationOperationOverride>();
 
   await traverseEntityRelations(
-    ({ path, value }) => {
+    ({ path, value, attribute }) => {
       if (isRelationOperationPayload(value) && hasMeaningfulRelationOperations(value)) {
-        overrides.set(path.rawWithIndices!, value);
+        overrides.set(path.rawWithIndices!, {
+          value,
+          isMedia: attribute?.type === 'media',
+          isMultiple: attribute?.type === 'media' && attribute.multiple === true,
+        });
       }
     },
-    { schema: contentType, getModel },
+    { schema: contentType, getModel, includeMedia: true },
     submittedData as TraversableData
   );
 
@@ -78,100 +270,1076 @@ const collectRelationOperationOverrides = async (
   );
 };
 
+const collectNestedCloneRelationAdjustments = async (
+  originalData: Record<string, unknown>,
+  submitted: Record<string, unknown>,
+  contentType: Schema.ContentType,
+  getModel: (uid: string) => Schema.Schema,
+  data: Record<string, unknown>
+) => {
+  const adjustedData = data;
+  const deferredCopies: DeferredRelationCopy[] = [];
+  const postCloneUpdates: PostCloneRelationUpdate[] = [];
+
+  await traverseAllEntityRelations(
+    ({ attribute, key, path, schema, value }) => {
+      if (!attribute || !isRelationAttribute(attribute)) {
+        return;
+      }
+
+      const relationPath = path.rawWithIndices!;
+      // Owner is the parent of the relation path (preserve indices for
+      // repeatable components / DZs, e.g. `items.0.tag` → `items.0`).
+      // Top-level relations have no parent segment → null (root entry).
+      const lastDot = relationPath.lastIndexOf('.');
+      const ownerPath = lastDot === -1 ? null : relationPath.slice(0, lastDot);
+
+      if (ownerPath == null) {
+        return;
+      }
+
+      if (isOwnerExplicitlyRemoved(submitted, ownerPath)) {
+        return;
+      }
+
+      const submittedValue = getSubmittedValueAtPath(submitted, relationPath);
+      const relationIsUnchanged = isRelationUnchangedAtPath(
+        submitted,
+        relationPath,
+        submittedValue
+      );
+
+      if (
+        relationIsUnchanged &&
+        isBidirectionalOneToOne(attribute) &&
+        usesJoinTable(attribute) &&
+        hasPopulatedRelation(value)
+      ) {
+        unset(adjustedData, relationPath);
+        deferredCopies.push({
+          schemaUid: schema.uid as UID.Schema,
+          attributeName: key,
+          kind: 'joinTable',
+          ownerPath,
+        });
+        return;
+      }
+
+      if (
+        relationIsUnchanged &&
+        isBidirectionalOneToOne(attribute) &&
+        !usesJoinTable(attribute) &&
+        hasPopulatedRelation(value)
+      ) {
+        unset(adjustedData, relationPath);
+        deferredCopies.push({
+          schemaUid: schema.uid as UID.Schema,
+          attributeName: key,
+          kind: 'fkColumn',
+          ownerPath,
+        });
+        return;
+      }
+
+      // Always defer morphToOne: populate can be null even when morph columns are set.
+      if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
+        unset(adjustedData, relationPath);
+        deferredCopies.push({
+          schemaUid: schema.uid as UID.Schema,
+          attributeName: key,
+          kind: 'morphToOne',
+          ownerPath,
+        });
+        return;
+      }
+
+      if (
+        relationIsUnchanged &&
+        isBidirectionalOneToManyMappedBy(attribute) &&
+        hasPopulatedRelationList(value)
+      ) {
+        unset(adjustedData, relationPath);
+        return;
+      }
+
+      if (
+        !relationIsUnchanged &&
+        isRelationOperationPayload(submittedValue) &&
+        hasMeaningfulRelationOperations(submittedValue) &&
+        (!usesJoinTable(attribute) || isMorphToOneAttribute(attribute))
+      ) {
+        unset(adjustedData, relationPath);
+        postCloneUpdates.push({
+          dataPath: relationPath,
+          value: submittedValue,
+          schemaUid: schema.uid as UID.Schema,
+          ownerPath,
+        });
+      }
+    },
+    { schema: contentType, getModel },
+    originalData as TraversableData
+  );
+
+  return { data: adjustedData, deferredCopies, postCloneUpdates };
+};
+
+const planRootCloneRelation = (
+  attributeName: string,
+  attribute: unknown,
+  submitted: Record<string, unknown>,
+  originalData: Record<string, unknown>
+):
+  | { kind: 'keep' }
+  | { kind: 'omit' }
+  | { kind: 'defer'; copyKind: DeferredRelationCopy['kind'] }
+  | { kind: 'postClone'; value: Record<string, unknown> } => {
+  if (!isRelationAttribute(attribute)) {
+    return { kind: 'keep' };
+  }
+
+  const submittedValue = submitted[attributeName];
+  const relationWasSubmitted = Object.hasOwn(submitted, attributeName);
+  const isOperationPayload = isRelationOperationPayload(submittedValue);
+  const hasMeaningfulOperations =
+    isOperationPayload && hasMeaningfulRelationOperations(submittedValue);
+  const relationIsUnchanged =
+    !relationWasSubmitted || (isOperationPayload && !hasMeaningfulOperations);
+
+  if (
+    relationIsUnchanged &&
+    isBidirectionalOneToOne(attribute) &&
+    usesJoinTable(attribute) &&
+    hasPopulatedRelation(originalData[attributeName])
+  ) {
+    return { kind: 'defer', copyKind: 'joinTable' };
+  }
+
+  if (
+    relationIsUnchanged &&
+    isBidirectionalOneToOne(attribute) &&
+    !usesJoinTable(attribute) &&
+    hasPopulatedRelation(originalData[attributeName])
+  ) {
+    return { kind: 'defer', copyKind: 'fkColumn' };
+  }
+
+  // Always defer morphToOne: populate can be null even when morph columns are set.
+  if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
+    return { kind: 'defer', copyKind: 'morphToOne' };
+  }
+
+  if (
+    relationIsUnchanged &&
+    isBidirectionalOneToManyMappedBy(attribute) &&
+    hasPopulatedRelationList(originalData[attributeName])
+  ) {
+    return { kind: 'omit' };
+  }
+
+  if (
+    !relationIsUnchanged &&
+    isOperationPayload &&
+    hasMeaningfulOperations &&
+    (!usesJoinTable(attribute) || isMorphToOneAttribute(attribute))
+  ) {
+    return { kind: 'postClone', value: submittedValue };
+  }
+
+  return { kind: 'keep' };
+};
+
 export const prepareCloneData = async (
   originalData: Record<string, unknown>,
   submittedData: Record<string, unknown> | undefined,
   contentType: Schema.ContentType,
   getModel: (uid: string) => Schema.Schema
-) => {
+): Promise<PrepareCloneDataResult> => {
   const submitted = submittedData ?? {};
   const relationOperationOverrides = await collectRelationOperationOverrides(
     submitted,
     contentType,
     getModel
   );
-  const data = merge({}, originalData, submitted) as Record<string, unknown>;
-  const relationsToCopy: string[] = [];
+  let data = merge({}, originalData, submitted) as Record<string, unknown>;
+  const deferredCopies: DeferredRelationCopy[] = [];
+  const postCloneUpdates: PostCloneRelationUpdate[] = [];
 
   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
-    if (!isRelationAttribute(attribute) || !canTransformRelationOperationPayload(attribute)) {
+    const plan = planRootCloneRelation(attributeName, attribute, submitted, originalData);
+
+    if (plan.kind === 'keep') {
       continue;
     }
 
-    const relationWasSubmitted = Object.prototype.hasOwnProperty.call(submitted, attributeName);
-    const submittedValue = submitted[attributeName];
-    const isOperationPayload = isRelationOperationPayload(submittedValue);
-    const hasMeaningfulOperations =
-      isOperationPayload && hasMeaningfulRelationOperations(submittedValue);
+    delete data[attributeName];
 
-    const relationIsUnchanged =
-      !relationWasSubmitted || (isOperationPayload && !hasMeaningfulOperations);
+    if (plan.kind === 'defer') {
+      deferredCopies.push({
+        schemaUid: contentType.uid as UID.Schema,
+        attributeName,
+        kind: plan.copyKind,
+        ownerPath: null,
+      });
+      continue;
+    }
 
-    if (
-      relationIsUnchanged &&
-      isBidirectionalOneToOne(attribute) &&
-      hasPopulatedRelation(originalData[attributeName])
-    ) {
-      // Normal relation attachment enforces oneToOne ownership by removing the source link.
-      // Leave unchanged relations out of create and copy their join row after the clone exists.
-      delete data[attributeName];
-      relationsToCopy.push(attributeName);
+    if (plan.kind === 'postClone') {
+      postCloneUpdates.push({
+        dataPath: attributeName,
+        value: plan.value,
+        schemaUid: contentType.uid as UID.Schema,
+        ownerPath: null,
+      });
     }
   }
 
-  for (const [path, value] of relationOperationOverrides) {
-    set(data, path, value);
+  const nested = await collectNestedCloneRelationAdjustments(
+    originalData,
+    submitted,
+    contentType,
+    getModel,
+    data
+  );
+  data = nested.data;
+  deferredCopies.push(...nested.deferredCopies);
+  postCloneUpdates.push(...nested.postCloneUpdates);
+
+  for (const [path, { value, isMedia, isMultiple }] of relationOperationOverrides) {
+    set(
+      data,
+      path,
+      isMedia ? resolveMediaOperations(get(originalData, path), value, isMultiple) : value
+    );
   }
 
-  return { data, relationsToCopy };
+  return { data, deferredCopies, postCloneUpdates };
+};
+
+const resolveOwnerEntryId = (
+  entryData: Record<string, unknown>,
+  ownerPath: string | null,
+  fallbackId?: number
+) => {
+  if (ownerPath == null) {
+    return fallbackId;
+  }
+
+  const owner = get(entryData, ownerPath) as Record<string, unknown> | undefined;
+  const ownerId = owner?.id;
+
+  return typeof ownerId === 'number' ? ownerId : undefined;
+};
+
+const ownerComponentUid = (owner: unknown) => {
+  if (!isRecord(owner) || typeof owner.__component !== 'string') {
+    return undefined;
+  }
+
+  return owner.__component;
+};
+
+/**
+ * A dynamic-zone block can be replaced by another component at the same index.
+ * Component ids are allocated per table, so a deferred write that still uses the
+ * source component UID and the new row id updates an unrelated row.
+ */
+const ownerComponentWasReplaced = (
+  originalData: Record<string, unknown>,
+  clonedData: Record<string, unknown>,
+  ownerPath: string | null
+) => {
+  if (ownerPath == null) {
+    return false;
+  }
+
+  const sourceComponent = ownerComponentUid(get(originalData, ownerPath));
+  const cloneComponent = ownerComponentUid(get(clonedData, ownerPath));
+
+  return sourceComponent != null && cloneComponent != null && sourceComponent !== cloneComponent;
 };
 
 export const copyCloneRelationRows = async (
   strapi: Core.Strapi,
-  uid: UID.ContentType,
+  uid: UID.Schema,
+  attributeName: string,
   sourceEntryId: number,
-  targetEntryId: number,
-  attributeNames: string[]
+  targetEntryId: number
 ) => {
-  if (attributeNames.length === 0) {
+  const { attributes } = strapi.db.metadata.get(uid);
+  const attribute = attributes[attributeName];
+
+  if (attribute?.type !== 'relation' || !('joinTable' in attribute) || !attribute.joinTable) {
     return;
   }
 
-  const { attributes } = strapi.db.metadata.get(uid);
   const idColumn = strapi.db.metadata.identifiers.ID_COLUMN;
   const batchSize = strapi.db.dialect.getBatchInsertSize();
+  const { joinTable } = attribute;
+  const { joinColumn } = joinTable;
 
   await strapi.db.transaction(async ({ trx }) => {
-    for (const attributeName of attributeNames) {
-      const attribute = attributes[attributeName];
+    const rows = (await strapi.db
+      .getConnection(joinTable.name)
+      .where({
+        [joinColumn.name]: sourceEntryId,
+        ...('on' in joinTable && joinTable.on),
+      })
+      .select('*')
+      .transacting(trx)) as Record<string, unknown>[];
 
-      if (attribute?.type !== 'relation' || !('joinTable' in attribute) || !attribute.joinTable) {
-        continue;
-      }
+    const rowsToCopy = rows.map((row) => {
+      const copiedRow = { ...row, [joinColumn.name]: targetEntryId };
+      delete copiedRow[idColumn];
+      return copiedRow;
+    });
 
-      const { joinTable } = attribute;
-      const { joinColumn } = joinTable;
-      const rows = (await strapi.db
-        .connection(joinTable.name)
-        .where({
-          [joinColumn.name]: sourceEntryId,
-          ...(('on' in joinTable && joinTable.on) || undefined),
-        })
-        .select('*')
-        .transacting(trx)) as Record<string, unknown>[];
-
-      const rowsToCopy = rows.map((row) => {
-        const copiedRow = { ...row, [joinColumn.name]: targetEntryId };
-        delete copiedRow[idColumn];
-        return copiedRow;
-      });
-
-      for (let index = 0; index < rowsToCopy.length; index += batchSize) {
-        await strapi.db
-          .connection(joinTable.name)
-          .insert(rowsToCopy.slice(index, index + batchSize))
-          .transacting(trx);
-      }
+    for (let index = 0; index < rowsToCopy.length; index += batchSize) {
+      await strapi.db
+        .getConnection(joinTable.name)
+        .insert(rowsToCopy.slice(index, index + batchSize))
+        .transacting(trx);
     }
   });
+};
+
+const copyFkColumnRelation = async (
+  strapi: Core.Strapi,
+  targetUid: UID.Schema,
+  attributeName: string,
+  sourceEntryId: number,
+  targetEntryId: number,
+  sourceUid: UID.Schema = targetUid
+) => {
+  const meta = strapi.db.metadata.get(sourceUid);
+  const attribute = meta.attributes[attributeName];
+
+  if (attribute?.type !== 'relation' || !('joinColumn' in attribute) || !attribute.joinColumn) {
+    return;
+  }
+
+  // Inverse/non-owning joinColumn.name is this table's `id`, not an FK. Copying it
+  // attaches an unrelated row whose numeric id happens to match the source id.
+  if (!('owner' in attribute) || attribute.owner !== true) {
+    return;
+  }
+
+  const joinColumnName = attribute.joinColumn.name;
+
+  await strapi.db.transaction(async ({ trx }) => {
+    const sourceRow = await strapi.db
+      .getConnection(meta.tableName)
+      .where({ id: sourceEntryId })
+      .select([joinColumnName])
+      .transacting(trx)
+      .first();
+
+    if (!sourceRow) {
+      return;
+    }
+
+    const targetAttribute = strapi.db.metadata.get(targetUid).attributes[attributeName];
+    if (targetAttribute?.type !== 'relation' || targetAttribute.relation !== 'oneToOne') {
+      return;
+    }
+
+    // processData only accepts attribute names, not raw join-column names
+    await strapi.db.query(targetUid).update({
+      where: { id: targetEntryId },
+      data: { [attributeName]: sourceRow[joinColumnName] ?? null },
+    });
+  });
+};
+
+const copyMorphToOneRelation = async (
+  strapi: Core.Strapi,
+  targetUid: UID.Schema,
+  attributeName: string,
+  sourceEntryId: number,
+  targetEntryId: number,
+  sourceUid: UID.Schema = targetUid
+) => {
+  const sourceAttribute = strapi.db.metadata.get(sourceUid).attributes[attributeName];
+  const targetAttribute = strapi.db.metadata.get(targetUid).attributes[attributeName];
+
+  if (
+    sourceAttribute?.type !== 'relation' ||
+    sourceAttribute.relation !== 'morphToOne' ||
+    !sourceAttribute.morphColumn ||
+    targetAttribute?.type !== 'relation' ||
+    targetAttribute.relation !== 'morphToOne'
+  ) {
+    return;
+  }
+
+  const { idColumn, typeColumn } = sourceAttribute.morphColumn;
+  const typeField = targetAttribute.morphColumn?.typeField ?? '__type';
+  const sourceMeta = strapi.db.metadata.get(sourceUid);
+
+  await strapi.db.transaction(async ({ trx }) => {
+    const sourceRow = await strapi.db
+      .getConnection(sourceMeta.tableName)
+      .where({ id: sourceEntryId })
+      .select([idColumn.name, typeColumn.name])
+      .transacting(trx)
+      .first();
+
+    if (!sourceRow) {
+      return;
+    }
+
+    const morphId = sourceRow[idColumn.name];
+    const morphType = sourceRow[typeColumn.name];
+
+    // processData only accepts the morph attribute ({ id, __type }), not raw column names
+    await strapi.db.query(targetUid).update({
+      where: { id: targetEntryId },
+      data: {
+        [attributeName]:
+          morphId != null && morphType != null ? { id: morphId, [typeField]: morphType } : null,
+      },
+    });
+  });
+};
+
+const runInOrder = async <T>(items: readonly T[], run: (item: T) => Promise<void>) => {
+  await items.reduce((previous, item) => previous.then(() => run(item)), Promise.resolve());
+};
+
+const applyOneDeferredCloneRelationCopy = async (
+  strapi: Core.Strapi,
+  originalData: Record<string, unknown>,
+  clonedData: Record<string, unknown>,
+  sourceRootId: number,
+  targetRootId: number,
+  task: DeferredRelationCopy
+) => {
+  // Root owners (ownerPath === null) resolve via the fallback root IDs.
+  // Nested owners must resolve explicitly — falling back to the root ID would
+  // copy component-schema relation rows using an unrelated document ID.
+  const sourceEntryId = resolveOwnerEntryId(originalData, task.ownerPath, sourceRootId);
+  const targetEntryId = resolveOwnerEntryId(clonedData, task.ownerPath, targetRootId);
+
+  if (sourceEntryId == null || targetEntryId == null) {
+    throw new Error(
+      `Unable to resolve clone relation owner for "${task.attributeName}" at path "${task.ownerPath ?? '<root>'}"`
+    );
+  }
+
+  if (ownerComponentWasReplaced(originalData, clonedData, task.ownerPath)) {
+    return;
+  }
+
+  if (sourceEntryId === targetEntryId) {
+    return;
+  }
+
+  if (task.kind === 'joinTable') {
+    await copyCloneRelationRows(
+      strapi,
+      task.schemaUid,
+      task.attributeName,
+      sourceEntryId,
+      targetEntryId
+    );
+    return;
+  }
+
+  if (task.kind === 'fkColumn') {
+    await copyFkColumnRelation(
+      strapi,
+      task.schemaUid,
+      task.attributeName,
+      sourceEntryId,
+      targetEntryId
+    );
+    return;
+  }
+
+  if (task.kind === 'morphToOne') {
+    await copyMorphToOneRelation(
+      strapi,
+      task.schemaUid,
+      task.attributeName,
+      sourceEntryId,
+      targetEntryId
+    );
+  }
+};
+
+export const applyDeferredCloneRelationCopies = async (
+  strapi: Core.Strapi,
+  rootUid: UID.ContentType,
+  sourceRootId: number,
+  targetRootId: number,
+  originalData: Record<string, unknown>,
+  clonedData: Record<string, unknown>,
+  deferredCopies: DeferredRelationCopy[]
+) => {
+  if (deferredCopies.length === 0) {
+    return;
+  }
+
+  await runInOrder(deferredCopies, (task) =>
+    applyOneDeferredCloneRelationCopy(
+      strapi,
+      originalData,
+      clonedData,
+      sourceRootId,
+      targetRootId,
+      task
+    )
+  );
+};
+
+const toRelationRef = (value: unknown): Record<string, unknown> | undefined => {
+  if (isRecord(value)) {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return { id: value };
+  }
+
+  // Document Service shorthand: a string is a documentId, matching mapRelation.
+  if (typeof value === 'string') {
+    return { documentId: value };
+  }
+
+  return undefined;
+};
+
+const relationOperationList = (value: unknown): unknown[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (value == null) {
+    return [];
+  }
+
+  return [value];
+};
+
+const pickInlineRelationTargetRef = (
+  value: Record<string, unknown>
+): Record<string, unknown> | null | undefined => {
+  if (Object.hasOwn(value, 'set')) {
+    const setValue = value.set;
+    if (setValue == null) {
+      return null;
+    }
+
+    const list = relationOperationList(setValue);
+    if (list.length === 0) {
+      return null;
+    }
+
+    return toRelationRef(list.at(-1));
+  }
+
+  const connect = value.connect;
+  if (connect == null) {
+    return undefined;
+  }
+
+  const list = relationOperationList(connect);
+  if (list.length === 0) {
+    return undefined;
+  }
+
+  return toRelationRef(list.at(-1));
+};
+
+const toRelationStatus = (value: unknown): 'draft' | 'published' | undefined => {
+  return value === 'draft' || value === 'published' ? value : undefined;
+};
+
+const relationEntryIdForStatus = async (
+  strapi: Core.Strapi,
+  targetUid: UID.Schema,
+  documentId: string,
+  status: 'draft' | 'published',
+  targetHasDP: boolean,
+  targetLocale: string | null | undefined
+) => {
+  const where: Record<string, unknown> = { documentId };
+
+  if (targetHasDP) {
+    where.publishedAt = status === 'draft' ? null : { $ne: null };
+  }
+
+  if (targetLocale) {
+    where.locale = targetLocale;
+  }
+
+  const row = await strapi.db.query(targetUid).findOne({
+    where,
+    select: ['id'],
+  });
+
+  return typeof row?.id === 'number' ? row.id : undefined;
+};
+
+const resolveEntryIdsByRef = async (
+  strapi: Core.Strapi,
+  sourceUid: UID.Schema,
+  targetUid: UID.Schema,
+  ref: Record<string, unknown>,
+  opts: { locale?: string }
+): Promise<number[]> => {
+  if (typeof ref.id === 'number') {
+    return [ref.id];
+  }
+
+  if (typeof ref.documentId !== 'string') {
+    return [];
+  }
+
+  const documentId = ref.documentId;
+  let relation = {
+    documentId,
+    locale: typeof ref.locale === 'string' ? ref.locale : undefined,
+    status: toRelationStatus(ref.status),
+  };
+
+  if (
+    relation.locale == null &&
+    !isLocalizedContentType(sourceUid) &&
+    isLocalizedContentType(targetUid)
+  ) {
+    relation = setDefaultLocaleToRelation(relation, await getDefaultLocale());
+  }
+
+  const targetLocale = getRelationTargetLocale(relation, {
+    targetUid,
+    sourceUid,
+    sourceLocale: opts.locale,
+  });
+
+  const sourceHasDP = contentTypes.hasDraftAndPublish(strapi.getModel(sourceUid));
+  const statuses = getRelationTargetStatus(relation, {
+    targetUid,
+    sourceUid,
+    sourceStatus: sourceHasDP ? 'draft' : undefined,
+  });
+
+  const model = strapi.getModel(targetUid);
+  const targetHasDP = contentTypes.hasDraftAndPublish(model);
+  const ids: Array<number | undefined> = [];
+
+  await statuses.reduce(
+    (previous, status) =>
+      previous.then(async () => {
+        ids.push(
+          await relationEntryIdForStatus(
+            strapi,
+            targetUid,
+            documentId,
+            status,
+            targetHasDP,
+            targetLocale
+          )
+        );
+      }),
+    Promise.resolve()
+  );
+
+  const resolvedIds: number[] = [];
+
+  for (const id of ids) {
+    if (typeof id === 'number' && !resolvedIds.includes(id)) {
+      resolvedIds.push(id);
+    }
+  }
+
+  return resolvedIds;
+};
+
+const resolveEntryIdByRef = async (
+  strapi: Core.Strapi,
+  sourceUid: UID.Schema,
+  targetUid: UID.Schema,
+  ref: Record<string, unknown>,
+  opts: { locale?: string }
+): Promise<number | undefined> => {
+  const resolvedIds = await resolveEntryIdsByRef(strapi, sourceUid, targetUid, ref, opts);
+
+  // Single-column FK/morph storage can keep only one id; match entity-manager and
+  // keep the last resolved status when the standard resolver returns both.
+  return resolvedIds.at(-1);
+};
+
+const getMorphTypeField = (attribute: CloneRelationAttribute) => {
+  const morphColumn =
+    'morphColumn' in attribute
+      ? (attribute as { morphColumn?: { typeField?: string } }).morphColumn
+      : undefined;
+
+  return morphColumn?.typeField ?? '__type';
+};
+
+const hasRelationTarget = (
+  attribute: CloneRelationAttribute
+): attribute is CloneRelationAttribute & { target: string } => {
+  return 'target' in attribute && typeof (attribute as { target?: unknown }).target === 'string';
+};
+
+const currentAssociationId = (current: unknown): number | undefined => {
+  if (typeof current === 'number') {
+    return current;
+  }
+
+  if (isRecord(current) && typeof current.id === 'number') {
+    return current.id;
+  }
+
+  return undefined;
+};
+
+const disconnectItemRef = (item: unknown): Record<string, unknown> | undefined => {
+  if (isRecord(item)) {
+    return item;
+  }
+
+  if (typeof item === 'number' || typeof item === 'string') {
+    return { id: item };
+  }
+
+  return undefined;
+};
+
+type DisconnectMatch = {
+  currentId: number;
+  currentType: string | undefined;
+  typeField: string;
+  opts: { locale?: string };
+};
+
+const disconnectItemMatchesCurrent = async (
+  strapi: Core.Strapi,
+  sourceUid: UID.Schema,
+  attribute: CloneRelationAttribute,
+  item: unknown,
+  match: DisconnectMatch
+) => {
+  const { currentId, currentType, typeField, opts } = match;
+  const ref = disconnectItemRef(item);
+
+  if (!ref) {
+    return false;
+  }
+
+  if (isMorphToOneAttribute(attribute)) {
+    const targetUid = ref[typeField];
+    if (typeof targetUid !== 'string') {
+      return false;
+    }
+
+    if (currentType != null && currentType !== targetUid) {
+      return false;
+    }
+
+    const ids = await resolveEntryIdsByRef(strapi, sourceUid, targetUid as UID.Schema, ref, opts);
+    return ids.includes(currentId);
+  }
+
+  if (!hasRelationTarget(attribute)) {
+    return false;
+  }
+
+  const ids = await resolveEntryIdsByRef(
+    strapi,
+    sourceUid,
+    attribute.target as UID.Schema,
+    ref,
+    opts
+  );
+  return ids.includes(currentId);
+};
+
+const disconnectMatchesCurrent = async (
+  strapi: Core.Strapi,
+  sourceUid: UID.Schema,
+  attribute: CloneRelationAttribute,
+  disconnect: unknown[],
+  current: unknown,
+  opts: { locale?: string }
+): Promise<boolean> => {
+  const currentId = currentAssociationId(current);
+
+  if (currentId == null) {
+    return false;
+  }
+
+  const typeField = getMorphTypeField(attribute);
+  const currentType =
+    isMorphToOneAttribute(attribute) && isRecord(current) && typeof current[typeField] === 'string'
+      ? current[typeField]
+      : undefined;
+
+  return await disconnect.reduce<Promise<boolean>>(
+    (previous, item) =>
+      previous.then((alreadyMatched) => {
+        if (alreadyMatched) {
+          return true;
+        }
+
+        return disconnectItemMatchesCurrent(strapi, sourceUid, attribute, item, {
+          currentId,
+          currentType,
+          typeField,
+          opts,
+        });
+      }),
+    Promise.resolve(false)
+  );
+};
+
+type InlineRelationAssignmentOptions = {
+  locale?: string;
+  ownerUid: UID.Schema;
+  /** Schema to read the current association from. Differs from ownerUid after a dynamic-zone component swap. */
+  sourceSchemaUid?: UID.Schema;
+  sourceUid: UID.Schema;
+  originalValue?: unknown;
+  sourceOwnerId?: number;
+  targetOwnerId: number;
+  attributeName: string;
+};
+
+const restoreUnmatchedInlineRelation = async (
+  strapi: Core.Strapi,
+  attribute: CloneRelationAttribute,
+  value: Record<string, unknown>,
+  opts: InlineRelationAssignmentOptions
+): Promise<null | undefined> => {
+  const disconnect = relationOperationList(value.disconnect);
+  if (disconnect.length === 0) {
+    return undefined;
+  }
+
+  const matches = await disconnectMatchesCurrent(
+    strapi,
+    opts.sourceUid,
+    attribute,
+    disconnect,
+    opts.originalValue,
+    { locale: opts.locale }
+  );
+
+  if (matches) {
+    return null;
+  }
+
+  // Unmatched disconnect must keep the original association. The clone was
+  // created without the relation (stripped from create data), so copy it now.
+  if (opts.sourceOwnerId == null) {
+    throw new Error(
+      `Unable to restore clone relation "${opts.attributeName}" after unmatched disconnect`
+    );
+  }
+
+  const readUid = opts.sourceSchemaUid ?? opts.ownerUid;
+
+  if (isMorphToOneAttribute(attribute)) {
+    await copyMorphToOneRelation(
+      strapi,
+      opts.ownerUid,
+      opts.attributeName,
+      opts.sourceOwnerId,
+      opts.targetOwnerId,
+      readUid
+    );
+    return undefined;
+  }
+
+  await copyFkColumnRelation(
+    strapi,
+    opts.ownerUid,
+    opts.attributeName,
+    opts.sourceOwnerId,
+    opts.targetOwnerId,
+    readUid
+  );
+  return undefined;
+};
+
+const resolveInlineRelationAssignment = async (
+  strapi: Core.Strapi,
+  attribute: CloneRelationAttribute,
+  value: Record<string, unknown>,
+  opts: InlineRelationAssignmentOptions
+): Promise<unknown> => {
+  const targetRef = pickInlineRelationTargetRef(value);
+
+  if (targetRef === undefined) {
+    return await restoreUnmatchedInlineRelation(strapi, attribute, value, opts);
+  }
+
+  if (targetRef === null) {
+    return null;
+  }
+
+  if (isMorphToOneAttribute(attribute)) {
+    const typeField = getMorphTypeField(attribute);
+    const targetUid = targetRef[typeField];
+
+    if (typeof targetUid !== 'string') {
+      throw new TypeError(`Inline morphToOne clone update requires ${typeField}`);
+    }
+
+    const id = await resolveEntryIdByRef(
+      strapi,
+      opts.sourceUid,
+      targetUid as UID.Schema,
+      targetRef,
+      opts
+    );
+
+    if (id == null) {
+      throw new Error(`Unable to resolve morphToOne target for clone relation update`);
+    }
+
+    return { id, [typeField]: targetUid };
+  }
+
+  if (!hasRelationTarget(attribute)) {
+    throw new Error('Inline FK clone update requires a relation target');
+  }
+
+  const id = await resolveEntryIdByRef(
+    strapi,
+    opts.sourceUid,
+    attribute.target as UID.Schema,
+    targetRef,
+    opts
+  );
+
+  if (id == null) {
+    throw new Error(`Unable to resolve relation target for clone relation update`);
+  }
+
+  return id;
+};
+
+const schemaUidForPostCloneUpdate = (
+  strapi: Core.Strapi,
+  originalData: Record<string, unknown>,
+  clonedData: Record<string, unknown>,
+  update: PostCloneRelationUpdate,
+  attributeName: string
+): UID.Schema | undefined => {
+  if (!ownerComponentWasReplaced(originalData, clonedData, update.ownerPath)) {
+    return update.schemaUid;
+  }
+
+  const cloneComponent = ownerComponentUid(get(clonedData, update.ownerPath!));
+  const cloneAttribute = cloneComponent
+    ? (strapi.db.metadata.get(cloneComponent).attributes[attributeName] as
+        CloneRelationAttribute | undefined)
+    : undefined;
+
+  // The submitted operation belongs to the new block. Do not apply it with the
+  // source component UID, or the new row id will match an unrelated row.
+  if (!cloneComponent || cloneAttribute?.type !== 'relation') {
+    return undefined;
+  }
+
+  return cloneComponent as UID.Schema;
+};
+
+type PostCloneRelationContext = {
+  rootUid: UID.ContentType;
+  sourceRootId: number;
+  clonedEntryId: number;
+  clonedData: Record<string, unknown>;
+  originalData: Record<string, unknown>;
+  locale: string | undefined;
+};
+
+const applyOnePostCloneRelationUpdate = async (
+  strapi: Core.Strapi,
+  update: PostCloneRelationUpdate,
+  context: PostCloneRelationContext
+) => {
+  const { rootUid, sourceRootId, clonedEntryId, clonedData, originalData, locale } = context;
+  const attributeName = update.dataPath.split('.').pop()!;
+  const ownerEntryId = resolveOwnerEntryId(clonedData, update.ownerPath, clonedEntryId);
+  const sourceOwnerId = resolveOwnerEntryId(originalData, update.ownerPath, sourceRootId);
+
+  if (ownerEntryId == null) {
+    throw new Error(
+      `Unable to resolve clone relation owner for "${attributeName}" at path "${update.ownerPath ?? '<root>'}"`
+    );
+  }
+
+  const schemaUid = schemaUidForPostCloneUpdate(
+    strapi,
+    originalData,
+    clonedData,
+    update,
+    attributeName
+  );
+
+  if (schemaUid === undefined) {
+    return;
+  }
+
+  const attribute = strapi.db.metadata.get(schemaUid).attributes[attributeName] as
+    CloneRelationAttribute | undefined;
+
+  if (attribute?.type !== 'relation') {
+    throw new Error(
+      `Unable to resolve clone relation attribute "${attributeName}" on "${schemaUid}"`
+    );
+  }
+
+  const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
+    locale,
+    ownerUid: schemaUid,
+    sourceSchemaUid: update.schemaUid,
+    sourceUid: rootUid,
+    originalValue: get(originalData, update.dataPath),
+    sourceOwnerId,
+    targetOwnerId: ownerEntryId,
+    attributeName,
+  });
+
+  if (assignment === undefined) {
+    return;
+  }
+
+  // processData accepts attribute names (FK id / morph { id, __type }), not operation payloads.
+  await strapi.db.query(schemaUid).update({
+    where: { id: ownerEntryId },
+    data: { [attributeName]: assignment },
+  });
+};
+
+export const applyPostCloneRelationUpdates = async (
+  strapi: Core.Strapi,
+  rootUid: UID.ContentType,
+  sourceRootId: number,
+  clonedEntryId: number,
+  clonedData: Record<string, unknown>,
+  originalData: Record<string, unknown>,
+  postCloneUpdates: PostCloneRelationUpdate[]
+) => {
+  if (postCloneUpdates.length === 0) {
+    return;
+  }
+
+  const locale = clonedData.locale as string | undefined;
+
+  await runInOrder(postCloneUpdates, (update) =>
+    applyOnePostCloneRelationUpdate(strapi, update, {
+      rootUid,
+      sourceRootId,
+      clonedEntryId,
+      clonedData,
+      originalData,
+      locale,
+    })
+  );
 };

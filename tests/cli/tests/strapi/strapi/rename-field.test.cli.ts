@@ -7,6 +7,7 @@ import stripAnsi from 'strip-ansi';
 import { getTestApps } from '../../../../utils/get-test-apps';
 
 const DOG_SCHEMA = 'src/api/dog/content-types/dog/schema.json';
+const ARTICLE_SCHEMA = 'src/api/article/content-types/article/schema.json';
 const MIGRATIONS_DIR = 'database/migrations';
 
 const readJson = async (file: string) => JSON.parse(await fs.readFile(file, 'utf8'));
@@ -27,20 +28,11 @@ describe('rename:field', () => {
     appPath = testApps.at(0) as string;
   });
 
-  it('renames a scalar attribute in the schema and generates a data-preserving migration', async () => {
-    const schemaPath = path.join(appPath, DOG_SCHEMA);
-    const migrationsDir = path.join(appPath, MIGRATIONS_DIR);
-
-    const before = new Set(await listMigrationFiles(migrationsDir));
-
+  const renameField = async (uid: string, oldName: string, newName: string) => {
     const result = await coffee
-      .spawn(
-        'npm',
-        ['run', '-s', 'strapi', '--', 'rename:field', 'api::dog.dog', 'age', 'ageInYears'],
-        {
-          cwd: appPath,
-        }
-      )
+      .spawn('npm', ['run', '-s', 'strapi', '--', 'rename:field', uid, oldName, newName], {
+        cwd: appPath,
+      })
       .end();
 
     if (result.code !== 0) {
@@ -49,7 +41,16 @@ describe('rename:field', () => {
       );
     }
 
-    const { stdout } = result;
+    return result;
+  };
+
+  it('renames a scalar attribute in the schema and generates a data-preserving migration', async () => {
+    const schemaPath = path.join(appPath, DOG_SCHEMA);
+    const migrationsDir = path.join(appPath, MIGRATIONS_DIR);
+
+    const before = new Set(await listMigrationFiles(migrationsDir));
+
+    const { stdout } = await renameField('api::dog.dog', 'age', 'ageInYears');
 
     // The attribute is renamed in the schema file.
     const schema = await readJson(schemaPath);
@@ -71,5 +72,25 @@ describe('rename:field', () => {
     const plainOut = stripAnsi(stdout);
     expect(plainOut).toMatch(/Renamed "age" to "ageInYears" on api::dog\.dog/);
     expect(plainOut).toMatch(/Generated migration/);
+  });
+
+  it('keeps a uid field attached to the field it is generated from', async () => {
+    const schemaPath = path.join(appPath, ARTICLE_SCHEMA);
+
+    expect((await readJson(schemaPath)).attributes.slug.targetField).toBe('title');
+
+    await renameField('api::article.article', 'title', 'heading');
+
+    const renamed = await readJson(schemaPath);
+    expect(renamed.attributes).toHaveProperty('heading');
+    expect(renamed.attributes).not.toHaveProperty('title');
+    expect(renamed.attributes.slug.targetField).toBe('heading');
+
+    // Rename back so the other tests sharing this app keep the template schema.
+    await renameField('api::article.article', 'heading', 'title');
+
+    const restored = await readJson(schemaPath);
+    expect(restored.attributes).toHaveProperty('title');
+    expect(restored.attributes.slug.targetField).toBe('title');
   });
 });
