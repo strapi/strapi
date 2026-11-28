@@ -45,6 +45,12 @@ const getDetectedAgent = async () => {
   }
 };
 
+/** Shared CI and terminal facts for telemetry and prompt mode. */
+const readEnvironment = () => ({
+  isCI: ciInfo.isCI,
+  hasTerminal: process.stdin.isTTY === true && process.stdout.isTTY === true,
+});
+
 /**
  * Tells how create-strapi-app was started. Signals, strongest first:
  * 1. `--agent <name>` or `STRAPI_AGENT`: the caller says it is an agent.
@@ -62,11 +68,55 @@ export async function detectInvocation({
     return { invocation: 'agent', agentName };
   }
 
-  if (ciInfo.isCI) {
+  const { isCI, hasTerminal } = readEnvironment();
+
+  if (isCI) {
     return { invocation: 'ci', agentName: null };
   }
 
-  const hasTerminal = process.stdin.isTTY === true && process.stdout.isTTY === true;
-
   return { invocation: hasTerminal ? 'human' : 'unknown', agentName: null };
+}
+
+export type NonInteractiveReason = 'flag' | 'ci' | 'no-tty';
+
+type InteractiveMode = { interactive: true };
+type NonInteractiveMode = { interactive: false; reason: NonInteractiveReason };
+
+export type PromptMode = InteractiveMode | NonInteractiveMode;
+
+/**
+ * Tells whether the CLI can ask questions. Signals, strongest first:
+ * 1. `--non-interactive`: never ask.
+ * 2. `--interactive`: do not switch off the prompts in CI or without a terminal. `--quickstart` still
+ *    skips the prompts. Each prompt opens its own readline, so the first prompt reads all of a piped
+ *    stdin: answers must arrive one at a time, after each prompt shows.
+ * 3. CI: nobody answers, even with a terminal.
+ * 4. No terminal on stdin or stdout: the prompts cannot read answers or cannot be seen.
+ */
+export function resolvePromptMode({
+  nonInteractive,
+  interactive,
+}: {
+  nonInteractive?: boolean;
+  interactive?: boolean;
+}): PromptMode {
+  if (nonInteractive === true) {
+    return { interactive: false, reason: 'flag' };
+  }
+
+  if (interactive === true) {
+    return { interactive: true };
+  }
+
+  const { isCI, hasTerminal } = readEnvironment();
+
+  if (isCI) {
+    return { interactive: false, reason: 'ci' };
+  }
+
+  if (!hasTerminal) {
+    return { interactive: false, reason: 'no-tty' };
+  }
+
+  return { interactive: true };
 }

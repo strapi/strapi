@@ -1,4 +1,4 @@
-import { generateSharedExtensionDefinition, emitDefinitions } from '../../generators/utils';
+import { generateSharedExtensionDefinition, emitDefinitions, timer } from '../../generators/utils';
 
 const makeDefinition = (uid, name) => ({
   uid,
@@ -37,5 +37,35 @@ describe('generateSharedExtensionDefinition', () => {
     const output = emitDefinitions([node]);
 
     expect(output).toContain('export interface ComponentSchemas');
+  });
+});
+
+describe('timer', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-01-01T00:00:00.000Z') });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('duration before end() is the elapsed time so far, not NaN', () => {
+    const t = timer().start();
+
+    expect(t.duration).toBe(0);
+
+    jest.advanceTimersByTime(1500);
+
+    expect(t.duration).toBe(1.5);
+  });
+
+  test('duration after end() is frozen at the end time', () => {
+    const t = timer().start();
+
+    jest.advanceTimersByTime(2000);
+    t.end();
+    jest.advanceTimersByTime(5000);
+
+    expect(t.duration).toBe(2);
   });
 });

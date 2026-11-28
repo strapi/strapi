@@ -6,7 +6,7 @@ package: '@strapi/upload'
 status: draft
 review_notes:
   - Written from the package source on develop; needs a maintainer review.
-  - The Media Library, AI metadata, MCP tools and GraphQL extension are not documented in this page beyond a mention. Add pages for them.
+  - AI metadata, MCP tools and the GraphQL extension are not documented beyond a mention. Add pages for them.
 ---
 
 ## Purpose
@@ -29,6 +29,20 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. It sends the file to the provider service, which prefers `uploadStream` over `upload`. It saves the `plugin::upload.file` entry and emits a `media.create` event, or `media.update` and `media.delete` for the other actions. The option `concurrentUploadSize` sets how many files one request processes at the same time.
 
+### Size limits
+
+Two limits apply to an uploaded file. The `strapi::body` middleware rejects a request whose files add up to more than `formidable.maxFileSize` while it parses it, before the plugin runs. formidable 2.x counts the file bytes of the whole request, not of each file, so a batch of small files can hit the limit too. The plugin then rejects a file above `upload.config.sizeLimit` (default 1 GB) in `checkFileSize`. The base provider in `server/src/register.ts` implements it, and a provider can override it, as `@strapi/provider-upload-local` does. A URL import checks `sizeLimit` while it downloads the file, in `fetchUrlToInputFile`.
+
+Each rejection carries a `details` object that names the limit, typed as `UploadTooLargeDetails` in `shared/contracts/files.ts`, with the limit in bytes:
+
+- The body parser answers with a 413 `PayloadTooLargeError` and `{ code: 'FileTooBig', limit }`.
+- `checkFileSize` throws a `PayloadTooLargeError` (413) with `{ code: 'SizeLimitExceeded', limit }`. When `@strapi/provider-upload-local` applies the deprecated `upload.config.providerOptions.sizeLimit`, the details also have `setting: 'upload.config.providerOptions.sizeLimit'`, and the admin names that setting instead of `upload.config.sizeLimit`.
+- A URL import throws an `ApplicationError` with `{ code: 'SizeLimitExceeded', limit }`. The response is a stream with status 200, so the error reaches the admin as a `file:error` event that carries the same details.
+
+The admin reads them in `admin/src/utils/getUploadTooLargeError.ts`. It treats a 413 that is not a Strapi `PayloadTooLargeError` as a limit outside Strapi, such as a reverse proxy.
+
+`register` calls `warnOnSizeLimitMismatch` (`server/src/size-limit-warning.ts`). It logs one warning when `sizeLimit` is higher than the body parser limit, because files between the two are rejected by the body parser. It compares the effective values, so it stays quiet when both are at their defaults (1 GB and 200 MiB), which have always been in that state. A `sizeLimit` or `maxFileSize` set explicitly to its default cannot be told apart from an unset one, so that pair stays quiet too.
+
 ### MIME type validation
 
 `server/src/utils/mime-validation.ts` decides whether a file is accepted. It compares the declared type, the type from the file extension and the type detected from the content against the `allowedTypes` and `deniedTypes` lists. See [MIME type validation](./01-backend/01-mime-validation.md).
@@ -44,6 +58,8 @@ A provider can return `true` from `isPrivate()` and implement `getSignedUrl(file
 ### Admin part
 
 The admin entry adds the Media Library menu link and its settings page, registers the `media` field input, and registers the `media-library` dialog component. `bootstrap` on the server registers the permission actions, for example `plugin::upload.assets.create`, and the webhook events. The redesigned Media Library is the default. The `useLegacyMediaLibrary` key in `config/features` selects the legacy one from `admin/src/legacy`.
+
+The [Admin](./02-admin/00-overview.md) pages document the admin code: its layout, the [asset list](./02-admin/01-asset-list.md), the [asset details drawer](./02-admin/02-asset-details-drawer.md), [forms](./02-admin/03-forms.md), [uploads](./02-admin/04-uploads.md), the [media field and picker](./02-admin/05-media-field-and-picker.md), [drag and drop](./02-admin/06-drag-and-drop.md), [data fetching](./02-admin/07-data-fetching.md) and [testing](./02-admin/08-testing.md).
 
 ## Related
 

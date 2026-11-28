@@ -35,6 +35,11 @@ interface MenuItem {
   exact?: boolean;
   position?: number;
   licenseOnly?: boolean;
+  /**
+   * The license feature a `licenseOnly` link belongs to, e.g. `'sso'`. Its ⚡ is purple while a
+   * trial grants the feature, absent once a paid license includes it, and grey otherwise.
+   */
+  licenseFeature?: string;
 }
 
 interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {

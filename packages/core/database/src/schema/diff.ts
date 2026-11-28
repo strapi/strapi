@@ -158,17 +158,20 @@ export default (db: Database) => {
     };
   };
 
+  // Matches lodash toLower: nullish becomes '' and other values are coerced to a string.
+  const toLower = (value: unknown) => String(value ?? '').toLowerCase();
+
   const diffDefault = (oldColumn: Column, column: Column) => {
     const oldDefaultTo = oldColumn.defaultTo;
     const { defaultTo } = column;
 
-    if (oldDefaultTo === null || _.toLower(oldDefaultTo) === 'null') {
-      return defaultTo == null || _.toLower(defaultTo) === 'null';
+    if (oldDefaultTo === null || toLower(oldDefaultTo) === 'null') {
+      return defaultTo == null || toLower(defaultTo) === 'null';
     }
 
     return (
-      _.toLower(oldDefaultTo) === _.toLower(column.defaultTo) ||
-      _.toLower(oldDefaultTo) === _.toLower(`'${column.defaultTo}'`)
+      toLower(oldDefaultTo) === toLower(column.defaultTo) ||
+      toLower(oldDefaultTo) === toLower(`'${column.defaultTo}'`)
     );
   };
 

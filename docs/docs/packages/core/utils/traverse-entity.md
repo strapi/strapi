@@ -38,9 +38,10 @@ async function traverseEntity(
   - `path` _(Path, optional)_: Tracks the current traversal path.
   - `parent` _(Parent, optional)_: Information about the parent attribute.
   - `getModel` _(Function)_: A function to retrieve the schema of a model by its UID.
+  - `allowedExtraRootKeys` _(string[], optional)_: Extra keys that are allowed at the root of the entity, such as the registered input params of a route. Traversal passes it to every visitor.
 
 - **`entity`**:  
-  The data entity to be traversed. Any plain object type is accepted, including a document whose values are `unknown`. A value typed with an `interface` (no implicit index signature) or a class instance is rejected at compile time. At runtime, a value that is not an object is returned unchanged.
+  The data entity to be traversed. Any plain object type is accepted, including a document whose values are `unknown`. A value typed with an `interface` (no implicit index signature) or a class instance is rejected at compile time. When present, `__type` and `__component` must be strings: `{ __type: 1 }` is rejected at compile time. At runtime, a value that is not an object is returned unchanged.
 
 ### Returns
 
@@ -85,6 +86,7 @@ interface VisitorOptions {
   path: Path;
   getModel(uid: string): Model;
   parent?: Parent;
+  allowedExtraRootKeys?: string[];
 }
 ```
 
@@ -96,6 +98,7 @@ interface VisitorOptions {
 - **`path`**: Tracks the traversal path.
 - **`getModel`**: Function to retrieve a schema definition by UID.
 - **`parent`** _(optional)_: Information about the parent attribute.
+- **`allowedExtraRootKeys`** _(optional)_: Extra keys allowed at the root of the entity, as passed in `TraverseOptions`. Visitors such as `removeUnrecognizedFields` and `throwUnrecognizedFields` read it only when `path.attribute` is `null`.
 
 ### VisitorUtils
 
@@ -117,7 +120,7 @@ Utility functions to modify the entity:
 interface Path {
   raw: string | null;
   attribute: string | null;
-  rawWithIndices: string | null;
+  rawWithIndices?: string | null;
 }
 ```
 
@@ -125,7 +128,7 @@ Tracks the traversal path:
 
 - **`raw`**: The traversal path on the entity
 - **`attribute`**: The same traversal path on the schema if the attribute exists
-- **`rawWithIndices`**: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
+- **`rawWithIndices`** _(optional)_: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
 
 ### Parent
 
@@ -148,6 +151,7 @@ interface TraverseOptions {
   path?: Path;
   parent?: Parent;
   getModel(uid: string): Model;
+  allowedExtraRootKeys?: string[];
 }
 ```
 
@@ -157,3 +161,4 @@ Configuration for the traversal:
 - **`path`** _(optional)_: Tracks the current traversal path.
 - **`parent`** _(optional)_: Information about the parent attribute.
 - **`getModel`**: Function to retrieve a schema definition by UID.
+- **`allowedExtraRootKeys`** _(optional)_: Extra keys allowed at the root of the entity, such as the registered input params of a route. Traversal passes it to every visitor and nested traversal.

@@ -13,7 +13,7 @@ const action = async () => {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const list = await app.admin.services.user.findPage({
+  const list = await app.service('admin::user').findPage({
     select: ['id', 'firstname', 'lastname', 'email', 'isActive', 'blocked'],
     populate: ['roles'],
     pageSize: 100,

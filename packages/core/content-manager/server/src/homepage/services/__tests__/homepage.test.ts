@@ -10,10 +10,73 @@ jest.mock('@strapi/utils', () => ({
   },
 }));
 
+// Mocks `strapi.service(uid)` for the admin services the homepage service reads
+const mockAdminServices = (services: Record<string, unknown>) =>
+  jest.fn((uid: string) =>
+    uid.startsWith('admin::') ? services[uid.slice('admin::'.length)] : undefined
+  );
+
 describe('homepage service', () => {
   afterEach(() => {
     jest.clearAllMocks();
     (strapiContentTypes.hasDraftAndPublish as jest.Mock).mockImplementation(() => false);
+  });
+
+  it('reads the admin permission service from the services registry, so extensions apply', async () => {
+    // The services registry returns the extended service; `strapi.admin.services` keeps the
+    // original one, because `extend()` writes only to the registry
+    const originalFindMany = jest.fn(async () => [{ subject: 'api::article.article' }]);
+    const extendedFindMany = jest.fn(async () => []);
+    const findConfigurations = jest.fn(async () => []);
+
+    const strapi = {
+      admin: { services: { permission: { findMany: originalFindMany } } },
+      service: mockAdminServices({ permission: { findMany: extendedFindMany } }),
+      contentTypes: {},
+      requestContext: {
+        get: jest.fn(() => ({ state: { user: { id: 1 }, userAbility: {} } })),
+      },
+      db: { query: jest.fn(() => ({ findMany: findConfigurations })) },
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ create: jest.fn() })) })),
+      documents: jest.fn(),
+    };
+
+    const service = createHomepageService({ strapi } as any);
+
+    const result = await service.queryLastDocuments({ sort: 'updatedAt:desc' });
+
+    expect(extendedFindMany).toHaveBeenCalledTimes(1);
+    expect(originalFindMany).not.toHaveBeenCalled();
+    expect(strapi.documents).not.toHaveBeenCalled();
+    expect(result).toEqual([]);
+  });
+
+  it('applies an admin permission extension registered after the homepage service exists', async () => {
+    // A `bootstrap` extension runs after routing created the homepage service
+    const originalFindMany = jest.fn(async () => [{ subject: 'api::article.article' }]);
+    const extendedFindMany = jest.fn(async () => []);
+    const adminServices: Record<string, unknown> = { permission: { findMany: originalFindMany } };
+
+    const strapi = {
+      service: mockAdminServices(adminServices),
+      contentTypes: {},
+      requestContext: {
+        get: jest.fn(() => ({ state: { user: { id: 1 }, userAbility: {} } })),
+      },
+      db: { query: jest.fn(() => ({ findMany: jest.fn(async () => []) })) },
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ create: jest.fn() })) })),
+      documents: jest.fn(),
+    };
+
+    const service = createHomepageService({ strapi } as any);
+
+    adminServices.permission = { findMany: extendedFindMany };
+
+    const result = await service.queryLastDocuments({ sort: 'updatedAt:desc' });
+
+    expect(extendedFindMany).toHaveBeenCalledTimes(1);
+    expect(originalFindMany).not.toHaveBeenCalled();
+    expect(result).toEqual([]);
   });
 
   describe('queryLastDocuments', () => {
@@ -66,18 +129,16 @@ describe('homepage service', () => {
       const warn = jest.fn();
 
       const strapi = {
-        admin: {
-          services: {
-            permission: {
-              findMany: jest.fn(async () => [
-                { subject: 'api::article.article' },
-                { subject: 'api::article.article' },
-                { subject: 'api::page.page' },
-                { subject: 'api::missing.missing' },
-              ]),
-            },
+        service: mockAdminServices({
+          permission: {
+            findMany: jest.fn(async () => [
+              { subject: 'api::article.article' },
+              { subject: 'api::article.article' },
+              { subject: 'api::page.page' },
+              { subject: 'api::missing.missing' },
+            ]),
           },
-        },
+        }),
         log: {
           warn,
         },
@@ -180,16 +241,14 @@ describe('homepage service', () => {
       const warn = jest.fn();
 
       const strapi = {
-        admin: {
-          services: {
-            permission: {
-              findMany: jest.fn(async () => [
-                { subject: 'api::article.article' },
-                { subject: 'api::missing.missing' },
-              ]),
-            },
+        service: mockAdminServices({
+          permission: {
+            findMany: jest.fn(async () => [
+              { subject: 'api::article.article' },
+              { subject: 'api::missing.missing' },
+            ]),
           },
-        },
+        }),
         log: {
           warn,
         },
@@ -286,13 +345,11 @@ describe('homepage service', () => {
       ]);
 
       const strapi = {
-        admin: {
-          services: {
-            permission: {
-              findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
-            },
+        service: mockAdminServices({
+          permission: {
+            findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
           },
-        },
+        }),
         contentTypes,
         requestContext: {
           get: jest.fn(() => ({
@@ -375,13 +432,11 @@ describe('homepage service', () => {
       ]);
 
       const strapi = {
-        admin: {
-          services: {
-            permission: {
-              findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
-            },
+        service: mockAdminServices({
+          permission: {
+            findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
           },
-        },
+        }),
         contentTypes,
         requestContext: {
           get: jest.fn(() => ({
@@ -468,16 +523,14 @@ describe('homepage service', () => {
       ]);
 
       const strapi = {
-        admin: {
-          services: {
-            permission: {
-              findMany: jest.fn(async () => [
-                { subject: 'api::article.article' },
-                { subject: 'plugin::users-permissions.role' },
-              ]),
-            },
+        service: mockAdminServices({
+          permission: {
+            findMany: jest.fn(async () => [
+              { subject: 'api::article.article' },
+              { subject: 'plugin::users-permissions.role' },
+            ]),
           },
-        },
+        }),
         contentTypes,
         requestContext: {
           get: jest.fn(() => ({

@@ -43,7 +43,7 @@ interface AssetsSearchInputProps {
 }
 
 /**
- * Keyword search over the whole Media Library. Owns the typing state and the
+ * Keyword search over the Media Library list. Owns the typing state and the
  * debounce; `useAssetSearch` owns the `?_q=` URL param.
  */
 export const AssetsSearchInput = ({ collapsible = false }: AssetsSearchInputProps) => {
@@ -121,7 +121,7 @@ export const AssetsSearchInput = ({ collapsible = false }: AssetsSearchInputProp
 
   // A folder navigation clears `_q`, but a term typed and never committed lives
   // only in the debounce — without this it lands afterwards and reactivates the
-  // global search. `_q` alone can't see it: it was never non-empty.
+  // search. `_q` alone can't see it: it was never non-empty.
   useEffect(() => {
     if (folderParam === lastFolderRef.current) {
       return;

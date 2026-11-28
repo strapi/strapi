@@ -9,14 +9,40 @@ describe('createMcpAdminTokenAuthenticator', () => {
   beforeEach(() => {
     authenticateAdminToken = vi.fn();
     authenticator = createMcpAdminTokenAuthenticator({
+      service: (uid: string) =>
+        uid === 'admin::api-token-admin' ? { authenticateAdminToken } : undefined,
+    } as unknown as Core.Strapi);
+  });
+
+  test('uses the admin api-token service from the services registry, so extensions apply', async () => {
+    // The services registry returns the extended service; `strapi.admin.services` keeps the
+    // original one, because `extend()` writes only to the registry
+    const originalAuthenticateAdminToken = vi.fn();
+    const extendedAuthenticateAdminToken = vi.fn().mockResolvedValue({
+      authenticated: false,
+      error: new Error('Rejected by the extension'),
+    });
+    const extendedAuthenticator = createMcpAdminTokenAuthenticator({
       admin: {
         services: {
-          'api-token-admin': {
-            authenticateAdminToken,
-          },
+          'api-token-admin': { authenticateAdminToken: originalAuthenticateAdminToken },
         },
       },
+      service: (uid: string) =>
+        uid === 'admin::api-token-admin'
+          ? { authenticateAdminToken: extendedAuthenticateAdminToken }
+          : undefined,
     } as unknown as Core.Strapi);
+
+    const result = await extendedAuthenticator.authenticate(makeCtx('Bearer some-token'));
+
+    expect(result).toEqual({
+      authenticated: false,
+      reason: 'invalid_token',
+      error: expect.any(Error),
+    });
+    expect(extendedAuthenticateAdminToken).toHaveBeenCalledWith('some-token');
+    expect(originalAuthenticateAdminToken).not.toHaveBeenCalled();
   });
 
   const makeCtx = (authorization?: string) =>

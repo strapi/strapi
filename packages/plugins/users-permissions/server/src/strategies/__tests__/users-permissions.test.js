@@ -73,13 +73,19 @@ describe('users-permissions strategy', () => {
     ).rejects.toThrow('Forbidden');
   });
 
-  it('checks sparse scope entries instead of skipping authorization', async () => {
-    const can = jest.fn().mockReturnValue(false);
+  it('rejects sparse scope entries instead of skipping authorization', async () => {
+    // Like Strapi's ability.can, which throws a TypeError on a nullish action
+    const can = jest.fn((action) => {
+      if (action === undefined || action === null) {
+        throw new TypeError(`Cannot check a nullish action: ${String(action)}`);
+      }
 
-    await expect(strategy.verify({ ability: { can } }, { scope: Array(1) })).rejects.toThrow(
-      'Forbidden'
-    );
+      return true;
+    });
 
-    expect(can).toHaveBeenCalledWith(undefined);
+    // eslint-disable-next-line no-sparse-arrays
+    const scope = [, 'article.find'];
+
+    await expect(strategy.verify({ ability: { can } }, { scope })).rejects.toThrow('Forbidden');
   });
 });

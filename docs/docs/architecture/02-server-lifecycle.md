@@ -121,12 +121,19 @@ The `admin` `register` runs before any plugin or API `register`, because provide
 14. It runs the `bootstrap` function of each provider.
 15. It runs `strapi.app.bootstrap({ strapi })`, if the application defines it.
 16. It calls the `strapi::app.afterBootstrap` hook. The admin uses it to lock the action provider, reset the super admin permissions and delete the stored permissions whose action is not registered.
+17. In development, it warns about the routes added to a module router after step 11. Strapi does not serve them.
 
 :::note
 The sync hooks run in steps 5 and 9, before module `bootstrap`. Add sync hook handlers in `register`. A handler that a module adds in `bootstrap` does not run during the current boot.
 :::
 
 Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootstrap` runs, the webhook runner has not read the stored webhooks, the cron service has not started, and the admin `bootstrap` has not run.
+
+### Late registrations
+
+Many registration APIs accept a call in any phase, but a fixed step reads what they hold. A registration that arrives after that step has no effect, or only part of it. For example, a route pushed into a module router after `server.initRouting()` is never served.
+
+Such a call does not throw, so that an app that never noticed the problem keeps working. Instead, `warnLateRegistration` in [`late-registration.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/late-registration.ts) logs one warning per app and registration, in the `development` environment only. The warning says what was registered, which step closed its window, and where to register it instead. The caller decides that the window is closed, with a flag that the closing step sets, such as `areRoutesRegistered`. Do not use `strapi.isLoaded` for this: it stays `false` until the bootstrap phase ends.
 
 ## Start and listen
 
@@ -152,7 +159,7 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 
 A second `destroy()` waits for the shutdown already in progress. After that shutdown succeeds, another `destroy()` returns immediately. If shutdown throws, a later `destroy()` continues from the step that failed, so a closed database is not skipped. `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
 
-`strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
+`strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files, with two exceptions. If that `destroy()` throws, the worker sends `stop` to the primary and exits with code 1. A failure in `start()` never reaches this path, because develop does not await `start()`: `start()` calls `stopWithError()` itself. If `destroy()` throws during a restart, the worker sends neither `killed` nor `stop` and does not exit by itself: what happens next depends on how the process handles the unhandled rejection. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
 
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
 

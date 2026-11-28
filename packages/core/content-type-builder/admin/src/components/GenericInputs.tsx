@@ -7,6 +7,7 @@
 import * as React from 'react';
 
 import {
+  Box,
   Checkbox,
   DatePicker,
   DateTimePicker,
@@ -19,6 +20,7 @@ import {
   TextInput,
   TimePicker,
   Toggle,
+  Tooltip,
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
@@ -143,6 +145,8 @@ interface GenericInputProps<
   placeholder?: TranslationMessage;
   required?: boolean;
   step?: number;
+  /** Shown on hover. Only rendered for the `checkbox` type. */
+  tooltip?: TranslationMessage;
   type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: unknown;
@@ -167,6 +171,7 @@ const GenericInput = ({
   placeholder,
   required,
   step,
+  tooltip,
   type,
   value: defaultValue,
   isNullable: _isNullable,
@@ -358,7 +363,7 @@ const GenericInput = ({
         );
       }
       case 'checkbox': {
-        return (
+        const checkbox = (
           <Checkbox
             disabled={disabled}
             onCheckedChange={(value) => {
@@ -368,6 +373,17 @@ const GenericInput = ({
           >
             {label}
           </Checkbox>
+        );
+
+        if (!tooltip) {
+          return checkbox;
+        }
+
+        // Disabled buttons do not emit pointer events, so the tooltip is attached to a wrapper.
+        return (
+          <Tooltip label={formatMessage(tooltip, tooltip.values)}>
+            <Box width="fit-content">{checkbox}</Box>
+          </Tooltip>
         );
       }
       case 'datetime': {

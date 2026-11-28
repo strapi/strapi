@@ -49,7 +49,9 @@ export {
 
 export * from './primitives';
 export * from './content-api-router';
+export * from './module-routers';
 export * from './security';
+export * from './blocks-link';
 export * from './publication-filter';
 export * from './has-published-version-param';
 export { hasSort } from './sort-query';

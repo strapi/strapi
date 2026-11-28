@@ -2,7 +2,6 @@ import type { Schema } from '@strapi/types';
 
 import {
   buildHomepageQueryFields,
-  compactSanitizedFields,
   FALLBACK_MAIN_FIELD,
   formatRecentDocumentTitle,
   resolveReadableMainField,
@@ -35,21 +34,6 @@ const createPermissionChecker = (unreadableFields: string[] = []): HomepagePermi
 });
 
 describe('Homepage query utils', () => {
-  describe('compactSanitizedFields', () => {
-    it('drops undefined and non-string entries left after admin field sanitization', () => {
-      expect(compactSanitizedFields(['documentId', 'updatedAt', undefined, 'title'])).toEqual([
-        'documentId',
-        'updatedAt',
-        'title',
-      ]);
-    });
-
-    it('returns undefined when fields is not a string array', () => {
-      expect(compactSanitizedFields(undefined)).toBeUndefined();
-      expect(compactSanitizedFields('title')).toBeUndefined();
-    });
-  });
-
   describe('resolveReadableMainField', () => {
     const configuration = { settings: { mainField: 'title' } };
 
