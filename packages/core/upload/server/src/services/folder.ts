@@ -2,6 +2,7 @@ import { map, sortBy } from 'lodash';
 import { errors, strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+import { replacePathPrefix } from '../utils/folder-path';
 import { isIntegerId } from '../utils/integer-id';
 import { AUDITED_EVENTS } from '../audit-logs';
 
@@ -174,6 +175,10 @@ const update = async (
       .query(FOLDER_MODEL_UID)
       .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
 
+    if (!previous) {
+      return undefined;
+    }
+
     const trx = await strapi.db.transaction();
     try {
       // fetch existing folder
@@ -251,11 +256,11 @@ const update = async (
         .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
           pathColumnName,
-          strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+          replacePathPrefix(
             pathColumnName,
             existingFolder.path,
-            strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`),
-          ])
+            strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`)
+          )
         );
 
       // update files below
@@ -266,11 +271,11 @@ const update = async (
         .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
           folderPathColumnName,
-          strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+          replacePathPrefix(
             folderPathColumnName,
             existingFolder.path,
-            strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`),
-          ])
+            strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`)
+          )
         );
 
       await trx.commit();

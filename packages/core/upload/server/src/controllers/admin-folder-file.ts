@@ -3,6 +3,7 @@ import { errors, strings } from '@strapi/utils';
 import type { Context } from 'koa';
 
 import { getService } from '../utils';
+import { replacePathPrefix } from '../utils/folder-path';
 import { ACTIONS, FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { FolderContainsUnauthorizedAssetsError } from '../errors';
 import {
@@ -211,19 +212,13 @@ export default {
             .execute();
         }
 
-        for (const existingFolder of existingFolders) {
-          let replaceQuery;
-          switch (strapi.db.dialect.client) {
-            case 'sqlite':
-              replaceQuery = '? || SUBSTRING(??, ?)';
-              break;
-            case 'postgres':
-              replaceQuery = 'CONCAT(?::TEXT, SUBSTRING(??, ?::INTEGER))';
-              break;
-            default:
-              replaceQuery = 'CONCAT(?, SUBSTRING(??, ?))';
-          }
+        // Deepest first: `path` was read before any write, so a folder selected together with one
+        // of its ancestors has to move before that ancestor rewrites its path.
+        const foldersDeepestFirst = [...existingFolders].sort(
+          (a, b) => b.path.length - a.path.length
+        );
 
+        for (const existingFolder of foldersDeepestFirst) {
           // update path for folders themselves & folders below
           totalFolderNumber = await strapi.db
             .getConnection(folderTable)
@@ -232,11 +227,11 @@ export default {
             .orWhere(pathColName, 'like', `${existingFolder.path}/%`)
             .update(
               pathColName,
-              strapi.db.connection.raw(replaceQuery, [
-                strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`),
+              replacePathPrefix(
                 pathColName,
-                existingFolder.path.length + 1,
-              ])
+                existingFolder.path,
+                strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`)
+              )
             );
 
           // update path of files below
@@ -247,11 +242,11 @@ export default {
             .orWhere(folderPathColName, 'like', `${existingFolder.path}/%`)
             .update(
               folderPathColName,
-              strapi.db.connection.raw(replaceQuery, [
-                strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`),
+              replacePathPrefix(
                 folderPathColName,
-                existingFolder.path.length + 1,
-              ])
+                existingFolder.path,
+                strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`)
+              )
             );
         }
       }

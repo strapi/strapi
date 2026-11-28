@@ -138,6 +138,8 @@ describe('folder', () => {
             return chain;
           }),
           connection: { raw: jest.fn() },
+          // `replacePathPrefix` picks its SQL from the dialect
+          dialect: { client: 'sqlite' },
           metadata: {
             get: () => ({
               attributes: {
