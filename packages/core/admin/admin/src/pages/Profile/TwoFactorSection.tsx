@@ -16,6 +16,7 @@ import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
 import { isMfaNotFoundError } from '../../utils/mfaFeature';
 
 import { EnrolDialog } from './EnrolDialog';
+import { MfaBlockHeader } from './MfaBlock';
 import { Passkeys } from './Passkeys';
 import { ReAuthDialog } from './ReAuthDialog';
 import { TrustedDevices } from './TrustedDevices';
@@ -102,13 +103,23 @@ const RecentSecurityEvents = ({
   const { formatMessage, formatDate } = useIntl();
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography variant="delta" tag="h3">
-        {formatMessage({
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <MfaBlockHeader
+        title={formatMessage({
           id: 'Settings.profile.form.section.mfa.notices.title',
           defaultMessage: 'Recent security events',
         })}
-      </Typography>
+        action={
+          notices.some((notice) => notice.isNew) ? (
+            <Button variant="tertiary" onClick={onMarkAllSeen}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.notices.markSeen',
+                defaultMessage: 'Mark all as seen',
+              })}
+            </Button>
+          ) : null
+        }
+      />
       <Flex tag="ul" role="list" direction="column" alignItems="stretch" gap={1}>
         {notices.map((notice) => (
           <Flex key={`${notice.id}`} tag="li" gap={2} alignItems="baseline">
@@ -126,16 +137,6 @@ const RecentSecurityEvents = ({
           </Flex>
         ))}
       </Flex>
-      {notices.some((notice) => notice.isNew) ? (
-        <Flex>
-          <Button variant="tertiary" onClick={onMarkAllSeen}>
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.notices.markSeen',
-              defaultMessage: 'Mark all as seen',
-            })}
-          </Button>
-        </Flex>
-      ) : null}
     </Flex>
   );
 };
@@ -220,113 +221,115 @@ const TwoFactorSection = () => {
     !dismissedLowCodes;
 
   return (
-    <Panel>
-      <Typography variant="delta" tag="h2">
-        {formatMessage({
-          id: 'Settings.profile.form.section.mfa.title',
-          defaultMessage: 'Two-factor authentication',
-        })}
-      </Typography>
-      <Typography textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.profile.form.section.mfa.description',
-          defaultMessage:
-            'Protect your account with a code from an authenticator app each time you log in.',
-        })}
-      </Typography>
-      {showAckWarning ? (
-        <Alert
-          variant="warning"
-          onClose={() => setDismissedAck(true)}
-          closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-          title={formatMessage({
-            id: 'Settings.profile.form.section.mfa.warning.ack.title',
-            defaultMessage: 'Recovery codes not saved',
-          })}
-        >
+    <Panel gap={7}>
+      <Flex direction="column" alignItems="stretch" gap={4}>
+        <Typography variant="delta" tag="h2">
           {formatMessage({
-            id: 'Settings.profile.form.section.mfa.warning.ack.body',
+            id: 'Settings.profile.form.section.mfa.title',
+            defaultMessage: 'Two-factor authentication',
+          })}
+        </Typography>
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.description',
             defaultMessage:
-              'You have not confirmed that you saved your recovery codes. They cannot be shown again. Generate new ones and store them somewhere safe.',
+              'Protect your account with a code from an authenticator app each time you log in.',
           })}
-        </Alert>
-      ) : null}
-      {showLowCodesWarning ? (
-        <Alert
-          variant="warning"
-          onClose={() => setDismissedLowCodes(true)}
-          closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-          title={formatMessage({
-            id: 'Settings.profile.form.section.mfa.warning.low.title',
-            defaultMessage: 'Running low on recovery codes',
-          })}
-        >
-          {formatMessage(
-            {
-              id: 'Settings.profile.form.section.mfa.warning.low.body',
-              defaultMessage:
-                'You have only {count, plural, one {# recovery code} other {# recovery codes}} left. Generate new ones before you run out.',
-            },
-            { count: status.recoveryCodesRemaining }
-          )}
-        </Alert>
-      ) : null}
-      <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
-        <TwoFactorStatus status={status} />
-        {!status.enabled && !status.hasLocalPassword ? (
-          // The dialog's first and only field is the current password, which this account does not
-          // have: the button was a dead end. `hasLocalPassword` was already on the wire.
-          <Typography variant="pi" textColor="neutral600">
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.noPassword',
-              defaultMessage:
-                'You log in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider.',
+        </Typography>
+        {showAckWarning ? (
+          <Alert
+            variant="warning"
+            onClose={() => setDismissedAck(true)}
+            closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+            title={formatMessage({
+              id: 'Settings.profile.form.section.mfa.warning.ack.title',
+              defaultMessage: 'Recovery codes not saved',
             })}
-          </Typography>
-        ) : !status.enabled ? (
-          <Flex gap={2}>
-            <Button onClick={() => setEnrolOpen(true)}>
+          >
+            {formatMessage({
+              id: 'Settings.profile.form.section.mfa.warning.ack.body',
+              defaultMessage:
+                'You have not confirmed that you saved your recovery codes. They cannot be shown again. Generate new ones and store them somewhere safe.',
+            })}
+          </Alert>
+        ) : null}
+        {showLowCodesWarning ? (
+          <Alert
+            variant="warning"
+            onClose={() => setDismissedLowCodes(true)}
+            closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+            title={formatMessage({
+              id: 'Settings.profile.form.section.mfa.warning.low.title',
+              defaultMessage: 'Running low on recovery codes',
+            })}
+          >
+            {formatMessage(
+              {
+                id: 'Settings.profile.form.section.mfa.warning.low.body',
+                defaultMessage:
+                  'You have only {count, plural, one {# recovery code} other {# recovery codes}} left. Generate new ones before you run out.',
+              },
+              { count: status.recoveryCodesRemaining }
+            )}
+          </Alert>
+        ) : null}
+        <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
+          <TwoFactorStatus status={status} />
+          {!status.enabled && !status.hasLocalPassword ? (
+            // The dialog's first and only field is the current password, which this account does not
+            // have: the button was a dead end. `hasLocalPassword` was already on the wire.
+            <Typography variant="pi" textColor="neutral600">
               {formatMessage({
-                id: 'Settings.profile.form.section.mfa.enable',
-                defaultMessage: 'Enable two-factor authentication',
+                id: 'Settings.profile.form.section.mfa.noPassword',
+                defaultMessage:
+                  'You log in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider.',
               })}
-            </Button>
-          </Flex>
-        ) : (
-          <Flex direction="column" alignItems="flex-end" gap={2}>
-            <Flex gap={2} wrap="wrap" justifyContent="flex-end">
-              <Button variant="secondary" onClick={() => setRegenerateOpen(true)}>
+            </Typography>
+          ) : !status.enabled ? (
+            <Flex gap={2}>
+              <Button onClick={() => setEnrolOpen(true)}>
                 {formatMessage({
-                  id: 'Settings.profile.form.section.mfa.regenerate.title',
-                  defaultMessage: 'Generate new recovery codes',
+                  id: 'Settings.profile.form.section.mfa.enable',
+                  defaultMessage: 'Enable two-factor authentication',
                 })}
               </Button>
-              <Button variant="secondary" onClick={() => setReplaceOpen(true)}>
-                {formatMessage({
-                  id: 'Settings.profile.form.section.mfa.replace.title',
-                  defaultMessage: 'Replace authenticator',
-                })}
-              </Button>
-              {!status.required ? (
-                <Button variant="danger-light" onClick={() => setDisableOpen(true)}>
+            </Flex>
+          ) : (
+            <Flex direction="column" alignItems="flex-end" gap={2}>
+              <Flex gap={2} wrap="wrap" justifyContent="flex-end">
+                <Button variant="secondary" onClick={() => setRegenerateOpen(true)}>
                   {formatMessage({
-                    id: 'Settings.profile.form.section.mfa.disable.title',
-                    defaultMessage: 'Disable two-factor authentication',
+                    id: 'Settings.profile.form.section.mfa.regenerate.title',
+                    defaultMessage: 'Generate new recovery codes',
                   })}
                 </Button>
+                <Button variant="secondary" onClick={() => setReplaceOpen(true)}>
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.replace.title',
+                    defaultMessage: 'Replace authenticator',
+                  })}
+                </Button>
+                {!status.required ? (
+                  <Button variant="danger-light" onClick={() => setDisableOpen(true)}>
+                    {formatMessage({
+                      id: 'Settings.profile.form.section.mfa.disable.title',
+                      defaultMessage: 'Disable two-factor authentication',
+                    })}
+                  </Button>
+                ) : null}
+              </Flex>
+              {status.required ? (
+                <Typography variant="pi" textColor="neutral600">
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.disable.required',
+                    defaultMessage:
+                      'Two-factor authentication is required for your account and cannot be disabled.',
+                  })}
+                </Typography>
               ) : null}
             </Flex>
-            {status.required ? (
-              <Typography variant="pi" textColor="neutral600">
-                {formatMessage({
-                  id: 'Settings.profile.form.section.mfa.disable.required',
-                  defaultMessage:
-                    'Two-factor authentication is required for your account and cannot be disabled.',
-                })}
-              </Typography>
-            ) : null}
-          </Flex>
-        )}
+          )}
+        </Flex>
       </Flex>
       {/*
        * Only for an enrolled user (an unenrolled one has nothing to skip) and only while

@@ -23,6 +23,7 @@ import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
 import { passkeyAvailability } from '../../utils/webauthn';
 
 import { AddPasskeyDialog } from './AddPasskeyDialog';
+import { ActionRow, ActionsTd, ActionsTh, MfaBlockHeader } from './MfaBlock';
 import { RemovePasskeyDialog } from './RemovePasskeyDialog';
 
 /**
@@ -68,30 +69,34 @@ const Passkeys = () => {
   }
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={2}>
-      <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
-        <Typography variant="delta" tag="h3">
-          {formatMessage({
-            id: 'Settings.profile.form.section.mfa.passkeys.title',
-            defaultMessage: 'Passkeys',
-          })}
-        </Typography>
-        {supported && !atCap ? (
-          <Button variant="secondary" onClick={() => setAddOpen(true)}>
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.passkeys.add',
-              defaultMessage: 'Add a passkey',
-            })}
-          </Button>
-        ) : (
-          <Typography variant="pi" textColor="neutral600">
-            {availability === 'insecure-context'
-              ? formatMessage({
-                  id: 'Settings.profile.form.section.mfa.passkeys.insecure',
-                  defaultMessage:
-                    'Passkeys need the admin panel to be served over HTTPS. This page is not, so your browser will not offer them.',
-                })
-              : !supported
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <MfaBlockHeader
+        title={formatMessage({
+          id: 'Settings.profile.form.section.mfa.passkeys.title',
+          defaultMessage: 'Passkeys',
+        })}
+        description={formatMessage({
+          id: 'Settings.profile.form.section.mfa.passkeys.description',
+          defaultMessage:
+            'A passkey logs you in with your device instead of a code, and cannot be used on a look-alike site. Your password is still required every time.',
+        })}
+        action={
+          supported && !atCap ? (
+            <Button variant="secondary" onClick={() => setAddOpen(true)}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.passkeys.add',
+                defaultMessage: 'Add a passkey',
+              })}
+            </Button>
+          ) : (
+            <Typography variant="pi" textColor="neutral600">
+              {availability === 'insecure-context'
+                ? formatMessage({
+                    id: 'Settings.profile.form.section.mfa.passkeys.insecure',
+                    defaultMessage:
+                      'Passkeys need the admin panel to be served over HTTPS. This page is not, so your browser will not offer them.',
+                  })
+                : !supported
                 ? formatMessage({
                     id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
                     defaultMessage: 'This browser does not support passkeys.',
@@ -104,16 +109,10 @@ const Passkeys = () => {
                     },
                     { max: MAX_PASSKEYS_PER_USER }
                   )}
-          </Typography>
-        )}
-      </Flex>
-      <Typography variant="pi" textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.profile.form.section.mfa.passkeys.description',
-          defaultMessage:
-            'A passkey logs you in with your device instead of a code, and cannot be used on a look-alike site. Your password is still required every time.',
-        })}
-      </Typography>
+            </Typography>
+          )
+        }
+      />
       {error ? <ErrorMessage error={toMessage(error)} /> : null}
       {!error && !hasPasskeys ? (
         <Typography textColor="neutral600">
@@ -151,16 +150,16 @@ const Passkeys = () => {
                   })}
                 </Typography>
               </Th>
-              <Th>
+              <ActionsTh>
                 <Typography variant="sigma">
                   {formatMessage({ id: 'Settings.sessions.actions', defaultMessage: 'Actions' })}
                 </Typography>
-              </Th>
+              </ActionsTh>
             </Tr>
           </Thead>
           <Tbody>
             {passkeys.map((passkey) => (
-              <Tr key={passkey.id}>
+              <ActionRow key={passkey.id}>
                 <Td>
                   <Typography textColor="neutral800">{passkey.name}</Typography>
                 </Td>
@@ -177,8 +176,8 @@ const Passkeys = () => {
                         })}
                   </Typography>
                 </Td>
-                <Td>
-                  <Flex justifyContent="end">
+                <ActionsTd>
+                  <Flex justifyContent="end" data-row-action>
                     <IconButton
                       label={formatMessage(
                         {
@@ -193,8 +192,8 @@ const Passkeys = () => {
                       <Trash />
                     </IconButton>
                   </Flex>
-                </Td>
-              </Tr>
+                </ActionsTd>
+              </ActionRow>
             ))}
           </Tbody>
         </Table>

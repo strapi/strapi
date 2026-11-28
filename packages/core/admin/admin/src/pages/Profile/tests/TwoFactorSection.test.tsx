@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { createIntl } from 'react-intl';
@@ -319,6 +320,9 @@ describe('TwoFactorSection', () => {
     expect(screen.getByText(expectFormattedNotice(notices[1]))).toBeInTheDocument();
     expect(screen.getAllByText('New')).toHaveLength(2);
 
+    // The action lives in the block header, beside the title.
+    const header = screen.getByRole('group', { name: 'Recent security events' });
+    expect(within(header).getByRole('button', { name: 'Mark all as seen' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Mark all as seen' }));
     await waitFor(() => expect(seenBody).toEqual({}));
   });

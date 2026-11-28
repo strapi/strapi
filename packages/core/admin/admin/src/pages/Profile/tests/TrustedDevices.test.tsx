@@ -41,29 +41,39 @@ describe('TrustedDevices', () => {
     expect(screen.getByText('Unknown device')).toBeInTheDocument();
     expect(screen.getByText('Not yet')).toBeInTheDocument();
     expect(rows[1]).toHaveTextContent(/2026/);
-    expect(screen.getByRole('button', { name: 'Revoke all' })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /^Revoke trust for / })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Remove all' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^Remove (?!all)/ })).toHaveLength(2);
     // Each row's button names its device, so a screen reader can tell them apart.
-    expect(
-      screen.getByRole('button', { name: 'Revoke trust for Chrome on macOS' })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Revoke trust for Unknown device' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Chrome on macOS' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Unknown device' })).toBeInTheDocument();
   });
 
-  it('shows the empty state without a table or a Revoke all button', async () => {
+  it('puts Remove all in the block header beside the title, and keeps row actions out of it', async () => {
+    server.use(list(DEVICES));
+    render(<TrustedDevices />);
+
+    const header = await screen.findByRole('group', { name: 'Trusted devices' });
+    expect(within(header).getByRole('button', { name: 'Remove all' })).toBeInTheDocument();
+    expect(
+      within(header).queryByRole('button', { name: /^Remove (?!all)/ })
+    ).not.toBeInTheDocument();
+    // Row actions stay focusable: hidden with opacity, never display: none or disabled.
+    const rowButton = screen.getByRole('button', { name: 'Remove Chrome on macOS' });
+    expect(rowButton).toBeEnabled();
+  });
+
+  it('shows the empty state without a table or a Remove all button', async () => {
     server.use(list([]));
     render(<TrustedDevices />);
 
     expect(
       await screen.findByText(/^No trusted devices\. You can trust a browser/)
     ).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Revoke all' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove all' })).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('revokes one device after confirmation, toasts, and the list refreshes', async () => {
+  it('removes one device after confirmation, toasts, and the list refreshes', async () => {
     let devices = DEVICES;
     server.use(
       http.get('/admin/mfa/trusted-devices', () => HttpResponse.json({ data: devices })),
@@ -75,18 +85,18 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getAllByRole('button', { name: /^Revoke trust for / })[0]);
-    expect(screen.getByRole('alertdialog', { name: 'Revoke this device?' })).toHaveTextContent(
-      /This browser will ask for a code/
+    await user.click(screen.getAllByRole('button', { name: /^Remove (?!all)/ })[0]);
+    expect(screen.getByRole('alertdialog', { name: 'Remove trusted device?' })).toHaveTextContent(
+      /Chrome on macOS will ask for a code at its next login\. It stays logged in until then\./
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Revoke' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
 
-    expect(await screen.findByText('Device revoked.')).toBeInTheDocument();
+    expect(await screen.findByText('Trusted device removed.')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText('Chrome on macOS')).not.toBeInTheDocument());
     expect(screen.getByText('Unknown device')).toBeInTheDocument();
   });
 
-  it('revokes every device after confirmation', async () => {
+  it('removes every device after confirmation', async () => {
     let devices = DEVICES;
     server.use(
       http.get('/admin/mfa/trusted-devices', () => HttpResponse.json({ data: devices })),
@@ -98,37 +108,37 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getByRole('button', { name: 'Revoke all' }));
-    const dialog = screen.getByRole('alertdialog', { name: 'Revoke every trusted device?' });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Revoke all' }));
+    await user.click(screen.getByRole('button', { name: 'Remove all' }));
+    const dialog = screen.getByRole('alertdialog', { name: 'Remove all' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove all' }));
 
-    expect(await screen.findByText('Trusted devices revoked.')).toBeInTheDocument();
+    expect(await screen.findByText('Trusted devices removed.')).toBeInTheDocument();
     expect(await screen.findByText(/^No trusted devices\./)).toBeInTheDocument();
   });
 
-  it('the confirmation for a non-current row says the OTHER browser will ask for a code', async () => {
+  it('the confirmation for a non-current row names the device for a code', async () => {
     server.use(list(DEVICES));
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getAllByRole('button', { name: /^Revoke trust for / })[1]);
-    expect(screen.getByRole('alertdialog', { name: 'Revoke this device?' })).toHaveTextContent(
-      'That browser will ask for a code at its next login.'
+    await user.click(screen.getAllByRole('button', { name: /^Remove (?!all)/ })[1]);
+    expect(screen.getByRole('alertdialog', { name: 'Remove trusted device?' })).toHaveTextContent(
+      'Unknown device will ask for a code at its next login. It stays logged in until then.'
     );
   });
 
-  it('the revoke-all confirmation says every trusted browser when none of them is the current one', async () => {
+  it('the remove-all confirmation says every device will ask for a code', async () => {
     server.use(list(DEVICES.map((device) => ({ ...device, current: false }))));
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getByRole('button', { name: 'Revoke all' }));
-    expect(
-      screen.getByRole('alertdialog', { name: 'Revoke every trusted device?' })
-    ).toHaveTextContent('Every trusted browser will ask for a code at its next login.');
+    await user.click(screen.getByRole('button', { name: 'Remove all' }));
+    expect(screen.getByRole('alertdialog', { name: 'Remove all' })).toHaveTextContent(
+      'Every device will ask for a code at its next login. They stay logged in until then.'
+    );
   });
 
-  it('toasts the server message when a revoke is refused', async () => {
+  it('toasts the server message when a removal is refused', async () => {
     server.use(
       list(DEVICES),
       http.delete('/admin/mfa/trusted-devices/3', () =>
@@ -148,15 +158,15 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getAllByRole('button', { name: /^Revoke trust for / })[0]);
-    fireEvent.click(screen.getByRole('button', { name: 'Revoke' }));
+    await user.click(screen.getAllByRole('button', { name: /^Remove (?!all)/ })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
 
     expect(await screen.findByText('Trusted device not found')).toBeInTheDocument();
-    // Nothing optimistic: a refused revoke leaves the list truthful.
+    // Nothing optimistic: a refused removal leaves the list truthful.
     expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
   });
 
-  it('toasts the server message when revoking every device is refused, and keeps the list', async () => {
+  it('toasts the server message when removing every device is refused, and keeps the list', async () => {
     server.use(
       list(DEVICES),
       http.delete('/admin/mfa/trusted-devices', () =>
@@ -169,13 +179,13 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getByRole('button', { name: 'Revoke all' }));
+    await user.click(screen.getByRole('button', { name: 'Remove all' }));
     fireEvent.click(
-      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Revoke all' })
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove all' })
     );
 
     expect(await screen.findByText('boom')).toBeInTheDocument();
-    expect(screen.queryByText('Trusted devices revoked.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Trusted devices removed.')).not.toBeInTheDocument();
     expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
   });
 
@@ -194,6 +204,6 @@ describe('TrustedDevices', () => {
     expect(await screen.findByText('boom')).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.queryByText(/^No trusted devices\./)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Revoke all' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove all' })).not.toBeInTheDocument();
   });
 });

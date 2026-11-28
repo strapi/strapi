@@ -79,12 +79,12 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     await page.goto('/admin/me');
     await expect(page.getByRole('heading', { name: 'Trusted devices' })).toBeVisible();
     await expect(page.getByText('This device', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: /^Revoke trust for / }).click();
+    await page.getByRole('button', { name: /^Remove (?!all)/ }).click();
     await page
-      .getByRole('alertdialog', { name: 'Revoke this device?' })
-      .getByRole('button', { name: 'Revoke' })
+      .getByRole('alertdialog', { name: 'Remove trusted device?' })
+      .getByRole('button', { name: 'Remove' })
       .click();
-    await expect(page.getByText('Device revoked.')).toBeVisible();
+    await expect(page.getByText('Trusted device removed.')).toBeVisible();
     await expect(page.getByText(/^No trusted devices\./)).toBeVisible();
     expect(
       (await context.cookies()).find((cookie) => cookie.name === TRUST_COOKIE)
