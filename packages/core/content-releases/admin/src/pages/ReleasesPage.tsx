@@ -24,6 +24,7 @@ import {
   SimpleMenu,
   SingleSelect,
   SingleSelectOption,
+  Tooltip,
   Typography,
   Link,
 } from '@strapi/design-system';
@@ -103,7 +104,8 @@ const isReleasePast = (release: ReleaseRow) =>
  * paper plane one behind us: it ran, or its date passed.
  *
  * The date is the schedule, the one the sort and the "Scheduled for" filter use: a release
- * published by hand without one stays "Not scheduled".
+ * published by hand without one stays "Not scheduled", and one published by hand before it shows
+ * the date alone until that date passes.
  */
 const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolean }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
@@ -126,6 +128,7 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
   const scheduledAt = new Date(release.scheduledAt);
   const absoluteTime = `${formatDate(scheduledAt, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(scheduledAt, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, scheduledAt)}`;
   const Icon = isPast ? PaperPlaneTilt : CalendarBlank;
+  const ranEarly = release.releasedAt != null && scheduledAt.getTime() > Date.now();
 
   return (
     <Flex gap={2} alignItems="center">
@@ -133,13 +136,63 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
         <Icon width="1.6rem" height="1.6rem" aria-hidden />
       </Flex>
       <SentenceCase textColor={isPast ? 'neutral600' : 'neutral800'}>
-        {/* Browser-zone default title would contradict the release-zone text */}
-        <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
-        {` • ${absoluteTime}`}
+        {ranEarly ? (
+          absoluteTime
+        ) : (
+          <>
+            {/* Browser-zone default title would contradict the release-zone text */}
+            <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
+            {` • ${absoluteTime}`}
+          </>
+        )}
       </SentenceCase>
     </Flex>
   );
 };
+
+const ReleaseName = ({ release, isPast }: { release: ReleaseRow; isPast: boolean }) => {
+  const textRef = React.useRef<HTMLSpanElement | null>(null);
+  const [isTruncated, setIsTruncated] = React.useState(false);
+
+  const checkTruncation = () => {
+    const el = textRef.current;
+
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    }
+  };
+
+  const attachRef = (el: HTMLSpanElement | null) => {
+    textRef.current = el;
+
+    if (el) {
+      checkTruncation();
+    }
+  };
+
+  return (
+    <Tooltip label={isTruncated ? release.name : undefined}>
+      <NameLink
+        tag={NavLink}
+        to={`${release.id}`}
+        isExternal={false}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        onPointerEnter={checkTruncation}
+        onFocus={checkTruncation}
+      >
+        <Typography ref={attachRef} textColor={isPast ? 'neutral600' : 'neutral800'} ellipsis>
+          {release.name}
+        </Typography>
+      </NameLink>
+    </Tooltip>
+  );
+};
+
+// The link is inline-flex, so it grows with the name and the ellipsis never applies
+const NameLink = styled(Link)`
+  display: block;
+  max-width: 100%;
+`;
 
 // "in 2 days" reads "In 2 days": `capitalize` would also write "Days"
 const SentenceCase = styled(Typography)`
@@ -334,7 +387,7 @@ const useReleasesFilterOptions = (): Filters.Filter[] => {
  * ReleasesSort
  * -----------------------------------------------------------------------------------------------*/
 
-const DEFAULT_SORT = 'scheduledAt:asc';
+const DEFAULT_SORT = 'scheduledAt:desc';
 // The first of the admin's page sizes
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -344,7 +397,7 @@ const SORT_OPTIONS = [
     value: 'scheduledAt:asc',
     message: {
       id: 'content-releases.pages.Releases.sort.scheduled-at-asc',
-      defaultMessage: 'Scheduled date (soonest first)',
+      defaultMessage: 'Scheduled date (earliest first)',
     },
   },
   {
@@ -530,16 +583,7 @@ const ReleasesTable = ({
                 onClick={() => navigate(`${release.id}`)}
               >
                 <Table.Cell width="30%" maxWidth="30rem">
-                  <Link
-                    tag={NavLink}
-                    to={`${release.id}`}
-                    isExternal={false}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  >
-                    <Typography textColor={isPast ? 'neutral600' : 'neutral800'} ellipsis>
-                      {release.name}
-                    </Typography>
-                  </Link>
+                  <ReleaseName release={release} isPast={isPast} />
                 </Table.Cell>
                 <Table.Cell>
                   <ReleaseStatusBadge status={release.status} />

@@ -21,6 +21,10 @@ describe.concurrent('filePathToPropPath', () => {
     expect(filePathToPropPath('./config/file.key.json')).toEqual(['config', 'file', 'key']);
   });
 
+  it('Strips leading dots from path segments', () => {
+    expect(filePathToPropPath('./config/..double.js')).toEqual(['config', 'double']);
+  });
+
   // removes the last prop of the path
   it('Disable file name key', () => {
     expect(filePathToPropPath('./config/test.js', false)).toEqual(['config']);
@@ -42,5 +46,12 @@ describe.concurrent('filePathToPropPath', () => {
       expect(filePathToPropPath('src\\config/test.js')).toEqual(['src', 'config', 'test']);
       expect(filePathToPropPath('.\\config/test.js')).toEqual(['config', 'test']);
     });
+  });
+});
+
+describe('filePathToPropPath leading dots', () => {
+  it('strips every leading dot of a segment', () => {
+    expect(filePathToPropPath('./config/.hidden.js')).toEqual(['config', 'hidden']);
+    expect(filePathToPropPath('./config/..double.js')).toEqual(['config', 'double']);
   });
 });

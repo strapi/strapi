@@ -1,50 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import reviewWorkflows from '../review-workflows';
+import routes from '../review-workflows';
 
-describe('Review Workflows routes', () => {
-  it('serves collection and single type entries on separate routes', () => {
-    const entryRoutes = reviewWorkflows.routes.filter(({ path }) =>
-      path.startsWith('/content-manager/')
+describe('review workflow routes', () => {
+  test('content-manager entry routes keep one alternation path', () => {
+    const entryRoutes = routes.routes.filter((route) =>
+      String(route.path).includes('(collection|single)-types')
     );
 
-    expect(
-      entryRoutes.map((route) => ({
-        method: route.method,
-        path: route.path,
-        handler: route.handler,
-      }))
-    ).toEqual([
-      {
-        method: 'PUT',
-        path: '/content-manager/collection-types/:model_uid/:id/stage',
-        handler: 'stages.updateEntity',
-      },
-      {
-        method: 'PUT',
-        path: '/content-manager/single-types/:model_uid/:id/stage',
-        handler: 'stages.updateEntity',
-      },
-      {
-        method: 'GET',
-        path: '/content-manager/collection-types/:model_uid/:id/stages',
-        handler: 'stages.listAvailableStages',
-      },
-      {
-        method: 'GET',
-        path: '/content-manager/single-types/:model_uid/:id/stages',
-        handler: 'stages.listAvailableStages',
-      },
-      {
-        method: 'PUT',
-        path: '/content-manager/collection-types/:model_uid/:id/assignee',
-        handler: 'assignees.updateEntity',
-      },
-      {
-        method: 'PUT',
-        path: '/content-manager/single-types/:model_uid/:id/assignee',
-        handler: 'assignees.updateEntity',
-      },
+    expect(entryRoutes.map((route) => `${route.method} ${route.path}`)).toEqual([
+      'PUT /content-manager/(collection|single)-types/:model_uid/:id/stage',
+      'GET /content-manager/(collection|single)-types/:model_uid/:id/stages',
+      'PUT /content-manager/(collection|single)-types/:model_uid/:id/assignee',
     ]);
   });
 });

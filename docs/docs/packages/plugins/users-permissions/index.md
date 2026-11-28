@@ -22,12 +22,13 @@ The plugin adds three content types. `plugin::users-permissions.user` (table `up
 
 ### `register`
 
-[`server/src/register.js`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/register.js) does four things:
+[`server/src/register.js`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/register.js) does five things:
 
 - It registers the strategy `users-permissions` for the `content-api` auth scope, with `strapi.get('auth').register`.
 - It adds a `content-api.output` sanitizer that removes the `users` relation from role entities.
 - It calls `server/src/graphql` when the `graphql` plugin exists. That code disables queries and mutations on permissions, replaces the create, update and delete mutations of users and roles, and adds the `me` query and the auth mutations (`login`, `register` and the password and email flows).
 - It registers a hand-written OpenAPI spec (`documentation/content-api.yaml`) with the `documentation` plugin when it exists.
+- It tells the Content Manager how to find the end user who made a Content API write, when Content History is enabled. A Content API write by an end user then shows the end user as its author. Read [History and preview](../../core/content-manager/index.md#history-and-preview) for the rule.
 
 ### Authentication strategy
 

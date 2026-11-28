@@ -23,6 +23,8 @@ interface GetFoldersParams {
   /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
   sort?: string;
   search?: string;
+  /** Folder path a search is limited to, subfolders included. Ignored when not searching. */
+  searchFolderPath?: string;
   /** Extra `filters[$and]` entries (list filters), AND-ed with the parent/search scope. */
   filters?: Record<string, unknown>[];
 }
@@ -48,7 +50,13 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId, sort, search, filters = [] } = params as GetFoldersParams;
+        const {
+          parentId,
+          sort,
+          search,
+          searchFolderPath,
+          filters = [],
+        } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
@@ -56,17 +64,21 @@ const foldersApi = uploadApi.injectEndpoints({
           populate: { parent: true },
         };
 
-        // List filters (dates) apply in BOTH modes — search composes with them,
-        // only the parent scope is dropped while searching.
+        // List filters (dates) apply in BOTH modes — search composes with them.
+        // While searching, the direct-children parent scope gives way to the
+        // searched subtree, or to nothing for a global search.
         if (search) {
-          // Search is global: the parent filter is dropped so matching folders
-          // anywhere in the library surface. The endpoint is unpaginated — it
-          // returns every match — so callers can treat the array length as the
-          // true total. Bounding it is a separate decision.
+          // No `page`/`pageSize` is sent, so the endpoint returns every match
+          // and callers can treat the array length as the true total. Opting
+          // into its pagination is a separate decision.
           queryParams['_q'] = encodeSearchQuery(search);
 
-          if (filters.length > 0) {
-            queryParams['filters'] = { $and: [...filters] };
+          const clauses = searchFolderPath
+            ? [{ path: { $startsWith: `${searchFolderPath}/` } }, ...filters]
+            : filters;
+
+          if (clauses.length > 0) {
+            queryParams['filters'] = { $and: clauses };
           }
         } else {
           const parentScope =

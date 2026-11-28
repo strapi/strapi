@@ -23,7 +23,6 @@ const defaultPlugin = {
     default: {},
     validator() {},
   },
-  routes: [],
   controllers: {},
   services: {},
   policies: {},
@@ -47,7 +46,6 @@ const applyUserExtension = async (plugins: Plugins) => {
     for (const ctName of Object.keys(extendedContentTypes)) {
       const extendedSchema = extendedContentTypes?.[ctName]?.schema;
       if (!extendedSchema) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -137,7 +135,9 @@ export default async function loadPlugins(strapi: Core.Strapi) {
       ...pluginServer,
       contentTypes: formatContentTypes(pluginName, pluginServer.contentTypes ?? {}),
       config: defaults({}, pluginServer.config, defaultPlugin.config),
-      routes: pluginServer.routes ?? defaultPlugin.routes,
+      // A fresh array per plugin: a shared default would register a route pushed on one
+      // route-less plugin under every route-less plugin's prefix
+      routes: pluginServer.routes ?? [],
     };
   }
 

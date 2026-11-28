@@ -1,9 +1,8 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
-import { toUpper } from 'lodash';
 
-import { createStrapi, compileStrapi, getRouteSourcePath } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -22,7 +21,7 @@ const action = async () => {
   list
     .filter((route) => route.methods.length)
     .forEach((route) => {
-      infoTable.push([route.methods.map(toUpper).join('|'), getRouteSourcePath(route)]);
+      infoTable.push([route.methods.map((method) => method.toUpperCase()).join('|'), route.path]);
     });
 
   console.log(infoTable.toString());

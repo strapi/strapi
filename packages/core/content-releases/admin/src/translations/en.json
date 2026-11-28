@@ -101,7 +101,7 @@
   "pages.Releases.filters.clear-all": "Clear all",
   "pages.Releases.sort.label": "Sort: {sort}",
   "pages.Releases.sort.placeholder": "Sort",
-  "pages.Releases.sort.scheduled-at-asc": "Scheduled date (soonest first)",
+  "pages.Releases.sort.scheduled-at-asc": "Scheduled date (earliest first)",
   "pages.Releases.sort.scheduled-at-desc": "Scheduled date (latest first)",
   "pages.Releases.sort.updated-at-desc": "Most recent updates",
   "pages.Releases.sort.updated-at-asc": "Oldest updates",

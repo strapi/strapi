@@ -24,6 +24,26 @@ describe('validatePreviewUrl', () => {
     expect(params).toEqual({ documentId: 'doc', status });
   });
 
+  test('omits a null locale', async () => {
+    const params = await validatePreviewUrl(createStrapi(true), uid, {
+      documentId: 'doc',
+      locale: null,
+      status: 'draft',
+    });
+
+    expect(params).toStrictEqual({ documentId: 'doc', status: 'draft' });
+  });
+
+  test.each(['', 'en'])('keeps the %j locale', async (locale) => {
+    const params = await validatePreviewUrl(createStrapi(true), uid, {
+      documentId: 'doc',
+      locale,
+      status: 'draft',
+    });
+
+    expect(params).toStrictEqual({ documentId: 'doc', locale, status: 'draft' });
+  });
+
   test('rejects any other status', async () => {
     await expect(
       validatePreviewUrl(createStrapi(true), uid, {

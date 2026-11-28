@@ -89,7 +89,7 @@ describe('AssetsSearchInput', () => {
     expect(mockSetQuery).toHaveBeenCalledWith({ _q: 'a%26b' }, 'push', true);
   });
 
-  it('removes _q when the input is cleared', async () => {
+  it('removes _q and searchAll when the input is cleared', async () => {
     mockUseQueryParams.mockReturnValue([{ query: { _q: 'kitten' } }, mockSetQuery]);
 
     const { user } = renderInput();
@@ -100,7 +100,7 @@ describe('AssetsSearchInput', () => {
       jest.advanceTimersByTime(DEBOUNCE_MS);
     });
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '' }, 'remove', true);
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '', searchAll: '' }, 'remove', true);
   });
 
   it('shows the value from the URL on mount', () => {

@@ -1,28 +1,102 @@
-import { test as base } from '@playwright/test';
+import { test as base, type TestInfo } from '@playwright/test';
 
 import {
+  SQLITE,
   appPort,
   generateApp,
+  getInstanceFeatures,
+  requireFeatures,
+  resetDatabase,
+  restoreDatabase,
+  snapshotDatabase,
   startServer,
+  writeProbe,
+  type InstanceFeatures,
+  type Requirements,
   type Server,
   type ServerMode,
 } from '@strapi/tests-shared';
 
+import { ROLES, loginRoles, storageStatePath, type Role } from './auth';
+
 /** Generated and built once per run by setup/global-setup.ts. */
 export const UI_APP_NAME = 'ui';
+
+/**
+ * When the database goes back to the worker's snapshot (RFC D4):
+ * - `file` (default): before the first `beforeAll` or test of each spec file, so a file's tests
+ *   share what its `beforeAll` wrote but never see another file's data. Don't make a test depend
+ *   on what an earlier test of the file wrote: it breaks when the test runs alone (`--grep`,
+ *   shard), and a failed test restarts the worker, so the next test starts on a fresh snapshot.
+ *   Write shared data in `beforeAll`, or use `test.describe.configure({ mode: 'serial' })` for
+ *   tests that must run in order;
+ * - `test`: before every test (and before `beforeAll`), so data a `beforeAll` writes is gone
+ *   by the first test. Not before `afterAll`, which sees what the last test wrote.
+ * Override it per file with `test.use({ resetScope: 'test' })`.
+ */
+export type ResetScope = 'file' | 'test';
 
 export interface AppOptions {
   /** How the Strapi server runs. Set per Playwright project. */
   serverMode: ServerMode;
 }
 
+export interface ResetOptions {
+  resetScope: ResetScope;
+  /**
+   * EE features and future flags the tests need, for example
+   * `test.use({ requires: { ee: ['cms-content-releases'] } })`. A test fails when the instance
+   * lacks one: it never skips. Tag EE-only tests `@ee` so CE runs leave them out.
+   */
+  requires: Requirements;
+}
+
+export interface AuthOptions {
+  /**
+   * The admin role the page starts logged in as (`fixtures/auth.ts`), through its storage state:
+   * `test.use({ role: 'editor' })`. Default: `'admin'` (Super Admin). `null` starts logged out,
+   * for the tests of the login page itself.
+   */
+  role: Role | null;
+}
+
 export interface AppWorkerFixtures {
   /** The Strapi server of this worker, started once per worker. */
   server: Server;
+  /**
+   * The spec file whose data is in the database, so file scope knows when to reset, and how many
+   * restores ran in this worker, so the seeding fixtures know when what they seeded is gone.
+   */
+  databaseOwner: { file?: string; restores: number };
+  /** Edition, EE features and future flags of the worker's instance. */
+  features: InstanceFeatures;
+  /** The storage state file of each role, saved by `server` (see fixtures/auth.ts). */
+  storageStates: Record<Role, string>;
 }
 
-export const test = base.extend<object, AppOptions & AppWorkerFixtures>({
+export interface ResetFixtures {
+  /** Restores the snapshot before a test or hook, following `resetScope`. Automatic. */
+  databaseReset: void;
+  /** Fails the test when the instance lacks one of `requires`. Automatic. */
+  requirementsCheck: void;
+}
+
+/**
+ * The hook the fixture is set up for (`beforeAll`, `afterAll`…), or undefined for a test.
+ * Playwright doesn't expose it: this reads the same internal method its own fixtures use.
+ * `reset-test-scope.ui-test.ts` fails if it stops working.
+ */
+export const currentHookType = (testInfo: TestInfo) =>
+  (testInfo as TestInfo & { _currentHookType?: () => string | undefined })._currentHookType?.();
+
+export const test = base.extend<
+  ResetOptions & ResetFixtures & AuthOptions,
+  AppOptions & AppWorkerFixtures
+>({
   serverMode: ['develop', { scope: 'worker', option: true }],
+  resetScope: ['file', { option: true }],
+  requires: [{}, { option: true }],
+  role: ['admin', { option: true }],
 
   server: [
     async ({ serverMode }, use, workerInfo) => {
@@ -35,19 +109,92 @@ export const test = base.extend<object, AppOptions & AppWorkerFixtures>({
       }
 
       const app = await generateApp({ name: UI_APP_NAME, overwrite: false });
+      // A worker restarted after a failure must not start on the previous worker's data.
+      await resetDatabase(app, SQLITE);
       const server = await startServer(app, {
         mode: serverMode,
         // parallelIndex stays in [0, workers): workerIndex goes up each time a worker restarts
         // after a failure, which would walk the port out of the ui range.
         port: appPort('ui', workerInfo.parallelIndex),
         requireAdmin: true,
+        // Snapshots are SQLite only, whatever TESTS_DATABASE says.
+        database: SQLITE,
       });
+      // The role users and their admin sessions come before the snapshot, so every reset keeps
+      // them and the saved storage states stay valid. Seeding (CMS-1947) goes here too.
+      await loginRoles(server, workerInfo);
+      // The state every reset goes back to.
+      await snapshotDatabase(server);
+      // The probe row is not in the snapshot: the live database starts one row off it, so even
+      // the first spec file of a worker starts with a real restore, and a reset spec run on its
+      // own (single file, --grep, shard) fails when the restore does nothing.
+      await writeProbe(server);
 
       await use(server);
 
       await server.stop();
     },
     { scope: 'worker', timeout: 180_000 },
+  ],
+
+  async baseURL({ server }, use) {
+    await use(server.url);
+  },
+
+  storageStates: [
+    async ({ server }, use, workerInfo) => {
+      const states = {} as Record<Role, string>;
+      for (const role of ROLES) {
+        states[role] = storageStatePath(workerInfo, server, role);
+      }
+      await use(states);
+    },
+    { scope: 'worker' },
+  ],
+
+  // A role's storage state, or a logged-out page for `role: null`.
+  async storageState({ role, storageStates }, use) {
+    await use(role === null ? undefined : storageStates[role]);
+  },
+
+  databaseOwner: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use({ restores: 0 });
+    },
+    { scope: 'worker' },
+  ],
+
+  features: [
+    async ({ server }, use) => {
+      await use(await getInstanceFeatures(server));
+    },
+    { scope: 'worker' },
+  ],
+
+  requirementsCheck: [
+    async ({ features, requires }, use) => {
+      requireFeatures(features, requires);
+      await use();
+    },
+    { auto: true },
+  ],
+
+  databaseReset: [
+    async ({ server, resetScope, databaseOwner }, use, testInfo) => {
+      const newFile = databaseOwner.file !== testInfo.file;
+      if (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll')) {
+        await restoreDatabase(server);
+        databaseOwner.restores += 1;
+      }
+      databaseOwner.file = testInfo.file;
+
+      await use();
+    },
+    // Also before `beforeAll` and `afterAll` hooks: with `auto: true`, Playwright sets the
+    // fixture up for tests only, so a file's reset would run after its `beforeAll` and wipe what
+    // it wrote. Playwright's own fixtures use this value; its types only declare a boolean.
+    { auto: 'all-hooks-included' as unknown as true },
   ],
 });
 

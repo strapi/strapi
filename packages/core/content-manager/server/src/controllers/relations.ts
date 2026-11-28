@@ -1,4 +1,4 @@
-import { property, uniq, uniqBy, concat, flow, isEmpty } from 'lodash';
+import { property, uniq, uniqBy, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -412,11 +412,14 @@ export default {
      * searching should be allowed only on mainField for permission reasons
      */
     if (search) {
-      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      const filter =
+        typeof query._filter === 'string' && isOperatorOfType('where', query._filter)
+          ? query._filter
+          : '$containsi';
       addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
-    if (idsToOmit?.length > 0) {
+    if ((idsToOmit?.length ?? 0) > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
         id: { $notIn: [...new Set(idsToOmit)] },
@@ -437,7 +440,7 @@ export default {
     const { userAbility } = ctx.state;
     const { id } = ctx.params;
 
-    await validateFindExisting(ctx.request.query);
+    const { page, pageSize } = await validateFindExisting(ctx.request.query);
 
     const {
       entryId,
@@ -470,7 +473,7 @@ export default {
           dbQuery
             .load(...args)
             // Ensure response is an array
-            .then((res) => ({ results: res ? [res] : [] }));
+            .then((res) => ({ results: res ? [res] : [], pagination: undefined }));
 
     const filters: {
       publishedAt?: Record<string, any>;
@@ -489,10 +492,7 @@ export default {
       filters.publishedAt = { $null: true };
     }
 
-    const pageParams = {
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
-    };
+    const pageParams = { page, pageSize };
 
     const defaultPagination = (total: number) => ({ page: 1, pageCount: 1, pageSize: 10, total });
 
@@ -538,6 +538,19 @@ export default {
     });
 
     /**
+     * A page without relations (no relation, or a page past the last one) has no main field to
+     * load: return it as is.
+     */
+    if (res.results.length === 0) {
+      ctx.body = {
+        pagination: res.pagination || defaultPagination(0),
+        results: [],
+      };
+
+      return;
+    }
+
+    /**
      * Add all ids to load in permissionQuery
      * If any of the relations are not accessible, the permissionQuery will exclude them
      */
@@ -548,15 +561,19 @@ export default {
      * Load the relations with the main field, the sanitized permission query
      * will exclude the relations the user does not have access to.
      *
-     * Pagination is not necessary as the permissionQuery contains the ids to load.
+     * The permissionQuery already restricts the load to the ids of the page, so it reads them as
+     * one first page. Without explicit page params, loadPages would fall back to its default page
+     * size of 10 and drop the main field of the relations past the 10th.
      */
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
       ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
+      page: 1,
+      pageSize: loadedIds.length,
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
+    const relationsUnion = uniqBy([sanitizedRes.results, res.results].flat(), 'id');
 
     ctx.body = {
       pagination: res.pagination || defaultPagination(relationsUnion.length),

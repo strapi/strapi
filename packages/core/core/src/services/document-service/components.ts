@@ -28,6 +28,29 @@ type ComponentBody = {
   [key: string]: ComponentValue | DynamicZoneValue;
 };
 
+/**
+ * Runs one task per component value.
+ *
+ * Inside a transaction every query is bound to the transaction's single connection, and
+ * node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
+ * that is already executing a query. The tasks therefore run one after another there, which
+ * costs nothing: the driver was already serialising them on that one connection. Outside a
+ * transaction they fan out over the pool as before.
+ */
+const mapComponents = async <T>(values: T[], task: (value: T) => Promise<any>): Promise<any[]> => {
+  if (strapi?.db?.inTransaction?.()) {
+    const results = [];
+
+    for (const value of values) {
+      results.push(await task(value));
+    }
+
+    return results;
+  }
+
+  return async.map(values, task);
+};
+
 const omitComponentData = curry(
   (schema: Schema.Schema, data: Input<UID.Schema>): Partial<Input<UID.Schema>> => {
     const { attributes } = schema;
@@ -71,8 +94,9 @@ const createComponents = async <TUID extends UID.Schema, TData extends Input<TUI
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components: RepeatableComponentValue = await async.map(componentValue, (value: any) =>
-          createComponent(componentUID, value)
+        const components: RepeatableComponentValue = await mapComponents(
+          componentValue,
+          (value: any) => createComponent(componentUID, value)
         );
 
         componentBody[attributeName] = components.map(({ id }) => {
@@ -125,7 +149,7 @@ const createComponents = async <TUID extends UID.Schema, TData extends Input<TUI
       };
 
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await async.map(
+      componentBody[attributeName] = await mapComponents(
         dynamiczoneValues,
         createDynamicZoneComponents
       );
@@ -152,11 +176,119 @@ const getComponents = async <TUID extends UID.Schema>(
   >);
 };
 
+type RepeatedComponentId = {
+  id: Modules.EntityService.Params.Attribute.ID;
+  path: string[];
+};
+
+/**
+ * Find the first component id sent twice in one list of the update data: a repeatable component,
+ * a dynamic zone, or such a list nested in a component, at any depth. Only the lists inside
+ * components that are updated (sent with an id) are checked.
+ *
+ * Every copy would update the same stored row, so only the last copy would be kept. Ids are
+ * compared as strings, so `1` and `"1"` are the same id. In a dynamic zone, an id is repeated only
+ * for the same component type, since each type stores its rows in its own table.
+ */
+const findRepeatedComponentId = (
+  uid: UID.Schema,
+  data: Record<string, unknown>,
+  path: string[] = []
+): RepeatedComponentId | null => {
+  const { attributes = {} } = strapi.getModel(uid);
+
+  for (const [attributeName, attribute] of Object.entries(attributes)) {
+    if (attribute.type !== 'component' && attribute.type !== 'dynamiczone') {
+      continue;
+    }
+
+    const value = data[attributeName];
+
+    if (isNil(value)) {
+      continue;
+    }
+
+    const isList =
+      attribute.type === 'dynamiczone' ||
+      (attribute.type === 'component' && attribute.repeatable === true);
+    const keys = new Set<string>();
+
+    for (const [index, item] of (_.castArray(value) as unknown[]).entries()) {
+      if (isPlainObject(item) === false) {
+        continue;
+      }
+
+      const component = item as Record<string, unknown>;
+
+      // A component sent without an id is created, and creating a component drops the ids nested
+      // in it, so nothing inside it can update a stored row twice
+      if (isNil(component.id) === true) {
+        continue;
+      }
+
+      const { id } = component as { id: Modules.EntityService.Params.Attribute.ID };
+      const itemPath = isList ? [...path, attributeName, `${index}`] : [...path, attributeName];
+      const componentUID =
+        attribute.type === 'component'
+          ? attribute.component
+          : (component.__component as UID.Component | undefined);
+
+      if (isList === true) {
+        const key =
+          attribute.type === 'dynamiczone'
+            ? `${componentUID}:${pickStringifiedId({ id })}`
+            : pickStringifiedId({ id });
+
+        if (keys.has(key) === true) {
+          return { id, path: [...itemPath, 'id'] };
+        }
+
+        keys.add(key);
+      }
+
+      if (componentUID === undefined || strapi.getModel(componentUID) === undefined) {
+        continue;
+      }
+
+      const nested = findRepeatedComponentId(componentUID, component, itemPath);
+
+      if (nested !== null) {
+        return nested;
+      }
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Update the components of an entry, after rejecting a component id sent twice in one list.
+ * The check runs on the whole data before anything is written.
+ */
+const updateComponents = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
+  uid: TUID,
+  entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
+  data: TData
+) => {
+  const repeated = findRepeatedComponentId(uid, data as Record<string, unknown>);
+
+  if (repeated !== null) {
+    const listPath = repeated.path.slice(0, -2).join('.');
+    const message = `The component id ${repeated.id} appears more than once in ${listPath}`;
+
+    throw new errors.ValidationError(message, {
+      errors: [{ path: repeated.path, message, name: 'ValidationError', value: repeated.id }],
+    });
+  }
+
+  return await writeComponentUpdates(uid, entityToUpdate, data);
+};
+
 /*
   delete old components
   create or update
 */
-const updateComponents = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
+const writeComponentUpdates = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   data: TData
@@ -201,7 +333,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const results: Array<ComponentWriteResult | null> = await async.map(
+        const results: Array<ComponentWriteResult | null> = await mapComponents(
           componentValue,
           (value: any) => updateOrCreateComponent(componentUID, value, getPrevious(value))
         );
@@ -281,7 +413,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
 
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
       const components: Array<ComponentWriteResult & { __component: UID.Component }> =
-        await async.map(dynamiczoneValues, async (value: any) => {
+        await mapComponents(dynamiczoneValues, async (value: any) => {
           const previous =
             has(value, 'id') && !isNil(value.id) ? previousByKey.get(toKey(value)) : undefined;
           const result = await updateOrCreateComponent(value.__component, value, previous);
@@ -835,11 +967,11 @@ const deleteComponentsOneByOne = async <TUID extends UID.Schema, TEntity extends
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
-        await async.map(_.castArray(value), (subValue: any) =>
+        await mapComponents(_.castArray(value), (subValue: any) =>
           deleteComponent(componentUID, subValue)
         );
       } else {
-        await async.map(_.castArray(value), (subValue: any) =>
+        await mapComponents(_.castArray(value), (subValue: any) =>
           deleteComponent(subValue.__component, subValue)
         );
       }
@@ -921,7 +1053,8 @@ const updateComponent = async <TUID extends UID.Component>(
 ): Promise<ComponentWriteResult | null> => {
   const schema = strapi.getModel(uid);
 
-  const componentData = await updateComponents(uid, componentToUpdate, data);
+  // The entry's updateComponents already checked the nested lists for repeated ids
+  const componentData = await writeComponentUpdates(uid, componentToUpdate, data);
 
   // Nothing to write when the component is stored as sent. updateComponents only reports the
   // nested attributes that changed, so an empty componentData means none of them did. The write

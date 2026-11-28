@@ -141,4 +141,40 @@ describe('Admin permissions of actions registered in the app lifecycles', () => 
       expect.arrayContaining([registerPhaseActionId, bootstrapPhaseActionId])
     );
   });
+
+  test('Stored permissions of an action that is no longer registered are all deleted after one restart, even past the first page', async () => {
+    // The boot cleanup reads 200 permissions per page
+    const removedPermissionCount = 450;
+
+    await strapi.destroy();
+    strapi = await startStrapi({ withRemovedAction: true });
+
+    for (let index = 0; index < removedPermissionCount; index += 1) {
+      await strapi.db.query('admin::permission').create({
+        data: {
+          action: removedActionId,
+          subject: null,
+          properties: {},
+          conditions: [],
+          role: roleId,
+        },
+      });
+    }
+
+    expect(
+      await strapi.db
+        .query('admin::permission')
+        .count({ where: { action: removedActionId, role: { id: roleId } } })
+    ).toBe(removedPermissionCount);
+
+    await strapi.destroy();
+    strapi = await startStrapi();
+
+    expect(
+      await strapi.db.query('admin::permission').count({ where: { action: removedActionId } })
+    ).toBe(0);
+    expect(await findPermissionActions(strapi, roleId)).toEqual(
+      expect.arrayContaining([registerPhaseActionId, bootstrapPhaseActionId])
+    );
+  });
 });

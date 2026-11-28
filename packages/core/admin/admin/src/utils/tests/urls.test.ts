@@ -14,8 +14,18 @@ describe('urls', () => {
       expect(createAbsoluteUrl('/example')).toBe('http://localhost:1337/example');
     });
 
+    it('should strip every trailing slash from a relative url', () => {
+      expect(createAbsoluteUrl('/admin///')).toBe('http://localhost:1337/admin');
+    });
+
     it('should handle protocol relative URLs', () => {
       expect(createAbsoluteUrl('//example.com')).toBe('http://example.com');
     });
+  });
+});
+
+describe('createAbsoluteUrl trailing slashes', () => {
+  it('removes every trailing slash, not only the last one', () => {
+    expect(createAbsoluteUrl('/admin///')).toBe('http://localhost:1337/admin');
   });
 });

@@ -85,16 +85,16 @@ async function createAdmin({ email, password, firstname, lastname }: CmdOptions)
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const user = await app.admin!.services.user.exists({ email });
+  const user = await app.service('admin::user').exists({ email });
 
   if (user) {
     console.error(`User with email "${email}" already exists`);
     process.exit(1);
   }
 
-  const superAdminRole = await app.admin!.services.role.getSuperAdmin();
+  const superAdminRole = await app.service('admin::role').getSuperAdmin();
 
-  await app.admin!.services.user.create({
+  await app.service('admin::user').create({
     email,
     firstname,
     lastname,

@@ -1,5 +1,6 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
+import { createAgent } from 'api-tests/agent';
 import { createUtils, describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import fs from 'fs';
@@ -238,6 +239,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
   let collectionTypeDocumentId;
   let singleTypeDocumentId;
   let relations;
+  // Hoisted so the deletion test can target this suite's own asset by id. Test files
+  // share a database within a CI shard, so upload ids are not stable across runs.
+  let imageA;
 
   const createEntry = async ({ uid, data, isCollectionType = true }: CreateEntryArgs) => {
     const type = isCollectionType ? 'collection-types' : 'single-types';
@@ -305,6 +309,16 @@ describeOnCondition(edition === 'EE')('History API', () => {
     return rq;
   };
 
+  // History rows are written from onCommit after the document write responds.
+  // Wait for those hooks before reading, or the row is not there yet.
+  const settleHistory = () =>
+    (strapi.db as unknown as { settleTransactionHooks(): Promise<void> }).settleTransactionHooks();
+
+  const readHistoryVersions = async (url: string) => {
+    await settleHistory();
+    return rq({ method: 'GET', url });
+  };
+
   beforeAll(async () => {
     builder.addComponent(componentModel);
     builder.addComponent(seoComponentModel);
@@ -344,7 +358,8 @@ describeOnCondition(edition === 'EE')('History API', () => {
     const relationIds = relations.map((relation) => relation.data.documentId);
 
     // Upload media assets to be added to versions
-    const [imageA, imageB] = await uploadFiles();
+    let imageB;
+    [imageA, imageB] = await uploadFiles();
     const nestedComposWithImages = {
       rootImage: imageA.id,
       rootImageSibling: imageB.id,
@@ -379,55 +394,70 @@ describeOnCondition(edition === 'EE')('History API', () => {
     collectionTypeDocumentId = collectionTypeEntry.data.documentId;
     singleTypeDocumentId = singleTypeEntry.data.documentId;
 
-    // Update to create history versions for entries in different locales
-    await Promise.all([
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        data: {
-          description: 'Hello',
-        },
-      }),
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        locale: 'fr',
-        data: {
-          name: 'Produit 1',
-        },
-      }),
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        locale: 'fr',
-        data: {
-          description: 'Coucou',
-        },
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          description: 'Wow, amazing!',
-        },
-        isCollectionType: false,
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          title: 'Bienvenue',
-        },
-        isCollectionType: false,
-        locale: 'fr',
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          description: 'Super',
-        },
-        isCollectionType: false,
-        locale: 'fr',
-      }),
-    ]);
+    // Create history versions in a fixed order. Parallel updates of one locale
+    // commit in any order on Postgres and MySQL, so the oldest version would
+    // not be stable.
+    const versionUpdates = [
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          data: {
+            description: 'Hello',
+          },
+        }),
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          locale: 'fr',
+          data: {
+            name: 'Produit 1',
+          },
+        }),
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          locale: 'fr',
+          data: {
+            description: 'Coucou',
+          },
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            description: 'Wow, amazing!',
+          },
+          isCollectionType: false,
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            title: 'Bienvenue',
+          },
+          isCollectionType: false,
+          locale: 'fr',
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            description: 'Super',
+          },
+          isCollectionType: false,
+          locale: 'fr',
+        }),
+    ];
+    for (const update of versionUpdates) {
+      await update();
+    }
+
+    await (
+      strapi.db as unknown as { settleTransactionHooks(): Promise<void> }
+    ).settleTransactionHooks();
   });
 
   afterAll(async () => {
@@ -614,10 +644,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       // Get the history of the cloned entry
-      const cloneHistoryVersions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`,
-      });
+      const cloneHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`
+      );
 
       expect(cloneHistoryVersions.body.meta.pagination.total).toBe(1);
       expect(cloneHistoryVersions.body.data[0].relatedDocumentId).toBe(
@@ -777,10 +806,10 @@ describeOnCondition(edition === 'EE')('History API', () => {
         url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=3&locale=en`,
       });
 
-      // Delete an asset
+      // Delete an asset — target this suite's own upload rather than a hardcoded id.
       await rq({
         method: 'DELETE',
-        url: `/upload/files/1`,
+        url: `/upload/files/${imageA.id}`,
       });
 
       // Restore the initial version containing the deleted asset
@@ -844,11 +873,12 @@ describeOnCondition(edition === 'EE')('History API', () => {
         data: { name: 'Product with no more reviews' },
       });
 
-      // Find and restore the initial version that had the components data
-      const versions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`,
-      });
+      // Find and restore the initial version that had the components data.
+      // readHistoryVersions waits for the onCommit hooks that write these rows.
+      const versions = await readHistoryVersions(
+        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`
+      );
+      expect(versions.body.data).toHaveLength(3);
       const res = await rq({
         method: 'PUT',
         url: `/content-manager/history-versions/${versions.body.data.at(2).id}/restore`,
@@ -908,6 +938,227 @@ describeOnCondition(edition === 'EE')('History API', () => {
     });
   });
 
+  describe('Source and author of history versions', () => {
+    const findVersions = async (documentId: string) => {
+      const { body } = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${documentId}`
+      );
+
+      return body.data;
+    };
+
+    const createAdminToken = async (name: string) => {
+      const permission = (action: string) => ({
+        action,
+        subject: collectionTypeUid,
+        conditions: [],
+        properties: { fields: ['name', 'description'], locales: ['en'] },
+      });
+
+      const { body } = await rq({
+        method: 'POST',
+        url: '/admin/admin-tokens',
+        body: {
+          name,
+          adminPermissions: [
+            permission('plugin::content-manager.explorer.read'),
+            permission('plugin::content-manager.explorer.update'),
+          ],
+        },
+      });
+
+      return {
+        tokenRq: await createAgent(strapi, { token: body.data.accessKey }),
+      };
+    };
+
+    const createAdminTokenVersion = async (name: string) => {
+      const { tokenRq } = await createAdminToken(name);
+
+      const res = await tokenRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: `Updated with the ${name}` },
+        qs: { locale: 'en' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+
+      return latestVersion;
+    };
+
+    test('Records an admin panel write with the admin panel source', async () => {
+      const versions = await findVersions(collectionTypeDocumentId);
+
+      expect(versions.length).toBeGreaterThan(0);
+      versions.forEach((version) => {
+        expect(version.source).toBe('admin-panel');
+      });
+    });
+
+    test('Records an admin panel write with the admin as its author', async () => {
+      const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: 'Updated in the admin panel' },
+        qs: { locale: 'en' },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: 'admin admin',
+        model: 'admin::user',
+        id: me.data.documentId,
+      });
+      expect(latestVersion.createdBy).toEqual({
+        id: me.data.id,
+        firstname: 'admin',
+        lastname: 'admin',
+        username: null,
+        email: 'admin@strapi.io',
+      });
+    });
+
+    test('Records an admin token write with the admin API source and the token owner as its author', async () => {
+      const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+
+      const version = await createAdminTokenVersion('history-author-token');
+
+      expect(version.source).toBe('admin-api');
+      expect(version.author).toEqual({
+        type: 'person',
+        name: 'admin admin',
+        model: 'admin::user',
+        id: me.data.documentId,
+      });
+      expect(version.createdBy).toMatchObject({ id: me.data.id });
+    });
+
+    const createAuthorVersion = async (firstname: string) => {
+      const utils = createUtils(strapi);
+      const superAdminRole = await utils.getSuperAdminRole();
+      const author = await utils.createUser({
+        firstname,
+        lastname: 'author',
+        email: `${firstname}.author@strapi.io`,
+        roles: [superAdminRole.id],
+      });
+      const authorRq = await createAuthRequest({ strapi, userInfo: author });
+      const { data: entry } = await createEntry({
+        uid: collectionTypeUid,
+        data: { name: `Product of the ${firstname} author` },
+      });
+
+      const res = await authorRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${entry.documentId}`,
+        body: { description: `Updated by the ${firstname} author` },
+        qs: { locale: 'en' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(entry.documentId);
+
+      return { author, version: latestVersion, documentId: entry.documentId };
+    };
+
+    test('Shows the current name of the author', async () => {
+      const { author, documentId } = await createAuthorVersion('renamed');
+
+      await strapi.service('admin::user').updateById(author.id, { firstname: 'Renamed' });
+
+      const [latestVersion] = await findVersions(documentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: 'Renamed author',
+        model: 'admin::user',
+        id: author.documentId,
+      });
+    });
+
+    test('Shows a deleted author when the author is deleted', async () => {
+      const { author, documentId } = await createAuthorVersion('deleted');
+
+      await createUtils(strapi).deleteUserById(author.id);
+
+      const [latestVersion] = await findVersions(documentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: null,
+        model: 'admin::user',
+        id: null,
+      });
+    });
+
+    describe('Versions saved before the source and the author', () => {
+      let documentId: string;
+
+      const createLegacyVersion = async (createdBy: number) => {
+        await settleHistory();
+
+        const historyVersions = strapi.db.query('plugin::content-manager.history-version');
+        const { contentType, relatedDocumentId, locale, status, data, schema } =
+          await historyVersions.findOne({ where: { relatedDocumentId: documentId } });
+
+        return historyVersions.create({
+          data: { contentType, relatedDocumentId, locale, status, data, schema, createdBy },
+        });
+      };
+
+      beforeAll(async () => {
+        const { data } = await createEntry({
+          uid: collectionTypeUid,
+          data: { name: 'Product saved before the source and the author' },
+        });
+        documentId = data.documentId;
+      });
+
+      test('Shows the admin panel source and the admin as the author', async () => {
+        const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+        const legacyVersion = await createLegacyVersion(me.data.id);
+
+        const versions = await findVersions(documentId);
+        const version = versions.find(({ id }) => id === legacyVersion.id);
+
+        expect(version.source).toBe('admin-panel');
+        expect(version.author).toEqual({
+          type: 'person',
+          name: 'admin admin',
+          model: 'admin::user',
+          id: me.data.documentId,
+        });
+      });
+
+      test('Shows a deleted author when the admin was deleted', async () => {
+        const utils = createUtils(strapi);
+        const admin = await utils.createUser({
+          firstname: 'deleted',
+          lastname: 'admin',
+          email: 'deleted.admin@strapi.io',
+        });
+        const legacyVersion = await createLegacyVersion(admin.id);
+        await utils.deleteUserById(admin.id);
+
+        const versions = await findVersions(documentId);
+        const version = versions.find(({ id }) => id === legacyVersion.id);
+
+        expect(version.source).toBe('admin-panel');
+        expect(version.author).toEqual({
+          type: 'person',
+          name: null,
+          model: 'admin::user',
+          id: null,
+        });
+      });
+    });
+  });
+
   describe('Bulk actions create versions', () => {
     it('Creates a history version when bulk publishing document entries', async () => {
       // Creating a new entry in multiple locales
@@ -933,15 +1184,13 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       expect(bulkPublishResult.statusCode).toBe(200);
 
-      const enHistoryVersions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`,
-      });
+      const enHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`
+      );
 
-      const frHistoryVersions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}&locale=fr`,
-      });
+      const frHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}&locale=fr`
+      );
 
       // Create + Publish = 2 versions
       expect(enHistoryVersions.body.data).toHaveLength(2);

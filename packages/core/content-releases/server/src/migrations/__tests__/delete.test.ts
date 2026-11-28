@@ -53,6 +53,19 @@ describe('content type removals', () => {
     expect(deleteContentTypeActions.mock.calls).toStrictEqual([[['api::deleted.deleted']]]);
   });
 
+  it('does nothing when there are no stored content types yet', async () => {
+    await deleteActionsOnDeleteContentType(
+      {
+        // First boot: the core store has no previous content types
+        oldContentTypes: undefined as unknown as Record<string, Schema.ContentType>,
+        contentTypes: { 'api::kept.kept': contentType(true) },
+      },
+      { strapi }
+    );
+
+    expect(deleteContentTypeActions).not.toHaveBeenCalled();
+  });
+
   it('does nothing when no content type was deleted or lost Draft and Publish', async () => {
     const unchanged = { 'api::kept.kept': contentType(true) };
 

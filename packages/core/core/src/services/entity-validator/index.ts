@@ -724,9 +724,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
             break;
           }
 
-          const target =
-            // eslint-disable-next-line no-nested-ternary
-            attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
+          const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
           // As there are multiple formats supported for associating relations
           // with an entity, the value here can be an: array, object or number.
           let source: RelationSource[];
@@ -813,37 +811,43 @@ const buildRelationsStore = <TUID extends UID.Schema>({
  * mentioned exists
  */
 const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) => {
-  const promises: Promise<void>[] = [];
+  const evaluate = async ([key, value]: [string, ID[]]) => {
+    const uniqueValues = uniqBy(value, `id`);
 
-  for (const [key, value] of Object.entries(relationsStore)) {
-    const evaluate = async () => {
-      const uniqueValues = uniqBy(value, `id`);
+    // Relations sent with empty connect and disconnect lists leave nothing to look up
+    if (uniqueValues.length === 0) {
+      return;
+    }
 
-      // Relations sent with empty connect and disconnect lists leave nothing to look up
-      if (uniqueValues.length === 0) {
-        return;
-      }
-
-      const count = await strapi.db.query(key as UID.Schema).count({
-        where: {
-          id: {
-            $in: uniqueValues.map((v) => v.id),
-          },
+    const count = await strapi.db.query(key as UID.Schema).count({
+      where: {
+        id: {
+          $in: uniqueValues.map((v) => v.id),
         },
-      });
+      },
+    });
 
-      if (count !== uniqueValues.length) {
-        throw new ValidationError(
-          `${
-            uniqueValues.length - count
-          } relation(s) of type ${key} associated with this entity do not exist`
-        );
-      }
-    };
-    promises.push(evaluate());
+    if (count !== uniqueValues.length) {
+      throw new ValidationError(
+        `${
+          uniqueValues.length - count
+        } relation(s) of type ${key} associated with this entity do not exist`
+      );
+    }
+  };
+
+  const entries = Object.entries(relationsStore);
+
+  // One connection inside a transaction: pg rejects overlapping `client.query()` calls, so run these one at a time there
+  if (strapi.db?.inTransaction?.()) {
+    for (const entry of entries) {
+      await evaluate(entry);
+    }
+
+    return;
   }
 
-  return Promise.all(promises);
+  await Promise.all(entries.map(evaluate));
 };
 
 const entityValidator: Modules.EntityValidator.EntityValidator = {

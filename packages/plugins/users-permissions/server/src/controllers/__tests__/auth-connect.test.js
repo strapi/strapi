@@ -2,39 +2,60 @@
 
 /* eslint-env jest */
 
-const authRoutes = require('../../routes/content-api/auth');
+const _ = require('lodash');
 
 jest.mock('../../utils/oauth-connect', () => ({
-  createOAuthConnectMiddleware: () => (ctx) => {
-    ctx.body = 'redirected to the provider';
-  },
+  createOAuthConnectMiddleware: jest.fn(),
 }));
 
+const { createOAuthConnectMiddleware } = require('../../utils/oauth-connect');
+
+/**
+ * Mirrors the config provider: the startup copy as own keys, plus `get` over the live tree.
+ */
+const createConfig = (values) => ({
+  ...values,
+  get: jest.fn((path, defaultValue) => _.get(values, path, defaultValue)),
+});
+
+const setup = ({ serverUrl }) => {
+  const oauthConnect = jest.fn();
+  createOAuthConnectMiddleware.mockReturnValue(oauthConnect);
+
+  global.strapi = {
+    config: createConfig({ server: { url: serverUrl } }),
+    store: jest.fn(() => ({ get: jest.fn(async () => ({ github: { enabled: true } })) })),
+    log: { warn: jest.fn() },
+  };
+
+  const controller = require('../auth')({ strapi: global.strapi });
+  const ctx = { request: { url: '/api/connect/github' }, query: {}, state: {} };
+
+  return { controller, ctx, oauthConnect };
+};
+
 describe('Auth controller - connect', () => {
-  beforeEach(() => {
-    global.strapi = {
-      store: () => ({ get: async () => ({ google: { enabled: true } }) }),
-      config: { server: { url: 'http://localhost:1337' } },
-    };
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  // The core router tests check that this path matches `/connect/google/callback`.
-  it('serves every provider path from one route, kept in v6 syntax', () => {
-    const route = authRoutes({}).find(({ handler }) => handler === 'auth.connect');
+  test('warns when the server URL is not absolute', async () => {
+    const { controller, ctx, oauthConnect } = setup({ serverUrl: '' });
 
-    expect(route.path).toBe('/connect/(.*)');
-    expect(route[Symbol.for('strapi.route.keepV6Path')]).toBe(true);
+    await controller.connect(ctx, jest.fn());
+
+    expect(global.strapi.log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Make sure to set an absolute url')
+    );
+    expect(oauthConnect).toHaveBeenCalled();
   });
 
-  it.each(['/connect/google', '/connect/google/callback'])(
-    'connects %s to the google provider',
-    async (url) => {
-      const controller = require('../auth')({ strapi: global.strapi });
-      const ctx = { request: { url }, query: {} };
+  test('does not warn when the server URL is absolute', async () => {
+    const { controller, ctx, oauthConnect } = setup({ serverUrl: 'http://localhost:1337' });
 
-      await controller.connect(ctx, jest.fn());
+    await controller.connect(ctx, jest.fn());
 
-      expect(ctx.body).toBe('redirected to the provider');
-    }
-  );
+    expect(global.strapi.log.warn).not.toHaveBeenCalled();
+    expect(oauthConnect).toHaveBeenCalled();
+  });
 });

@@ -1,5 +1,8 @@
 import type { OxlintConfig } from 'oxlint';
 
+const LODASH_STRING_ARRAY_MESSAGE =
+  'Use native String.prototype.toLowerCase / toUpperCase / trim / trimStart / trimEnd / padEnd / padStart and Array.prototype.includes / every. Lodash coerces input to a string (null/undefined become "") and returns false / true for nullish collections, so coerce or guard untrusted input (e.g. `String(x ?? "")`). For trim with custom chars use a regex replace; lodash includes also searches object values; lodash every accepts shorthand predicates and visits sparse-array holes, which native every skips (use `Array.from(arr).every(...)` for untrusted arrays such as auth scopes).';
+
 /**
  * Shared baseline applied to every file in the monorepo.
  *
@@ -47,13 +50,85 @@ export const base = {
             message:
               'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
           },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message:
+              'Use native Object.keys / Object.values / Object.entries instead. They throw on null/undefined, so guard nullish input (e.g. `?? {}`).',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
+          },
+          {
+            group: [
+              'lodash/toLower',
+              'lodash/toLower.js',
+              'lodash/toUpper',
+              'lodash/toUpper.js',
+              'lodash/trim',
+              'lodash/trim.js',
+              'lodash/trimStart',
+              'lodash/trimStart.js',
+              'lodash/trimEnd',
+              'lodash/trimEnd.js',
+              'lodash/padEnd',
+              'lodash/padEnd.js',
+              'lodash/padStart',
+              'lodash/padStart.js',
+              'lodash/includes',
+              'lodash/includes.js',
+              'lodash/every',
+              'lodash/every.js',
+            ],
+            message: LODASH_STRING_ARRAY_MESSAGE,
+          },
         ],
         paths: [
           {
             name: 'lodash',
-            importNames: ['isArray', 'forEach', 'each'],
+            importNames: [
+              'isArray',
+              'forEach',
+              'each',
+              'keys',
+              'values',
+              'entries',
+              'concat',
+              'filter',
+              'find',
+            ],
             message:
-              'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
+              'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
+          },
+          {
+            name: 'lodash',
+            importNames: [
+              'toLower',
+              'toUpper',
+              'trim',
+              'trimStart',
+              'trimEnd',
+              'padEnd',
+              'padStart',
+              'includes',
+              'every',
+            ],
+            message: LODASH_STRING_ARRAY_MESSAGE,
           },
         ],
       },
