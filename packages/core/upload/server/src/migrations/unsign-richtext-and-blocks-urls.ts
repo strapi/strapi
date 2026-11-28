@@ -54,11 +54,13 @@ const migrateSchema = async (
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
   // The schema checks must run on the migration transaction: on SQLite the pool
-  // has a single connection, so a root-connection query would wait on it forever
-  const knex = db.getSchemaConnection(trx);
+  // has a single connection, so a root-connection query would wait on it forever.
+  // Each check takes a fresh builder: a knex SchemaBuilder queues its statements,
+  // so a reused one re-runs the earlier checks and resolves to an always-truthy array
+  const schemaConnection = () => db.getSchemaConnection(trx);
 
   // On a fresh project the migrations run before the tables exist
-  if (!(await knex.hasTable(tableName))) {
+  if (!(await schemaConnection().hasTable(tableName))) {
     return progress;
   }
 
@@ -73,7 +75,7 @@ const migrateSchema = async (
         ? attributeMeta.columnName
         : attribute.name;
 
-    if (await knex.hasColumn(tableName, columnName)) {
+    if (await schemaConnection().hasColumn(tableName, columnName)) {
       existing.push(attribute);
     }
   }
