@@ -46,12 +46,12 @@ const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
       // Check if the created node is empty (if there was no text after the cursor in the node)
       // This lets us know if we need to carry over the modifiers from the previous node
       const parentBlockEntry = Editor.above(editor, {
-        match: (node) => !Editor.isEditor(node) && node.type !== 'text',
+        match: (node) => !Editor.isEditor(node) && node.type !== 'text' && node.type !== 'link',
       });
       if (!parentBlockEntry) {
         return;
       }
-      const [, parentBlockPath] = parentBlockEntry;
+      const [fragmentedNode, parentBlockPath] = parentBlockEntry;
       const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, parentBlockPath);
 
       /**
@@ -61,8 +61,7 @@ const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
        * Select the parent of the selection because we want the full block, not the leaf.
        * And copy its children to make sure we keep the modifiers.
        */
-      const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
-      Transforms.removeNodes(editor);
+      Transforms.removeNodes(editor, { at: parentBlockPath });
 
       // Check if after the current position there is another node
       const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;

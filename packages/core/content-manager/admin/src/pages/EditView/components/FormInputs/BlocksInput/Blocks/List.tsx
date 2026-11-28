@@ -274,11 +274,26 @@ const handleEnterKeyOnList = (editor: Editor) => {
  * Common handler for converting a node to a list
  */
 const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
-  const convertedPath = baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
+  const convertedPaths = baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
 
-  if (!convertedPath) return;
+  if (!convertedPaths || convertedPaths.length === 0) return;
 
-  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: convertedPath });
+  if (convertedPaths.length === 1) {
+    Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: convertedPaths[0] });
+    return;
+  }
+
+  const firstPath = convertedPaths[0];
+  const lastPath = convertedPaths[convertedPaths.length - 1];
+
+  Transforms.wrapNodes(
+    editor,
+    { type: 'list', format, children: [] },
+    {
+      at: Editor.range(editor, firstPath, lastPath),
+      match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
+    }
+  );
 };
 
 /**

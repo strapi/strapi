@@ -120,7 +120,7 @@ const select = async (location: Location) => {
 const setup = (data: Descendant[] = defaultInitialValue) => {
   // Create a fresh instance of a Slate editor
   // so that we have no side effects due to the previous selection or children
-  baseEditor = createEditor();
+  baseEditor = linkBlocks.link.plugin!(createEditor());
 
   return render(<BlocksToolbar />, {
     renderOptions: { wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper> },
@@ -868,5 +868,85 @@ describe('BlocksToolbar', () => {
 
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();
+  });
+
+  it('converts multiple selected paragraphs containing links into a bulleted list', async () => {
+    const { user } = setup([
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: 'First ' },
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            rel: '',
+            target: '',
+            children: [{ type: 'text', text: 'link 1' }],
+          },
+          { type: 'text', text: '' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: 'Second ' },
+          {
+            type: 'link',
+            url: 'https://docs.strapi.io',
+            rel: '',
+            target: '',
+            children: [{ type: 'text', text: 'link 2' }],
+          },
+          { type: 'text', text: '' },
+        ],
+      },
+    ]);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 1, 0], offset: 6 },
+    });
+
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+    expect(unorderedListButton).toBeEnabled();
+
+    await user.click(unorderedListButton);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              { type: 'text', text: 'First ' },
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                rel: '',
+                target: '',
+                children: [{ type: 'text', text: 'link 1' }],
+              },
+              { type: 'text', text: '' },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              { type: 'text', text: 'Second ' },
+              {
+                type: 'link',
+                url: 'https://docs.strapi.io',
+                rel: '',
+                target: '',
+                children: [{ type: 'text', text: 'link 2' }],
+              },
+              { type: 'text', text: '' },
+            ],
+          },
+        ],
+      },
+    ]);
   });
 });
