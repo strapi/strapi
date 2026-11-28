@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { Button, Flex, Modal, Typography } from '@strapi/design-system';
+import { Typography, type ButtonProps } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
+import { FormConfirmDialog } from '../../../../../components/FormConfirmDialog';
 import { CredentialFields } from '../../../../Profile/CredentialFields';
 
 interface DowngradeCredentials {
@@ -38,6 +39,10 @@ interface ConfirmDowngradeDialogProps {
   description?: React.ReactNode;
   /** Overrides the confirm button, "Lower requirements" by default. */
   confirmLabel?: string;
+  /** The confirm button's variant: `danger-light`, like `ConfirmDialog`, by default. */
+  variant?: ButtonProps['variant'];
+  /** The icon over the text: the red warning one by default. */
+  icon?: React.ReactElement;
 }
 
 /**
@@ -53,8 +58,11 @@ interface ConfirmDowngradeDialogProps {
  * with the password alone. This component owns no mutation; the page hands it the save.
  *
  * Same submission mechanics as `ReAuthDialog` (see its doc comment): the footer button is
- * `type="submit"` so Enter works with two blocking fields, and a synchronous `inFlightRef`
- * guards the click + native-submit double fire.
+ * a `<form>` submit so Enter works with two blocking fields, and a synchronous `inFlightRef`
+ * guards a double fire.
+ *
+ * Looks like the admin `ConfirmDialog` (`FormConfirmDialog`); callers pick the confirm variant and
+ * icon, `danger-light` with the red warning by default.
  */
 const ConfirmDowngradeDialog = ({
   open,
@@ -65,6 +73,8 @@ const ConfirmDowngradeDialog = ({
   title,
   description,
   confirmLabel,
+  variant,
+  icon,
 }: ConfirmDowngradeDialogProps) => {
   const { formatMessage } = useIntl();
   const [password, setPassword] = React.useState('');
@@ -115,81 +125,62 @@ const ConfirmDowngradeDialog = ({
   };
 
   return (
-    <Modal.Root
+    <FormConfirmDialog
       open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          close();
-        }
-      }}
+      onClose={close}
+      title={
+        title ??
+        formatMessage({
+          id: 'Settings.security.mfa.downgrade.title',
+          defaultMessage: 'Lower two-factor requirements?',
+        })
+      }
+      confirmLabel={
+        confirmLabel ??
+        formatMessage({
+          id: 'Settings.security.mfa.downgrade.confirm',
+          defaultMessage: 'Lower requirements',
+        })
+      }
+      variant={variant}
+      icon={icon}
+      canSubmit={canSubmit}
+      loading={submitting}
+      onSubmit={handleSubmit}
+      fields={
+        requiresPassword ? (
+          <CredentialFields
+            password={password}
+            onPasswordChange={setPassword}
+            code={code}
+            onCodeChange={setCode}
+            requiresCode={requiresCode}
+            error={error}
+            codeHint={formatMessage({
+              id: 'Settings.security.mfa.downgrade.code.hint',
+              defaultMessage: 'A code from your authenticator app, or an unused recovery code.',
+            })}
+          />
+        ) : null
+      }
     >
-      <Modal.Content>
-        <Modal.Header>
-          <Modal.Title>
-            {title ??
-              formatMessage({
-                id: 'Settings.security.mfa.downgrade.title',
-                defaultMessage: 'Lower two-factor requirements?',
+      {/* Without fields there is no slot to hold a refusal, so it reads above the text. */}
+      {requiresPassword ? null : <ErrorMessage error={error} />}
+      {description}
+      {requiresPassword ? (
+        <Typography>
+          {requiresCode
+            ? formatMessage({
+                id: 'Settings.security.confirm.passwordAndCode',
+                defaultMessage: 'Confirm your password and a code to continue.',
+              })
+            : formatMessage({
+                id: 'Settings.security.confirm.password',
+                defaultMessage: 'Confirm your password to continue.',
               })}
-          </Modal.Title>
-        </Modal.Header>
-        <form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Flex direction="column" alignItems="stretch" gap={4}>
-              {/* Without fields there is no slot to hold a refusal, so it reads above the text. */}
-              {requiresPassword ? null : <ErrorMessage error={error} />}
-              {description}
-              {requiresPassword ? (
-                <>
-                  <Typography>
-                    {requiresCode
-                      ? formatMessage({
-                          id: 'Settings.security.confirm.passwordAndCode',
-                          defaultMessage: 'Confirm your password and a code to continue.',
-                        })
-                      : formatMessage({
-                          id: 'Settings.security.confirm.password',
-                          defaultMessage: 'Confirm your password to continue.',
-                        })}
-                  </Typography>
-                  <CredentialFields
-                    password={password}
-                    onPasswordChange={setPassword}
-                    code={code}
-                    onCodeChange={setCode}
-                    requiresCode={requiresCode}
-                    error={error}
-                    codeHint={formatMessage({
-                      id: 'Settings.security.mfa.downgrade.code.hint',
-                      defaultMessage:
-                        'A code from your authenticator app, or an unused recovery code.',
-                    })}
-                  />
-                </>
-              ) : null}
-            </Flex>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button type="button" variant="tertiary" onClick={close}>
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-            <Button
-              type="submit"
-              variant="danger"
-              onClick={() => handleSubmit()}
-              loading={submitting}
-              disabled={!canSubmit}
-            >
-              {confirmLabel ??
-                formatMessage({
-                  id: 'Settings.security.mfa.downgrade.confirm',
-                  defaultMessage: 'Lower requirements',
-                })}
-            </Button>
-          </Modal.Footer>
-        </form>
-      </Modal.Content>
-    </Modal.Root>
+        </Typography>
+      ) : null}
+    </FormConfirmDialog>
   );
 };
 

@@ -142,7 +142,7 @@ const confirmWithCredentials = async (
   confirm: string,
   { password = 'Password123', code = '123456' } = {}
 ) => {
-  const dialog = await screen.findByRole('dialog');
+  const dialog = await screen.findByRole('alertdialog');
   const passwordField = within(dialog).queryByLabelText(/Current password/);
   if (passwordField) await user.type(passwordField, password);
   const codeField = within(dialog).queryByLabelText(/Authentication code/);
@@ -219,7 +219,7 @@ describe('TwoFactorPanel', () => {
     captureReset();
 
     await user.click(await screen.findByRole('button', { name: 'Reset' }));
-    const dialog = await screen.findByRole('dialog');
+    const dialog = await screen.findByRole('alertdialog');
     await waitFor(() =>
       expect(within(dialog).queryByLabelText(/Authentication code/)).not.toBeInTheDocument()
     );
@@ -234,7 +234,7 @@ describe('TwoFactorPanel', () => {
     captureReset();
 
     await user.click(await screen.findByRole('button', { name: 'Reset' }));
-    const dialog = await screen.findByRole('dialog');
+    const dialog = await screen.findByRole('alertdialog');
     await waitFor(() =>
       expect(within(dialog).queryByLabelText(/Current password/)).not.toBeInTheDocument()
     );
@@ -269,7 +269,7 @@ describe('TwoFactorPanel', () => {
         'Only a super admin can change the two-factor settings of a super admin.'
       )
     ).toBeInTheDocument();
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
   });
 
   it('leaves the account alone when the confirmation is cancelled', async () => {

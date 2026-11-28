@@ -8,7 +8,7 @@ const renderLock = (props: Partial<React.ComponentProps<typeof UserLockStatus>> 
   render(<UserLockStatus userId={3} lockedAt="2026-02-01T00:00:00.000Z" canUpdate {...props} />);
 
 const confirmWithCredentials = async (user: ReturnType<typeof renderLock>['user']) => {
-  const dialog = await screen.findByRole('dialog');
+  const dialog = await screen.findByRole('alertdialog');
   const password = within(dialog).queryByLabelText(/Current password/);
   if (password) await user.type(password, 'Password123');
   const code = within(dialog).queryByLabelText(/Authentication code/);

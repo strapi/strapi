@@ -168,7 +168,7 @@ describe('Passkeys', () => {
   /** Fills the removal dialog's two credential fields and submits it. */
   const confirmRemoval = async (user: ReturnType<typeof render>['user']) => {
     await user.click(screen.getAllByRole('button', { name: /^Remove passkey / })[0]);
-    await screen.findByRole('dialog', { name: 'Remove this passkey?' });
+    await screen.findByRole('alertdialog', { name: 'Remove this passkey?' });
     await user.type(screen.getByLabelText('Current password*'), 'pw');
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
     fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
@@ -211,7 +211,7 @@ describe('Passkeys', () => {
     await screen.findByText('MacBook Touch ID');
 
     await user.click(screen.getAllByRole('button', { name: /^Remove passkey / })[0]);
-    await screen.findByRole('dialog', { name: 'Remove this passkey?' });
+    await screen.findByRole('alertdialog', { name: 'Remove this passkey?' });
     await user.type(screen.getByLabelText('Current password*'), 'pw');
 
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled();
@@ -243,7 +243,7 @@ describe('Passkeys', () => {
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
     // The row must survive, and so must the dialog: a wrong password is a retry, not a dead end.
     expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
-    expect(screen.getByRole('dialog', { name: 'Remove this passkey?' })).toBeInTheDocument();
+    expect(screen.getByRole('alertdialog', { name: 'Remove this passkey?' })).toBeInTheDocument();
   });
 
   it('shows the read error instead of the table or the empty state', async () => {

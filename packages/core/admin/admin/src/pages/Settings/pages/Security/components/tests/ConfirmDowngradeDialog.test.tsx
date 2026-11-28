@@ -16,7 +16,7 @@ describe('ConfirmDowngradeDialog', () => {
     renderDialog();
 
     expect(
-      screen.getByRole('dialog', { name: 'Lower two-factor requirements?' })
+      screen.getByRole('alertdialog', { name: 'Lower two-factor requirements?' })
     ).toBeInTheDocument();
     expect(screen.getByText('Confirm your password and a code to continue.')).toBeInTheDocument();
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe('ConfirmDowngradeDialog', () => {
       confirmLabel: 'Turn off',
     });
 
-    expect(screen.getByRole('dialog', { name: 'Turn passkeys off?' })).toBeInTheDocument();
+    expect(screen.getByRole('alertdialog', { name: 'Turn passkeys off?' })).toBeInTheDocument();
     expect(
       screen.getByText('This deletes all 4 passkeys your users registered. This cannot be undone.')
     ).toBeInTheDocument();

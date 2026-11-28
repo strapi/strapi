@@ -274,7 +274,7 @@ describe('TwoFactorSection', () => {
 
     await user.click(disableButton);
     expect(
-      await screen.findByRole('dialog', { name: 'Disable two-factor authentication' })
+      await screen.findByRole('alertdialog', { name: 'Disable two-factor authentication' })
     ).toBeInTheDocument();
   });
 

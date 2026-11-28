@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { Button, Flex, Modal, Typography } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { type Passkey } from '../../../../shared/contracts/mfa';
+import { FormConfirmDialog } from '../../components/FormConfirmDialog';
 import { useNotification } from '../../features/Notifications';
 import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import { useDeletePasskeyMutation } from '../../services/mfa';
@@ -81,59 +82,41 @@ const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => 
   };
 
   return (
-    <Modal.Root
+    <FormConfirmDialog
       open={passkey !== undefined}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          close();
-        }
-      }}
+      onClose={close}
+      title={formatMessage({
+        id: 'Settings.profile.form.section.mfa.passkeys.delete.title',
+        defaultMessage: 'Remove this passkey?',
+      })}
+      confirmLabel={formatMessage({
+        id: 'Settings.profile.form.section.mfa.passkeys.delete.confirm',
+        defaultMessage: 'Remove',
+      })}
+      canSubmit={canSubmit}
+      loading={submitting}
+      onSubmit={handleSubmit}
+      fields={
+        <CredentialFields
+          password={password}
+          onPasswordChange={setPassword}
+          code={code}
+          onCodeChange={setCode}
+          error={error}
+        />
+      }
     >
-      <Modal.Content>
-        <Modal.Header>
-          <Modal.Title>
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.passkeys.delete.title',
-              defaultMessage: 'Remove this passkey?',
-            })}
-          </Modal.Title>
-        </Modal.Header>
-        <form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Flex direction="column" alignItems="stretch" gap={4}>
-              <Typography>
-                {formatMessage(
-                  {
-                    id: 'Settings.profile.form.section.mfa.passkeys.delete.intro',
-                    defaultMessage:
-                      '{name} will no longer log you in. Your authenticator app is unaffected. Confirm your password and a code from it, or an unused recovery code.',
-                  },
-                  { name: passkey?.name ?? '' }
-                )}
-              </Typography>
-              <CredentialFields
-                password={password}
-                onPasswordChange={setPassword}
-                code={code}
-                onCodeChange={setCode}
-                error={error}
-              />
-            </Flex>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="tertiary" onClick={close} type="button">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-            <Button variant="danger-light" type="submit" loading={submitting} disabled={!canSubmit}>
-              {formatMessage({
-                id: 'Settings.profile.form.section.mfa.passkeys.delete.confirm',
-                defaultMessage: 'Remove',
-              })}
-            </Button>
-          </Modal.Footer>
-        </form>
-      </Modal.Content>
-    </Modal.Root>
+      <Typography>
+        {formatMessage(
+          {
+            id: 'Settings.profile.form.section.mfa.passkeys.delete.intro',
+            defaultMessage:
+              '{name} will no longer log you in. Your authenticator app is unaffected. Confirm your password and a code from it, or an unused recovery code.',
+          },
+          { name: passkey?.name ?? '' }
+        )}
+      </Typography>
+    </FormConfirmDialog>
   );
 };
 

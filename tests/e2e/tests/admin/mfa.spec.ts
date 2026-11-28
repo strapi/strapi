@@ -71,7 +71,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Two-factor authentication', () => {
     const { secret } = await enrolViaUi(page, ADMIN_PASSWORD);
 
     await page.getByRole('button', { name: 'Disable two-factor authentication' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Disable two-factor authentication' });
+    const dialog = page.getByRole('alertdialog', { name: 'Disable two-factor authentication' });
     await dialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
     await waitForNextTotpStep();
     await dialog.getByLabel('Authentication code*').fill(totpFor(secret));

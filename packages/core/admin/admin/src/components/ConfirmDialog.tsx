@@ -16,6 +16,9 @@ const StyledWarning = styled(WarningCircle)`
 
 const DEFAULT_ICON: NonNullable<ConfirmDialogProps['icon']> = <StyledWarning />;
 
+/** The red warning icon `ConfirmDialog` shows by default, for dialogs composed to look like it. */
+const ConfirmDialogIcon = () => <StyledWarning />;
+
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
@@ -138,5 +141,5 @@ const ConfirmDialog = ({
   );
 };
 
-export { ConfirmDialog };
+export { ConfirmDialog, ConfirmDialogIcon };
 export type { ConfirmDialogProps };

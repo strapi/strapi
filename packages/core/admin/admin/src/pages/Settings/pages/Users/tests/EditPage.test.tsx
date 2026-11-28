@@ -49,7 +49,7 @@ describe('Users | EditPage', () => {
       user: ReturnType<typeof renderEdit>['user'],
       confirm: string
     ) => {
-      const dialog = screen.getByRole('dialog');
+      const dialog = screen.getByRole('alertdialog');
       await user.type(within(dialog).getByLabelText(/Current password/), 'Password123');
       await user.type(within(dialog).getByLabelText(/Authentication code/), '123456');
       await user.click(within(dialog).getByRole('button', { name: confirm }));
@@ -153,7 +153,7 @@ describe('Users | EditPage', () => {
       expect(screen.getByText('Required')).toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: 'Unlock' }));
-      expect(screen.getByRole('dialog', { name: 'Unlock this account?' })).toBeInTheDocument();
+      expect(screen.getByRole('alertdialog', { name: 'Unlock this account?' })).toBeInTheDocument();
       await confirmWithCredentials(user, 'Unlock');
 
       expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
@@ -331,7 +331,7 @@ describe('Users | EditPage', () => {
       expect(await screen.findByText('2 passkeys')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Remove passkeys' }));
       expect(
-        screen.getByRole('dialog', { name: "Remove this user's passkeys?" })
+        screen.getByRole('alertdialog', { name: "Remove this user's passkeys?" })
       ).toBeInTheDocument();
       await confirmWithCredentials(user, 'Remove');
 

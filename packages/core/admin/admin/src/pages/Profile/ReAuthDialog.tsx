@@ -4,6 +4,7 @@ import { Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../components/ErrorMessage';
+import { FormConfirmDialog } from '../../components/FormConfirmDialog';
 import { useNotification } from '../../features/Notifications';
 import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
@@ -190,6 +191,33 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
 
   const copy = COPY[intent];
 
+  // Disabling is the destructive one: it reads as the admin `ConfirmDialog`. Regenerating goes on
+  // to a second step (the new codes), so it keeps the modal.
+  if (intent === 'disable') {
+    return (
+      <FormConfirmDialog
+        open={open}
+        onClose={close}
+        title={formatMessage(copy.title)}
+        confirmLabel={formatMessage(copy.submit)}
+        canSubmit={password.length > 0 && code.trim().length >= 6}
+        loading={isSubmitting}
+        onSubmit={handleSubmit}
+        fields={
+          <CredentialFields
+            password={password}
+            onPasswordChange={setPassword}
+            code={code}
+            onCodeChange={setCode}
+            error={error}
+          />
+        }
+      >
+        <Typography>{formatMessage(copy.intro)}</Typography>
+      </FormConfirmDialog>
+    );
+  }
+
   return (
     <Modal.Root
       open={open}
@@ -238,7 +266,6 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
               </Button>
               <Button
                 type="submit"
-                variant={intent === 'disable' ? 'danger' : undefined}
                 onClick={() => handleSubmit()}
                 loading={isSubmitting}
                 disabled={password.length === 0 || code.trim().length < 6}

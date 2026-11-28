@@ -109,7 +109,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Two-factor enforcement', () => {
     await page.getByRole('button', { name: 'Unlock' }).click();
     // Unlocking lowers someone else's protection, so the administrator confirms it is them: their
     // own password, and a fresh code (the login above spent the current step).
-    const unlockDialog = page.getByRole('dialog', { name: 'Unlock this account?' });
+    const unlockDialog = page.getByRole('alertdialog', { name: 'Unlock this account?' });
     await unlockDialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
     await waitForNextTotpStep();
     await unlockDialog.getByLabel('Authentication code*').fill(totpFor(admin.secret));
