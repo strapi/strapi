@@ -35,6 +35,9 @@ describe('resolveWorkflowLimits', () => {
     ['0', 0],
     ['negative', -5],
     ['not a number or a string', true],
+    ['Infinity', Infinity],
+    ['the string Infinity', 'Infinity'],
+    ['a numeric string too large to be finite', '1e309'],
   ])('falls back to the default when the license value is %s', (_, value) => {
     expect(resolveWorkflowLimits(withBothLimits(value))).toEqual(defaults);
   });

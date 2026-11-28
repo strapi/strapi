@@ -39,12 +39,13 @@ export const getWorkflowContentTypeFilter = (
  * - Absent, null, an empty string or a non-numeric value means the license sets no limit.
  * - 0 or a negative value also gets the default. The admin panel reads 0 as "no limit" too, and
  *   the default keeps a limit enforced where NaN or 0 would turn the check off or block everything.
+ * - A value that is not finite, such as Infinity or '1e309', also gets the default, so it cannot
+ *   turn the check off either.
  */
 const resolveLicenseLimit = (value: unknown, defaultLimit: number): number => {
   const limit = typeof value === 'number' || typeof value === 'string' ? Number(value) : NaN;
 
-  // NaN fails the comparison, so a non-numeric value gets the default as well
-  return limit >= 1 ? Math.floor(limit) : defaultLimit;
+  return Number.isFinite(limit) && limit >= 1 ? Math.floor(limit) : defaultLimit;
 };
 
 /**
