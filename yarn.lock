@@ -9614,7 +9614,7 @@ __metadata:
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
     typescript: "npm:5.9.3"
-    vite: "npm:6.4.5"
+    vite: "npm:6.4.6"
     vite-plugin-dts: "npm:^4.3.0"
     vitest: "catalog:"
     vitest-config: "npm:5.64.0"
@@ -10744,7 +10744,7 @@ __metadata:
     tsconfig: "npm:5.64.0"
     typescript: "npm:5.9.3"
     util: "npm:0.12.5"
-    vite: "npm:6.4.5"
+    vite: "npm:6.4.6"
     webpack: "npm:5.109.2"
     webpack-bundle-analyzer: "npm:5.3.0"
     webpack-dev-middleware: "npm:7.4.6"
@@ -31303,9 +31303,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:6.4.5":
-  version: 6.4.5
-  resolution: "vite@npm:6.4.5"
+"vite@npm:6.4.6":
+  version: 6.4.6
+  resolution: "vite@npm:6.4.6"
   dependencies:
     esbuild: "npm:^0.25.0"
     fdir: "npm:^6.4.4"
@@ -31354,7 +31354,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/e9bb246caa72197d2cac0ad05cf2c7c2f71d0affa45ce981e555176b26028db5769b98fc919ca7ff368499ae95c534710e56c4e4adfd8d57ea4b41c396ccd7b0
+  checksum: 10c0/7b548e73b4bea00a0d16e7669f0062e2c8832e410ed70f08bc54b8217becbe837ddd85f9bbf0f49225109f7c0bf32e113407e9c6a63dfb5e1289daf963cf7f28
   languageName: node
   linkType: hard
 
