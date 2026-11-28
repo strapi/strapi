@@ -18,13 +18,16 @@ export default defineProvider({
     );
   },
   async bootstrap(strapi) {
+    // Created even when there are no webhooks, so that an invalid `server.webhooks` configuration
+    // stops Strapi at startup instead of when a webhook is first used
+    const webhookRunner = strapi.get('webhookRunner');
     const webhooks = await strapi.get('webhookStore').findWebhooks();
     if (!webhooks) {
       return;
     }
 
     for (const webhook of webhooks) {
-      strapi.get('webhookRunner').add(webhook);
+      webhookRunner.add(webhook);
     }
   },
 });

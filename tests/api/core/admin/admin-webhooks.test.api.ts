@@ -108,18 +108,66 @@ describe('Admin API Webhooks', () => {
     });
   });
 
-  test('Can not create a webhook with a local url on production', async () => {
-    // change NODE_ENV to 'production' to test this
+  // No destination check is on by default, in any environment
+  test('Can create a webhook with a local or private url on production', async () => {
     const originalNodeEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
 
-    const { status } = await createWebhook({ url: 'http://localhost:1337' });
-    const { status: statusInt } = await createWebhook({ url: '私の.家' });
+    try {
+      const { status } = await createWebhook({ url: 'http://localhost:1337' });
+      const { status: statusPrivate } = await createWebhook({ url: 'http://10.0.0.5/hook' });
 
-    process.env.NODE_ENV = originalNodeEnv;
+      expect(status).toBe(201);
+      expect(statusPrivate).toBe(201);
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
+  });
+
+  // https://github.com/strapi/strapi/issues/26876
+  test('Sends a webhook to a local url on production', async () => {
+    const received: Array<{ event: string | string[] | undefined; body: string }> = [];
+    const server = http.createServer((req, res) => {
+      let body = '';
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+      req.on('end', () => {
+        received.push({ event: req.headers['x-strapi-event'], body });
+        res.end();
+      });
+    });
+
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', resolve);
+    });
+
+    const { port } = server.address() as AddressInfo;
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    try {
+      const { webhook, status } = await createWebhook({ url: `http://127.0.0.1:${port}/hook` });
+
+      expect(status).toBe(201);
+
+      const res = await rq({ url: `/admin/webhooks/${webhook.id}/trigger`, method: 'POST' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual({ statusCode: 200 });
+      expect(received).toEqual([{ event: 'trigger-test', body: expect.any(String) }]);
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      await new Promise((resolve) => {
+        server.close(resolve);
+      });
+    }
+  });
+
+  test('Can not create a webhook with a url that has no valid host', async () => {
+    const { status } = await createWebhook({ url: '私の.家' });
 
     expect(status).toBe(400);
-    expect(statusInt).toBe(400);
   });
 
   test('Can not create a webhook with an invalid url', async () => {

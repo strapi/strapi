@@ -17,6 +17,18 @@ declare module 'undici/lib/dispatcher/dispatcher.js' {
   export default Dispatcher;
 }
 
+declare module 'undici/lib/dispatcher/agent.js' {
+  import { Agent } from 'undici';
+
+  export default Agent;
+}
+
+declare module 'undici/lib/core/connect.js' {
+  import { buildConnector } from 'undici';
+
+  export default buildConnector;
+}
+
 declare module 'undici/lib/api/api-connect.js' {
   import type { Dispatcher } from 'undici';
 

@@ -1,11 +1,15 @@
+import dns from 'node:dns';
+import http from 'node:http';
+import net, { type AddressInfo } from 'node:net';
 import type { ParameterizedContext } from 'koa';
 import { createLogger } from '@strapi/logger';
-import { beforeEach, describe, expect, it, test, vi, type Mock } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, test, vi, type Mock } from 'vitest';
 import type { Modules } from '@strapi/types';
 
 import createEventHub from '../event-hub';
 import requestContext from '../request-context';
 import createWebhookRunner from '../webhook-runner';
+import type { Fetch } from '../../utils/fetch';
 
 type Webhook = Modules.WebhookStore.Webhook;
 
@@ -563,4 +567,379 @@ describe('Release webhooks', () => {
       }
     }
   );
+});
+
+describe('Destination checks', () => {
+  interface ReceivedRequest {
+    method?: string;
+    host?: string;
+    path?: string;
+    body: string;
+    authorization?: string;
+  }
+
+  const received: ReceivedRequest[] = [];
+  let port: number;
+
+  // Every path but /hook redirects
+  const server = http.createServer((req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+
+    req.on('end', () => {
+      received.push({
+        method: req.method,
+        host: req.headers.host,
+        path: req.url,
+        body,
+        authorization: req.headers.authorization,
+      });
+
+      const redirects: Record<string, [number, string]> = {
+        '/same-origin': [307, '/hook'],
+        '/to-hook-test': [307, `http://hook.test:${port}/hook`],
+        '/to-internal-test': [307, `http://internal.test:${port}/hook`],
+        '/see-other': [303, '/hook'],
+        '/loop': [307, '/loop'],
+      };
+      const redirect = redirects[req.url ?? ''];
+
+      if (redirect) {
+        res.writeHead(redirect[0], { location: redirect[1] }).end('moved');
+      } else {
+        res.end('ok');
+      }
+    });
+  });
+
+  // The stubbed DNS: hook.test is the test server, internal.test a private address
+  const resolve = (hostname: string) => {
+    const address = { 'hook.test': '127.0.0.1', 'internal.test': '10.0.0.5' }[hostname];
+
+    if (!address) {
+      throw Object.assign(new Error(`getaddrinfo ENOTFOUND ${hostname}`), { code: 'ENOTFOUND' });
+    }
+
+    return [{ address, family: 4 }];
+  };
+
+  let lookup: ReturnType<typeof vi.spyOn<typeof dns.promises, 'lookup'>>;
+
+  beforeAll(async () => {
+    lookup = vi.spyOn(dns.promises, 'lookup');
+    await new Promise<void>((done) => {
+      server.listen(0, '127.0.0.1', () => done());
+    });
+    port = (server.address() as AddressInfo).port;
+  });
+
+  afterAll(async () => {
+    lookup.mockRestore();
+    server.closeAllConnections();
+    await new Promise((done) => {
+      server.close(done);
+    });
+  });
+
+  beforeEach(() => {
+    received.length = 0;
+    lookup.mockReset();
+    lookup.mockImplementation((async (hostname: string) =>
+      resolve(hostname)) as unknown as typeof dns.promises.lookup);
+  });
+
+  const setupRunner = (
+    destinationChecks?: Record<string, unknown>,
+    fetch: Fetch = (url, init) => globalThis.fetch(url, init)
+  ) => {
+    const logger = { error: vi.fn(), warn: vi.fn() };
+    const runner = createWebhookRunner({
+      eventHub: createEventHub(),
+      requestContext,
+      logger: logger as any,
+      configuration: destinationChecks ? { destinationChecks } : {},
+      fetch,
+    });
+
+    const run = (path: string, host = `127.0.0.1:${port}`, headers = {}) =>
+      runner.run(createWebhook({ url: `http://${host}${path}`, headers }), 'trigger-test');
+
+    return { runner, run, logger };
+  };
+
+  const receivedPaths = () => received.map(({ host, path }) => `${host}${path}`);
+
+  test('Allows any destination by default, without resolving it', async () => {
+    const { runner, run } = setupRunner();
+
+    await expect(runner.checkDestination('http://internal.test/hook')).resolves.toBeUndefined();
+    await expect(run('/hook')).resolves.toEqual({ statusCode: 200 });
+    expect(lookup).not.toHaveBeenCalled();
+  });
+
+  test('Warns at startup when checkOnSend or redirects are set without a block option', () => {
+    expect(setupRunner({ checkOnSend: true }).logger.warn).toHaveBeenCalledTimes(1);
+    expect(setupRunner({ redirects: 'check' }).logger.warn).toHaveBeenCalledTimes(1);
+    expect(setupRunner({ redirects: 'none' }).logger.warn).not.toHaveBeenCalled();
+  });
+
+  test('Logs a webhook a check blocks once, as a warning, when an event triggers it', async () => {
+    const eventHub = createEventHub();
+    const logger = { error: vi.fn(), warn: vi.fn() };
+    const runner = createWebhookRunner({
+      eventHub,
+      requestContext,
+      logger: logger as any,
+      configuration: { destinationChecks: { blockLoopback: true, checkOnSend: true } },
+      fetch: (url, init) => globalThis.fetch(url, init),
+    });
+
+    runner.add(createWebhook({ url: `http://127.0.0.1:${port}/hook` }));
+    await eventHub.emit('entry.create', { model: 'article', uid: ARTICLE_UID, entry: { id: 1 } });
+    await new Promise((done) => {
+      setTimeout(done, 50);
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(received).toEqual([]);
+  });
+
+  describe('redirects', () => {
+    test("'follow' follows redirects, as before", async () => {
+      const { run } = setupRunner({ redirects: 'follow' });
+
+      await expect(run('/same-origin')).resolves.toEqual({ statusCode: 200 });
+      expect(receivedPaths()).toEqual([`127.0.0.1:${port}/same-origin`, `127.0.0.1:${port}/hook`]);
+    });
+
+    test("'none' doesn't follow redirects, and reports the redirect as the response", async () => {
+      const { run } = setupRunner({ redirects: 'none' });
+
+      await expect(run('/same-origin')).resolves.toEqual({ statusCode: 307, message: 'moved' });
+      expect(receivedPaths()).toEqual([`127.0.0.1:${port}/same-origin`]);
+    });
+
+    test("'check' follows a redirect to an address that is allowed", async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
+
+      await expect(run('/to-hook-test')).resolves.toEqual({ statusCode: 200 });
+      expect(receivedPaths()).toEqual([`127.0.0.1:${port}/to-hook-test`, `hook.test:${port}/hook`]);
+      // A 307 keeps the method and the body
+      expect(received[1].method).toBe('POST');
+      expect(JSON.parse(received[1].body)).toMatchObject({ event: 'trigger-test' });
+    });
+
+    test("'check' does not follow a redirect to a blocked address", async () => {
+      const { run, logger } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
+
+      await expect(run('/to-internal-test')).rejects.toMatchObject({
+        name: 'ApplicationError',
+        details: { hostname: 'internal.test', address: '10.0.0.5', option: 'blockPrivateNetworks' },
+        message:
+          'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
+      });
+      expect(receivedPaths()).toEqual([`127.0.0.1:${port}/to-internal-test`]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Webhook "webhook" was not sent: internal.test resolves to 10.0.0.5'
+        )
+      );
+    });
+
+    test("'check' applies the checks to redirect targets, and to the first request only with checkOnSend", async () => {
+      // The first request goes to 127.0.0.1, which the loopback check blocks
+      const { run } = setupRunner({ blockLoopback: true, redirects: 'check' });
+
+      await expect(run('/same-origin')).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: expect.stringContaining('server.webhooks.destinationChecks.blockLoopback blocks'),
+      });
+      expect(receivedPaths()).toEqual([`127.0.0.1:${port}/same-origin`]);
+
+      received.length = 0;
+      const withOnSend = setupRunner({
+        blockLoopback: true,
+        redirects: 'check',
+        checkOnSend: true,
+      });
+
+      await expect(withOnSend.run('/same-origin')).rejects.toMatchObject({
+        name: 'ApplicationError',
+      });
+      expect(received).toEqual([]);
+    });
+
+    test("'check' stops after 5 redirects", async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
+
+      await expect(run('/loop')).resolves.toEqual({
+        statusCode: 500,
+        message: 'The webhook was redirected more than 5 times',
+      });
+      expect(received).toHaveLength(6);
+    });
+
+    test("'check' follows redirects the way fetch does", async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
+
+      // A 303 turns the request into a GET without a body
+      await expect(run('/see-other')).resolves.toEqual({ statusCode: 200 });
+      expect(received[1]).toMatchObject({ method: 'GET', path: '/hook', body: '' });
+
+      // A redirect to another origin drops the Authorization header
+      received.length = 0;
+      await run('/to-hook-test', undefined, { Authorization: 'Bearer s3cret' });
+      expect(received.map(({ authorization }) => authorization)).toEqual([
+        'Bearer s3cret',
+        undefined,
+      ]);
+    });
+  });
+
+  describe('checkOnSend', () => {
+    test('sends to a hostname that resolves to an allowed address', async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
+
+      await expect(run('/hook', `hook.test:${port}`)).resolves.toEqual({ statusCode: 200 });
+      expect(receivedPaths()).toEqual([`hook.test:${port}/hook`]);
+    });
+
+    test('does not connect to a hostname that resolves to a blocked address', async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
+
+      await expect(run('/hook', `internal.test:${port}`)).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: expect.stringContaining('internal.test resolves to 10.0.0.5'),
+      });
+      expect(received).toEqual([]);
+    });
+
+    test('checks the address the hostname resolves to when the webhook is sent', async () => {
+      const { runner, run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
+
+      // Public when the webhook is saved...
+      lookup.mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }] as any);
+      await expect(
+        runner.checkDestination(`http://hook.test:${port}/hook`)
+      ).resolves.toBeUndefined();
+
+      // ...private when it is sent
+      lookup.mockResolvedValueOnce([{ address: '10.0.0.5', family: 4 }] as any);
+      await expect(run('/hook', `hook.test:${port}`)).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: expect.stringContaining('hook.test resolves to 10.0.0.5'),
+      });
+      expect(received).toEqual([]);
+    });
+
+    test('also checks the redirects fetch follows', async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
+
+      await expect(run('/to-internal-test')).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: expect.stringContaining('internal.test resolves to 10.0.0.5'),
+      });
+      expect(receivedPaths()).toEqual([`127.0.0.1:${port}/to-internal-test`]);
+    });
+
+    test('does not connect to an IP address that is blocked', async () => {
+      const { run } = setupRunner({ blockLoopback: true, checkOnSend: true });
+
+      await expect(run('/hook')).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: expect.stringContaining('blockLoopback blocks 127.0.0.1.'),
+      });
+      expect(received).toEqual([]);
+    });
+
+    test('passes the lookup options Node gives, when it asks for a single address', async () => {
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
+      const autoSelectFamily = net.getDefaultAutoSelectFamily();
+
+      net.setDefaultAutoSelectFamily(false);
+
+      try {
+        await expect(run('/hook', `hook.test:${port}`)).resolves.toEqual({ statusCode: 200 });
+      } finally {
+        net.setDefaultAutoSelectFamily(autoSelectFamily);
+      }
+
+      expect(lookup).toHaveBeenCalledWith(
+        'hook.test',
+        expect.objectContaining({ all: true, hints: dns.ADDRCONFIG })
+      );
+    });
+
+    describe('with a proxy', () => {
+      // A proxied strapi.fetch has a dispatcher
+      const createProxiedFetch = (location?: string) =>
+        Object.assign(
+          vi.fn(async () =>
+            location
+              ? new Response('moved', { status: 307, headers: { location } })
+              : new Response('ok')
+          ),
+          { dispatcher: {} }
+        );
+
+      test('checks the URL before sending it to the proxy', async () => {
+        const proxiedFetch = createProxiedFetch();
+        const { run } = setupRunner(
+          { blockPrivateNetworks: true, checkOnSend: true },
+          proxiedFetch as unknown as Fetch
+        );
+
+        await expect(run('/hook', 'internal.test')).rejects.toMatchObject({
+          name: 'ApplicationError',
+        });
+        expect(proxiedFetch).not.toHaveBeenCalled();
+
+        await expect(run('/hook', 'hook.test')).resolves.toEqual({ statusCode: 200 });
+        expect(proxiedFetch).toHaveBeenCalledTimes(1);
+        // The proxy's own dispatcher is kept
+        expect(proxiedFetch.mock.calls[0]).not.toHaveProperty('1.dispatcher');
+      });
+
+      test('checks redirect targets before sending them to the proxy', async () => {
+        const proxiedFetch = createProxiedFetch('http://internal.test/hook');
+        const { run } = setupRunner(
+          { blockPrivateNetworks: true, checkOnSend: true },
+          proxiedFetch as unknown as Fetch
+        );
+
+        await expect(run('/hook', 'hook.test')).rejects.toMatchObject({
+          name: 'ApplicationError',
+          message: expect.stringContaining('internal.test resolves to 10.0.0.5'),
+        });
+        expect(proxiedFetch).toHaveBeenCalledTimes(1);
+      });
+
+      test("counts Node's own proxy support as a proxy", async () => {
+        vi.stubEnv('HTTP_PROXY', 'http://proxy.test:3128');
+        vi.stubEnv('NODE_USE_ENV_PROXY', '1');
+
+        try {
+          const fetch = vi.fn(async () => new Response('ok'));
+          const { run } = setupRunner(
+            { blockPrivateNetworks: true, checkOnSend: true },
+            fetch as unknown as Fetch
+          );
+
+          await expect(run('/hook', 'internal.test')).rejects.toMatchObject({
+            name: 'ApplicationError',
+          });
+          await expect(run('/hook', 'hook.test')).resolves.toEqual({ statusCode: 200 });
+          // No dispatcher of its own, so the request still goes through Node's proxy
+          expect(fetch.mock.calls).toHaveLength(1);
+          expect(fetch.mock.calls[0]).not.toHaveProperty('1.dispatcher');
+        } finally {
+          vi.unstubAllEnvs();
+        }
+      });
+    });
+  });
 });

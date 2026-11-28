@@ -29,7 +29,13 @@ const body = {
 };
 
 const setStrapi = (store: Record<string, Mock>) => {
-  const runner = { add: vi.fn(), update: vi.fn(), remove: vi.fn(), run: vi.fn() };
+  const runner = {
+    add: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    run: vi.fn(),
+    checkDestination: vi.fn(async (): Promise<unknown> => undefined),
+  };
   global.strapi = {
     get: (name: string) => (name === 'webhookStore' ? store : runner),
   } as any;
@@ -231,5 +237,100 @@ describe('Webhooks controller content type events', () => {
       new errors.ValidationError('Content type api::missing.missing does not exist')
     );
     expect(updateWebhook).not.toHaveBeenCalled();
+  });
+});
+
+describe('Webhooks controller destination checks', () => {
+  const blocked = {
+    hostname: 'internal.example.com',
+    address: '10.0.0.5',
+    option: 'blockPrivateNetworks',
+    message:
+      'internal.example.com resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
+  };
+
+  beforeEach(() => {
+    emitAuditMock.mockClear();
+  });
+
+  // https://github.com/strapi/strapi/issues/26876
+  test.each(['http://localhost:1337/hook', 'http://10.0.0.5/hook'])(
+    'createWebhook saves %s in production when no check is on',
+    async (url) => {
+      vi.stubEnv('NODE_ENV', 'production');
+
+      try {
+        const created = { ...webhook, url };
+        setStrapi({ createWebhook: vi.fn(async () => created) });
+        const ctx = createCtx({ body: { ...body, url } });
+
+        await webhooksController.createWebhook(ctx as any);
+
+        expect(ctx.created).toHaveBeenCalledWith({ data: created });
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    }
+  );
+
+  test('createWebhook saves a URL the checks allow', async () => {
+    const createWebhook = vi.fn(async () => webhook);
+    const runner = setStrapi({ createWebhook });
+    const ctx = createCtx({ body });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(runner.checkDestination).toHaveBeenCalledWith(webhook.url);
+    expect(ctx.created).toHaveBeenCalledWith({ data: webhook });
+  });
+
+  test('createWebhook rejects a URL a check blocks, with the reason', async () => {
+    const createWebhook = vi.fn();
+    const runner = setStrapi({ createWebhook });
+    runner.checkDestination.mockResolvedValue(blocked);
+    const ctx = createCtx({ body: { ...body, url: 'https://internal.example.com/hook' } });
+
+    const error = await webhooksController.createWebhook(ctx as any).catch((e) => e);
+
+    expect(error).toBeInstanceOf(errors.ApplicationError);
+    expect(error.message).toBe(blocked.message);
+    // The admin shows a translated message for the option
+    expect(error.details).toEqual({
+      hostname: 'internal.example.com',
+      address: '10.0.0.5',
+      option: 'blockPrivateNetworks',
+    });
+    expect(createWebhook).not.toHaveBeenCalled();
+    expect(emitAuditMock).not.toHaveBeenCalled();
+  });
+
+  test('updateWebhook rejects a new URL a check blocks', async () => {
+    const updateWebhook = vi.fn();
+    const runner = setStrapi({ findWebhook: vi.fn(async () => webhook), updateWebhook });
+    runner.checkDestination.mockResolvedValue(blocked);
+    const ctx = createCtx({
+      params: { id: '4' },
+      body: { ...body, url: 'https://internal.example.com/hook' },
+    });
+
+    await expect(webhooksController.updateWebhook(ctx as any)).rejects.toMatchObject({
+      name: 'ApplicationError',
+      message: blocked.message,
+    });
+    expect(runner.checkDestination).toHaveBeenCalledWith('https://internal.example.com/hook');
+    expect(updateWebhook).not.toHaveBeenCalled();
+  });
+
+  test('updateWebhook does not check a URL that did not change, so the webhook can still be disabled', async () => {
+    const disabled = { ...webhook, isEnabled: false };
+    const updateWebhook = vi.fn(async () => disabled);
+    const runner = setStrapi({ findWebhook: vi.fn(async () => webhook), updateWebhook });
+    runner.checkDestination.mockResolvedValue(blocked);
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, isEnabled: false } });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(runner.checkDestination).not.toHaveBeenCalled();
+    expect(ctx.send).toHaveBeenCalledWith({ data: disabled });
   });
 });
