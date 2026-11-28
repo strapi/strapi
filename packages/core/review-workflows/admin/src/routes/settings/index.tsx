@@ -1,5 +1,4 @@
 /* eslint-disable check-file/no-index */
-/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
 import { Page, useTracking, ConfirmDialog, useRBAC, Table } from '@strapi/admin/strapi-admin';

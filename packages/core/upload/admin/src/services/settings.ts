@@ -6,8 +6,9 @@ const settingsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     // Deliberately NOT named `getSettings`. Every plugin's admin API is built on
     // the same shared `adminApi` instance — one endpoint registry keyed by name,
-    // under `reducerPath: 'adminApi'` — and `injectEndpoints` silently keeps the
-    // FIRST registration of a duplicate name and discards later ones. The i18n
+    // under `reducerPath: 'adminApi'` — and `injectEndpoints` keeps the FIRST
+    // registration of a duplicate name and discards later ones (development
+    // builds log an error, production builds say nothing). The i18n
     // plugin already registers a `getSettings`, so a generic name here would,
     // depending on module load order, resolve this hook to i18n's cache entry
     // (`/i18n/settings`) instead of `/upload/settings` — non-deterministically.

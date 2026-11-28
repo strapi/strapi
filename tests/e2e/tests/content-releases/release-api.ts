@@ -1,4 +1,5 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect } from '../../../fixtures';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 
 const MATCH_UID = 'api::match.match';

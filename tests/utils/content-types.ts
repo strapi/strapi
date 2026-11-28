@@ -1,7 +1,8 @@
 import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect } from '../fixtures';
 import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
 import { rowHeight } from '@strapi/admin/admin/src/pages/Settings/pages/Roles/utils/constants';
 

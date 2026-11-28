@@ -18,8 +18,8 @@ describe('getDocumentDimensions', () => {
     }),
   } as any;
 
-  test('invalid status', () => {
-    expect(() =>
+  test('invalid status', async () => {
+    await expect(() =>
       getDocumentLocaleAndStatus(
         { locale: 'en', status: 'notAStatus' },
         modelWithDraftAndPublishUID
@@ -27,8 +27,8 @@ describe('getDocumentDimensions', () => {
     ).rejects.toThrow();
   });
 
-  test('invalid locale - string array when not supported', () => {
-    expect(() =>
+  test('invalid locale - string array when not supported', async () => {
+    await expect(() =>
       // Multiple locales are not supported here
       getDocumentLocaleAndStatus(
         { locale: ['en', 'fr'], status: 'draft' },
@@ -37,8 +37,8 @@ describe('getDocumentDimensions', () => {
     ).rejects.toThrow();
   });
 
-  test('invalid locale - mixed array', () => {
-    expect(() =>
+  test('invalid locale - mixed array', async () => {
+    await expect(() =>
       getDocumentLocaleAndStatus(
         // Numbers are not allowed as locales
         { locale: ['en', 'fr', 123], status: 'published' },
@@ -48,34 +48,34 @@ describe('getDocumentDimensions', () => {
     ).rejects.toThrow();
   });
 
-  test('neither status or locale are required', () => {
-    expect(getDocumentLocaleAndStatus({}, modelWithDraftAndPublishUID)).resolves.toEqual({});
+  test('neither status or locale are required', async () => {
+    await expect(getDocumentLocaleAndStatus({}, modelWithDraftAndPublishUID)).resolves.toEqual({});
   });
 
-  test('status = modified is invalid (not a document status; use publicationStatusFilter)', () => {
-    expect(
+  test('status = modified is invalid (not a document status; use publicationStatusFilter)', async () => {
+    await expect(
       getDocumentLocaleAndStatus({ status: 'modified' }, modelWithDraftAndPublishUID)
     ).rejects.toThrow();
   });
 
-  test('valid status only', () => {
-    expect(
+  test('valid status only', async () => {
+    await expect(
       getDocumentLocaleAndStatus({ status: 'draft' }, modelWithDraftAndPublishUID)
     ).resolves.toEqual({
       status: 'draft',
     });
   });
 
-  test('valid locale only', () => {
-    expect(
+  test('valid locale only', async () => {
+    await expect(
       getDocumentLocaleAndStatus({ locale: 'en' }, modelWithDraftAndPublishUID)
     ).resolves.toEqual({
       locale: 'en',
     });
   });
 
-  test('valid status and locale', () => {
-    expect(
+  test('valid status and locale', async () => {
+    await expect(
       getDocumentLocaleAndStatus({ locale: 'en', status: 'published' }, modelWithDraftAndPublishUID)
     ).resolves.toEqual({
       locale: 'en',
@@ -83,12 +83,60 @@ describe('getDocumentDimensions', () => {
     });
   });
 
-  test("default status to published if the model does'nt have draft and publish enabled", () => {
-    expect(
+  test("default status to published if the model does'nt have draft and publish enabled", async () => {
+    await expect(
       getDocumentLocaleAndStatus({ locale: 'en' }, modelWithoutDraftAndPublishUID)
     ).resolves.toEqual({
       locale: 'en',
       status: 'published',
+    });
+  });
+
+  describe('missing locale', () => {
+    test.each([
+      ['absent', {}],
+      ['undefined', { locale: undefined }],
+      ['null', { locale: null }],
+      ['an empty string', { locale: '' }],
+    ])('returns an undefined locale when it is %s', async (_name, request) => {
+      const result = await getDocumentLocaleAndStatus(request, modelWithDraftAndPublishUID);
+
+      expect(result.locale).toBeUndefined();
+    });
+
+    test.each([
+      ['null', { locale: null }],
+      ['an empty string', { locale: '' }],
+    ])(
+      'returns an undefined locale when it is %s and multiple locales are allowed',
+      async (_name, request) => {
+        const result = await getDocumentLocaleAndStatus(request, modelWithDraftAndPublishUID, {
+          allowMultipleLocales: true,
+        });
+
+        expect(result.locale).toBeUndefined();
+      }
+    );
+
+    test.each([
+      ['a locale', 'fr', 'fr'],
+      ['all locales', '*', '*'],
+      ['an array of locales', ['en', 'fr'], ['en', 'fr']],
+    ])('keeps %s', async (_name, locale, expected) => {
+      const result = await getDocumentLocaleAndStatus({ locale }, modelWithDraftAndPublishUID, {
+        allowMultipleLocales: true,
+      });
+
+      expect(result.locale).toEqual(expected);
+    });
+
+    test('keeps the other request fields', async () => {
+      const result = await getDocumentLocaleAndStatus(
+        { locale: '', status: 'draft', title: 'Title' },
+        modelWithDraftAndPublishUID
+      );
+
+      expect(result).toEqual({ locale: undefined, status: 'draft', title: 'Title' });
     });
   });
 });

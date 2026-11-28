@@ -100,6 +100,38 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
       expect(attribute).not.toHaveProperty('searchable');
     });
 
+    it('keeps required on a multiple media attribute when another setting changes', () => {
+      const contentType = initCT('test', {
+        attributes: [{ name: 'gallery', type: 'media', multiple: true, required: true }],
+      });
+      const initializedState = init({
+        contentTypes: { [contentType.uid]: contentType },
+      });
+
+      const state = reducer(
+        initializedState,
+        actions.editAttribute({
+          attributeToSet: {
+            name: 'gallery',
+            type: 'media',
+            multiple: true,
+            required: true,
+            private: true,
+          },
+          forTarget: 'contentType',
+          targetUid: contentType.uid,
+          name: 'gallery',
+        })
+      );
+
+      expect(state.current.contentTypes[contentType.uid].attributes[0]).toMatchObject({
+        name: 'gallery',
+        required: true,
+        private: true,
+        status: 'CHANGED',
+      });
+    });
+
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
       const contentType = initCT('test', {
         attributes: [

@@ -44,6 +44,54 @@ describe('Component validator', () => {
       });
     });
 
+    // A null attribute made the yup.lazy callback throw where nothing awaited it, so the
+    // validation never settled. The timeout fails the test instead of hanging.
+    test.each([
+      ['a null attribute', { foo: null }],
+      ['an array with a null attribute', [null]],
+    ])(
+      'rejects %s',
+      async (_label, attributes) => {
+        const input = {
+          component: {
+            category: 'default',
+            displayName: 'mycompo',
+            icon: 'calendar',
+            attributes,
+          },
+        } as any;
+
+        await expect(componentValidation[method](input)).rejects.toMatchObject({
+          name: 'ValidationError',
+        });
+      },
+      2000
+    );
+
+    test('rejects a null attribute in a nested component', async () => {
+      const input = {
+        component: {
+          category: 'default',
+          displayName: 'mycompo',
+          icon: 'calendar',
+          attributes: { title: { type: 'string' } },
+        },
+        components: [
+          {
+            uid: 'default.nested',
+            category: 'default',
+            displayName: 'nested',
+            icon: 'calendar',
+            attributes: { foo: null },
+          },
+        ],
+      } as any;
+
+      await expect(componentValidation[method](input)).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
+    }, 2000);
+
     test('can use custom keys in attributes', async () => {
       const input = {
         components: [],

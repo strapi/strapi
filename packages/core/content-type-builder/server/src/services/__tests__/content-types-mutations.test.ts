@@ -287,6 +287,25 @@ describe('content type mutation compensation', () => {
     });
   });
 
+  it('emits the update event when an edit that keeps the kind succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, attributes: {} },
+    });
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', expect.anything());
+  });
+
+  it('rejects, and emits no event, when an edit that keeps the kind fails to write', async () => {
+    // The builder already rolled the files back
+    builder.writeFiles.mockResolvedValueOnce(false);
+
+    await expect(
+      editContentType(contentType.uid, { contentType: { ...contentType, attributes: {} } })
+    ).rejects.toThrow('Invalid schema edition');
+
+    expect(strapi.eventHub.emit).not.toHaveBeenCalled();
+  });
+
   describe('collectionType to singleType entry guard', () => {
     type Row = { documentId: string; locale?: string; publishedAt: string | null };
     type Where = {
@@ -438,6 +457,23 @@ describe('content type mutation compensation', () => {
     );
     expect(strapi.log.error).toHaveBeenCalledWith(
       'A content-type.delete listener failed: listener failed'
+    );
+  });
+
+  it('logs a failing event listener after a kind switch instead of leaving an unhandled rejection', async () => {
+    // A user listener that throws makes the event hub emit reject
+    jest.mocked(strapi.eventHub.emit).mockRejectedValue(new Error('listener failed'));
+
+    const rejections = await collectUnhandledRejections(async () => {
+      await editContentType(contentType.uid, {
+        contentType: { ...contentType, kind: 'singleType', attributes: {} },
+      });
+    });
+
+    expect(rejections).toEqual([]);
+    expect(strapi.eventHub.emit).toHaveBeenCalledTimes(1);
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.update listener failed: listener failed'
     );
   });
 

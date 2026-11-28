@@ -611,10 +611,14 @@ describe('updateMany relation filters', () => {
 
   /**
    * updateMany must pick `_q` / `filters` via query-builder `.init()`, same as deleteMany.
+   *
+   * `_q` also searches `documentId`, a random cuid2 over [a-z0-9]. The `_q` tests below search the
+   * full name because a short term can occur inside another row's documentId by chance, while a
+   * space never can.
    */
   test('updateMany: _q updates matching rows only', async () => {
     const result = await strapi.db.query(TEST_UID).updateMany({
-      _q: 'Hugo',
+      _q: 'Hugo LLORIS',
       data: { name: 'Q UPDATED' },
     });
 
@@ -626,7 +630,7 @@ describe('updateMany relation filters', () => {
 
   test('updateMany: _q + relation where updates matching rows only', async () => {
     const result = await strapi.db.query(TEST_UID).updateMany({
-      _q: 'Hugo',
+      _q: 'Hugo LLORIS',
       where: { related: { title: 'Category A' } },
       data: { name: 'Q UPDATED' },
     });

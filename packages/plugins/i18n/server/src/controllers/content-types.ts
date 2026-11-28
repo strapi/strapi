@@ -62,7 +62,7 @@ const controller = {
       return ctx.notFound();
     }
 
-    const permissions = await strapi.admin.services.permission.findMany({
+    const permissions = await strapi.service('admin::permission').findMany({
       where: {
         action: [READ_ACTION, CREATE_ACTION],
         subject: model,

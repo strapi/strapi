@@ -42,7 +42,28 @@ The edit view response holds only a count for each relation field, and the relat
 
 ### History and preview
 
-`server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost. The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). Both folders carry their own `LICENSE` file.
+`server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost.
+
+History records the writes made through the Content Manager routes, through the Content API (REST and GraphQL), and through the MCP server. Each version stores the source of the write, and the versions list shows it as a tag:
+
+| Source        | Write made with                                                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `admin-panel` | Any admin strategy that sets a user on the Content Manager routes, except an admin token. This includes SSO and the strategies of plugins |
+| `admin-api`   | An admin token on the Content Manager routes                                                                                              |
+| `content-api` | Any request on a Content API route                                                                                                        |
+| `mcp`         | An admin token on the MCP server                                                                                                          |
+
+History records nothing for the other writes: a write on another admin route, a write made outside a request, and a Content API write when `admin.history.contentApi.enabled` is `false`.
+
+Each version also stores a reference to its author: a type, and the model and document id of the author record. A write made with an admin panel session is attributed to the admin. An admin token write, on the Content Manager routes or on the MCP server, is attributed to the owner of the token, not to the token. A Content API write made with an API token is attributed to that token. A Content API write made by a logged-in end user is attributed to that end user. The author of an `admin-panel` write is always the admin of the request, whatever the admin strategy. For the other sources, the author comes from the authentication strategy of the request: each strategy that can give an author is registered with the history feature, and the Users & Permissions plugin registers its own. These writes have no author when the request has no authentication, when it is a public write, or when it uses a strategy that is not registered. The versions list shows no author for these versions. For the other versions, the versions list shows the current name of the author. A version of a deleted admin or end user shows "Deleted user", and a version of a deleted Content API token shows "Deleted token". The reference stays on the version after a delete. A document id is never given to another record, so the reference never points to a newer author.
+
+Set `admin.history.contentApi.enabled` to `false` to stop recording Content API writes. It is `true` by default. The flag does not change Content Manager writes.
+
+The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead. It is empty for Content API writes and MCP writes.
+
+Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`. An admin token write of that time also shows as `admin-panel`, and its author is the owner of the token.
+
+The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). The `history` and `preview` folders carry their own `LICENSE` file.
 
 ## Related
 

@@ -1,6 +1,7 @@
 import path from 'path';
 
-import { test, expect, type Route, type APIRequestContext } from '@playwright/test';
+import { type Route, type APIRequestContext } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 import { loginWithApi } from '../../../utils/login';
@@ -287,10 +288,20 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         ).toBeVisible();
 
         // The count alone does not tell the user why the file was refused.
-        await expect(assetsPage.uploadProgressDialog.getByText('blocked-file.exe')).toBeVisible();
         await expect(
-          assetsPage.uploadProgressDialog.getByText(/not allowed|not supported/i)
+          assetsPage.uploadProgressDialog.getByText('blocked-file.exe', { exact: true })
         ).toBeVisible();
+        await expect(
+          assetsPage.uploadProgressDialog
+            .getByText(/not allowed|not supported/i)
+            .filter({ hasNotText: 'blocked-file.exe:' })
+        ).toBeVisible();
+        // Screen readers hear the file name with the cause.
+        await expect(
+          assetsPage.uploadProgressDialog.getByText(
+            /^blocked-file\.exe: .*(not allowed|not supported)/i
+          )
+        ).toBeAttached();
 
         await assetsPage.closeUploadProgressDialog();
 

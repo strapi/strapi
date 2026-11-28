@@ -288,7 +288,6 @@ export const BrowseStep = ({
               )
             }
             content={
-              // eslint-disable-next-line no-nested-ternary
               isSearchingOrFiltering
                 ? formatMessage({
                     id: getTrad('list.assets-empty.title-withSearch'),

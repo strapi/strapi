@@ -1,19 +1,49 @@
 import path from 'node:path';
 
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices, type Project } from '@playwright/test';
+import { editionFromEnv } from '@strapi/tests-shared';
 
 import type { AppOptions } from './fixtures/app';
 
 const REPORTS_DIR = path.join(__dirname, '../../test-apps/next/reports');
 
 /**
- * Browser projects and the auth setup come with the E2E suite issues (CMS-1949 and after).
- * The server mode is a project option, so a `prod` project can be added next to `develop`.
+ * Edition contract (RFC D6), from STRAPI_TEST_EDITION. A CE run runs every test but the `@ee`
+ * ones. An EE run replays the `@ee` and `@smoke` tests only: the rest behaves the same in both
+ * editions.
+ */
+const edition = editionFromEnv();
+
+/**
+ * Browser projects (RFC D10). Chromium always; WebKit in CI, or locally with TESTS_WEBKIT=true.
+ * Each project sets its server mode, so a `prod` project only adds an entry here.
+ */
+const withWebkit = !!process.env.CI || process.env.TESTS_WEBKIT === 'true';
+
+const projects: Project<AppOptions>[] = [
+  {
+    name: 'chromium',
+    use: { ...devices['Desktop Chrome'], serverMode: 'develop' },
+  },
+  ...(withWebkit
+    ? [
+        {
+          name: 'webkit',
+          use: { ...devices['Desktop Safari'], serverMode: 'develop' as const },
+        },
+      ]
+    : []),
+];
+
+/**
+ * Also the config of `npx playwright test`, UI mode (`--ui`) and the VS Code extension: run them
+ * from tests-next/ui (see its README).
  */
 export default defineConfig<AppOptions>({
   testDir: './tests',
   testMatch: '**/*.ui-test.ts',
   forbidOnly: !!process.env.CI,
+  ...(edition === 'ee' ? { grep: /@ee|@smoke/ } : { grepInvert: /@ee/ }),
   // In CI, JUnit and HTML reports next to the generated apps, uploaded as artifacts.
   reporter: process.env.CI
     ? [
@@ -23,9 +53,8 @@ export default defineConfig<AppOptions>({
       ]
     : 'list',
   globalSetup: './setup/global-setup.ts',
-  // One app and DB per run for now. Parallel workers need one app each (see fixtures/app.ts).
+  // One app and DB per run for now. Parallel workers and sharding need one app each (CMS-2483,
+  // see fixtures/app.ts).
   workers: 1,
-  use: {
-    serverMode: 'develop',
-  },
+  projects,
 });

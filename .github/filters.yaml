@@ -1,6 +1,9 @@
 # This file determines when jobs should run or skipped based on which files were modified
 
 backend:
+  # shared/ code (contracts, utils, constants) is imported by both server and admin code,
+  # so it also sits in `frontend` below: `unit_front` runs only on frontend or global
+  - 'packages/**/shared/**'
   - 'packages/**/server/**/*.(js|ts|json)'
   - 'packages/**/strapi-server.js'
   - 'packages/{utils,generators,cli,providers}/**'
@@ -11,6 +14,7 @@ backend:
   - 'tests/setup/unit.setup.js'
   - 'tests/setup/timezone-environment.js'
 frontend:
+  - 'packages/**/shared/**'
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
   - 'packages/**/strapi-admin.js'
@@ -20,6 +24,12 @@ frontend:
 api:
   - 'tests/scripts/run-api-tests.js'
   - 'tests/scripts/generate-test-app.js'
+  - 'tests/scripts/database-config.js'
+  - 'tests/scripts/database-assurance.js'
+  - 'tests/scripts/verify-api-database-client.js'
+  - 'tests/scripts/__tests__/resolve-database-config.test.js'
+  - 'tests/scripts/__tests__/database-assurance.test.js'
+  - '.github/actions/run-api-tests/**'
   - 'tests/api/**'
   - 'tests/helpers/**'
   - 'tests/setup/jest-api.setup.js'
@@ -29,6 +39,7 @@ e2e:
   - 'tests/scripts/run-tests.js'
   - 'tests/e2e/**'
   - 'playwright.base.config.js'
+  - 'tests/fixtures.ts'
   - 'tests/utils/**'
   - 'tests/helpers/**'
   - 'tests/app-template/**'
@@ -51,8 +62,10 @@ tests_next:
   - 'tests-next/**'
 # Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
 # Fixture paths may move under tests/migration/ later; keep both globs in sync until then (see tests/migration/README.md).
+# packages/core/database is included because the upgrade runs that code, and this job is the MariaDB leg.
 migrations:
   - 'packages/**/migrations/**'
+  - 'packages/core/database/**'
   - 'tests/migration/**'
   - 'examples/complex/docker-compose.dev.yml'
   - 'examples/complex/scripts/**'

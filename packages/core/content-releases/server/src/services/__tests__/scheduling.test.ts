@@ -36,7 +36,7 @@ describe('Scheduling service', () => {
 
       // @ts-expect-error Ignore missing properties
       const schedulingService = createSchedulingService({ strapi: strapiMock });
-      expect(() => schedulingService.set('1', new Date())).rejects.toThrow(
+      await expect(() => schedulingService.set('1', new Date())).rejects.toThrow(
         'No release found for id 1'
       );
     });
@@ -195,6 +195,49 @@ describe('Scheduling service', () => {
   });
 
   describe('syncFromDatabase', () => {
+    it('waits until each release is scheduled before resolving', async () => {
+      let resolveFindOne: (value: { id: number }) => void = () => {};
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn(() => ({
+            findMany: jest.fn().mockReturnValue([
+              {
+                id: 1,
+                scheduledAt: inAnHour,
+                releasedAt: null,
+              },
+            ]),
+            findOne: jest.fn(
+              () =>
+                new Promise((resolve) => {
+                  resolveFindOne = resolve;
+                })
+            ),
+          })),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+      let settled = false;
+      const pending = schedulingService.syncFromDatabase().then((jobs) => {
+        settled = true;
+        return jobs;
+      });
+
+      // Drain microtasks so an un-awaited set() can resolve before the assertion.
+      await new Promise((resolve) => {
+        setImmediate(resolve);
+      });
+      expect(settled).toBe(false);
+
+      resolveFindOne({ id: 1 });
+      const scheduledJobs = await pending;
+      expect(settled).toBe(true);
+      expect(scheduledJobs.size).toBe(1);
+    });
+
     it('should sync the scheduled jobs from the database', async () => {
       const strapiMock = {
         ...baseStrapiMock,

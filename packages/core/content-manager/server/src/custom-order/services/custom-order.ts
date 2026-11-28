@@ -252,13 +252,21 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
         .from(firstRowIds)
         .where('x.d', documentIdOfUpdatedRow);
 
+      // `id` is unsigned on MySQL. Subtracting it from the current top (often
+      // already negative) overflows unless the id is signed first.
+      let positionFromCreation;
+      if (top === undefined) {
+        positionFromCreation = knex.raw('(?)', [firstRowIdOfDocument]);
+      } else if (strapi.db.dialect.client === 'mysql') {
+        positionFromCreation = knex.raw('? - CAST(? AS SIGNED)', [top, firstRowIdOfDocument]);
+      } else {
+        positionFromCreation = knex.raw('? - (?)', [top, firstRowIdOfDocument]);
+      }
+
       await table()
         .whereNull(positionColumn)
         .update({
-          [positionColumn]:
-            top === undefined
-              ? knex.raw('(?)', [firstRowIdOfDocument])
-              : knex.raw('? - (?)', [top, firstRowIdOfDocument]),
+          [positionColumn]: positionFromCreation,
         });
     });
   };
