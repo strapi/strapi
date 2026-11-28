@@ -115,9 +115,10 @@ describeOnCondition(MFA_FLAG_ENABLED)('Two-factor enforcement', () => {
     await unlockDialog.getByLabel('Authentication code*').fill(totpFor(admin.secret));
     await unlockDialog.getByRole('button', { name: 'Unlock' }).click();
     await expect(page.getByText('Account unlocked.')).toBeVisible();
-    await expect(
-      page.getByText(/^Not set up\. A new \d+-day grace period starts at their next login\.$/)
-    ).toBeVisible();
+    // The lock leaves the account status, and the Two-factor panel shows the requirement on its own
+    // line: a new grace period starts at the editor's next login.
+    await expect(page.getByText(/^Locked for password login since/)).toHaveCount(0);
+    await expect(page.getByText('Required from next login')).toBeVisible();
 
     // 5. The editor logs in again (fresh grace), enrols, and the banner goes away.
     await context.clearCookies();
