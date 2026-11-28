@@ -651,6 +651,7 @@ describe('user-permissions auth', () => {
               password: 'NewPassword123',
               passwordConfirmation: 'NewPassword123',
             },
+            header: {},
           },
           send: jest.fn(),
         };
@@ -712,6 +713,7 @@ describe('user-permissions auth', () => {
             passwordConfirmation: 'NewPassword123',
             code: 'valid-reset-token',
           },
+          header: {},
         },
         send: jest.fn(),
       };
